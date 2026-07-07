@@ -1,0 +1,122 @@
+@page "/Account/ExternalLogin"
+@layout AccountLayout
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using SoftSync.DAL.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject ILogger<ExternalLogin> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject LocalizationService L
+
+<PageTitle>@L["auth.external.title"]</PageTitle>
+
+<StatusMessage Message="@message" />
+<div class="tw:text-center tw:py-4">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="tw:mt-3">@L["auth.external.processing"]</p>
+</div>
+
+@code {
+    private string? message;
+    private ExternalLoginInfo externalLoginInfo = default!;
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [SupplyParameterFromQuery] private string? RemoteError { get; set; }
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (RemoteError is not null)
+        {
+            RedirectManager.RedirectToWithStatus("Account/Login",
+                $"Error: {RemoteError}", HttpContext);
+        }
+
+        var info = await SignInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+        {
+            RedirectManager.RedirectToWithStatus("Account/Login",
+                $"Error: {L["auth.error.externalNoInfo"]}", HttpContext);
+        }
+        externalLoginInfo = info!;
+
+        // Try to sign in with the existing external login.
+        var result = await SignInManager.ExternalLoginSignInAsync(
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true);
+
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("{Name} logged in with {Provider}.",
+                externalLoginInfo.Principal.Identity?.Name, externalLoginInfo.LoginProvider);
+            WelcomeCookie.Set(HttpContext, externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name));
+            RedirectManager.RedirectTo(ReturnUrl ?? "");
+        }
+        else if (result.IsLockedOut)
+        {
+            RedirectManager.RedirectToWithStatus("Account/Login",
+                $"Error: {L["auth.error.lockedOut"]}", HttpContext);
+        }
+        else
+        {
+            // First time with this provider — auto-provision a new account.
+            await ProvisionAndSignInAsync();
+        }
+    }
+
+    private async Task ProvisionAndSignInAsync()
+    {
+        var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
+        var name = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? email ?? "";
+
+        if (string.IsNullOrEmpty(email))
+        {
+            RedirectManager.RedirectToWithStatus("Account/Login",
+                $"Error: {L["auth.error.externalNoEmail"]}", HttpContext);
+        }
+
+        // Link to an existing local account with the same email, or create one.
+        var user = await UserManager.FindByEmailAsync(email!);
+        var isNew = false;
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                FullName = name,
+                CreatedAt = DateTime.UtcNow,
+                Role = SoftSync.Common.Enums.UserRole.Student,
+                EmailConfirmed = true
+            };
+            await UserStore.SetUserNameAsync(user, email!, CancellationToken.None);
+            var emailStore = (IUserEmailStore<ApplicationUser>)UserStore;
+            await emailStore.SetEmailAsync(user, email!, CancellationToken.None);
+
+            var createResult = await UserManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                message = "Error: " + string.Join(" ", createResult.Errors.Select(e => e.Description));
+                return;
+            }
+            isNew = true;
+        }
+
+        var addLoginResult = await UserManager.AddLoginAsync(user, externalLoginInfo);
+        if (!addLoginResult.Succeeded && isNew)
+        {
+            message = "Error: " + string.Join(" ", addLoginResult.Errors.Select(e => e.Description));
+            return;
+        }
+
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        Logger.LogInformation("New account provisioned via {Provider}.", externalLoginInfo.LoginProvider);
+        WelcomeCookie.Set(HttpContext, user.FullName);
+
+        // New users complete their profile; returning users go home.
+        RedirectManager.RedirectTo(isNew ? "profile-setup" : (ReturnUrl ?? ""));
+    }
+}

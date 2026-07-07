@@ -1,0 +1,419 @@
+@rendermode InteractiveServer
+@implements IDisposable
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject LocalizationService L
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject IServiceScopeFactory ScopeFactory
+@inject AuthenticationStateProvider AuthProvider
+
+@* Top navigation. Interactive so the language toggle (@onclick + JS interop)
+   works — the surrounding MainLayout renders as static SSR. *@
+
+<nav class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center">
+    <!-- Brand -->
+    <div class="tw:flex tw:items-center tw:gap-2 cursor-pointer" @onclick='() => Nav.NavigateTo("/")'>
+        <div class="ss-brand-logo tw:flex tw:items-center tw:justify-center">
+            <img src="images/logo.png" alt="S" class="tw:w-full tw:h-full tw:object-cover" />
+        </div>
+        <span class="tw:text-xl tw:font-bold ss-gradient-text">SoftSync</span>
+    </div>
+
+    <!-- Center: nav pills -->
+    <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
+        <NavLink class="ss-navpill" href="/" Match="NavLinkMatch.All">
+            <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
+        </NavLink>
+        <NavLink class="ss-navpill" href="/assistant">
+            <i class="bi bi-robot"></i> <span>@L["nav.assistant"]</span>
+        </NavLink>
+        <NavLink class="ss-navpill" href="/case-studies">
+            <i class="bi bi-mortarboard"></i> <span>@L["nav.caseStudies"]</span>
+        </NavLink>
+        <NavLink class="ss-navpill" href="/progress">
+            <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
+        </NavLink>
+        <NavLink class="ss-navpill" href="/community">
+            <i class="bi bi-people"></i> <span>@L["nav.community"]</span>
+        </NavLink>
+    </div>
+
+    <!-- Right: actions -->
+    <div class="tw:flex tw:items-center tw:gap-3">
+        <button class="ss-icon-btn" @onclick="ToggleLanguage" title="@L["lang.switchTitle"]">
+            <i class="bi bi-translate"></i>
+            <span class="tw:text-sm tw:font-semibold tw:ms-1">@L["lang.switchLabel"]</span>
+        </button>
+
+        <AuthorizeView>
+            <Authorized>
+                <button class="ss-icon-btn" title="@L["nav.search"]">
+                    <i class="bi bi-search"></i>
+                </button>
+                <button class="ss-icon-btn ss-bell" title="@L["nav.notifications"]">
+                    <i class="bi bi-bell"></i>
+                    <span class="ss-bell-badge">3</span>
+                </button>
+
+                <div class="ss-userchip" @onclick="ToggleUserMenu">
+                    <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
+                        @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
+                        {
+                            <img src="@profile.AvatarUrl" alt="avatar" class="ss-avatar-img" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-fill"></i>
+                        }
+                    </div>
+                    <div class="tw:flex tw:flex-col tw:leading-tight">
+                        <span class="tw:font-semibold tw:text-sm">@(profile?.FullName ?? context.User.Identity?.Name)</span>
+                        <span class="ss-userchip-sub">@L["nav.level"] @(profile?.Level ?? 1)</span>
+                    </div>
+                    <i class="bi bi-chevron-down ss-userchip-caret"></i>
+
+                    @if (userMenuOpen)
+                    {
+                        <div class="ss-usermenu" @onclick:stopPropagation="true">
+                            <div class="ss-usermenu-xp">
+                                <div class="tw:flex tw:justify-between tw:text-sm tw:mb-1">
+                                    <span class="tw:font-semibold">@L["nav.level"] @(profile?.Level ?? 1)</span>
+                                    <span class="text-muted">@(profile?.ExperiencePoints ?? 0) XP</span>
+                                </div>
+                                <div class="ss-xp-bar-mini">
+                                    <div class="ss-xp-fill-mini" style="width: @(profile?.LevelProgressPercent ?? 0)%"></div>
+                                </div>
+                            </div>
+                            <a class="ss-usermenu-item" href="/profile">
+                                <i class="bi bi-person-badge"></i> @L["nav.myProfile"]
+                            </a>
+                            <a class="ss-usermenu-item" href="/roadmap">
+                                <i class="bi bi-map"></i> @L["nav.myRoadmap"]
+                            </a>
+                            <a class="ss-usermenu-item" href="/progress">
+                                <i class="bi bi-graph-up-arrow"></i> @L["nav.progress"]
+                            </a>
+                            <a class="ss-usermenu-item" href="/profile-setup">
+                                <i class="bi bi-gear"></i> @L["nav.settings"]
+                            </a>
+                            <div class="ss-usermenu-divider"></div>
+                            <form id="ss-logout-form" action="Account/Logout" method="post" class="tw:m-0">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="" />
+                                <button type="button" class="ss-usermenu-item ss-usermenu-danger tw:w-full" @onclick="OnLogoutClicked">
+                                    <i class="bi bi-box-arrow-right"></i> @L["nav.logout"]
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <a href="Account/Login" class="ss-btn-primary tw:px-4 tw:py-2 tw:no-underline">
+                    <i class="bi bi-box-arrow-in-right tw:me-1"></i> @L["nav.login"]
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</nav>
+
+@if (showLogoutModal)
+{
+    <div class="ss-modal-backdrop" @onclick="CancelLogout">
+        <div class="ss-modal" @onclick:stopPropagation="true">
+            <div class="wiz-mascot ss-modal-mascot">
+                <img src="/images/syncy-male.png" alt="SYNCY"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                <span class="wiz-mascot-fallback">@Mascot.Emoji</span>
+            </div>
+            <h4 class="tw:font-bold tw:text-center tw:mt-3 tw:mb-2">@L["logout.confirm.title"]</h4>
+            <p class="text-muted tw:text-center tw:mb-5">@L["logout.confirm.body"]</p>
+            <div class="tw:flex tw:gap-3">
+                <button class="btn btn-light tw:flex-1 tw:py-2" @onclick="CancelLogout">@L["logout.confirm.cancel"]</button>
+                <button class="ss-btn-primary tw:flex-1 tw:py-2" @onclick="ConfirmLogout">@L["nav.logout"]</button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .wiz-mascot-fallback {
+        display: none;
+        width: 100%; height: 100%;
+        align-items: center; justify-content: center;
+        font-size: 2.4rem;
+    }
+    .ss-navbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--glass-bg-strong);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .ss-brand-logo {
+        width: 38px; height: 38px;
+        background: var(--gradient);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .cursor-pointer { cursor: pointer; }
+
+    /* Center nav pills */
+    .ss-navpill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        color: #4b5563;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+    }
+    .ss-navpill i { font-size: 1.05rem; }
+    .ss-navpill:hover {
+        color: var(--color-brand);
+        background: rgba(99, 102, 241, 0.08);
+    }
+    .ss-navpill.active {
+        color: var(--color-brand-dark);
+        background: rgba(99, 102, 241, 0.14);
+    }
+
+    /* Icon buttons (language, search, bell) */
+    .ss-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.6rem;
+        border-radius: 12px;
+        border: none;
+        background: rgba(255, 255, 255, 0.6);
+        color: #4b5563;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    .ss-icon-btn:hover {
+        background: #fff;
+        color: var(--color-brand);
+    }
+    .ss-icon-btn i { font-size: 1.05rem; }
+
+    /* Notification bell badge */
+    .ss-bell { position: relative; }
+    .ss-bell-badge {
+        position: absolute;
+        top: -4px; right: -4px;
+        min-width: 18px; height: 18px;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: var(--color-brand-accent);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 0 2px var(--glass-bg-strong);
+    }
+
+    /* User chip */
+    .ss-userchip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.3rem 0.6rem 0.3rem 0.35rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.18s ease;
+    }
+    .ss-userchip:hover { background: rgba(255, 255, 255, 0.6); }
+    .ss-avatar {
+        width: 38px; height: 38px;
+        border-radius: 999px;
+        background: var(--gradient);
+        color: #fff;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .ss-avatar .ss-avatar-img {
+        width: 100%; height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+    }
+    .ss-userchip-sub {
+        font-size: 0.75rem;
+        color: var(--color-brand);
+        font-weight: 600;
+    }
+    .ss-userchip-caret { color: #9ca3af; font-size: 0.8rem; }
+
+    /* User dropdown menu */
+    .ss-usermenu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 200px;
+        background: var(--glass-bg-strong);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: var(--shadow-glass);
+        padding: 0.4rem;
+        z-index: 60;
+    }
+    .ss-usermenu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        color: #374151;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+    }
+    .ss-usermenu-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--color-brand-dark); }
+    .ss-usermenu-danger:hover { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .ss-usermenu-xp {
+        padding: 0.55rem 0.75rem 0.7rem;
+        border-bottom: 1px solid var(--glass-border);
+        margin-bottom: 0.35rem;
+    }
+    .ss-usermenu-divider {
+        height: 1px;
+        background: var(--glass-border);
+        margin: 0.35rem 0.4rem;
+    }
+    .ss-xp-bar-mini {
+        height: 7px; border-radius: 999px;
+        background: rgba(99, 102, 241, 0.15);
+        overflow: hidden;
+    }
+    .ss-xp-fill-mini {
+        height: 100%; border-radius: 999px;
+        background: var(--gradient);
+        transition: width 0.4s ease;
+    }
+
+    @@media (max-width: 900px) {
+        .ss-navpill span { display: none; }
+        .ss-userchip .tw\:flex-col { display: none; }
+    }
+
+    /* Logout confirm modal */
+    .ss-modal-backdrop {
+        position: fixed; inset: 0; z-index: 200;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+        display: flex; align-items: center; justify-content: center;
+        padding: 1rem;
+        animation: ss-fade-in 0.2s ease;
+    }
+    .ss-modal {
+        width: 100%; max-width: 380px;
+        background: #fff;
+        border-radius: 22px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-glass-hover);
+        animation: ss-pop-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ss-modal-mascot {
+        width: 72px; height: 72px; margin: 0 auto;
+    }
+    @@keyframes ss-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @@keyframes ss-pop-in {
+        from { opacity: 0; transform: translateY(12px) scale(0.94); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+</style>
+
+@code {
+    private bool userMenuOpen;
+    private bool showLogoutModal;
+
+    private UserDto? profile;
+
+    protected override void OnInitialized()
+    {
+        L.OnChanged += StateHasChangedSafe;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Restore the saved language after the circuit is interactive.
+            var saved = await JS.InvokeAsync<string?>("ssLang.get");
+            var lang = LocalizationService.Parse(saved);
+            if (lang != L.Current)
+            {
+                L.SetLanguage(lang);
+            }
+
+            // Load the user's profile (avatar + level) in its own DI scope so we
+            // don't share the page's scoped DbContext (avoids a concurrent-query
+            // crash when a page also queries the DB during its own init).
+            var userId = await AuthProvider.GetUserIdAsync();
+            if (userId > 0)
+            {
+                await using var scope = ScopeFactory.CreateAsyncScope();
+                var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+                profile = await userService.GetUserByIdAsync(userId);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private async Task ToggleLanguage()
+    {
+        L.Toggle();
+        await JS.InvokeVoidAsync("ssLang.set", L.Code);
+    }
+
+    private void ToggleUserMenu() => userMenuOpen = !userMenuOpen;
+
+    // Pages where unsaved learning progress could be lost — confirm before logout.
+    private static readonly string[] SensitivePaths = { "assessment", "select-skills", "profile-setup" };
+
+    private async Task OnLogoutClicked()
+    {
+        var path = new Uri(Nav.Uri).AbsolutePath.Trim('/').ToLowerInvariant();
+        var inLearningFlow = SensitivePaths.Any(p => path.StartsWith(p));
+        if (inLearningFlow)
+        {
+            userMenuOpen = false;
+            showLogoutModal = true;
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("ssSubmitForm", "ss-logout-form");
+        }
+    }
+
+    private void CancelLogout() => showLogoutModal = false;
+
+    private async Task ConfirmLogout()
+    {
+        showLogoutModal = false;
+        await JS.InvokeVoidAsync("ssSubmitForm", "ss-logout-form");
+    }
+
+    private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => L.OnChanged -= StateHasChangedSafe;
+}

@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoftSync.BLL\SoftSync.BLL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- Front-end (Vite + Tailwind) build. Runs `npm install` when node_modules
+       is missing, then `npm run build` to emit wwwroot/dist before the app is
+       published. Skipped if Node is unavailable so the C# build still works. -->
+  <PropertyGroup>
+    <NpmInstallStampFile>node_modules/.install-stamp</NpmInstallStampFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrontEndInputs Include="Styles/**/*.css;Scripts/**/*.js;Components/**/*.razor;package.json;vite.config.js" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="Build" Inputs="package.json" Outputs="$(NpmInstallStampFile)" Condition="Exists('package.json')">
+    <Exec Command="npm install" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="NpmInstallExitCode" />
+    </Exec>
+    <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" Condition="'$(NpmInstallExitCode)' == '0'" />
+    <Warning Text="npm install failed or npm not found; skipping front-end build. Run it manually with 'npm install &amp;&amp; npm run build'." Condition="'$(NpmInstallExitCode)' != '0'" />
+  </Target>
+
+  <Target Name="ViteBuild" BeforeTargets="Build" AfterTargets="NpmInstall" Inputs="@(FrontEndInputs)" Outputs="wwwroot/dist/app.css" Condition="Exists('$(NpmInstallStampFile)')">
+    <Exec Command="npm run build" ContinueOnError="true" />
+  </Target>
+
+</Project>

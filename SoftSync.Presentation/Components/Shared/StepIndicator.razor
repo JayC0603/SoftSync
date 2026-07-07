@@ -1,0 +1,30 @@
+@namespace SoftSync.Presentation.Components.Shared
+@inherits LocalizedComponentBase
+
+<div class="tw:flex tw:justify-center tw:mb-12">
+    @for (int i = 1; i <= TotalSteps; i++)
+    {
+        var step = i;
+        <div class="tw:flex tw:items-center">
+            <div class="ss-onboarding-step @(step <= CurrentStep ? "active" : "")">
+                @if (step < CurrentStep)
+                {
+                    <i class="bi bi-check"></i>
+                }
+                else
+                {
+                    @step
+                }
+            </div>
+            @if (step < TotalSteps)
+            {
+                <div style="width: 50px; height: 2px; background: @(step < CurrentStep ? "var(--primary)" : "#e2e8f0");"></div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int CurrentStep { get; set; }
+    [Parameter] public int TotalSteps { get; set; } = 5;
+}

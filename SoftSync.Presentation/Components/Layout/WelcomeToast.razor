@@ -1,0 +1,103 @@
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject LocalizationService L
+
+@* Shows a one-off SYNCY welcome animation right after login. Reads the
+   `ss-welcome` cookie set by the server on a successful sign-in, then clears it
+   so the greeting plays exactly once. *@
+
+@if (visible)
+{
+    <div class="ss-welcome-toast @(leaving ? "leaving" : "")">
+        <div class="ss-welcome-mascot">
+            <img src="/images/syncy-male.png" alt="SYNCY"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <span class="ss-welcome-fallback">🐟</span>
+        </div>
+        <div>
+            <div class="tw:font-bold">@L["welcome.title"] @name! 🎉</div>
+            <div class="tw:text-sm text-muted">@L["welcome.subtitle"]</div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool visible;
+    private bool leaving;
+    private string name = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var raw = await JS.InvokeAsync<string?>("ssWelcome.get");
+        if (string.IsNullOrWhiteSpace(raw)) return;
+
+        await JS.InvokeVoidAsync("ssWelcome.clear");
+        name = FirstNameOf(raw.Trim());
+        visible = true;
+        await InvokeAsync(StateHasChanged);
+
+        // Slide out after a few seconds, then remove from the DOM.
+        await Task.Delay(3600);
+        leaving = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(400);
+        visible = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string FirstNameOf(string full)
+    {
+        if (string.IsNullOrWhiteSpace(full)) return "";
+        var parts = full.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 0 ? parts[^1] : full;
+    }
+}
+
+<style>
+    .ss-welcome-toast {
+        position: fixed;
+        top: 84px; right: 24px;
+        z-index: 300;
+        display: flex; align-items: center; gap: 0.9rem;
+        background: var(--glass-bg-strong);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        box-shadow: var(--shadow-glass-hover);
+        padding: 0.9rem 1.2rem 0.9rem 0.9rem;
+        max-width: 340px;
+        animation: ss-welcome-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ss-welcome-toast.leaving { animation: ss-welcome-out 0.4s ease forwards; }
+
+    .ss-welcome-mascot {
+        position: relative;
+        width: 52px; height: 52px; flex-shrink: 0;
+        animation: ss-welcome-bounce 1.1s ease-in-out infinite;
+    }
+    .ss-welcome-mascot img { width: 100%; height: 100%; object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(99,102,241,0.4)); }
+    .ss-welcome-fallback {
+        display: none; width: 100%; height: 100%;
+        align-items: center; justify-content: center; font-size: 2rem;
+    }
+
+    @@keyframes ss-welcome-in {
+        from { opacity: 0; transform: translateX(60px) scale(0.9); }
+        to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @@keyframes ss-welcome-out {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(60px); }
+    }
+    @@keyframes ss-welcome-bounce {
+        0%, 100% { transform: translateY(0) rotate(-3deg); }
+        50% { transform: translateY(-6px) rotate(3deg); }
+    }
+    @@media (prefers-reduced-motion: reduce) {
+        .ss-welcome-mascot { animation: none; }
+    }
+</style>

@@ -1,0 +1,123 @@
+@page "/Account/Login"
+@layout AccountLayout
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using SoftSync.DAL.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject LocalizationService L
+
+<PageTitle>@L["auth.login.title"]</PageTitle>
+
+<h2 class="tw:font-bold tw:mb-2 tw:text-center">@L["auth.login.title"]</h2>
+<p class="text-muted tw:text-center tw:mb-6">@L["auth.login.subtitle"]</p>
+
+<StatusMessage Message="@errorMessage" />
+
+<EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+
+    <div class="tw:mb-3">
+        <label class="form-label tw:font-medium">@L["auth.identifier"]</label>
+        <InputText @bind-Value="Input.Identifier" class="form-control form-control-lg" autocomplete="username" placeholder="@L["auth.identifier.placeholder"]" />
+        <ValidationMessage For="() => Input.Identifier" class="text-danger" />
+    </div>
+    <div class="tw:mb-3">
+        <label class="form-label tw:font-medium">@L["auth.password"]</label>
+        <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" />
+        <ValidationMessage For="() => Input.Password" class="text-danger" />
+    </div>
+    <div class="form-check tw:mb-4">
+        <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
+        <label class="form-check-label" for="rememberMe">@L["auth.rememberMe"]</label>
+    </div>
+
+    <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.login.submit"]</button>
+</EditForm>
+
+<div class="tw:flex tw:justify-between tw:mt-4 tw:text-sm">
+    <a href="Account/ForgotPassword">@L["auth.forgot"]</a>
+    <a href="Account/LoginWithOtp">@L["auth.loginWithOtp"]</a>
+</div>
+
+<hr class="tw:my-4" />
+<ExternalLoginPicker />
+
+<div class="tw:text-center tw:mt-4 tw:text-sm">
+    @L["auth.noAccount"] <a href="Account/Register">@L["auth.register"]</a>
+</div>
+
+@code {
+    private string? errorMessage;
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear any leftover external cookie so the login page starts clean.
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser()
+    {
+        // Allow logging in with either email or phone number.
+        var user = await ResolveUserAsync(Input.Identifier);
+        if (user?.UserName is null)
+        {
+            errorMessage = L["auth.error.invalidLogin"];
+            return;
+        }
+
+        var result = await SignInManager.PasswordSignInAsync(
+            user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            WelcomeCookie.Set(HttpContext, user.FullName);
+            RedirectManager.RedirectTo(ReturnUrl ?? "");
+        }
+        else if (result.IsLockedOut)
+        {
+            errorMessage = L["auth.error.lockedOut"];
+        }
+        else
+        {
+            errorMessage = L["auth.error.invalidLogin"];
+        }
+    }
+
+    private async Task<ApplicationUser?> ResolveUserAsync(string identifier)
+    {
+        if (identifier.Contains('@'))
+            return await UserManager.FindByEmailAsync(identifier);
+
+        var byName = await UserManager.FindByNameAsync(identifier);
+        if (byName is not null) return byName;
+
+        // Fall back to phone-number lookup.
+        return UserManager.Users.FirstOrDefault(u => u.PhoneNumber == identifier);
+    }
+
+    private sealed class InputModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập email hoặc số điện thoại.")]
+        public string Identifier { get; set; } = "";
+
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        public bool RememberMe { get; set; }
+    }
+}

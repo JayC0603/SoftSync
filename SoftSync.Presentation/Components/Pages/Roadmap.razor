@@ -1,0 +1,77 @@
+@page "/roadmap"
+@page "/roadmap/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IRoadmapService RoadmapService
+
+<div class="max-800 mx-auto">
+    <StepIndicator CurrentStep="5" />
+
+    <div class="tw:flex tw:justify-between tw:items-end tw:mb-6">
+        <div>
+            <h2 class="tw:font-bold tw:mb-1">@L["roadmap.title.prefix"] <span class="ss-gradient-text">@L["roadmap.title.highlight"]</span></h2>
+            <p class="text-muted tw:mb-0">@L["roadmap.subtitle"]</p>
+        </div>
+        <div class="tw:text-end">
+            <span class="badge bg-primary tw:text-base">@L["roadmap.demoMode"]</span>
+        </div>
+    </div>
+
+    @if (roadmap == null)
+    {
+        <div class="tw:text-center tw:py-12">@L["roadmap.loading"]</div>
+    }
+    else
+    {
+        <div class="ss-roadmap-line tw:mt-12">
+            @foreach (var item in roadmap.Items)
+            {
+                <div class="tw:mb-12 tw:relative">
+                    <div class="ss-roadmap-dot @(item.IsCompleted ? "active" : "")" style="top: 0.5rem; @(item.IsCompleted ? "" : "background: #cbd5e1;")"></div>
+                    <div class="ss-card ss-glass-interactive tw:p-6 tw:ms-2">
+                        <div class="tw:flex tw:justify-between tw:items-start tw:mb-2">
+                            <div>
+                                <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
+                                <h5 class="tw:font-bold tw:mt-1">@item.Title</h5>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input tw:text-2xl cursor-pointer" type="checkbox" checked="@item.IsCompleted"
+                                       @onchange="() => ToggleComplete(item)" />
+                            </div>
+                        </div>
+                        <p class="text-muted tw:mb-0">@item.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    private RoadmapDto? roadmap;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fall back to the signed-in user when no id is supplied via the route.
+        if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
+        roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+    }
+
+    private async Task ToggleComplete(RoadmapItemDto item)
+    {
+        if (!item.IsCompleted)
+        {
+            await RoadmapService.MarkCompleteAsync(item.Id);
+            item.IsCompleted = true;
+        }
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .cursor-pointer { cursor: pointer; }
+</style>

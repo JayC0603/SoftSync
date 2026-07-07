@@ -1,0 +1,301 @@
+@page "/profile-setup"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@inject IUserService UserService
+@inject ISkillService SkillService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="wizard-shell tw:mx-auto">
+    <!-- Progress dots -->
+    <div class="tw:flex tw:justify-center tw:gap-2 tw:mb-8">
+        @for (var i = 1; i <= LastStep; i++)
+        {
+            <span class="wiz-dot @(step >= i ? "active" : "")"></span>
+        }
+    </div>
+
+    <div class="ss-card wiz-card tw:p-8 tw:sm:p-12">
+        <!-- SYNCY mascot + speech -->
+        <div class="tw:flex tw:items-start tw:gap-4 tw:mb-6">
+            <div class="wiz-mascot">
+                <img src="@Mascot.ImageFor(mascotGender)" alt="SYNCY"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                <span class="wiz-mascot-fallback">@Mascot.Emoji</span>
+            </div>
+            <div class="wiz-bubble">
+                @switch (step)
+                {
+                    case 0:
+                        <p class="tw:mb-1 tw:font-semibold">@L["wizard.greeting.hi"] @firstName! @L["wizard.greeting.iam"] 🐟</p>
+                        <p class="tw:mb-0 text-muted">@L["wizard.greeting.intro"]</p>
+                        break;
+                    case 1:
+                        <p class="tw:mb-0 tw:font-semibold">@L["wizard.about.q"]</p>
+                        break;
+                    case 2:
+                        <p class="tw:mb-0 tw:font-semibold">@L["wizard.goal.q"]</p>
+                        break;
+                    case 3:
+                        <p class="tw:mb-0 tw:font-semibold">@L["wizard.skills.q"]</p>
+                        break;
+                    case 4:
+                        <p class="tw:mb-1 tw:font-semibold">@L["wizard.done.title"]</p>
+                        <p class="tw:mb-0 text-muted">@L["wizard.done.subtitle"]</p>
+                        break;
+                }
+            </div>
+        </div>
+
+        <!-- Step body -->
+        <div class="wiz-body">
+            @switch (step)
+            {
+                case 0:
+                    <div class="tw:mb-4">
+                        <label class="form-label tw:font-medium">@L["profile.fullName"]</label>
+                        <input type="text" class="form-control form-control-lg tw:p-3" @bind="user.FullName" placeholder="@L["profile.fullName.placeholder"]" />
+                    </div>
+                    break;
+
+                case 1:
+                    <label class="form-label tw:font-medium">@L["wizard.about.ageGroup"]</label>
+                    <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-4 tw:gap-3 tw:mb-6">
+                        @foreach (var ag in ageGroups)
+                        {
+                            <button class="wiz-choice @(ageGroup == ag.Key ? "selected" : "")" @onclick="() => ageGroup = ag.Key">
+                                @L[ag.Value]
+                            </button>
+                        }
+                    </div>
+                    <label class="form-label tw:font-medium">@L["wizard.about.gender"]</label>
+                    <div class="tw:grid tw:grid-cols-3 tw:gap-3">
+                        <button class="wiz-choice @(user.Gender == Gender.Male ? "selected" : "")" @onclick="() => SetGender(Gender.Male)">
+                            <i class="bi bi-gender-male"></i> @L["wizard.gender.male"]
+                        </button>
+                        <button class="wiz-choice @(user.Gender == Gender.Female ? "selected" : "")" @onclick="() => SetGender(Gender.Female)">
+                            <i class="bi bi-gender-female"></i> @L["wizard.gender.female"]
+                        </button>
+                        <button class="wiz-choice @(user.Gender == Gender.Unspecified ? "selected" : "")" @onclick="() => SetGender(Gender.Unspecified)">
+                            <i class="bi bi-person"></i> @L["wizard.gender.other"]
+                        </button>
+                    </div>
+                    break;
+
+                case 2:
+                    <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-3">
+                        @foreach (var g in goals)
+                        {
+                            <button class="wiz-choice wiz-choice-lg @(user.Goal == L[g.Value] ? "selected" : "")" @onclick="() => user.Goal = L[g.Value]">
+                                <i class="bi @g.Key tw:me-2"></i> @L[g.Value]
+                            </button>
+                        }
+                    </div>
+                    break;
+
+                case 3:
+                    @if (skills is null)
+                    {
+                        <div class="tw:text-center text-muted">@L["selectSkills.loading"]</div>
+                    }
+                    else
+                    {
+                        <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:gap-3">
+                            @foreach (var s in skills)
+                            {
+                                <button class="wiz-choice @(selectedSkillIds.Contains(s.Id) ? "selected" : "")" @onclick="() => ToggleSkill(s.Id)">
+                                    <i class="bi @s.IconName tw:me-1"></i> @s.Name
+                                </button>
+                            }
+                        </div>
+                    }
+                    break;
+
+                case 4:
+                    <div class="tw:text-center tw:py-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    break;
+            }
+        </div>
+
+        <!-- Nav buttons -->
+        <div class="tw:flex tw:justify-between tw:items-center tw:mt-8">
+            @if (step > 0 && step < LastStep)
+            {
+                <button class="btn btn-link text-muted tw:no-underline" @onclick="Back">
+                    <i class="bi bi-arrow-left tw:me-1"></i> @L["wizard.back"]
+                </button>
+            }
+            else
+            {
+                <span></span>
+            }
+
+            @if (step < LastStep)
+            {
+                <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="Next" disabled="@(!CanAdvance)">
+                    @L["wizard.next"] <i class="bi bi-arrow-right tw:ms-2"></i>
+                </button>
+            }
+            else
+            {
+                <button class="ss-btn-primary tw:px-8 tw:py-3 tw:w-full tw:text-lg" @onclick="Finish">
+                    <i class="bi bi-rocket-takeoff tw:me-2"></i> @L["wizard.start"]
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private const int LastStep = 4;
+    private int step;
+    private UserDto user = new() { Role = UserRole.Student, Gender = Gender.Unspecified };
+    private int userId;
+    private Gender mascotGender = Gender.Unspecified;
+    private string firstName = "";
+    private string ageGroup = "";
+
+    private IEnumerable<SkillDto>? skills;
+    private readonly List<int> selectedSkillIds = new();
+
+    private readonly (string Key, string Value)[] ageGroups =
+    {
+        ("<18", "wizard.age.under18"),
+        ("18-22", "wizard.age.1822"),
+        ("23-27", "wizard.age.2327"),
+        ("28+", "wizard.age.28plus")
+    };
+
+    private readonly (string Key, string Value)[] goals =
+    {
+        ("bi-chat-dots", "wizard.goal.communication"),
+        ("bi-briefcase", "wizard.goal.internship"),
+        ("bi-trophy", "wizard.goal.leadership"),
+        ("bi-people", "wizard.goal.teamwork")
+    };
+
+    private bool CanAdvance => step switch
+    {
+        0 => !string.IsNullOrWhiteSpace(user.FullName),
+        1 => user.Gender != Gender.Unspecified || !string.IsNullOrEmpty(ageGroup),
+        2 => !string.IsNullOrWhiteSpace(user.Goal),
+        3 => selectedSkillIds.Any(),
+        _ => true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        userId = await AuthProvider.GetUserIdAsync();
+        var existing = await UserService.GetUserByIdAsync(userId);
+        if (existing is not null)
+        {
+            user = existing;
+            mascotGender = existing.Gender;
+        }
+        firstName = FirstNameOf(user.FullName);
+        skills = await SkillService.GetAllSkillsAsync();
+    }
+
+    private void SetGender(Gender g)
+    {
+        user.Gender = g;
+        mascotGender = g;
+    }
+
+    private void ToggleSkill(int id)
+    {
+        if (!selectedSkillIds.Remove(id)) selectedSkillIds.Add(id);
+    }
+
+    private void Next()
+    {
+        if (step == 0) firstName = FirstNameOf(user.FullName);
+        if (step < LastStep) step++;
+    }
+
+    private void Back()
+    {
+        if (step > 0) step--;
+    }
+
+    private async Task Finish()
+    {
+        await UserService.UpdateProfileAsync(userId, user);
+        if (selectedSkillIds.Any())
+        {
+            await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
+        }
+        Nav.NavigateTo($"/assessment/{userId}");
+    }
+
+    private static string FirstNameOf(string full)
+    {
+        if (string.IsNullOrWhiteSpace(full)) return "";
+        var parts = full.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 0 ? parts[^1] : full; // Vietnamese given name is last
+    }
+}
+
+<style>
+    .wizard-shell { max-width: 640px; }
+    .wiz-dot {
+        width: 28px; height: 6px; border-radius: 999px;
+        background: rgba(99, 102, 241, 0.2);
+        transition: background 0.3s;
+    }
+    .wiz-dot.active { background: var(--gradient); }
+    .wiz-card { border-radius: 24px; }
+
+    .wiz-mascot {
+        position: relative;
+        width: 64px; height: 64px; flex-shrink: 0;
+    }
+    .wiz-mascot img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(99,102,241,0.35));
+    }
+    .wiz-mascot-fallback {
+        display: none;
+        width: 100%; height: 100%;
+        align-items: center; justify-content: center;
+        font-size: 2.4rem;
+    }
+    .wiz-bubble {
+        background: rgba(99, 102, 241, 0.08);
+        border-radius: 16px 16px 16px 4px;
+        padding: 0.9rem 1.1rem;
+        flex: 1;
+    }
+
+    .wiz-choice {
+        border: 2px solid var(--glass-border);
+        background: rgba(255,255,255,0.6);
+        border-radius: 14px;
+        padding: 0.7rem 0.9rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        text-align: center;
+    }
+    .wiz-choice:hover { border-color: var(--color-brand); color: var(--color-brand-dark); }
+    .wiz-choice.selected {
+        border-color: var(--color-brand);
+        background: var(--gradient);
+        color: #fff;
+    }
+    .wiz-choice-lg { padding: 1rem; font-size: 0.95rem; text-align: left; }
+
+    .form-control:focus {
+        border-color: var(--color-brand);
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    }
+</style>

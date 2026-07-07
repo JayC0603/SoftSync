@@ -1,0 +1,28 @@
+@inherits LayoutComponentBase
+
+@* Static layout for Account pages. No JS interop or language toggle so it is
+   safe under static SSR (where auth cookies can be written). *@
+
+<div class="ss-aurora" aria-hidden="true">
+    <span></span><span></span><span></span>
+</div>
+
+<div class="tw:min-h-screen tw:flex tw:items-center tw:justify-center tw:py-12 tw:px-4">
+    <div class="account-shell tw:w-full">
+        <div class="tw:flex tw:items-center tw:justify-center tw:gap-2 tw:mb-6">
+            <a href="/" class="tw:flex tw:items-center tw:gap-2 tw:no-underline">
+                <div style="width: 40px; height: 40px; background: var(--gradient); border-radius: 10px; overflow: hidden;" class="tw:flex tw:items-center tw:justify-center">
+                    <img src="images/logo.png" alt="S" class="tw:w-full tw:h-full tw:object-cover" />
+                </div>
+                <span class="tw:text-2xl tw:font-bold ss-gradient-text">SoftSync</span>
+            </a>
+        </div>
+        <div class="ss-card tw:p-8">
+            @Body
+        </div>
+    </div>
+</div>
+
+<style>
+    .account-shell { max-width: 440px; }
+</style>

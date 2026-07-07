@@ -1,0 +1,130 @@
+@page "/Account/LoginWithOtp"
+@layout AccountLayout
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using SoftSync.BLL.Auth
+@using SoftSync.Common.Enums
+@using SoftSync.DAL.Entities
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject VerificationCodeService CodeService
+@inject ILogger<LoginWithOtp> Logger
+@inject IdentityRedirectManager RedirectManager
+@inject LocalizationService L
+
+<PageTitle>@L["auth.otp.title"]</PageTitle>
+
+<h2 class="tw:font-bold tw:mb-2 tw:text-center">@L["auth.otp.title"]</h2>
+<p class="text-muted tw:text-center tw:mb-6">@L["auth.otp.subtitle"]</p>
+
+<StatusMessage Message="@message" />
+
+@if (!codeSent)
+{
+    <EditForm Model="RequestInput" method="post" OnValidSubmit="SendCode" FormName="otp-request">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+        <div class="tw:mb-4">
+            <label class="form-label tw:font-medium">@L["auth.phone"]</label>
+            <InputText @bind-Value="RequestInput.PhoneNumber" class="form-control form-control-lg" autocomplete="tel" placeholder="+84..." />
+            <ValidationMessage For="() => RequestInput.PhoneNumber" class="text-danger" />
+        </div>
+        <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.sendCode"]</button>
+    </EditForm>
+}
+else
+{
+    <EditForm Model="VerifyInput" method="post" OnValidSubmit="VerifyCode" FormName="otp-verify">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+        <input type="hidden" name="VerifyInput.PhoneNumber" value="@VerifyInput.PhoneNumber" />
+        <div class="tw:mb-4">
+            <label class="form-label tw:font-medium">@L["auth.enterCode"]</label>
+            <InputText @bind-Value="VerifyInput.Code" class="form-control form-control-lg" inputmode="numeric" autocomplete="one-time-code" />
+            <ValidationMessage For="() => VerifyInput.Code" class="text-danger" />
+        </div>
+        <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.verifyLogin"]</button>
+    </EditForm>
+}
+
+<div class="tw:text-center tw:mt-4 tw:text-sm">
+    <a href="Account/Login">@L["auth.backToLogin"]</a>
+</div>
+
+@code {
+    private bool codeSent;
+    private string? message;
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [SupplyParameterFromForm(FormName = "otp-request")] private RequestModel RequestInput { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "otp-verify")] private VerifyModel VerifyInput { get; set; } = new();
+
+    private async Task SendCode()
+    {
+        var user = UserManager.Users.FirstOrDefault(u => u.PhoneNumber == RequestInput.PhoneNumber);
+        if (user is null)
+        {
+            message = L["auth.error.phoneNotFound"];
+            return;
+        }
+
+        try
+        {
+            await CodeService.IssueAsync(VerificationPurpose.PhoneLoginOtp, RequestInput.PhoneNumber, user.Id);
+            VerifyInput = new VerifyModel { PhoneNumber = RequestInput.PhoneNumber };
+            codeSent = true;
+            message = L["auth.codeSent"];
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = "Error: " + ex.Message;
+        }
+    }
+
+    private async Task VerifyCode()
+    {
+        var result = await CodeService.VerifyAsync(
+            VerificationPurpose.PhoneLoginOtp, VerifyInput.PhoneNumber, VerifyInput.Code);
+
+        if (result != VerificationResult.Success)
+        {
+            codeSent = true;
+            message = "Error: " + MapError(result);
+            return;
+        }
+
+        var user = UserManager.Users.FirstOrDefault(u => u.PhoneNumber == VerifyInput.PhoneNumber);
+        if (user is null)
+        {
+            message = L["auth.error.phoneNotFound"];
+            return;
+        }
+
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        Logger.LogInformation("User logged in via phone OTP.");
+        WelcomeCookie.Set(HttpContext, user.FullName);
+        RedirectManager.RedirectTo("");
+    }
+
+    private string MapError(VerificationResult result) => result switch
+    {
+        VerificationResult.Expired => L["auth.error.codeExpired"],
+        VerificationResult.TooManyAttempts => L["auth.error.tooManyAttempts"],
+        VerificationResult.NotFound => L["auth.error.codeNotFound"],
+        _ => L["auth.error.codeInvalid"]
+    };
+
+    private sealed class RequestModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        public string PhoneNumber { get; set; } = "";
+    }
+
+    private sealed class VerifyModel
+    {
+        [Required] public string PhoneNumber { get; set; } = "";
+        [Required(ErrorMessage = "Vui lòng nhập mã.")]
+        public string Code { get; set; } = "";
+    }
+}

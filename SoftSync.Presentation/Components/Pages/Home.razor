@@ -1,0 +1,175 @@
+@page "/"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@inject NavigationManager Nav
+
+<div class="hero-section tw:py-12">
+    <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-12 tw:items-center">
+        <div>
+            <div class="tw:flex tw:items-center tw:gap-4 tw:mb-6">
+                <div class="logo-container tw:overflow-hidden">
+                    <img src="images/logo.png" alt="SoftSync Logo" class="tw:w-full tw:h-full tw:object-cover" />
+                </div>
+                <div>
+                    <h1 class="tw:text-6xl tw:font-bold tw:mb-0 ss-gradient-text">SoftSync</h1>
+                    <p class="text-muted tw:font-medium tw:mb-0">@L["home.tagline"]</p>
+                </div>
+            </div>
+
+            <h2 class="tw:text-4xl tw:font-bold tw:mb-6">@L["home.heroTitlePrefix"]<span class="text-primary">@L["home.heroTitleHighlight"]</span>.</h2>
+            <p class="tw:text-xl text-muted tw:mb-12">
+                @L["home.heroDesc"]
+            </p>
+
+            <div class="tw:flex tw:gap-4">
+                <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick='() => Nav.NavigateTo("/profile-setup")'>
+                    @L["home.startJourney"] <i class="bi bi-arrow-right tw:ms-2"></i>
+                </button>
+            </div>
+
+            <div class="tw:grid tw:grid-cols-3 tw:gap-6 tw:mt-12">
+                <div>
+                    <div class="tw:text-center">
+                        <div class="tw:text-2xl tw:font-bold tw:mb-0">7+</div>
+                        <div class="tw:text-sm text-muted">@L["home.stat.coreSkills"]</div>
+                    </div>
+                </div>
+                <div class="border-start border-end">
+                    <div class="tw:text-center">
+                        <div class="tw:text-2xl tw:font-bold tw:mb-0">AI</div>
+                        <div class="tw:text-sm text-muted">@L["home.stat.assessment"]</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="tw:text-center">
+                        <div class="tw:text-2xl tw:font-bold tw:mb-0">24/7</div>
+                        <div class="tw:text-sm text-muted">@L["home.stat.support"]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="mockup-container">
+                <div class="phone-frame">
+                    <div class="phone-screen tw:flex tw:flex-col">
+                        <div class="phone-header tw:p-4 border-bottom tw:flex tw:items-center tw:justify-between">
+                            <i class="bi bi-list tw:text-2xl"></i>
+                            <span class="tw:font-bold tw:text-base">@L["home.mockup.title"]</span>
+                            <i class="bi bi-person-circle tw:text-2xl"></i>
+                        </div>
+                        <div class="phone-content tw:p-6 tw:grow">
+                            <div class="ss-card tw:mb-4 tw:p-4 tw:text-center tw:border-0" style="background: var(--gradient-soft);">
+                                <i class="bi bi-graph-up ss-gradient-text tw:text-4xl"></i>
+                                <div class="tw:font-bold tw:mt-2">@L["home.mockup.roadmap"]</div>
+                            </div>
+                            <div class="chat-mockup tw:mt-6">
+                                <div class="chat-bubble chat-assistant" style="font-size: 0.8rem;">
+                                    @L["home.mockup.chatAssistant"]
+                                </div>
+                                <div class="chat-bubble chat-user tw:ms-auto" style="font-size: 0.8rem;">
+                                    @L["home.mockup.chatUser"]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="floating-badge badge-1 ss-glass" style="animation: ss-float 6s ease-in-out infinite;">
+                    <i class="bi bi-check-circle-fill text-success tw:me-2"></i> @L["home.badge.verified"]
+                </div>
+                <div class="floating-badge badge-2 ss-glass" style="animation: ss-float 6s ease-in-out infinite; animation-delay: -3s;">
+                    <i class="bi bi-lightning-fill text-warning tw:me-2"></i> @L["home.badge.aiPowered"]
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6 tw:mt-12 tw:py-12">
+    <div>
+        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
+            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">
+                <i class="bi bi-shield-check tw:text-3xl"></i>
+            </div>
+            <h4 class="tw:font-bold">@L["home.feature.assessment.title"]</h4>
+            <p class="text-muted tw:px-2">@L["home.feature.assessment.desc"]</p>
+        </div>
+    </div>
+    <div>
+        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
+            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(168, 85, 247, 0.1); color: var(--secondary);">
+                <i class="bi bi-map tw:text-3xl"></i>
+            </div>
+            <h4 class="tw:font-bold">@L["home.feature.roadmap.title"]</h4>
+            <p class="text-muted tw:px-2">@L["home.feature.roadmap.desc"]</p>
+        </div>
+    </div>
+    <div>
+        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
+            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(236, 72, 153, 0.1); color: var(--accent);">
+                <i class="bi bi-chat-heart tw:text-3xl"></i>
+            </div>
+            <h4 class="tw:font-bold">@L["home.feature.assistant.title"]</h4>
+            <p class="text-muted tw:px-2">@L["home.feature.assistant.desc"]</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .logo-container {
+        width: 64px;
+        height: 64px;
+        background: var(--gradient);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-card);
+    }
+    
+    .mockup-container {
+        position: relative;
+        perspective: 1000px;
+    }
+    
+    .phone-frame {
+        width: 300px;
+        height: 600px;
+        background: #1e293b;
+        border-radius: 40px;
+        padding: 12px;
+        box-shadow: 0 50px 100px -20px rgba(50,50,93,0.25), 0 30px 60px -30px rgba(0,0,0,0.3);
+        margin: 0 auto;
+        transform: rotateY(-10deg) rotateX(5deg);
+    }
+    
+    .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: white;
+        border-radius: 30px;
+        overflow: hidden;
+    }
+    
+    .icon-box {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .floating-badge {
+        position: absolute;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        z-index: 10;
+        white-space: nowrap;
+    }
+    
+    .badge-1 { top: 20%; right: -10%; }
+    .badge-2 { bottom: 30%; left: -5%; }
+</style>

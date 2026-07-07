@@ -1,0 +1,76 @@
+@page "/assessment-result/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IAssessmentService AssessmentService
+@inject NavigationManager Nav
+
+<div class="max-800 mx-auto">
+    <StepIndicator CurrentStep="4" />
+
+    <div class="tw:text-center tw:mb-12">
+        <h2 class="tw:font-bold">@L["result.title.prefix"] <span class="ss-gradient-text">@L["result.title.highlight"]</span></h2>
+        <p class="text-muted">@L["result.subtitle"]</p>
+    </div>
+
+    @if (results == null)
+    {
+        <div class="tw:text-center tw:py-12">@L["result.loading"]</div>
+    }
+    else
+    {
+        <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6 tw:mb-12">
+            @foreach (var res in results)
+            {
+                <div>
+                    <div class="ss-card ss-glass-interactive tw:p-6">
+                        <div class="tw:flex tw:justify-between tw:mb-2">
+                            <h5 class="tw:font-bold tw:mb-0">@res.SkillName</h5>
+                            <span class="badge @GetLevelBadgeClass(res.Level)">@res.Level</span>
+                        </div>
+                        <div class="progress tw:mb-4" style="height: 12px; border-radius: 6px;">
+                            <div class="progress-bar" style="width: @(res.Score)%; background: var(--gradient);"></div>
+                        </div>
+                        <p class="tw:text-sm text-muted tw:mb-0">
+                            @(res.Score > 70 ? L["result.feedback.high"] : L["result.feedback.low"])
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="ss-card tw:p-12 tw:text-center tw:mb-12" style="background: var(--gradient-soft);">
+            <h4 class="tw:font-bold tw:mb-4">@L["result.recommendation.title"]</h4>
+            <p class="tw:text-xl tw:mb-6">
+                "@L["result.recommendation.part1"]<strong>Communication</strong>@L["result.recommendation.part2"]<strong>Teamwork</strong>@L["result.recommendation.part3"]"
+            </p>
+            <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="GoToRoadmap">
+                @L["result.viewRoadmap"] <i class="bi bi-calendar-check tw:ms-2"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    private IEnumerable<AssessmentResultDto>? results;
+
+    protected override async Task OnInitializedAsync()
+    {
+        results = await AssessmentService.GetLatestResultsAsync(UserId);
+    }
+
+    private string GetLevelBadgeClass(SoftSync.Common.Enums.AssessmentLevel level) => level switch
+    {
+        SoftSync.Common.Enums.AssessmentLevel.Good => "bg-success",
+        SoftSync.Common.Enums.AssessmentLevel.Average => "bg-warning",
+        _ => "bg-danger"
+    };
+
+    private void GoToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+</style>

@@ -1,0 +1,87 @@
+@page "/case-studies"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject ICaseStudyService CaseStudyService
+
+<div class="max-800 mx-auto">
+    <div class="tw:mb-12">
+        <h2 class="tw:font-bold tw:mb-1">@L["caseStudies.titlePrefix"] <span class="ss-gradient-text">@L["caseStudies.titleHighlight"]</span></h2>
+        <p class="text-muted">@L["caseStudies.subtitle"]</p>
+    </div>
+
+    @if (caseStudy == null)
+    {
+        <div class="tw:text-center tw:py-12">@L["caseStudies.loading"]</div>
+    }
+    else
+    {
+        <div class="ss-card tw:mb-12 tw:overflow-hidden">
+            <div class="bg-primary text-white tw:p-4 tw:px-6 tw:font-bold">@L["caseStudies.label"] @caseStudy.Title</div>
+            <div class="tw:p-12">
+                <p class="tw:text-xl tw:mb-12 lh-lg">@caseStudy.Scenario</p>
+
+                <h6 class="tw:font-bold tw:uppercase tw:text-sm text-muted tw:mb-4">@L["caseStudies.howRespond"]</h6>
+                <div class="tw:grid tw:gap-4">
+                    @foreach (var opt in caseStudy.Options)
+                    {
+                        <button class="btn btn-outline-primary tw:text-start tw:p-4 tw:text-xl"
+                                @onclick="() => SelectOption(opt)"
+                                disabled="@(feedback != null)">
+                            @opt.OptionText
+                        </button>
+                    }
+                </div>
+
+                @if (feedback != null)
+                {
+                    <div class="tw:mt-12 tw:p-6 rounded-3 @(isCorrect ? "bg-success-subtle border-success" : "bg-warning-subtle border-warning") border">
+                        <div class="tw:flex tw:gap-4">
+                            <i class="bi @(isCorrect ? "bi-check-circle-fill text-success" : "bi-exclamation-triangle-fill text-warning") tw:text-2xl"></i>
+                            <div>
+                                <h5 class="tw:font-bold @(isCorrect ? "text-success" : "text-warning")">@(isCorrect ? L["caseStudies.correctTitle"] : L["caseStudies.incorrectTitle"])</h5>
+                                <p class="tw:mb-0 text-dark">@feedback</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tw:mt-6 tw:text-center">
+                        <button class="btn btn-primary tw:px-6 tw:py-2" @onclick="LoadNext">@L["caseStudies.tryAnother"]</button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private CaseStudyDto? caseStudy;
+    private string? feedback;
+    private bool isCorrect;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNext();
+    }
+
+    private async Task LoadNext()
+    {
+        feedback = null;
+        var list = await CaseStudyService.GetCaseStudiesBySkillAsync(1); // Communication for demo
+        var random = new Random();
+        var id = list.ElementAt(random.Next(list.Count())).Id;
+        caseStudy = await CaseStudyService.GetCaseStudyByIdAsync(id);
+    }
+
+    private void SelectOption(CaseStudyOptionDto opt)
+    {
+        feedback = opt.Feedback;
+        isCorrect = opt.IsRecommended;
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .bg-success-subtle { background: #dcfce7 !important; }
+    .bg-warning-subtle { background: #fef9c3 !important; }
+</style>
