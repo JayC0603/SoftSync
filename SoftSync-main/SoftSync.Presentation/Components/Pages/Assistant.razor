@@ -1,0 +1,83 @@
+@page "/assistant"
+@page "/assistant/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IAiAssistantService AssistantService
+
+<div class="max-800 tw:mx-auto tw:h-full tw:flex tw:flex-col" style="min-height: 70vh;">
+    <div class="tw:mb-6">
+        <h2 class="tw:font-bold tw:mb-1"><i class="bi bi-robot tw:me-2 ss-gradient-text"></i>@L["assistant.title"]</h2>
+        <p class="text-muted">@L["assistant.subtitle"]</p>
+    </div>
+
+    <div class="ss-card tw:grow tw:p-6 tw:mb-6 overflow-auto tw:flex tw:flex-col" style="max-height: 500px;">
+        @foreach (var msg in messages)
+        {
+            <div class="chat-bubble @(msg.Sender == SoftSync.Common.Enums.ChatSender.User ? "chat-user" : "chat-assistant")">
+                @msg.Content
+            </div>
+        }
+        @if (isTyping)
+        {
+            <div class="chat-bubble chat-assistant text-muted">
+                <span class="spinner-grow spinner-grow-sm" role="status"></span> @L["assistant.typing"]
+            </div>
+        }
+    </div>
+
+    <div class="input-group">
+        <input type="text" class="form-control form-control-lg tw:p-4" placeholder="@L["assistant.inputPlaceholder"]"
+               @bind="userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" />
+        <button class="ss-btn-primary tw:px-6" @onclick="SendMessage" disabled="@(string.IsNullOrWhiteSpace(userInput))">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    private string userInput = "";
+    private bool isTyping = false;
+    private List<MessageDto> messages = new()
+    {
+        new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.Assistant, Content = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?", CreatedAt = DateTime.Now }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fall back to the signed-in user when no id is supplied via the route.
+        if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(userInput)) return;
+
+        var userMsg = userInput;
+        userInput = "";
+        messages.Add(new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.User, Content = userMsg, CreatedAt = DateTime.Now });
+
+        isTyping = true;
+        StateHasChanged();
+
+        // Simulate AI response delay
+        await Task.Delay(1000);
+        var reply = await AssistantService.GetReplyAsync(userMsg, UserId);
+
+        messages.Add(new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.Assistant, Content = reply, CreatedAt = DateTime.Now });
+        isTyping = false;
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SendMessage();
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .overflow-auto { overflow-y: auto; }
+</style>

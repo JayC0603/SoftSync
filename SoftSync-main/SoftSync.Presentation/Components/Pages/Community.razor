@@ -1,0 +1,68 @@
+@page "/community"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IMentorService MentorService
+
+<div class="max-800 tw:mx-auto">
+    <div class="tw:mb-12">
+        <h2 class="tw:font-bold tw:mb-1"><span class="ss-gradient-text">@L["community.title.highlight"]</span> @L["community.title.rest"]</h2>
+        <p class="text-muted">@L["community.subtitle"]</p>
+    </div>
+
+    <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6">
+        @if (mentors == null)
+        {
+            <div class="tw:text-center">@L["community.loading"]</div>
+        }
+        else
+        {
+            @foreach (var mentor in mentors)
+            {
+                <div>
+                    <div class="ss-card ss-glass-interactive tw:p-6 tw:h-full">
+                        <div class="tw:flex tw:items-center tw:gap-4 tw:mb-4">
+                            <img src="@mentor.AvatarUrl" class="tw:rounded-full" style="width: 64px; height: 64px; object-fit: cover;" />
+                            <div>
+                                <h5 class="tw:font-bold tw:mb-0">@mentor.Name</h5>
+                                <span class="tw:text-sm text-primary">@mentor.Expertise</span>
+                            </div>
+                        </div>
+                        <p class="text-muted tw:text-sm tw:mb-6">@mentor.ShortBio</p>
+                        <button class="btn btn-outline-primary tw:w-full tw:py-2 rounded-pill" @onclick="() => Connect(mentor.Name)">
+                            @L["community.connect"]
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(notification))
+    {
+        <div class="tw:mt-6 alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill tw:me-2"></i> @notification
+            <button type="button" class="btn-close" @onclick="() => notification = null"></button>
+        </div>
+    }
+</div>
+
+@code {
+    private IEnumerable<MentorDto>? mentors;
+    private string? notification;
+
+    protected override async Task OnInitializedAsync()
+    {
+        mentors = await MentorService.GetAllAsync();
+    }
+
+    private void Connect(string name)
+    {
+        notification = string.Format(L["community.notification"], name);
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+</style>

@@ -1,0 +1,209 @@
+@page "/profile"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+@inject IUserService UserService
+@inject IProgressService ProgressService
+@inject IAssessmentService AssessmentService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+@inject IWebHostEnvironment Env
+
+<div class="max-720 tw:mx-auto">
+    @if (user is null)
+    {
+        <div class="tw:text-center tw:py-12">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else
+    {
+        <!-- Header card: avatar + name + level -->
+        <div class="ss-card tw:p-8 tw:mb-6">
+            <div class="tw:flex tw:items-center tw:gap-6 tw:flex-col tw:sm:flex-row">
+                <div class="ss-avatar-upload">
+                    @if (!string.IsNullOrEmpty(user.AvatarUrl))
+                    {
+                        <img src="@user.AvatarUrl" alt="avatar" class="ss-avatar-img" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill"></i>
+                    }
+                    <label class="ss-avatar-edit" title="@L["profile.avatar.change"]">
+                        <i class="bi bi-camera-fill"></i>
+                        <InputFile OnChange="OnAvatarSelected" accept="image/*" class="tw:hidden" />
+                    </label>
+                </div>
+
+                <div class="tw:flex-1 tw:text-center tw:sm:text-left">
+                    <h2 class="tw:font-bold tw:mb-1">@user.FullName</h2>
+                    <div class="tw:flex tw:items-center tw:gap-2 tw:justify-center tw:sm:justify-start tw:mb-3">
+                        <span class="ss-level-badge"><i class="bi bi-star-fill"></i> @L["nav.level"] @user.Level</span>
+                        <span class="text-muted tw:text-sm">@user.ExperiencePoints XP</span>
+                    </div>
+
+                    <!-- Level progress bar -->
+                    <div class="ss-xp-bar" title="@xpIntoLevel / @xpForNext XP">
+                        <div class="ss-xp-fill" style="width: @(user.LevelProgressPercent)%"></div>
+                    </div>
+                    <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mt-1">
+                        <span>@L["nav.level"] @user.Level</span>
+                        <span>@xpIntoLevel / @xpForNext XP → @L["nav.level"] @(user.Level + 1)</span>
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(avatarError))
+            {
+                <div class="text-danger tw:text-sm tw:mt-3">@avatarError</div>
+            }
+        </div>
+
+        <!-- Stats -->
+        <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-4 tw:mb-6">
+            <div class="ss-card tw:p-6 tw:text-center">
+                <div class="ss-stat-num">@assessmentCount</div>
+                <div class="text-muted tw:text-sm">@L["profile.stat.assessments"]</div>
+            </div>
+            <div class="ss-card tw:p-6 tw:text-center">
+                <div class="ss-stat-num">@completedSkills</div>
+                <div class="text-muted tw:text-sm">@L["profile.stat.skillsTracked"]</div>
+            </div>
+            <div class="ss-card tw:p-6 tw:text-center">
+                <div class="ss-stat-num">@user.Level</div>
+                <div class="text-muted tw:text-sm">@L["profile.stat.currentLevel"]</div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="ss-card tw:p-6">
+            <h3 class="tw:font-bold tw:mb-4">@L["profile.details"]</h3>
+            <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-4">
+                <div>
+                    <div class="text-muted tw:text-sm">@L["auth.email"]</div>
+                    <div class="tw:font-medium">@email</div>
+                </div>
+                <div>
+                    <div class="text-muted tw:text-sm">@L["profile.age"]</div>
+                    <div class="tw:font-medium">@user.Age</div>
+                </div>
+                <div class="tw:sm:col-span-2">
+                    <div class="text-muted tw:text-sm">@L["profile.goal"]</div>
+                    <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : user.Goal)</div>
+                </div>
+            </div>
+            <button class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo("/profile-setup")'>
+                <i class="bi bi-pencil tw:me-2"></i> @L["profile.edit"]
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private const long MaxAvatarBytes = 3 * 1024 * 1024;
+    private UserDto? user;
+    private int userId;
+    private string? email;
+    private string? avatarError;
+    private int assessmentCount;
+    private int completedSkills;
+    private int xpIntoLevel;
+    private int xpForNext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        userId = state.User.GetUserId();
+        email = state.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                ?? state.User.Identity?.Name;
+
+        user = await UserService.GetUserByIdAsync(userId);
+        if (user is not null)
+        {
+            xpIntoLevel = LevelSystem.XpIntoCurrentLevel(user.ExperiencePoints);
+            xpForNext = LevelSystem.XpForNextLevel(user.ExperiencePoints);
+        }
+
+        var results = await AssessmentService.GetLatestResultsAsync(userId);
+        assessmentCount = results.Count();
+        var progress = await ProgressService.GetUserProgressAsync(userId);
+        completedSkills = progress.Count();
+    }
+
+    private async Task OnAvatarSelected(InputFileChangeEventArgs e)
+    {
+        avatarError = null;
+        var file = e.File;
+        if (file is null || user is null) return;
+
+        if (file.Size > MaxAvatarBytes) { avatarError = L["profile.avatar.tooLarge"]; return; }
+        if (!file.ContentType.StartsWith("image/")) { avatarError = L["profile.avatar.notImage"]; return; }
+
+        try
+        {
+            var ext = Path.GetExtension(file.Name);
+            if (string.IsNullOrWhiteSpace(ext)) ext = ".png";
+            var fileName = $"user{userId}_{Guid.NewGuid():N}{ext}";
+            var dir = Path.Combine(Env.WebRootPath, "uploads", "avatars");
+            Directory.CreateDirectory(dir);
+            await using (var fs = new FileStream(Path.Combine(dir, fileName), FileMode.Create))
+            {
+                await file.OpenReadStream(MaxAvatarBytes).CopyToAsync(fs);
+            }
+            user.AvatarUrl = $"/uploads/avatars/{fileName}";
+            await UserService.SetAvatarAsync(userId, user.AvatarUrl);
+        }
+        catch (Exception ex)
+        {
+            avatarError = L["profile.avatar.uploadFailed"] + " " + ex.Message;
+        }
+    }
+}
+
+<style>
+    .max-720 { max-width: 720px; }
+    .ss-avatar-upload {
+        position: relative;
+        width: 110px; height: 110px;
+        border-radius: 999px;
+        background: var(--gradient);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.8rem;
+        flex-shrink: 0;
+    }
+    .ss-avatar-img { width: 100%; height: 100%; border-radius: 999px; object-fit: cover; }
+    .ss-avatar-edit {
+        position: absolute; bottom: 0; right: 0;
+        width: 36px; height: 36px; border-radius: 999px;
+        background: #fff; color: var(--color-brand);
+        border: 2px solid var(--glass-border);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; box-shadow: var(--shadow-glass);
+    }
+    .ss-avatar-edit:hover { color: var(--color-brand-dark); }
+    .ss-level-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        background: var(--gradient); color: #fff;
+        padding: 0.2rem 0.7rem; border-radius: 999px;
+        font-weight: 700; font-size: 0.85rem;
+    }
+    .ss-xp-bar {
+        height: 10px; border-radius: 999px;
+        background: rgba(99, 102, 241, 0.15);
+        overflow: hidden;
+    }
+    .ss-xp-fill {
+        height: 100%; border-radius: 999px;
+        background: var(--gradient);
+        transition: width 0.4s ease;
+    }
+    .ss-stat-num {
+        font-size: 2rem; font-weight: 800;
+        color: var(--color-brand-dark);
+        line-height: 1.1;
+    }
+</style>

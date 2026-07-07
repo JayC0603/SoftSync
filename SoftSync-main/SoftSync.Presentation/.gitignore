@@ -1,0 +1,7 @@
+# Front-end build artifacts (Vite + Tailwind)
+node_modules/
+wwwroot/dist/
+
+# .NET build output
+bin/
+obj/

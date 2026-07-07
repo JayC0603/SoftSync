@@ -1,0 +1,95 @@
+@page "/select-skills/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject ISkillService SkillService
+@inject IUserService UserService
+@inject NavigationManager Nav
+
+<div class="max-800 mx-auto">
+    <StepIndicator CurrentStep="2" />
+
+    <div class="tw:text-center tw:mb-12">
+        <h2 class="tw:font-bold">@L["selectSkills.title"]</h2>
+        <p class="text-muted">@L["selectSkills.subtitle"]</p>
+    </div>
+
+    <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:md:grid-cols-3 tw:gap-6 tw:mb-12">
+        @if (skills == null)
+        {
+            <div class="tw:text-center">@L["selectSkills.loading"]</div>
+        }
+        else
+        {
+            @foreach (var skill in skills)
+            {
+                <div>
+                    <div class="ss-card ss-glass-interactive tw:p-6 tw:text-center tw:h-full cursor-pointer @(selectedSkillIds.Contains(skill.Id) ? "selected" : "")"
+                         @onclick="() => ToggleSkill(skill.Id)">
+                        <div class="skill-icon tw:mb-4">
+                            <i class="bi @skill.IconName tw:text-2xl"></i>
+                        </div>
+                        <h5 class="tw:font-bold">@skill.Name</h5>
+                        <p class="tw:text-sm text-muted tw:mb-0">@skill.Description</p>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="tw:text-center">
+        <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="HandleSubmit" disabled="@(!selectedSkillIds.Any())">
+            @L["selectSkills.startAssessment"] <i class="bi bi-arrow-right tw:ms-2"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    private IEnumerable<SkillDto>? skills;
+    private List<int> selectedSkillIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        skills = await SkillService.GetAllSkillsAsync();
+    }
+
+    private void ToggleSkill(int id)
+    {
+        if (selectedSkillIds.Contains(id))
+            selectedSkillIds.Remove(id);
+        else
+            selectedSkillIds.Add(id);
+    }
+
+    private async Task HandleSubmit()
+    {
+        await UserService.AddSkillSelectionsAsync(UserId, selectedSkillIds);
+        Nav.NavigateTo($"/assessment/{UserId}");
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .cursor-pointer { cursor: pointer; }
+    .ss-card.selected {
+        border: 2px solid var(--primary);
+        background: var(--gradient-soft);
+    }
+    .skill-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: var(--primary);
+    }
+    .ss-card.selected .skill-icon {
+        background: var(--gradient);
+        color: white;
+    }
+</style>

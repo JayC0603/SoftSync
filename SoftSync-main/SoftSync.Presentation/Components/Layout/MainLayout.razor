@@ -1,0 +1,20 @@
+@inherits LayoutComponentBase
+
+<div class="ss-aurora" aria-hidden="true">
+    <span></span><span></span><span></span>
+</div>
+
+<div class="page">
+    <NavBar />
+    <WelcomeToast />
+
+    <main class="container tw:py-12">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

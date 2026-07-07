@@ -1,0 +1,68 @@
+@page "/progress"
+@page "/progress/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IProgressService ProgressService
+
+<div class="max-800 mx-auto">
+    <div class="tw:mb-12">
+        <h2 class="tw:font-bold tw:mb-1">@L["progress.title.prefix"] <span class="ss-gradient-text">@L["progress.title.highlight"]</span></h2>
+        <p class="text-muted">@L["progress.subtitle"]</p>
+    </div>
+
+    @if (progressLogs == null)
+    {
+        <div class="tw:text-center tw:py-12">@L["progress.loading"]</div>
+    }
+    else if (!progressLogs.Any())
+    {
+        <div class="ss-card tw:p-12 tw:text-center">
+            <i class="bi bi-lightning-charge tw:text-4xl text-muted tw:mb-4"></i>
+            <h4>@L["progress.empty.title"]</h4>
+            <p class="text-muted">@L["progress.empty.description"]</p>
+            <a href="/" class="btn btn-primary tw:mt-4">@L["progress.empty.cta"]</a>
+        </div>
+    }
+    else
+    {
+        <div class="tw:grid tw:grid-cols-1 tw:gap-6">
+            @foreach (var p in progressLogs)
+            {
+                <div>
+                    <div class="ss-card ss-glass-interactive tw:p-6">
+                        <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
+                            <h5 class="tw:font-bold tw:mb-0">@p.SkillName</h5>
+                            <span class="tw:font-bold ss-gradient-text tw:text-2xl">@p.PercentComplete%</span>
+                        </div>
+                        <div class="progress" style="height: 20px; border-radius: 10px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 style="width: @p.PercentComplete%; background: var(--gradient);"></div>
+                        </div>
+                        <div class="tw:mt-4 tw:text-sm text-muted">
+                            @L["progress.lastActive"] @p.UpdatedAt.ToString("MMM dd, yyyy")
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    private IEnumerable<ProgressDto>? progressLogs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fall back to the signed-in user when no id is supplied via the route.
+        if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
+        progressLogs = await ProgressService.GetUserProgressAsync(UserId);
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+</style>

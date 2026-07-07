@@ -1,0 +1,126 @@
+@page "/assessment/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IAssessmentService AssessmentService
+@inject NavigationManager Nav
+
+<div class="max-800 tw:mx-auto">
+    <StepIndicator CurrentStep="3" />
+
+    @if (questions == null)
+    {
+        <div class="tw:text-center tw:py-12">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="tw:mt-4">@L["assessment.preparing"]</p>
+        </div>
+    }
+    else if (currentQuestionIndex < questions.Count)
+    {
+        var q = questions[currentQuestionIndex];
+        <div class="ss-card tw:p-12">
+            <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
+                <span class="badge bg-primary tw:px-4 tw:py-2">@L["assessment.question"] @(currentQuestionIndex + 1) @L["assessment.of"] @questions.Count</span>
+                <span class="badge bg-light text-primary tw:px-4 tw:py-2"><i class="bi bi-tag tw:me-1"></i>@SkillLabel(q)</span>
+            </div>
+
+            <div class="progress tw:mb-6" style="height: 8px; border-radius: 6px;">
+                <div class="progress-bar" style="width: @(((currentQuestionIndex) * 100) / questions.Count)%; background: var(--gradient);"></div>
+            </div>
+
+            <h3 class="tw:font-bold tw:mb-6">@QuestionLabel(q)</h3>
+
+            <div class="tw:grid tw:gap-4">
+                @foreach (var opt in q.Options)
+                {
+                    <button class="btn btn-outline-primary tw:text-start tw:p-6 tw:text-xl @(selectedOptionId == opt.Id ? "active" : "")"
+                            @onclick="() => SelectOption(opt.Id)">
+                        @OptionLabel(opt)
+                    </button>
+                }
+            </div>
+
+            <div class="tw:mt-12 tw:flex tw:justify-end">
+                <button class="ss-btn-primary tw:px-12" @onclick="NextQuestion" disabled="@(selectedOptionId == 0)">
+                    @(currentQuestionIndex == questions.Count - 1 ? L["assessment.finish"] : L["assessment.nextQuestion"])
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="tw:text-center tw:py-12">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="tw:mt-4">@L["assessment.analyzing"]</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    private List<AssessmentQuestionDto>? questions;
+    private int currentQuestionIndex = 0;
+    private int selectedOptionId = 0;
+    private List<UserAnswerDto> answers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        questions = (await AssessmentService.GetAssessmentQuestionsAsync(UserId)).ToList();
+    }
+
+    // Pick the localized text, falling back to English when a Vietnamese
+    // string is missing. The page inherits LocalizedComponentBase, so a
+    // mid-quiz language toggle re-renders and swaps these instantly.
+    private bool IsVi => L.Current == SoftSync.Presentation.Services.AppLanguage.Vi;
+
+    private string QuestionLabel(AssessmentQuestionDto q) =>
+        IsVi && !string.IsNullOrWhiteSpace(q.QuestionTextVi) ? q.QuestionTextVi : q.QuestionText;
+
+    private string OptionLabel(AssessmentOptionDto o) =>
+        IsVi && !string.IsNullOrWhiteSpace(o.OptionTextVi) ? o.OptionTextVi : o.OptionText;
+
+    private string SkillLabel(AssessmentQuestionDto q) =>
+        IsVi && !string.IsNullOrWhiteSpace(q.SkillNameVi) ? q.SkillNameVi : q.SkillName;
+
+    private void SelectOption(int id)
+    {
+        selectedOptionId = id;
+    }
+
+    private async Task NextQuestion()
+    {
+        answers.Add(new UserAnswerDto { QuestionId = questions![currentQuestionIndex].Id, OptionId = selectedOptionId });
+        
+        if (currentQuestionIndex < questions.Count - 1)
+        {
+            currentQuestionIndex++;
+            selectedOptionId = 0;
+        }
+        else
+        {
+            currentQuestionIndex++; // Move to processing state
+            await AssessmentService.SubmitAssessmentAsync(UserId, answers);
+            Nav.NavigateTo($"/assessment-result/{UserId}");
+        }
+    }
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .btn-outline-primary {
+        border: 2px solid #e2e8f0;
+        color: var(--text);
+        border-radius: 1rem;
+    }
+    .btn-outline-primary:hover {
+        background: #f8fafc;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    .btn-outline-primary.active {
+        background: var(--gradient-soft);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+</style>

@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using SoftSync.DAL.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+
+@if (externalLogins.Length == 0)
+{
+    <div class="tw:text-center text-muted tw:text-sm tw:mt-2">
+        @L["auth.googleNotConfigured"]
+    </div>
+}
+else
+{
+    <form class="tw:mt-2" action="Account/PerformExternalLogin" method="post">
+        <AntiforgeryToken />
+        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        @foreach (var provider in externalLogins)
+        {
+            <button type="submit" class="btn btn-outline-secondary tw:w-full tw:py-2 tw:flex tw:items-center tw:justify-center tw:gap-2"
+                    name="provider" value="@provider.Name" title="@provider.DisplayName">
+                <i class="bi bi-google"></i> @L["auth.googleSignIn"]
+            </button>
+        }
+    </form>
+}
+
+@code {
+    private AuthenticationScheme[] externalLogins = [];
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    [Inject] private LocalizationService L { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
+    }
+}

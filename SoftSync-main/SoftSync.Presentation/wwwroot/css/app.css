@@ -1,0 +1,292 @@
+:root {
+    --primary: #6366f1;       /* Indigo */
+    --primary-dark: #4f46e5;
+    --secondary: #8b5cf6;      /* Violet */
+    --accent: #ec4899;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --bg-soft: #f8fafc;
+    --card-bg: #ffffff;
+    --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    --gradient-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+    --radius: 1rem;
+    --shadow-card: 0 4px 20px rgba(99, 102, 241, 0.08);
+
+    /* Liquid Glass tokens */
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-blur: 18px;
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --glass-highlight: rgba(255, 255, 255, 0.9);
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    /* Transparent so the animated .ss-aurora field shows through behind the glass */
+    background-color: transparent;
+}
+
+/* ===== Liquid Glass System ===== */
+.ss-glass {
+    position: relative;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Specular highlight: a soft light source glancing off the top-left */
+.ss-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Moving sheen: a diagonal band of light that drifts across the surface */
+.ss-glass::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(105deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.35) 45%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.35) 55%,
+        rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    z-index: -1;
+    animation: ss-glass-sheen 7s ease-in-out infinite;
+}
+
+@keyframes ss-glass-sheen {
+    0%   { left: -60%; opacity: 0; }
+    35%  { opacity: 0.8; }
+    60%  { left: 130%; opacity: 0; }
+    100% { left: 130%; opacity: 0; }
+}
+
+.ss-glass:hover {
+    background: var(--glass-bg-strong);
+    box-shadow: 0 16px 48px rgba(31, 38, 135, 0.22), inset 0 1px 0 var(--glass-highlight);
+    transform: translateY(-4px);
+}
+
+/* Interactive tilt/shine that follows the cursor via JS-set custom props */
+.ss-glass-interactive {
+    --mx: 50%;
+    --my: 50%;
+}
+
+.ss-glass-interactive::before {
+    background:
+        radial-gradient(20rem 20rem at var(--mx) var(--my), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 45%),
+        radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 55%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ss-glass::after { animation: none; opacity: 0; }
+    .ss-glass, .ss-glass:hover { transition: none; }
+}
+
+/* Common Classes */
+.ss-gradient-text {
+    background: var(--gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ss-card {
+    position: relative;
+    background: var(--glass-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    padding: 1.5rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.ss-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 55%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.ss-card:hover {
+    background: var(--glass-bg-strong);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(31, 38, 135, 0.22), inset 0 1px 0 var(--glass-highlight);
+}
+
+.ss-btn-primary {
+    background: var(--gradient-action, linear-gradient(135deg, #2563eb, #3b82f6));
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.ss-btn-primary:hover {
+    opacity: 0.95;
+    color: white;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    transform: scale(1.02);
+}
+
+/* Nav */
+.ss-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 4px 24px rgba(31, 38, 135, 0.08), inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Step Indicator */
+.ss-onboarding-step {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+    color: #64748b;
+    font-weight: bold;
+    margin: 0 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.ss-onboarding-step.active {
+    background: var(--gradient);
+    color: white;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+/* Roadmap */
+.ss-roadmap-line {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.ss-roadmap-line::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #e2e8f0;
+}
+
+.ss-roadmap-dot {
+    position: absolute;
+    left: 0.35rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: #cbd5e1;
+    z-index: 1;
+    border: 3px solid white;
+}
+
+.ss-roadmap-dot.active {
+    background: var(--gradient);
+}
+
+/* Chat Assistant */
+.chat-bubble {
+    padding: 0.75rem 1.25rem;
+    border-radius: 1.25rem;
+    margin-bottom: 1rem;
+    max-width: 75%;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.chat-user {
+    background: var(--gradient);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.chat-assistant {
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    backdrop-filter: blur(10px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+    color: var(--text);
+    margin-right: auto;
+    border-bottom-left-radius: 0.25rem;
+}
+
+/* Onboarding Flow Classes */
+.cursor-pointer { cursor: pointer; }
+
+/* Blazor Default Overrides/Preservations */
+.blazor-error-boundary {
+    background: #ff000022;
+    padding: 1rem;
+    border-radius: var(--radius);
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.validation-message {
+    color: var(--accent);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
