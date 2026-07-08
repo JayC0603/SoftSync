@@ -128,27 +128,25 @@
     66%      { transform: translate(-5%, 3%) scale(0.95); }
 }
 
-/* Animated color field behind the glass so there's something to refract. */
+/* Full-page cosmic background image behind the glass. The galaxy photo is the
+   top layer; a purple→pink gradient sits underneath as a fallback so the page
+   still looks cosmic if the image is missing (e.g. before it's committed). */
 .ss-aurora {
     position: fixed;
     inset: 0;
     z-index: -10;
     overflow: hidden;
     pointer-events: none;
-    background: #f8fafc;
+    background-image:
+        url('/images/space-bg.jpg'),
+        linear-gradient(135deg, #3b1e78 0%, #8b5cf6 40%, #d8b4fe 68%, #fdf4ff 100%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.ss-aurora span {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.55;
-    animation: var(--animate-blob);
-}
-
-.ss-aurora span:nth-child(1) { top: -10%; left: 5%;  width: 38rem; height: 38rem; background: var(--color-brand); }
-.ss-aurora span:nth-child(2) { top: -5%;  right: 0;  width: 34rem; height: 34rem; background: var(--color-brand-accent); animation-delay: -6s; }
-.ss-aurora span:nth-child(3) { bottom: -15%; left: 30%; width: 42rem; height: 42rem; background: var(--color-brand-violet); animation-delay: -12s; }
+/* The animated blobs are replaced by the image now. */
+.ss-aurora span { display: none; }
 
 .ss-gradient-text {
     background: var(--gradient);
@@ -180,8 +178,14 @@ html[data-theme="dark"] {
 html[data-theme="dark"] body { color: #ede9fe; }
 /* Deep navy-purple canvas with a slightly brighter aurora so the page reads as a
    rich dark surface (like the reference) rather than washed-out grey. */
-html[data-theme="dark"] .ss-aurora { background: #0a0918; }
-html[data-theme="dark"] .ss-aurora span { opacity: 0.5; }
+/* Dark theme keeps the same galaxy image but darkens it with an overlay so the
+   glass cards stay readable and the mood matches the dark UI. */
+html[data-theme="dark"] .ss-aurora {
+    background-image:
+        linear-gradient(rgba(10, 9, 24, 0.62), rgba(10, 9, 24, 0.72)),
+        url('/images/space-bg.jpg'),
+        linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6b21a8 100%);
+}
 html[data-theme="dark"] .text-muted { color: #9ca3af !important; }
 html[data-theme="dark"] .ss-card,
 html[data-theme="dark"] .card { color: #e5e7eb; }
