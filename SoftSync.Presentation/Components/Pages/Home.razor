@@ -193,4 +193,41 @@
     
     .badge-1 { top: 20%; right: -10%; }
     .badge-2 { bottom: 30%; left: -5%; }
+
+    /* ===== Mobile (max-width 768px) =====
+       The hero copy and the 3D phone mockup are sized for desktop; on a narrow
+       screen the huge headings wrap badly and the rotated phone + floating
+       badges (right:-10% / left:-5%) spill past the viewport edge, forcing a
+       horizontal scrollbar. Shrink type, flatten/scale the mockup, and drop the
+       badges so nothing overflows. */
+    @@media (max-width: 768px) {
+        .hero-section { text-align: center; }
+        .hero-section .tw\:flex.tw\:items-center.tw\:gap-4 { justify-content: center; }
+
+        /* Headings: text-6xl (SoftSync) / text-4xl (hero title) are too large. */
+        .hero-section h1.tw\:text-6xl { font-size: 2.5rem; }
+        .hero-section h2.tw\:text-4xl { font-size: 1.75rem; }
+        .hero-section .tw\:text-xl { font-size: 1.05rem; margin-bottom: 2rem; }
+
+        /* CTA: full-width, centered. */
+        .hero-section .tw\:flex.tw\:gap-4 { justify-content: center; }
+        .hero-section .ss-btn-primary { width: 100%; justify-content: center; }
+
+        /* Phone mockup: kill the 3D rotate (caused clipping) and scale to fit. */
+        .phone-frame {
+            transform: none;
+            width: min(280px, 82vw);
+            height: auto;
+            aspect-ratio: 1 / 2;
+            margin-top: 2.5rem;
+        }
+        /* Floating badges sit outside the phone (right:-10% / left:-5%) and
+           overflow on mobile — hide them there. */
+        .floating-badge { display: none; }
+    }
+
+    /* Belt-and-braces: never let the page scroll sideways on small screens. */
+    @@media (max-width: 768px) {
+        html, body { overflow-x: hidden; }
+    }
 </style>

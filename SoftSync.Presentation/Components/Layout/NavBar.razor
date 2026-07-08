@@ -200,6 +200,17 @@
         .ss-userchip .tw\:flex-col { display: none; }
     }
 
+    /* Narrow phones: the row (brand + 5 pills + lang + search + bell + avatar)
+       gets cramped. Tighten padding/gaps and drop the "EN"/"VI" label so the
+       bar never overflows or wraps. */
+    @@media (max-width: 560px) {
+        .ss-navbar { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .ss-navpills { gap: 0; }
+        .ss-navpill { padding: 0.5rem 0.55rem; }
+        .ss-icon-btn { min-width: 36px; height: 36px; padding: 0 0.4rem; }
+        .ss-icon-btn .tw\:ms-1 { display: none; } /* hide lang label, keep glyph */
+    }
+
     /* Dark theme: lighten nav text/icons so they read on the deep canvas. */
     html[data-theme="dark"] .ss-navpill { color: #cbd5e1; }
     html[data-theme="dark"] .ss-navpill:hover { color: #fff; background: rgba(139, 92, 246, 0.18); }
