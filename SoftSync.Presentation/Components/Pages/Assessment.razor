@@ -67,6 +67,20 @@
     protected override async Task OnInitializedAsync()
     {
         questions = (await AssessmentService.GetAssessmentQuestionsAsync(UserId)).ToList();
+
+        // Shuffle the options of each question so the "best" answer isn't always
+        // last (the seed bank is authored A→D = score 1→4). Scoring is unaffected:
+        // the server scores by OptionId/ScoreValue, not display position. Done once
+        // here so a mid-quiz language toggle re-render doesn't reshuffle.
+        var rng = new Random();
+        foreach (var q in questions)
+        {
+            for (var i = q.Options.Count - 1; i > 0; i--)
+            {
+                var j = rng.Next(i + 1);
+                (q.Options[i], q.Options[j]) = (q.Options[j], q.Options[i]);
+            }
+        }
     }
 
     // Pick the localized text, falling back to English when a Vietnamese
