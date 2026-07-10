@@ -3,173 +3,580 @@
 @inherits LocalizedComponentBase
 @inject NavigationManager Nav
 
-<div class="hero-section tw:py-12">
-    <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-12 tw:items-center">
-        <div>
-            <div class="tw:flex tw:items-center tw:gap-4 tw:mb-6">
-                <div class="logo-container tw:overflow-hidden">
-                    <img src="images/logo.png" alt="SoftSync Logo" class="tw:w-full tw:h-full tw:object-cover" />
-                </div>
-                <div>
-                    <h1 class="tw:text-6xl tw:font-bold tw:mb-0 ss-gradient-text">SoftSync</h1>
-                    <p class="text-muted tw:font-medium tw:mb-0">@L["home.tagline"]</p>
-                </div>
-            </div>
+<section class="ss-landing">
+    <div class="ss-hero-grid">
+        <div class="ss-hero-copy">
+            <div class="ss-eyebrow">@L["home.tagline"]</div>
+            <h1>
+                @L["home.heroTitlePrefix"]<span>@L["home.heroTitleHighlight"]</span>.
+            </h1>
+            <p>@L["home.heroDesc"]</p>
 
-            <h2 class="tw:text-4xl tw:font-bold tw:mb-6">@L["home.heroTitlePrefix"]<span class="text-primary">@L["home.heroTitleHighlight"]</span>.</h2>
-            <p class="tw:text-xl text-muted tw:mb-12">
-                @L["home.heroDesc"]
-            </p>
-
-            <div class="tw:flex tw:gap-4">
-                <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick='() => Nav.NavigateTo("/profile-setup")'>
-                    @L["home.startJourney"] <i class="bi bi-arrow-right tw:ms-2"></i>
+            <div class="ss-hero-actions">
+                <AuthorizeView>
+                    <Authorized>
+                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("/profile-setup")'>
+                            @L["home.startJourney"] <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("Account/Register")'>
+                            @L["auth.register"] <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </NotAuthorized>
+                </AuthorizeView>
+                <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/assistant")'>
+                    <i class="bi bi-play-circle-fill"></i> Learn More
                 </button>
             </div>
+        </div>
 
-            <div class="tw:grid tw:grid-cols-3 tw:gap-6 tw:mt-12">
+        <div class="ss-orbit-stage" aria-hidden="true">
+            <div class="ss-orbit ss-orbit-one"></div>
+            <div class="ss-orbit ss-orbit-two"></div>
+            <div class="ss-galaxy-core"></div>
+            <div class="ss-planet ss-planet-a"></div>
+            <div class="ss-planet ss-planet-b"></div>
+            <div class="ss-ai-orb">
+                <img src="/images/syncy-male.png" alt="" />
+            </div>
+            <div class="ss-ai-caption">
+                <strong>Hi! I'm SoftSync AI</strong>
+                <span>Your learning companion</span>
+                <button type="button" @onclick='() => Nav.NavigateTo("/assistant")'>Click to chat</button>
+            </div>
+            <div class="ss-feature-chip ss-chip-practice ss-glass ss-glass-interactive">
+                <i class="bi bi-controller"></i>
+                <div><strong>Practice</strong><span>Real-world scenarios</span></div>
+            </div>
+            <div class="ss-feature-chip ss-chip-assess ss-glass ss-glass-interactive">
+                <i class="bi bi-graph-up-arrow"></i>
+                <div><strong>Assess</strong><span>Understand your skills</span></div>
+            </div>
+            <div class="ss-feature-chip ss-chip-grow ss-glass ss-glass-interactive">
+                <i class="bi bi-leaf"></i>
+                <div><strong>Grow</strong><span>Personalized learning path</span></div>
+            </div>
+        </div>
+    </div>
+
+    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
+        <div class="ss-panel-head ss-glass">
+            <div>
+                <div class="ss-panel-title"><i class="bi bi-stars"></i> Meet Your Mentors</div>
+                <p>Learn from AI mentors, here to guide you.</p>
+            </div>
+            <button type="button" @onclick='() => Nav.NavigateTo("/community")'>
+                View All Mentors <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="ss-mentor-grid">
+            <article class="ss-mentor-card ss-mentor-violet ss-glass ss-glass-interactive">
+                <img src="/images/syncy-female.png" alt="Nova" />
                 <div>
-                    <div class="tw:text-center">
-                        <div class="tw:text-2xl tw:font-bold tw:mb-0">7+</div>
-                        <div class="tw:text-sm text-muted">@L["home.stat.coreSkills"]</div>
-                    </div>
+                    <h3>Nova <i class="bi bi-stars"></i></h3>
+                    <span>Communication Mentor</span>
+                    <p>Helps you express your ideas clearly, listen actively, and build strong connections.</p>
+                    <div class="ss-specialty"><b>Specialty</b> Public Speaking, Active Listening</div>
                 </div>
-                <div class="border-start border-end">
-                    <div class="tw:text-center">
-                        <div class="tw:text-2xl tw:font-bold tw:mb-0">AI</div>
-                        <div class="tw:text-sm text-muted">@L["home.stat.assessment"]</div>
-                    </div>
-                </div>
+            </article>
+
+            <article class="ss-mentor-card ss-mentor-blue ss-glass ss-glass-interactive">
+                <img src="/images/syncy-male.png" alt="Ace" />
                 <div>
-                    <div class="tw:text-center">
-                        <div class="tw:text-2xl tw:font-bold tw:mb-0">24/7</div>
-                        <div class="tw:text-sm text-muted">@L["home.stat.support"]</div>
-                    </div>
+                    <h3>Ace <i class="bi bi-lightning-charge-fill"></i></h3>
+                    <span>Leadership Mentor</span>
+                    <p>Guides you to lead with confidence, make better decisions, and inspire your team.</p>
+                    <div class="ss-specialty"><b>Specialty</b> Leadership, Decision Making</div>
                 </div>
-            </div>
-        </div>
+            </article>
 
-        <div>
-            <div class="mockup-container">
-                <div class="phone-frame">
-                    <div class="phone-screen tw:flex tw:flex-col">
-                        <div class="phone-header tw:p-4 border-bottom tw:flex tw:items-center tw:justify-between">
-                            <i class="bi bi-list tw:text-2xl"></i>
-                            <span class="tw:font-bold tw:text-base">@L["home.mockup.title"]</span>
-                            <i class="bi bi-person-circle tw:text-2xl"></i>
-                        </div>
-                        <div class="phone-content tw:p-6 tw:grow">
-                            <div class="ss-card tw:mb-4 tw:p-4 tw:text-center tw:border-0" style="background: var(--gradient-soft);">
-                                <i class="bi bi-graph-up ss-gradient-text tw:text-4xl"></i>
-                                <div class="tw:font-bold tw:mt-2">@L["home.mockup.roadmap"]</div>
-                            </div>
-                            <div class="chat-mockup tw:mt-6">
-                                <div class="chat-bubble chat-assistant" style="font-size: 0.8rem;">
-                                    @L["home.mockup.chatAssistant"]
-                                </div>
-                                <div class="chat-bubble chat-user tw:ms-auto" style="font-size: 0.8rem;">
-                                    @L["home.mockup.chatUser"]
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <article class="ss-mentor-card ss-mentor-green ss-glass ss-glass-interactive">
+                <img src="/images/syncy-female.png" alt="Lexi" />
+                <div>
+                    <h3>Lexi <i class="bi bi-leaf-fill"></i></h3>
+                    <span>Productivity Mentor</span>
+                    <p>Helps you stay focused, manage your time, and build effective habits for success.</p>
+                    <div class="ss-specialty"><b>Specialty</b> Time Management, Focus</div>
                 </div>
-                <div class="floating-badge badge-1 ss-glass" style="animation: ss-float 6s ease-in-out infinite;">
-                    <i class="bi bi-check-circle-fill text-success tw:me-2"></i> @L["home.badge.verified"]
-                </div>
-                <div class="floating-badge badge-2 ss-glass" style="animation: ss-float 6s ease-in-out infinite; animation-delay: -3s;">
-                    <i class="bi bi-lightning-fill text-warning tw:me-2"></i> @L["home.badge.aiPowered"]
-                </div>
-            </div>
+            </article>
         </div>
-    </div>
-</div>
+    </section>
 
-<div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6 tw:mt-12 tw:py-12">
-    <div>
-        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
-            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">
-                <i class="bi bi-shield-check tw:text-3xl"></i>
-            </div>
-            <h4 class="tw:font-bold">@L["home.feature.assessment.title"]</h4>
-            <p class="text-muted tw:px-2">@L["home.feature.assessment.desc"]</p>
-        </div>
-    </div>
-    <div>
-        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
-            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(168, 85, 247, 0.1); color: var(--secondary);">
-                <i class="bi bi-map tw:text-3xl"></i>
-            </div>
-            <h4 class="tw:font-bold">@L["home.feature.roadmap.title"]</h4>
-            <p class="text-muted tw:px-2">@L["home.feature.roadmap.desc"]</p>
-        </div>
-    </div>
-    <div>
-        <div class="ss-card ss-glass-interactive tw:h-full tw:text-center">
-            <div class="icon-box tw:mb-4 tw:mx-auto" style="background: rgba(236, 72, 153, 0.1); color: var(--accent);">
-                <i class="bi bi-chat-heart tw:text-3xl"></i>
-            </div>
-            <h4 class="tw:font-bold">@L["home.feature.assistant.title"]</h4>
-            <p class="text-muted tw:px-2">@L["home.feature.assistant.desc"]</p>
-        </div>
-    </div>
-</div>
+    <section class="ss-landing-stats">
+        <div class="ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><strong>7+</strong><span>@L["home.stat.coreSkills"]</span></div>
+        <div class="ss-glass ss-glass-interactive"><i class="bi bi-pie-chart-fill"></i><strong>AI</strong><span>@L["home.stat.assessment"]</span></div>
+        <div class="ss-glass ss-glass-interactive"><i class="bi bi-headset"></i><strong>24/7</strong><span>@L["home.stat.support"]</span></div>
+        <div class="ss-glass ss-glass-interactive"><i class="bi bi-star-fill"></i><strong>10K+</strong><span>Learners</span></div>
+    </section>
+</section>
 
 <style>
-    .logo-container {
-        width: 64px;
-        height: 64px;
-        background: var(--gradient);
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-card);
+    .ss-navbar {
+        background: rgba(5, 8, 30, 0.82) !important;
+        border-bottom-color: rgba(148, 163, 184, 0.08) !important;
+        box-shadow: 0 18px 50px rgba(2, 6, 23, 0.22);
     }
-    
-    .mockup-container {
-        position: relative;
-        perspective: 1000px;
+    .ss-navbar .ss-gradient-text {
+        background: none;
+        -webkit-text-fill-color: #fff;
+        color: #fff;
     }
-    
-    .phone-frame {
-        width: 300px;
-        height: 600px;
-        background: #1e293b;
-        border-radius: 40px;
-        padding: 12px;
-        box-shadow: 0 50px 100px -20px rgba(50,50,93,0.25), 0 30px 60px -30px rgba(0,0,0,0.3);
-        margin: 0 auto;
-        transform: rotateY(-10deg) rotateX(5deg);
+    .ss-navbar .ss-navpill { color: rgba(226, 232, 240, 0.9); }
+    .ss-navbar .ss-navpill:hover,
+    .ss-navbar .ss-navpill.active {
+        color: #fff;
+        background: rgba(124, 58, 237, 0.34);
     }
-    
-    .phone-screen {
-        width: 100%;
-        height: 100%;
-        background: white;
-        border-radius: 30px;
+    .ss-navbar .ss-icon-btn {
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .ss-navbar .ss-icon-btn:hover { background: rgba(124, 58, 237, 0.22); color: #fff; }
+    .ss-navbar .ss-userchip { color: #fff; }
+
+    .ss-landing {
+        --ss-home-text: #f8fafc;
+        --ss-home-muted: rgba(226, 232, 240, 0.86);
+        --ss-home-soft: rgba(226, 232, 240, 0.74);
+        --ss-home-surface: rgba(30, 41, 82, 0.66);
+        --ss-home-surface-strong: rgba(10, 16, 45, 0.52);
+        --ss-home-border: rgba(255, 255, 255, 0.16);
+        --ss-home-shadow: rgba(2, 6, 23, 0.28);
+        color: var(--ss-home-text);
+        padding: clamp(2.5rem, 5vw, 5rem) clamp(1rem, 4vw, 4.5rem) 2.5rem;
+        min-height: calc(100vh - 72px);
         overflow: hidden;
     }
-    
-    .icon-box {
-        width: 70px;
-        height: 70px;
-        border-radius: 20px;
+    .ss-landing::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -8;
+        background:
+            radial-gradient(circle at 74% 12%, rgba(236, 72, 153, 0.22), transparent 30rem),
+            radial-gradient(circle at 52% 18%, rgba(139, 92, 246, 0.2), transparent 34rem),
+            linear-gradient(180deg, rgba(3, 7, 18, 0.28), rgba(3, 7, 18, 0.9)),
+            url('/images/space-bg.jpg');
+        background-size: auto, auto, auto, cover;
+        background-position: center;
+        pointer-events: none;
+    }
+
+    html[data-theme="light"] .ss-navbar {
+        background: rgba(245, 241, 255, 0.78) !important;
+        border-bottom-color: rgba(124, 58, 237, 0.14) !important;
+        box-shadow: 0 18px 48px rgba(99, 102, 241, 0.12);
+    }
+    html[data-theme="light"] .ss-navbar .ss-gradient-text {
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: var(--color-brand);
+    }
+    html[data-theme="light"] .ss-navbar .ss-navpill { color: #475569; }
+    html[data-theme="light"] .ss-navbar .ss-navpill:hover,
+    html[data-theme="light"] .ss-navbar .ss-navpill.active {
+        color: var(--color-brand-dark);
+        background: rgba(99, 102, 241, 0.12);
+    }
+    html[data-theme="light"] .ss-navbar .ss-icon-btn {
+        color: #475569;
+        background: rgba(255, 255, 255, 0.62);
+    }
+    html[data-theme="light"] .ss-navbar .ss-icon-btn:hover {
+        color: var(--color-brand-dark);
+        background: rgba(255, 255, 255, 0.86);
+    }
+    html[data-theme="light"] .ss-navbar .ss-userchip { color: #1e293b; }
+
+    html[data-theme="light"] .ss-landing {
+        --ss-home-text: #172033;
+        --ss-home-muted: rgba(51, 65, 85, 0.82);
+        --ss-home-soft: rgba(71, 85, 105, 0.72);
+        --ss-home-surface: rgba(255, 255, 255, 0.5);
+        --ss-home-surface-strong: rgba(255, 255, 255, 0.62);
+        --ss-home-border: rgba(124, 58, 237, 0.16);
+        --ss-home-shadow: rgba(99, 102, 241, 0.16);
+    }
+    html[data-theme="light"] .ss-landing::before {
+        background:
+            radial-gradient(circle at 18% 10%, rgba(96, 165, 250, 0.34), transparent 31rem),
+            radial-gradient(circle at 80% 8%, rgba(236, 72, 153, 0.22), transparent 28rem),
+            radial-gradient(circle at 62% 42%, rgba(167, 139, 250, 0.26), transparent 34rem),
+            linear-gradient(135deg, rgba(248, 250, 252, 0.88), rgba(237, 233, 254, 0.76) 44%, rgba(255, 228, 245, 0.68)),
+            url('/images/space-bg.jpg');
+        background-size: auto, auto, auto, auto, cover;
+        background-position: center;
+    }
+    html[data-theme="light"] .ss-eyebrow {
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    .ss-hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.35fr);
+        align-items: center;
+        gap: clamp(2rem, 5vw, 5rem);
+        max-width: 1360px;
+        margin: 0 auto;
+    }
+    .ss-hero-copy { max-width: 520px; }
+    .ss-eyebrow {
+        display: inline-flex;
+        padding: 0.45rem 0.85rem;
+        border: 1px solid var(--ss-home-border);
+        border-radius: 999px;
+        background: rgba(30, 41, 82, 0.52);
+        font-size: 0.85rem;
+        margin-bottom: 1.4rem;
+    }
+    .ss-hero-copy h1 {
+        font-size: clamp(3rem, 5vw, 4.75rem);
+        line-height: 1.08;
+        font-weight: 850;
+        letter-spacing: 0;
+        margin: 0 0 1.4rem;
+    }
+    .ss-hero-copy h1 span {
+        color: #6ea8ff;
+        text-shadow: 0 0 30px rgba(99, 102, 241, 0.55);
+    }
+    .ss-hero-copy p {
+        color: var(--ss-home-muted);
+        font-size: 1.08rem;
+        line-height: 1.75;
+        margin-bottom: 2rem;
+    }
+    .ss-hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .ss-primary-cta,
+    .ss-secondary-cta,
+    .ss-panel-head button {
+        height: 52px;
+        border-radius: 14px;
+        border: 1px solid rgba(139, 92, 246, 0.55);
+        color: #fff;
+        padding: 0 1.45rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-weight: 750;
+    }
+    .ss-primary-cta {
+        border: none;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        box-shadow: 0 18px 42px rgba(59, 130, 246, 0.28);
+    }
+    .ss-secondary-cta,
+    .ss-panel-head button {
+        background: rgba(10, 16, 45, 0.43);
+        backdrop-filter: blur(18px);
+    }
+    html[data-theme="light"] .ss-secondary-cta {
+        color: #312e81;
+        background: rgba(255, 255, 255, 0.68);
+        border-color: rgba(99, 102, 241, 0.36);
+        box-shadow: 0 14px 34px rgba(99, 102, 241, 0.14);
+    }
+
+    .ss-orbit-stage {
+        min-height: 470px;
+        position: relative;
+    }
+    .ss-galaxy-core {
+        position: absolute;
+        right: 7%;
+        top: 23%;
+        width: min(38vw, 500px);
+        aspect-ratio: 1.65;
+        border-radius: 50%;
+        background:
+            radial-gradient(ellipse at center, rgba(255, 236, 202, 0.92), rgba(236, 72, 153, 0.32) 22%, rgba(79, 70, 229, 0.18) 48%, transparent 70%),
+            url('/images/space-bg.jpg');
+        background-size: 160%;
+        filter: saturate(1.4);
+        transform: rotate(-10deg);
+        opacity: 0.9;
+    }
+    .ss-orbit {
+        position: absolute;
+        right: 5%;
+        top: 9%;
+        width: min(48vw, 630px);
+        aspect-ratio: 1.65;
+        border: 1px solid rgba(96, 165, 250, 0.5);
+        border-radius: 50%;
+        transform: rotate(-18deg);
+    }
+    .ss-orbit-two { inset: 22% 2% auto auto; width: min(38vw, 520px); opacity: 0.55; }
+    .ss-ai-orb {
+        position: absolute;
+        left: 8%;
+        top: 12%;
+        width: 200px;
+        height: 200px;
+        border-radius: 999px;
+        padding: 20px;
+        background:
+            radial-gradient(circle at 35% 25%, rgba(255,255,255,0.75), transparent 23%),
+            linear-gradient(135deg, rgba(168, 85, 247, 0.92), rgba(37, 99, 235, 0.9));
+        box-shadow: 0 0 0 16px rgba(124, 58, 237, 0.16), 0 0 55px rgba(96, 165, 250, 0.46);
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    
-    .floating-badge {
+    .ss-ai-orb img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 24px rgba(15,23,42,0.28)); }
+    .ss-ai-caption {
         position: absolute;
+        left: 12%;
+        top: 62%;
+        display: grid;
+        gap: 0.25rem;
+        text-align: center;
+    }
+    .ss-ai-caption span { color: var(--ss-home-soft); }
+    .ss-ai-caption button {
+        margin: 0.8rem auto 0;
+        border: 1px solid rgba(139, 92, 246, 0.55);
+        background: rgba(124, 58, 237, 0.36);
+        color: #ddd6fe;
+        border-radius: 999px;
+        padding: 0.45rem 1rem;
+    }
+    .ss-feature-chip {
+        position: absolute;
+        display: flex;
+        gap: 0.9rem;
+        align-items: center;
+        width: 190px;
         padding: 1rem;
+        border: 1px solid var(--ss-home-border);
+        border-radius: 14px;
+        background: var(--ss-home-surface);
+        box-shadow: 0 18px 44px var(--ss-home-shadow);
+        backdrop-filter: blur(18px);
+    }
+    .ss-feature-chip i {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #8b5cf6, #4f46e5);
+        font-size: 1.35rem;
+    }
+    .ss-feature-chip strong,
+    .ss-feature-chip span { display: block; }
+    .ss-feature-chip span { color: var(--ss-home-soft); font-size: 0.9rem; }
+    .ss-chip-practice { right: 11%; top: 3%; }
+    .ss-chip-assess { right: 0; top: 43%; }
+    .ss-chip-grow { right: 28%; top: 66%; }
+    .ss-chip-assess i { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+    .ss-chip-grow i { background: linear-gradient(135deg, #34d399, #0f766e); }
+    .ss-planet { position: absolute; border-radius: 999px; box-shadow: inset -14px -16px 24px rgba(2,6,23,0.34), 0 0 22px rgba(139,92,246,0.28); }
+    .ss-planet-a { right: 48%; top: 24%; width: 58px; height: 58px; background: linear-gradient(135deg, #c4b5fd, #4c1d95); }
+    .ss-planet-b { right: 11%; top: 63%; width: 42px; height: 42px; background: linear-gradient(135deg, #f0abfc, #4338ca); }
+
+    .ss-mentor-panel {
+        max-width: 1360px;
+        margin: 2.5rem auto 0;
+        padding: 1.35rem;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 22px;
+        background:
+            radial-gradient(circle at 14% 0%, rgba(167, 139, 250, 0.34), transparent 34%),
+            linear-gradient(135deg, var(--ss-home-surface-strong), rgba(124, 58, 237, 0.2) 44%, rgba(15, 23, 42, 0.5));
+        backdrop-filter: blur(20px);
+        box-shadow: 0 22px 75px var(--ss-home-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+    .ss-panel-head {
         display: flex;
         align-items: center;
-        font-weight: bold;
-        z-index: 10;
-        white-space: nowrap;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: -0.15rem -0.15rem 1.3rem;
+        padding: 0.95rem 1rem;
+        border: 1px solid var(--ss-home-border);
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(167, 139, 250, 0.16));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
     }
-    
-    .badge-1 { top: 20%; right: -10%; }
-    .badge-2 { bottom: 30%; left: -5%; }
+    .ss-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        color: var(--ss-home-text);
+        font-weight: 850;
+        font-size: 1.25rem;
+        text-shadow: 0 2px 18px rgba(2, 6, 23, 0.45);
+    }
+    .ss-panel-title i {
+        color: #d8b4fe;
+        filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.6));
+    }
+    .ss-panel-head p {
+        margin: 0.35rem 0 0 2rem;
+        color: var(--ss-home-muted);
+        font-weight: 550;
+        text-shadow: 0 1px 10px rgba(2, 6, 23, 0.32);
+    }
+    .ss-panel-head button {
+        height: 42px;
+        font-weight: 750;
+        background: rgba(30, 27, 75, 0.76);
+        border-color: rgba(196, 181, 253, 0.7);
+        box-shadow: 0 14px 32px rgba(49, 46, 129, 0.24);
+    }
+    html[data-theme="light"] .ss-panel-head button {
+        color: #312e81;
+        background: rgba(255, 255, 255, 0.74);
+        border-color: rgba(99, 102, 241, 0.38);
+        box-shadow: 0 14px 34px rgba(99, 102, 241, 0.14);
+    }
+    .ss-mentor-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .ss-mentor-card {
+        min-height: 210px;
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 145px 1fr;
+        gap: 1rem;
+        padding: 1rem 1rem 0;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 16px;
+        background: rgba(30, 41, 82, 0.58);
+    }
+    .ss-mentor-card img {
+        align-self: end;
+        width: 145px;
+        height: 190px;
+        object-fit: contain;
+        filter: drop-shadow(0 18px 20px rgba(0,0,0,0.22));
+    }
+    .ss-mentor-card h3 { margin: 0.45rem 0 0.15rem; font-size: 1.25rem; font-weight: 850; }
+    .ss-mentor-card h3 i { color: #a78bfa; }
+    .ss-mentor-card span { color: rgba(226,232,240,0.72); }
+    .ss-mentor-card p { color: rgba(226,232,240,0.82); margin: 0.65rem 0 1rem; font-size: 0.95rem; line-height: 1.55; }
+    .ss-specialty {
+        margin-top: auto;
+        border-radius: 12px 12px 0 0;
+        padding: 0.65rem 0.8rem;
+        background: rgba(99, 102, 241, 0.18);
+        color: rgba(255,255,255,0.92);
+        font-size: 0.86rem;
+    }
+    .ss-specialty b {
+        display: inline-flex;
+        margin-right: 0.55rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 8px;
+        background: rgba(99, 102, 241, 0.55);
+    }
+    .ss-mentor-violet { background: linear-gradient(135deg, rgba(49,46,129,0.72), rgba(30,41,59,0.58)); }
+    .ss-mentor-blue { background: linear-gradient(135deg, rgba(30,58,138,0.58), rgba(30,41,59,0.58)); }
+    .ss-mentor-green { background: linear-gradient(135deg, rgba(20,83,45,0.44), rgba(30,41,59,0.58)); }
+    .ss-mentor-green .ss-specialty b { background: rgba(20, 184, 166, 0.45); }
+
+    html[data-theme="light"] .ss-mentor-panel {
+        background:
+            radial-gradient(circle at 14% 0%, rgba(167, 139, 250, 0.25), transparent 34%),
+            linear-gradient(135deg, rgba(255,255,255,0.64), rgba(237,233,254,0.52) 46%, rgba(255,241,248,0.58));
+    }
+    html[data-theme="light"] .ss-panel-head {
+        background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(237,233,254,0.56));
+    }
+    html[data-theme="light"] .ss-panel-title {
+        text-shadow: 0 2px 18px rgba(99, 102, 241, 0.16);
+    }
+    html[data-theme="light"] .ss-panel-head p {
+        text-shadow: none;
+    }
+    html[data-theme="light"] .ss-mentor-card {
+        border-color: rgba(124, 58, 237, 0.16);
+        box-shadow: 0 18px 44px rgba(99, 102, 241, 0.12);
+    }
+    html[data-theme="light"] .ss-mentor-card span { color: rgba(71,85,105,0.72); }
+    html[data-theme="light"] .ss-mentor-card p { color: rgba(51,65,85,0.82); }
+    html[data-theme="light"] .ss-mentor-violet { background: linear-gradient(135deg, rgba(238,242,255,0.76), rgba(245,243,255,0.66)); }
+    html[data-theme="light"] .ss-mentor-blue { background: linear-gradient(135deg, rgba(219,234,254,0.72), rgba(248,250,252,0.66)); }
+    html[data-theme="light"] .ss-mentor-green { background: linear-gradient(135deg, rgba(220,252,231,0.62), rgba(248,250,252,0.68)); }
+    html[data-theme="light"] .ss-specialty {
+        color: #334155;
+        background: rgba(99, 102, 241, 0.1);
+    }
+    html[data-theme="light"] .ss-specialty b {
+        color: #fff;
+        background: rgba(99, 102, 241, 0.72);
+    }
+    html[data-theme="light"] .ss-mentor-green .ss-specialty b { background: rgba(13, 148, 136, 0.72); }
+
+    .ss-landing-stats {
+        max-width: 1120px;
+        margin: 1.8rem auto 0;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .ss-landing-stats div {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        column-gap: 1rem;
+        align-items: center;
+        padding: 1rem;
+        border-right: 1px solid rgba(148,163,184,0.18);
+    }
+    .ss-landing-stats div:last-child { border-right: none; }
+    .ss-landing-stats i {
+        grid-row: span 2;
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.7), rgba(124,58,237,0.55));
+        color: #c4b5fd;
+        font-size: 1.35rem;
+    }
+    .ss-landing-stats strong { font-size: 1.35rem; }
+    .ss-landing-stats span { color: var(--ss-home-soft); }
+    html[data-theme="light"] .ss-landing-stats div {
+        border-right-color: rgba(99,102,241,0.14);
+    }
+    html[data-theme="light"] .ss-landing-stats i {
+        color: #eef2ff;
+        box-shadow: 0 12px 28px rgba(99,102,241,0.16);
+    }
+
+    @@media (max-width: 1024px) {
+        .ss-hero-grid { grid-template-columns: 1fr; }
+        .ss-orbit-stage { min-height: 520px; }
+        .ss-mentor-grid { grid-template-columns: 1fr; }
+        .ss-mentor-card { grid-template-columns: 130px 1fr; }
+        .ss-landing-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @@media (max-width: 640px) {
+        .ss-landing { padding-inline: 1rem; }
+        .ss-hero-copy h1 { font-size: 2.55rem; }
+        .ss-hero-actions > * { width: 100%; justify-content: center; }
+        .ss-orbit-stage { min-height: 640px; }
+        .ss-ai-orb { left: 50%; transform: translateX(-50%); top: 2%; }
+        .ss-ai-caption { left: 50%; transform: translateX(-50%); top: 36%; width: 100%; }
+        .ss-galaxy-core { width: 90vw; right: -8%; top: 50%; }
+        .ss-orbit { width: 110vw; right: -18%; top: 40%; }
+        .ss-feature-chip { position: relative; width: 100%; left: auto; right: auto; top: auto; margin-top: 0.75rem; }
+        .ss-chip-practice { margin-top: 300px; }
+        .ss-panel-head { align-items: flex-start; flex-direction: column; }
+        .ss-panel-head button { width: 100%; justify-content: center; }
+        .ss-mentor-card { grid-template-columns: 1fr; }
+        .ss-mentor-card img { width: 130px; height: 150px; justify-self: center; }
+        .ss-landing-stats { grid-template-columns: 1fr; }
+        .ss-landing-stats div { border-right: none; border-bottom: 1px solid rgba(148,163,184,0.18); }
+        .ss-landing-stats div:last-child { border-bottom: none; }
+    }
 </style>

@@ -23,6 +23,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ProgressLog> ProgressLogs { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

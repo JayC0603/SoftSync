@@ -1,0 +1,21 @@
+# Build output
+**/bin/
+**/obj/
+**/wwwroot/dist/
+
+# Front-end
+**/node_modules/
+
+# IDE / editor
+.vs/
+.vscode/
+.idea/
+*.user
+
+# Local secrets / uploads
+**/appsettings.*.local.json
+**/wwwroot/uploads/
+
+# OS
+Thumbs.db
+.DS_Store

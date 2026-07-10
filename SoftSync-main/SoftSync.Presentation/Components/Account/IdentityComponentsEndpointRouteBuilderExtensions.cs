@@ -52,6 +52,40 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
             return TypedResults.LocalRedirect($"~/{returnUrl}");
         });
 
+        // Temporarily suspend the current account: lock it far into the future and
+        // sign out. The user can be restored later by clearing LockoutEnd. Requires
+        // an authenticated user; anonymous callers just bounce to login.
+        group.MapPost("/Suspend", async (
+            ClaimsPrincipal principal,
+            [FromServices] UserManager<ApplicationUser> userManager,
+            [FromServices] SignInManager<ApplicationUser> signInManager) =>
+        {
+            var user = await userManager.GetUserAsync(principal);
+            if (user is null)
+                return (IResult)TypedResults.LocalRedirect("~/Account/Login");
+
+            await userManager.SetLockoutEnabledAsync(user, true);
+            await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
+            await signInManager.SignOutAsync();
+            return TypedResults.LocalRedirect("~/Account/Login?suspended=1");
+        });
+
+        // Permanently delete the current account and sign out. Irreversible; the
+        // Settings UI gates this behind a typed-confirmation modal.
+        group.MapPost("/DeleteAccount", async (
+            ClaimsPrincipal principal,
+            [FromServices] UserManager<ApplicationUser> userManager,
+            [FromServices] SignInManager<ApplicationUser> signInManager) =>
+        {
+            var user = await userManager.GetUserAsync(principal);
+            if (user is null)
+                return (IResult)TypedResults.LocalRedirect("~/Account/Login");
+
+            await signInManager.SignOutAsync();
+            await userManager.DeleteAsync(user);
+            return TypedResults.LocalRedirect("~/Account/Login?deleted=1");
+        });
+
         return group;
     }
 }

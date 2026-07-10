@@ -100,7 +100,7 @@ else
             return;
         }
 
-        await SignInManager.SignInAsync(user, isPersistent: false);
+        await SignInManager.SignInAsync(user, isPersistent: true);
         Logger.LogInformation("User logged in via phone OTP.");
         WelcomeCookie.Set(HttpContext, user.FullName);
         RedirectManager.RedirectTo("");

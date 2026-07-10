@@ -7,7 +7,7 @@
 @inject IProgressService ProgressService
 
 <div class="max-800 mx-auto">
-    <div class="tw:mb-12">
+    <div class="ss-page-heading tw:mb-12">
         <h2 class="tw:font-bold tw:mb-1">@L["progress.title.prefix"] <span class="ss-gradient-text">@L["progress.title.highlight"]</span></h2>
         <p class="text-muted">@L["progress.subtitle"]</p>
     </div>
@@ -65,4 +65,32 @@
 
 <style>
     .max-800 { max-width: 800px; }
+    .ss-page-heading h2 {
+        color: #111827;
+        text-shadow: 0 1px 18px rgba(255,255,255,0.75);
+    }
+    .ss-page-heading .ss-gradient-text {
+        background: none;
+        -webkit-text-fill-color: #4f46e5;
+        color: #4f46e5;
+        text-shadow: 0 1px 18px rgba(255,255,255,0.78);
+    }
+    .ss-page-heading .text-muted {
+        color: #4b5563 !important;
+        font-weight: 600;
+        text-shadow: 0 1px 14px rgba(255,255,255,0.82);
+    }
+    html[data-theme="dark"] .ss-page-heading h2 {
+        color: #f8fafc;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+    html[data-theme="dark"] .ss-page-heading .ss-gradient-text {
+        -webkit-text-fill-color: #a78bfa;
+        color: #a78bfa;
+        text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+    }
+    html[data-theme="dark"] .ss-page-heading .text-muted {
+        color: #cbd5e1 !important;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.55);
+    }
 </style>

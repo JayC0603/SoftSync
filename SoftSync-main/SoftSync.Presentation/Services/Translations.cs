@@ -136,9 +136,57 @@ public static class Translations
         ["result.recommendation.part2"] = (", but your roadmap suggests prioritizing ", ", nhưng lộ trình gợi ý bạn nên ưu tiên các tình huống "),
         ["result.recommendation.part3"] = (" scenarios to balance your skill set.", " để cân bằng bộ kỹ năng của mình."),
         ["result.viewRoadmap"] = ("View My Roadmap", "Xem lộ trình của tôi"),
+        ["result.score"] = ("Score", "Điểm"),
+
+        // Band labels (raw score 8–32 per skill: 8–14 / 15–20 / 21–26 / 27–32)
+        ["result.level.passive"] = ("Passive", "Bị động"),
+        ["result.level.developing"] = ("Developing", "Đang phát triển"),
+        ["result.level.proactive"] = ("Proactive", "Chủ động"),
+        ["result.level.mastery"] = ("Mastery", "Làm chủ"),
+
+        // Per-skill × band descriptions. Keyed result.desc.<slug>.<band>; slug is
+        // the skill name with spaces removed, lowercased (see AssessmentResult.razor).
+        ["result.desc.timemanagement.passive"] = (
+            "Right now you tend to study and work reactively — only starting when a deadline is near or when someone reminds you. Procrastination and losing focus are affecting your results quite a lot. This is a skill you should prioritize first, beginning with small changes like setting a fixed study time each day.",
+            "Hiện tại bạn thường học và làm việc theo cách bị động — chỉ bắt tay vào khi gần đến hạn hoặc khi có người nhắc. Việc trì hoãn và mất tập trung đang ảnh hưởng khá nhiều đến kết quả học tập của bạn. Đây là kỹ năng bạn nên ưu tiên rèn luyện trước, bắt đầu từ những thay đổi nhỏ như đặt giờ học cố định mỗi ngày."),
+        ["result.desc.timemanagement.developing"] = (
+            "You're already conscious of planning and have tried some time-management methods, but you haven't kept them up consistently — you easily quit halfway or lose focus when things get hard. You're on the right track; you just need more persistence and a suitable reminder tool to keep the habit long term.",
+            "Bạn đã có ý thức lên kế hoạch và thử áp dụng một số cách quản lý thời gian, nhưng chưa duy trì được đều đặn — dễ bỏ giữa chừng hoặc mất tập trung khi gặp việc khó. Bạn đang đi đúng hướng, chỉ cần rèn luyện thêm tính kiên trì và có công cụ nhắc nhở phù hợp để giữ được thói quen lâu dài."),
+        ["result.desc.timemanagement.proactive"] = (
+            "You organize your time fairly well: you plan, know how to prioritize important tasks, and stay focused most of the time. Occasionally you still misjudge how long things take or get distracted, but overall you are proactively in control of your schedule.",
+            "Bạn đã biết cách sắp xếp thời gian khá tốt: có kế hoạch, biết ưu tiên việc quan trọng, và giữ được sự tập trung phần lớn thời gian. Thỉnh thoảng vẫn còn những lúc ước lượng thời gian chưa chính xác hoặc bị xao nhãng, nhưng nhìn chung bạn đang chủ động kiểm soát được lịch trình của mình."),
+        ["result.desc.timemanagement.mastery"] = (
+            "You manage your time very well: you have a clear plan, prioritize the right things, stay highly focused, and always have a backup plan for the unexpected. This is a strength of yours — keep it up, and consider sharing your approach to help others.",
+            "Bạn quản lý thời gian rất tốt: có kế hoạch rõ ràng, biết ưu tiên đúng việc, giữ tập trung cao và luôn có phương án dự phòng khi có việc bất ngờ. Đây là một thế mạnh của bạn — hãy tiếp tục duy trì và có thể chia sẻ cách làm này để giúp đỡ người khác."),
+
+        ["result.desc.communication.passive"] = (
+            "You currently struggle to exchange with others — either focusing on speaking while listening little, avoiding disagreements, or reacting harshly to feedback. This can make others misread your meaning or hesitate to be honest with you. Starting with listening to the full sentence before you respond will help you improve quickly.",
+            "Bạn hiện gặp khó khăn khi trao đổi với người khác — hoặc chỉ tập trung nói mà ít lắng nghe, hoặc né tránh khi có bất đồng, hoặc phản ứng gay gắt khi bị góp ý. Điều này có thể khiến người khác hiểu lầm ý bạn hoặc ngại chia sẻ thẳng thắn với bạn. Bắt đầu bằng việc tập lắng nghe hết câu trước khi trả lời sẽ giúp bạn cải thiện nhanh."),
+        ["result.desc.communication.developing"] = (
+            "You know you need to listen and express yourself more clearly, but you're still reluctant to check whether others understood you, or awkward when giving/receiving feedback. Practicing confirmation questions (\"does that make sense to you?\") will help you communicate more confidently.",
+            "Bạn đã biết mình cần lắng nghe và diễn đạt rõ ràng hơn, nhưng vẫn còn ngại hỏi lại khi chưa chắc người khác hiểu ý mình, hoặc lúng túng khi phải góp ý/nhận góp ý. Luyện tập thêm cách đặt câu hỏi xác nhận (\"mình nói vậy bạn hiểu chưa?\") sẽ giúp bạn giao tiếp tự tin hơn."),
+        ["result.desc.communication.proactive"] = (
+            "You communicate fairly well: you listen, choose a way of speaking that fits each person, and handle back-and-forth feedback calmly. You still get a bit awkward in more sensitive situations (e.g. delivering bad news), but overall you're proactive in communication.",
+            "Bạn giao tiếp khá tốt: biết lắng nghe, chọn cách nói phù hợp với từng người, và xử lý được các tình huống góp ý qua lại một cách bình tĩnh. Đôi khi vẫn còn lúng túng ở những tình huống nhạy cảm hơn (ví dụ báo tin không vui), nhưng nhìn chung bạn đã chủ động trong giao tiếp."),
+        ["result.desc.communication.mastery"] = (
+            "You communicate very effectively: you listen actively, express yourself clearly, adjust your style to each person and situation, and handle feedback/conflict calmly and respectfully. This is a skill you can put to great use in teamwork or a leadership role.",
+            "Bạn giao tiếp rất hiệu quả: lắng nghe chủ động, diễn đạt rõ ràng, biết điều chỉnh cách nói theo từng người và hoàn cảnh, đồng thời xử lý góp ý/xung đột một cách bình tĩnh, tôn trọng người khác. Đây là kỹ năng bạn có thể phát huy tốt trong làm việc nhóm hoặc vai trò dẫn dắt."),
+
+        ["result.desc.criticalthinking.passive"] = (
+            "You tend to believe information immediately without verifying it, or only fix the surface of a problem without finding the real cause. This makes you prone to fake news or repeating the same mistake. Build the habit of asking yourself \"why do I think this is true?\" before believing or deciding anything.",
+            "Bạn có xu hướng tin ngay vào thông tin mà không kiểm chứng, hoặc chỉ giải quyết vấn đề ở phần bên ngoài mà không tìm hiểu nguyên nhân thật sự. Điều này khiến bạn dễ bị ảnh hưởng bởi tin giả hoặc lặp lại cùng một lỗi sai. Hãy tập thói quen tự hỏi \"vì sao mình nghĩ điều này đúng?\" trước khi tin hoặc quyết định điều gì."),
+        ["result.desc.criticalthinking.developing"] = (
+            "You've started asking questions and looking for the root cause of a problem, but you're sometimes swayed by emotion or the majority's opinion, or don't verify sources thoroughly. Building the habit of cross-checking 2–3 sources before believing will make your thinking more solid.",
+            "Bạn đã bắt đầu biết đặt câu hỏi và tìm nguyên nhân gốc rễ của vấn đề, nhưng đôi khi vẫn bị cảm xúc hoặc ý kiến số đông chi phối, hoặc chưa kiểm chứng nguồn tin một cách đầy đủ. Rèn thêm thói quen đối chiếu từ 2-3 nguồn trước khi tin sẽ giúp bạn tư duy vững vàng hơn."),
+        ["result.desc.criticalthinking.proactive"] = (
+            "You analyze problems fairly well: you find root causes, weigh multiple viewpoints, and are willing to change your mind when new evidence appears. You're also fairly careful with new information. Keep sharpening the habit of verifying sources even more thoroughly to go further.",
+            "Bạn có khả năng phân tích vấn đề khá tốt: biết tìm nguyên nhân gốc, cân nhắc nhiều góc nhìn, và sẵn sàng thay đổi suy nghĩ khi có bằng chứng mới. Bạn cũng khá cẩn trọng khi tiếp nhận thông tin mới. Tiếp tục rèn luyện thói quen kiểm chứng nguồn tin kỹ hơn nữa sẽ giúp bạn tiến xa hơn."),
+        ["result.desc.criticalthinking.mastery"] = (
+            "Your critical thinking is very strong: you always verify information from multiple sources, analyze problems to their root, and adjust your views when the evidence is convincing. This strength helps you learn and make decisions effectively — keep it up in subjects that require analysis and research.",
+            "Bạn tư duy phản biện rất tốt: luôn kiểm chứng thông tin từ nhiều nguồn, phân tích vấn đề đến gốc rễ, và sẵn sàng điều chỉnh quan điểm khi có bằng chứng thuyết phục. Đây là một điểm mạnh giúp bạn học tập và ra quyết định hiệu quả — hãy tiếp tục phát huy trong các môn học đòi hỏi phân tích, nghiên cứu."),
 
         // ===== Language switch =====
-        ["lang.switchLabel"] = ("VN", "EN"),
+        ["lang.switchLabel"] = ("VI", "EN"),
 
         // ===== Auth: nav =====
         ["nav.login"] = ("Sign in", "Đăng nhập"),
@@ -199,6 +247,104 @@ public static class Translations
         ["profile.stat.assessments"] = ("Assessments done", "Bài đánh giá đã làm"),
         ["profile.stat.skillsTracked"] = ("Skills tracked", "Kỹ năng theo dõi"),
         ["profile.stat.currentLevel"] = ("Current level", "Cấp hiện tại"),
+
+        // ===== Settings =====
+        ["settings.title"] = ("Settings", "Cài đặt"),
+        ["settings.subtitle"] = ("Manage your account, learning experience and preferences.", "Quản lý tài khoản, trải nghiệm học tập và tùy chọn của bạn."),
+        ["settings.save"] = ("Save changes", "Lưu thay đổi"),
+        ["settings.saved"] = ("Your changes have been saved.", "Đã lưu thay đổi của bạn."),
+        ["settings.back"] = ("Back to settings", "Quay lại cài đặt"),
+
+        ["settings.tab.account"] = ("Account", "Tài khoản"),
+        ["settings.tab.learning"] = ("Learning", "Học tập"),
+        ["settings.tab.appearance"] = ("Appearance & language", "Giao diện & ngôn ngữ"),
+        ["settings.tab.account.actions"] = ("Account actions", "Tác vụ tài khoản"),
+
+        ["settings.displayName"] = ("Display name", "Tên hiển thị"),
+        ["settings.security"] = ("Security & sign-in", "Bảo mật & đăng nhập"),
+        ["settings.linkedAccounts"] = ("Linked Accounts", "Tài khoản liên kết"),
+        ["settings.eyebrow"] = ("SETTINGS", "CÀI ĐẶT"),
+        ["settings.side.sub"] = ("Manage your profile and SoftSync experience", "Quản lý hồ sơ và trải nghiệm SoftSync của bạn"),
+        ["settings.tab.notifications"] = ("Notifications", "Thông báo"),
+        ["settings.tab.privacy"] = ("Privacy & Community", "Quyền riêng tư & Cộng đồng"),
+        ["settings.tab.billing"] = ("Subscription & Billing", "Gói dịch vụ & Thanh toán"),
+        ["settings.profile.info"] = ("Profile Information", "Thông tin hồ sơ"),
+        ["settings.secureNote"] = ("Your information is secure and encrypted.", "Thông tin của bạn được bảo mật và mã hóa."),
+        ["settings.hero.quote"] = ("Small progress every day leads to big changes.", "Tiến bộ nhỏ mỗi ngày dẫn đến thay đổi lớn."),
+        ["settings.hero.xp"] = ("XP Points", "Điểm XP"),
+        ["settings.hero.streak"] = ("Day Streak", "Chuỗi ngày"),
+        ["settings.hero.badges"] = ("Badges", "Huy hiệu"),
+        ["settings.linked.connected"] = ("Connected", "Đã kết nối"),
+        ["settings.linked.notConnected"] = ("Not connected", "Chưa kết nối"),
+        ["settings.linked.connect"] = ("Connect", "Kết nối"),
+        ["settings.premium.title"] = ("Go Premium", "Nâng cấp Premium"),
+        ["settings.premium.sub"] = ("Unlock unlimited AI chats, advanced case studies and exclusive rewards.", "Mở khóa trò chuyện AI không giới hạn, tình huống nâng cao và phần thưởng độc quyền."),
+        ["settings.premium.cta"] = ("Upgrade Now", "Nâng cấp ngay"),
+        ["settings.notifications.hint"] = ("Choose how SoftSync keeps you in the loop.", "Chọn cách SoftSync giữ liên lạc với bạn."),
+        ["settings.notif.study"] = ("Study reminders", "Nhắc nhở học tập"),
+        ["settings.notif.study.hint"] = ("A gentle nudge to keep your streak going.", "Nhắc nhẹ để duy trì chuỗi ngày học của bạn."),
+        ["settings.notif.progress"] = ("Progress summaries", "Tóm tắt tiến độ"),
+        ["settings.notif.progress.hint"] = ("Weekly progress summaries and important updates.", "Tóm tắt tiến độ hằng tuần và cập nhật quan trọng."),
+        ["settings.notif.community"] = ("Community activity", "Hoạt động cộng đồng"),
+        ["settings.notif.community.hint"] = ("Real-time alerts for messages and community replies.", "Cảnh báo thời gian thực cho tin nhắn và phản hồi cộng đồng."),
+        ["settings.notif.preview"] = ("These preferences are a preview and aren't saved yet.", "Các tùy chọn này đang ở dạng xem trước và chưa được lưu."),
+        ["settings.privacy.hint"] = ("Control what other learners can see about you.", "Kiểm soát những gì người học khác có thể thấy về bạn."),
+        ["settings.privacy.profile"] = ("Public profile", "Hồ sơ công khai"),
+        ["settings.privacy.profile.hint"] = ("Let other members view your profile and progress.", "Cho phép thành viên khác xem hồ sơ và tiến độ của bạn."),
+        ["settings.privacy.leaderboard"] = ("Show on leaderboard", "Hiển thị trên bảng xếp hạng"),
+        ["settings.privacy.leaderboard.hint"] = ("Appear in community XP rankings.", "Xuất hiện trong bảng xếp hạng XP cộng đồng."),
+        ["settings.billing.hint"] = ("Manage your subscription plan and payment options.", "Quản lý gói đăng ký và tùy chọn thanh toán của bạn."),
+        ["settings.billing.currentPlan"] = ("Current plan", "Gói hiện tại"),
+        ["settings.billing.freePlan"] = ("You're on the free plan. Upgrade any time to unlock premium features.", "Bạn đang dùng gói miễn phí. Nâng cấp bất cứ lúc nào để mở khóa tính năng cao cấp."),
+
+        ["settings.learning.hint"] = ("SoftSync's AI uses these to personalize your roadmap and activity suggestions.", "AI của SoftSync dùng các thiết lập này để cá nhân hóa lộ trình và gợi ý hoạt động."),
+        ["settings.prioritySkills"] = ("Priority skills", "Kỹ năng ưu tiên"),
+        ["settings.currentLevel"] = ("Current level", "Mức độ hiện tại"),
+        ["settings.level.beginner"] = ("Beginner", "Mới bắt đầu"),
+        ["settings.level.intermediate"] = ("Intermediate", "Trung cấp"),
+        ["settings.level.advanced"] = ("Advanced", "Nâng cao"),
+        ["settings.dailyMinutes"] = ("Time to learn each day", "Thời gian học mỗi ngày"),
+        ["settings.minutes"] = ("min", "phút"),
+        ["settings.daysPerWeek"] = ("Days per week", "Số ngày mỗi tuần"),
+        ["settings.preferredTime"] = ("Preferred study time", "Thời điểm học yêu thích"),
+        ["settings.time.morning"] = ("Morning", "Buổi sáng"),
+        ["settings.time.afternoon"] = ("Afternoon", "Buổi chiều"),
+        ["settings.time.evening"] = ("Evening", "Buổi tối"),
+        ["settings.time.night"] = ("Night", "Đêm khuya"),
+
+        ["settings.language"] = ("Language", "Ngôn ngữ"),
+        ["settings.theme"] = ("Theme", "Giao diện"),
+        ["settings.theme.light"] = ("Light", "Sáng"),
+        ["settings.theme.dark"] = ("Dark", "Tối"),
+        ["settings.theme.system"] = ("System", "Theo hệ thống"),
+        ["settings.reduceMotion"] = ("Reduce motion", "Giảm hiệu ứng chuyển động"),
+        ["settings.reduceMotion.hint"] = ("Minimizes animations for a calmer, more accessible experience.", "Giảm hoạt ảnh để trải nghiệm nhẹ nhàng và dễ tiếp cận hơn."),
+
+        ["settings.session"] = ("Session", "Phiên đăng nhập"),
+        ["settings.danger"] = ("Danger zone", "Vùng nguy hiểm"),
+        ["settings.danger.hint"] = ("These actions affect your whole account. Please read carefully.", "Các tác vụ này ảnh hưởng đến toàn bộ tài khoản. Hãy đọc kỹ."),
+        ["settings.suspend.title"] = ("Suspend account", "Tạm khóa tài khoản"),
+        ["settings.suspend.hint"] = ("Temporarily lock your account. Sign back in later to reactivate.", "Tạm khóa tài khoản. Đăng nhập lại sau để kích hoạt lại."),
+        ["settings.suspend.button"] = ("Suspend", "Tạm khóa"),
+        ["settings.suspend.confirm"] = ("You'll be signed out and won't be able to sign in until an admin restores your account. Continue?", "Bạn sẽ bị đăng xuất và không thể đăng nhập cho đến khi quản trị viên khôi phục tài khoản. Tiếp tục?"),
+        ["settings.suspend.done"] = ("Your account has been suspended.", "Tài khoản của bạn đã bị tạm khóa."),
+        ["settings.delete.title"] = ("Delete account", "Xóa tài khoản"),
+        ["settings.delete.hint"] = ("Permanently delete your account and data. This cannot be undone.", "Xóa vĩnh viễn tài khoản và dữ liệu. Không thể hoàn tác."),
+        ["settings.delete.button"] = ("Delete account", "Xóa tài khoản"),
+        ["settings.delete.confirm"] = ("This permanently deletes your account and all associated data. This action cannot be undone.", "Thao tác này xóa vĩnh viễn tài khoản và toàn bộ dữ liệu liên quan. Không thể hoàn tác."),
+        ["settings.delete.typePrompt"] = ("To confirm, type:", "Để xác nhận, hãy gõ:"),
+        ["settings.delete.word"] = ("DELETE", "XÓA"),
+        ["settings.delete.done"] = ("Your account has been deleted.", "Tài khoản của bạn đã được xóa."),
+
+        // ===== Settings: change password =====
+        ["settings.password.title"] = ("Change password", "Đổi mật khẩu"),
+        ["settings.password.subtitle"] = ("Enter your current password and a new one.", "Nhập mật khẩu hiện tại và mật khẩu mới."),
+        ["settings.password.setSubtitle"] = ("Set a password to sign in without Google.", "Đặt mật khẩu để đăng nhập không cần Google."),
+        ["settings.password.current"] = ("Current password", "Mật khẩu hiện tại"),
+        ["settings.password.new"] = ("New password", "Mật khẩu mới"),
+        ["settings.password.confirm"] = ("Confirm new password", "Nhập lại mật khẩu mới"),
+        ["settings.password.submit"] = ("Update password", "Cập nhật mật khẩu"),
+        ["settings.password.changed"] = ("Your password has been updated.", "Mật khẩu của bạn đã được cập nhật."),
 
         // ===== Auth: login =====
         ["auth.login.title"] = ("Sign in", "Đăng nhập"),

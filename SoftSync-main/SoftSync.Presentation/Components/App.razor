@@ -1,5 +1,6 @@
+@inject IHttpContextAccessor HttpContextAccessor
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
 
 <head>
     <meta charset="utf-8" />
@@ -11,6 +12,43 @@
     <link rel="stylesheet" href="dist/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
+    <script>
+        // The server already renders data-theme on <html> from the ss-theme
+        // cookie, so there's no flash and no revert on Blazor enhanced navigation.
+        // This script only handles the parts the server can't know:
+        //   1. Resolving "system" against the OS setting.
+        //   2. Keeping the cookie in sync so the next SSR paints correctly.
+        //   3. Reacting to OS theme changes while "system" is selected.
+        (function () {
+            function setCookie(name, value) {
+                try { document.cookie = name + '=' + value + '; path=/; max-age=31536000; samesite=lax'; }
+                catch (e) { /* ignore */ }
+            }
+            function apply() {
+                try {
+                    var pref = localStorage.getItem('ss-theme') || 'system';
+                    var rm = localStorage.getItem('ss-reduce-motion') === '1';
+                    var resolved = (pref === 'light' || pref === 'dark') ? pref
+                        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                    var el = document.documentElement;
+                    el.setAttribute('data-theme', resolved);
+                    if (rm) el.setAttribute('data-reduce-motion', '1');
+                    else el.removeAttribute('data-reduce-motion');
+                    // Persist the RESOLVED value so the server can paint it next time.
+                    setCookie('ss-theme', resolved);
+                    setCookie('ss-reduce-motion', rm ? '1' : '0');
+                } catch (e) { /* ignore */ }
+            }
+            apply();
+            document.addEventListener('enhancedload', apply);
+            // If the user chose "system", follow OS theme changes.
+            try {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+                    if ((localStorage.getItem('ss-theme') || 'system') === 'system') apply();
+                });
+            } catch (e) { /* older browsers */ }
+        })();
+    </script>
 </head>
 
 <body>
@@ -20,3 +58,16 @@
 </body>
 
 </html>
+
+@code {
+    // Read the resolved theme the browser last persisted to the ss-theme cookie
+    // and paint it straight onto <html> during SSR / enhanced navigation. This is
+    // what stops the theme from flashing to light and reverting between pages.
+    private string ServerTheme =>
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
+
+    // Returns "1" or null — Blazor omits the attribute entirely when it's null,
+    // so we never emit a broken/empty data-reduce-motion.
+    private string? ReduceMotionAttr =>
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-reduce-motion"] == "1" ? "1" : null;
+}

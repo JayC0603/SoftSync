@@ -36,7 +36,7 @@ public static class DbInitializer
                 FullName = "Nguyễn Văn A",
                 Age = 20,
                 Role = UserRole.Student,
-                Goal = "Cải thiện kỹ năng giao tiếp",
+                Goal = "wizard.goal.communication",
                 ExperiencePoints = 320, // demo: ~level 3
                 CreatedAt = DateTime.UtcNow
             };
@@ -48,5 +48,38 @@ public static class DbInitializer
             existing.ExperiencePoints = 320;
             await userManager.UpdateAsync(existing);
         }
+
+        await BackfillGoalKeysAsync(db);
+    }
+
+    // Older builds stored the goal as resolved text (e.g. "Cải thiện giao tiếp")
+    // instead of a translation key, so it couldn't switch languages. Map any known
+    // legacy text (either language) back to its key so display re-localizes.
+    private static readonly Dictionary<string, string> LegacyGoalText = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Improve communication"] = "wizard.goal.communication",
+        ["Cải thiện giao tiếp"] = "wizard.goal.communication",
+        ["Cải thiện kỹ năng giao tiếp"] = "wizard.goal.communication",
+        ["Prepare for internship"] = "wizard.goal.internship",
+        ["Chuẩn bị cho thực tập"] = "wizard.goal.internship",
+        ["Build leadership skills"] = "wizard.goal.leadership",
+        ["Xây dựng kỹ năng lãnh đạo"] = "wizard.goal.leadership",
+        ["Improve teamwork"] = "wizard.goal.teamwork",
+        ["Cải thiện làm việc nhóm"] = "wizard.goal.teamwork",
+    };
+
+    private static async Task BackfillGoalKeysAsync(SoftSyncDbContext db)
+    {
+        var users = await db.Users.Where(u => u.Goal != "" && !u.Goal.StartsWith("wizard.goal.")).ToListAsync();
+        var changed = false;
+        foreach (var u in users)
+        {
+            if (LegacyGoalText.TryGetValue(u.Goal.Trim(), out var key))
+            {
+                u.Goal = key;
+                changed = true;
+            }
+        }
+        if (changed) await db.SaveChangesAsync();
     }
 }

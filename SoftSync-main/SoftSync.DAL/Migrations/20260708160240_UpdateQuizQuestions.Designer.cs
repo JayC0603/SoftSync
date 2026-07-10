@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SoftSync.DAL.Data;
 
 #nullable disable
@@ -12,8 +12,8 @@ using SoftSync.DAL.Data;
 namespace SoftSync.DAL.Migrations
 {
     [DbContext(typeof(SoftSyncDbContext))]
-    [Migration("20260707084624_AddBilingualQuiz")]
-    partial class AddBilingualQuiz
+    [Migration("20260708160240_UpdateQuizQuestions")]
+    partial class UpdateQuizQuestions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,36 +21,35 @@ namespace SoftSync.DAL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -59,18 +58,18 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -83,18 +82,18 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -106,16 +105,16 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -127,10 +126,10 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -142,16 +141,16 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -162,86 +161,114 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Age")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("CurrentLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DailyStudyMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ExperiencePoints")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Gender")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Goal")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<int>("PreferredStudyTime")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ReduceMotion")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
+
+                    b.Property<int>("StudyDaysPerWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Theme")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -250,8 +277,7 @@ namespace SoftSync.DAL.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -260,23 +286,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("OptionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OptionTextVi")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("QuestionId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ScoreValue")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -288,256 +314,256 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 1011,
-                            OptionText = "I focus on saying everything on my mind, paying little attention to the listener's reaction.",
-                            OptionTextVi = "Chỉ tập trung nói hết ý mình, ít để ý phản ứng người nghe",
+                            OptionText = "Keep talking, assuming they'll figure it out themselves.",
+                            OptionTextVi = "Nói tiếp, nghĩ bạn ấy sẽ tự hiểu ra",
                             QuestionId = 101,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1012,
-                            OptionText = "I pay attention but am reluctant to ask directly whether it's clear.",
-                            OptionTextVi = "Có để ý nhưng ngại hỏi thẳng \"có rõ không\"",
+                            OptionText = "Speak louder or repeat the exact same sentence.",
+                            OptionTextVi = "Nói to hơn hoặc lặp lại y nguyên câu cũ",
                             QuestionId = 101,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1013,
-                            OptionText = "I only check when speaking in person, and skip it in texts/emails.",
-                            OptionTextVi = "Chỉ kiểm tra khi nói trực tiếp, bỏ qua khi nhắn tin/email",
+                            OptionText = "Drop it, thinking it's not important.",
+                            OptionTextVi = "Bỏ qua, nghĩ chuyện đó không quan trọng",
                             QuestionId = 101,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1014,
-                            OptionText = "I always watch the listener's cues and proactively ask for feedback.",
-                            OptionTextVi = "Luôn quan sát tín hiệu người nghe và chủ động hỏi phản hồi",
+                            OptionText = "Pause, ask how much they understood, then re-explain a different way.",
+                            OptionTextVi = "Dừng lại, hỏi bạn ấy hiểu đến đâu rồi giải thích lại theo cách khác",
                             QuestionId = 101,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1021,
-                            OptionText = "I'm busy preparing a rebuttal in my head and don't hear it all.",
-                            OptionTextVi = "Bận chuẩn bị phản biện trong đầu, không nghe hết",
+                            OptionText = "I'm busy thinking about what I'll say back.",
+                            OptionTextVi = "Bạn đang mải nghĩ mình sẽ nói lại gì",
                             QuestionId = 102,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1022,
-                            OptionText = "I easily lose interest if I don't click with the speaker.",
-                            OptionTextVi = "Dễ mất hứng nếu không hợp gu với người nói",
+                            OptionText = "If I don't like the speaker, I lose interest in listening.",
+                            OptionTextVi = "Nếu không thích người đang nói, bạn mất hứng nghe",
                             QuestionId = 102,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1023,
-                            OptionText = "I listen while doing other things, thinking I multitask well.",
-                            OptionTextVi = "Vừa nghe vừa làm việc riêng, nghĩ mình đa nhiệm tốt",
+                            OptionText = "I listen while doing something else at the same time.",
+                            OptionTextVi = "Bạn vừa nghe vừa làm việc khác cùng lúc",
                             QuestionId = 102,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1024,
-                            OptionText = "I listen actively and paraphrase back to confirm I understood.",
-                            OptionTextVi = "Lắng nghe chủ động, diễn đạt lại để xác nhận hiểu đúng",
+                            OptionText = "I listen carefully and repeat the point back to make sure I understood.",
+                            OptionTextVi = "Bạn nghe kỹ và nhắc lại ý để chắc là mình hiểu đúng",
                             QuestionId = 102,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1031,
-                            OptionText = "I use jargon/slang and assume others just understand.",
-                            OptionTextVi = "Dùng jargon/từ lóng, mặc định người khác tự hiểu",
+                            OptionText = "Still use hard/technical words, assuming everyone understands like me.",
+                            OptionTextVi = "Vẫn dùng từ khó/từ chuyên môn, nghĩ ai cũng hiểu như mình",
                             QuestionId = 103,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1032,
-                            OptionText = "I sometimes misunderstand because of regional words or abbreviations.",
-                            OptionTextVi = "Thỉnh thoảng hiểu lầm vì từ địa phương, viết tắt",
+                            OptionText = "Sometimes cause misunderstanding by using abbreviations.",
+                            OptionTextVi = "Thỉnh thoảng làm người nghe hiểu lầm vì dùng từ viết tắt",
                             QuestionId = 103,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1033,
-                            OptionText = "I know the differences but am reluctant to re-explain hard terms.",
-                            OptionTextVi = "Biết khác biệt nhưng ngại giải thích lại từ khó",
+                            OptionText = "Know the listener may not understand but am reluctant to re-explain.",
+                            OptionTextVi = "Biết người nghe có thể không hiểu nhưng ngại giải thích lại",
                             QuestionId = 103,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1034,
-                            OptionText = "I proactively choose plain words, define clearly, and give examples.",
-                            OptionTextVi = "Chủ động chọn từ dễ hiểu, định nghĩa rõ, có ví dụ",
+                            OptionText = "Choose easy words, explain clearly, with examples.",
+                            OptionTextVi = "Chọn từ dễ hiểu, giải thích rõ, có ví dụ đi kèm",
                             QuestionId = 103,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1041,
-                            OptionText = "I WRITE IN CAPS when urgent and use abbreviations even with superiors.",
-                            OptionTextVi = "Viết HOA khi khẩn cấp, dùng viết tắt cả với cấp trên",
+                            OptionText = "Write in ALL CAPS when in a hurry, use abbreviations even when texting teachers.",
+                            OptionTextVi = "Viết CHỮ HOA khi gấp, viết tắt cả khi nhắn cho thầy cô",
                             QuestionId = 104,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1042,
-                            OptionText = "I reply right away when angry, which easily leads to arguments.",
-                            OptionTextVi = "Phản hồi ngay khi tức giận, dễ dẫn đến tranh cãi",
+                            OptionText = "Reply right while I'm angry, which easily starts arguments.",
+                            OptionTextVi = "Trả lời ngay lúc đang bực mình, dễ gây cãi nhau",
                             QuestionId = 104,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1043,
-                            OptionText = "I write carelessly — no subject line, no proofreading.",
-                            OptionTextVi = "Viết tùy tiện, không tiêu đề, không kiểm tra lỗi",
+                            OptionText = "Write in a rush without checking for spelling mistakes.",
+                            OptionTextVi = "Viết vội, không kiểm tra lại lỗi chính tả",
                             QuestionId = 104,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1044,
-                            OptionText = "I'm always polite, grammatical, and check the tone before sending.",
-                            OptionTextVi = "Luôn lịch sự, đúng ngữ pháp, kiểm tra tông giọng trước khi gửi",
+                            OptionText = "Write politely, spell correctly, and re-read before sending.",
+                            OptionTextVi = "Viết lịch sự, đúng chính tả, đọc lại trước khi gửi",
                             QuestionId = 104,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1051,
-                            OptionText = "I get defensive and attack the person back.",
-                            OptionTextVi = "Phản ứng phòng vệ, công kích cá nhân lại",
+                            OptionText = "Argue back right away, saying they're wrong.",
+                            OptionTextVi = "Cãi lại ngay, nói rằng bạn ấy sai",
                             QuestionId = 105,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1052,
-                            OptionText = "I go silent, walk away, and avoid the conflict.",
-                            OptionTextVi = "Im lặng, bỏ đi, né tránh xung đột",
+                            OptionText = "Go silent and not want to talk to them anymore.",
+                            OptionTextVi = "Im lặng, không muốn nói chuyện với bạn ấy nữa",
                             QuestionId = 105,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1053,
-                            OptionText = "I try to listen but feel deeply hurt and lose confidence.",
-                            OptionTextVi = "Cố nghe nhưng tổn thương sâu, mất tự tin",
+                            OptionText = "Listen but feel down all day and lose confidence.",
+                            OptionTextVi = "Nghe nhưng buồn cả ngày, mất tự tin",
                             QuestionId = 105,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1054,
-                            OptionText = "I calmly clarify the issue while saving face for the other person.",
-                            OptionTextVi = "Bình tĩnh làm rõ vấn đề, giữ thể diện cho đối phương",
+                            OptionText = "Calmly ask exactly what isn't good, and thank them for the feedback.",
+                            OptionTextVi = "Bình tĩnh hỏi rõ chỗ chưa tốt, cảm ơn vì đã góp ý",
                             QuestionId = 105,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1061,
-                            OptionText = "I speak exactly the same way to everyone.",
-                            OptionTextVi = "Nói chuyện y hệt nhau với mọi đối tượng",
+                            OptionText = "Speak exactly the same way to everyone.",
+                            OptionTextVi = "Nói giống hệt nhau với tất cả mọi người",
                             QuestionId = 106,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1062,
-                            OptionText = "I try to change but fumble choosing the right channel.",
-                            OptionTextVi = "Cố thay đổi nhưng lúng túng chọn kênh phù hợp",
+                            OptionText = "Want to change how I speak but don't know how to make it fit.",
+                            OptionTextVi = "Muốn thay đổi cách nói nhưng không biết nên nói sao cho phù hợp",
                             QuestionId = 106,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1063,
-                            OptionText = "I'm easily swayed by bias and stereotypes when communicating.",
-                            OptionTextVi = "Dễ bị định kiến, khuôn mẫu chi phối khi giao tiếp",
+                            OptionText = "Judge by appearance, then guess and speak accordingly.",
+                            OptionTextVi = "Nhìn bề ngoài người khác rồi đoán và nói chuyện theo cách đó",
                             QuestionId = 106,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1064,
-                            OptionText = "I always analyze the context and audience before communicating.",
-                            OptionTextVi = "Luôn phân tích bối cảnh, khán giả trước khi giao tiếp",
+                            OptionText = "Always mind who I'm talking to and where, then choose a fitting way to speak.",
+                            OptionTextVi = "Luôn để ý đang nói với ai, ở đâu, rồi chọn cách nói phù hợp",
                             QuestionId = 106,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1071,
-                            OptionText = "I speak bluntly, sometimes hurting others.",
-                            OptionTextVi = "Nói thẳng thô, đôi khi làm tổn thương người khác",
+                            OptionText = "Say it bluntly: \"this part is really bad\".",
+                            OptionTextVi = "Nói thẳng luôn \"phần này làm dở quá\"",
                             QuestionId = 107,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1072,
-                            OptionText = "I talk in circles until the listener can't follow my point.",
-                            OptionTextVi = "Nói vòng vo đến mức người nghe không hiểu ý",
+                            OptionText = "Don't dare say anything, just leave it be.",
+                            OptionTextVi = "Không dám nói, để im vậy",
                             QuestionId = 107,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1073,
-                            OptionText = "I'm confused about when to be direct vs. indirect.",
-                            OptionTextVi = "Bối rối không biết khi nào nên trực tiếp/gián tiếp",
+                            OptionText = "Talk around it endlessly without stating the main point.",
+                            OptionTextVi = "Nói vòng vo mãi mà không nói rõ ý chính",
                             QuestionId = 107,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1074,
-                            OptionText = "I balance it: direct for work, gentle when delivering bad news.",
-                            OptionTextVi = "Cân bằng: trực tiếp cho công việc, mềm mỏng khi tin xấu",
+                            OptionText = "Point out clearly what needs fixing, but gently, and suggest how to improve.",
+                            OptionTextVi = "Nói rõ chỗ cần sửa, nhưng nhẹ nhàng và góp ý cách cải thiện",
                             QuestionId = 107,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 1081,
-                            OptionText = "I can't control it — crossed arms, avoiding eye contact.",
-                            OptionTextVi = "Không kiểm soát được, khoanh tay, né ánh mắt",
+                            OptionText = "Don't pay attention — often cross my arms or avoid eye contact.",
+                            OptionTextVi = "Không để ý, hay khoanh tay hoặc tránh nhìn vào mắt người khác",
                             QuestionId = 108,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 1082,
-                            OptionText = "I'm awkward about personal space (too close/too far).",
-                            OptionTextVi = "Lúng túng về khoảng cách giao tiếp (quá gần/xa)",
+                            OptionText = "Don't know whether to stand close to or far from the person.",
+                            OptionTextVi = "Không biết nên đứng gần hay xa người đang nói chuyện",
                             QuestionId = 108,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1083,
-                            OptionText = "I focus only on words and forget expression and posture.",
-                            OptionTextVi = "Chỉ chú trọng câu chữ, quên biểu cảm và tư thế",
+                            OptionText = "Only mind my words, forgetting my expression and posture.",
+                            OptionTextVi = "Chỉ chú ý lời mình nói, quên để ý nét mặt và tư thế",
                             QuestionId = 108,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 1084,
-                            OptionText = "I keep my posture, eye contact, and tone appropriate to the context.",
-                            OptionTextVi = "Luôn giữ tư thế, ánh mắt, tông giọng phù hợp bối cảnh",
+                            OptionText = "Always keep eye contact, posture, and tone appropriate to the moment.",
+                            OptionTextVi = "Luôn giữ ánh mắt, tư thế, giọng nói phù hợp lúc đó",
                             QuestionId = 108,
                             ScoreValue = 4
                         },
@@ -800,512 +826,512 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 3011,
-                            OptionText = "It depends on whatever schedule others set for me.",
-                            OptionTextVi = "Phụ thuộc lịch người khác sắp xếp",
+                            OptionText = "Leave it and only start when the deadline is near.",
+                            OptionTextVi = "Để đó, gần đến ngày nộp mới bắt đầu làm",
                             QuestionId = 301,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3012,
-                            OptionText = "I study on a whim, with no schedule.",
-                            OptionTextVi = "Học tùy hứng, không lịch trình",
+                            OptionText = "Start today but with no plan, just working as I go.",
+                            OptionTextVi = "Làm ngay hôm nay nhưng không có kế hoạch, làm tới đâu hay tới đó",
                             QuestionId = 301,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3013,
-                            OptionText = "I have a plan but find it hard to stick to.",
-                            OptionTextVi = "Có kế hoạch nhưng khó giữ đúng",
+                            OptionText = "Split the assignment into several short sessions, doing one part each.",
+                            OptionTextVi = "Chia bài ra làm nhiều buổi nhỏ, mỗi buổi làm một phần",
                             QuestionId = 301,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3014,
-                            OptionText = "I'm always proactive, with my own strategy.",
-                            OptionTextVi = "Luôn chủ động, có chiến lược riêng",
+                            OptionText = "Break the work down, set a time for each part, and leave buffer time for anything unexpected.",
+                            OptionTextVi = "Chia nhỏ công việc, đặt thời gian cho từng phần và để dư thời gian phòng khi có việc phát sinh",
                             QuestionId = 301,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3021,
-                            OptionText = "Fear of failure, so I avoid getting started.",
-                            OptionTextVi = "Sợ thất bại nên né tránh bắt tay vào làm",
+                            OptionText = "Afraid of doing it wrong, so I don't dare start.",
+                            OptionTextVi = "Sợ làm sai nên chưa dám bắt đầu",
                             QuestionId = 302,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3022,
-                            OptionText = "I'm easily distracted by my phone and social media.",
-                            OptionTextVi = "Dễ mất tập trung bởi điện thoại, mạng xã hội",
+                            OptionText = "Absorbed in my phone and social media.",
+                            OptionTextVi = "Mải xem điện thoại, mạng xã hội",
                             QuestionId = 302,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3023,
-                            OptionText = "My body is tired, sleep-deprived, low on energy.",
-                            OptionTextVi = "Cơ thể mệt mỏi, thiếu ngủ, thiếu năng lượng",
+                            OptionText = "Tired, sleepy, no energy to work.",
+                            OptionTextVi = "Mệt, buồn ngủ, không có sức làm",
                             QuestionId = 302,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3024,
-                            OptionText = "I rarely have this problem — I start right away.",
-                            OptionTextVi = "Tôi hiếm khi gặp vấn đề này, bắt tay vào việc ngay",
+                            OptionText = "I rarely leave tasks like that — I usually do them right away.",
+                            OptionTextVi = "Bạn ít khi để việc đó lại, thường làm ngay",
                             QuestionId = 302,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3031,
-                            OptionText = "Way off — a task I thought was 1 hour takes 4–5.",
-                            OptionTextVi = "Sai lệch nặng, việc tưởng 1 giờ hóa ra mất 4-5 giờ",
+                            OptionText = "Don't think about how long it will take, just do it and sort it out later.",
+                            OptionTextVi = "Không nghĩ mất bao lâu, cứ làm rồi tính sau",
                             QuestionId = 303,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3032,
-                            OptionText = "Hard to estimate for material heavy with figures and charts.",
-                            OptionTextVi = "Khó ước lượng với tài liệu nhiều số liệu, biểu đồ",
+                            OptionText = "Guess a random figure without checking it.",
+                            OptionTextVi = "Đoán đại một con số, không kiểm tra lại",
                             QuestionId = 303,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3033,
-                            OptionText = "I often pull all-nighters near the deadline to make up for it.",
-                            OptionTextVi = "Thường phải thức trắng đêm sát hạn để bù đắp",
+                            OptionText = "Estimate, but are often wrong because you don't account for unexpected time.",
+                            OptionTextVi = "Ước lượng nhưng thường sai vì không tính thời gian phát sinh",
                             QuestionId = 303,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3034,
-                            OptionText = "Fairly accurate, always with buffer time.",
-                            OptionTextVi = "Ước lượng khá sát, luôn có thời gian dự phòng",
+                            OptionText = "Estimate carefully and leave buffer time in case something unexpected comes up.",
+                            OptionTextVi = "Ước lượng cẩn thận và để dư thời gian phòng khi có việc bất ngờ",
                             QuestionId = 303,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3041,
-                            OptionText = "I'm constantly pulled in by notifications, messages, games.",
-                            OptionTextVi = "Liên tục bị cuốn vào thông báo, tin nhắn, game",
+                            OptionText = "Phone, messages, games.",
+                            OptionTextVi = "Điện thoại, tin nhắn, trò chơi",
                             QuestionId = 304,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3042,
-                            OptionText = "I'm easily distracted by noise and a messy space.",
-                            OptionTextVi = "Dễ xao nhãng bởi tiếng ồn, không gian bừa bộn",
+                            OptionText = "Surrounding noise, a messy workspace.",
+                            OptionTextVi = "Tiếng ồn xung quanh, chỗ ngồi bừa bộn",
                             QuestionId = 304,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3043,
-                            OptionText = "I sometimes multitask, which lowers my output.",
-                            OptionTextVi = "Thỉnh thoảng làm nhiều việc cùng lúc, hiệu suất giảm",
+                            OptionText = "Doing many things at once, so everything is slow.",
+                            OptionTextVi = "Làm nhiều việc cùng lúc nên việc nào cũng chậm",
                             QuestionId = 304,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3044,
-                            OptionText = "I always have a quiet space with all notifications off.",
-                            OptionTextVi = "Luôn có không gian yên tĩnh, tắt hết thông báo",
+                            OptionText = "I always find a quiet place and turn off my phone when studying.",
+                            OptionTextVi = "Bạn luôn tìm chỗ yên tĩnh và tắt điện thoại khi học",
                             QuestionId = 304,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3051,
-                            OptionText = "No, I only get motivated when the deadline is imminent.",
-                            OptionTextVi = "Không, chỉ có động lực khi hạn chót cận kề",
+                            OptionText = "Drop it entirely if it seems a bit hard to apply.",
+                            OptionTextVi = "Bỏ luôn nếu thấy hơi khó áp dụng",
                             QuestionId = 305,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3052,
-                            OptionText = "I know some but have never applied one successfully.",
-                            OptionTextVi = "Có biết nhưng chưa áp dụng thành công lần nào",
+                            OptionText = "Only do it when someone reminds me.",
+                            OptionTextVi = "Chỉ làm khi có ai đó nhắc",
                             QuestionId = 305,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3053,
-                            OptionText = "I apply them but often quit halfway (e.g. Pomodoro).",
-                            OptionTextVi = "Có áp dụng nhưng hay bỏ giữa chừng (vd: Pomodoro)",
+                            OptionText = "Try to keep it up but often forget, doing it inconsistently.",
+                            OptionTextVi = "Cố duy trì nhưng hay quên, không đều",
                             QuestionId = 305,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3054,
-                            OptionText = "I apply them fluently: Eat the Frog, break tasks down, daily Top 3.",
-                            OptionTextVi = "Áp dụng nhuần nhuyễn: Eat the Frog, chia việc nhỏ, Top 3 mỗi ngày",
+                            OptionText = "Persist with it steadily, adjusting it to fit myself.",
+                            OptionTextVi = "Kiên trì áp dụng đều đặn, điều chỉnh cho phù hợp với mình",
                             QuestionId = 305,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3061,
-                            OptionText = "Momentary emotion or panic over the deadline.",
-                            OptionTextVi = "Cảm xúc nhất thời hoặc hoảng loạn vì hạn chót",
+                            OptionText = "Do whatever others ask first, regardless of how important that task is.",
+                            OptionTextVi = "Làm việc nào người khác nhờ trước, không cần biết việc đó quan trọng ra sao",
                             QuestionId = 306,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3062,
-                            OptionText = "I pick easy tasks first and dodge hard-but-important ones.",
-                            OptionTextVi = "Chọn việc dễ trước, né việc khó nhưng quan trọng",
+                            OptionText = "Do the easy tasks first to get them done quickly.",
+                            OptionTextVi = "Việc nào dễ thì làm trước cho xong nhanh",
                             QuestionId = 306,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3063,
-                            OptionText = "I make a list but struggle to sort out the core tasks.",
-                            OptionTextVi = "Có lập danh sách nhưng khó phân loại việc cốt lõi",
+                            OptionText = "Do the urgent tasks first, regardless of whether they're important.",
+                            OptionTextVi = "Việc nào gấp thì làm trước, không cần biết có quan trọng không",
                             QuestionId = 306,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3064,
-                            OptionText = "I use the Eisenhower matrix to classify clearly.",
-                            OptionTextVi = "Dùng ma trận Eisenhower để phân loại rõ ràng",
+                            OptionText = "Do the important and necessary tasks first, even if they aren't very urgent yet.",
+                            OptionTextVi = "Làm việc quan trọng và cần thiết trước, dù nó chưa gấp lắm",
                             QuestionId = 306,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3071,
-                            OptionText = "Very vague, hard to measure (\"get better\").",
-                            OptionTextVi = "Rất mơ hồ, khó đo lường (\"học giỏi hơn\")",
+                            OptionText = "Set very general goals, hard to know when they're achieved (e.g. \"study better\").",
+                            OptionTextVi = "Đặt mục tiêu rất chung chung, khó biết khi nào đạt được (ví dụ: \"học giỏi hơn\")",
                             QuestionId = 307,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3072,
-                            OptionText = "Clear but with no specific deadline.",
-                            OptionTextVi = "Rõ ràng nhưng không gắn thời hạn cụ thể",
+                            OptionText = "Set clear goals but with no due date.",
+                            OptionTextVi = "Đặt mục tiêu rõ nhưng không hẹn ngày xong",
                             QuestionId = 307,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3073,
-                            OptionText = "Specific but unrealistic, not feasible.",
-                            OptionTextVi = "Cụ thể nhưng thiếu thực tế, không khả thi",
+                            OptionText = "Set clear goals with a due date, but they're hard to actually accomplish.",
+                            OptionTextVi = "Đặt mục tiêu rõ, có ngày hẹn, nhưng khó thực hiện nổi",
                             QuestionId = 307,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3074,
-                            OptionText = "Always fully meet the SMART criteria.",
-                            OptionTextVi = "Luôn đạt chuẩn SMART đầy đủ",
+                            OptionText = "Set clear goals, with a due date, and get them done.",
+                            OptionTextVi = "Đặt mục tiêu rõ ràng, có ngày hẹn, và làm được",
                             QuestionId = 307,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 3081,
-                            OptionText = "Panic, get discouraged, and drop the work.",
-                            OptionTextVi = "Hoảng loạn, nản chí, bỏ dở công việc",
+                            OptionText = "Worry, feel down, then give up on it entirely.",
+                            OptionTextVi = "Lo lắng, buồn, rồi bỏ luôn không làm nữa",
                             QuestionId = 308,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3082,
-                            OptionText = "Stubbornly cling to the old plan, extremely stressed.",
-                            OptionTextVi = "Cố chấp bám kế hoạch cũ, căng thẳng tột độ",
+                            OptionText = "Try to follow the old plan even when it no longer makes sense, feeling very stressed.",
+                            OptionTextVi = "Cố làm theo đúng kế hoạch cũ dù không còn hợp lý, thấy rất căng thẳng",
                             QuestionId = 308,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3083,
-                            OptionText = "Struggle through it alone, without telling anyone.",
-                            OptionTextVi = "Tự loay hoay giải quyết, không báo với ai",
+                            OptionText = "Figure it out alone without telling anyone.",
+                            OptionTextVi = "Tự tìm cách giải quyết một mình, không nói cho ai biết",
                             QuestionId = 308,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 3084,
-                            OptionText = "Calmly reassess, proactively inform others, and adjust.",
-                            OptionTextVi = "Bình tĩnh đánh giá lại, chủ động thông báo và điều chỉnh",
+                            OptionText = "Calmly review it, tell the people involved, and switch to a new plan.",
+                            OptionTextVi = "Bình tĩnh xem lại, nói cho người liên quan biết và đổi kế hoạch mới",
                             QuestionId = 308,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4011,
-                            OptionText = "I instantly believe convincing claims on social media.",
-                            OptionTextVi = "Tin ngay vào tuyên bố thuyết phục trên mạng xã hội",
+                            OptionText = "Believe it right away because many people praise it.",
+                            OptionTextVi = "Tin ngay vì có nhiều người khen",
                             QuestionId = 401,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4012,
-                            OptionText = "I treat the opinion of someone I like as obvious fact.",
-                            OptionTextVi = "Coi ý kiến người mình yêu thích là sự thật hiển nhiên",
+                            OptionText = "Believe it because the article looks nice and professional.",
+                            OptionTextVi = "Tin vì bài viết trình bày đẹp, chuyên nghiệp",
                             QuestionId = 401,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4013,
-                            OptionText = "I distinguish well, but struggle with cleverly disguised data.",
-                            OptionTextVi = "Phân biệt tốt nhưng khó với số liệu ngụy trang tinh vi",
+                            OptionText = "Half believe it but still share it with friends.",
+                            OptionTextVi = "Nửa tin nửa ngờ nhưng vẫn chia sẻ cho bạn bè",
                             QuestionId = 401,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4014,
-                            OptionText = "I always distinguish clearly and demand empirical evidence.",
-                            OptionTextVi = "Luôn phân biệt rõ, yêu cầu bằng chứng thực nghiệm",
+                            OptionText = "Look for other sources (reputable news, experts) to verify before believing it.",
+                            OptionTextVi = "Tìm thêm nguồn khác (báo uy tín, chuyên gia) để kiểm chứng trước khi tin",
                             QuestionId = 401,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4021,
-                            OptionText = "I only read news that agrees with me and think others are wrong.",
-                            OptionTextVi = "Chỉ đọc tin cùng quan điểm, nghĩ người khác sai",
+                            OptionText = "Skip it immediately without finishing, sure that you're right.",
+                            OptionTextVi = "Bỏ qua ngay, không đọc hết vì nghĩ chắc chắn mình đúng",
                             QuestionId = 402,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4022,
-                            OptionText = "I'm annoyed by opposing news and look to refute it.",
-                            OptionTextVi = "Khó chịu khi đọc tin trái chiều, tìm cách bác bỏ",
+                            OptionText = "Read it but look for ways to refute it rather than consider it carefully.",
+                            OptionTextVi = "Đọc nhưng tìm cách bác bỏ thay vì xem xét kỹ",
                             QuestionId = 402,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4023,
-                            OptionText = "I read other views but still cherry-pick what favors me.",
-                            OptionTextVi = "Đọc góc nhìn khác nhưng vẫn chọn lọc có lợi cho mình",
+                            OptionText = "Read it and keep only the parts that favor your own thinking.",
+                            OptionTextVi = "Đọc và chỉ giữ lại phần nào có lợi cho suy nghĩ của mình",
                             QuestionId = 402,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4024,
-                            OptionText = "I proactively seek many sources and weigh opposing evidence fairly.",
-                            OptionTextVi = "Chủ động tiếp cận đa nguồn, công tâm với bằng chứng trái chiều",
+                            OptionText = "Read it all, weigh the reasoning, and be ready to change if it makes sense.",
+                            OptionTextVi = "Đọc hết, xem xét lý lẽ, và sẵn sàng thay đổi nếu thấy hợp lý",
                             QuestionId = 402,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4031,
-                            OptionText = "Attack the other person when I'm challenged.",
-                            OptionTextVi = "Công kích cá nhân đối phương khi bị phản bác",
+                            OptionText = "Use over-the-top examples to distract and confuse others.",
+                            OptionTextVi = "Dùng ví dụ quá đáng để đánh lạc hướng, làm người khác rối",
                             QuestionId = 403,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4032,
-                            OptionText = "Follow the majority, avoiding independent thinking.",
-                            OptionTextVi = "A dua theo số đông, tránh tư duy độc lập",
+                            OptionText = "Badmouth or belittle whoever opposes your idea.",
+                            OptionTextVi = "Nói xấu, chê bai người phản đối ý mình",
                             QuestionId = 403,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4033,
-                            OptionText = "Sometimes use extreme examples to distract.",
-                            OptionTextVi = "Đôi khi dùng ví dụ cực đoan để đánh lạc hướng",
+                            OptionText = "Follow the majority, not daring to voice your own opinion.",
+                            OptionTextVi = "Nghe theo số đông, không dám nói ý kiến riêng",
                             QuestionId = 403,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4034,
-                            OptionText = "Focus on rational analysis, avoiding logical fallacies.",
-                            OptionTextVi = "Tập trung phân tích lý trí, tránh ngụy biện logic",
+                            OptionText = "Focus on giving clear reasons, without twisting the truth just to win.",
+                            OptionTextVi = "Tập trung nói lý do rõ ràng, không nói sai sự thật chỉ để thắng",
                             QuestionId = 403,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4041,
-                            OptionText = "Trust a nice-looking site and the author's self-introduction.",
-                            OptionTextVi = "Tin vào giao diện đẹp, lời tự giới thiệu của tác giả",
+                            OptionText = "Believe it because many people are sharing it.",
+                            OptionTextVi = "Tin vì thấy nhiều người chia sẻ",
                             QuestionId = 404,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4042,
-                            OptionText = "Trust it based on likes and positive comments below.",
-                            OptionTextVi = "Tin theo lượt thích, bình luận tích cực bên dưới",
+                            OptionText = "Believe it because the headline is sensational, there must be something to it.",
+                            OptionTextVi = "Tin vì tiêu đề giật gân, chắc phải có gì đó",
                             QuestionId = 404,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4043,
-                            OptionText = "I know I should verify but am lazy, only doing it when it matters.",
-                            OptionTextVi = "Biết cần kiểm chứng nhưng lười, chỉ làm khi quan trọng",
+                            OptionText = "Doubt it but still share it because it's interesting.",
+                            OptionTextVi = "Nghi ngờ nhưng vẫn chia sẻ vì thấy thú vị",
                             QuestionId = 404,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4044,
-                            OptionText = "Read laterally — open many tabs to cross-check independent sources.",
-                            OptionTextVi = "Đọc ngang — mở nhiều tab đối chiếu nguồn độc lập",
+                            OptionText = "Check whether any reputable outlet has reported it before believing it.",
+                            OptionTextVi = "Tìm xem tin đó có được báo uy tín nào đăng không rồi mới tin",
                             QuestionId = 404,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4051,
-                            OptionText = "Only fix the surface, without exploring the root cause.",
-                            OptionTextVi = "Chỉ giải quyết phần nổi, không tìm hiểu gốc rễ",
+                            OptionText = "Assume the tests are just hard and not look into it further.",
+                            OptionTextVi = "Nghĩ do đề khó, không tìm hiểu thêm",
                             QuestionId = 405,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4052,
-                            OptionText = "Decide hastily on gut feeling.",
-                            OptionTextVi = "Quyết định vội vàng theo cảm tính",
+                            OptionText = "Memorize more similar exercises without understanding why you were wrong.",
+                            OptionTextVi = "Học thuộc thêm nhiều bài tập tương tự mà không hiểu vì sao mình sai",
                             QuestionId = 405,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4053,
-                            OptionText = "Get stuck after a few \"why\" questions, easily going off track.",
-                            OptionTextVi = "Bế tắc sau vài câu hỏi \"tại sao\", dễ lạc hướng",
+                            OptionText = "Ask friends where you went wrong but stop there.",
+                            OptionTextVi = "Hỏi bạn bè điểm nào mình sai nhưng chỉ dừng ở đó",
                             QuestionId = 405,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4054,
-                            OptionText = "Apply the \"5 Whys\" to find the root cause.",
-                            OptionTextVi = "Áp dụng \"5 câu hỏi Tại sao\" để tìm gốc rễ vấn đề",
+                            OptionText = "Ask yourself \"why am I wrong\" repeatedly to find what you truly don't understand (e.g. wrong formula or not reading the question carefully).",
+                            OptionTextVi = "Tự hỏi \"tại sao mình sai\" nhiều lần để tìm ra chỗ mình chưa hiểu thật sự (ví dụ: sai công thức hay đọc đề chưa kỹ)",
                             QuestionId = 405,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4061,
-                            OptionText = "Stubborn — I cling to my view even when proven wrong.",
-                            OptionTextVi = "Bảo thủ, bám quan điểm dù bị chứng minh sai",
+                            OptionText = "Keep your old approach because you're used to it.",
+                            OptionTextVi = "Vẫn giữ cách làm cũ vì đã quen",
                             QuestionId = 406,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4062,
-                            OptionText = "I change, but by emotion/the crowd, not by evidence.",
-                            OptionTextVi = "Thay đổi nhưng theo cảm xúc/số đông, không phải bằng chứng",
+                            OptionText = "Switch because friends do it the teacher's way too, even without understanding why.",
+                            OptionTextVi = "Đổi theo vì thấy bạn bè cũng làm theo cách thầy cô nói, dù chưa hiểu tại sao",
                             QuestionId = 406,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4063,
-                            OptionText = "I note the new evidence but delay adjusting.",
-                            OptionTextVi = "Ghi nhận bằng chứng mới nhưng trì hoãn điều chỉnh",
+                            OptionText = "Agree you were wrong but still use the old way on the next problem.",
+                            OptionTextVi = "Đồng ý là mình sai nhưng vẫn làm theo cách cũ ở bài sau",
                             QuestionId = 406,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4064,
-                            OptionText = "I proactively update my thinking when the data changes.",
-                            OptionTextVi = "Chủ động cập nhật tư duy khi dữ liệu thay đổi",
+                            OptionText = "Review the formula, understand why you were wrong, and apply the correct way from now on.",
+                            OptionTextVi = "Xem lại công thức, hiểu vì sao mình sai và áp dụng cách đúng từ bây giờ",
                             QuestionId = 406,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4071,
-                            OptionText = "Pick the first Google result, assuming it's most authoritative.",
-                            OptionTextVi = "Chọn kết quả đầu tiên trên Google, tin là uy tín nhất",
+                            OptionText = "The first result that shows up on Google.",
+                            OptionTextVi = "Kết quả đầu tiên hiện ra khi tìm trên Google",
                             QuestionId = 407,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4072,
-                            OptionText = "It only needs to be well-written and match what I want to prove.",
-                            OptionTextVi = "Chỉ cần viết hay và trùng khớp với điều mình muốn chứng minh",
+                            OptionText = "Whichever page says exactly what I want to say.",
+                            OptionTextVi = "Trang nào viết đúng ý mình muốn nói thì dùng",
                             QuestionId = 407,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4073,
-                            OptionText = "I only check the author/domain, ignoring conflicts of interest.",
-                            OptionTextVi = "Chỉ xem tên tác giả/tên miền, bỏ qua xung đột lợi ích",
+                            OptionText = "Any website whose name sounds reputable, and use it right away.",
+                            OptionTextVi = "Chỉ xem tên website nghe có vẻ uy tín là dùng luôn",
                             QuestionId = 407,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4074,
-                            OptionText = "I review comprehensively: author, recency, funding source, peer review.",
-                            OptionTextVi = "Rà soát toàn diện: tác giả, tính cập nhật, nguồn tài trợ, bình duyệt",
+                            OptionText = "Check whether it has a clear author, was updated recently, and matches many other sources.",
+                            OptionTextVi = "Xem thông tin đó có tác giả rõ ràng, cập nhật gần đây, và khớp với nhiều nguồn khác không",
                             QuestionId = 407,
                             ScoreValue = 4
                         },
                         new
                         {
                             Id = 4081,
-                            OptionText = "I think of only one solution, helpless when it fails.",
-                            OptionTextVi = "Chỉ nghĩ 1 giải pháp, bất lực khi nó thất bại",
+                            OptionText = "Not prepare anything extra — deal with it later if it fails.",
+                            OptionTextVi = "Không chuẩn bị gì thêm, nếu lỗi thì tính sau",
                             QuestionId = 408,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 4082,
-                            OptionText = "I think about it but give up, seeing it as time-consuming.",
-                            OptionTextVi = "Có nghĩ đến nhưng bỏ cuộc vì thấy tốn thời gian",
+                            OptionText = "Think of a backup plan but drop it because it's too much trouble.",
+                            OptionTextVi = "Nghĩ tới phương án khác nhưng thấy mất công nên thôi",
                             QuestionId = 408,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4083,
-                            OptionText = "I only prepare a backup for big things, improvising the rest.",
-                            OptionTextVi = "Chỉ chuẩn bị dự phòng cho việc lớn, còn lại tùy cơ ứng biến",
+                            OptionText = "Only prepare a backup for the most important part.",
+                            OptionTextVi = "Chỉ chuẩn bị phương án dự phòng cho phần quan trọng nhất",
                             QuestionId = 408,
                             ScoreValue = 3
                         },
                         new
                         {
                             Id = 4084,
-                            OptionText = "I always build multiple options and concrete contingency plans.",
-                            OptionTextVi = "Luôn xây nhiều phương án và kế hoạch dự phòng cụ thể",
+                            OptionText = "Prepare a USB, printed copies, or a phone backup in case the computer has trouble.",
+                            OptionTextVi = "Chuẩn bị sẵn USB, in giấy hoặc lưu trên điện thoại phòng khi máy tính gặp sự cố",
                             QuestionId = 408,
                             ScoreValue = 4
                         },
@@ -2083,23 +2109,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("QuestionTextVi")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2111,64 +2137,64 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 101,
-                            QuestionText = "How do you handle two-way exchange of information?",
-                            QuestionTextVi = "Bạn xử lý việc trao đổi thông tin hai chiều thế nào?",
+                            QuestionText = "You're explaining something to a friend, but you notice they don't seem to get it. You will:",
+                            QuestionTextVi = "Bạn đang giải thích điều gì đó cho bạn mình, nhưng thấy bạn ấy có vẻ chưa hiểu. Bạn sẽ:",
                             SkillId = 1,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 102,
-                            QuestionText = "What most affects your listening habits?",
-                            QuestionTextVi = "Thói quen lắng nghe của bạn bị ảnh hưởng nhiều nhất bởi gì?",
+                            QuestionText = "When someone is talking to you, what makes it hard to listen fully?",
+                            QuestionTextVi = "Khi người khác nói chuyện với bạn, điều gì khiến bạn khó nghe hết được?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 103,
-                            QuestionText = "How do you deal with differences in wording and terminology?",
-                            QuestionTextVi = "Bạn xử lý sự khác biệt về từ ngữ, thuật ngữ thế nào?",
+                            QuestionText = "When explaining to someone younger or without your background, you will:",
+                            QuestionTextVi = "Khi giải thích cho em nhỏ tuổi hơn hoặc người không cùng chuyên môn với mình, bạn sẽ:",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 104,
-                            QuestionText = "What is your texting/email style like?",
-                            QuestionTextVi = "Phong cách viết tin nhắn/email của bạn thế nào?",
+                            QuestionText = "When texting or writing, how do you usually write?",
+                            QuestionTextVi = "Khi nhắn tin hoặc viết bài, bạn thường viết như thế nào?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 105,
-                            QuestionText = "When criticized in a conversation, what is your natural reaction?",
-                            QuestionTextVi = "Khi bị chỉ trích trong hội thoại, phản ứng tự nhiên của bạn là gì?",
+                            QuestionText = "You just finished a piece of work and a friend points out something isn't good. You will:",
+                            QuestionTextVi = "Bạn vừa làm xong một bài, bạn bè góp ý là bài có chỗ chưa tốt. Bạn sẽ:",
                             SkillId = 1,
                             Type = 1
                         },
                         new
                         {
                             Id = 106,
-                            QuestionText = "How do you adapt your communication style to context?",
-                            QuestionTextVi = "Bạn thích ứng phong cách giao tiếp theo bối cảnh thế nào?",
+                            QuestionText = "Do you talk differently depending on who you're talking to?",
+                            QuestionTextVi = "Bạn có nói chuyện khác nhau tùy người mình đang nói cùng không?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 107,
-                            QuestionText = "How do you recognize your own direct/indirect style?",
-                            QuestionTextVi = "Bạn nhận diện phong cách trực tiếp/gián tiếp của mình ra sao?",
+                            QuestionText = "You need to tell a teammate that their part of the work isn't good. How will you say it?",
+                            QuestionTextVi = "Bạn cần báo cho bạn cùng nhóm biết rằng phần việc của bạn ấy làm chưa tốt. Bạn sẽ nói thế nào?",
                             SkillId = 1,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 108,
-                            QuestionText = "How do you control your body language?",
-                            QuestionTextVi = "Bạn kiểm soát ngôn ngữ cơ thể của mình thế nào?",
+                            QuestionText = "When talking, do you pay attention to your eye contact and posture?",
+                            QuestionTextVi = "Khi nói chuyện, bạn có để ý đến ánh mắt, tư thế của mình không?",
                             SkillId = 1,
                             Type = 0
                         },
@@ -2239,130 +2265,130 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 301,
-                            QuestionText = "How does your out-of-class studying go?",
-                            QuestionTextVi = "Việc học ngoài giờ lên lớp của bạn diễn ra thế nào?",
+                            QuestionText = "You have an assignment due in 3 days. What will you do?",
+                            QuestionTextVi = "Bạn có một bài tập phải nộp sau 3 ngày nữa. Bạn sẽ làm gì?",
                             SkillId = 3,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 302,
-                            QuestionText = "When you procrastinate on a big task, what is the deepest reason?",
-                            QuestionTextVi = "Khi trì hoãn một việc lớn, lý do sâu xa nhất của bạn là gì?",
+                            QuestionText = "When there's an important task you keep putting off, what is the main reason?",
+                            QuestionTextVi = "Khi có một việc quan trọng mà bạn cứ để đó chưa làm, lý do chính là gì?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 303,
-                            QuestionText = "Do you estimate how long a task takes accurately?",
-                            QuestionTextVi = "Bạn ước lượng thời gian làm một việc có chính xác không?",
+                            QuestionText = "The teacher assigns a big task to be done in a week. Before starting, you:",
+                            QuestionTextVi = "Cô giáo giao một bài tập lớn, cần làm trong 1 tuần. Trước khi bắt đầu, bạn sẽ:",
                             SkillId = 3,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 304,
-                            QuestionText = "What most affects your focus?",
-                            QuestionTextVi = "Yếu tố nào ảnh hưởng đến sự tập trung của bạn nhất?",
+                            QuestionText = "What distracts you the most when studying?",
+                            QuestionTextVi = "Điều gì làm bạn mất tập trung nhiều nhất khi học?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 305,
-                            QuestionText = "Do you apply scientific time-management methods?",
-                            QuestionTextVi = "Bạn có áp dụng phương pháp quản lý thời gian khoa học không?",
+                            QuestionText = "You try a new study method (e.g. study 25 minutes - rest 5 minutes) for a few days. After that you:",
+                            QuestionTextVi = "Bạn thử áp dụng một cách học mới (ví dụ: học 25 phút - nghỉ 5 phút) được vài ngày. Sau đó bạn sẽ:",
                             SkillId = 3,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 306,
-                            QuestionText = "What do you base on when deciding what to do first?",
-                            QuestionTextVi = "Bạn quyết định làm việc gì trước dựa trên điều gì?",
+                            QuestionText = "When you have many tasks at once, what do you base your decision on for what to do first?",
+                            QuestionTextVi = "Khi có nhiều việc cùng lúc, bạn quyết định làm việc nào trước dựa vào điều gì?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 307,
-                            QuestionText = "How are your study/work goals written?",
-                            QuestionTextVi = "Mục tiêu học tập/công việc của bạn được viết ra như thế nào?",
+                            QuestionText = "When setting study goals for this semester, you usually:",
+                            QuestionTextVi = "Khi đặt mục tiêu học tập cho học kỳ này, bạn thường:",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 308,
-                            QuestionText = "When your plan is broken by an unexpected event, how do you react?",
-                            QuestionTextVi = "Khi kế hoạch bị phá vỡ bởi biến cố bất ngờ, bạn phản ứng ra sao?",
+                            QuestionText = "When an unexpected event ruins your plan, what do you do?",
+                            QuestionTextVi = "Khi có việc bất ngờ làm hỏng kế hoạch của bạn, bạn làm gì?",
                             SkillId = 3,
                             Type = 1
                         },
                         new
                         {
                             Id = 401,
-                            QuestionText = "How well do you separate fact from personal opinion?",
-                            QuestionTextVi = "Bạn phân biệt sự thật và ý kiến cá nhân tốt đến đâu?",
+                            QuestionText = "You read an online article claiming a food cures an illness in 3 days, with lots of praise in the comments. You will:",
+                            QuestionTextVi = "Bạn đọc được một bài viết trên mạng nói một loại thực phẩm chữa khỏi bệnh trong 3 ngày, kèm rất nhiều lời khen trong phần bình luận. Bạn sẽ:",
                             SkillId = 4,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 402,
-                            QuestionText = "How do you deal with your own confirmation bias?",
-                            QuestionTextVi = "Bạn đối phó với thiên kiến xác nhận của bản thân thế nào?",
+                            QuestionText = "You read an article with a view opposite to yours. You will:",
+                            QuestionTextVi = "Bạn đọc một bài viết có quan điểm ngược với suy nghĩ của mình. Bạn sẽ:",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 403,
-                            QuestionText = "In a group debate, how do you usually react?",
-                            QuestionTextVi = "Khi tranh luận nhóm, bạn thường phản ứng ra sao?",
+                            QuestionText = "When debating in a group and being challenged, what do you usually do?",
+                            QuestionTextVi = "Khi tranh luận trong nhóm và bị phản bác, bạn thường làm gì?",
                             SkillId = 4,
                             Type = 1
                         },
                         new
                         {
                             Id = 404,
-                            QuestionText = "How do you verify an unfamiliar source online?",
-                            QuestionTextVi = "Bạn kiểm chứng một nguồn tin lạ trên mạng ra sao?",
+                            QuestionText = "You see hot news spreading on social media, but no major outlet has reported it. You will:",
+                            QuestionTextVi = "Bạn thấy một tin nóng lan truyền trên mạng xã hội, nhưng không thấy báo lớn nào đăng. Bạn sẽ:",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 405,
-                            QuestionText = "Facing a complex problem, how do you find a solution?",
-                            QuestionTextVi = "Khi gặp vấn đề phức tạp, bạn tìm giải pháp thế nào?",
+                            QuestionText = "You keep getting low scores in Math even though you've studied. You will:",
+                            QuestionTextVi = "Bạn liên tục bị điểm thấp môn Toán dù đã học bài. Bạn sẽ:",
                             SkillId = 4,
                             Type = 1
                         },
                         new
                         {
                             Id = 406,
-                            QuestionText = "Are you willing to change your view when new evidence appears?",
-                            QuestionTextVi = "Bạn có sẵn sàng thay đổi quan điểm khi có bằng chứng mới không?",
+                            QuestionText = "You're sure your way of solving a problem is right, but the teacher shows you misunderstood the formula. You will:",
+                            QuestionTextVi = "Bạn tin chắc cách giải một bài toán là đúng, nhưng thầy cô chỉ ra bạn đã hiểu sai công thức. Bạn sẽ:",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 407,
-                            QuestionText = "How do you assess the reliability of a research document?",
-                            QuestionTextVi = "Bạn đánh giá độ tin cậy một tài liệu nghiên cứu ra sao?",
+                            QuestionText = "When your assignment needs cited information, which source do you usually pick?",
+                            QuestionTextVi = "Khi làm bài tập cần trích dẫn thông tin, bạn thường chọn nguồn nào?",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 408,
-                            QuestionText = "When facing a problem, do you prepare multiple options?",
-                            QuestionTextVi = "Khi gặp vấn đề, bạn có chuẩn bị nhiều phương án không?",
+                            QuestionText = "You're preparing a presentation but worry the computer might fail mid-talk. You will:",
+                            QuestionTextVi = "Bạn đang chuẩn bị thuyết trình nhưng lo máy tính có thể bị lỗi lúc trình bày. Bạn sẽ:",
                             SkillId = 4,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
@@ -2562,24 +2588,24 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Score")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2594,21 +2620,21 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Scenario")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
@@ -2637,23 +2663,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CaseStudyId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Feedback")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsRecommended")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OptionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2700,22 +2726,22 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Sender")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2728,27 +2754,27 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Expertise")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ShortBio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2777,21 +2803,21 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("PercentComplete")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2806,28 +2832,28 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("WeekNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2840,24 +2866,24 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("IconName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -2918,10 +2944,10 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("SoftSync.DAL.Entities.UserSkillSelection", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "SkillId");
 
@@ -2934,37 +2960,37 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AttemptCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CodeHash")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Consumed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Destination")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("ExpiresAtUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Purpose")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

@@ -38,8 +38,18 @@ public class Repository<T> : IRepository<T> where T : class
 }
 
 // Specialized interfaces
-public interface IUserRepository : IRepository<ApplicationUser> { }
-public class UserRepository : Repository<ApplicationUser>, IUserRepository { public UserRepository(Data.SoftSyncDbContext context) : base(context) { } }
+public interface IUserRepository : IRepository<ApplicationUser>
+{
+    /// <summary>Loads the user with their skill selections tracked, so the caller can diff/replace them.</summary>
+    Task<ApplicationUser?> GetWithSkillSelectionsAsync(int userId);
+}
+public class UserRepository : Repository<ApplicationUser>, IUserRepository
+{
+    public UserRepository(Data.SoftSyncDbContext context) : base(context) { }
+
+    public async Task<ApplicationUser?> GetWithSkillSelectionsAsync(int userId) =>
+        await _dbSet.Include(u => u.SkillSelections).FirstOrDefaultAsync(u => u.Id == userId);
+}
 
 public interface ISkillRepository : IRepository<Skill> { }
 public class SkillRepository : Repository<Skill>, ISkillRepository { public SkillRepository(Data.SoftSyncDbContext context) : base(context) { } }

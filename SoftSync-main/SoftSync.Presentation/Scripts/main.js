@@ -79,3 +79,61 @@ window.ssSubmitForm = function (id) {
     const f = document.getElementById(id);
     if (f) f.submit();
 };
+
+// Theme + accessibility preferences. Persisted in localStorage and applied to
+// <html> as data-theme / data-reduce-motion so the CSS in main.css can react.
+// apply() runs immediately (see the inline bootstrap in App.razor) to avoid a
+// flash of the wrong theme before Blazor starts.
+window.ssTheme = {
+    // pref: "light" | "dark" | "system"
+    resolve(pref) {
+        if (pref === 'light' || pref === 'dark') return pref;
+        try {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        } catch { return 'light'; }
+    },
+    // Mirror the RESOLVED theme into a cookie so the server can render
+    // data-theme on <html> during SSR / enhanced navigation (no flash / revert).
+    _cookie(name, value) {
+        try { document.cookie = name + '=' + value + '; path=/; max-age=31536000; samesite=lax'; }
+        catch { /* ignore */ }
+    },
+    apply(pref, reduceMotion) {
+        try {
+            const el = document.documentElement;
+            const resolved = this.resolve(pref || 'system');
+            el.setAttribute('data-theme', resolved);
+            if (reduceMotion) el.setAttribute('data-reduce-motion', '1');
+            else el.removeAttribute('data-reduce-motion');
+            this._cookie('ss-theme', resolved);
+            this._cookie('ss-reduce-motion', reduceMotion ? '1' : '0');
+        } catch { /* ignore */ }
+    },
+    set(pref, reduceMotion) {
+        try {
+            localStorage.setItem('ss-theme', pref);
+            localStorage.setItem('ss-reduce-motion', reduceMotion ? '1' : '0');
+        } catch { /* ignore */ }
+        this.apply(pref, reduceMotion);
+    },
+    // Re-apply from storage; called on startup by the App.razor bootstrap.
+    init() {
+        let pref = 'system', rm = false;
+        try {
+            pref = localStorage.getItem('ss-theme') || 'system';
+            rm = localStorage.getItem('ss-reduce-motion') === '1';
+        } catch { /* ignore */ }
+        this.apply(pref, rm);
+    },
+    // Seed the client from the server-stored preference (DB) the first time a
+    // browser is used — but never override a choice the user already made here.
+    syncFromServer(pref, reduceMotion) {
+        try {
+            if (localStorage.getItem('ss-theme')) return;
+        } catch { /* ignore */ }
+        this.set(pref || 'system', !!reduceMotion);
+    }
+};
+
+// Apply saved theme as early as the bundle runs.
+try { window.ssTheme.init(); } catch { /* ignore */ }

@@ -16,6 +16,15 @@
 <h2 class="tw:font-bold tw:mb-2 tw:text-center">@L["auth.login.title"]</h2>
 <p class="text-muted tw:text-center tw:mb-6">@L["auth.login.subtitle"]</p>
 
+@if (Suspended == 1)
+{
+    <div class="alert alert-warning tw:text-sm" role="alert">@L["settings.suspend.done"]</div>
+}
+@if (Deleted == 1)
+{
+    <div class="alert alert-info tw:text-sm" role="alert">@L["settings.delete.done"]</div>
+}
+
 <StatusMessage Message="@errorMessage" />
 
 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
@@ -58,6 +67,8 @@
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    [SupplyParameterFromQuery] private int Suspended { get; set; }
+    [SupplyParameterFromQuery] private int Deleted { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,6 +129,6 @@
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
-        public bool RememberMe { get; set; }
+        public bool RememberMe { get; set; } = true;
     }
 }

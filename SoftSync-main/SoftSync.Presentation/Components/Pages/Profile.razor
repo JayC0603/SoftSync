@@ -10,7 +10,7 @@
 @inject IAssessmentService AssessmentService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
-@inject IWebHostEnvironment Env
+@inject UserProfileState UserProfileState
 
 <div class="max-720 tw:mx-auto">
     @if (user is null)
@@ -92,7 +92,7 @@
                 </div>
                 <div class="tw:sm:col-span-2">
                     <div class="text-muted tw:text-sm">@L["profile.goal"]</div>
-                    <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : user.Goal)</div>
+                    <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</div>
                 </div>
             </div>
             <button class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo("/profile-setup")'>
@@ -144,22 +144,22 @@
 
         try
         {
-            var ext = Path.GetExtension(file.Name);
-            if (string.IsNullOrWhiteSpace(ext)) ext = ".png";
-            var fileName = $"user{userId}_{Guid.NewGuid():N}{ext}";
-            var dir = Path.Combine(Env.WebRootPath, "uploads", "avatars");
-            Directory.CreateDirectory(dir);
-            await using (var fs = new FileStream(Path.Combine(dir, fileName), FileMode.Create))
-            {
-                await file.OpenReadStream(MaxAvatarBytes).CopyToAsync(fs);
-            }
-            user.AvatarUrl = $"/uploads/avatars/{fileName}";
+            user.AvatarUrl = await ToDataUrlAsync(file);
             await UserService.SetAvatarAsync(userId, user.AvatarUrl);
+            UserProfileState.NotifyAvatarChanged(user.AvatarUrl);
         }
         catch (Exception ex)
         {
             avatarError = L["profile.avatar.uploadFailed"] + " " + ex.Message;
         }
+    }
+
+    private static async Task<string> ToDataUrlAsync(IBrowserFile file)
+    {
+        await using var stream = file.OpenReadStream(MaxAvatarBytes);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+        return $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
     }
 }
 

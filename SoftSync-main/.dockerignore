@@ -1,0 +1,14 @@
+# Keep the Docker build context small and free of stale build artifacts.
+**/bin
+**/obj
+**/node_modules
+**/wwwroot/dist
+.git
+.gitignore
+.vs
+.vscode
+**/.idea
+*.user
+docker-compose.yml
+**/Dockerfile
+README.md

@@ -90,7 +90,7 @@
                     <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-3">
                         @foreach (var g in goals)
                         {
-                            <button class="wiz-choice wiz-choice-lg @(user.Goal == L[g.Value] ? "selected" : "")" @onclick="() => user.Goal = L[g.Value]">
+                            <button class="wiz-choice wiz-choice-lg @(user.Goal == g.Value ? "selected" : "")" @onclick="() => user.Goal = g.Value">
                                 <i class="bi @g.Key tw:me-2"></i> @L[g.Value]
                             </button>
                         }

@@ -1,10 +1,14 @@
 @page "/assessment-result/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
+@using SoftSync.Common
 @using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
 @inject IAssessmentService AssessmentService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="max-800 mx-auto">
     <StepIndicator CurrentStep="4" />
@@ -25,15 +29,19 @@
             {
                 <div>
                     <div class="ss-card ss-glass-interactive tw:p-6">
-                        <div class="tw:flex tw:justify-between tw:mb-2">
+                        <div class="tw:flex tw:justify-between tw:items-center tw:mb-2">
                             <h5 class="tw:font-bold tw:mb-0">@res.SkillName</h5>
-                            <span class="badge @GetLevelBadgeClass(res.Level)">@res.Level</span>
+                            <span class="badge @GetLevelBadgeClass(res.Level)">@LevelLabel(res.Level)</span>
+                        </div>
+                        <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mb-1">
+                            <span>@L["result.score"]</span>
+                            <span>@res.Score / @SoftSync.Common.AssessmentScoring.MaxScore</span>
                         </div>
                         <div class="progress tw:mb-4" style="height: 12px; border-radius: 6px;">
-                            <div class="progress-bar" style="width: @(res.Score)%; background: var(--gradient);"></div>
+                            <div class="progress-bar" style="width: @(ScorePercent(res.Score))%; background: var(--gradient);"></div>
                         </div>
                         <p class="tw:text-sm text-muted tw:mb-0">
-                            @(res.Score > 70 ? L["result.feedback.high"] : L["result.feedback.low"])
+                            @LevelDescription(res.SkillName, res.Level)
                         </p>
                     </div>
                 </div>
@@ -58,13 +66,45 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var signedInUserId = await AuthProvider.GetUserIdAsync();
+        if (signedInUserId <= 0)
+        {
+            Nav.NavigateTo("Account/Login", forceLoad: true);
+            return;
+        }
+
+        if (UserId <= 0 || UserId != signedInUserId)
+            UserId = signedInUserId;
+
         results = await AssessmentService.GetLatestResultsAsync(UserId);
     }
 
-    private string GetLevelBadgeClass(SoftSync.Common.Enums.AssessmentLevel level) => level switch
+    private static int ScorePercent(int score)
     {
-        SoftSync.Common.Enums.AssessmentLevel.Good => "bg-success",
-        SoftSync.Common.Enums.AssessmentLevel.Average => "bg-warning",
+        var clamped = Math.Clamp(score, 0, AssessmentScoring.MaxScore);
+        return (int)Math.Round(clamped * 100.0 / AssessmentScoring.MaxScore);
+    }
+
+    private string LevelLabel(AssessmentLevel level) => L[$"result.level.{LevelKey(level)}"];
+
+    private string LevelDescription(string skillName, AssessmentLevel level)
+    {
+        var skillKey = skillName.Replace(" ", "", StringComparison.Ordinal).ToLowerInvariant();
+        var key = $"result.desc.{skillKey}.{LevelKey(level)}";
+        var description = L[key];
+
+        return description == key
+            ? L[level >= AssessmentLevel.Proactive ? "result.feedback.high" : "result.feedback.low"]
+            : description;
+    }
+
+    private static string LevelKey(AssessmentLevel level) => level.ToString().ToLowerInvariant();
+
+    private string GetLevelBadgeClass(AssessmentLevel level) => level switch
+    {
+        AssessmentLevel.Mastery => "bg-success",
+        AssessmentLevel.Proactive => "bg-primary",
+        AssessmentLevel.Developing => "bg-warning",
         _ => "bg-danger"
     };
 

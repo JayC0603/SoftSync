@@ -10,6 +10,10 @@ public interface IUserService
     Task SetAvatarAsync(int userId, string avatarUrl);
     Task AddExperienceAsync(int userId, int amount);
     Task AddSkillSelectionsAsync(int userId, List<int> skillIds);
+    /// <summary>Save the Settings page fields (account/display, learning, appearance).</summary>
+    Task UpdateSettingsAsync(int userId, UserDto userDto);
+    /// <summary>Skill ids the user currently has selected (for the learning tab).</summary>
+    Task<List<int>> GetSelectedSkillIdsAsync(int userId);
 }
 
 public interface ISkillService

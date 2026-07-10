@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SoftSync.DAL.Data;
 
 #nullable disable
@@ -12,8 +12,8 @@ using SoftSync.DAL.Data;
 namespace SoftSync.DAL.Migrations
 {
     [DbContext(typeof(SoftSyncDbContext))]
-    [Migration("20260707073115_AddFullQuizBank")]
-    partial class AddFullQuizBank
+    [Migration("20260708071912_InitialPostgres")]
+    partial class InitialPostgres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,36 +21,35 @@ namespace SoftSync.DAL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -59,18 +58,18 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -83,18 +82,18 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -106,16 +105,16 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -127,10 +126,10 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -142,16 +141,16 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -162,86 +161,114 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Age")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("CurrentLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DailyStudyMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ExperiencePoints")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Gender")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Goal")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<int>("PreferredStudyTime")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ReduceMotion")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
+
+                    b.Property<int>("StudyDaysPerWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Theme")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -250,8 +277,7 @@ namespace SoftSync.DAL.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -260,19 +286,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("OptionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("OptionTextVi")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("QuestionId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ScoreValue")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -284,231 +314,264 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 1011,
-                            OptionText = "Politely note you'd like to finish, then continue your point.",
+                            OptionText = "I focus on saying everything on my mind, paying little attention to the listener's reaction.",
+                            OptionTextVi = "Chỉ tập trung nói hết ý mình, ít để ý phản ứng người nghe",
                             QuestionId = 101,
-                            ScoreValue = 4
+                            ScoreValue = 1
                         },
                         new
                         {
                             Id = 1012,
-                            OptionText = "Stop talking and let the moment go.",
+                            OptionText = "I pay attention but am reluctant to ask directly whether it's clear.",
+                            OptionTextVi = "Có để ý nhưng ngại hỏi thẳng \"có rõ không\"",
                             QuestionId = 101,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1013,
-                            OptionText = "Raise your voice to talk over them.",
+                            OptionText = "I only check when speaking in person, and skip it in texts/emails.",
+                            OptionTextVi = "Chỉ kiểm tra khi nói trực tiếp, bỏ qua khi nhắn tin/email",
                             QuestionId = 101,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1014,
-                            OptionText = "Say nothing but complain about them later.",
-                            QuestionId = 101,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1021,
-                            OptionText = "Essential — I paraphrase to confirm I understood.",
-                            QuestionId = 102,
-                            ScoreValue = 4
-                        },
-                        new
-                        {
-                            Id = 1022,
-                            OptionText = "Fairly important, I try to listen most of the time.",
-                            QuestionId = 102,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 1023,
-                            OptionText = "Somewhat — I mostly wait for my turn to talk.",
+                            Id = 1014,
+                            OptionText = "I always watch the listener's cues and proactively ask for feedback.",
+                            OptionTextVi = "Luôn quan sát tín hiệu người nghe và chủ động hỏi phản hồi",
+                            QuestionId = 101,
+                            ScoreValue = 4
+                        },
+                        new
+                        {
+                            Id = 1021,
+                            OptionText = "I'm busy preparing a rebuttal in my head and don't hear it all.",
+                            OptionTextVi = "Bận chuẩn bị phản biện trong đầu, không nghe hết",
+                            QuestionId = 102,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
+                            Id = 1022,
+                            OptionText = "I easily lose interest if I don't click with the speaker.",
+                            OptionTextVi = "Dễ mất hứng nếu không hợp gu với người nói",
                             QuestionId = 102,
                             ScoreValue = 2
                         },
                         new
                         {
-                            Id = 1024,
-                            OptionText = "Not important.",
+                            Id = 1023,
+                            OptionText = "I listen while doing other things, thinking I multitask well.",
+                            OptionTextVi = "Vừa nghe vừa làm việc riêng, nghĩ mình đa nhiệm tốt",
                             QuestionId = 102,
-                            ScoreValue = 1
+                            ScoreValue = 3
                         },
                         new
                         {
-                            Id = 1031,
-                            OptionText = "Use plain language and a relatable example.",
-                            QuestionId = 103,
+                            Id = 1024,
+                            OptionText = "I listen actively and paraphrase back to confirm I understood.",
+                            OptionTextVi = "Lắng nghe chủ động, diễn đạt lại để xác nhận hiểu đúng",
+                            QuestionId = 102,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1031,
+                            OptionText = "I use jargon/slang and assume others just understand.",
+                            OptionTextVi = "Dùng jargon/từ lóng, mặc định người khác tự hiểu",
+                            QuestionId = 103,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1032,
-                            OptionText = "Explain it fully with all the technical terms.",
+                            OptionText = "I sometimes misunderstand because of regional words or abbreviations.",
+                            OptionTextVi = "Thỉnh thoảng hiểu lầm vì từ địa phương, viết tắt",
                             QuestionId = 103,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1033,
-                            OptionText = "Send them a document to read on their own.",
+                            OptionText = "I know the differences but am reluctant to re-explain hard terms.",
+                            OptionTextVi = "Biết khác biệt nhưng ngại giải thích lại từ khó",
                             QuestionId = 103,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 1034,
-                            OptionText = "Assume they'll figure it out.",
+                            OptionText = "I proactively choose plain words, define clearly, and give examples.",
+                            OptionTextVi = "Chủ động chọn từ dễ hiểu, định nghĩa rõ, có ví dụ",
                             QuestionId = 103,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1041,
-                            OptionText = "Be specific, kind, and focus on the behavior.",
-                            QuestionId = 104,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1041,
+                            OptionText = "I WRITE IN CAPS when urgent and use abbreviations even with superiors.",
+                            OptionTextVi = "Viết HOA khi khẩn cấp, dùng viết tắt cả với cấp trên",
+                            QuestionId = 104,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1042,
-                            OptionText = "Give general praise and avoid the hard parts.",
+                            OptionText = "I reply right away when angry, which easily leads to arguments.",
+                            OptionTextVi = "Phản hồi ngay khi tức giận, dễ dẫn đến tranh cãi",
                             QuestionId = 104,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1043,
-                            OptionText = "Point out only what went wrong.",
+                            OptionText = "I write carelessly — no subject line, no proofreading.",
+                            OptionTextVi = "Viết tùy tiện, không tiêu đề, không kiểm tra lỗi",
                             QuestionId = 104,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 1044,
-                            OptionText = "Avoid giving feedback at all.",
+                            OptionText = "I'm always polite, grammatical, and check the tone before sending.",
+                            OptionTextVi = "Luôn lịch sự, đúng ngữ pháp, kiểm tra tông giọng trước khi gửi",
                             QuestionId = 104,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1051,
-                            OptionText = "Share your view calmly with reasons and ask for others'.",
-                            QuestionId = 105,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1051,
+                            OptionText = "I get defensive and attack the person back.",
+                            OptionTextVi = "Phản ứng phòng vệ, công kích cá nhân lại",
+                            QuestionId = 105,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1052,
-                            OptionText = "Go along with it to keep the peace.",
+                            OptionText = "I go silent, walk away, and avoid the conflict.",
+                            OptionTextVi = "Im lặng, bỏ đi, né tránh xung đột",
                             QuestionId = 105,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1053,
-                            OptionText = "Send a blunt message showing your frustration.",
+                            OptionText = "I try to listen but feel deeply hurt and lose confidence.",
+                            OptionTextVi = "Cố nghe nhưng tổn thương sâu, mất tự tin",
                             QuestionId = 105,
-                            ScoreValue = 1
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 1054,
-                            OptionText = "Stay silent and disengage.",
+                            OptionText = "I calmly clarify the issue while saving face for the other person.",
+                            OptionTextVi = "Bình tĩnh làm rõ vấn đề, giữ thể diện cho đối phương",
                             QuestionId = 105,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1061,
-                            OptionText = "Ask a clarifying question right away.",
-                            QuestionId = 106,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1061,
+                            OptionText = "I speak exactly the same way to everyone.",
+                            OptionTextVi = "Nói chuyện y hệt nhau với mọi đối tượng",
+                            QuestionId = 106,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1062,
-                            OptionText = "Guess the meaning and reply.",
+                            OptionText = "I try to change but fumble choosing the right channel.",
+                            OptionTextVi = "Cố thay đổi nhưng lúng túng chọn kênh phù hợp",
                             QuestionId = 106,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1063,
-                            OptionText = "Wait and hope it becomes clear later.",
+                            OptionText = "I'm easily swayed by bias and stereotypes when communicating.",
+                            OptionTextVi = "Dễ bị định kiến, khuôn mẫu chi phối khi giao tiếp",
                             QuestionId = 106,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 1064,
-                            OptionText = "Ignore it.",
+                            OptionText = "I always analyze the context and audience before communicating.",
+                            OptionTextVi = "Luôn phân tích bối cảnh, khán giả trước khi giao tiếp",
                             QuestionId = 106,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1071,
-                            OptionText = "Pause, check in, and re-explain the key point.",
-                            QuestionId = 107,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1071,
+                            OptionText = "I speak bluntly, sometimes hurting others.",
+                            OptionTextVi = "Nói thẳng thô, đôi khi làm tổn thương người khác",
+                            QuestionId = 107,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1072,
-                            OptionText = "Slow down but keep going as planned.",
+                            OptionText = "I talk in circles until the listener can't follow my point.",
+                            OptionTextVi = "Nói vòng vo đến mức người nghe không hiểu ý",
+                            QuestionId = 107,
+                            ScoreValue = 2
+                        },
+                        new
+                        {
+                            Id = 1073,
+                            OptionText = "I'm confused about when to be direct vs. indirect.",
+                            OptionTextVi = "Bối rối không biết khi nào nên trực tiếp/gián tiếp",
                             QuestionId = 107,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 1073,
-                            OptionText = "Speed up to finish sooner.",
-                            QuestionId = 107,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
                             Id = 1074,
-                            OptionText = "Ignore it and push through.",
+                            OptionText = "I balance it: direct for work, gentle when delivering bad news.",
+                            OptionTextVi = "Cân bằng: trực tiếp cho công việc, mềm mỏng khi tin xấu",
                             QuestionId = 107,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 1081,
-                            OptionText = "Adapt tone and detail to the reader.",
-                            QuestionId = 108,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 1081,
+                            OptionText = "I can't control it — crossed arms, avoiding eye contact.",
+                            OptionTextVi = "Không kiểm soát được, khoanh tay, né ánh mắt",
+                            QuestionId = 108,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 1082,
-                            OptionText = "Keep it short regardless of the reader.",
+                            OptionText = "I'm awkward about personal space (too close/too far).",
+                            OptionTextVi = "Lúng túng về khoảng cách giao tiếp (quá gần/xa)",
                             QuestionId = 108,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 1083,
-                            OptionText = "Write the same way for everyone.",
+                            OptionText = "I focus only on words and forget expression and posture.",
+                            OptionTextVi = "Chỉ chú trọng câu chữ, quên biểu cảm và tư thế",
                             QuestionId = 108,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 1084,
-                            OptionText = "Don't think about tone.",
+                            OptionText = "I keep my posture, eye contact, and tone appropriate to the context.",
+                            OptionTextVi = "Luôn giữ tư thế, ánh mắt, tông giọng phù hợp bối cảnh",
                             QuestionId = 108,
-                            ScoreValue = 1
+                            ScoreValue = 4
                         },
                         new
                         {
                             Id = 2011,
                             OptionText = "Talk to them privately to understand what's going on.",
+                            OptionTextVi = "Nói chuyện riêng để hiểu chuyện gì đang xảy ra.",
                             QuestionId = 201,
                             ScoreValue = 4
                         },
@@ -516,6 +579,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2012,
                             OptionText = "Quietly do their share yourself.",
+                            OptionTextVi = "Lặng lẽ tự làm luôn phần của họ.",
                             QuestionId = 201,
                             ScoreValue = 2
                         },
@@ -523,6 +587,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2013,
                             OptionText = "Report them to the supervisor immediately.",
+                            OptionTextVi = "Báo ngay với người phụ trách.",
                             QuestionId = 201,
                             ScoreValue = 2
                         },
@@ -530,6 +595,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2014,
                             OptionText = "Call them out in front of the group.",
+                            OptionTextVi = "Chỉ trích họ trước cả nhóm.",
                             QuestionId = 201,
                             ScoreValue = 1
                         },
@@ -537,6 +603,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2021,
                             OptionText = "Look for a solution that combines the best of both.",
+                            OptionTextVi = "Tìm giải pháp kết hợp điểm tốt của cả hai.",
                             QuestionId = 202,
                             ScoreValue = 4
                         },
@@ -544,6 +611,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2022,
                             OptionText = "Push for your idea because you're confident in it.",
+                            OptionTextVi = "Cố bảo vệ ý mình vì tự tin vào nó.",
                             QuestionId = 202,
                             ScoreValue = 2
                         },
@@ -551,6 +619,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2023,
                             OptionText = "Give up your idea to avoid friction.",
+                            OptionTextVi = "Bỏ ý mình để tránh va chạm.",
                             QuestionId = 202,
                             ScoreValue = 2
                         },
@@ -558,6 +627,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2024,
                             OptionText = "Refuse to work with them.",
+                            OptionTextVi = "Từ chối làm việc với họ.",
                             QuestionId = 202,
                             ScoreValue = 1
                         },
@@ -565,6 +635,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2031,
                             OptionText = "Rally the group, re-plan, and share the load.",
+                            OptionTextVi = "Tập hợp nhóm, lên lại kế hoạch và chia sẻ khối lượng việc.",
                             QuestionId = 203,
                             ScoreValue = 4
                         },
@@ -572,6 +643,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2032,
                             OptionText = "Focus only on finishing your own part.",
+                            OptionTextVi = "Chỉ tập trung hoàn thành phần của mình.",
                             QuestionId = 203,
                             ScoreValue = 2
                         },
@@ -579,6 +651,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2033,
                             OptionText = "Wait for someone else to take charge.",
+                            OptionTextVi = "Chờ người khác đứng ra chịu trách nhiệm.",
                             QuestionId = 203,
                             ScoreValue = 2
                         },
@@ -586,6 +659,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2034,
                             OptionText = "Blame whoever caused it.",
+                            OptionTextVi = "Đổ lỗi cho người gây ra chuyện.",
                             QuestionId = 203,
                             ScoreValue = 1
                         },
@@ -593,6 +667,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2041,
                             OptionText = "Acknowledge everyone's contribution.",
+                            OptionTextVi = "Ghi nhận đóng góp của mọi người.",
                             QuestionId = 204,
                             ScoreValue = 4
                         },
@@ -600,6 +675,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2042,
                             OptionText = "Mention the team if asked.",
+                            OptionTextVi = "Nhắc đến cả nhóm nếu được hỏi.",
                             QuestionId = 204,
                             ScoreValue = 3
                         },
@@ -607,6 +683,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2043,
                             OptionText = "Highlight my own part first.",
+                            OptionTextVi = "Đề cao phần của mình trước.",
                             QuestionId = 204,
                             ScoreValue = 2
                         },
@@ -614,6 +691,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2044,
                             OptionText = "Take the credit myself.",
+                            OptionTextVi = "Nhận hết công về mình.",
                             QuestionId = 204,
                             ScoreValue = 1
                         },
@@ -621,6 +699,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2051,
                             OptionText = "Invite them in and ask what they think.",
+                            OptionTextVi = "Mời họ tham gia và hỏi họ nghĩ gì.",
                             QuestionId = 205,
                             ScoreValue = 4
                         },
@@ -628,6 +707,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2052,
                             OptionText = "Assume they agree with the group.",
+                            OptionTextVi = "Cho rằng họ đồng ý với cả nhóm.",
                             QuestionId = 205,
                             ScoreValue = 2
                         },
@@ -635,6 +715,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2053,
                             OptionText = "Move on without them.",
+                            OptionTextVi = "Bỏ qua và tiếp tục mà không có họ.",
                             QuestionId = 205,
                             ScoreValue = 2
                         },
@@ -642,6 +723,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2054,
                             OptionText = "Decide for them.",
+                            OptionTextVi = "Quyết định thay cho họ.",
                             QuestionId = 205,
                             ScoreValue = 1
                         },
@@ -649,6 +731,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2061,
                             OptionText = "Take it on and do it well for the team.",
+                            OptionTextVi = "Nhận và làm tốt vì cả nhóm.",
                             QuestionId = 206,
                             ScoreValue = 4
                         },
@@ -656,6 +739,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2062,
                             OptionText = "Do it, but with minimal effort.",
+                            OptionTextVi = "Làm, nhưng chỉ ở mức tối thiểu.",
                             QuestionId = 206,
                             ScoreValue = 2
                         },
@@ -663,6 +747,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2063,
                             OptionText = "Try to pass it to someone else.",
+                            OptionTextVi = "Tìm cách đẩy cho người khác.",
                             QuestionId = 206,
                             ScoreValue = 2
                         },
@@ -670,6 +755,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2064,
                             OptionText = "Refuse.",
+                            OptionTextVi = "Từ chối.",
                             QuestionId = 206,
                             ScoreValue = 1
                         },
@@ -677,6 +763,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2071,
                             OptionText = "Help them talk it through and find common ground.",
+                            OptionTextVi = "Giúp họ trao đổi và tìm điểm chung.",
                             QuestionId = 207,
                             ScoreValue = 4
                         },
@@ -684,6 +771,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2072,
                             OptionText = "Pick the side you agree with.",
+                            OptionTextVi = "Chọn phe mình đồng tình.",
                             QuestionId = 207,
                             ScoreValue = 2
                         },
@@ -691,6 +779,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2073,
                             OptionText = "Stay out of it entirely.",
+                            OptionTextVi = "Đứng ngoài hoàn toàn.",
                             QuestionId = 207,
                             ScoreValue = 2
                         },
@@ -698,6 +787,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2074,
                             OptionText = "Tell everyone to just get over it.",
+                            OptionTextVi = "Bảo mọi người dẹp chuyện đó đi.",
                             QuestionId = 207,
                             ScoreValue = 1
                         },
@@ -705,6 +795,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2081,
                             OptionText = "I deliver what I promise, on time, consistently.",
+                            OptionTextVi = "Tôi làm đúng điều đã hứa, đúng hạn, ổn định.",
                             QuestionId = 208,
                             ScoreValue = 4
                         },
@@ -712,6 +803,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2082,
                             OptionText = "Usually reliable, occasional slips.",
+                            OptionTextVi = "Thường đáng tin, thỉnh thoảng lỡ hẹn.",
                             QuestionId = 208,
                             ScoreValue = 3
                         },
@@ -719,6 +811,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2083,
                             OptionText = "Reliable only when reminded.",
+                            OptionTextVi = "Chỉ đáng tin khi được nhắc.",
                             QuestionId = 208,
                             ScoreValue = 2
                         },
@@ -726,461 +819,527 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 2084,
                             OptionText = "Often miss commitments.",
+                            OptionTextVi = "Hay thất hứa.",
                             QuestionId = 208,
                             ScoreValue = 1
                         },
                         new
                         {
                             Id = 3011,
-                            OptionText = "Inform stakeholders and propose a new timeline.",
+                            OptionText = "It depends on whatever schedule others set for me.",
+                            OptionTextVi = "Phụ thuộc lịch người khác sắp xếp",
                             QuestionId = 301,
-                            ScoreValue = 4
+                            ScoreValue = 1
                         },
                         new
                         {
                             Id = 3012,
-                            OptionText = "Work all night and hope it's enough.",
+                            OptionText = "I study on a whim, with no schedule.",
+                            OptionTextVi = "Học tùy hứng, không lịch trình",
                             QuestionId = 301,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3013,
-                            OptionText = "Say nothing and hand it in late.",
+                            OptionText = "I have a plan but find it hard to stick to.",
+                            OptionTextVi = "Có kế hoạch nhưng khó giữ đúng",
                             QuestionId = 301,
-                            ScoreValue = 1
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3014,
-                            OptionText = "Ask for the deadline to be dropped.",
+                            OptionText = "I'm always proactive, with my own strategy.",
+                            OptionTextVi = "Luôn chủ động, có chiến lược riêng",
                             QuestionId = 301,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
-                            Id = 3021,
-                            OptionText = "Review priorities and plan the day.",
-                            QuestionId = 302,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3021,
+                            OptionText = "Fear of failure, so I avoid getting started.",
+                            OptionTextVi = "Sợ thất bại nên né tránh bắt tay vào làm",
+                            QuestionId = 302,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3022,
-                            OptionText = "Jump into whatever feels urgent.",
+                            OptionText = "I'm easily distracted by my phone and social media.",
+                            OptionTextVi = "Dễ mất tập trung bởi điện thoại, mạng xã hội",
                             QuestionId = 302,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3023,
-                            OptionText = "Check messages first, then wing it.",
+                            OptionText = "My body is tired, sleep-deprived, low on energy.",
+                            OptionTextVi = "Cơ thể mệt mỏi, thiếu ngủ, thiếu năng lượng",
                             QuestionId = 302,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3024,
-                            OptionText = "Start with the easiest tasks.",
+                            OptionText = "I rarely have this problem — I start right away.",
+                            OptionTextVi = "Tôi hiếm khi gặp vấn đề này, bắt tay vào việc ngay",
                             QuestionId = 302,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
-                            Id = 3031,
-                            OptionText = "Prioritize by impact and deadline, then focus.",
-                            QuestionId = 303,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3031,
+                            OptionText = "Way off — a task I thought was 1 hour takes 4–5.",
+                            OptionTextVi = "Sai lệch nặng, việc tưởng 1 giờ hóa ra mất 4-5 giờ",
+                            QuestionId = 303,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3032,
-                            OptionText = "Do them in the order they arrived.",
+                            OptionText = "Hard to estimate for material heavy with figures and charts.",
+                            OptionTextVi = "Khó ước lượng với tài liệu nhiều số liệu, biểu đồ",
                             QuestionId = 303,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3033,
-                            OptionText = "Do the quickest ones and leave the big one.",
+                            OptionText = "I often pull all-nighters near the deadline to make up for it.",
+                            OptionTextVi = "Thường phải thức trắng đêm sát hạn để bù đắp",
                             QuestionId = 303,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3034,
-                            OptionText = "Try to multitask all three at once.",
+                            OptionText = "Fairly accurate, always with buffer time.",
+                            OptionTextVi = "Ước lượng khá sát, luôn có thời gian dự phòng",
                             QuestionId = 303,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 3041,
-                            OptionText = "Block focus time and silence interruptions.",
-                            QuestionId = 304,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3041,
+                            OptionText = "I'm constantly pulled in by notifications, messages, games.",
+                            OptionTextVi = "Liên tục bị cuốn vào thông báo, tin nhắn, game",
+                            QuestionId = 304,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3042,
-                            OptionText = "Take breaks whenever a distraction appears.",
+                            OptionText = "I'm easily distracted by noise and a messy space.",
+                            OptionTextVi = "Dễ xao nhãng bởi tiếng ồn, không gian bừa bộn",
                             QuestionId = 304,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3043,
-                            OptionText = "Try to resist but often give in.",
+                            OptionText = "I sometimes multitask, which lowers my output.",
+                            OptionTextVi = "Thỉnh thoảng làm nhiều việc cùng lúc, hiệu suất giảm",
                             QuestionId = 304,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3044,
-                            OptionText = "I'm easily pulled off-task.",
+                            OptionText = "I always have a quiet space with all notifications off.",
+                            OptionTextVi = "Luôn có không gian yên tĩnh, tắt hết thông báo",
                             QuestionId = 304,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 3051,
-                            OptionText = "Assess its true priority before switching.",
-                            QuestionId = 305,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3051,
+                            OptionText = "No, I only get motivated when the deadline is imminent.",
+                            OptionTextVi = "Không, chỉ có động lực khi hạn chót cận kề",
+                            QuestionId = 305,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3052,
-                            OptionText = "Drop everything and switch immediately.",
+                            OptionText = "I know some but have never applied one successfully.",
+                            OptionTextVi = "Có biết nhưng chưa áp dụng thành công lần nào",
                             QuestionId = 305,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3053,
-                            OptionText = "Ignore it until my current task is done.",
+                            OptionText = "I apply them but often quit halfway (e.g. Pomodoro).",
+                            OptionTextVi = "Có áp dụng nhưng hay bỏ giữa chừng (vd: Pomodoro)",
                             QuestionId = 305,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3054,
-                            OptionText = "Panic and lose track of both.",
+                            OptionText = "I apply them fluently: Eat the Frog, break tasks down, daily Top 3.",
+                            OptionTextVi = "Áp dụng nhuần nhuyễn: Eat the Frog, chia việc nhỏ, Top 3 mỗi ngày",
                             QuestionId = 305,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 3061,
-                            OptionText = "Fairly accurately, with buffer for surprises.",
-                            QuestionId = 306,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3061,
+                            OptionText = "Momentary emotion or panic over the deadline.",
+                            OptionTextVi = "Cảm xúc nhất thời hoặc hoảng loạn vì hạn chót",
+                            QuestionId = 306,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3062,
-                            OptionText = "Roughly right most of the time.",
+                            OptionText = "I pick easy tasks first and dodge hard-but-important ones.",
+                            OptionTextVi = "Chọn việc dễ trước, né việc khó nhưng quan trọng",
+                            QuestionId = 306,
+                            ScoreValue = 2
+                        },
+                        new
+                        {
+                            Id = 3063,
+                            OptionText = "I make a list but struggle to sort out the core tasks.",
+                            OptionTextVi = "Có lập danh sách nhưng khó phân loại việc cốt lõi",
                             QuestionId = 306,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 3063,
-                            OptionText = "I usually underestimate.",
-                            QuestionId = 306,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
                             Id = 3064,
-                            OptionText = "I don't estimate at all.",
+                            OptionText = "I use the Eisenhower matrix to classify clearly.",
+                            OptionTextVi = "Dùng ma trận Eisenhower để phân loại rõ ràng",
                             QuestionId = 306,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 3071,
-                            OptionText = "Break it into small steps and start one now.",
-                            QuestionId = 307,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3071,
+                            OptionText = "Very vague, hard to measure (\"get better\").",
+                            OptionTextVi = "Rất mơ hồ, khó đo lường (\"học giỏi hơn\")",
+                            QuestionId = 307,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3072,
-                            OptionText = "Wait until you feel motivated.",
+                            OptionText = "Clear but with no specific deadline.",
+                            OptionTextVi = "Rõ ràng nhưng không gắn thời hạn cụ thể",
                             QuestionId = 307,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3073,
-                            OptionText = "Do smaller tasks to feel productive.",
+                            OptionText = "Specific but unrealistic, not feasible.",
+                            OptionTextVi = "Cụ thể nhưng thiếu thực tế, không khả thi",
                             QuestionId = 307,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3074,
-                            OptionText = "Keep putting it off.",
+                            OptionText = "Always fully meet the SMART criteria.",
+                            OptionTextVi = "Luôn đạt chuẩn SMART đầy đủ",
                             QuestionId = 307,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 3081,
-                            OptionText = "Reflect on what worked and adjust next week.",
-                            QuestionId = 308,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 3081,
+                            OptionText = "Panic, get discouraged, and drop the work.",
+                            OptionTextVi = "Hoảng loạn, nản chí, bỏ dở công việc",
+                            QuestionId = 308,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 3082,
-                            OptionText = "Just move on to the weekend.",
+                            OptionText = "Stubbornly cling to the old plan, extremely stressed.",
+                            OptionTextVi = "Cố chấp bám kế hoạch cũ, căng thẳng tột độ",
                             QuestionId = 308,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 3083,
-                            OptionText = "Feel behind but don't review why.",
+                            OptionText = "Struggle through it alone, without telling anyone.",
+                            OptionTextVi = "Tự loay hoay giải quyết, không báo với ai",
                             QuestionId = 308,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 3084,
-                            OptionText = "Rarely think about it.",
+                            OptionText = "Calmly reassess, proactively inform others, and adjust.",
+                            OptionTextVi = "Bình tĩnh đánh giá lại, chủ động thông báo và điều chỉnh",
                             QuestionId = 308,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4011,
-                            OptionText = "Check the source and how the data was gathered.",
-                            QuestionId = 401,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4011,
+                            OptionText = "I instantly believe convincing claims on social media.",
+                            OptionTextVi = "Tin ngay vào tuyên bố thuyết phục trên mạng xã hội",
+                            QuestionId = 401,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4012,
-                            OptionText = "Trust it if it sounds reasonable.",
+                            OptionText = "I treat the opinion of someone I like as obvious fact.",
+                            OptionTextVi = "Coi ý kiến người mình yêu thích là sự thật hiển nhiên",
                             QuestionId = 401,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4013,
-                            OptionText = "Share it if it matches what I believe.",
+                            OptionText = "I distinguish well, but struggle with cleverly disguised data.",
+                            OptionTextVi = "Phân biệt tốt nhưng khó với số liệu ngụy trang tinh vi",
                             QuestionId = 401,
-                            ScoreValue = 1
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 4014,
-                            OptionText = "Accept it because it was widely posted.",
+                            OptionText = "I always distinguish clearly and demand empirical evidence.",
+                            OptionTextVi = "Luôn phân biệt rõ, yêu cầu bằng chứng thực nghiệm",
                             QuestionId = 401,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
-                            Id = 4021,
-                            OptionText = "Weigh evidence and consider alternatives first.",
-                            QuestionId = 402,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4021,
+                            OptionText = "I only read news that agrees with me and think others are wrong.",
+                            OptionTextVi = "Chỉ đọc tin cùng quan điểm, nghĩ người khác sai",
+                            QuestionId = 402,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4022,
-                            OptionText = "Go with it since everyone agrees.",
+                            OptionText = "I'm annoyed by opposing news and look to refute it.",
+                            OptionTextVi = "Khó chịu khi đọc tin trái chiều, tìm cách bác bỏ",
                             QuestionId = 402,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4023,
-                            OptionText = "Support it to avoid standing out.",
+                            OptionText = "I read other views but still cherry-pick what favors me.",
+                            OptionTextVi = "Đọc góc nhìn khác nhưng vẫn chọn lọc có lợi cho mình",
                             QuestionId = 402,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 4024,
-                            OptionText = "Reject it just to be different.",
+                            OptionText = "I proactively seek many sources and weigh opposing evidence fairly.",
+                            OptionTextVi = "Chủ động tiếp cận đa nguồn, công tâm với bằng chứng trái chiều",
                             QuestionId = 402,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4031,
-                            OptionText = "Actively seek views that challenge mine.",
-                            QuestionId = 403,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4031,
+                            OptionText = "Attack the other person when I'm challenged.",
+                            OptionTextVi = "Công kích cá nhân đối phương khi bị phản bác",
+                            QuestionId = 403,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4032,
-                            OptionText = "Consider other views if they come up.",
+                            OptionText = "Follow the majority, avoiding independent thinking.",
+                            OptionTextVi = "A dua theo số đông, tránh tư duy độc lập",
+                            QuestionId = 403,
+                            ScoreValue = 2
+                        },
+                        new
+                        {
+                            Id = 4033,
+                            OptionText = "Sometimes use extreme examples to distract.",
+                            OptionTextVi = "Đôi khi dùng ví dụ cực đoan để đánh lạc hướng",
                             QuestionId = 403,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 4033,
-                            OptionText = "Mostly look for support for my view.",
-                            QuestionId = 403,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
                             Id = 4034,
-                            OptionText = "Rarely question my first reaction.",
+                            OptionText = "Focus on rational analysis, avoiding logical fallacies.",
+                            OptionTextVi = "Tập trung phân tích lý trí, tránh ngụy biện logic",
                             QuestionId = 403,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4041,
-                            OptionText = "Examine the reasoning and evidence behind each.",
-                            QuestionId = 404,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4041,
+                            OptionText = "Trust a nice-looking site and the author's self-introduction.",
+                            OptionTextVi = "Tin vào giao diện đẹp, lời tự giới thiệu của tác giả",
+                            QuestionId = 404,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4042,
-                            OptionText = "Follow whoever is more senior.",
+                            OptionText = "Trust it based on likes and positive comments below.",
+                            OptionTextVi = "Tin theo lượt thích, bình luận tích cực bên dưới",
                             QuestionId = 404,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4043,
-                            OptionText = "Pick the advice that's easier to follow.",
+                            OptionText = "I know I should verify but am lazy, only doing it when it matters.",
+                            OptionTextVi = "Biết cần kiểm chứng nhưng lười, chỉ làm khi quan trọng",
                             QuestionId = 404,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 4044,
-                            OptionText = "Get stuck and do nothing.",
+                            OptionText = "Read laterally — open many tabs to cross-check independent sources.",
+                            OptionTextVi = "Đọc ngang — mở nhiều tab đối chiếu nguồn độc lập",
                             QuestionId = 404,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4051,
-                            OptionText = "I identify and test them explicitly.",
-                            QuestionId = 405,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4051,
+                            OptionText = "Only fix the surface, without exploring the root cause.",
+                            OptionTextVi = "Chỉ giải quyết phần nổi, không tìm hiểu gốc rễ",
+                            QuestionId = 405,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4052,
-                            OptionText = "I notice them sometimes.",
+                            OptionText = "Decide hastily on gut feeling.",
+                            OptionTextVi = "Quyết định vội vàng theo cảm tính",
+                            QuestionId = 405,
+                            ScoreValue = 2
+                        },
+                        new
+                        {
+                            Id = 4053,
+                            OptionText = "Get stuck after a few \"why\" questions, easily going off track.",
+                            OptionTextVi = "Bế tắc sau vài câu hỏi \"tại sao\", dễ lạc hướng",
                             QuestionId = 405,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 4053,
-                            OptionText = "I rarely question them.",
-                            QuestionId = 405,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
                             Id = 4054,
-                            OptionText = "I don't think about them.",
+                            OptionText = "Apply the \"5 Whys\" to find the root cause.",
+                            OptionTextVi = "Áp dụng \"5 câu hỏi Tại sao\" để tìm gốc rễ vấn đề",
                             QuestionId = 405,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4061,
-                            OptionText = "Accept the data and revise the approach.",
-                            QuestionId = 406,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4061,
+                            OptionText = "Stubborn — I cling to my view even when proven wrong.",
+                            OptionTextVi = "Bảo thủ, bám quan điểm dù bị chứng minh sai",
+                            QuestionId = 406,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4062,
-                            OptionText = "Look for reasons to dismiss the data.",
+                            OptionText = "I change, but by emotion/the crowd, not by evidence.",
+                            OptionTextVi = "Thay đổi nhưng theo cảm xúc/số đông, không phải bằng chứng",
                             QuestionId = 406,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4063,
-                            OptionText = "Keep going and hope it improves.",
+                            OptionText = "I note the new evidence but delay adjusting.",
+                            OptionTextVi = "Ghi nhận bằng chứng mới nhưng trì hoãn điều chỉnh",
                             QuestionId = 406,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 4064,
-                            OptionText = "Ignore the data.",
+                            OptionText = "I proactively update my thinking when the data changes.",
+                            OptionTextVi = "Chủ động cập nhật tư duy khi dữ liệu thay đổi",
                             QuestionId = 406,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4071,
-                            OptionText = "Break it into parts and check each.",
-                            QuestionId = 407,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4071,
+                            OptionText = "Pick the first Google result, assuming it's most authoritative.",
+                            OptionTextVi = "Chọn kết quả đầu tiên trên Google, tin là uy tín nhất",
+                            QuestionId = 407,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4072,
-                            OptionText = "Judge it as a whole by gut feel.",
+                            OptionText = "It only needs to be well-written and match what I want to prove.",
+                            OptionTextVi = "Chỉ cần viết hay và trùng khớp với điều mình muốn chứng minh",
                             QuestionId = 407,
                             ScoreValue = 2
                         },
                         new
                         {
                             Id = 4073,
-                            OptionText = "Ask what others think of it.",
+                            OptionText = "I only check the author/domain, ignoring conflicts of interest.",
+                            OptionTextVi = "Chỉ xem tên tác giả/tên miền, bỏ qua xung đột lợi ích",
                             QuestionId = 407,
-                            ScoreValue = 2
+                            ScoreValue = 3
                         },
                         new
                         {
                             Id = 4074,
-                            OptionText = "Accept or reject it quickly.",
+                            OptionText = "I review comprehensively: author, recency, funding source, peer review.",
+                            OptionTextVi = "Rà soát toàn diện: tác giả, tính cập nhật, nguồn tài trợ, bình duyệt",
                             QuestionId = 407,
-                            ScoreValue = 1
-                        },
-                        new
-                        {
-                            Id = 4081,
-                            OptionText = "I look for confounders and other explanations.",
-                            QuestionId = 408,
                             ScoreValue = 4
                         },
                         new
                         {
+                            Id = 4081,
+                            OptionText = "I think of only one solution, helpless when it fails.",
+                            OptionTextVi = "Chỉ nghĩ 1 giải pháp, bất lực khi nó thất bại",
+                            QuestionId = 408,
+                            ScoreValue = 1
+                        },
+                        new
+                        {
                             Id = 4082,
-                            OptionText = "I'm cautious but not always sure.",
+                            OptionText = "I think about it but give up, seeing it as time-consuming.",
+                            OptionTextVi = "Có nghĩ đến nhưng bỏ cuộc vì thấy tốn thời gian",
+                            QuestionId = 408,
+                            ScoreValue = 2
+                        },
+                        new
+                        {
+                            Id = 4083,
+                            OptionText = "I only prepare a backup for big things, improvising the rest.",
+                            OptionTextVi = "Chỉ chuẩn bị dự phòng cho việc lớn, còn lại tùy cơ ứng biến",
                             QuestionId = 408,
                             ScoreValue = 3
                         },
                         new
                         {
-                            Id = 4083,
-                            OptionText = "I often assume one causes the other.",
-                            QuestionId = 408,
-                            ScoreValue = 2
-                        },
-                        new
-                        {
                             Id = 4084,
-                            OptionText = "I don't consider the difference.",
+                            OptionText = "I always build multiple options and concrete contingency plans.",
+                            OptionTextVi = "Luôn xây nhiều phương án và kế hoạch dự phòng cụ thể",
                             QuestionId = 408,
-                            ScoreValue = 1
+                            ScoreValue = 4
                         },
                         new
                         {
                             Id = 5011,
                             OptionText = "Define the problem clearly, then explore options.",
+                            OptionTextVi = "Xác định rõ vấn đề, rồi khám phá các phương án.",
                             QuestionId = 501,
                             ScoreValue = 4
                         },
@@ -1188,6 +1347,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5012,
                             OptionText = "Try the first idea that comes to mind.",
+                            OptionTextVi = "Thử ngay ý tưởng đầu tiên nảy ra.",
                             QuestionId = 501,
                             ScoreValue = 2
                         },
@@ -1195,6 +1355,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5013,
                             OptionText = "Wait for someone else to solve it.",
+                            OptionTextVi = "Chờ người khác giải quyết.",
                             QuestionId = 501,
                             ScoreValue = 1
                         },
@@ -1202,6 +1363,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5014,
                             OptionText = "Avoid it and work on something else.",
+                            OptionTextVi = "Né tránh và làm việc khác.",
                             QuestionId = 501,
                             ScoreValue = 1
                         },
@@ -1209,6 +1371,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5021,
                             OptionText = "Analyze why, then try a different approach.",
+                            OptionTextVi = "Phân tích lý do, rồi thử cách khác.",
                             QuestionId = 502,
                             ScoreValue = 4
                         },
@@ -1216,6 +1379,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5022,
                             OptionText = "Repeat it hoping for a different result.",
+                            OptionTextVi = "Lặp lại và hy vọng kết quả khác.",
                             QuestionId = 502,
                             ScoreValue = 2
                         },
@@ -1223,6 +1387,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5023,
                             OptionText = "Give up on that problem.",
+                            OptionTextVi = "Bỏ cuộc với vấn đề đó.",
                             QuestionId = 502,
                             ScoreValue = 1
                         },
@@ -1230,6 +1395,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5024,
                             OptionText = "Blame external factors.",
+                            OptionTextVi = "Đổ lỗi cho yếu tố bên ngoài.",
                             QuestionId = 502,
                             ScoreValue = 1
                         },
@@ -1237,6 +1403,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5031,
                             OptionText = "Break it into smaller, solvable pieces.",
+                            OptionTextVi = "Chia nhỏ thành các phần có thể giải quyết.",
                             QuestionId = 503,
                             ScoreValue = 4
                         },
@@ -1244,6 +1411,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5032,
                             OptionText = "Attack the whole thing head-on.",
+                            OptionTextVi = "Lao thẳng vào toàn bộ vấn đề.",
                             QuestionId = 503,
                             ScoreValue = 2
                         },
@@ -1251,6 +1419,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5033,
                             OptionText = "Wait until it becomes urgent.",
+                            OptionTextVi = "Chờ đến khi nó trở nên cấp bách.",
                             QuestionId = 503,
                             ScoreValue = 2
                         },
@@ -1258,6 +1427,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5034,
                             OptionText = "Hope it resolves itself.",
+                            OptionTextVi = "Hy vọng nó tự được giải quyết.",
                             QuestionId = 503,
                             ScoreValue = 1
                         },
@@ -1265,6 +1435,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5041,
                             OptionText = "Brainstorm several, then evaluate trade-offs.",
+                            OptionTextVi = "Nghĩ nhiều ý, rồi cân nhắc được–mất.",
                             QuestionId = 504,
                             ScoreValue = 4
                         },
@@ -1272,6 +1443,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5042,
                             OptionText = "Go with the most familiar option.",
+                            OptionTextVi = "Chọn phương án quen thuộc nhất.",
                             QuestionId = 504,
                             ScoreValue = 2
                         },
@@ -1279,6 +1451,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5043,
                             OptionText = "Copy what worked elsewhere without adapting.",
+                            OptionTextVi = "Sao chép cách đã hiệu quả ở nơi khác mà không điều chỉnh.",
                             QuestionId = 504,
                             ScoreValue = 2
                         },
@@ -1286,6 +1459,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5044,
                             OptionText = "Pick the first workable idea.",
+                            OptionTextVi = "Chọn ý đầu tiên khả thi.",
                             QuestionId = 504,
                             ScoreValue = 2
                         },
@@ -1293,6 +1467,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5051,
                             OptionText = "Identify what's missing and go find it.",
+                            OptionTextVi = "Xác định thứ còn thiếu và đi tìm nó.",
                             QuestionId = 505,
                             ScoreValue = 4
                         },
@@ -1300,6 +1475,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5052,
                             OptionText = "Make assumptions and proceed.",
+                            OptionTextVi = "Giả định rồi cứ tiến hành.",
                             QuestionId = 505,
                             ScoreValue = 2
                         },
@@ -1307,6 +1483,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5053,
                             OptionText = "Solve a different, easier problem instead.",
+                            OptionTextVi = "Giải một vấn đề khác dễ hơn.",
                             QuestionId = 505,
                             ScoreValue = 2
                         },
@@ -1314,6 +1491,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5054,
                             OptionText = "Stop until someone hands you the info.",
+                            OptionTextVi = "Dừng lại đến khi có người đưa thông tin.",
                             QuestionId = 505,
                             ScoreValue = 1
                         },
@@ -1321,6 +1499,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5061,
                             OptionText = "Test it against real criteria and edge cases.",
+                            OptionTextVi = "Kiểm thử theo tiêu chí thực và các trường hợp biên.",
                             QuestionId = 506,
                             ScoreValue = 4
                         },
@@ -1328,6 +1507,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5062,
                             OptionText = "Check that it looks right.",
+                            OptionTextVi = "Xem qua thấy có vẻ đúng.",
                             QuestionId = 506,
                             ScoreValue = 2
                         },
@@ -1335,6 +1515,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5063,
                             OptionText = "Assume it works if there's no error.",
+                            OptionTextVi = "Cho là chạy được nếu không báo lỗi.",
                             QuestionId = 506,
                             ScoreValue = 2
                         },
@@ -1342,6 +1523,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5064,
                             OptionText = "I don't validate.",
+                            OptionTextVi = "Tôi không kiểm chứng.",
                             QuestionId = 506,
                             ScoreValue = 1
                         },
@@ -1349,6 +1531,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5071,
                             OptionText = "Ship it, then plan a cleaner improvement.",
+                            OptionTextVi = "Dùng trước, rồi lên kế hoạch cải tiến gọn hơn.",
                             QuestionId = 507,
                             ScoreValue = 4
                         },
@@ -1356,6 +1539,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5072,
                             OptionText = "Leave it as-is forever.",
+                            OptionTextVi = "Để nguyên như vậy mãi.",
                             QuestionId = 507,
                             ScoreValue = 2
                         },
@@ -1363,6 +1547,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5073,
                             OptionText = "Scrap it and restart from zero.",
+                            OptionTextVi = "Bỏ hết và làm lại từ đầu.",
                             QuestionId = 507,
                             ScoreValue = 2
                         },
@@ -1370,6 +1555,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5074,
                             OptionText = "Ignore the inefficiency.",
+                            OptionTextVi = "Phớt lờ sự kém hiệu quả.",
                             QuestionId = 507,
                             ScoreValue = 1
                         },
@@ -1377,6 +1563,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5081,
                             OptionText = "Step back and reframe the problem.",
+                            OptionTextVi = "Lùi lại và nhìn nhận lại vấn đề.",
                             QuestionId = 508,
                             ScoreValue = 4
                         },
@@ -1384,6 +1571,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5082,
                             OptionText = "Keep pushing the same way harder.",
+                            OptionTextVi = "Cố đẩy mạnh theo cùng một cách.",
                             QuestionId = 508,
                             ScoreValue = 2
                         },
@@ -1391,6 +1579,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5083,
                             OptionText = "Take a guess and move on.",
+                            OptionTextVi = "Đoán bừa rồi đi tiếp.",
                             QuestionId = 508,
                             ScoreValue = 2
                         },
@@ -1398,6 +1587,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 5084,
                             OptionText = "Abandon the task.",
+                            OptionTextVi = "Bỏ dở nhiệm vụ.",
                             QuestionId = 508,
                             ScoreValue = 1
                         },
@@ -1405,6 +1595,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6011,
                             OptionText = "Take a breath, look for the useful part, and respond calmly.",
+                            OptionTextVi = "Hít thở, tìm phần hữu ích và phản hồi bình tĩnh.",
                             QuestionId = 601,
                             ScoreValue = 4
                         },
@@ -1412,6 +1603,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6012,
                             OptionText = "Feel defensive and argue back.",
+                            OptionTextVi = "Thấy bị công kích và cãi lại.",
                             QuestionId = 601,
                             ScoreValue = 2
                         },
@@ -1419,6 +1611,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6013,
                             OptionText = "Shut down and stop engaging.",
+                            OptionTextVi = "Đóng lại và ngừng tương tác.",
                             QuestionId = 601,
                             ScoreValue = 1
                         },
@@ -1426,6 +1619,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6014,
                             OptionText = "Pretend it didn't bother you but stew on it.",
+                            OptionTextVi = "Giả vờ không bận tâm nhưng ấm ức trong lòng.",
                             QuestionId = 601,
                             ScoreValue = 2
                         },
@@ -1433,6 +1627,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6021,
                             OptionText = "Recognize it, pause, and choose how to respond.",
+                            OptionTextVi = "Nhận ra, dừng lại và chọn cách phản hồi.",
                             QuestionId = 602,
                             ScoreValue = 4
                         },
@@ -1440,6 +1635,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6022,
                             OptionText = "Try to hide it but it leaks out.",
+                            OptionTextVi = "Cố giấu nhưng vẫn lộ ra.",
                             QuestionId = 602,
                             ScoreValue = 2
                         },
@@ -1447,6 +1643,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6023,
                             OptionText = "Express it immediately.",
+                            OptionTextVi = "Bộc lộ ngay lập tức.",
                             QuestionId = 602,
                             ScoreValue = 1
                         },
@@ -1454,6 +1651,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6024,
                             OptionText = "Bottle it up completely.",
+                            OptionTextVi = "Dồn nén hoàn toàn.",
                             QuestionId = 602,
                             ScoreValue = 2
                         },
@@ -1461,6 +1659,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6031,
                             OptionText = "Use a coping routine and focus on the next step.",
+                            OptionTextVi = "Dùng thói quen đối phó và tập trung vào bước kế tiếp.",
                             QuestionId = 603,
                             ScoreValue = 4
                         },
@@ -1468,6 +1667,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6032,
                             OptionText = "Push through while ignoring the stress.",
+                            OptionTextVi = "Cố làm tới trong khi phớt lờ căng thẳng.",
                             QuestionId = 603,
                             ScoreValue = 2
                         },
@@ -1475,6 +1675,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6033,
                             OptionText = "Let the anxiety stall your work.",
+                            OptionTextVi = "Để nỗi lo làm đình trệ công việc.",
                             QuestionId = 603,
                             ScoreValue = 1
                         },
@@ -1482,6 +1683,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6034,
                             OptionText = "Vent to everyone around you.",
+                            OptionTextVi = "Trút bực dọc lên mọi người xung quanh.",
                             QuestionId = 603,
                             ScoreValue = 2
                         },
@@ -1489,6 +1691,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6041,
                             OptionText = "Very — I can name what I feel and why.",
+                            OptionTextVi = "Rất rõ — tôi gọi tên được cảm xúc và lý do.",
                             QuestionId = 604,
                             ScoreValue = 4
                         },
@@ -1496,6 +1699,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6042,
                             OptionText = "Somewhat aware in the moment.",
+                            OptionTextVi = "Nhận biết phần nào trong lúc đó.",
                             QuestionId = 604,
                             ScoreValue = 3
                         },
@@ -1503,6 +1707,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6043,
                             OptionText = "I notice only after the fact.",
+                            OptionTextVi = "Chỉ nhận ra sau khi mọi chuyện qua.",
                             QuestionId = 604,
                             ScoreValue = 2
                         },
@@ -1510,6 +1715,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6044,
                             OptionText = "Rarely aware.",
+                            OptionTextVi = "Hiếm khi nhận biết.",
                             QuestionId = 604,
                             ScoreValue = 1
                         },
@@ -1517,6 +1723,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6051,
                             OptionText = "Acknowledge how they feel and offer support.",
+                            OptionTextVi = "Ghi nhận cảm xúc của họ và đề nghị hỗ trợ.",
                             QuestionId = 605,
                             ScoreValue = 4
                         },
@@ -1524,6 +1731,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6052,
                             OptionText = "Give practical advice right away.",
+                            OptionTextVi = "Đưa lời khuyên thực tế ngay.",
                             QuestionId = 605,
                             ScoreValue = 3
                         },
@@ -1531,6 +1739,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6053,
                             OptionText = "Avoid them to not make it worse.",
+                            OptionTextVi = "Tránh họ để không làm mọi việc tệ hơn.",
                             QuestionId = 605,
                             ScoreValue = 2
                         },
@@ -1538,6 +1747,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6054,
                             OptionText = "Tell them to calm down.",
+                            OptionTextVi = "Bảo họ bình tĩnh lại.",
                             QuestionId = 605,
                             ScoreValue = 1
                         },
@@ -1545,6 +1755,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6061,
                             OptionText = "Process it, learn, and move forward.",
+                            OptionTextVi = "Xử lý nó, rút kinh nghiệm và tiến lên.",
                             QuestionId = 606,
                             ScoreValue = 4
                         },
@@ -1552,6 +1763,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6062,
                             OptionText = "Distract myself and avoid it.",
+                            OptionTextVi = "Làm mình sao nhãng và né tránh.",
                             QuestionId = 606,
                             ScoreValue = 2
                         },
@@ -1559,6 +1771,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6063,
                             OptionText = "Dwell on it for a long time.",
+                            OptionTextVi = "Day dứt về nó rất lâu.",
                             QuestionId = 606,
                             ScoreValue = 2
                         },
@@ -1566,6 +1779,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6064,
                             OptionText = "Let it affect everything else.",
+                            OptionTextVi = "Để nó ảnh hưởng đến mọi thứ khác.",
                             QuestionId = 606,
                             ScoreValue = 1
                         },
@@ -1573,6 +1787,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6071,
                             OptionText = "Regulate your tone and stay constructive.",
+                            OptionTextVi = "Điều tiết giọng điệu và giữ tinh thần xây dựng.",
                             QuestionId = 607,
                             ScoreValue = 4
                         },
@@ -1580,6 +1795,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6072,
                             OptionText = "Go quiet and disengage.",
+                            OptionTextVi = "Im lặng và rút lui.",
                             QuestionId = 607,
                             ScoreValue = 2
                         },
@@ -1587,6 +1803,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6073,
                             OptionText = "Let the frustration show sharply.",
+                            OptionTextVi = "Để sự bực bội lộ ra gay gắt.",
                             QuestionId = 607,
                             ScoreValue = 1
                         },
@@ -1594,6 +1811,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6074,
                             OptionText = "Make a sarcastic comment.",
+                            OptionTextVi = "Buông một lời mỉa mai.",
                             QuestionId = 607,
                             ScoreValue = 1
                         },
@@ -1601,6 +1819,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6081,
                             OptionText = "Stay calm and help de-escalate.",
+                            OptionTextVi = "Giữ bình tĩnh và giúp hạ nhiệt.",
                             QuestionId = 608,
                             ScoreValue = 4
                         },
@@ -1608,6 +1827,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6082,
                             OptionText = "Match their energy without thinking.",
+                            OptionTextVi = "Bị cuốn theo cảm xúc của họ mà không nghĩ.",
                             QuestionId = 608,
                             ScoreValue = 2
                         },
@@ -1615,6 +1835,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6083,
                             OptionText = "Withdraw from the situation.",
+                            OptionTextVi = "Rút khỏi tình huống.",
                             QuestionId = 608,
                             ScoreValue = 2
                         },
@@ -1622,6 +1843,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 6084,
                             OptionText = "Get overwhelmed.",
+                            OptionTextVi = "Bị choáng ngợp.",
                             QuestionId = 608,
                             ScoreValue = 1
                         },
@@ -1629,6 +1851,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7011,
                             OptionText = "Re-assess, adjust the plan, and move forward.",
+                            OptionTextVi = "Đánh giá lại, điều chỉnh kế hoạch và tiến lên.",
                             QuestionId = 701,
                             ScoreValue = 4
                         },
@@ -1636,6 +1859,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7012,
                             OptionText = "Resist the change and argue for the old plan.",
+                            OptionTextVi = "Chống lại thay đổi và bảo vệ kế hoạch cũ.",
                             QuestionId = 701,
                             ScoreValue = 2
                         },
@@ -1643,6 +1867,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7013,
                             OptionText = "Feel stuck and wait for direction.",
+                            OptionTextVi = "Thấy bế tắc và chờ chỉ đạo.",
                             QuestionId = 701,
                             ScoreValue = 2
                         },
@@ -1650,6 +1875,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7014,
                             OptionText = "Keep working on the outdated plan.",
+                            OptionTextVi = "Vẫn làm theo kế hoạch đã lỗi thời.",
                             QuestionId = 701,
                             ScoreValue = 1
                         },
@@ -1657,6 +1883,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7021,
                             OptionText = "I seek them out and enjoy the challenge.",
+                            OptionTextVi = "Tôi chủ động tìm và thích thử thách.",
                             QuestionId = 702,
                             ScoreValue = 4
                         },
@@ -1664,6 +1891,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7022,
                             OptionText = "I'll learn them when required.",
+                            OptionTextVi = "Tôi học khi bắt buộc.",
                             QuestionId = 702,
                             ScoreValue = 3
                         },
@@ -1671,6 +1899,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7023,
                             OptionText = "I prefer to stick with what I know.",
+                            OptionTextVi = "Tôi thích giữ những gì đã quen.",
                             QuestionId = 702,
                             ScoreValue = 2
                         },
@@ -1678,6 +1907,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7024,
                             OptionText = "I avoid change whenever possible.",
+                            OptionTextVi = "Tôi né tránh thay đổi bất cứ khi nào có thể.",
                             QuestionId = 702,
                             ScoreValue = 1
                         },
@@ -1685,6 +1915,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7031,
                             OptionText = "Stay open, ask questions, and adapt quickly.",
+                            OptionTextVi = "Giữ cởi mở, đặt câu hỏi và thích nghi nhanh.",
                             QuestionId = 703,
                             ScoreValue = 4
                         },
@@ -1692,6 +1923,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7032,
                             OptionText = "Wait for everything to be explained.",
+                            OptionTextVi = "Chờ mọi thứ được giải thích.",
                             QuestionId = 703,
                             ScoreValue = 2
                         },
@@ -1699,6 +1931,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7033,
                             OptionText = "Compare it unfavorably to the old team.",
+                            OptionTextVi = "So sánh theo hướng chê so với nhóm cũ.",
                             QuestionId = 703,
                             ScoreValue = 2
                         },
@@ -1706,6 +1939,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7034,
                             OptionText = "Disengage until things settle.",
+                            OptionTextVi = "Thu mình lại đến khi mọi việc ổn định.",
                             QuestionId = 703,
                             ScoreValue = 1
                         },
@@ -1713,6 +1947,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7041,
                             OptionText = "An opportunity to find a better path.",
+                            OptionTextVi = "Một cơ hội để tìm hướng đi tốt hơn.",
                             QuestionId = 704,
                             ScoreValue = 4
                         },
@@ -1720,6 +1955,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7042,
                             OptionText = "An annoyance I have to tolerate.",
+                            OptionTextVi = "Một sự phiền toái phải chịu đựng.",
                             QuestionId = 704,
                             ScoreValue = 2
                         },
@@ -1727,6 +1963,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7043,
                             OptionText = "A reason to feel discouraged.",
+                            OptionTextVi = "Một lý do để nản lòng.",
                             QuestionId = 704,
                             ScoreValue = 2
                         },
@@ -1734,6 +1971,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7044,
                             OptionText = "A disaster I can't handle.",
+                            OptionTextVi = "Một thảm họa tôi không xử lý nổi.",
                             QuestionId = 704,
                             ScoreValue = 1
                         },
@@ -1741,6 +1979,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7051,
                             OptionText = "Explore alternatives and learn a replacement.",
+                            OptionTextVi = "Tìm giải pháp thay thế và học công cụ mới.",
                             QuestionId = 705,
                             ScoreValue = 4
                         },
@@ -1748,6 +1987,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7052,
                             OptionText = "Keep using it until it fully breaks.",
+                            OptionTextVi = "Dùng tiếp đến khi nó hỏng hẳn.",
                             QuestionId = 705,
                             ScoreValue = 2
                         },
@@ -1755,6 +1995,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7053,
                             OptionText = "Wait for someone to choose a replacement.",
+                            OptionTextVi = "Chờ người khác chọn công cụ thay thế.",
                             QuestionId = 705,
                             ScoreValue = 2
                         },
@@ -1762,6 +2003,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7054,
                             OptionText = "Complain and delay adapting.",
+                            OptionTextVi = "Than phiền và trì hoãn thích nghi.",
                             QuestionId = 705,
                             ScoreValue = 1
                         },
@@ -1769,6 +2011,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7061,
                             OptionText = "Consider it seriously and try adjusting.",
+                            OptionTextVi = "Cân nhắc nghiêm túc và thử điều chỉnh.",
                             QuestionId = 706,
                             ScoreValue = 4
                         },
@@ -1776,6 +2019,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7062,
                             OptionText = "Consider it but rarely change.",
+                            OptionTextVi = "Cân nhắc nhưng hiếm khi thay đổi.",
                             QuestionId = 706,
                             ScoreValue = 2
                         },
@@ -1783,6 +2027,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7063,
                             OptionText = "Feel criticized and defend my way.",
+                            OptionTextVi = "Thấy bị chê và bảo vệ cách của mình.",
                             QuestionId = 706,
                             ScoreValue = 2
                         },
@@ -1790,6 +2035,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7064,
                             OptionText = "Dismiss it.",
+                            OptionTextVi = "Gạt bỏ nó.",
                             QuestionId = 706,
                             ScoreValue = 1
                         },
@@ -1797,6 +2043,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7071,
                             OptionText = "Stay flexible and re-focus on what matters now.",
+                            OptionTextVi = "Giữ linh hoạt và tập trung lại vào việc quan trọng lúc này.",
                             QuestionId = 707,
                             ScoreValue = 4
                         },
@@ -1804,6 +2051,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7072,
                             OptionText = "Get frustrated but comply.",
+                            OptionTextVi = "Bực bội nhưng vẫn làm theo.",
                             QuestionId = 707,
                             ScoreValue = 2
                         },
@@ -1811,6 +2059,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7073,
                             OptionText = "Push back on every change.",
+                            OptionTextVi = "Phản đối mọi thay đổi.",
                             QuestionId = 707,
                             ScoreValue = 2
                         },
@@ -1818,6 +2067,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7074,
                             OptionText = "Lose motivation.",
+                            OptionTextVi = "Mất động lực.",
                             QuestionId = 707,
                             ScoreValue = 1
                         },
@@ -1825,6 +2075,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7081,
                             OptionText = "Stay calm and take sensible next steps.",
+                            OptionTextVi = "Giữ bình tĩnh và thực hiện các bước hợp lý tiếp theo.",
                             QuestionId = 708,
                             ScoreValue = 4
                         },
@@ -1832,6 +2083,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7082,
                             OptionText = "Wait for full certainty before acting.",
+                            OptionTextVi = "Chờ hoàn toàn chắc chắn mới hành động.",
                             QuestionId = 708,
                             ScoreValue = 2
                         },
@@ -1839,6 +2091,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7083,
                             OptionText = "Feel paralyzed by the unknown.",
+                            OptionTextVi = "Bị tê liệt trước điều chưa biết.",
                             QuestionId = 708,
                             ScoreValue = 2
                         },
@@ -1846,6 +2099,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 7084,
                             OptionText = "Act rashly without thinking.",
+                            OptionTextVi = "Hành động hấp tấp mà không suy nghĩ.",
                             QuestionId = 708,
                             ScoreValue = 1
                         });
@@ -1855,19 +2109,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("QuestionTextVi")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1879,56 +2137,64 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 101,
-                            QuestionText = "A teammate interrupts you mid-sentence in a meeting. What do you do?",
+                            QuestionText = "How do you handle two-way exchange of information?",
+                            QuestionTextVi = "Bạn xử lý việc trao đổi thông tin hai chiều thế nào?",
                             SkillId = 1,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 102,
-                            QuestionText = "How important is active listening in a conversation?",
+                            QuestionText = "What most affects your listening habits?",
+                            QuestionTextVi = "Thói quen lắng nghe của bạn bị ảnh hưởng nhiều nhất bởi gì?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 103,
-                            QuestionText = "You need to explain a complex idea to a non-expert. You...",
+                            QuestionText = "How do you deal with differences in wording and terminology?",
+                            QuestionTextVi = "Bạn xử lý sự khác biệt về từ ngữ, thuật ngữ thế nào?",
                             SkillId = 1,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 104,
-                            QuestionText = "When giving feedback to a peer, you tend to...",
+                            QuestionText = "What is your texting/email style like?",
+                            QuestionTextVi = "Phong cách viết tin nhắn/email của bạn thế nào?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 105,
-                            QuestionText = "You disagree with a decision in a group chat. You...",
+                            QuestionText = "When criticized in a conversation, what is your natural reaction?",
+                            QuestionTextVi = "Khi bị chỉ trích trong hội thoại, phản ứng tự nhiên của bạn là gì?",
                             SkillId = 1,
                             Type = 1
                         },
                         new
                         {
                             Id = 106,
-                            QuestionText = "How do you handle a message you don't fully understand?",
+                            QuestionText = "How do you adapt your communication style to context?",
+                            QuestionTextVi = "Bạn thích ứng phong cách giao tiếp theo bối cảnh thế nào?",
                             SkillId = 1,
                             Type = 0
                         },
                         new
                         {
                             Id = 107,
-                            QuestionText = "You're presenting and notice the audience looks confused. You...",
+                            QuestionText = "How do you recognize your own direct/indirect style?",
+                            QuestionTextVi = "Bạn nhận diện phong cách trực tiếp/gián tiếp của mình ra sao?",
                             SkillId = 1,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 108,
-                            QuestionText = "In written communication, you...",
+                            QuestionText = "How do you control your body language?",
+                            QuestionTextVi = "Bạn kiểm soát ngôn ngữ cơ thể của mình thế nào?",
                             SkillId = 1,
                             Type = 0
                         },
@@ -1936,6 +2202,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 201,
                             QuestionText = "A team member isn't contributing to a group project. You...",
+                            QuestionTextVi = "Một thành viên không đóng góp cho dự án nhóm. Bạn...",
                             SkillId = 2,
                             Type = 1
                         },
@@ -1943,6 +2210,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 202,
                             QuestionText = "When your idea conflicts with a teammate's, you...",
+                            QuestionTextVi = "Khi ý tưởng của bạn xung đột với đồng đội, bạn...",
                             SkillId = 2,
                             Type = 0
                         },
@@ -1950,6 +2218,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 203,
                             QuestionText = "The team hits a setback close to a deadline. You...",
+                            QuestionTextVi = "Nhóm gặp trục trặc sát hạn chót. Bạn...",
                             SkillId = 2,
                             Type = 1
                         },
@@ -1957,6 +2226,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 204,
                             QuestionText = "How do you treat credit for a shared success?",
+                            QuestionTextVi = "Bạn ứng xử với công lao của một thành công chung thế nào?",
                             SkillId = 2,
                             Type = 0
                         },
@@ -1964,6 +2234,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 205,
                             QuestionText = "A quieter teammate hasn't shared their opinion. You...",
+                            QuestionTextVi = "Một đồng đội trầm tính chưa nêu ý kiến. Bạn...",
                             SkillId = 2,
                             Type = 1
                         },
@@ -1971,6 +2242,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 206,
                             QuestionText = "When you receive a task you dislike but the team needs, you...",
+                            QuestionTextVi = "Khi nhận việc mình không thích nhưng nhóm cần, bạn...",
                             SkillId = 2,
                             Type = 0
                         },
@@ -1978,6 +2250,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 207,
                             QuestionText = "Two teammates are in conflict and it's slowing work. You...",
+                            QuestionTextVi = "Hai đồng đội mâu thuẫn làm chậm công việc. Bạn...",
                             SkillId = 2,
                             Type = 1
                         },
@@ -1985,118 +2258,135 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 208,
                             QuestionText = "How reliable are you with commitments to the team?",
+                            QuestionTextVi = "Bạn giữ cam kết với nhóm đáng tin đến đâu?",
                             SkillId = 2,
                             Type = 0
                         },
                         new
                         {
                             Id = 301,
-                            QuestionText = "You realize you will miss a deadline tomorrow. Your first action is to...",
+                            QuestionText = "How does your out-of-class studying go?",
+                            QuestionTextVi = "Việc học ngoài giờ lên lớp của bạn diễn ra thế nào?",
                             SkillId = 3,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 302,
-                            QuestionText = "How do you start your workday?",
+                            QuestionText = "When you procrastinate on a big task, what is the deepest reason?",
+                            QuestionTextVi = "Khi trì hoãn một việc lớn, lý do sâu xa nhất của bạn là gì?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 303,
-                            QuestionText = "You have three tasks due and can't finish all. You...",
+                            QuestionText = "Do you estimate how long a task takes accurately?",
+                            QuestionTextVi = "Bạn ước lượng thời gian làm một việc có chính xác không?",
                             SkillId = 3,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 304,
-                            QuestionText = "How do you handle distractions while working?",
+                            QuestionText = "What most affects your focus?",
+                            QuestionTextVi = "Yếu tố nào ảnh hưởng đến sự tập trung của bạn nhất?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 305,
-                            QuestionText = "A new urgent request lands mid-task. You...",
+                            QuestionText = "Do you apply scientific time-management methods?",
+                            QuestionTextVi = "Bạn có áp dụng phương pháp quản lý thời gian khoa học không?",
                             SkillId = 3,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 306,
-                            QuestionText = "How well do you estimate how long tasks take?",
+                            QuestionText = "What do you base on when deciding what to do first?",
+                            QuestionTextVi = "Bạn quyết định làm việc gì trước dựa trên điều gì?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
                             Id = 307,
-                            QuestionText = "You keep procrastinating on a big task. You...",
-                            SkillId = 3,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 308,
-                            QuestionText = "At the end of the week you...",
+                            QuestionText = "How are your study/work goals written?",
+                            QuestionTextVi = "Mục tiêu học tập/công việc của bạn được viết ra như thế nào?",
                             SkillId = 3,
                             Type = 0
                         },
                         new
                         {
+                            Id = 308,
+                            QuestionText = "When your plan is broken by an unexpected event, how do you react?",
+                            QuestionTextVi = "Khi kế hoạch bị phá vỡ bởi biến cố bất ngờ, bạn phản ứng ra sao?",
+                            SkillId = 3,
+                            Type = 1
+                        },
+                        new
+                        {
                             Id = 401,
-                            QuestionText = "You read a surprising statistic online. You...",
+                            QuestionText = "How well do you separate fact from personal opinion?",
+                            QuestionTextVi = "Bạn phân biệt sự thật và ý kiến cá nhân tốt đến đâu?",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 402,
-                            QuestionText = "A popular solution is proposed for a problem. You...",
+                            QuestionText = "How do you deal with your own confirmation bias?",
+                            QuestionTextVi = "Bạn đối phó với thiên kiến xác nhận của bản thân thế nào?",
                             SkillId = 4,
-                            Type = 1
+                            Type = 0
                         },
                         new
                         {
                             Id = 403,
-                            QuestionText = "When you form an opinion, you...",
+                            QuestionText = "In a group debate, how do you usually react?",
+                            QuestionTextVi = "Khi tranh luận nhóm, bạn thường phản ứng ra sao?",
                             SkillId = 4,
-                            Type = 0
+                            Type = 1
                         },
                         new
                         {
                             Id = 404,
-                            QuestionText = "Two experts give you conflicting advice. You...",
-                            SkillId = 4,
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 405,
-                            QuestionText = "How do you treat your own assumptions?",
+                            QuestionText = "How do you verify an unfamiliar source online?",
+                            QuestionTextVi = "Bạn kiểm chứng một nguồn tin lạ trên mạng ra sao?",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
-                            Id = 406,
-                            QuestionText = "Data shows your favorite approach is underperforming. You...",
+                            Id = 405,
+                            QuestionText = "Facing a complex problem, how do you find a solution?",
+                            QuestionTextVi = "Khi gặp vấn đề phức tạp, bạn tìm giải pháp thế nào?",
                             SkillId = 4,
                             Type = 1
                         },
                         new
                         {
+                            Id = 406,
+                            QuestionText = "Are you willing to change your view when new evidence appears?",
+                            QuestionTextVi = "Bạn có sẵn sàng thay đổi quan điểm khi có bằng chứng mới không?",
+                            SkillId = 4,
+                            Type = 0
+                        },
+                        new
+                        {
                             Id = 407,
-                            QuestionText = "Faced with a complex claim, you first...",
+                            QuestionText = "How do you assess the reliability of a research document?",
+                            QuestionTextVi = "Bạn đánh giá độ tin cậy một tài liệu nghiên cứu ra sao?",
                             SkillId = 4,
                             Type = 0
                         },
                         new
                         {
                             Id = 408,
-                            QuestionText = "How do you distinguish correlation from causation?",
+                            QuestionText = "When facing a problem, do you prepare multiple options?",
+                            QuestionTextVi = "Khi gặp vấn đề, bạn có chuẩn bị nhiều phương án không?",
                             SkillId = 4,
                             Type = 0
                         },
@@ -2104,6 +2394,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 501,
                             QuestionText = "You hit an unfamiliar problem with no obvious solution. You...",
+                            QuestionTextVi = "Bạn gặp một vấn đề lạ không có giải pháp rõ ràng. Bạn...",
                             SkillId = 5,
                             Type = 1
                         },
@@ -2111,6 +2402,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 502,
                             QuestionText = "When a solution fails, you...",
+                            QuestionTextVi = "Khi một giải pháp thất bại, bạn...",
                             SkillId = 5,
                             Type = 0
                         },
@@ -2118,6 +2410,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 503,
                             QuestionText = "A problem is too big to tackle at once. You...",
+                            QuestionTextVi = "Một vấn đề quá lớn để xử lý một lần. Bạn...",
                             SkillId = 5,
                             Type = 1
                         },
@@ -2125,6 +2418,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 504,
                             QuestionText = "How do you generate solution ideas?",
+                            QuestionTextVi = "Bạn tạo ra các ý tưởng giải pháp thế nào?",
                             SkillId = 5,
                             Type = 0
                         },
@@ -2132,6 +2426,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 505,
                             QuestionText = "You lack information to solve a problem. You...",
+                            QuestionTextVi = "Bạn thiếu thông tin để giải quyết vấn đề. Bạn...",
                             SkillId = 5,
                             Type = 1
                         },
@@ -2139,6 +2434,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 506,
                             QuestionText = "How do you validate that a solution actually works?",
+                            QuestionTextVi = "Bạn kiểm chứng một giải pháp thực sự hiệu quả thế nào?",
                             SkillId = 5,
                             Type = 0
                         },
@@ -2146,6 +2442,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 507,
                             QuestionText = "Your solution works but is inefficient. You...",
+                            QuestionTextVi = "Giải pháp của bạn chạy được nhưng chưa tối ưu. Bạn...",
                             SkillId = 5,
                             Type = 1
                         },
@@ -2153,6 +2450,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 508,
                             QuestionText = "When stuck, you...",
+                            QuestionTextVi = "Khi bế tắc, bạn...",
                             SkillId = 5,
                             Type = 0
                         },
@@ -2160,6 +2458,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 601,
                             QuestionText = "You receive harsh criticism on your work. You...",
+                            QuestionTextVi = "Bạn nhận lời chỉ trích gay gắt về công việc của mình. Bạn...",
                             SkillId = 6,
                             Type = 1
                         },
@@ -2167,6 +2466,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 602,
                             QuestionText = "When you feel angry at work, you...",
+                            QuestionTextVi = "Khi tức giận trong công việc, bạn...",
                             SkillId = 6,
                             Type = 0
                         },
@@ -2174,6 +2474,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 603,
                             QuestionText = "A stressful deadline is making you anxious. You...",
+                            QuestionTextVi = "Một hạn chót căng thẳng khiến bạn lo lắng. Bạn...",
                             SkillId = 6,
                             Type = 1
                         },
@@ -2181,6 +2482,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 604,
                             QuestionText = "How aware are you of your emotions as they happen?",
+                            QuestionTextVi = "Bạn nhận biết cảm xúc của mình ngay khi nó xảy ra đến đâu?",
                             SkillId = 6,
                             Type = 0
                         },
@@ -2188,6 +2490,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 605,
                             QuestionText = "A colleague is visibly upset. You...",
+                            QuestionTextVi = "Một đồng nghiệp rõ ràng đang buồn bực. Bạn...",
                             SkillId = 6,
                             Type = 1
                         },
@@ -2195,6 +2498,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 606,
                             QuestionText = "After a setback, how do you recover?",
+                            QuestionTextVi = "Sau một thất bại, bạn hồi phục thế nào?",
                             SkillId = 6,
                             Type = 0
                         },
@@ -2202,6 +2506,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 607,
                             QuestionText = "You're frustrated in a meeting. You...",
+                            QuestionTextVi = "Bạn bực bội trong một cuộc họp. Bạn...",
                             SkillId = 6,
                             Type = 1
                         },
@@ -2209,6 +2514,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 608,
                             QuestionText = "How do you handle others' strong emotions?",
+                            QuestionTextVi = "Bạn xử lý cảm xúc mạnh của người khác thế nào?",
                             SkillId = 6,
                             Type = 0
                         },
@@ -2216,6 +2522,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 701,
                             QuestionText = "Your project's requirements change suddenly. You...",
+                            QuestionTextVi = "Yêu cầu của dự án thay đổi đột ngột. Bạn...",
                             SkillId = 7,
                             Type = 1
                         },
@@ -2223,6 +2530,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 702,
                             QuestionText = "How do you feel about learning new tools or methods?",
+                            QuestionTextVi = "Bạn cảm thấy thế nào về việc học công cụ hay phương pháp mới?",
                             SkillId = 7,
                             Type = 0
                         },
@@ -2230,6 +2538,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 703,
                             QuestionText = "You're moved to an unfamiliar team overnight. You...",
+                            QuestionTextVi = "Bạn bị chuyển sang một nhóm xa lạ chỉ sau một đêm. Bạn...",
                             SkillId = 7,
                             Type = 1
                         },
@@ -2237,6 +2546,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 704,
                             QuestionText = "When plans fall apart, your mindset is...",
+                            QuestionTextVi = "Khi kế hoạch đổ vỡ, tâm thế của bạn là...",
                             SkillId = 7,
                             Type = 0
                         },
@@ -2244,6 +2554,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 705,
                             QuestionText = "A tool you rely on is discontinued. You...",
+                            QuestionTextVi = "Một công cụ bạn phụ thuộc bị ngừng hỗ trợ. Bạn...",
                             SkillId = 7,
                             Type = 1
                         },
@@ -2251,6 +2562,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 706,
                             QuestionText = "How do you respond to feedback that you should change how you work?",
+                            QuestionTextVi = "Bạn phản hồi thế nào khi được góp ý nên thay đổi cách làm việc?",
                             SkillId = 7,
                             Type = 0
                         },
@@ -2258,6 +2570,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 707,
                             QuestionText = "Priorities shift for the third time this week. You...",
+                            QuestionTextVi = "Ưu tiên thay đổi lần thứ ba trong tuần. Bạn...",
                             SkillId = 7,
                             Type = 1
                         },
@@ -2265,6 +2578,7 @@ namespace SoftSync.DAL.Migrations
                         {
                             Id = 708,
                             QuestionText = "In an uncertain, ambiguous situation you...",
+                            QuestionTextVi = "Trong một tình huống mơ hồ, bất định, bạn...",
                             SkillId = 7,
                             Type = 0
                         });
@@ -2274,24 +2588,24 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Score")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2306,21 +2620,21 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Scenario")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
@@ -2349,23 +2663,23 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CaseStudyId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Feedback")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsRecommended")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OptionText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2412,22 +2726,22 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Sender")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2440,27 +2754,27 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Expertise")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ShortBio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2489,21 +2803,21 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("PercentComplete")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2518,28 +2832,28 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("WeekNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2552,24 +2866,24 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("IconName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -2630,10 +2944,10 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("SoftSync.DAL.Entities.UserSkillSelection", b =>
                 {
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SkillId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "SkillId");
 
@@ -2646,37 +2960,37 @@ namespace SoftSync.DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AttemptCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CodeHash")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Consumed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Destination")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("ExpiresAtUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Purpose")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

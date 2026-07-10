@@ -11,9 +11,11 @@ public class FakeAiAssessmentService : IAiAssessmentService
 {
     public Task<AssessmentResultDto> EvaluateAsync(List<UserAnswerDto> answers)
     {
-        // Simulate AI logic: more answers = better score
-        int score = (answers.Count * 23) % 100;
-        var level = score < 50 ? AssessmentLevel.Weak : score < 80 ? AssessmentLevel.Average : AssessmentLevel.Good;
+        // Simulate AI logic. Real scoring lives in AssessmentService; this fake is
+        // only a placeholder. Produce a raw score in the valid 8–32 range and band it.
+        int score = SoftSync.Common.AssessmentScoring.MinScore
+            + (answers.Count % (SoftSync.Common.AssessmentScoring.MaxScore - SoftSync.Common.AssessmentScoring.MinScore + 1));
+        var level = SoftSync.Common.AssessmentScoring.BandFor(score);
 
         return Task.FromResult(new AssessmentResultDto
         {
@@ -45,21 +47,63 @@ public class FakeAiAssistantService : IAiAssistantService
 
 // TODO [AI-TEAM: Kiệt/Chánh] - Thay FakeAiRoadmapService bằng implementation
 // sinh lộ trình thật từ LLM/AI.
+//
+// Hiện tại roadmap được sinh cơ học từ danh sách kỹ năng yếu (do RoadmapService
+// truyền vào, đã lọc theo QuizSeedData.ActiveSkillIds — chỉ 3 kỹ năng active).
+// Mỗi kỹ năng cấp 2 tuần (nền tảng → thực hành), rồi 1 tuần tổng kết ở cuối.
+// Nội dung mô tả bám theo tên kỹ năng lấy từ DB, không tham chiếu tài liệu ngoài.
 public class FakeAiRoadmapService : IAiRoadmapService
 {
     public Task<RoadmapDto> GenerateRoadmapAsync(int userId, List<string> weakSkills)
     {
-        var roadmap = new RoadmapDto
+        var items = new List<RoadmapItemDto>();
+        var week = 1;
+
+        // Tuần 1: luôn bắt đầu bằng bước tự đánh giá — không phụ thuộc kỹ năng nào.
+        items.Add(new RoadmapItemDto
         {
-            UserId = userId,
-            Items = new List<RoadmapItemDto>
+            WeekNumber = week++,
+            Title = "Khám phá bản thân",
+            Description = "Hoàn thành bài đánh giá đầu vào và xác định mục tiêu học tập cho những tuần tiếp theo.",
+            IsCompleted = false
+        });
+
+        // 2 tuần cho mỗi kỹ năng người dùng cần cải thiện (đã được caller giới hạn
+        // trong 3 kỹ năng active, sắp xếp theo điểm yếu → mạnh).
+        foreach (var skill in weakSkills)
+        {
+            var vi = ToVietnameseSkillName(skill);
+            items.Add(new RoadmapItemDto
             {
-                new RoadmapItemDto { WeekNumber = 1, Title = "Khám phá bản thân", Description = "Hoàn thành bài đánh giá năng lực và xác định mục tiêu.", IsCompleted = false },
-                new RoadmapItemDto { WeekNumber = 2, Title = "Kỹ năng Giao tiếp cơ bản", Description = "Tham gia mini-game về tình huống đối thoại.", IsCompleted = false },
-                new RoadmapItemDto { WeekNumber = 3, Title = "Kỹ năng Làm việc nhóm", Description = "Học cách giải quyết xung đột trong team.", IsCompleted = false },
-                new RoadmapItemDto { WeekNumber = 4, Title = "Tổng kết tháng", Description = "Xem lại tiến độ và nhận feedback từ AI Mentor.", IsCompleted = false }
-            }
-        };
-        return Task.FromResult(roadmap);
+                WeekNumber = week++,
+                Title = $"Nền tảng {vi}",
+                Description = $"Nắm lý thuyết cốt lõi của {vi.ToLower()} và làm bài luyện tập cơ bản để hình thành thói quen."
+            });
+            items.Add(new RoadmapItemDto
+            {
+                WeekNumber = week++,
+                Title = $"Thực hành {vi}",
+                Description = $"Áp dụng {vi.ToLower()} vào tình huống thực tế qua case study và tự phản tư sau mỗi buổi."
+            });
+        }
+
+        // Tuần cuối: tổng kết + đánh giá lại.
+        items.Add(new RoadmapItemDto
+        {
+            WeekNumber = week,
+            Title = "Tổng kết & đánh giá lại",
+            Description = "Xem lại tiến độ toàn lộ trình, làm bài đánh giá lại để đo tiến bộ và điều chỉnh mục tiêu tiếp theo."
+        });
+
+        return Task.FromResult(new RoadmapDto { UserId = userId, Items = items });
     }
+
+    /// <summary>Ánh xạ tên kỹ năng trong DB (tiếng Anh) sang tên hiển thị tiếng Việt cho roadmap.</summary>
+    private static string ToVietnameseSkillName(string englishName) => englishName switch
+    {
+        "Communication"     => "Kỹ năng Giao tiếp",
+        "Time Management"   => "Kỹ năng Quản lý thời gian",
+        "Critical Thinking" => "Kỹ năng Tư duy phản biện",
+        _ => englishName
+    };
 }

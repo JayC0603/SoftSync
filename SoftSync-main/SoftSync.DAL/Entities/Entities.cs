@@ -19,12 +19,32 @@ public class ApplicationUser : IdentityUser<int>
     public Gender Gender { get; set; }
     [MaxLength(500)]
     public string Goal { get; set; } = string.Empty;
-    /// <summary>Relative path to the uploaded avatar (e.g. /uploads/avatars/xxx.png).</summary>
-    [MaxLength(300)]
+    /// <summary>Avatar image source. User uploads are stored as data URLs so they survive Render restarts.</summary>
     public string AvatarUrl { get; set; } = string.Empty;
     /// <summary>Total XP earned; the current level is derived from this via LevelSystem.</summary>
     public int ExperiencePoints { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // ---- Settings: profile / display ----
+    /// <summary>Public display name shown to others (falls back to FullName when empty).</summary>
+    [MaxLength(60)]
+    public string DisplayName { get; set; } = string.Empty;
+
+    // ---- Settings: learning personalization (used by the AI to tune the roadmap) ----
+    public LearningLevel CurrentLevel { get; set; }
+    /// <summary>Target study minutes per day.</summary>
+    public int DailyStudyMinutes { get; set; }
+    /// <summary>Target study days per week (0–7).</summary>
+    public int StudyDaysPerWeek { get; set; }
+    public StudyTime PreferredStudyTime { get; set; }
+
+    // ---- Settings: appearance ----
+    /// <summary>Preferred UI language code ("en"/"vi"); empty means follow the browser.</summary>
+    [MaxLength(5)]
+    public string PreferredLanguage { get; set; } = string.Empty;
+    public ThemePreference Theme { get; set; }
+    /// <summary>Accessibility: reduce non-essential motion/animation.</summary>
+    public bool ReduceMotion { get; set; }
 
     // Navigation properties
     public ICollection<UserSkillSelection> SkillSelections { get; set; } = new List<UserSkillSelection>();
@@ -194,4 +214,13 @@ public class Mentor
     public string Expertise { get; set; } = string.Empty;
     public string AvatarUrl { get; set; } = string.Empty;
     public string ShortBio { get; set; } = string.Empty;
+}
+
+public class DataProtectionKey
+{
+    [Key]
+    public int Id { get; set; }
+    [MaxLength(200)]
+    public string FriendlyName { get; set; } = string.Empty;
+    public string Xml { get; set; } = string.Empty;
 }
