@@ -141,7 +141,6 @@ builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
-builder.Services.AddScoped<IGameBankService, GameBankService>();
 
 // 5. HttpClient for future AI integration
 builder.Services.AddHttpClient("AiApi", client =>
