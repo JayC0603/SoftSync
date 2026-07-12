@@ -36,15 +36,19 @@ builder.Services.AddScoped<UserProfileState>();
 builder.Services.AddHttpContextAccessor();
 
 // 1. Database Configuration (PostgreSQL).
-// Resolve order: explicit ConnectionStrings:SoftSyncDb (or env
-// ConnectionStrings__SoftSyncDb) → else the DATABASE_URL env that Render provides
-// (a postgres:// URI we convert to an Npgsql keyword string).
-var connectionString = builder.Configuration.GetConnectionString("SoftSyncDb");
+// Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
+// cannot override the managed database's current internal connection URL.
+// Local/other environments can still use ConnectionStrings:SoftSyncDb.
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var connectionString = !string.IsNullOrWhiteSpace(databaseUrl)
+    ? BuildNpgsqlConnectionString(databaseUrl)
+    : builder.Configuration.GetConnectionString("SoftSyncDb");
+
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-    if (!string.IsNullOrWhiteSpace(databaseUrl))
-        connectionString = BuildNpgsqlConnectionString(databaseUrl);
+    throw new InvalidOperationException(
+        "PostgreSQL is not configured. Set DATABASE_URL on Render or " +
+        "ConnectionStrings__SoftSyncDb for another environment.");
 }
 builder.Services.AddDbContext<SoftSyncDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -137,6 +141,7 @@ builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
+builder.Services.AddScoped<IGameBankService, GameBankService>();
 
 // 5. HttpClient for future AI integration
 builder.Services.AddHttpClient("AiApi", client =>
