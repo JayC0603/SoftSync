@@ -33,18 +33,25 @@
         <ValidationMessage For="() => Input.Email" class="text-danger" />
     </div>
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["auth.phone"] <span class="text-muted tw:text-sm">(@L["auth.optional"])</span></label>
-        <InputText @bind-Value="Input.PhoneNumber" class="form-control form-control-lg" autocomplete="tel" placeholder="+84..." />
-        <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
-    </div>
-    <div class="tw:mb-3">
         <label class="form-label tw:font-medium">@L["auth.password"]</label>
-        <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
+        <div class="input-group">
+            <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
+            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="Show or hide password"
+                    onclick="const input=this.previousElementSibling; const show=input.type==='password'; input.type=show?'text':'password'; this.querySelector('i').className=show?'bi bi-eye-slash':'bi bi-eye';">
+                <i class="bi bi-eye"></i>
+            </button>
+        </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
     <div class="tw:mb-4">
         <label class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
-        <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
+        <div class="input-group">
+            <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
+            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="Show or hide password"
+                    onclick="const input=this.previousElementSibling; const show=input.type==='password'; input.type=show?'text':'password'; this.querySelector('i').className=show?'bi bi-eye-slash':'bi bi-eye';">
+                <i class="bi bi-eye"></i>
+            </button>
+        </div>
         <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
     </div>
 
@@ -77,11 +84,6 @@
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = (IUserEmailStore<ApplicationUser>)UserStore;
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        if (!string.IsNullOrWhiteSpace(Input.PhoneNumber))
-        {
-            user.PhoneNumber = Input.PhoneNumber;
-        }
-
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
