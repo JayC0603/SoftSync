@@ -2,169 +2,192 @@
 @page "/roadmap/{UserId:int}"
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
-@using SoftSync.BLL.Interfaces
-@using SoftSync.Common.Dtos
-@inject IRoadmapService RoadmapService
-@inject NavigationManager Nav
 
-@if (roadmap is null)
-{
-    <div class="rm-loading"><span></span>@L["roadmap.loading"]</div>
-}
-else
-{
-    <div class="rm-shell">
-        <aside class="rm-left">
-            <section class="rm-panel rm-summary">
-                <div class="rm-label">@Tx("YOUR ROADMAP", "LỘ TRÌNH CỦA BẠN")</div>
-                <img src="/images/syncy-fish.png" alt="SYNCY" />
-                <h2>@CurrentSkill<br />Mastery</h2>
-                <p><b>@ProgressPercent%</b> @Tx("completed", "hoàn thành")</p>
-                <div class="rm-progress"><i style="width:@(ProgressPercent)%"></i></div>
-                <button @onclick="ScrollToCurrent">@Tx("View overview", "Xem tổng quan")</button>
-            </section>
+<PageTitle>SoftSync Roadmap</PageTitle>
 
-            <section class="rm-panel rm-stages">
-                <div class="rm-label">@Tx("STAGES", "GIAI ĐOẠN")</div>
-                @foreach (var section in Sections.Select((value, index) => (value, index)))
-                {
-                    var percent = SectionPercent(section.value);
-                    <button class="rm-stage @(section.index == selectedSection ? "active" : "")"
-                            @onclick="() => SelectSection(section.index)">
-                        <span>@(section.index + 1)</span>
-                        <b>@section.value.Title</b>
-                        <small>@percent%</small>
-                        @if (section.index > selectedSection && percent == 0) { <i class="bi bi-lock-fill"></i> }
-                    </button>
-                }
-            </section>
+<main class="sr-page">
+    <header class="sr-hero">
+        <div class="sr-hero-copy">
+            <span class="sr-eyebrow"><i class="bi bi-stars"></i> SOFTSYNC ROADMAP</span>
+            <h1>Lộ trình phát triển<br /><em>năng lực kỹ năng mềm</em></h1>
+            <p>Chương trình học 6 tuần theo từng năng lực, kết hợp kiến thức nền tảng, công cụ thực tế và hoạt động ứng dụng.</p>
+            <div class="sr-meta">
+                <span><b>03</b> năng lực cốt lõi</span>
+                <span><b>03</b> cấp độ phát triển</span>
+                <span><b>18</b> chủ đề thực hành</span>
+            </div>
+        </div>
+        <div class="sr-hero-art" aria-hidden="true">
+            <div class="sr-orbit"></div>
+            <div class="sr-orbit sr-orbit-two"></div>
+            <img src="/images/syncy-fish.png" alt="" />
+            <span class="sr-float sr-float-one"><i class="bi bi-clock-history"></i> Quản lý thời gian</span>
+            <span class="sr-float sr-float-two"><i class="bi bi-chat-heart"></i> Giao tiếp</span>
+            <span class="sr-float sr-float-three"><i class="bi bi-lightbulb"></i> Tư duy phản biện</span>
+        </div>
+    </header>
 
-            <section class="rm-panel rm-mentor">
-                <div class="rm-label">@Tx("AI MENTOR SUGGESTS", "AI MENTOR GỢI Ý")</div>
-                <p>@Tx("You're doing great! Complete each step to reinforce your knowledge.", "Bạn đang học rất tốt! Hãy hoàn thành từng bước để củng cố kiến thức nhé.")</p>
-                <img src="/images/syncy-fish.png" alt="Nova" />
-                <button @onclick='() => Nav.NavigateTo("/assistant")'>@Tx("Chat with Nova", "Chat với Nova")</button>
-            </section>
-        </aside>
+    <section class="sr-curriculum">
+        <div class="sr-section-head">
+            <div><span>CHỌN NĂNG LỰC</span><h2>Lộ trình dành cho bạn</h2></div>
+            <div class="sr-progress-copy"><b>@(selectedSkill + 1)/@Skills.Count</b><span>Năng lực</span></div>
+        </div>
 
-        <main class="rm-main" id="roadmap-current">
-            <header class="rm-head">
-                <div><h1>@Tx("Stage", "Giai đoạn") @(selectedSection + 1): @Selected.Title <i class="bi bi-info-circle"></i></h1><p>@Tx("Build a strong foundation and apply your skills in practice.", "Xây dựng nền tảng vững chắc và áp dụng kỹ năng vào thực tế.")</p></div>
-                <span><i class="bi bi-star-fill"></i> @CompletedCount/@TotalCount @Tx("lessons", "bài học")</span>
+        <nav class="sr-skill-tabs" aria-label="Chọn kỹ năng">
+            @foreach (var entry in Skills.Select((skill, index) => (skill, index)))
+            {
+                <button class="@(selectedSkill == entry.index ? "active" : "")" @onclick="() => SelectSkill(entry.index)">
+                    <span class="sr-tab-icon"><i class="bi @entry.skill.Icon"></i></span>
+                    <span><small>NĂNG LỰC 0@(entry.index + 1)</small><b>@entry.skill.ShortTitle</b></span>
+                    <i class="bi bi-arrow-right sr-tab-arrow"></i>
+                </button>
+            }
+        </nav>
+
+        <article class="sr-skill-intro">
+            <div class="sr-skill-number">0@(selectedSkill + 1)</div>
+            <div><span>@Current.EnglishTitle</span><h2>@Current.Title</h2><p>@Current.Description</p></div>
+            <div class="sr-duration"><i class="bi bi-calendar3"></i><span><b>6 tuần</b> · 3 cấp độ</span></div>
+        </article>
+
+        <div class="sr-level-tabs" role="tablist">
+            @foreach (var entry in Current.Levels.Select((level, index) => (level, index)))
+            {
+                <button role="tab" aria-selected="@(selectedLevel == entry.index)" class="level-@entry.index @(selectedLevel == entry.index ? "active" : "")" @onclick="() => SelectLevel(entry.index)">
+                    <span>@entry.level.Emoji</span>
+                    <div><small>CẤP ĐỘ @(entry.index + 1)</small><b>@entry.level.Name</b></div>
+                    <i class="bi bi-check-circle-fill"></i>
+                </button>
+            }
+        </div>
+
+        <section class="sr-level-panel level-theme-@selectedLevel">
+            <header>
+                <div class="sr-level-badge">@CurrentLevel.Emoji</div>
+                <div><span>@CurrentLevel.Subtitle</span><h2>@CurrentLevel.Name</h2><p><b>Mục tiêu:</b> @CurrentLevel.Goal</p></div>
             </header>
 
-            <div class="rm-track">
-                @foreach (var entry in Selected.Items.Select((value, index) => (value, index)))
+            <div class="sr-week-list">
+                @foreach (var entry in CurrentLevel.Weeks.Select((week, index) => (week, index)))
                 {
-                    var state = ItemState(entry.value, entry.index);
-                    <button class="rm-track-item @state" @onclick="() => SelectItem(entry.value)">
-                        <span><i class="bi @(entry.value.IsCompleted ? "bi-check-lg" : entry.index == ActiveIndex ? "bi-play-fill" : "bi-lock-fill")"></i></span>
-                        <b>@(selectedSection + 1).@(entry.index + 1) @entry.value.Title</b>
-                    </button>
+                    var isOpen = openWeek == entry.index;
+                    <article class="sr-week @(isOpen ? "open" : "")">
+                        <button class="sr-week-head" @onclick="() => ToggleWeek(entry.index)" aria-expanded="@isOpen">
+                            <span class="sr-week-index">0@(entry.index + 1)</span>
+                            <span class="sr-week-title"><small>TUẦN @(entry.index + 1)</small><b>@entry.week.Title</b></span>
+                            <span class="sr-week-time"><i class="bi bi-clock"></i> 60–90 phút</span>
+                            <i class="bi bi-chevron-down sr-chevron"></i>
+                        </button>
+                        @if (isOpen)
+                        {
+                            <div class="sr-week-body">
+                                <section>
+                                    <span class="sr-content-icon theory"><i class="bi bi-book"></i></span>
+                                    <div><small>KIẾN THỨC TRỌNG TÂM</small><h3>Lý thuyết</h3><p>@entry.week.Theory</p></div>
+                                </section>
+                                <section>
+                                    <span class="sr-content-icon practice"><i class="bi bi-rocket-takeoff"></i></span>
+                                    <div><small>HOẠT ĐỘNG ỨNG DỤNG</small><h3>Thực hành</h3><p>@entry.week.Practice</p></div>
+                                </section>
+                                <footer><span><i class="bi bi-check2-circle"></i> Hoàn thành nội dung tuần</span><button @onclick="() => CompleteWeek(entry.index)">@(CompletedWeeks.Contains(WeekKey(entry.index)) ? "Đã hoàn thành" : "Đánh dấu hoàn thành")</button></footer>
+                            </div>
+                        }
+                    </article>
                 }
             </div>
-
-            <section class="rm-lesson">
-                <div class="rm-lesson-title"><i class="bi bi-headphones"></i><div><h2>@(selectedSection + 1).@(SelectedItemIndex + 1) @SelectedItem.Title</h2><p>@SelectedItem.Description</p></div><span><i class="bi bi-clock"></i> ~ 40 @Tx("minutes", "phút")</span></div>
-                <div class="rm-steps">
-                    @foreach (var step in LessonSteps.Select((value, index) => (value, index)))
-                    {
-                        var locked = step.index > 1;
-                        <article class="rm-step @(step.index == 0 ? "done" : locked ? "locked" : "current")">
-                            <div class="rm-step-no">@(step.index == 0 ? "✓" : (step.index + 1).ToString())</div>
-                            <div class="rm-step-visual @step.value.Color"><i class="bi @step.value.Icon"></i></div>
-                            <div class="rm-step-copy"><small>@step.value.Type</small><h3>@step.value.Title</h3><p>@step.value.Description</p></div>
-                            <div class="rm-step-action">
-                                @if (step.index == 0) { <em>✓ @Tx("Completed", "Đã hoàn thành")</em><button @onclick="() => OpenLecture(SelectedItem)">@Tx("Review", "Xem lại")</button> }
-                                else if (step.index == 1) { <button class="primary" @onclick="() => OpenLecture(SelectedItem)">@Tx("Start learning", "Bắt đầu học")</button><small>~ 15 @Tx("minutes", "phút")</small> }
-                                else { <span><i class="bi bi-lock-fill"></i> @Tx("Locked", "Chưa mở khóa")</span><small>@Tx("Complete step", "Hoàn thành bước") @step.index</small> }
-                            </div>
-                        </article>
-                    }
-                </div>
-            </section>
-
-            <footer class="rm-reward"><span>🏆 @Tx("Complete all 4 steps to earn", "Hoàn thành tất cả 4 bước để nhận")</span><b>⭐ +80 XP</b><b>♙ +1 @Tx("Badge", "Huy hiệu")</b><button disabled>@Tx("Claim reward", "Nhận phần thưởng")</button></footer>
-        </main>
-
-        <aside class="rm-right">
-            <section class="rm-panel"><div class="rm-label">@Tx("STAGE PROGRESS", "TIẾN ĐỘ GIAI ĐOẠN") @(selectedSection + 1)</div><div class="rm-ring" style="--p:@SectionPercent(Selected)"><b>@SectionPercent(Selected)%</b></div><strong>@Selected.Items.Count(x => x.IsCompleted)/@Selected.Items.Count @Tx("lessons", "bài học")</strong><button>@Tx("View details", "Xem chi tiết")</button></section>
-            <section class="rm-panel rm-skills"><div class="rm-label">@Tx("SKILLS EARNED", "KỸ NĂNG ĐẠT ĐƯỢC")</div><p><i class="bi bi-headphones"></i> @Tx("Active listening", "Lắng nghe chủ động")</p><p><i class="bi bi-heart"></i> @Tx("Understanding others", "Thấu hiểu người khác")</p><p><i class="bi bi-people"></i> @Tx("Effective questioning", "Đặt câu hỏi hiệu quả")</p></section>
-            <section class="rm-panel rm-stats"><div class="rm-label">@Tx("THIS WEEK'S ACHIEVEMENTS", "THÀNH TÍCH TUẦN NÀY")</div><p>◷ @Tx("Study time", "Thời gian học") <b>2h 15m</b></p><p>☑ @Tx("Lessons completed", "Bài học hoàn thành") <b>@CompletedCount</b></p><p>⭐ @Tx("XP earned", "XP nhận được") <b>@(CompletedCount * 80)</b></p><p>🔥 @Tx("Study streak", "Chuỗi ngày học") <b>5 @Tx("days", "ngày")</b></p></section>
-            <section class="rm-panel rm-reminder"><div class="rm-label">@Tx("STUDY REMINDER", "LỊCH NHẮC HỌC")</div><p>📅 <span>@Tx("Study", "Học") @SelectedItem.Title<small>@Tx("Today", "Hôm nay"), 19:00</small></span></p><button>@Tx("View schedule", "Xem lịch học")</button></section>
-        </aside>
-    </div>
-}
+        </section>
+    </section>
+</main>
 
 @code {
     [Parameter] public int UserId { get; set; }
-    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
-    private RoadmapDto? roadmap;
-    private List<RoadmapSection> Sections = [];
-    private int selectedSection;
-    private int selectedItem;
-    private RoadmapSection Selected => Sections[Math.Min(selectedSection, Sections.Count - 1)];
-    private RoadmapItemDto SelectedItem => Selected.Items[Math.Min(selectedItem, Selected.Items.Count - 1)];
-    private int SelectedItemIndex => Selected.Items.IndexOf(SelectedItem);
-    private int TotalCount => roadmap?.Items.Count ?? 0;
-    private int CompletedCount => roadmap?.Items.Count(x => x.IsCompleted) ?? 0;
-    private int ProgressPercent => TotalCount == 0 ? 0 : CompletedCount * 100 / TotalCount;
-    private string CurrentSkill => Sections.Count == 0 ? "Communication" : Selected.Title;
-    private int ActiveIndex => Math.Max(0, Selected.Items.FindIndex(x => !x.IsCompleted));
-    private LessonStep[] LessonSteps => [
-        new("VIDEO", Tx("Video lesson", "Video bài giảng"), Tx("Watch the video for an overview of the core concepts and principles.", "Xem video để nắm tổng quan về khái niệm và nguyên tắc cốt lõi."), "bi-play-circle-fill", "blue"),
-        new(Tx("THEORY", "LÝ THUYẾT"), Tx("Theory content", "Nội dung lý thuyết"), Tx("Read detailed theory, examples, and important principles.", "Đọc chi tiết lý thuyết, ví dụ minh họa và các nguyên tắc quan trọng."), "bi-book", "green"),
-        new(Tx("QUIZ", "BÀI TẬP TRẮC NGHIỆM"), Tx("Knowledge check", "Kiểm tra kiến thức"), Tx("Answer 10 questions to reinforce what you have learned.", "Trả lời 10 câu hỏi trắc nghiệm để củng cố kiến thức vừa học."), "bi-clipboard-check", "orange"),
-        new("GAME", Tx("Practice game", "Game thực hành"), Tx("Complete an interactive challenge to apply the skill in real situations.", "Vượt qua thử thách tương tác để áp dụng kỹ năng vào tình huống thực tế."), "bi-controller", "purple")];
+    private int selectedSkill;
+    private int selectedLevel;
+    private int openWeek;
+    private HashSet<string> CompletedWeeks { get; } = [];
+    private Skill Current => Skills[selectedSkill];
+    private Level CurrentLevel => Current.Levels[selectedLevel];
+    private string WeekKey(int week) => $"{selectedSkill}-{selectedLevel}-{week}";
+    private void SelectSkill(int index) { selectedSkill = index; selectedLevel = 0; openWeek = 0; }
+    private void SelectLevel(int index) { selectedLevel = index; openWeek = 0; }
+    private void ToggleWeek(int index) => openWeek = openWeek == index ? -1 : index;
+    private void CompleteWeek(int week) { var key = WeekKey(week); if (!CompletedWeeks.Add(key)) CompletedWeeks.Remove(key); }
 
-    protected override async Task OnInitializedAsync() {
-        if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
-        roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
-        Sections = (roadmap.Items.Count == 0 ? DemoItems() : roadmap.Items)
-            .GroupBy(x => string.IsNullOrWhiteSpace(x.SkillName) ? "Communication" : x.SkillName)
-            .Select(g => new RoadmapSection(g.Key, g.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList())).ToList();
-    }
-    private static List<RoadmapItemDto> DemoItems() => [new(){Id=1,WeekNumber=1,SkillName="Nền tảng giao tiếp",Title="Hiểu về giao tiếp",Description="Khám phá nền tảng giao tiếp hiệu quả.",IsCompleted=true},new(){Id=2,WeekNumber=2,SkillName="Nền tảng giao tiếp",Title="Lắng nghe chủ động",Description="Học cách lắng nghe để thấu hiểu và kết nối hiệu quả hơn."},new(){Id=3,WeekNumber=3,SkillName="Nền tảng giao tiếp",Title="Ngôn ngữ cơ thể",Description="Nhận biết và sử dụng tín hiệu phi ngôn ngữ."},new(){Id=4,WeekNumber=4,SkillName="Nền tảng giao tiếp",Title="Đặt câu hỏi hiệu quả",Description="Đặt câu hỏi để mở rộng đối thoại."}];
-    private int SectionPercent(RoadmapSection s) => s.Items.Count == 0 ? 0 : s.Items.Count(x => x.IsCompleted) * 100 / s.Items.Count;
-    private string ItemState(RoadmapItemDto item, int index) => item.IsCompleted ? "done" : index == ActiveIndex ? "active" : "locked";
-    private void SelectSection(int index) { selectedSection = index; selectedItem = 0; }
-    private void SelectItem(RoadmapItemDto item) { selectedItem = Selected.Items.IndexOf(item); }
-    private void OpenLecture(RoadmapItemDto item) => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
-    private void ScrollToCurrent() => Nav.NavigateTo("/roadmap#roadmap-current");
-    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
-    private sealed record RoadmapSection(string Title, List<RoadmapItemDto> Items);
-    private sealed record LessonStep(string Type, string Title, string Description, string Icon, string Color);
+    private static readonly List<Skill> Skills =
+    [
+        new("Quản lý thời gian và độ trì hoãn", "Quản lý thời gian", "TIME MANAGEMENT", "bi-clock-history", "Xây dựng năng lực tổ chức, ưu tiên và sử dụng thời gian có chủ đích để học tập và làm việc hiệu quả.",
+        [
+            new("Mức Thấp Nhất", "Khắc phục trì hoãn & thiết lập trật tự cơ bản", "📉", "Nhận diện tác hại của sự trì hoãn kinh niên gây căng thẳng, suy giảm kết quả học tập và bắt đầu xây dựng thói quen tổ chức cơ bản.",
+            [
+                new("Nhận diện & Ăn ếch (Eat the Frog)", "Học thuyết “Ăn ếch” chỉ ra rằng khi giải quyết nhiệm vụ lớn nhất hoặc khó chịu nhất ngay đầu ngày, mọi công việc sau đó sẽ nhẹ nhàng hơn. Việc lo lắng, né tránh một nhiệm vụ làm suy giảm nghiêm trọng hiệu suất chung.", "Xác định Daily Top Three – ba việc quan trọng nhất trong ngày. Chọn việc khó nhất, “con ếch”, và giải quyết ngay vào buổi sáng."),
+                new("Chia nhỏ dự án & Theo dõi thực tế", "Chia dự án lớn thành các phần việc nhỏ dưới 60 phút và rải đều qua các ngày thay vì cố hoàn thành trong một lần. Tránh thức trắng đêm sát hạn chót vì hiếm khi mang lại kết quả tốt.", "Activity 16.1: Liệt kê việc dự định làm ngày mai, ước tính thời gian hoàn thành. Cuối ngày ghi lại thời gian thực tế để đánh giá độ chênh lệch nhận thức.")
+            ]),
+            new("Mức Trung Bình", "Dự đoán thời gian chuẩn xác & tối ưu tập trung", "📊", "Nâng cao khả năng tự chủ học tập ngoài lớp học và khả năng dự đoán thời gian thực hiện nhiệm vụ – Time-on-Task.",
+            [
+                new("Dự đoán Time-on-Task chuẩn khoa học", "Dùng mốc tham chiếu: đọc giáo trình 5–7 phút/trang; tài liệu kỹ thuật 10–15 phút/trang; toán phức tạp 15 phút/câu; bài luận ngắn 60 phút/trang; bài luận nghiên cứu 105 phút/trang.", "Đo tốc độ đọc và viết cá nhân trong 5 phút, nhân với 12 để tính tốc độ mỗi giờ, rồi lập lịch đọc cho cả tuần dựa trên dữ liệu thực."),
+                new("Pomodoro & Thu hồi thời gian hao phí", "Áp dụng Pomodoro: tập trung 25 phút, nghỉ 3–5 phút; sau bốn chu kỳ nghỉ dài 15–30 phút để giảm mệt mỏi tinh thần và duy trì hiệu suất.", "Rà soát lịch hằng ngày, phát hiện thời gian vụn vặt bị lãng phí. Đặt giới hạn cụ thể cho mạng xã hội, tin tức và gộp thời gian thu hồi thành các khối hữu ích.")
+            ]),
+            new("Mức Tốt", "Làm chủ ưu tiên, mục tiêu SMART & học tập giãn cách", "🏆", "Tự điều phối cuộc sống học tập và công việc chuyên môn dựa trên hệ giá trị cốt lõi cùng mục tiêu dài hạn.",
+            [
+                new("Làm chủ ưu tiên bằng Ma trận Eisenhower", "Không quyết định dựa trên phản ứng hoảng loạn. Dùng Ma trận Eisenhower phân chia công việc theo hai tiêu chí Khẩn cấp và Quan trọng thành bốn góc phần tư.", "Vẽ Ma trận Eisenhower mỗi tuần và phân bổ toàn bộ danh sách việc cần làm vào đúng vị trí để xác định thứ tự xử lý tối ưu."),
+                new("Mục tiêu SMART, Spacing & Interleaving", "Gắn mục tiêu dài hạn với giá trị cá nhân và năm tiêu chuẩn SMART. Khi ôn tập, giãn cách qua nhiều ngày và học xen kẽ chủ đề thay vì học dồn một dạng bài.", "Viết một mục tiêu SMART cho tuần này và một mục tiêu SMART cho năm nay, bảo đảm đủ Specific, Measurable, Attainable, Relevant và Time-bound.")
+            ])
+        ]),
+        new("Giao tiếp và lắng nghe chủ động", "Giao tiếp chủ động", "COMMUNICATION", "bi-chat-heart", "Phát triển khả năng truyền đạt rõ ràng, lắng nghe thấu cảm và phản hồi linh hoạt trong nhiều bối cảnh.",
+        [
+            new("Mức Thấp Nhất", "Chuẩn hóa email chuyên nghiệp & khắc phục bypassing", "📉", "Nắm bản chất quá trình giao tiếp, quy tắc ứng xử trên không gian mạng và hạn chế hiểu lệch nghĩa từ ngữ.",
+            [
+                new("Bản chất & 8 thành phần giao tiếp", "Giao tiếp là quá trình thấu hiểu và chia sẻ ý nghĩa, gồm Nguồn gửi, Thông điệp, Kênh truyền, Người nhận, Phản hồi, Môi trường, Bối cảnh và Nhiễu/Sự can thiệp.", "Phân tích một tình huống giao tiếp nhóm gần nhất, xác định tám yếu tố và tìm nguồn gây nhiễu khiến thông tin sai lệch."),
+                new("Email học thuật & Kiểm soát Bypassing", "Email chính thức cần câu hoàn chỉnh, tiêu đề cụ thể, giọng khẳng định ôn hòa, lời chào trang trọng và chữ ký rõ ràng. Bypassing xảy ra khi hai bên hiểu khác nhau về cùng một từ do khác biệt văn hóa, thế hệ hoặc địa lý.", "Soạn email xin gia hạn bài tập hoặc báo cáo tiến độ MVP SoftSync theo chuẩn chuyên nghiệp. Định nghĩa thuật ngữ chuyên ngành khi trao đổi với người ngoài ngành.")
+            ]),
+            new("Mức Trung Bình", "Lắng nghe chủ động & nhận diện EQ", "📊", "Vượt qua xao nhãng thiết bị, thực hành lắng nghe thấu cảm và dùng trí tuệ cảm xúc để điều chỉnh phản ứng giao tiếp.",
+            [
+                new("Thực hành Lắng nghe chủ động", "Tập trung toàn bộ tâm trí vào người nói: duy trì giao tiếp mắt, dừng nói, không đa nhiệm và chú ý thông điệp thay vì chuẩn bị phản biện trong đầu.", "Trong buổi học hoặc thảo luận, ghi lại điểm cốt lõi và paraphrase ý đối phương bằng câu “Có phải bạn muốn nói rằng...?” trước khi trả lời."),
+                new("Trí tuệ cảm xúc trong xung đột", "EQ là khả năng nhận diện cảm xúc bản thân và người khác để điều chỉnh hành vi, tránh phòng vệ hoặc giận dữ khi bị phê bình và giải quyết xung đột ôn hòa.", "Khi bất đồng, hít thở sâu và trì hoãn phản ứng. Hỏi ôn hòa về nội dung câu chữ thay vì chỉ trích cá nhân để cùng tìm giải pháp và giữ thể diện.")
+            ]),
+            new("Mức Tốt", "Đa bối cảnh, phi ngôn ngữ & phản hồi thấu cảm", "🏆", "Đạt độ nhạy cảm văn hóa sâu sắc, làm chủ bối cảnh đa dạng và điều phối các lớp phản hồi phức tạp.",
+            [
+                new("Trực tiếp, gián tiếp & Phi ngôn ngữ", "Phong cách trực tiếp phù hợp chuyên môn; phong cách gián tiếp và lời xoa dịu phù hợp khi báo tin tiêu cực hoặc sửa lỗi để bảo vệ lòng tự trọng của người khác.", "Kiểm soát tư thế, tông giọng, nét mặt và tôn trọng khoảng cách cá nhân của đối phương trong một cuộc trao đổi quan trọng."),
+                new("5 nhóm Phản hồi của Carl Rogers", "Carl Rogers chia phản hồi thành Đánh giá, Diễn giải, Hỗ trợ, Thăm dò và Thấu hiểu. Chọn loại phù hợp giúp xây dựng quan hệ hợp tác dài hạn.", "Viết năm câu phản hồi thuộc năm nhóm cho một bài viết hoặc đề xuất SoftSync của bạn học để luyện tính linh hoạt trong phản hồi.")
+            ])
+        ]),
+        new("Tư duy phản biện và giải quyết vấn đề", "Tư duy phản biện", "CRITICAL THINKING", "bi-lightbulb", "Rèn tư duy lý trí, kiểm chứng thông tin và giải quyết vấn đề từ nguyên nhân gốc rễ bằng bằng chứng.",
+        [
+            new("Mức Thấp Nhất", "Phân biệt sự thật, ý kiến & nhận diện ngụy biện", "📉", "Định hình nền tảng tư duy lý trí qua việc bóc tách thông tin khách quan và phòng tránh lỗi lập luận sai lệch.",
+            [
+                new("Sự thật (Fact) và Ý kiến (Opinion)", "Sự thật có bằng chứng và có thể xác minh qua nghiên cứu hoặc quan sát; ý kiến là phán đoán chủ quan không có bằng chứng trực tiếp. “Mèo là động vật” là sự thật; “Mèo là thú cưng tốt nhất” là ý kiến.", "Phân tích năm tuyên bố trên mạng xã hội hoặc tài liệu SoftSync, chỉ ra đâu là sự thật có thể kiểm chứng và đâu là ý kiến cá nhân."),
+                new("Loại bỏ ngụy biện logic cơ bản", "Nhận diện Ad Hominem – công kích người nói thay vì luận điểm, và Bandwagon/Ad Populum – cho rằng điều gì đúng chỉ vì số đông tin như vậy.", "Rà soát một cuộc tranh luận nhóm gần đây để nhận diện thành viên hoặc chính bạn có vô tình phạm các lỗi ngụy biện trên hay không.")
+            ]),
+            new("Mức Trung Bình", "Đọc ngang & chống thiên kiến xác nhận", "📊", "Làm chủ phương pháp kiểm chứng thông tin trực tuyến độc lập và giảm thiểu thiên lệch nhận thức cá nhân.",
+            [
+                new("Đọc ngang (Lateral Reading)", "Thay vì chỉ đọc từ trên xuống trên một trang lạ, hãy rời trang và mở nhiều tab để kiểm tra các nguồn độc lập, tổ chức uy tín đánh giá thế nào về tác giả hoặc nguồn tin.", "Khi tìm tài liệu cho SoftSync, áp dụng đọc ngang để xác thực uy tín của ít nhất hai trang web lạ trước khi trích dẫn."),
+                new("Đối phó Thiên kiến xác nhận", "Thiên kiến xác nhận khiến ta chỉ tìm và tin thông tin củng cố niềm tin sẵn có, đồng thời bỏ qua bằng chứng trái ngược. Tư duy phản biện đòi hỏi tự giám sát và sửa lỗi.", "Chọn một chủ đề bạn có quan điểm mạnh, chủ động đọc ít nhất hai bài từ nguồn uy tín bảo vệ quan điểm đối lập và phân tích công tâm.")
+            ]),
+            new("Mức Tốt", "5 Whys, linh hoạt có cơ sở & đánh giá nguồn tin", "🏆", "Phát triển tư duy tự định hướng, bóc tách nguyên nhân gốc rễ và linh hoạt thay đổi dựa trên bằng chứng thực nghiệm.",
+            [
+                new("Đào sâu gốc rễ bằng 5 Whys", "Không chỉ dập tắt biểu hiện bề nổi. Liên tục hỏi “Tại sao?” để bóc tách nguyên nhân đến gốc rễ, đồng thời tạo nhiều giải pháp dự phòng thay thế.", "Chọn một vấn đề học tập hoặc sự cố SoftSync MVP, lập sơ đồ 5 Whys và bảng so sánh ít nhất ba phương án giải quyết."),
+                new("Linh hoạt có cơ sở & Đánh giá nguồn", "Sẵn sàng cập nhật kết luận hoặc kế hoạch khi có dữ liệu khoa học đáng tin cậy hơn. Đánh giá chuyên môn tác giả, độ mới dữ liệu, thiên kiến ẩn và xung đột lợi ích tài trợ.", "Rà soát toàn bộ nguồn của một bài luận: chấm mức uy tín tác giả, độ cập nhật, thiên kiến và xung đột lợi ích trước khi quyết định sử dụng.")
+            ])
+        ])
+    ];
+
+    private sealed record Skill(string Title, string ShortTitle, string EnglishTitle, string Icon, string Description, List<Level> Levels);
+    private sealed record Level(string Name, string Subtitle, string Emoji, string Goal, List<Week> Weeks);
+    private sealed record Week(string Title, string Theory, string Practice);
 }
 
 <style>
-    .rm-shell{display:grid;grid-template-columns:250px minmax(560px,1fr) 260px;min-height:calc(100vh - 72px);background:#fbfbff;color:#18223b}.rm-left,.rm-right{padding:24px 18px;border-color:#e5e7f5;display:flex;flex-direction:column;gap:16px}.rm-left{border-right:1px solid #e5e7f5}.rm-right{border-left:1px solid #e5e7f5}.rm-main{padding:28px 24px}.rm-panel{position:relative;padding:20px;border:1px solid #e6e5f8;border-radius:18px;background:linear-gradient(145deg,#fff,#f6f4ff);box-shadow:0 8px 24px rgba(86,71,210,.05)}.rm-label{font-size:12px;font-weight:900;color:#25208e;margin-bottom:16px}.rm-summary img{position:absolute;right:8px;top:35px;width:86px;height:70px;object-fit:contain}.rm-summary h2{font-size:19px;max-width:140px}.rm-summary p{font-size:13px}.rm-progress{height:7px;background:#e8e4ff;border-radius:9px;overflow:hidden}.rm-progress i{display:block;height:100%;background:linear-gradient(90deg,#6046ef,#8068f6)}.rm-panel button{border:1px solid #d7d2ff;background:#fff;color:#573cf0;border-radius:10px;font-weight:750;padding:10px 16px}.rm-summary>button,.rm-mentor>button,.rm-reminder>button{width:100%;margin-top:16px}.rm-stage{width:100%;display:grid!important;grid-template-columns:24px 1fr auto;align-items:center;gap:8px;margin:8px 0;text-align:left!important;color:#536077!important}.rm-stage span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#edf0f6}.rm-stage small{font-size:11px}.rm-stage.active{color:#fff!important;border:0;background:linear-gradient(135deg,#8a7cf5,#765bf0)}.rm-stage.active span{color:#6850ed;background:#fff}.rm-mentor p{font-size:13px;line-height:1.65}.rm-mentor img{width:90px;height:70px;object-fit:contain;display:block;margin-left:auto}.rm-head{display:flex;justify-content:space-between;gap:15px}.rm-head h1{font-size:20px;font-weight:850}.rm-head p{font-size:13px;color:#7b8498}.rm-head>span{height:max-content;padding:10px 14px;border:1px solid #e1dfff;border-radius:12px;font-size:12px}.rm-head .bi-star-fill{color:#ffc43d}.rm-track{display:flex;justify-content:space-between;position:relative;margin:32px 8px 30px}.rm-track:before{content:"";position:absolute;left:5%;right:5%;top:22px;height:2px;background:#e1e4eb}.rm-track-item{z-index:1;flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:8px;color:#8a92a3;font-size:11px}.rm-track-item span{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid #d9dce5;background:#f7f8fa}.rm-track-item b{max-width:110px}.rm-track-item.done span,.rm-track-item.active span{color:#fff;border-color:#6046ef;background:#6046ef}.rm-track-item.active span{box-shadow:0 0 0 7px #e7e2ff}.rm-track-item.active b{color:#5b42e7}.rm-lesson{border:1px solid #e2e3f3;border-radius:18px;padding:18px;background:rgba(255,255,255,.7)}.rm-lesson-title{display:flex;align-items:flex-start;gap:14px}.rm-lesson-title>i{color:#6046ef}.rm-lesson-title h2{font-size:18px;margin:0}.rm-lesson-title p{font-size:12px;color:#7b8498}.rm-lesson-title>span{margin-left:auto;font-size:12px}.rm-steps{display:flex;flex-direction:column;gap:9px;margin-top:12px}.rm-step{position:relative;display:grid;grid-template-columns:24px 200px 1fr 145px;align-items:center;gap:14px;border:1px solid #e3e5f0;border-radius:14px;padding:12px;background:#fff}.rm-step-no{position:absolute;left:-34px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#eeeef5;color:#48546a}.rm-step.done .rm-step-no{color:#fff;background:#31b766}.rm-step.current .rm-step-no{color:#fff;background:#6349ed}.rm-step-visual{height:90px;border-radius:11px;display:grid;place-items:center;font-size:38px}.rm-step-visual.blue{color:#5155da;background:#e7eaff}.rm-step-visual.green{color:#25a55b;background:#e4f8ed}.rm-step-visual.orange{color:#ef8b19;background:#fff1df}.rm-step-visual.purple{color:#7148ee;background:#eee8ff}.rm-step-copy small{font-size:10px;font-weight:850;color:#6246e7}.rm-step-copy h3{font-size:16px;margin:6px 0}.rm-step-copy p{font-size:12px;color:#748096;margin:0}.rm-step-action{display:flex;flex-direction:column;align-items:stretch;gap:8px;text-align:center}.rm-step-action em,.rm-step-action span{font-style:normal;font-size:11px;color:#2f9a5a;background:#ecf9f1;padding:8px}.rm-step-action span{color:#697386;background:#f3f4f6}.rm-step-action button.primary{color:#fff;border:0;background:#6046ed}.rm-step-action small{font-size:10px;color:#8b93a2}.rm-reward{display:flex;align-items:center;gap:20px;margin-top:14px;padding:14px;border:1px solid #e6e4f6;border-radius:14px;background:#fff;font-size:12px}.rm-reward button{margin-left:auto;border:0;border-radius:10px;padding:10px 18px}.rm-right .rm-panel>button{width:100%}.rm-ring{float:left;width:100px;height:100px;margin:0 14px 12px 0;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#6046ed calc(var(--p)*1%),#e9e7fb 0);position:relative}.rm-ring:after{content:"";position:absolute;inset:11px;border-radius:50%;background:#faf9ff}.rm-ring b{z-index:1;color:#5840df;font-size:22px}.rm-skills p,.rm-stats p,.rm-reminder p{display:flex;align-items:center;gap:10px;font-size:12px;margin:16px 0}.rm-skills i{display:grid;place-items:center;width:32px;height:32px;color:#6046ed;border-radius:50%;background:#eeeaff}.rm-stats p b{margin-left:auto}.rm-reminder p span{display:flex;flex-direction:column}.rm-reminder small{color:#8b93a2}.rm-loading{min-height:60vh;display:grid;place-items:center}.rm-loading span{width:40px;height:40px;border:4px solid #eee;border-top-color:#6046ed;border-radius:50%;animation:spin 1s linear infinite}@@keyframes spin{to{transform:rotate(360deg)}}
-    .rm-summary img{right:10px;top:54px;width:70px;height:58px}
-    .rm-summary h2{font-size:17px;line-height:1.2;max-width:125px;min-height:42px;overflow-wrap:anywhere}
-    .rm-shell{background:linear-gradient(135deg,rgba(248,247,255,.52),rgba(238,242,255,.34))}
-    .rm-shell,.rm-shell button,.rm-shell input,.rm-shell select,.rm-shell textarea{font-family:inherit}
-    .rm-shell button{font-size:inherit;line-height:1.25;letter-spacing:inherit}
-    .rm-stage b,.rm-track-item b,.rm-step-copy h3,.rm-step-action button{font-family:inherit;font-weight:750}
-    .rm-stage b{min-width:0;overflow-wrap:anywhere}
-    .rm-stage{position:relative;grid-template-columns:30px minmax(0,1fr) 38px!important;min-height:58px;padding:11px 12px!important;gap:10px!important}
-    .rm-stage span{width:28px!important;height:28px!important;font-size:14px;font-weight:800}
-    .rm-stage b{font-size:13.5px;font-weight:650!important;line-height:1.35;text-align:left}
-    .rm-stage small{width:38px;text-align:right;font-size:11px!important;font-weight:700;white-space:nowrap}
-    .rm-stage>i{position:absolute;right:12px;bottom:5px;font-size:9px;opacity:.75}
-    .rm-stage.active b{font-weight:750!important}
-    .rm-panel,.rm-lesson,.rm-step,.rm-reward{
-        background:
-            radial-gradient(130% 100% at 0 0,rgba(255,255,255,.9),transparent 46%),
-            radial-gradient(90% 90% at 100% 100%,rgba(167,139,250,.18),transparent 58%),
-            linear-gradient(145deg,var(--liquid-surface-strong),var(--liquid-surface))!important;
-        border:1px solid var(--liquid-edge)!important;
-        box-shadow:0 18px 46px var(--liquid-shadow),inset 1px 1px 0 rgba(255,255,255,.92),inset -1px -1px 0 rgba(124,92,252,.1)!important;
-        -webkit-backdrop-filter:blur(24px) saturate(180%);
-        backdrop-filter:blur(24px) saturate(180%);
-    }
-    .rm-panel,.rm-step{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
-    .rm-panel:hover,.rm-step:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.96)!important;box-shadow:0 23px 56px rgba(76,29,149,.18),inset 1px 1px 0 #fff!important}
-    html[data-theme="dark"] .rm-shell{background:linear-gradient(135deg,rgba(18,15,43,.48),rgba(30,27,75,.28))}
-    @@media(max-width:1150px){.rm-shell{grid-template-columns:220px 1fr}.rm-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);border-left:0;border-top:1px solid #e5e7f5}.rm-step{grid-template-columns:24px 150px 1fr 130px}}
-    @@media(max-width:800px){.rm-shell{display:block}.rm-left{border:0;display:grid;grid-template-columns:1fr 1fr}.rm-mentor{display:none}.rm-main{padding:20px 12px}.rm-track{overflow-x:auto}.rm-track-item{min-width:120px}.rm-step{grid-template-columns:1fr}.rm-step-no{left:8px;top:8px}.rm-step-visual{height:120px}.rm-right{grid-template-columns:1fr 1fr}.rm-reward{flex-wrap:wrap}}
-    @@media(max-width:520px){.rm-left,.rm-right{display:block}.rm-left>* ,.rm-right>*{margin-bottom:12px}.rm-head{display:block}.rm-step-visual{height:100px}}
+    .sr-page{--ink:#17163f;--muted:#667085;--violet:#6d4df4;--line:rgba(109,77,244,.14);min-height:calc(100vh - 72px);padding:clamp(1rem,3vw,2.5rem);color:var(--ink);background:radial-gradient(circle at 4% 10%,rgba(96,165,250,.18),transparent 28rem),radial-gradient(circle at 96% 8%,rgba(236,72,153,.14),transparent 28rem),linear-gradient(145deg,#f8faff,#f5f0ff 48%,#fff7fc)}
+    .sr-hero,.sr-curriculum{max-width:1320px;margin:auto}.sr-hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;min-height:390px;overflow:hidden;border:1px solid rgba(255,255,255,.9);border-radius:32px;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(238,233,254,.7));box-shadow:0 28px 70px rgba(76,29,149,.12)}
+    .sr-hero-copy{z-index:1;padding:clamp(2rem,5vw,4.5rem)}.sr-eyebrow{display:inline-flex;align-items:center;gap:.55rem;padding:.55rem .9rem;color:#6547e8;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:.78rem;font-weight:900;letter-spacing:.08em}.sr-hero h1{margin:1.2rem 0;font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.04;letter-spacing:-.045em;font-weight:950}.sr-hero h1 em{font-style:normal;color:#6d4df4}.sr-hero-copy>p{max-width:680px;color:var(--muted);font-size:1.02rem;line-height:1.75}.sr-meta{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.8rem}.sr-meta span{display:flex;align-items:center;gap:.45rem;padding:.7rem 1rem;border-radius:14px;background:rgba(255,255,255,.72);color:#667085;font-size:.82rem}.sr-meta b{color:#6044dd;font-size:1rem}
+    .sr-hero-art{position:relative;min-height:360px}.sr-hero-art:before{content:"";position:absolute;inset:12% 8%;border-radius:50%;background:radial-gradient(circle,#fff 0,rgba(167,139,250,.38) 35%,rgba(96,165,250,.16) 58%,transparent 70%)}.sr-hero-art img{position:absolute;z-index:2;left:50%;top:50%;width:min(58%,270px);transform:translate(-50%,-50%);filter:drop-shadow(0 28px 35px rgba(76,29,149,.18))}.sr-orbit{position:absolute;inset:12%;border:1px solid rgba(109,77,244,.22);border-radius:50%;transform:rotate(-15deg)}.sr-orbit-two{inset:23% 4%;transform:rotate(17deg)}.sr-float{position:absolute;z-index:3;display:flex;align-items:center;gap:.55rem;padding:.7rem .9rem;border:1px solid rgba(255,255,255,.9);border-radius:14px;background:rgba(255,255,255,.82);box-shadow:0 16px 30px rgba(76,29,149,.12);font-size:.75rem;font-weight:800}.sr-float i{color:#6d4df4}.sr-float-one{left:1%;top:18%}.sr-float-two{right:3%;top:32%}.sr-float-three{left:4%;bottom:16%}
+    .sr-curriculum{padding:4rem 0}.sr-section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:1.25rem}.sr-section-head span,.sr-skill-intro>div>span,.sr-level-panel header span{color:#7357e8;font-size:.72rem;font-weight:900;letter-spacing:.1em}.sr-section-head h2{margin:.35rem 0 0;font-size:clamp(1.7rem,3vw,2.4rem)}.sr-progress-copy{display:flex;align-items:end;gap:.5rem}.sr-progress-copy b{font-size:1.6rem;color:#6d4df4}.sr-progress-copy span{padding-bottom:.25rem;color:#8a91a3;letter-spacing:0}
+    .sr-skill-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.sr-skill-tabs button{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:.8rem;padding:1rem;text-align:left;color:#515a6e;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.7);transition:.2s}.sr-skill-tabs button:hover{transform:translateY(-2px)}.sr-skill-tabs button.active{color:#fff;border-color:transparent;background:linear-gradient(135deg,#6547e8,#8b5cf6);box-shadow:0 18px 36px rgba(109,77,244,.24)}.sr-tab-icon{display:grid!important;place-items:center;width:48px;height:48px;border-radius:14px;background:#eeeaff;color:#6d4df4;font-size:1.25rem}.active .sr-tab-icon{color:#fff;background:rgba(255,255,255,.16)}.sr-skill-tabs small{display:block;margin-bottom:.2rem;font-size:.62rem;font-weight:850;opacity:.72}.sr-skill-tabs b{display:block;font-size:.86rem}.sr-tab-arrow{opacity:.6}
+    .sr-skill-intro{display:grid;grid-template-columns:90px 1fr auto;align-items:center;gap:1.4rem;margin:1rem 0 2rem;padding:1.3rem 1.5rem;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.72)}.sr-skill-number{font-size:3.5rem;font-weight:950;color:rgba(109,77,244,.18)}.sr-skill-intro h2{margin:.25rem 0;font-size:1.35rem}.sr-skill-intro p{margin:0;color:var(--muted);font-size:.88rem}.sr-duration{display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;border-radius:14px;background:#f1edff;color:#6044dd}.sr-duration span{font-size:.78rem!important;letter-spacing:0!important}
+    .sr-level-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.sr-level-tabs button{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:.75rem;padding:1rem;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.72);text-align:left;color:#4b5565}.sr-level-tabs button>span{font-size:1.3rem}.sr-level-tabs small{display:block;color:#8991a3;font-size:.62rem;font-weight:900}.sr-level-tabs b{font-size:.86rem}.sr-level-tabs button>i{color:#d7d9e4}.sr-level-tabs button.active{border-color:rgba(109,77,244,.45);box-shadow:0 12px 28px rgba(109,77,244,.12)}.sr-level-tabs button.active>i{color:#6d4df4}
+    .sr-level-panel{margin-top:1rem;padding:clamp(1rem,3vw,2rem);border:1px solid var(--line);border-radius:26px;background:rgba(255,255,255,.72);box-shadow:0 20px 50px rgba(76,29,149,.09)}.sr-level-panel>header{display:grid;grid-template-columns:62px 1fr;gap:1rem;align-items:start;padding-bottom:1.5rem}.sr-level-badge{display:grid;place-items:center;width:62px;height:62px;border-radius:18px;background:#f0ecff;font-size:1.75rem}.sr-level-panel header h2{margin:.3rem 0;font-size:1.45rem}.sr-level-panel header p{max-width:1000px;margin:.35rem 0 0;color:var(--muted);line-height:1.65;font-size:.9rem}
+    .sr-week-list{display:grid;gap:.8rem}.sr-week{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#fff}.sr-week-head{width:100%;display:grid;grid-template-columns:52px 1fr auto 24px;align-items:center;gap:1rem;padding:1rem;border:0;background:transparent;text-align:left;color:var(--ink)}.sr-week-index{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#f1edff;color:#6447e2;font-weight:900}.sr-week-title small{display:block;color:#8b93a4;font-size:.62rem;font-weight:900}.sr-week-title b{font-size:.96rem}.sr-week-time{color:#8b93a4;font-size:.75rem}.sr-chevron{color:#6d4df4;transition:.2s}.sr-week.open .sr-chevron{transform:rotate(180deg)}.sr-week-body{padding:0 1rem 1rem}.sr-week-body>section{display:grid;grid-template-columns:44px 1fr;gap:.8rem;padding:1rem;border-top:1px solid #eeeafc}.sr-content-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px}.sr-content-icon.theory{color:#3b82f6;background:#eaf2ff}.sr-content-icon.practice{color:#16a269;background:#e8f8ef}.sr-week-body small{font-size:.6rem;font-weight:900;color:#8b93a4;letter-spacing:.08em}.sr-week-body h3{margin:.2rem 0 .4rem;font-size:.95rem}.sr-week-body p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.72}.sr-week-body footer{display:flex;justify-content:space-between;align-items:center;margin:0 1rem;padding:1rem 0 0;border-top:1px dashed #e5e0fa;color:#687084;font-size:.76rem}.sr-week-body footer i{color:#22a06b}.sr-week-body footer button{padding:.65rem .9rem;color:#fff;border:0;border-radius:11px;background:linear-gradient(135deg,#6547e8,#8b5cf6);font-weight:800;font-size:.72rem}
+    html[data-theme="dark"] .sr-page{--ink:#f8fafc;--muted:#cbd5e1;--line:rgba(167,139,250,.2);background:radial-gradient(circle at 5% 5%,rgba(59,130,246,.16),transparent 28rem),linear-gradient(145deg,#080d20,#17112e)}html[data-theme="dark"] .sr-hero,html[data-theme="dark"] .sr-skill-tabs button,html[data-theme="dark"] .sr-skill-intro,html[data-theme="dark"] .sr-level-tabs button,html[data-theme="dark"] .sr-level-panel{background:rgba(30,27,75,.7);border-color:var(--line)}html[data-theme="dark"] .sr-week{background:#211d47}html[data-theme="dark"] .sr-float{color:#e9e5ff;background:rgba(30,27,75,.85)}
+    @@media(max-width:900px){.sr-hero{grid-template-columns:1fr}.sr-hero-art{min-height:300px}.sr-skill-tabs{grid-template-columns:1fr}.sr-level-tabs{grid-template-columns:1fr}.sr-skill-intro{grid-template-columns:70px 1fr}.sr-duration{grid-column:1/-1;justify-content:center}}
+    @@media(max-width:600px){.sr-page{padding:.75rem}.sr-hero{border-radius:24px}.sr-hero-copy{padding:1.5rem}.sr-hero h1{font-size:2.35rem}.sr-meta{display:grid;grid-template-columns:1fr}.sr-curriculum{padding:2.5rem 0}.sr-section-head{align-items:start}.sr-progress-copy{display:none}.sr-skill-intro{grid-template-columns:1fr}.sr-skill-number{display:none}.sr-level-panel>header{grid-template-columns:1fr}.sr-week-head{grid-template-columns:48px 1fr 20px}.sr-week-time{display:none}.sr-week-body>section{grid-template-columns:1fr}.sr-week-body footer{align-items:stretch;flex-direction:column;gap:.8rem}.sr-week-body footer button{width:100%}}
 </style>
