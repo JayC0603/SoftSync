@@ -67,39 +67,60 @@
             </button>
         </div>
 
-        <article class="ss-main-mentor ss-glass ss-glass-interactive">
-            <div class="ss-main-mentor-portrait">
-                <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
-                <img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thụy Tố Trâm" />
-            </div>
-
-            <div class="ss-main-mentor-content">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-gem"></i> @L["mentor.main.role"]</span>
-                <h2>Th.S. Nguyễn Thụy Tố Trâm</h2>
-                <p class="ss-main-mentor-position">@L["mentor.main.position"]</p>
-
-                <ul class="ss-main-mentor-highlights">
-                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight1"]</li>
-                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight2"]</li>
-                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight3"]</li>
-                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight4"]</li>
-                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight5"]</li>
-                </ul>
-
-                <div class="ss-main-mentor-about">
-                    <h3>@L["mentor.main.about"]</h3>
-                    <p>@L["mentor.main.bio1"]</p>
-                    <p>@L["mentor.main.bio2"]</p>
-                    <p>@L["mentor.main.bio3"]</p>
+        <div class="ss-main-mentor-grid">
+            <article class="ss-main-mentor ss-glass ss-glass-interactive">
+                <div class="ss-main-mentor-portrait">
+                    <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
+                    <img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thụy Tố Trâm" />
                 </div>
 
-                <div class="ss-main-mentor-tags">
-                    <span><i class="bi bi-chat-dots-fill"></i>@L["mentor.main.specialty.softSkills"]</span>
-                    <span><i class="bi bi-heart-fill"></i>@L["mentor.main.specialty.community"]</span>
-                    <span><i class="bi bi-universal-access"></i>@L["mentor.main.specialty.inclusion"]</span>
+                <div class="ss-main-mentor-content">
+                    <span class="ss-main-mentor-kicker"><i class="bi bi-gem"></i> @L["mentor.main.role"]</span>
+                    <h2>Th.S. Nguyễn Thụy Tố Trâm</h2>
+                    <p class="ss-main-mentor-position">@L["mentor.main.position"]</p>
+                    <p class="ss-main-mentor-summary">@L["mentor.main.summary"]</p>
+                    <div class="ss-main-mentor-tags">
+                        <span><i class="bi bi-chat-dots-fill"></i>@L["mentor.main.specialty.softSkills"]</span>
+                        <span><i class="bi bi-heart-fill"></i>@L["mentor.main.specialty.community"]</span>
+                        <span><i class="bi bi-universal-access"></i>@L["mentor.main.specialty.inclusion"]</span>
+                    </div>
+                    <button type="button" class="ss-mentor-detail-btn" @onclick="() => mentorDetailsOpen = true">
+                        @L["mentor.main.viewDetails"] <i class="bi bi-arrow-right"></i>
+                    </button>
                 </div>
+            </article>
+        </div>
+
+        @if (mentorDetailsOpen)
+        {
+            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => mentorDetailsOpen = false">
+                <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="mentor-detail-title" @onclick:stopPropagation="true">
+                    <button type="button" class="ss-mentor-modal-close" @onclick="() => mentorDetailsOpen = false" aria-label="@L["mentor.main.close"]">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <header>
+                        <img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thụy Tố Trâm" />
+                        <div>
+                            <span>@L["mentor.main.role"]</span>
+                            <h2 id="mentor-detail-title">Th.S. Nguyễn Thụy Tố Trâm</h2>
+                            <p>@L["mentor.main.position"]</p>
+                        </div>
+                    </header>
+                    <ul>
+                        <li><i class="bi bi-stars"></i>@L["mentor.main.highlight2"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.main.highlight3"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.main.highlight4"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.main.highlight5"]</li>
+                    </ul>
+                    <div class="ss-mentor-modal-bio">
+                        <h3>@L["mentor.main.about"]</h3>
+                        <p>@L["mentor.main.bio1"]</p>
+                        <p>@L["mentor.main.bio2"]</p>
+                        <p>@L["mentor.main.bio3"]</p>
+                    </div>
+                </section>
             </div>
-        </article>
+        }
     </section>
 
     <section class="ss-landing-stats">
@@ -701,10 +722,45 @@
     .ss-main-mentor-about p { color: #64748b; line-height: 1.72; }
     .ss-main-mentor-tags { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.4rem; }
     .ss-main-mentor-tags span { display: inline-flex; align-items: center; gap: .45rem; padding: .65rem .8rem; color: #5b42db; background: rgba(255,255,255,.65); border: 1px solid rgba(124,92,252,.16); border-radius: 14px; font-size: .8rem; font-weight: 750; }
+    .ss-main-mentor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+    .ss-main-mentor-grid .ss-main-mentor {
+        grid-column: 2;
+        display: block;
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: 24px;
+        text-align: center;
+    }
+    .ss-main-mentor-grid .ss-main-mentor-portrait { position: relative; top: auto; width: 150px; margin: 0 auto 1rem; }
+    .ss-main-mentor-grid .ss-main-mentor-content h2 { margin-top: .65rem; font-size: 1.35rem; }
+    .ss-main-mentor-grid .ss-main-mentor-position { min-height: 3.4em; margin-bottom: .75rem; font-size: .82rem; line-height: 1.5; }
+    .ss-main-mentor-summary { color: #64748b; font-size: .86rem; line-height: 1.6; }
+    .ss-main-mentor-grid .ss-main-mentor-tags { justify-content: center; gap: .4rem; }
+    .ss-main-mentor-grid .ss-main-mentor-tags span { padding: .45rem .55rem; font-size: .7rem; }
+    .ss-mentor-detail-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; width: 100%; margin-top: 1rem; padding: .7rem 1rem; color: #fff; border: 0; border-radius: 14px; background: linear-gradient(135deg,#6d4cf5,#8b5cf6); font-weight: 800; }
+    .ss-mentor-modal-backdrop { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 1rem; background: rgba(15,23,42,.58); backdrop-filter: blur(8px); }
+    .ss-mentor-modal { position: relative; width: min(860px, 100%); max-height: min(86vh, 900px); overflow-y: auto; padding: clamp(1.25rem, 4vw, 2.5rem); border-radius: 28px; background: rgba(255,255,255,.96); }
+    .ss-mentor-modal-close { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 40px; height: 40px; color: #5b42db; border: 1px solid rgba(124,92,252,.18); border-radius: 50%; background: rgba(255,255,255,.9); }
+    .ss-mentor-modal header { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 1.5rem; padding-right: 2.5rem; }
+    .ss-mentor-modal header img { width: 150px; height: 150px; object-fit: cover; border-radius: 50%; box-shadow: 0 18px 36px rgba(76,29,149,.18); }
+    .ss-mentor-modal header span { color: #6d4cf5; font-weight: 850; }
+    .ss-mentor-modal header h2 { margin: .35rem 0; color: #17143d; font-size: clamp(1.55rem, 3vw, 2.25rem); font-weight: 900; }
+    .ss-mentor-modal header p { margin: 0; color: #64748b; }
+    .ss-mentor-modal > ul { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 1.5rem 0; padding: 0; list-style: none; }
+    .ss-mentor-modal > ul li { display: flex; align-items: flex-start; gap: .55rem; padding: .8rem; color: #475569; border: 1px solid rgba(124,92,252,.14); border-radius: 14px; background: rgba(245,243,255,.68); font-size: .86rem; line-height: 1.5; }
+    .ss-mentor-modal > ul i { color: #8b5cf6; }
+    .ss-mentor-modal-bio { padding-top: 1rem; border-top: 1px solid rgba(124,92,252,.16); }
+    .ss-mentor-modal-bio h3 { color: #25205d; font-weight: 900; }
+    .ss-mentor-modal-bio p { color: #64748b; line-height: 1.72; }
     html[data-theme="dark"] .ss-main-mentor { background: linear-gradient(145deg, rgba(38,32,78,.86), rgba(30,27,75,.72)); }
     html[data-theme="dark"] .ss-main-mentor-content h2, html[data-theme="dark"] .ss-main-mentor-about h3 { color: #f8fafc; }
     html[data-theme="dark"] .ss-main-mentor-highlights li, html[data-theme="dark"] .ss-main-mentor-about p { color: #cbd5e1; }
+    html[data-theme="dark"] .ss-main-mentor-summary { color: #cbd5e1; }
     html[data-theme="dark"] .ss-main-mentor-tags span { color: #ddd6fe; background: rgba(76,61,139,.45); }
+    html[data-theme="dark"] .ss-mentor-modal { background: rgba(30,27,75,.97); }
+    html[data-theme="dark"] .ss-mentor-modal header h2, html[data-theme="dark"] .ss-mentor-modal-bio h3 { color: #f8fafc; }
+    html[data-theme="dark"] .ss-mentor-modal header p, html[data-theme="dark"] .ss-mentor-modal-bio p, html[data-theme="dark"] .ss-mentor-modal > ul li { color: #cbd5e1; }
+    html[data-theme="dark"] .ss-mentor-modal > ul li { background: rgba(76,61,139,.32); }
     .ss-mentor-card {
         min-height: 210px;
         position: relative;
@@ -823,7 +879,7 @@
         .ss-orbit-stage { min-height: 520px; }
         .ss-mentor-grid { grid-template-columns: 1fr; }
         .ss-mentor-card { grid-template-columns: 130px 1fr; }
-        .ss-main-mentor { grid-template-columns: 280px minmax(0, 1fr); }
+        .ss-main-mentor-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .ss-landing-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @@media (max-width: 640px) {
@@ -840,10 +896,14 @@
         .ss-panel-head button { width: 100%; justify-content: center; }
         .ss-mentor-card { grid-template-columns: 1fr; }
         .ss-mentor-card img { width: 130px; height: 150px; justify-self: center; }
-        .ss-main-mentor { grid-template-columns: 1fr; padding: 1.25rem; border-radius: 24px; }
+        .ss-main-mentor-grid { grid-template-columns: 1fr; }
+        .ss-main-mentor-grid .ss-main-mentor { grid-column: 1; max-width: 380px; margin: 0 auto; }
         .ss-main-mentor-portrait { position: relative; top: auto; width: min(78vw, 320px); margin: 0 auto; }
         .ss-main-mentor-content h2 { text-align: center; }
         .ss-main-mentor-position { text-align: center; }
+        .ss-mentor-modal header { grid-template-columns: 1fr; text-align: center; }
+        .ss-mentor-modal header img { margin: 0 auto; }
+        .ss-mentor-modal > ul { grid-template-columns: 1fr; }
         .ss-landing-stats { grid-template-columns: 1fr; }
         .ss-landing-stats div { border-right: none; border-bottom: 1px solid rgba(148,163,184,0.18); }
         .ss-landing-stats div:last-child { border-bottom: none; }
@@ -855,6 +915,7 @@
 
 @code {
     private bool chatbotOpen;
+    private bool mentorDetailsOpen;
     private string chatView = "welcome";
 
     protected override async Task OnInitializedAsync()
