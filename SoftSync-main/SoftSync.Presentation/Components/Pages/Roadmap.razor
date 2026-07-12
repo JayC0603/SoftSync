@@ -7,100 +7,137 @@
 @inject IRoadmapService RoadmapService
 @inject NavigationManager Nav
 
-<div class="max-800 mx-auto">
-    <StepIndicator CurrentStep="5" />
+@if (roadmap is null)
+{
+    <div class="rm-loading"><span></span>@L["roadmap.loading"]</div>
+}
+else
+{
+    <div class="rm-shell">
+        <aside class="rm-left">
+            <section class="rm-panel rm-summary">
+                <div class="rm-label">LỘ TRÌNH CỦA BẠN</div>
+                <img src="/images/syncy-fish.png" alt="SYNCY" />
+                <h2>@CurrentSkill<br />Mastery</h2>
+                <p><b>@ProgressPercent%</b> hoàn thành</p>
+                <div class="rm-progress"><i style="width:@(ProgressPercent)%"></i></div>
+                <button @onclick="ScrollToCurrent">Xem tổng quan</button>
+            </section>
 
-    <div class="tw:flex tw:justify-between tw:items-end tw:mb-6">
-        <div>
-            <h2 class="tw:font-bold tw:mb-1">@L["roadmap.title.prefix"] <span class="ss-gradient-text">@L["roadmap.title.highlight"]</span></h2>
-            <p class="text-muted tw:mb-0">@L["roadmap.subtitle"]</p>
-        </div>
-        <div class="tw:text-end">
-            <span class="badge bg-primary tw:text-base">@L["roadmap.demoMode"]</span>
-        </div>
-    </div>
+            <section class="rm-panel rm-stages">
+                <div class="rm-label">GIAI ĐOẠN</div>
+                @foreach (var section in Sections.Select((value, index) => (value, index)))
+                {
+                    var percent = SectionPercent(section.value);
+                    <button class="rm-stage @(section.index == selectedSection ? "active" : "")"
+                            @onclick="() => SelectSection(section.index)">
+                        <span>@(section.index + 1)</span>
+                        <b>@section.value.Title</b>
+                        <small>@percent%</small>
+                        @if (section.index > selectedSection && percent == 0) { <i class="bi bi-lock-fill"></i> }
+                    </button>
+                }
+            </section>
 
-    @if (roadmap == null)
-    {
-        <div class="tw:text-center tw:py-12">@L["roadmap.loading"]</div>
-    }
-    else
-    {
-        @foreach (var section in GetSections())
-        {
-            <div class="tw:mb-12">
-                <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
-                    <div>
-                        <h4 class="tw:font-bold tw:mb-1">@section.Title</h4>
-                        <p class="text-muted tw:mb-0">3 @L["roadmap.week"]</p>
-                    </div>
-                </div>
+            <section class="rm-panel rm-mentor">
+                <div class="rm-label">AI MENTOR GỢI Ý</div>
+                <p>Bạn đang học rất tốt! Hãy hoàn thành từng bước để củng cố kiến thức nhé.</p>
+                <img src="/images/syncy-fish.png" alt="Nova" />
+                <button @onclick='() => Nav.NavigateTo("/assistant")'>Chat với Nova</button>
+            </section>
+        </aside>
 
-                <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-4">
-                    @foreach (var item in section.Items)
+        <main class="rm-main" id="roadmap-current">
+            <header class="rm-head">
+                <div><h1>Giai đoạn @(selectedSection + 1): @Selected.Title <i class="bi bi-info-circle"></i></h1><p>Xây dựng nền tảng vững chắc và áp dụng kỹ năng vào thực tế.</p></div>
+                <span><i class="bi bi-star-fill"></i> @CompletedCount/@TotalCount bài học</span>
+            </header>
+
+            <div class="rm-track">
+                @foreach (var entry in Selected.Items.Select((value, index) => (value, index)))
+                {
+                    var state = ItemState(entry.value, entry.index);
+                    <button class="rm-track-item @state" @onclick="() => SelectItem(entry.value)">
+                        <span><i class="bi @(entry.value.IsCompleted ? "bi-check-lg" : entry.index == ActiveIndex ? "bi-play-fill" : "bi-lock-fill")"></i></span>
+                        <b>@(selectedSection + 1).@(entry.index + 1) @entry.value.Title</b>
+                    </button>
+                }
+            </div>
+
+            <section class="rm-lesson">
+                <div class="rm-lesson-title"><i class="bi bi-headphones"></i><div><h2>@(selectedSection + 1).@(SelectedItemIndex + 1) @SelectedItem.Title</h2><p>@SelectedItem.Description</p></div><span><i class="bi bi-clock"></i> ~ 40 phút</span></div>
+                <div class="rm-steps">
+                    @foreach (var step in LessonSteps.Select((value, index) => (value, index)))
                     {
-                        <button class="ss-card ss-glass-interactive roadmap-week-card tw:p-5 tw:text-start"
-                                @onclick="() => OpenLecture(item)">
-                            <div class="tw:flex tw:justify-between tw:items-start tw:mb-2">
-                                <div>
-                                    <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
-                                    <h5 class="tw:font-bold tw:mt-1 tw:mb-0">@item.Title</h5>
-                                </div>
-                                <i class="bi bi-play-circle-fill roadmap-week-icon"></i>
+                        var locked = step.index > 1;
+                        <article class="rm-step @(step.index == 0 ? "done" : locked ? "locked" : "current")">
+                            <div class="rm-step-no">@(step.index == 0 ? "✓" : (step.index + 1).ToString())</div>
+                            <div class="rm-step-visual @step.value.Color"><i class="bi @step.value.Icon"></i></div>
+                            <div class="rm-step-copy"><small>@step.value.Type</small><h3>@step.value.Title</h3><p>@step.value.Description</p></div>
+                            <div class="rm-step-action">
+                                @if (step.index == 0) { <em>✓ Đã hoàn thành</em><button @onclick="() => OpenLecture(SelectedItem)">Xem lại</button> }
+                                else if (step.index == 1) { <button class="primary" @onclick="() => OpenLecture(SelectedItem)">Bắt đầu học</button><small>~ 15 phút</small> }
+                                else { <span><i class="bi bi-lock-fill"></i> Chưa mở khóa</span><small>Hoàn thành bước @step.index</small> }
                             </div>
-                            <p class="text-muted tw:mb-0">@item.Description</p>
-                        </button>
+                        </article>
                     }
                 </div>
-            </div>
-        }
-    }
-</div>
+            </section>
+
+            <footer class="rm-reward"><span>🏆 Hoàn thành tất cả 4 bước để nhận</span><b>⭐ +80 XP</b><b>♙ +1 Huy hiệu</b><button disabled>Nhận phần thưởng</button></footer>
+        </main>
+
+        <aside class="rm-right">
+            <section class="rm-panel"><div class="rm-label">TIẾN ĐỘ GIAI ĐOẠN @(selectedSection + 1)</div><div class="rm-ring" style="--p:@SectionPercent(Selected)"><b>@SectionPercent(Selected)%</b></div><strong>@Selected.Items.Count(x => x.IsCompleted)/@Selected.Items.Count bài học</strong><button>Xem chi tiết</button></section>
+            <section class="rm-panel rm-skills"><div class="rm-label">KỸ NĂNG ĐẠT ĐƯỢC</div><p><i class="bi bi-headphones"></i> Lắng nghe chủ động</p><p><i class="bi bi-heart"></i> Thấu hiểu người khác</p><p><i class="bi bi-people"></i> Đặt câu hỏi hiệu quả</p></section>
+            <section class="rm-panel rm-stats"><div class="rm-label">THÀNH TÍCH TUẦN NÀY</div><p>◷ Thời gian học <b>2h 15m</b></p><p>☑ Bài học hoàn thành <b>@CompletedCount</b></p><p>⭐ XP nhận được <b>@(CompletedCount * 80)</b></p><p>🔥 Chuỗi ngày học <b>5 ngày</b></p></section>
+            <section class="rm-panel rm-reminder"><div class="rm-label">LỊCH NHẮC HỌC</div><p>📅 <span>Học @SelectedItem.Title<small>Hôm nay, 19:00</small></span></p><button>Xem lịch học</button></section>
+        </aside>
+    </div>
+}
 
 @code {
     [Parameter] public int UserId { get; set; }
     [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
     private RoadmapDto? roadmap;
+    private List<RoadmapSection> Sections = [];
+    private int selectedSection;
+    private int selectedItem;
+    private RoadmapSection Selected => Sections[Math.Min(selectedSection, Sections.Count - 1)];
+    private RoadmapItemDto SelectedItem => Selected.Items[Math.Min(selectedItem, Selected.Items.Count - 1)];
+    private int SelectedItemIndex => Selected.Items.IndexOf(SelectedItem);
+    private int TotalCount => roadmap?.Items.Count ?? 0;
+    private int CompletedCount => roadmap?.Items.Count(x => x.IsCompleted) ?? 0;
+    private int ProgressPercent => TotalCount == 0 ? 0 : CompletedCount * 100 / TotalCount;
+    private string CurrentSkill => Sections.Count == 0 ? "Communication" : Selected.Title;
+    private int ActiveIndex => Math.Max(0, Selected.Items.FindIndex(x => !x.IsCompleted));
+    private readonly LessonStep[] LessonSteps = [
+        new("VIDEO", "Video bài giảng", "Xem video để nắm tổng quan về khái niệm và nguyên tắc cốt lõi.", "bi-play-circle-fill", "blue"),
+        new("LÝ THUYẾT", "Nội dung lý thuyết", "Đọc chi tiết lý thuyết, ví dụ minh họa và các nguyên tắc quan trọng.", "bi-book", "green"),
+        new("BÀI TẬP TRẮC NGHIỆM", "Kiểm tra kiến thức", "Trả lời 10 câu hỏi trắc nghiệm để củng cố kiến thức vừa học.", "bi-clipboard-check", "orange"),
+        new("GAME", "Game thực hành", "Vượt qua thử thách tương tác để áp dụng kỹ năng vào tình huống thực tế.", "bi-controller", "purple")];
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
         roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        Sections = (roadmap.Items.Count == 0 ? DemoItems() : roadmap.Items)
+            .GroupBy(x => string.IsNullOrWhiteSpace(x.SkillName) ? "Communication" : x.SkillName)
+            .Select(g => new RoadmapSection(g.Key, g.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList())).ToList();
     }
-
-    private IEnumerable<RoadmapSection> GetSections()
-    {
-        if (roadmap?.Items == null || roadmap.Items.Count == 0)
-            return Enumerable.Empty<RoadmapSection>();
-
-        return roadmap.Items
-            .GroupBy(item => string.IsNullOrWhiteSpace(item.SkillName) ? L["roadmap.general"] : item.SkillName)
-            .Select(group => new RoadmapSection(
-                group.Key,
-                group.Min(item => item.Id),
-                group.OrderBy(item => item.WeekNumber).ThenBy(item => item.Id).ToList()))
-            .OrderBy(section => section.Order);
-    }
-
-    private void OpenLecture(RoadmapItemDto item) =>
-        Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
-
-    private sealed record RoadmapSection(string Title, int Order, List<RoadmapItemDto> Items);
+    private static List<RoadmapItemDto> DemoItems() => [new(){Id=1,WeekNumber=1,SkillName="Nền tảng giao tiếp",Title="Hiểu về giao tiếp",Description="Khám phá nền tảng giao tiếp hiệu quả.",IsCompleted=true},new(){Id=2,WeekNumber=2,SkillName="Nền tảng giao tiếp",Title="Lắng nghe chủ động",Description="Học cách lắng nghe để thấu hiểu và kết nối hiệu quả hơn."},new(){Id=3,WeekNumber=3,SkillName="Nền tảng giao tiếp",Title="Ngôn ngữ cơ thể",Description="Nhận biết và sử dụng tín hiệu phi ngôn ngữ."},new(){Id=4,WeekNumber=4,SkillName="Nền tảng giao tiếp",Title="Đặt câu hỏi hiệu quả",Description="Đặt câu hỏi để mở rộng đối thoại."}];
+    private int SectionPercent(RoadmapSection s) => s.Items.Count == 0 ? 0 : s.Items.Count(x => x.IsCompleted) * 100 / s.Items.Count;
+    private string ItemState(RoadmapItemDto item, int index) => item.IsCompleted ? "done" : index == ActiveIndex ? "active" : "locked";
+    private void SelectSection(int index) { selectedSection = index; selectedItem = 0; }
+    private void SelectItem(RoadmapItemDto item) { selectedItem = Selected.Items.IndexOf(item); }
+    private void OpenLecture(RoadmapItemDto item) => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
+    private void ScrollToCurrent() => Nav.NavigateTo("/roadmap#roadmap-current");
+    private sealed record RoadmapSection(string Title, List<RoadmapItemDto> Items);
+    private sealed record LessonStep(string Type, string Title, string Description, string Icon, string Color);
 }
 
 <style>
-    .max-800 { max-width: 800px; }
-    .roadmap-week-card {
-        border: 0;
-        border-radius: 20px;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-    .roadmap-week-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
-    }
-    .roadmap-week-icon {
-        font-size: 1.5rem;
-        color: var(--primary);
-    }
+    .rm-shell{display:grid;grid-template-columns:250px minmax(560px,1fr) 260px;min-height:calc(100vh - 72px);background:#fbfbff;color:#18223b}.rm-left,.rm-right{padding:24px 18px;border-color:#e5e7f5;display:flex;flex-direction:column;gap:16px}.rm-left{border-right:1px solid #e5e7f5}.rm-right{border-left:1px solid #e5e7f5}.rm-main{padding:28px 24px}.rm-panel{position:relative;padding:20px;border:1px solid #e6e5f8;border-radius:18px;background:linear-gradient(145deg,#fff,#f6f4ff);box-shadow:0 8px 24px rgba(86,71,210,.05)}.rm-label{font-size:12px;font-weight:900;color:#25208e;margin-bottom:16px}.rm-summary img{position:absolute;right:8px;top:35px;width:86px;height:70px;object-fit:contain}.rm-summary h2{font-size:19px;max-width:140px}.rm-summary p{font-size:13px}.rm-progress{height:7px;background:#e8e4ff;border-radius:9px;overflow:hidden}.rm-progress i{display:block;height:100%;background:linear-gradient(90deg,#6046ef,#8068f6)}.rm-panel button{border:1px solid #d7d2ff;background:#fff;color:#573cf0;border-radius:10px;font-weight:750;padding:10px 16px}.rm-summary>button,.rm-mentor>button,.rm-reminder>button{width:100%;margin-top:16px}.rm-stage{width:100%;display:grid!important;grid-template-columns:24px 1fr auto;align-items:center;gap:8px;margin:8px 0;text-align:left!important;color:#536077!important}.rm-stage span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#edf0f6}.rm-stage small{font-size:11px}.rm-stage.active{color:#fff!important;border:0;background:linear-gradient(135deg,#8a7cf5,#765bf0)}.rm-stage.active span{color:#6850ed;background:#fff}.rm-mentor p{font-size:13px;line-height:1.65}.rm-mentor img{width:90px;height:70px;object-fit:contain;display:block;margin-left:auto}.rm-head{display:flex;justify-content:space-between;gap:15px}.rm-head h1{font-size:20px;font-weight:850}.rm-head p{font-size:13px;color:#7b8498}.rm-head>span{height:max-content;padding:10px 14px;border:1px solid #e1dfff;border-radius:12px;font-size:12px}.rm-head .bi-star-fill{color:#ffc43d}.rm-track{display:flex;justify-content:space-between;position:relative;margin:32px 8px 30px}.rm-track:before{content:"";position:absolute;left:5%;right:5%;top:22px;height:2px;background:#e1e4eb}.rm-track-item{z-index:1;flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:8px;color:#8a92a3;font-size:11px}.rm-track-item span{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid #d9dce5;background:#f7f8fa}.rm-track-item b{max-width:110px}.rm-track-item.done span,.rm-track-item.active span{color:#fff;border-color:#6046ef;background:#6046ef}.rm-track-item.active span{box-shadow:0 0 0 7px #e7e2ff}.rm-track-item.active b{color:#5b42e7}.rm-lesson{border:1px solid #e2e3f3;border-radius:18px;padding:18px;background:rgba(255,255,255,.7)}.rm-lesson-title{display:flex;align-items:flex-start;gap:14px}.rm-lesson-title>i{color:#6046ef}.rm-lesson-title h2{font-size:18px;margin:0}.rm-lesson-title p{font-size:12px;color:#7b8498}.rm-lesson-title>span{margin-left:auto;font-size:12px}.rm-steps{display:flex;flex-direction:column;gap:9px;margin-top:12px}.rm-step{position:relative;display:grid;grid-template-columns:24px 200px 1fr 145px;align-items:center;gap:14px;border:1px solid #e3e5f0;border-radius:14px;padding:12px;background:#fff}.rm-step-no{position:absolute;left:-34px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#eeeef5;color:#48546a}.rm-step.done .rm-step-no{color:#fff;background:#31b766}.rm-step.current .rm-step-no{color:#fff;background:#6349ed}.rm-step-visual{height:90px;border-radius:11px;display:grid;place-items:center;font-size:38px}.rm-step-visual.blue{color:#5155da;background:#e7eaff}.rm-step-visual.green{color:#25a55b;background:#e4f8ed}.rm-step-visual.orange{color:#ef8b19;background:#fff1df}.rm-step-visual.purple{color:#7148ee;background:#eee8ff}.rm-step-copy small{font-size:10px;font-weight:850;color:#6246e7}.rm-step-copy h3{font-size:16px;margin:6px 0}.rm-step-copy p{font-size:12px;color:#748096;margin:0}.rm-step-action{display:flex;flex-direction:column;align-items:stretch;gap:8px;text-align:center}.rm-step-action em,.rm-step-action span{font-style:normal;font-size:11px;color:#2f9a5a;background:#ecf9f1;padding:8px}.rm-step-action span{color:#697386;background:#f3f4f6}.rm-step-action button.primary{color:#fff;border:0;background:#6046ed}.rm-step-action small{font-size:10px;color:#8b93a2}.rm-reward{display:flex;align-items:center;gap:20px;margin-top:14px;padding:14px;border:1px solid #e6e4f6;border-radius:14px;background:#fff;font-size:12px}.rm-reward button{margin-left:auto;border:0;border-radius:10px;padding:10px 18px}.rm-right .rm-panel>button{width:100%}.rm-ring{float:left;width:100px;height:100px;margin:0 14px 12px 0;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#6046ed calc(var(--p)*1%),#e9e7fb 0);position:relative}.rm-ring:after{content:"";position:absolute;inset:11px;border-radius:50%;background:#faf9ff}.rm-ring b{z-index:1;color:#5840df;font-size:22px}.rm-skills p,.rm-stats p,.rm-reminder p{display:flex;align-items:center;gap:10px;font-size:12px;margin:16px 0}.rm-skills i{display:grid;place-items:center;width:32px;height:32px;color:#6046ed;border-radius:50%;background:#eeeaff}.rm-stats p b{margin-left:auto}.rm-reminder p span{display:flex;flex-direction:column}.rm-reminder small{color:#8b93a2}.rm-loading{min-height:60vh;display:grid;place-items:center}.rm-loading span{width:40px;height:40px;border:4px solid #eee;border-top-color:#6046ed;border-radius:50%;animation:spin 1s linear infinite}@@keyframes spin{to{transform:rotate(360deg)}}
+    @@media(max-width:1150px){.rm-shell{grid-template-columns:220px 1fr}.rm-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);border-left:0;border-top:1px solid #e5e7f5}.rm-step{grid-template-columns:24px 150px 1fr 130px}}
+    @@media(max-width:800px){.rm-shell{display:block}.rm-left{border:0;display:grid;grid-template-columns:1fr 1fr}.rm-mentor{display:none}.rm-main{padding:20px 12px}.rm-track{overflow-x:auto}.rm-track-item{min-width:120px}.rm-step{grid-template-columns:1fr}.rm-step-no{left:8px;top:8px}.rm-step-visual{height:120px}.rm-right{grid-template-columns:1fr 1fr}.rm-reward{flex-wrap:wrap}}
+    @@media(max-width:520px){.rm-left,.rm-right{display:block}.rm-left>* ,.rm-right>*{margin-bottom:12px}.rm-head{display:block}.rm-step-visual{height:100px}}
 </style>
