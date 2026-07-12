@@ -20,6 +20,7 @@ public static class Translations
         ["nav.home"] = ("Home", "Trang chủ"),
         ["nav.assistant"] = ("AI Assistant", "Trợ lý AI"),
         ["nav.caseStudies"] = ("Case Studies", "Tình huống"),
+        ["nav.roadmap"] = ("Roadmap", "Lộ trình"),
         ["nav.progress"] = ("Progress", "Tiến độ"),
         ["nav.community"] = ("Community", "Cộng đồng"),
 
