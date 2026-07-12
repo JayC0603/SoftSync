@@ -16,16 +16,16 @@ else
     <div class="rm-shell">
         <aside class="rm-left">
             <section class="rm-panel rm-summary">
-                <div class="rm-label">LỘ TRÌNH CỦA BẠN</div>
+                <div class="rm-label">@Tx("YOUR ROADMAP", "LỘ TRÌNH CỦA BẠN")</div>
                 <img src="/images/syncy-fish.png" alt="SYNCY" />
                 <h2>@CurrentSkill<br />Mastery</h2>
-                <p><b>@ProgressPercent%</b> hoàn thành</p>
+                <p><b>@ProgressPercent%</b> @Tx("completed", "hoàn thành")</p>
                 <div class="rm-progress"><i style="width:@(ProgressPercent)%"></i></div>
-                <button @onclick="ScrollToCurrent">Xem tổng quan</button>
+                <button @onclick="ScrollToCurrent">@Tx("View overview", "Xem tổng quan")</button>
             </section>
 
             <section class="rm-panel rm-stages">
-                <div class="rm-label">GIAI ĐOẠN</div>
+                <div class="rm-label">@Tx("STAGES", "GIAI ĐOẠN")</div>
                 @foreach (var section in Sections.Select((value, index) => (value, index)))
                 {
                     var percent = SectionPercent(section.value);
@@ -40,17 +40,17 @@ else
             </section>
 
             <section class="rm-panel rm-mentor">
-                <div class="rm-label">AI MENTOR GỢI Ý</div>
-                <p>Bạn đang học rất tốt! Hãy hoàn thành từng bước để củng cố kiến thức nhé.</p>
+                <div class="rm-label">@Tx("AI MENTOR SUGGESTS", "AI MENTOR GỢI Ý")</div>
+                <p>@Tx("You're doing great! Complete each step to reinforce your knowledge.", "Bạn đang học rất tốt! Hãy hoàn thành từng bước để củng cố kiến thức nhé.")</p>
                 <img src="/images/syncy-fish.png" alt="Nova" />
-                <button @onclick='() => Nav.NavigateTo("/assistant")'>Chat với Nova</button>
+                <button @onclick='() => Nav.NavigateTo("/assistant")'>@Tx("Chat with Nova", "Chat với Nova")</button>
             </section>
         </aside>
 
         <main class="rm-main" id="roadmap-current">
             <header class="rm-head">
-                <div><h1>Giai đoạn @(selectedSection + 1): @Selected.Title <i class="bi bi-info-circle"></i></h1><p>Xây dựng nền tảng vững chắc và áp dụng kỹ năng vào thực tế.</p></div>
-                <span><i class="bi bi-star-fill"></i> @CompletedCount/@TotalCount bài học</span>
+                <div><h1>@Tx("Stage", "Giai đoạn") @(selectedSection + 1): @Selected.Title <i class="bi bi-info-circle"></i></h1><p>@Tx("Build a strong foundation and apply your skills in practice.", "Xây dựng nền tảng vững chắc và áp dụng kỹ năng vào thực tế.")</p></div>
+                <span><i class="bi bi-star-fill"></i> @CompletedCount/@TotalCount @Tx("lessons", "bài học")</span>
             </header>
 
             <div class="rm-track">
@@ -65,7 +65,7 @@ else
             </div>
 
             <section class="rm-lesson">
-                <div class="rm-lesson-title"><i class="bi bi-headphones"></i><div><h2>@(selectedSection + 1).@(SelectedItemIndex + 1) @SelectedItem.Title</h2><p>@SelectedItem.Description</p></div><span><i class="bi bi-clock"></i> ~ 40 phút</span></div>
+                <div class="rm-lesson-title"><i class="bi bi-headphones"></i><div><h2>@(selectedSection + 1).@(SelectedItemIndex + 1) @SelectedItem.Title</h2><p>@SelectedItem.Description</p></div><span><i class="bi bi-clock"></i> ~ 40 @Tx("minutes", "phút")</span></div>
                 <div class="rm-steps">
                     @foreach (var step in LessonSteps.Select((value, index) => (value, index)))
                     {
@@ -75,23 +75,23 @@ else
                             <div class="rm-step-visual @step.value.Color"><i class="bi @step.value.Icon"></i></div>
                             <div class="rm-step-copy"><small>@step.value.Type</small><h3>@step.value.Title</h3><p>@step.value.Description</p></div>
                             <div class="rm-step-action">
-                                @if (step.index == 0) { <em>✓ Đã hoàn thành</em><button @onclick="() => OpenLecture(SelectedItem)">Xem lại</button> }
-                                else if (step.index == 1) { <button class="primary" @onclick="() => OpenLecture(SelectedItem)">Bắt đầu học</button><small>~ 15 phút</small> }
-                                else { <span><i class="bi bi-lock-fill"></i> Chưa mở khóa</span><small>Hoàn thành bước @step.index</small> }
+                                @if (step.index == 0) { <em>✓ @Tx("Completed", "Đã hoàn thành")</em><button @onclick="() => OpenLecture(SelectedItem)">@Tx("Review", "Xem lại")</button> }
+                                else if (step.index == 1) { <button class="primary" @onclick="() => OpenLecture(SelectedItem)">@Tx("Start learning", "Bắt đầu học")</button><small>~ 15 @Tx("minutes", "phút")</small> }
+                                else { <span><i class="bi bi-lock-fill"></i> @Tx("Locked", "Chưa mở khóa")</span><small>@Tx("Complete step", "Hoàn thành bước") @step.index</small> }
                             </div>
                         </article>
                     }
                 </div>
             </section>
 
-            <footer class="rm-reward"><span>🏆 Hoàn thành tất cả 4 bước để nhận</span><b>⭐ +80 XP</b><b>♙ +1 Huy hiệu</b><button disabled>Nhận phần thưởng</button></footer>
+            <footer class="rm-reward"><span>🏆 @Tx("Complete all 4 steps to earn", "Hoàn thành tất cả 4 bước để nhận")</span><b>⭐ +80 XP</b><b>♙ +1 @Tx("Badge", "Huy hiệu")</b><button disabled>@Tx("Claim reward", "Nhận phần thưởng")</button></footer>
         </main>
 
         <aside class="rm-right">
-            <section class="rm-panel"><div class="rm-label">TIẾN ĐỘ GIAI ĐOẠN @(selectedSection + 1)</div><div class="rm-ring" style="--p:@SectionPercent(Selected)"><b>@SectionPercent(Selected)%</b></div><strong>@Selected.Items.Count(x => x.IsCompleted)/@Selected.Items.Count bài học</strong><button>Xem chi tiết</button></section>
-            <section class="rm-panel rm-skills"><div class="rm-label">KỸ NĂNG ĐẠT ĐƯỢC</div><p><i class="bi bi-headphones"></i> Lắng nghe chủ động</p><p><i class="bi bi-heart"></i> Thấu hiểu người khác</p><p><i class="bi bi-people"></i> Đặt câu hỏi hiệu quả</p></section>
-            <section class="rm-panel rm-stats"><div class="rm-label">THÀNH TÍCH TUẦN NÀY</div><p>◷ Thời gian học <b>2h 15m</b></p><p>☑ Bài học hoàn thành <b>@CompletedCount</b></p><p>⭐ XP nhận được <b>@(CompletedCount * 80)</b></p><p>🔥 Chuỗi ngày học <b>5 ngày</b></p></section>
-            <section class="rm-panel rm-reminder"><div class="rm-label">LỊCH NHẮC HỌC</div><p>📅 <span>Học @SelectedItem.Title<small>Hôm nay, 19:00</small></span></p><button>Xem lịch học</button></section>
+            <section class="rm-panel"><div class="rm-label">@Tx("STAGE PROGRESS", "TIẾN ĐỘ GIAI ĐOẠN") @(selectedSection + 1)</div><div class="rm-ring" style="--p:@SectionPercent(Selected)"><b>@SectionPercent(Selected)%</b></div><strong>@Selected.Items.Count(x => x.IsCompleted)/@Selected.Items.Count @Tx("lessons", "bài học")</strong><button>@Tx("View details", "Xem chi tiết")</button></section>
+            <section class="rm-panel rm-skills"><div class="rm-label">@Tx("SKILLS EARNED", "KỸ NĂNG ĐẠT ĐƯỢC")</div><p><i class="bi bi-headphones"></i> @Tx("Active listening", "Lắng nghe chủ động")</p><p><i class="bi bi-heart"></i> @Tx("Understanding others", "Thấu hiểu người khác")</p><p><i class="bi bi-people"></i> @Tx("Effective questioning", "Đặt câu hỏi hiệu quả")</p></section>
+            <section class="rm-panel rm-stats"><div class="rm-label">@Tx("THIS WEEK'S ACHIEVEMENTS", "THÀNH TÍCH TUẦN NÀY")</div><p>◷ @Tx("Study time", "Thời gian học") <b>2h 15m</b></p><p>☑ @Tx("Lessons completed", "Bài học hoàn thành") <b>@CompletedCount</b></p><p>⭐ @Tx("XP earned", "XP nhận được") <b>@(CompletedCount * 80)</b></p><p>🔥 @Tx("Study streak", "Chuỗi ngày học") <b>5 @Tx("days", "ngày")</b></p></section>
+            <section class="rm-panel rm-reminder"><div class="rm-label">@Tx("STUDY REMINDER", "LỊCH NHẮC HỌC")</div><p>📅 <span>@Tx("Study", "Học") @SelectedItem.Title<small>@Tx("Today", "Hôm nay"), 19:00</small></span></p><button>@Tx("View schedule", "Xem lịch học")</button></section>
         </aside>
     </div>
 }
@@ -111,11 +111,11 @@ else
     private int ProgressPercent => TotalCount == 0 ? 0 : CompletedCount * 100 / TotalCount;
     private string CurrentSkill => Sections.Count == 0 ? "Communication" : Selected.Title;
     private int ActiveIndex => Math.Max(0, Selected.Items.FindIndex(x => !x.IsCompleted));
-    private readonly LessonStep[] LessonSteps = [
-        new("VIDEO", "Video bài giảng", "Xem video để nắm tổng quan về khái niệm và nguyên tắc cốt lõi.", "bi-play-circle-fill", "blue"),
-        new("LÝ THUYẾT", "Nội dung lý thuyết", "Đọc chi tiết lý thuyết, ví dụ minh họa và các nguyên tắc quan trọng.", "bi-book", "green"),
-        new("BÀI TẬP TRẮC NGHIỆM", "Kiểm tra kiến thức", "Trả lời 10 câu hỏi trắc nghiệm để củng cố kiến thức vừa học.", "bi-clipboard-check", "orange"),
-        new("GAME", "Game thực hành", "Vượt qua thử thách tương tác để áp dụng kỹ năng vào tình huống thực tế.", "bi-controller", "purple")];
+    private LessonStep[] LessonSteps => [
+        new("VIDEO", Tx("Video lesson", "Video bài giảng"), Tx("Watch the video for an overview of the core concepts and principles.", "Xem video để nắm tổng quan về khái niệm và nguyên tắc cốt lõi."), "bi-play-circle-fill", "blue"),
+        new(Tx("THEORY", "LÝ THUYẾT"), Tx("Theory content", "Nội dung lý thuyết"), Tx("Read detailed theory, examples, and important principles.", "Đọc chi tiết lý thuyết, ví dụ minh họa và các nguyên tắc quan trọng."), "bi-book", "green"),
+        new(Tx("QUIZ", "BÀI TẬP TRẮC NGHIỆM"), Tx("Knowledge check", "Kiểm tra kiến thức"), Tx("Answer 10 questions to reinforce what you have learned.", "Trả lời 10 câu hỏi trắc nghiệm để củng cố kiến thức vừa học."), "bi-clipboard-check", "orange"),
+        new("GAME", Tx("Practice game", "Game thực hành"), Tx("Complete an interactive challenge to apply the skill in real situations.", "Vượt qua thử thách tương tác để áp dụng kỹ năng vào tình huống thực tế."), "bi-controller", "purple")];
 
     protected override async Task OnInitializedAsync() {
         if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
@@ -131,6 +131,7 @@ else
     private void SelectItem(RoadmapItemDto item) { selectedItem = Selected.Items.IndexOf(item); }
     private void OpenLecture(RoadmapItemDto item) => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
     private void ScrollToCurrent() => Nav.NavigateTo("/roadmap#roadmap-current");
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
     private sealed record RoadmapSection(string Title, List<RoadmapItemDto> Items);
     private sealed record LessonStep(string Type, string Title, string Description, string Icon, string Color);
 }
