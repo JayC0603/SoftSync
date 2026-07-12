@@ -328,6 +328,8 @@ public static class Translations
         // ===== Welcome toast =====
         ["welcome.title"] = ("Welcome back,", "Chào mừng trở lại,"),
         ["welcome.subtitle"] = ("SYNCY is ready to help you today!", "SYNCY đã sẵn sàng hỗ trợ bạn hôm nay!"),
+        ["welcome.first.title"] = ("Welcome to SoftSync,", "Chào mừng bạn đến với SoftSync,"),
+        ["welcome.first.subtitle"] = ("Let's begin your soft-skills journey!", "Hãy bắt đầu hành trình phát triển kỹ năng mềm nhé!"),
         ["nav.level"] = ("Level", "Cấp"),
         ["lang.switchTitle"] = ("Switch language", "Chuyển ngôn ngữ"),
 

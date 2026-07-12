@@ -94,7 +94,7 @@
 
         Logger.LogInformation("User created a new account with password.");
         await SignInManager.SignInAsync(user, isPersistent: true);
-        WelcomeCookie.Set(HttpContext, user.FullName);
+        WelcomeCookie.Set(HttpContext, user.FullName, isFirstLogin: true);
 
         // First-time users complete their profile (age/goal) next.
         RedirectManager.RedirectTo("profile-setup");

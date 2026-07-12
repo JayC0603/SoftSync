@@ -15,8 +15,8 @@
             <span class="ss-welcome-fallback">🐟</span>
         </div>
         <div>
-            <div class="tw:font-bold">@L["welcome.title"] @name! 🎉</div>
-            <div class="tw:text-sm text-muted">@L["welcome.subtitle"]</div>
+            <div class="tw:font-bold">@L[isFirstLogin ? "welcome.first.title" : "welcome.title"] @name! 🎉</div>
+            <div class="tw:text-sm text-muted">@L[isFirstLogin ? "welcome.first.subtitle" : "welcome.subtitle"]</div>
         </div>
     </div>
 }
@@ -24,6 +24,7 @@
 @code {
     private bool visible;
     private bool leaving;
+    private bool isFirstLogin;
     private string name = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -34,6 +35,13 @@
         if (string.IsNullOrWhiteSpace(raw)) return;
 
         await JS.InvokeVoidAsync("ssWelcome.clear");
+        var separatorIndex = raw.IndexOf('|');
+        if (separatorIndex >= 0)
+        {
+            isFirstLogin = raw[..separatorIndex] == "first";
+            raw = raw[(separatorIndex + 1)..];
+        }
+
         name = FirstNameOf(raw.Trim());
         visible = true;
         await InvokeAsync(StateHasChanged);

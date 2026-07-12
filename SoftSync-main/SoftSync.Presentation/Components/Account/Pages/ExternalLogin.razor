@@ -114,7 +114,7 @@
 
         await SignInManager.SignInAsync(user, isPersistent: true);
         Logger.LogInformation("New account provisioned via {Provider}.", externalLoginInfo.LoginProvider);
-        WelcomeCookie.Set(HttpContext, user.FullName);
+        WelcomeCookie.Set(HttpContext, user.FullName, isFirstLogin: isNew);
 
         // New users complete their profile; returning users go to their dashboard.
         var destination = string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" ? "dashboard" : ReturnUrl;
