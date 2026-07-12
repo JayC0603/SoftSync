@@ -9,7 +9,10 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <div class="max-800 tw:mx-auto">
-    <StepIndicator CurrentStep="3" />
+    @if (questions is not null && questions.Count > 0)
+    {
+        <StepIndicator CurrentStep="@(currentQuestionIndex + 1)" TotalSteps="@questions.Count" />
+    }
 
     @if (questions == null)
     {

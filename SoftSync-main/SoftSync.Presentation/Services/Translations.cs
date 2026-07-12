@@ -269,12 +269,18 @@ public static class Translations
         ["result.recommendation.part3"] = (" scenarios to balance your skill set.", " để cân bằng bộ kỹ năng của mình."),
         ["result.viewRoadmap"] = ("View My Roadmap", "Xem lộ trình của tôi"),
         ["result.score"] = ("Score", "Điểm"),
+        ["result.questionsCompleted"] = ("Completed", "Đã hoàn thành"),
+        ["result.questions"] = ("questions", "câu"),
 
         // Band labels (raw score 8–32 per skill: 8–14 / 15–20 / 21–26 / 27–32)
         ["result.level.passive"] = ("Passive", "Bị động"),
         ["result.level.developing"] = ("Developing", "Đang phát triển"),
         ["result.level.proactive"] = ("Proactive", "Chủ động"),
         ["result.level.mastery"] = ("Mastery", "Làm chủ"),
+        ["result.performance.passive"] = ("Needs more effort", "Cần cố gắng hơn"),
+        ["result.performance.developing"] = ("Good", "Khá tốt"),
+        ["result.performance.proactive"] = ("Very good", "Tốt"),
+        ["result.performance.mastery"] = ("Excellent", "Xuất sắc"),
 
         // Per-skill × band descriptions. Keyed result.desc.<slug>.<band>; slug is
         // the skill name with spaces removed, lowercased (see AssessmentResult.razor).

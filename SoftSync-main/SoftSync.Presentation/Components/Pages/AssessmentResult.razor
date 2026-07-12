@@ -11,7 +11,10 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <div class="max-800 mx-auto">
-    <StepIndicator CurrentStep="4" />
+    @if (results is not null)
+    {
+        <StepIndicator CurrentStep="@TotalQuestionCount" TotalSteps="@TotalQuestionCount" IsComplete="true" />
+    }
 
     <div class="tw:text-center tw:mb-12">
         <h2 class="tw:font-bold">@L["result.title.prefix"] <span class="ss-gradient-text">@L["result.title.highlight"]</span></h2>
@@ -34,8 +37,12 @@
                             <span class="badge @GetLevelBadgeClass(res.Level)">@LevelLabel(res.Level)</span>
                         </div>
                         <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mb-1">
-                            <span>@L["result.score"]</span>
-                            <span>@res.Score / @SoftSync.Common.AssessmentScoring.MaxScore</span>
+                            <span>@L["result.questionsCompleted"]</span>
+                            <span>@AssessmentScoring.QuestionsPerSkill @L["result.questions"]</span>
+                        </div>
+                        <div class="tw:flex tw:justify-between tw:items-center tw:text-sm tw:mb-2">
+                            <span class="text-muted">@L["result.score"]: @res.Score / @AssessmentScoring.MaxScore</span>
+                            <strong class="performance-label">@PerformanceLabel(res.Level)</strong>
                         </div>
                         <div class="progress tw:mb-4" style="height: 12px; border-radius: 6px;">
                             <div class="progress-bar" style="width: @(ScorePercent(res.Score))%; background: var(--gradient);"></div>
@@ -63,6 +70,7 @@
 @code {
     [Parameter] public int UserId { get; set; }
     private IEnumerable<AssessmentResultDto>? results;
+    private int TotalQuestionCount => (results?.Count() ?? 0) * AssessmentScoring.QuestionsPerSkill;
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,6 +94,8 @@
     }
 
     private string LevelLabel(AssessmentLevel level) => L[$"result.level.{LevelKey(level)}"];
+
+    private string PerformanceLabel(AssessmentLevel level) => L[$"result.performance.{LevelKey(level)}"];
 
     private string SkillName(AssessmentResultDto result) => result.SkillId is >= 1 and <= 7
         ? L[$"skill.name.{result.SkillId}"]
@@ -123,4 +133,5 @@
 
 <style>
     .max-800 { max-width: 800px; }
+    .performance-label { color: var(--primary); }
 </style>

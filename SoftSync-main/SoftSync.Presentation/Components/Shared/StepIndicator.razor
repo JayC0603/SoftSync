@@ -1,13 +1,13 @@
 @namespace SoftSync.Presentation.Components.Shared
 @inherits LocalizedComponentBase
 
-<div class="tw:flex tw:justify-center tw:mb-12">
+<div class="step-indicator @(TotalSteps > 8 ? "many-steps" : "") tw:flex tw:justify-center tw:mb-12" aria-label="Progress">
     @for (int i = 1; i <= TotalSteps; i++)
     {
         var step = i;
         <div class="tw:flex tw:items-center">
             <div class="ss-onboarding-step @(step <= CurrentStep ? "active" : "")">
-                @if (step < CurrentStep)
+                @if (IsComplete || step < CurrentStep)
                 {
                     <i class="bi bi-check"></i>
                 }
@@ -18,7 +18,7 @@
             </div>
             @if (step < TotalSteps)
             {
-                <div style="width: 50px; height: 2px; background: @(step < CurrentStep ? "var(--primary)" : "#e2e8f0");"></div>
+                <div class="step-connector" style="background: @(IsComplete || step < CurrentStep ? "var(--primary)" : "#e2e8f0");"></div>
             }
         </div>
     }
@@ -27,4 +27,21 @@
 @code {
     [Parameter] public int CurrentStep { get; set; }
     [Parameter] public int TotalSteps { get; set; } = 5;
+    [Parameter] public bool IsComplete { get; set; }
 }
+
+<style>
+    .step-indicator {
+        max-width: 100%;
+        overflow-x: auto;
+        padding: 0.25rem;
+    }
+    .step-connector { width: 50px; height: 2px; }
+    .many-steps .ss-onboarding-step {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        font-size: 0.7rem;
+    }
+    .many-steps .step-connector { width: 4px; }
+</style>
