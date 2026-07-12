@@ -30,7 +30,7 @@
                 <div>
                     <div class="ss-card ss-glass-interactive tw:p-6">
                         <div class="tw:flex tw:justify-between tw:items-center tw:mb-2">
-                            <h5 class="tw:font-bold tw:mb-0">@res.SkillName</h5>
+                            <h5 class="tw:font-bold tw:mb-0">@SkillName(res)</h5>
                             <span class="badge @GetLevelBadgeClass(res.Level)">@LevelLabel(res.Level)</span>
                         </div>
                         <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mb-1">
@@ -41,7 +41,7 @@
                             <div class="progress-bar" style="width: @(ScorePercent(res.Score))%; background: var(--gradient);"></div>
                         </div>
                         <p class="tw:text-sm text-muted tw:mb-0">
-                            @LevelDescription(res.SkillName, res.Level)
+                            @LevelDescription(res.SkillId, res.Level)
                         </p>
                     </div>
                 </div>
@@ -87,9 +87,19 @@
 
     private string LevelLabel(AssessmentLevel level) => L[$"result.level.{LevelKey(level)}"];
 
-    private string LevelDescription(string skillName, AssessmentLevel level)
+    private string SkillName(AssessmentResultDto result) => result.SkillId is >= 1 and <= 7
+        ? L[$"skill.name.{result.SkillId}"]
+        : result.SkillName;
+
+    private string LevelDescription(int skillId, AssessmentLevel level)
     {
-        var skillKey = skillName.Replace(" ", "", StringComparison.Ordinal).ToLowerInvariant();
+        var skillKey = skillId switch
+        {
+            1 => "communication",
+            3 => "timemanagement",
+            4 => "criticalthinking",
+            _ => string.Empty
+        };
         var key = $"result.desc.{skillKey}.{LevelKey(level)}";
         var description = L[key];
 

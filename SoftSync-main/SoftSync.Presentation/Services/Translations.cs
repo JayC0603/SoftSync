@@ -146,6 +146,10 @@ public static class Translations
         ["assessment.back"] = ("Back", "Quay lại"),
         ["assessment.noQuestions"] = ("No entrance-test questions are available yet.", "Chưa tải được câu hỏi kiểm tra đầu vào."),
         ["assessment.retry"] = ("Try again", "Thử lại"),
+        ["assessment.milestone.oneThird"] = ("You're one-third of the way through this skill. Keep going! 💪", "Bạn đã đi được 1/3 phần kỹ năng này rồi, tiếp tục nhé! 💪"),
+        ["assessment.milestone.twoThirds"] = ("Two-thirds done — just a few questions left!", "Đã đi được 2/3 rồi — chỉ còn vài câu nữa thôi!"),
+        ["assessment.milestone.lastQuestion"] = ("Only one final question for this skill — you've got this!", "Chỉ còn 1 câu cuối của phần kỹ năng này — cố lên nào!"),
+        ["assessment.milestone.skillComplete"] = ("Great! You completed {skill}. Let's continue with the next skill.", "Tuyệt vời! Bạn đã hoàn thành phần {skill}. Cùng chuyển sang kỹ năng tiếp theo nhé."),
 
         // ===== Select Skills =====
         ["selectSkills.title"] = ("Which skills do you want to improve?", "Bạn muốn cải thiện những kỹ năng nào?"),

@@ -259,8 +259,7 @@
         {
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
         }
-        var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(userId)).Any();
-        Nav.NavigateTo("/dashboard");
+        Nav.NavigateTo($"/assessment/{userId}");
     }
 
     private static string FirstNameOf(string full)
