@@ -1,36 +1,87 @@
-﻿@page "/Error"
-@using System.Diagnostics
+@page "/Error"
+@inject NavigationManager Navigation
 
-<PageTitle>Error</PageTitle>
+<PageTitle>Something went wrong | SoftSync</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<main class="guest-error">
+    <section class="guest-error-card">
+        <div class="guest-error-mascot" aria-hidden="true">
+            <img src="/images/syncy-fish.png" alt="" />
+        </div>
+        <div class="guest-error-copy">
+            <span class="guest-error-kicker">SoftSync</span>
+            <h1>Let’s get you back on track</h1>
+            <p>We couldn’t open that page right now. You can return home, sign in, or create a free account to start learning.</p>
+            <div class="guest-error-actions">
+                <button class="guest-error-primary" @onclick='() => Navigation.NavigateTo("/")'>
+                    <i class="bi bi-house-door"></i> Back to home
+                </button>
+                <a href="/Account/Login" class="guest-error-secondary">Sign in</a>
+                <a href="/Account/Register" class="guest-error-link">Create account</a>
+            </div>
+        </div>
+    </section>
+</main>
 
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
-
-@code{
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
-    private string? RequestId { get; set; }
-    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-    protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
-}
+<style>
+    .guest-error {
+        min-height: calc(100vh - 84px);
+        display: grid;
+        place-items: center;
+        padding: clamp(1.5rem, 5vw, 5rem);
+    }
+    .guest-error-card {
+        width: min(920px, 100%);
+        display: grid;
+        grid-template-columns: minmax(220px, 0.8fr) minmax(280px, 1.2fr);
+        align-items: center;
+        gap: clamp(1.5rem, 5vw, 4rem);
+        padding: clamp(1.5rem, 5vw, 4rem);
+        border: 1px solid rgba(124, 58, 237, 0.14);
+        border-radius: 32px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 28px 80px rgba(99, 102, 241, 0.14);
+        backdrop-filter: blur(20px);
+    }
+    .guest-error-mascot {
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(196, 181, 253, 0.55), rgba(238, 242, 255, 0.18) 68%, transparent 70%);
+    }
+    .guest-error-mascot img { width: 100%; height: 100%; object-fit: contain; }
+    .guest-error-kicker {
+        color: #6d5ce7;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+    .guest-error h1 {
+        margin: 0.7rem 0 1rem;
+        color: #171c2d;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1.05;
+    }
+    .guest-error p { margin: 0; color: #64748b; font-size: 1.05rem; line-height: 1.75; }
+    .guest-error-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.75rem; }
+    .guest-error-actions a, .guest-error-actions button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0 1.15rem;
+        border-radius: 13px;
+        font-weight: 750;
+        text-decoration: none;
+    }
+    .guest-error-primary { border: 0; color: #fff; background: linear-gradient(135deg, #6d5ce7, #7c3aed); }
+    .guest-error-secondary { color: #4f46e5; background: rgba(99, 102, 241, 0.1); }
+    .guest-error-link { color: #475569; }
+    @@media (max-width: 680px) {
+        .guest-error-card { grid-template-columns: 1fr; text-align: center; }
+        .guest-error-mascot { width: min(220px, 70vw); margin: auto; }
+        .guest-error-actions { justify-content: center; }
+    }
+</style>

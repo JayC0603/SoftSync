@@ -51,7 +51,7 @@ public class AssessmentOptionDto
 public interface IRoadmapService
 {
     Task<RoadmapDto> GetUserRoadmapAsync(int userId);
-    Task MarkCompleteAsync(int itemId);
+    Task<bool> MarkCompleteAsync(int itemId, int userId);
 }
 
 public interface IProgressService

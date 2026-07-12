@@ -8,6 +8,7 @@
 @inject IRoadmapService RoadmapService
 @inject IGameBankService GameBankService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="game-page mx-auto">
     <div class="tw:mb-4">
@@ -190,10 +191,14 @@
                 @if (submitted)
                 {
                     <div class="ss-card game-result-card">
-                        <div class="result-score">@correctCount/5</div>
+                        <div class="result-score">@correctCount/@session.QuestionLimit</div>
                         <div class="text-muted tw:mb-2">Số câu đúng</div>
                         <div class="result-percent">@ScorePercent%</div>
-                        <div class="text-muted tw:mb-4">Bạn đã hoàn thành Game 1 cho @session.SkillName.</div>
+                        <div class="@(ScorePercent >= 60 ? "text-success" : "text-danger") tw:mb-4">
+                            @(ScorePercent >= 60
+                                ? $"Đạt yêu cầu — bài học {session.SkillName} đã được hoàn thành."
+                                : "Chưa đạt 60% — hãy làm lại để hoàn thành bài học.")
+                        </div>
 
                         <div class="result-list">
                             @foreach (var row in reviewRows)
@@ -230,6 +235,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var signedInUserId = await AuthProvider.GetUserIdAsync();
+        if (signedInUserId <= 0)
+        {
+            Nav.NavigateTo("/Account/Login", true);
+            return;
+        }
+
+        if (UserId != signedInUserId)
+        {
+            UserId = signedInUserId;
+            Nav.NavigateTo($"/roadmap/game/{UserId}/{ItemId}", true);
+            return;
+        }
+
         var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
         item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
@@ -366,7 +385,8 @@
         }
 
         submitted = true;
-        await RoadmapService.MarkCompleteAsync(ItemId);
+        if (ScorePercent >= 60)
+            await RoadmapService.MarkCompleteAsync(ItemId, UserId);
     }
 
     private async Task RestartAsync()

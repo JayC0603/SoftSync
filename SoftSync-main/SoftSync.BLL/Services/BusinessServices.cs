@@ -393,10 +393,13 @@ public class RoadmapService : IRoadmapService
             .ToList();
     }
 
-    public async Task MarkCompleteAsync(int itemId)
+    public async Task<bool> MarkCompleteAsync(int itemId, int userId)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item != null && !item.IsCompleted)
+        if (item is null || item.UserId != userId)
+            return false;
+
+        if (!item.IsCompleted)
         {
             item.IsCompleted = true;
             await _roadmapRepo.SaveChangesAsync();
@@ -409,6 +412,8 @@ public class RoadmapService : IRoadmapService
                 await _userRepo.SaveChangesAsync();
             }
         }
+
+        return true;
     }
 }
 

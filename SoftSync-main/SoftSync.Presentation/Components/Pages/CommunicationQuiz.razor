@@ -42,7 +42,7 @@
     {
         <section class="cq-shell cq-result">
             <div class="cq-score-ring rating-@Rating.Css"><strong>@totalScore/50</strong><span>@ScorePercent%</span></div>
-            <div class="cq-result-copy"><small>@Rating.Name.ToUpperInvariant()</small><h2>@Rating.Headline</h2><p>@Rating.Feedback</p><div class="cq-result-actions"><button @onclick="RestartAsync">Làm bộ câu hỏi mới <i class="bi bi-arrow-repeat"></i></button><button class="secondary" @onclick='() => Nav.NavigateTo("/communication-roleplay")'>Tiếp tục Quiz 2 <i class="bi bi-arrow-right"></i></button></div></div>
+            <div class="cq-result-copy"><small>@Rating.Name.ToUpperInvariant()</small><h2>@Rating.Headline</h2><p>@Rating.Feedback</p><div class="cq-result-actions"><button @onclick="RestartAsync">Làm bộ câu hỏi mới <i class="bi bi-arrow-repeat"></i></button><button class="secondary" @onclick='() => Nav.NavigateTo("/communication-lesson-2")'>Tiếp tục Quiz 2 <i class="bi bi-arrow-right"></i></button></div></div>
             <div class="cq-review">
                 @foreach (var row in reviewRows.Select((value,index)=>(value,index)))
                 {
