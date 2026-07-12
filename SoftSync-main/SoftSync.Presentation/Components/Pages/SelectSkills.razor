@@ -31,7 +31,7 @@
                         <div class="skill-icon tw:mb-4">
                             <i class="bi @skill.IconName tw:text-2xl"></i>
                         </div>
-                        <h5 class="tw:font-bold">@skill.Name</h5>
+                        <h5 class="tw:font-bold">@SkillName(skill)</h5>
                         <p class="tw:text-sm text-muted tw:mb-0">@skill.Description</p>
                     </div>
                 </div>
@@ -79,6 +79,12 @@
         else
             selectedSkillIds.Add(id);
     }
+
+    private string SkillName(SkillDto skill) => skill.Id switch
+    {
+        >= 1 and <= 7 => L[$"skill.name.{skill.Id}"],
+        _ => skill.Name
+    };
 
     private async Task HandleSubmit()
     {

@@ -152,6 +152,13 @@ public static class Translations
         ["selectSkills.subtitle"] = ("Select as many as you'd like. Our AI will focus on these.", "Chọn bao nhiêu tùy bạn. AI của chúng tôi sẽ tập trung vào những kỹ năng này."),
         ["selectSkills.loading"] = ("Loading skills...", "Đang tải kỹ năng..."),
         ["selectSkills.startAssessment"] = ("Start Assessment", "Bắt đầu đánh giá"),
+        ["skill.name.1"] = ("Communication", "Giao tiếp"),
+        ["skill.name.2"] = ("Teamwork", "Làm việc nhóm"),
+        ["skill.name.3"] = ("Time Management", "Quản lý thời gian"),
+        ["skill.name.4"] = ("Critical Thinking", "Tư duy phản biện"),
+        ["skill.name.5"] = ("Problem Solving", "Giải quyết vấn đề"),
+        ["skill.name.6"] = ("Emotional Management", "Quản lý cảm xúc"),
+        ["skill.name.7"] = ("Adaptability", "Khả năng thích ứng"),
 
         // ===== Case Studies =====
         ["caseStudies.titlePrefix"] = ("Interactive", "Tình huống"),

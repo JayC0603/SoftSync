@@ -109,7 +109,7 @@
                             @foreach (var s in skills)
                             {
                                 <button class="wiz-choice @(selectedSkillIds.Contains(s.Id) ? "selected" : "")" @onclick="() => ToggleSkill(s.Id)">
-                                    <i class="bi @s.IconName tw:me-1"></i> @s.Name
+                                    <i class="bi @s.IconName tw:me-1"></i> @SkillName(s)
                                 </button>
                             }
                         </div>
@@ -234,6 +234,12 @@
     {
         if (!selectedSkillIds.Remove(id)) selectedSkillIds.Add(id);
     }
+
+    private string SkillName(SkillDto skill) => skill.Id switch
+    {
+        >= 1 and <= 7 => L[$"skill.name.{skill.Id}"],
+        _ => skill.Name
+    };
 
     private void Next()
     {
