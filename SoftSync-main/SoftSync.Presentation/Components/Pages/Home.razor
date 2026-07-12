@@ -59,45 +59,47 @@
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
         <div class="ss-panel-head ss-glass">
             <div>
-                <div class="ss-panel-title"><i class="bi bi-stars"></i> Meet Your Mentors</div>
-                <p>Learn from AI mentors, here to guide you.</p>
+                <div class="ss-panel-title"><i class="bi bi-stars"></i> @L["mentor.main.heading"]</div>
+                <p>@L["mentor.main.headingDesc"]</p>
             </div>
             <button type="button" @onclick='() => Nav.NavigateTo("/community")'>
                 @L["home.communityHubCta"] <i class="bi bi-arrow-right"></i>
             </button>
         </div>
 
-        <div class="ss-mentor-grid">
-            <article class="ss-mentor-card ss-mentor-violet ss-glass ss-glass-interactive">
-                <img src="/images/syncy-fish.png" alt="Nova" />
-                <div>
-                    <h3>Nova <i class="bi bi-stars"></i></h3>
-                    <span>Communication Mentor</span>
-                    <p>Helps you express your ideas clearly, listen actively, and build strong connections.</p>
-                    <div class="ss-specialty"><b>Specialty</b> Public Speaking, Active Listening</div>
-                </div>
-            </article>
+        <article class="ss-main-mentor ss-glass ss-glass-interactive">
+            <div class="ss-main-mentor-portrait">
+                <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
+                <img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thụy Tố Trâm" />
+            </div>
 
-            <article class="ss-mentor-card ss-mentor-blue ss-glass ss-glass-interactive">
-                <img src="/images/syncy-fish.png" alt="Ace" />
-                <div>
-                    <h3>Ace <i class="bi bi-lightning-charge-fill"></i></h3>
-                    <span>Leadership Mentor</span>
-                    <p>Guides you to lead with confidence, make better decisions, and inspire your team.</p>
-                    <div class="ss-specialty"><b>Specialty</b> Leadership, Decision Making</div>
-                </div>
-            </article>
+            <div class="ss-main-mentor-content">
+                <span class="ss-main-mentor-kicker"><i class="bi bi-gem"></i> @L["mentor.main.role"]</span>
+                <h2>Th.S. Nguyễn Thụy Tố Trâm</h2>
+                <p class="ss-main-mentor-position">@L["mentor.main.position"]</p>
 
-            <article class="ss-mentor-card ss-mentor-green ss-glass ss-glass-interactive">
-                <img src="/images/syncy-fish.png" alt="Lexi" />
-                <div>
-                    <h3>Lexi <i class="bi bi-leaf-fill"></i></h3>
-                    <span>Productivity Mentor</span>
-                    <p>Helps you stay focused, manage your time, and build effective habits for success.</p>
-                    <div class="ss-specialty"><b>Specialty</b> Time Management, Focus</div>
+                <ul class="ss-main-mentor-highlights">
+                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight1"]</li>
+                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight2"]</li>
+                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight3"]</li>
+                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight4"]</li>
+                    <li><i class="bi bi-stars"></i>@L["mentor.main.highlight5"]</li>
+                </ul>
+
+                <div class="ss-main-mentor-about">
+                    <h3>@L["mentor.main.about"]</h3>
+                    <p>@L["mentor.main.bio1"]</p>
+                    <p>@L["mentor.main.bio2"]</p>
+                    <p>@L["mentor.main.bio3"]</p>
                 </div>
-            </article>
-        </div>
+
+                <div class="ss-main-mentor-tags">
+                    <span><i class="bi bi-chat-dots-fill"></i>@L["mentor.main.specialty.softSkills"]</span>
+                    <span><i class="bi bi-heart-fill"></i>@L["mentor.main.specialty.community"]</span>
+                    <span><i class="bi bi-universal-access"></i>@L["mentor.main.specialty.inclusion"]</span>
+                </div>
+            </div>
+        </article>
     </section>
 
     <section class="ss-landing-stats">
@@ -643,6 +645,66 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1rem;
     }
+    .ss-main-mentor {
+        display: grid;
+        grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+        gap: clamp(1.5rem, 4vw, 3.5rem);
+        align-items: start;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: clamp(1.5rem, 4vw, 3rem);
+        border-radius: 32px;
+        background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(237,233,254,.7));
+    }
+    .ss-main-mentor-portrait { position: sticky; top: 96px; }
+    .ss-main-mentor-portrait img {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 50%;
+        filter: drop-shadow(0 24px 34px rgba(76,29,149,.22));
+    }
+    .ss-main-mentor-orbit {
+        position: absolute;
+        inset: -5%;
+        border: 2px solid rgba(124,92,252,.24);
+        border-radius: 50%;
+        transform: rotate(-12deg) scaleY(.7);
+        box-shadow: 0 0 42px rgba(167,139,250,.2);
+    }
+    .ss-main-mentor-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .45rem .8rem;
+        color: #6d4cf5;
+        background: rgba(124,92,252,.1);
+        border: 1px solid rgba(124,92,252,.18);
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 850;
+    }
+    .ss-main-mentor-content h2 {
+        margin: .8rem 0 .25rem;
+        color: #17143d;
+        font-size: clamp(1.8rem, 3vw, 2.65rem);
+        font-weight: 900;
+    }
+    .ss-main-mentor-position { color: #6d4cf5; font-weight: 800; }
+    .ss-main-mentor-highlights { display: grid; gap: .65rem; margin: 1.4rem 0; padding: 0; list-style: none; }
+    .ss-main-mentor-highlights li { display: flex; align-items: flex-start; gap: .6rem; color: #475569; line-height: 1.55; }
+    .ss-main-mentor-highlights i { flex: 0 0 auto; color: #9b72f5; margin-top: .2rem; }
+    .ss-main-mentor-about { padding-top: 1.2rem; border-top: 1px solid rgba(124,92,252,.16); }
+    .ss-main-mentor-about h3 { color: #25205d; font-size: 1.15rem; font-weight: 900; }
+    .ss-main-mentor-about p { color: #64748b; line-height: 1.72; }
+    .ss-main-mentor-tags { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.4rem; }
+    .ss-main-mentor-tags span { display: inline-flex; align-items: center; gap: .45rem; padding: .65rem .8rem; color: #5b42db; background: rgba(255,255,255,.65); border: 1px solid rgba(124,92,252,.16); border-radius: 14px; font-size: .8rem; font-weight: 750; }
+    html[data-theme="dark"] .ss-main-mentor { background: linear-gradient(145deg, rgba(38,32,78,.86), rgba(30,27,75,.72)); }
+    html[data-theme="dark"] .ss-main-mentor-content h2, html[data-theme="dark"] .ss-main-mentor-about h3 { color: #f8fafc; }
+    html[data-theme="dark"] .ss-main-mentor-highlights li, html[data-theme="dark"] .ss-main-mentor-about p { color: #cbd5e1; }
+    html[data-theme="dark"] .ss-main-mentor-tags span { color: #ddd6fe; background: rgba(76,61,139,.45); }
     .ss-mentor-card {
         min-height: 210px;
         position: relative;
@@ -761,6 +823,7 @@
         .ss-orbit-stage { min-height: 520px; }
         .ss-mentor-grid { grid-template-columns: 1fr; }
         .ss-mentor-card { grid-template-columns: 130px 1fr; }
+        .ss-main-mentor { grid-template-columns: 280px minmax(0, 1fr); }
         .ss-landing-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @@media (max-width: 640px) {
@@ -777,6 +840,10 @@
         .ss-panel-head button { width: 100%; justify-content: center; }
         .ss-mentor-card { grid-template-columns: 1fr; }
         .ss-mentor-card img { width: 130px; height: 150px; justify-self: center; }
+        .ss-main-mentor { grid-template-columns: 1fr; padding: 1.25rem; border-radius: 24px; }
+        .ss-main-mentor-portrait { position: relative; top: auto; width: min(78vw, 320px); margin: 0 auto; }
+        .ss-main-mentor-content h2 { text-align: center; }
+        .ss-main-mentor-position { text-align: center; }
         .ss-landing-stats { grid-template-columns: 1fr; }
         .ss-landing-stats div { border-right: none; border-bottom: 1px solid rgba(148,163,184,0.18); }
         .ss-landing-stats div:last-child { border-bottom: none; }
