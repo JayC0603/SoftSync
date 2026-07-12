@@ -73,6 +73,25 @@ window.ssWelcome = {
     }
 };
 
+// Preserve an unfinished onboarding wizard across refreshes in this tab.
+window.ssWizard = {
+    key(userId) { return `ss-wizard-${userId}`; },
+    get(userId) {
+        try {
+            const raw = sessionStorage.getItem(this.key(userId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, state) {
+        try { sessionStorage.setItem(this.key(userId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId) {
+        try { sessionStorage.removeItem(this.key(userId)); }
+        catch { /* ignore */ }
+    }
+};
+
 // Submit a plain HTML form by id (used to POST the logout form after the
 // "Leave your learning journey?" modal is confirmed).
 window.ssSubmitForm = function (id) {
