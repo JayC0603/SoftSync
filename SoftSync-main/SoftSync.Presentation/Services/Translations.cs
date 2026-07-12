@@ -143,6 +143,9 @@ public static class Translations
         ["assessment.skillCommunication"] = ("Skill: Communication", "Kỹ năng: Giao tiếp"),
         ["assessment.finish"] = ("Finish", "Hoàn thành"),
         ["assessment.nextQuestion"] = ("Next Question", "Câu hỏi tiếp theo"),
+        ["assessment.back"] = ("Back", "Quay lại"),
+        ["assessment.noQuestions"] = ("No entrance-test questions are available yet.", "Chưa tải được câu hỏi kiểm tra đầu vào."),
+        ["assessment.retry"] = ("Try again", "Thử lại"),
 
         // ===== Select Skills =====
         ["selectSkills.title"] = ("Which skills do you want to improve?", "Bạn muốn cải thiện những kỹ năng nào?"),

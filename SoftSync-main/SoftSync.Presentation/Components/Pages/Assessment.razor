@@ -18,6 +18,16 @@
             <p class="tw:mt-4">@L["assessment.preparing"]</p>
         </div>
     }
+    else if (questions.Count == 0)
+    {
+        <div class="ss-card tw:p-12 tw:text-center">
+            <i class="bi bi-exclamation-circle tw:text-4xl text-warning"></i>
+            <p class="tw:mt-4 tw:mb-6">@L["assessment.noQuestions"]</p>
+            <button class="ss-btn-primary tw:px-8" @onclick="ReloadQuestionsAsync">
+                <i class="bi bi-arrow-clockwise tw:me-2"></i>@L["assessment.retry"]
+            </button>
+        </div>
+    }
     else if (currentQuestionIndex < questions.Count)
     {
         var q = questions[currentQuestionIndex];
@@ -43,9 +53,16 @@
                 }
             </div>
 
-            <div class="tw:mt-12 tw:flex tw:justify-end">
+            <div class="tw:mt-12 tw:flex tw:justify-between tw:gap-4">
+                <button class="btn btn-outline-primary tw:px-8" @onclick="PreviousQuestion" disabled="@(currentQuestionIndex == 0)">
+                    <i class="bi bi-arrow-left tw:me-2"></i>@L["assessment.back"]
+                </button>
                 <button class="ss-btn-primary tw:px-12" @onclick="NextQuestion" disabled="@(selectedOptionId == 0)">
                     @(currentQuestionIndex == questions.Count - 1 ? L["assessment.finish"] : L["assessment.nextQuestion"])
+                    @if (currentQuestionIndex < questions.Count - 1)
+                    {
+                        <i class="bi bi-arrow-right tw:ms-2"></i>
+                    }
                 </button>
             </div>
         </div>
@@ -64,7 +81,7 @@
     private List<AssessmentQuestionDto>? questions;
     private int currentQuestionIndex = 0;
     private int selectedOptionId = 0;
-    private List<UserAnswerDto> answers = new();
+    private readonly Dictionary<int, int> answers = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +102,17 @@
             return;
         }
 
+        await LoadQuestionsAsync();
+    }
+
+    private async Task ReloadQuestionsAsync()
+    {
+        questions = null;
+        await LoadQuestionsAsync();
+    }
+
+    private async Task LoadQuestionsAsync()
+    {
         questions = (await AssessmentService.GetAssessmentQuestionsAsync(UserId)).ToList();
 
         // Shuffle the options of each question so the "best" answer isn't always
@@ -121,19 +149,46 @@
         selectedOptionId = id;
     }
 
+    private void PreviousQuestion()
+    {
+        SaveCurrentAnswer();
+        if (currentQuestionIndex == 0)
+            return;
+
+        currentQuestionIndex--;
+        RestoreCurrentAnswer();
+    }
+
+    private void SaveCurrentAnswer()
+    {
+        if (questions is null || selectedOptionId == 0)
+            return;
+
+        answers[questions[currentQuestionIndex].Id] = selectedOptionId;
+    }
+
+    private void RestoreCurrentAnswer()
+    {
+        var questionId = questions![currentQuestionIndex].Id;
+        selectedOptionId = answers.TryGetValue(questionId, out var optionId) ? optionId : 0;
+    }
+
     private async Task NextQuestion()
     {
-        answers.Add(new UserAnswerDto { QuestionId = questions![currentQuestionIndex].Id, OptionId = selectedOptionId });
+        SaveCurrentAnswer();
         
-        if (currentQuestionIndex < questions.Count - 1)
+        if (currentQuestionIndex < questions!.Count - 1)
         {
             currentQuestionIndex++;
-            selectedOptionId = 0;
+            RestoreCurrentAnswer();
         }
         else
         {
             currentQuestionIndex++; // Move to processing state
-            await AssessmentService.SubmitAssessmentAsync(UserId, answers);
+            var submittedAnswers = answers
+                .Select(answer => new UserAnswerDto { QuestionId = answer.Key, OptionId = answer.Value })
+                .ToList();
+            await AssessmentService.SubmitAssessmentAsync(UserId, submittedAnswers);
             Nav.NavigateTo($"/assessment-result/{UserId}");
         }
     }
