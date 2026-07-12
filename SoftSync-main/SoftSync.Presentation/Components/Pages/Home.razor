@@ -110,7 +110,58 @@
                     </button>
                 </div>
             </article>
+
+            <article class="ss-main-mentor ss-advisor-card ss-advisor-card-right ss-glass ss-glass-interactive">
+                <div class="ss-main-mentor-portrait">
+                    <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
+                    <img src="/images/mentor-nguyen-xuan.png" alt="Th.S. Nguyễn Xuân" />
+                </div>
+
+                <div class="ss-main-mentor-content">
+                    <span class="ss-main-mentor-kicker"><i class="bi bi-stars"></i> @L["mentor.advisor.role"]</span>
+                    <h2>Th.S. Nguyễn Xuân</h2>
+                    <p class="ss-main-mentor-position">@L["mentor.advisor.xuan.position"]</p>
+                    <p class="ss-main-mentor-summary">@L["mentor.advisor.xuan.summary"]</p>
+                    <div class="ss-main-mentor-tags">
+                        <span><i class="bi bi-award-fill"></i>@L["mentor.advisor.xuan.specialty.experience"]</span>
+                        <span><i class="bi bi-cpu-fill"></i>@L["mentor.advisor.xuan.specialty.edtech"]</span>
+                    </div>
+                    <button type="button" class="ss-mentor-detail-btn" @onclick="() => xuanDetailsOpen = true">
+                        @L["mentor.main.viewDetails"] <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </article>
         </div>
+
+        @if (xuanDetailsOpen)
+        {
+            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => xuanDetailsOpen = false">
+                <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="xuan-detail-title" @onclick:stopPropagation="true">
+                    <button type="button" class="ss-mentor-modal-close" @onclick="() => xuanDetailsOpen = false" aria-label="@L["mentor.main.close"]">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <header>
+                        <img src="/images/mentor-nguyen-xuan.png" alt="Th.S. Nguyễn Xuân" />
+                        <div>
+                            <span>@L["mentor.advisor.role"]</span>
+                            <h2 id="xuan-detail-title">Th.S. Nguyễn Xuân</h2>
+                            <p>@L["mentor.advisor.xuan.position"]</p>
+                        </div>
+                    </header>
+                    <ul>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.xuan.highlight1"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.xuan.highlight2"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.xuan.highlight3"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.xuan.highlight4"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.xuan.highlight5"]</li>
+                    </ul>
+                    <div class="ss-mentor-modal-bio">
+                        <h3>@L["mentor.main.about"]</h3>
+                        <p>@L["mentor.advisor.xuan.bio"]</p>
+                    </div>
+                </section>
+            </div>
+        }
 
         @if (advisorDetailsOpen)
         {
@@ -786,6 +837,7 @@
         grid-column: 1;
         margin-top: 2.25rem;
     }
+    .ss-main-mentor-grid .ss-advisor-card-right { grid-column: 3; }
     .ss-main-mentor-grid .ss-main-mentor-portrait { position: relative; top: auto; width: 150px; margin: 0 auto 1rem; }
     .ss-main-mentor-grid .ss-main-mentor-content h2 { margin-top: .65rem; font-size: 1.35rem; }
     .ss-main-mentor-grid .ss-main-mentor-position { min-height: 3.4em; margin-bottom: .75rem; font-size: .82rem; line-height: 1.5; }
@@ -953,7 +1005,7 @@
         .ss-mentor-card img { width: 130px; height: 150px; justify-self: center; }
         .ss-main-mentor-grid { grid-template-columns: 1fr; }
         .ss-main-mentor-grid .ss-main-mentor { grid-column: 1; max-width: 380px; margin: 0 auto; }
-        .ss-main-mentor-grid .ss-advisor-card { margin-top: 0; }
+        .ss-main-mentor-grid .ss-advisor-card { grid-column: 1; margin-top: 0; }
         .ss-main-mentor-portrait { position: relative; top: auto; width: min(78vw, 320px); margin: 0 auto; }
         .ss-main-mentor-content h2 { text-align: center; }
         .ss-main-mentor-position { text-align: center; }
@@ -973,6 +1025,7 @@
     private bool chatbotOpen;
     private bool mentorDetailsOpen;
     private bool advisorDetailsOpen;
+    private bool xuanDetailsOpen;
     private string chatView = "welcome";
 
     protected override async Task OnInitializedAsync()
