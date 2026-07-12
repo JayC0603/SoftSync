@@ -1,0 +1,125 @@
+@page "/communication-quiz"
+@rendermode InteractiveServer
+@using SoftSync.Presentation.Services
+@inject IGameBankService GameBankService
+@inject NavigationManager Nav
+
+<PageTitle>Trắc nghiệm Kỹ năng Giao tiếp</PageTitle>
+
+<main class="cq-page">
+    <button class="cq-back" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-arrow-left"></i> Quay lại Roadmap</button>
+
+    <header class="cq-hero">
+        <div>
+            <span class="cq-eyebrow"><i class="bi bi-chat-heart-fill"></i> COMMUNICATION REVIEW</span>
+            <h1>Trắc nghiệm ôn tập<br /><em>Kỹ năng Giao tiếp</em></h1>
+            <p>Kiểm tra khả năng vận dụng lý thuyết vào email, lắng nghe chủ động, xử lý xung đột và giao tiếp khẳng định ôn hòa.</p>
+        </div>
+        <div class="cq-hero-stat"><small>MỖI LƯỢT</small><strong>05</strong><span>câu hỏi ngẫu nhiên</span><i>từ ngân hàng 20 tình huống</i></div>
+    </header>
+
+    <section class="cq-theory">
+        <button @onclick="() => theoryOpen = !theoryOpen">
+            <span><i class="bi bi-journal-bookmark-fill"></i><b>Ôn nhanh nền tảng lý thuyết</b><small>4 chủ đề · đọc trong 3 phút</small></span>
+            <i class="bi bi-chevron-down @(theoryOpen ? "open" : "")"></i>
+        </button>
+        @if (theoryOpen)
+        {
+            <div class="cq-theory-grid">
+                @foreach (var topic in Topics)
+                {
+                    <article><span><i class="bi @topic.Icon"></i></span><div><small>@topic.Number</small><h3>@topic.Title</h3><p>@topic.Body</p></div></article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (session is null)
+    {
+        <section class="cq-shell cq-loading"><span></span><p>Đang khởi tạo bộ câu hỏi...</p></section>
+    }
+    else if (submitted)
+    {
+        <section class="cq-shell cq-result">
+            <div class="cq-score-ring @(correctCount >= 3 ? "pass" : "retry")"><strong>@correctCount/5</strong><span>@(correctCount * 20)%</span></div>
+            <div class="cq-result-copy"><small>@(correctCount >= 3 ? "HOÀN THÀNH" : "CẦN ÔN THÊM")</small><h2>@(correctCount >= 3 ? "Bạn đã nắm khá tốt kỹ năng giao tiếp!" : "Hãy xem lại lý thuyết và thử lần nữa")</h2><p>Mỗi câu trả lời được giải thích bên dưới để bạn hiểu nguyên tắc thay vì chỉ ghi nhớ đáp án.</p><button @onclick="RestartAsync">Làm bộ câu hỏi mới <i class="bi bi-arrow-repeat"></i></button></div>
+            <div class="cq-review">
+                @foreach (var row in reviewRows.Select((value,index)=>(value,index)))
+                {
+                    <article class="@(row.value.Correct ? "ok" : "miss")"><span>@(row.value.Correct ? "✓" : "×")</span><div><small>CÂU @(row.index + 1)</small><h3>@row.value.Question</h3><p>Đáp án phù hợp: <b>@row.value.Answer</b></p></div></article>
+                }
+            </div>
+        </section>
+    }
+    else
+    {
+        var question = session.Questions[currentIndex];
+        <section class="cq-shell">
+            <div class="cq-progress"><div><span>CÂU HỎI @(currentIndex + 1)</span><b>@(currentIndex + 1)/5</b></div><div class="cq-bar"><i style="width:@((currentIndex + 1) * 20)%"></i></div></div>
+            <article class="cq-question">
+                <span class="cq-context"><i class="bi bi-people-fill"></i> TÌNH HUỐNG GIAO TIẾP</span>
+                <h2>@question.QuestionText</h2>
+                <div class="cq-options">
+                    @foreach (var option in question.Options)
+                    {
+                        <button class="@(selectedOptionId == option.Id ? "selected" : "")" @onclick="() => selectedOptionId = option.Id"><span>@option.DisplayLabel</span><p>@option.Text</p><i class="bi bi-check-circle-fill"></i></button>
+                    }
+                </div>
+                <footer><span><i class="bi bi-lightbulb"></i> Chọn phản hồi phù hợp và chuyên nghiệp nhất</span><button disabled="@(selectedOptionId is null)" @onclick="NextQuestion">@(currentIndex == 4 ? "Xem kết quả" : "Câu tiếp theo") <i class="bi bi-arrow-right"></i></button></footer>
+            </article>
+        </section>
+    }
+</main>
+
+@code {
+    private Game1SessionDto? session;
+    private int currentIndex, correctCount;
+    private string? selectedOptionId;
+    private bool theoryOpen, submitted;
+    private List<ReviewRow> reviewRows { get; } = [];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+    private async Task LoadAsync() => session = await GameBankService.CreateSessionAsync(1, 5);
+
+    private void NextQuestion()
+    {
+        if (session is null || selectedOptionId is null) return;
+        var question = session.Questions[currentIndex];
+        var selected = question.Options.First(x => x.Id == selectedOptionId);
+        var correct = question.Options.First(x => x.IsCorrect);
+        if (selected.IsCorrect) correctCount++;
+        reviewRows.Add(new(question.QuestionText, $"{correct.DisplayLabel}. {correct.Text}", selected.IsCorrect));
+        selectedOptionId = null;
+        if (currentIndex < session.QuestionLimit - 1) currentIndex++;
+        else submitted = true;
+    }
+
+    private async Task RestartAsync()
+    {
+        currentIndex = correctCount = 0;
+        selectedOptionId = null;
+        submitted = false;
+        reviewRows.Clear();
+        session = null;
+        await LoadAsync();
+    }
+
+    private static readonly List<Topic> Topics =
+    [
+        new("I", "Thành phần & mô hình giao tiếp", "Giao tiếp gồm Nguồn, Thông điệp, Kênh, Người nhận, Phản hồi, Môi trường, Bối cảnh và Nhiễu. Mô hình giao dịch diễn ra hai chiều; mô hình kiến tạo nhấn mạnh ý nghĩa được đàm phán.", "bi-diagram-3"),
+        new("II", "Lắng nghe chủ động", "Tập trung tuyệt đối, không phán xét, paraphrase để xác nhận và đọc tín hiệu phi ngôn từ. Trong 5 nhóm Carl Rogers, phản hồi thấu hiểu là cấp độ cao nhất.", "bi-ear"),
+        new("III", "Rào cản & thiên kiến nhận thức", "Bypassing, jargon, slang, khác biệt phi ngôn ngữ và phản ứng phòng vệ đều có thể làm sai lệch thông điệp. Hãy chuyển từ môi trường phòng vệ sang hỗ trợ.", "bi-sign-stop"),
+        new("IV", "Assertive Communication", "Dùng I-statements để mô tả quan sát và cảm xúc thay cho lời quy chụp. Giữ netiquette chuyên nghiệp và không dùng ALL CAPS vì dễ bị hiểu là quát tháo.", "bi-chat-square-heart")
+    ];
+
+    private sealed record Topic(string Number, string Title, string Body, string Icon);
+    private sealed record ReviewRow(string Question, string Answer, bool Correct);
+}
+
+<style>
+    .cq-page{--cq:#6847eb;--ink:#17163e;--muted:#667085;max-width:1180px;margin:auto;padding:clamp(1rem,3vw,2.5rem);color:var(--ink)}.cq-page button{font-family:inherit}.cq-back{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;padding:.5rem 0;color:#6b7280;border:0;background:transparent;font-weight:750}.cq-hero{display:grid;grid-template-columns:1fr 230px;gap:2rem;align-items:center;padding:clamp(1.5rem,4vw,3.5rem);border:1px solid rgba(109,77,244,.13);border-radius:30px;background:radial-gradient(circle at 90% 20%,rgba(236,72,153,.16),transparent 19rem),linear-gradient(135deg,#fff,#f0ebff);box-shadow:0 25px 60px rgba(76,29,149,.1)}.cq-eyebrow{display:inline-flex;align-items:center;gap:.5rem;color:var(--cq);font-size:.72rem;font-weight:900;letter-spacing:.09em}.cq-hero h1{margin:.8rem 0;font-size:clamp(2.4rem,5vw,4rem);line-height:1.05;letter-spacing:-.045em}.cq-hero h1 em{font-style:normal;color:var(--cq)}.cq-hero p{max-width:680px;margin:0;color:var(--muted);line-height:1.7}.cq-hero-stat{padding:1.4rem;border:1px solid rgba(255,255,255,.9);border-radius:22px;background:rgba(255,255,255,.72);text-align:center}.cq-hero-stat>*{display:block}.cq-hero-stat small{color:#8b93a4;font-size:.65rem;font-weight:900}.cq-hero-stat strong{margin:.2rem 0;color:var(--cq);font-size:3rem}.cq-hero-stat span{font-weight:800}.cq-hero-stat i{margin-top:.3rem;color:#8b93a4;font-size:.68rem;font-style:normal}
+    .cq-theory{margin:1rem 0}.cq-theory>button{width:100%;display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;color:var(--ink);border:1px solid rgba(109,77,244,.13);border-radius:18px;background:#fff;text-align:left}.cq-theory>button span{display:grid;grid-template-columns:38px 1fr;align-items:center}.cq-theory>button span>i{grid-row:1/3;color:var(--cq);font-size:1.3rem}.cq-theory>button small{color:#8b93a4}.cq-theory>button>i{transition:.2s}.cq-theory>button>i.open{transform:rotate(180deg)}.cq-theory-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;padding:1rem;border:1px solid rgba(109,77,244,.1);border-top:0;border-radius:0 0 18px 18px}.cq-theory-grid article{display:grid;grid-template-columns:44px 1fr;gap:.8rem;padding:1rem;border-radius:15px;background:#f8f7ff}.cq-theory-grid article>span{display:grid;place-items:center;width:42px;height:42px;color:var(--cq);border-radius:12px;background:#ece8ff}.cq-theory-grid small{color:var(--cq);font-weight:900}.cq-theory-grid h3{margin:.2rem 0;font-size:.95rem}.cq-theory-grid p{margin:0;color:var(--muted);font-size:.8rem;line-height:1.6}
+    .cq-shell{padding:clamp(1rem,3vw,2rem);border:1px solid rgba(109,77,244,.13);border-radius:25px;background:linear-gradient(145deg,#fff,#faf8ff);box-shadow:0 22px 55px rgba(76,29,149,.09)}.cq-loading{min-height:300px;display:grid;place-items:center;align-content:center;color:#858c9c}.cq-loading span{width:38px;height:38px;border:3px solid #e3ddfa;border-top-color:var(--cq);border-radius:50%;animation:cqspin 1s linear infinite}.cq-progress>div:first-child{display:flex;justify-content:space-between;color:var(--cq);font-size:.72rem;font-weight:900}.cq-bar{height:7px;margin-top:.6rem;overflow:hidden;border-radius:9px;background:#e5dffb}.cq-bar i{display:block;height:100%;background:linear-gradient(90deg,#5b43e5,#a855f7);transition:.3s}.cq-question{margin-top:1rem;padding:clamp(1rem,3vw,2rem);border:1px solid #e9e5f5;border-radius:20px;background:#fff}.cq-context{display:inline-flex;align-items:center;gap:.45rem;color:var(--cq);font-size:.66rem;font-weight:900}.cq-question h2{margin:.8rem 0 1.2rem;font-size:1.15rem;line-height:1.55}.cq-options{display:grid;gap:.7rem}.cq-options button{display:grid;grid-template-columns:38px 1fr 20px;align-items:center;gap:.8rem;padding:.8rem;text-align:left;color:#4e5769;border:1px solid #e5e2ef;border-radius:14px;background:#fff;transition:.15s}.cq-options button:hover{border-color:#b5a6f5;transform:translateY(-1px)}.cq-options button>span{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#f0edfa;font-weight:900}.cq-options button p{margin:0;line-height:1.5}.cq-options button>i{color:#d8d3e9}.cq-options button.selected{color:#4f35c8;border-color:var(--cq);background:#f3efff}.cq-options button.selected>i{color:var(--cq)}.cq-question footer{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #eeeaf8;color:#8b93a4;font-size:.75rem}.cq-question footer>button,.cq-result-copy button{padding:.75rem 1rem;color:#fff;border:0;border-radius:11px;background:linear-gradient(135deg,#6044e4,#8b5cf6);font-weight:800}.cq-question footer>button:disabled{opacity:.45}
+    .cq-result{display:grid;grid-template-columns:170px 1fr;gap:2rem;align-items:center}.cq-score-ring{display:grid;place-items:center;width:160px;height:160px;border:12px solid #ddd6fa;border-top-color:var(--cq);border-radius:50%}.cq-score-ring.retry{border-top-color:#f59e0b}.cq-score-ring strong{font-size:2rem}.cq-score-ring span{color:#7e8595}.cq-result-copy>small{color:#1c9c68;font-weight:900}.cq-result-copy h2{margin:.35rem 0}.cq-result-copy p{color:var(--muted)}.cq-review{grid-column:1/-1;display:grid;gap:.65rem}.cq-review article{display:grid;grid-template-columns:36px 1fr;gap:.8rem;padding:1rem;border-radius:14px}.cq-review article.ok{background:#ebfaf3}.cq-review article.miss{background:#fff2f2}.cq-review article>span{font-size:1.25rem;font-weight:900}.cq-review article.ok>span{color:#16a269}.cq-review article.miss>span{color:#dc5454}.cq-review small{font-size:.62rem;font-weight:900}.cq-review h3{margin:.2rem 0;font-size:.9rem}.cq-review p{margin:0;color:#687084;font-size:.8rem}
+    html[data-theme="dark"] .cq-page{--ink:#f8fafc;--muted:#cbd5e1}html[data-theme="dark"] .cq-hero,html[data-theme="dark"] .cq-theory>button,html[data-theme="dark"] .cq-shell,html[data-theme="dark"] .cq-question,html[data-theme="dark"] .cq-options button{background:#211c47;border-color:rgba(167,139,250,.2)}html[data-theme="dark"] .cq-theory-grid article{background:#292352}@@keyframes cqspin{to{transform:rotate(360deg)}}@@media(max-width:760px){.cq-hero{grid-template-columns:1fr}.cq-theory-grid{grid-template-columns:1fr}.cq-result{grid-template-columns:1fr}.cq-score-ring{margin:auto}}@@media(max-width:520px){.cq-page{padding:.75rem}.cq-question footer{align-items:stretch;flex-direction:column}.cq-question footer>button{width:100%}.cq-options button{grid-template-columns:36px 1fr}.cq-options button>i{display:none}}
+</style>
