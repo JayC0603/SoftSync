@@ -5,92 +5,77 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @inject IProgressService ProgressService
+@inject IRoadmapService RoadmapService
+@inject NavigationManager Nav
 
-<div class="max-800 mx-auto">
-    <div class="ss-page-heading tw:mb-12">
-        <h2 class="tw:font-bold tw:mb-1">@L["progress.title.prefix"] <span class="ss-gradient-text">@L["progress.title.highlight"]</span></h2>
-        <p class="text-muted">@L["progress.subtitle"]</p>
-    </div>
+<div class="progress-workspace">
+    <aside class="progress-side">
+        <span>@L["progress.overview"]</span>
+        <button class="active"><i class="bi bi-graph-up-arrow"></i> @L["dashboard.progress"]</button>
+        <button @onclick='() => Nav.NavigateTo("/assessment/" + UserId)'><i class="bi bi-bullseye"></i> @L["progress.skills"]</button>
+        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-book"></i> @L["progress.lessons"]</button>
+        <button><i class="bi bi-trophy"></i> @L["dashboard.achievements"]</button>
+        <hr /><span>@L["progress.tools"]</span>
+        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-map"></i> @L["dashboard.roadmap"]</button>
+        <button><i class="bi bi-bar-chart"></i> @L["progress.statistics"]</button>
+        <button><i class="bi bi-journal-text"></i> @L["progress.notes"]</button>
+        <div class="progress-side-fish"><img src="/images/syncy-fish.png" alt="SYNCY" /><b>@L["progress.keepGoing"]</b><p>@L["progress.keepGoingSub"]</p></div>
+    </aside>
 
-    @if (progressLogs == null)
-    {
-        <div class="tw:text-center tw:py-12">@L["progress.loading"]</div>
-    }
-    else if (!progressLogs.Any())
-    {
-        <div class="ss-card tw:p-12 tw:text-center">
-            <i class="bi bi-lightning-charge tw:text-4xl text-muted tw:mb-4"></i>
-            <h4>@L["progress.empty.title"]</h4>
-            <p class="text-muted">@L["progress.empty.description"]</p>
-            <a href="/" class="btn btn-primary tw:mt-4">@L["progress.empty.cta"]</a>
-        </div>
-    }
-    else
-    {
-        <div class="tw:grid tw:grid-cols-1 tw:gap-6">
-            @foreach (var p in progressLogs)
-            {
-                <div>
-                    <div class="ss-card ss-glass-interactive tw:p-6">
-                        <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
-                            <h5 class="tw:font-bold tw:mb-0">@p.SkillName</h5>
-                            <span class="tw:font-bold ss-gradient-text tw:text-2xl">@p.PercentComplete%</span>
-                        </div>
-                        <div class="progress" style="height: 20px; border-radius: 10px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 style="width: @p.PercentComplete%; background: var(--gradient);"></div>
-                        </div>
-                        <div class="tw:mt-4 tw:text-sm text-muted">
-                            @L["progress.lastActive"] @p.UpdatedAt.ToString("MMM dd, yyyy")
-                        </div>
+    <main class="progress-main">
+        <header class="progress-hero">
+            <div><h1>@L["progress.title.prefix"] <b>@L["progress.title.highlight"]</b></h1><p>@L["progress.subtitle"]</p><i></i></div>
+            <img src="/images/syncy-fish.png" alt="SYNCY" />
+        </header>
+
+        <div class="progress-content">
+            <section class="progress-center">
+                @if (progressLogs is null)
+                {
+                    <div class="progress-state">@L["progress.loading"]</div>
+                }
+                else if (progressLogs.Count == 0)
+                {
+                    <div class="progress-state empty"><div class="empty-icon"><i class="bi bi-clipboard-data"></i></div><h2>@L["progress.empty.title"]</h2><p>@L["progress.empty.description"]</p><button @onclick='() => Nav.NavigateTo("/roadmap")'>@L["progress.empty.cta"] <i class="bi bi-arrow-right"></i></button></div>
+                }
+                else
+                {
+                    <div class="skill-progress-grid">
+                        @foreach (var item in progressLogs)
+                        {
+                            <article><div><strong>@item.SkillName</strong><b>@item.PercentComplete%</b></div><span><i style="width:@item.PercentComplete%"></i></span><small>@L["progress.lastActive"] @item.UpdatedAt.ToString("MMM dd, yyyy")</small></article>
+                        }
                     </div>
-                </div>
-            }
+                }
+
+            </section>
         </div>
-    }
+        <h2 class="progress-start-title">@L["progress.startWith"]</h2>
+        <section class="progress-start-grid">
+            <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-book"></i><span><b>@L["assistant.exploreLessons"]</b><small>@L["progress.card.lessons"]</small></span><strong>→</strong></button>
+            <button @onclick='() => Nav.NavigateTo("/case-studies")'><i class="bi bi-bullseye"></i><span><b>@L["progress.card.skills"]</b><small>@L["progress.card.skillsSub"]</small></span><strong>→</strong></button>
+            <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-map"></i><span><b>@L["progress.card.roadmap"]</b><small>@L["progress.card.roadmapSub"]</small></span><strong>→</strong></button>
+            <button @onclick='() => Nav.NavigateTo("/community")'><i class="bi bi-people"></i><span><b>@L["progress.card.community"]</b><small>@L["progress.card.communitySub"]</small></span><strong>→</strong></button>
+        </section>
+    </main>
 </div>
 
 @code {
     [Parameter] public int UserId { get; set; }
     [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
-    private IEnumerable<ProgressDto>? progressLogs;
-
+    private List<ProgressDto>? progressLogs;
+    private List<RoadmapItemDto> roadmapItems = [];
     protected override async Task OnInitializedAsync()
     {
-        // Fall back to the signed-in user when no id is supplied via the route.
         if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
-        progressLogs = await ProgressService.GetUserProgressAsync(UserId);
+        progressLogs = (await ProgressService.GetUserProgressAsync(UserId)).ToList();
+        roadmapItems = (await RoadmapService.GetUserRoadmapAsync(UserId)).Items.OrderBy(x => x.WeekNumber).ToList();
     }
 }
 
 <style>
-    .max-800 { max-width: 800px; }
-    .ss-page-heading h2 {
-        color: #111827;
-        text-shadow: 0 1px 18px rgba(255,255,255,0.75);
-    }
-    .ss-page-heading .ss-gradient-text {
-        background: none;
-        -webkit-text-fill-color: #4f46e5;
-        color: #4f46e5;
-        text-shadow: 0 1px 18px rgba(255,255,255,0.78);
-    }
-    .ss-page-heading .text-muted {
-        color: #4b5563 !important;
-        font-weight: 600;
-        text-shadow: 0 1px 14px rgba(255,255,255,0.82);
-    }
-    html[data-theme="dark"] .ss-page-heading h2 {
-        color: #f8fafc;
-        text-shadow: 0 2px 16px rgba(0,0,0,0.5);
-    }
-    html[data-theme="dark"] .ss-page-heading .ss-gradient-text {
-        -webkit-text-fill-color: #a78bfa;
-        color: #a78bfa;
-        text-shadow: 0 2px 18px rgba(0,0,0,0.55);
-    }
-    html[data-theme="dark"] .ss-page-heading .text-muted {
-        color: #cbd5e1 !important;
-        text-shadow: 0 2px 16px rgba(0,0,0,0.55);
-    }
+    .progress-workspace{display:grid;grid-template-columns:220px 1fr;max-width:1500px;min-height:calc(100vh - 120px);margin:auto;border:1px solid rgba(255,255,255,.8);border-radius:28px;overflow:hidden;background:rgba(248,247,255,.94);box-shadow:0 24px 70px rgba(49,46,129,.14)}.progress-side{display:flex;flex-direction:column;gap:.4rem;padding:1.35rem;background:rgba(255,255,255,.72);border-right:1px solid #ebe7f6}.progress-brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;color:#5b42db;font-size:1.15rem}.progress-brand img{width:42px;height:42px;border-radius:12px}.progress-side>span{margin:1.2rem .3rem .35rem;color:#64748b;font-size:.7rem;font-weight:900;text-transform:uppercase}.progress-side>button{display:flex;align-items:center;gap:.65rem;padding:.72rem;border:0;border-radius:12px;background:transparent;color:#475569;text-align:left}.progress-side>button.active,.progress-side>button:hover{color:#5b42db;background:#ede8ff}.progress-side .side-primary{justify-content:center;color:#fff;background:linear-gradient(135deg,#7c5cfc,#5b21f4);font-weight:800}.progress-premium{margin-top:auto;padding:1rem;border-radius:18px;background:linear-gradient(145deg,#fff,#eee8ff);color:#5b42db}.progress-premium p{color:#64748b;font-size:.7rem}.progress-premium button{width:100%;padding:.55rem;border:0;border-radius:10px;background:#6d4aff;color:#fff;font-weight:800}.progress-main{padding:0 1.6rem 1.6rem;min-width:0}.progress-hero{display:flex;align-items:center;justify-content:space-between;min-height:220px;padding:1.5rem 2.4rem;border-radius:0 0 24px 24px;background:radial-gradient(circle at 80% 30%,rgba(167,139,250,.35),transparent 30%),linear-gradient(135deg,rgba(255,255,255,.9),rgba(237,232,255,.75))}.progress-hero h1{margin:0;color:#111827;font-size:2.1rem;font-weight:850}.progress-hero h1 b{color:#6d4aff}.progress-hero p{color:#475569;font-weight:650}.progress-hero div>i{display:block;width:54px;height:4px;border-radius:99px;background:#6d4aff}.progress-hero img{width:210px;height:190px;object-fit:contain}.progress-content{display:grid;grid-template-columns:1fr 240px;gap:1rem;margin-top:-1px}.progress-center{min-width:0}.progress-state,.roadmap-strip,.skill-progress-grid{margin-top:1rem;border:1px solid #e9e4f6;border-radius:22px;background:rgba(255,255,255,.88);box-shadow:0 12px 32px rgba(76,29,149,.08)}.progress-state{display:grid;place-items:center;min-height:280px;padding:2rem;text-align:center}.progress-state h2{margin:.7rem 0 .25rem;color:#111827}.progress-state p{max-width:560px;color:#64748b}.progress-state>button{padding:.75rem 1.25rem;border:0;border-radius:12px;background:linear-gradient(135deg,#7c5cfc,#5b21f4);color:#fff;font-weight:800}.empty-icon{display:grid;place-items:center;width:80px;height:80px;border-radius:24px;background:#ede8ff;color:#7c5cfc;font-size:2rem}.skill-progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.2rem}.skill-progress-grid article{padding:1rem;border-radius:16px;background:#faf9ff}.skill-progress-grid article>div{display:flex;justify-content:space-between}.skill-progress-grid article>span{display:block;height:8px;margin:.7rem 0;background:#ede9fe;border-radius:99px;overflow:hidden}.skill-progress-grid article>span i{display:block;height:100%;background:#7c5cfc}.skill-progress-grid small{color:#64748b}.roadmap-strip{overflow:hidden}.strip-head{display:flex;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #eeeaf7}.strip-head h2{margin:0;font-size:1rem}.strip-head button{border:0;background:transparent;color:#6d4aff;font-weight:750}.roadmap-steps{display:flex;justify-content:space-around;gap:.6rem;padding:1.25rem;overflow-x:auto}.roadmap-step{position:relative;min-width:130px;text-align:center}.roadmap-step>span{display:grid;place-items:center;width:52px;height:52px;margin:auto;border-radius:50%;background:#eeeef7;color:#64748b}.roadmap-step.complete>span{color:#fff;background:#7c5cfc}.roadmap-step strong,.roadmap-step small{display:block}.roadmap-step strong{margin-top:.55rem;color:#334155;font-size:.75rem}.roadmap-step small{color:#64748b;font-size:.65rem}.roadmap-placeholder{padding:2rem;color:#64748b}.motivation-card{align-self:end;min-height:280px;margin-top:1rem;padding:1.3rem;border:1px solid #ded6f6;border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(230,224,255,.9));color:#312e81;overflow:hidden}.motivation-card>i{color:#7c5cfc}.motivation-card h3{font-size:1rem}.motivation-card p{color:#64748b;font-size:.78rem}.mountains{margin:4rem -1.3rem -1.3rem;color:#7c5cfc;font-size:5rem;line-height:.7;opacity:.75}.mountains span{color:#a78bfa}html[data-theme="dark"] .progress-workspace{background:rgba(18,15,43,.95)}html[data-theme="dark"] .progress-side,html[data-theme="dark"] .progress-state,html[data-theme="dark"] .roadmap-strip,html[data-theme="dark"] .skill-progress-grid{background:rgba(35,30,70,.9);border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .progress-hero{background:linear-gradient(135deg,#282253,#40347b)}html[data-theme="dark"] .progress-hero h1,html[data-theme="dark"] .progress-state h2,html[data-theme="dark"] .roadmap-step strong{color:#fff}html[data-theme="dark"] .progress-hero p{color:#ddd6fe}
+    @@media(max-width:1000px){.progress-workspace{grid-template-columns:1fr}.progress-side{display:none}}@@media(max-width:760px){.progress-main{padding:0 1rem 1rem}.progress-content{grid-template-columns:1fr}.motivation-card{display:none}.progress-hero{padding:1rem}.progress-hero img{width:120px}.skill-progress-grid{grid-template-columns:1fr}}
+    .progress-side hr{width:100%;border-color:#ebe7f6}.progress-side-fish{margin-top:auto;padding:1rem;text-align:center;border:1px solid #ebe7f6;border-radius:18px;background:linear-gradient(145deg,#fff,#f0ebff)}.progress-side-fish img{width:115px;height:95px;object-fit:contain;mix-blend-mode:multiply}.progress-side-fish b,.progress-side-fish p{display:block}.progress-side-fish b{color:#17203b;font-size:.78rem}.progress-side-fish p{margin:.45rem 0 0;color:#64748b;font-size:.68rem}.progress-content{display:block}.progress-state{min-height:390px}.progress-start-title{margin:2rem 0 1rem;padding-left:1rem;border-left:4px solid #7c5cfc;color:#111827;font-size:1rem}.progress-start-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.progress-start-grid button{display:grid;grid-template-columns:auto 1fr;gap:.8rem;min-height:145px;padding:1rem;border:1px solid #ebe7f6;border-radius:18px;background:rgba(255,255,255,.86);color:#334155;text-align:left;box-shadow:0 10px 28px rgba(76,29,149,.07)}.progress-start-grid button>i{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:#ede8ff;color:#6d4aff;font-size:1.3rem}.progress-start-grid button span b,.progress-start-grid button span small{display:block}.progress-start-grid button span small{margin-top:.45rem;color:#64748b;font-size:.68rem;line-height:1.5}.progress-start-grid button>strong{grid-column:2;justify-self:end;color:#6d4aff;font-size:1.25rem}.progress-hero img{mix-blend-mode:multiply}html[data-theme="dark"] .progress-side-fish,html[data-theme="dark"] .progress-start-grid button{background:rgba(35,30,70,.9);border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .progress-side-fish img,html[data-theme="dark"] .progress-hero img{mix-blend-mode:screen}html[data-theme="dark"] .progress-side-fish b,html[data-theme="dark"] .progress-start-title,html[data-theme="dark"] .progress-start-grid button{color:#fff}
+    @@media(max-width:1100px){.progress-start-grid{grid-template-columns:1fr 1fr}}@@media(max-width:620px){.progress-start-grid{grid-template-columns:1fr}}
 </style>

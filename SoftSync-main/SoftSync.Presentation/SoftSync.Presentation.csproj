@@ -29,6 +29,12 @@
     <FrontEndInputs Include="Styles/**/*.css;Scripts/**/*.js;Components/**/*.razor;package.json;vite.config.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Assets\Game1Banks\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="NpmInstall" BeforeTargets="Build" Inputs="package.json" Outputs="$(NpmInstallStampFile)" Condition="Exists('package.json')">
     <Exec Command="npm install" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="NpmInstallExitCode" />

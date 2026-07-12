@@ -1,0 +1,52 @@
+@page "/assessment-complete/{UserId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@inject NavigationManager Nav
+
+<div class="max-800 mx-auto">
+    <StepIndicator CurrentStep="4" />
+
+    <div class="ss-card ss-glass-interactive tw:p-12 tw:text-center completed-shell">
+        <div class="tw:mb-4">
+            <i class="bi bi-patch-check-fill completed-icon"></i>
+        </div>
+
+        <h2 class="tw:font-bold tw:mb-3">@L["assessmentComplete.title"]</h2>
+        <p class="text-muted tw:mb-5">@L["assessmentComplete.subtitle"]</p>
+
+        <div class="completed-note tw:mx-auto tw:mb-8">
+            <strong>@L["assessmentComplete.noteTitle"]</strong>
+            <div>@L["assessmentComplete.noteBody"]</div>
+        </div>
+
+        <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="GoToRoadmap">
+            @L["assessmentComplete.cta"] <i class="bi bi-calendar-check tw:ms-2"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+
+    private void GoToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
+}
+
+<style>
+    .max-800 { max-width: 800px; }
+    .completed-shell {
+        background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(248,250,252,0.94));
+        border-radius: 24px;
+    }
+    .completed-icon {
+        font-size: 4rem;
+        color: var(--primary);
+        filter: drop-shadow(0 8px 24px rgba(99,102,241,0.25));
+    }
+    .completed-note {
+        max-width: 420px;
+        padding: 1rem 1.25rem;
+        border-radius: 18px;
+        background: rgba(99, 102, 241, 0.08);
+        color: var(--text);
+    }
+</style>

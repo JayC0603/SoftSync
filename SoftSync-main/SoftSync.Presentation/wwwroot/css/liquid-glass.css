@@ -1,0 +1,84 @@
+:root {
+    --liquid-surface: rgba(255, 255, 255, 0.58);
+    --liquid-surface-strong: rgba(255, 255, 255, 0.76);
+    --liquid-edge: rgba(255, 255, 255, 0.82);
+    --liquid-shadow: rgba(76, 29, 149, 0.14);
+}
+
+/* Runtime liquid-glass layer. Loaded after the generated bundle on purpose. */
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card) {
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(140% 110% at 0% 0%, rgba(255,255,255,.88), transparent 45%),
+        radial-gradient(90% 100% at 100% 100%, rgba(167,139,250,.2), transparent 58%),
+        linear-gradient(145deg, var(--liquid-surface-strong), var(--liquid-surface)) !important;
+    border: 1px solid var(--liquid-edge) !important;
+    box-shadow:
+        0 18px 46px var(--liquid-shadow),
+        inset 1px 1px 0 rgba(255,255,255,.95),
+        inset -1px -1px 0 rgba(124,92,252,.12) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(185%) contrast(105%) !important;
+    backdrop-filter: blur(26px) saturate(185%) contrast(105%) !important;
+}
+
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card)::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        linear-gradient(120deg, rgba(255,255,255,.62), transparent 24%, transparent 72%, rgba(196,181,253,.16)),
+        radial-gradient(18rem 12rem at var(--mx, 18%) var(--my, 8%), rgba(255,255,255,.72), transparent 52%);
+}
+
+:where(.ss-glass-interactive, .ss-card, .dash-card) {
+    transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+:where(.ss-glass-interactive, .ss-card, .dash-card):hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,.96) !important;
+    box-shadow:
+        0 24px 60px rgba(76,29,149,.2),
+        inset 1px 1px 0 #fff,
+        inset -1px -1px 0 rgba(124,92,252,.18) !important;
+}
+
+.ss-navbar {
+    background: rgba(248,247,255,.68) !important;
+    border-bottom: 1px solid rgba(255,255,255,.84) !important;
+    box-shadow: 0 10px 34px rgba(49,46,129,.1), inset 0 -1px 0 rgba(124,92,252,.08) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+}
+
+html[data-theme="dark"] {
+    --liquid-surface: rgba(25, 22, 53, 0.7);
+    --liquid-surface-strong: rgba(44, 37, 88, 0.78);
+    --liquid-edge: rgba(196, 181, 253, 0.28);
+    --liquid-shadow: rgba(2, 6, 23, 0.38);
+}
+
+html[data-theme="dark"] :where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card) {
+    background:
+        radial-gradient(120% 90% at 0% 0%, rgba(139,92,246,.2), transparent 48%),
+        radial-gradient(80% 90% at 100% 100%, rgba(79,70,229,.16), transparent 60%),
+        linear-gradient(145deg, var(--liquid-surface-strong), var(--liquid-surface)) !important;
+    box-shadow:
+        0 22px 56px var(--liquid-shadow),
+        inset 1px 1px 0 rgba(255,255,255,.1),
+        inset -1px -1px 0 rgba(139,92,246,.12) !important;
+}
+
+html[data-theme="dark"] .ss-navbar {
+    background: rgba(18,15,43,.72) !important;
+    border-bottom-color: rgba(196,181,253,.16) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(.ss-glass-interactive, .ss-card, .dash-card) { transition: none; }
+    :where(.ss-glass-interactive, .ss-card, .dash-card):hover { transform: none; }
+}

@@ -1,96 +1,87 @@
 @page "/community"
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
-@using SoftSync.BLL.Interfaces
-@using SoftSync.Common.Dtos
-@inject IMentorService MentorService
 
-<div class="max-800 tw:mx-auto">
-    <div class="ss-page-heading tw:mb-12">
-        <h2 class="tw:font-bold tw:mb-1"><span class="ss-gradient-text">@L["community.title.highlight"]</span> @L["community.title.rest"]</h2>
-        <p class="text-muted">@L["community.subtitle"]</p>
-    </div>
+<div class="community-shell tw:mx-auto">
+    <section class="community-hero ss-card">
+        <div>
+            <span class="community-eyebrow">SOFTSYNC SPACE</span>
+            <h1>👥 @L["community.hub.title"]</h1>
+            <p>@L["community.hub.subtitle"]</p>
+        </div>
+        <div class="community-stats">
+            <div><strong>2,500+</strong><span>@L["community.stats.members"]</span></div>
+            <div><strong>20+</strong><span>@L["community.stats.events"]</span></div>
+            <div><strong>150+</strong><span>@L["community.stats.discussions"]</span></div>
+        </div>
+    </section>
 
-    <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6">
-        @if (mentors == null)
+    <section class="community-grid">
+        @foreach (var channel in Channels)
         {
-            <div class="tw:text-center">@L["community.loading"]</div>
-        }
-        else
-        {
-            @foreach (var mentor in mentors)
-            {
-                <div>
-                    <div class="ss-card ss-glass-interactive tw:p-6 tw:h-full">
-                        <div class="tw:flex tw:items-center tw:gap-4 tw:mb-4">
-                            <img src="@mentor.AvatarUrl" class="tw:rounded-full" style="width: 64px; height: 64px; object-fit: cover;" />
-                            <div>
-                                <h5 class="tw:font-bold tw:mb-0">@mentor.Name</h5>
-                                <span class="tw:text-sm text-primary">@mentor.Expertise</span>
-                            </div>
-                        </div>
-                        <p class="text-muted tw:text-sm tw:mb-6">@mentor.ShortBio</p>
-                        <button class="btn btn-outline-primary tw:w-full tw:py-2 rounded-pill" @onclick="() => Connect(mentor.Name)">
-                            @L["community.connect"]
-                        </button>
-                    </div>
+            <article class="community-card ss-card ss-glass-interactive">
+                <div class="community-icon @channel.ColorClass"><i class="bi @channel.Icon"></i></div>
+                <div class="community-copy">
+                    <h2>@channel.Name</h2>
+                    <p>@L[channel.DescriptionKey]</p>
                 </div>
-            }
+                <button type="button" @onclick="() => ShowPending(channel.Name)">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></button>
+            </article>
         }
-    </div>
+    </section>
 
     @if (!string.IsNullOrEmpty(notification))
     {
-        <div class="tw:mt-6 alert alert-info alert-dismissible fade show" role="alert">
-            <i class="bi bi-info-circle-fill tw:me-2"></i> @notification
-            <button type="button" class="btn-close" @onclick="() => notification = null"></button>
-        </div>
+        <div class="community-notice" role="status"><i class="bi bi-info-circle-fill"></i> @notification</div>
     }
 </div>
 
 @code {
-    private IEnumerable<MentorDto>? mentors;
     private string? notification;
 
-    protected override async Task OnInitializedAsync()
-    {
-        mentors = await MentorService.GetAllAsync();
-    }
+    private static readonly Channel[] Channels =
+    [
+        new("Discord", "bi-discord", "discord", "community.discord.desc", "community.action.join"),
+        new("Facebook", "bi-facebook", "facebook", "community.facebook.desc", "community.action.follow"),
+        new("TikTok", "bi-tiktok", "tiktok", "community.tiktok.desc", "community.action.follow"),
+        new("YouTube", "bi-youtube", "youtube", "community.youtube.desc", "community.action.subscribe"),
+        new("Website", "bi-globe2", "website", "community.website.desc", "community.action.visit"),
+        new("Events", "bi-calendar-event-fill", "events", "community.events.desc", "community.action.view")
+    ];
 
-    private void Connect(string name)
-    {
-        notification = string.Format(L["community.notification"], name);
-    }
+    private void ShowPending(string channel) => notification = string.Format(L["community.linkPending"], channel);
+    private sealed record Channel(string Name, string Icon, string ColorClass, string DescriptionKey, string ActionKey);
 }
 
 <style>
-    .max-800 { max-width: 800px; }
-    .ss-page-heading h2 {
-        color: #111827;
-        text-shadow: 0 1px 18px rgba(255,255,255,0.75);
-    }
-    .ss-page-heading .ss-gradient-text {
-        background: none;
-        -webkit-text-fill-color: #4f46e5;
-        color: #4f46e5;
-        text-shadow: 0 1px 18px rgba(255,255,255,0.78);
-    }
-    .ss-page-heading .text-muted {
-        color: #4b5563 !important;
-        font-weight: 600;
-        text-shadow: 0 1px 14px rgba(255,255,255,0.82);
-    }
-    html[data-theme="dark"] .ss-page-heading h2 {
-        color: #f8fafc;
-        text-shadow: 0 2px 16px rgba(0,0,0,0.5);
-    }
-    html[data-theme="dark"] .ss-page-heading .ss-gradient-text {
-        -webkit-text-fill-color: #a78bfa;
-        color: #a78bfa;
-        text-shadow: 0 2px 18px rgba(0,0,0,0.55);
-    }
-    html[data-theme="dark"] .ss-page-heading .text-muted {
-        color: #cbd5e1 !important;
-        text-shadow: 0 2px 16px rgba(0,0,0,0.55);
-    }
+    .community-shell { max-width: 1080px; padding: 1.25rem 0 3rem; }
+    .community-hero { display: grid; grid-template-columns: 1.35fr 1fr; align-items: center; gap: 2rem; padding: 2rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(237,233,254,.76)); }
+    .community-eyebrow { color: #6366f1; letter-spacing: .15em; font-size: .72rem; font-weight: 900; }
+    .community-hero h1 { margin: .45rem 0 .55rem; color: #111827; font-size: clamp(1.9rem, 4vw, 2.65rem); font-weight: 900; }
+    .community-hero p { color: #64748b; max-width: 600px; margin: 0; line-height: 1.65; font-weight: 600; }
+    .community-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; }
+    .community-stats div { text-align: center; padding: 1rem .5rem; border: 1px solid rgba(99,102,241,.16); border-radius: 18px; background: rgba(255,255,255,.62); }
+    .community-stats strong, .community-stats span { display: block; }
+    .community-stats strong { color: #4f46e5; font-size: 1.2rem; }
+    .community-stats span { color: #64748b; margin-top: .2rem; font-size: .75rem; font-weight: 700; }
+    .community-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .community-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: 1.25rem; }
+    .community-icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 16px; font-size: 1.45rem; }
+    .discord { color: #5865f2; background: #eef0ff; } .facebook { color: #1877f2; background: #e8f2ff; }
+    .tiktok { color: #111827; background: #f1f5f9; } .youtube { color: #ff0000; background: #fff0f0; }
+    .website { color: #7c3aed; background: #f3e8ff; } .events { color: #ea580c; background: #fff7ed; }
+    .community-copy h2 { color: #111827; margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 850; }
+    .community-copy p { color: #64748b; margin: 0; font-size: .85rem; }
+    .community-card button { color: #4f46e5; background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.22); border-radius: 999px; padding: .5rem .75rem; font-size: .8rem; font-weight: 800; white-space: nowrap; }
+    .community-card button:hover { color: white; background: linear-gradient(135deg,#6366f1,#8b5cf6); }
+    .community-notice { display: flex; align-items: center; gap: .55rem; margin-top: 1rem; padding: .9rem 1rem; color: #4338ca; background: rgba(238,242,255,.88); border: 1px solid rgba(99,102,241,.25); border-radius: 14px; font-weight: 650; }
+    html[data-theme="dark"] .community-hero { background: linear-gradient(135deg,rgba(45,39,86,.86),rgba(30,27,75,.78)); }
+    html[data-theme="dark"] .community-hero h1, html[data-theme="dark"] .community-copy h2 { color: #f8fafc; }
+    html[data-theme="dark"] .community-hero p, html[data-theme="dark"] .community-copy p { color: #cbd5e1; }
+    html[data-theme="dark"] .community-stats div { background: rgba(67,56,132,.38); border-color: rgba(196,181,253,.25); }
+    html[data-theme="dark"] .community-stats strong { color: #c4b5fd; }
+    html[data-theme="dark"] .community-stats span { color: #cbd5e1; }
+    html[data-theme="dark"] .community-notice { color: #ddd6fe; background: rgba(49,46,129,.72); }
+    @@media (max-width: 800px) { .community-hero { grid-template-columns: 1fr; } .community-grid { grid-template-columns: 1fr; } }
+    @@media (max-width: 480px) { .community-stats { grid-template-columns: 1fr; } .community-card { grid-template-columns: auto 1fr; } .community-card button { grid-column: 1 / -1; width: 100%; } }
 </style>

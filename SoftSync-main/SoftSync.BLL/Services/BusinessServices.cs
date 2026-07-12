@@ -282,25 +282,79 @@ public class RoadmapService : IRoadmapService
 
     public async Task<RoadmapDto> GetUserRoadmapAsync(int userId)
     {
-        var items = await _roadmapRepo.GetByUserIdAsync(userId);
-        if (!items.Any())
+        var focusSkills = await GetFocusSkillNamesAsync(userId);
+        var expectedItemCount = focusSkills.Count * 3;
+
+        var items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
+        if (!items.Any() || NeedsRoadmapRefresh(items, expectedItemCount))
         {
-            var focusSkills = await GetFocusSkillNamesAsync(userId);
-            var fakeRoadmap = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
-            foreach (var item in fakeRoadmap.Items)
-            {
-                await _roadmapRepo.AddAsync(new RoadmapItem { UserId = userId, WeekNumber = item.WeekNumber, Title = item.Title, Description = item.Description });
-            }
+            foreach (var oldItem in items)
+                _roadmapRepo.Delete(oldItem);
+
             await _roadmapRepo.SaveChangesAsync();
-            items = await _roadmapRepo.GetByUserIdAsync(userId);
+
+            var freshRoadmap = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
+            foreach (var item in freshRoadmap.Items)
+            {
+                await _roadmapRepo.AddAsync(new RoadmapItem
+                {
+                    UserId = userId,
+                    WeekNumber = item.WeekNumber,
+                    Title = item.Title,
+                    Description = item.Description
+                });
+            }
+
+            await _roadmapRepo.SaveChangesAsync();
+            items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
         }
 
         return new RoadmapDto
         {
             UserId = userId,
-            Items = items.Select(i => new RoadmapItemDto { Id = i.Id, WeekNumber = i.WeekNumber, Title = i.Title, Description = i.Description, IsCompleted = i.IsCompleted }).ToList()
+            Items = items.Select(i => new RoadmapItemDto
+            {
+                Id = i.Id,
+                WeekNumber = i.WeekNumber,
+                SkillName = ResolveRoadmapSkillName(i.Title),
+                Title = i.Title,
+                Description = i.Description,
+                IsCompleted = i.IsCompleted
+            }).ToList()
         };
     }
+
+    private static bool NeedsRoadmapRefresh(List<RoadmapItem> items, int expectedItemCount)
+    {
+        if (expectedItemCount <= 0)
+            return false;
+
+        if (items.Count != expectedItemCount)
+            return true;
+
+        return items.Any(item =>
+            item.Title.Contains("Khám phá bản thân", StringComparison.OrdinalIgnoreCase) ||
+            item.Title.Contains("Tổng kết", StringComparison.OrdinalIgnoreCase) ||
+            item.Title.Contains("đánh giá lại", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string ResolveRoadmapSkillName(string title)
+    {
+        foreach (var (skillName, aliases) in RoadmapSkillAliases)
+        {
+            if (aliases.Any(alias => title.Contains(alias, StringComparison.OrdinalIgnoreCase)))
+                return skillName;
+        }
+
+        return string.Empty;
+    }
+
+    private static readonly (string SkillName, string[] Aliases)[] RoadmapSkillAliases =
+    {
+        ("Giao tiếp", new[] { "Communication", "Giao tiếp", "Kỹ năng Giao tiếp" }),
+        ("Quản lý thời gian", new[] { "Time Management", "Quản lý thời gian", "Kỹ năng Quản lý thời gian" }),
+        ("Tư duy phản biện", new[] { "Critical Thinking", "Tư duy phản biện", "Kỹ năng Tư duy phản biện" })
+    };
 
     /// <summary>
     /// Picks which skills the roadmap should focus on, restricted to the 3 active

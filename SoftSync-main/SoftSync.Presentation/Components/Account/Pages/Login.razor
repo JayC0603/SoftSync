@@ -96,7 +96,7 @@
         {
             Logger.LogInformation("User logged in.");
             WelcomeCookie.Set(HttpContext, user.FullName);
-            RedirectManager.RedirectTo(ReturnUrl ?? "");
+            RedirectManager.RedirectTo(string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" ? "dashboard" : ReturnUrl);
         }
         else if (result.IsLockedOut)
         {

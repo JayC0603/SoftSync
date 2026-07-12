@@ -1,0 +1,128 @@
+@page "/roadmap/lecture/{UserId:int}/{ItemId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IRoadmapService RoadmapService
+@inject NavigationManager Nav
+
+<div class="max-900 mx-auto">
+    <div class="tw:mb-4">
+        <button class="btn btn-link text-muted tw:no-underline tw:px-0" @onclick="BackToRoadmap">
+            <i class="bi bi-arrow-left tw:me-1"></i> @L["roadmap.backToRoadmap"]
+        </button>
+    </div>
+
+    @if (item == null)
+    {
+        <div class="ss-card tw:p-12 tw:text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else
+    {
+        <div class="ss-card ss-glass-interactive tw:p-12 lecture-shell">
+            <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+                <div>
+                    <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
+                    <h2 class="tw:font-bold tw:mb-0">@item.Title</h2>
+                </div>
+                <span class="badge bg-primary">@item.SkillName</span>
+            </div>
+
+            @if (item.IsCompleted)
+            {
+                <div class="lecture-complete tw:mb-4">
+                    <i class="bi bi-patch-check-fill" style="font-size: 2rem;"></i>
+                    <strong>Game 1 đã hoàn thành</strong>
+                    <span>Trang này chỉ còn để xem lại lộ trình. Bạn có thể đi tiếp sang các tuần sau.</span>
+                </div>
+            }
+            else
+            {
+                <div class="lecture-placeholder tw:mb-4">
+                    <i class="bi bi-play-btn-fill tw:me-2"></i>
+                    @L["roadmap.videoUnavailable"]
+                </div>
+            }
+
+            <p class="text-muted tw:mb-0">
+                @item.Description
+            </p>
+
+            <div class="tw:mt-8 tw:text-end">
+                @if (item.IsCompleted)
+                {
+                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled style="opacity:.65; cursor:not-allowed;">
+                        Đã hoàn thành Game 1
+                    </button>
+                }
+                else if (item.WeekNumber == 1)
+                {
+                    <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="GoToGame">
+                        @L["roadmap.continueToGame"] <i class="bi bi-arrow-right tw:ms-2"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled title="@L["roadmap.gameUnavailable"]" style="opacity:.65; cursor:not-allowed;">
+                        @L["roadmap.gameUnavailable"]
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public int ItemId { get; set; }
+
+    private RoadmapItemDto? item;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
+        if (item is null)
+            Nav.NavigateTo($"/roadmap/{UserId}", true);
+    }
+
+    private void GoToGame() => Nav.NavigateTo($"/roadmap/game/{UserId}/{ItemId}");
+
+    private void BackToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
+}
+
+<style>
+    .max-900 { max-width: 900px; }
+    .lecture-shell {
+        border-radius: 24px;
+    }
+    .lecture-placeholder {
+        min-height: 320px;
+        border-radius: 22px;
+        border: 2px dashed rgba(99, 102, 241, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--primary);
+        background: rgba(99, 102, 241, 0.06);
+    }
+
+    .lecture-complete {
+        min-height: 320px;
+        border-radius: 22px;
+        border: 1px solid rgba(16, 185, 129, 0.18);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        color: #059669;
+        background: rgba(16, 185, 129, 0.08);
+        text-align: center;
+        padding: 24px;
+    }
+</style>

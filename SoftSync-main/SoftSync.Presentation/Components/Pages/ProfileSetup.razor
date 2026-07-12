@@ -6,6 +6,7 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
 @inject IUserService UserService
+@inject IAssessmentService AssessmentService
 @inject ISkillService SkillService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
@@ -67,7 +68,7 @@
                     <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-4 tw:gap-3 tw:mb-6">
                         @foreach (var ag in ageGroups)
                         {
-                            <button class="wiz-choice @(ageGroup == ag.Key ? "selected" : "")" @onclick="() => ageGroup = ag.Key">
+                            <button class="wiz-choice @(ageGroup == ag.Key ? "selected" : "")" @onclick="() => SetAgeGroup(ag.Key)">
                                 @L[ag.Value]
                             </button>
                         }
@@ -197,7 +198,22 @@
         {
             user = existing;
             mascotGender = existing.Gender;
+            if (IsProfileComplete(existing))
+            {
+                Nav.NavigateTo("/dashboard", true);
+                return;
+            }
         }
+
+        selectedSkillIds.AddRange(await UserService.GetSelectedSkillIdsAsync(userId));
+
+        var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(userId)).Any();
+        if (hasCompletedAssessment)
+        {
+            Nav.NavigateTo($"/assessment-complete/{userId}", true);
+            return;
+        }
+
         firstName = FirstNameOf(user.FullName);
         skills = await SkillService.GetAllSkillsAsync();
     }
@@ -206,6 +222,12 @@
     {
         user.Gender = g;
         mascotGender = g;
+    }
+
+    private void SetAgeGroup(string group)
+    {
+        ageGroup = group;
+        user.Age = group switch { "<18" => 17, "18-22" => 20, "23-27" => 25, _ => 30 };
     }
 
     private void ToggleSkill(int id)
@@ -231,7 +253,8 @@
         {
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
         }
-        Nav.NavigateTo($"/assessment/{userId}");
+        var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(userId)).Any();
+        Nav.NavigateTo("/dashboard");
     }
 
     private static string FirstNameOf(string full)
@@ -240,6 +263,10 @@
         var parts = full.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return parts.Length > 0 ? parts[^1] : full; // Vietnamese given name is last
     }
+
+    private static bool IsProfileComplete(UserDto value) => value.Age > 0
+        && !string.IsNullOrWhiteSpace(value.FullName)
+        && !string.IsNullOrWhiteSpace(value.Goal);
 }
 
 <style>

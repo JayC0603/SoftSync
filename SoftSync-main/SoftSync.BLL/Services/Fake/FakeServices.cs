@@ -33,6 +33,18 @@ public class FakeAiAssistantService : IAiAssistantService
 {
     public Task<string> GetReplyAsync(string userMessage, int userId)
     {
+        var english = userMessage.StartsWith("[en]");
+        userMessage = userMessage.Length > 4 && (english || userMessage.StartsWith("[vi]")) ? userMessage[4..] : userMessage;
+        if (english)
+        {
+            var lower = userMessage.ToLowerInvariant();
+            var enReply = lower.Contains("communication") || lower.Contains("giao tiếp")
+                ? "To improve communication, start by practicing active listening and asking clear follow-up questions."
+                : lower.Contains("roadmap") || lower.Contains("lộ trình")
+                    ? "Your personalized learning roadmap is available in the Roadmap section."
+                    : $"Thanks for your message: '{userMessage}'. I'm ready to support your soft-skills learning journey.";
+            return Task.FromResult(enReply);
+        }
         string reply = "Chào bạn! Tôi là trợ lý SoftSync AI. ";
         if (userMessage.ToLower().Contains("giao tiếp"))
             reply += "Để cải thiện kỹ năng giao tiếp, hãy bắt đầu bằng việc lắng nghe chủ động hơn nhé.";

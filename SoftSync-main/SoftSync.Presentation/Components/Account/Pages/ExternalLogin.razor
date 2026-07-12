@@ -116,7 +116,8 @@
         Logger.LogInformation("New account provisioned via {Provider}.", externalLoginInfo.LoginProvider);
         WelcomeCookie.Set(HttpContext, user.FullName);
 
-        // New users complete their profile; returning users go home.
-        RedirectManager.RedirectTo(isNew ? "profile-setup" : (ReturnUrl ?? ""));
+        // New users complete their profile; returning users go to their dashboard.
+        var destination = string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" ? "dashboard" : ReturnUrl;
+        RedirectManager.RedirectTo(isNew ? "profile-setup" : destination);
     }
 }

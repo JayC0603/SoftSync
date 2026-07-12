@@ -5,18 +5,39 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @inject IAiAssistantService AssistantService
+@inject NavigationManager Nav
 
-<div class="max-800 tw:mx-auto tw:h-full tw:flex tw:flex-col" style="min-height: 70vh;">
-    <div class="tw:mb-6">
-        <h2 class="tw:font-bold tw:mb-1"><i class="bi bi-robot tw:me-2 ss-gradient-text"></i>@L["assistant.title"]</h2>
-        <p class="text-muted">@L["assistant.subtitle"]</p>
-    </div>
+<div class="assistant-layout">
+    <aside class="assistant-side">
+        <div class="assistant-side-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong></div>
+        <button class="new-chat" @onclick="NewChat"><i class="bi bi-plus-lg"></i> @L["assistant.newChat"]</button>
+        <span class="side-label">@L["assistant.suggested"]</span>
+        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-book"></i> @L["assistant.exploreLessons"]</button>
+        <button @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-graph-up-arrow"></i> @L["assistant.trackProgress"]</button>
+        <button @onclick='() => Nav.NavigateTo("/community")'><i class="bi bi-people"></i> @L["assistant.joinCommunity"]</button>
+        <div class="side-mascot"><img src="/images/syncy-fish.png" alt="SYNCY" /><p>@L["assistant.sideQuote"] ✨</p></div>
+    </aside>
 
-    <div class="ss-card tw:grow tw:p-6 tw:mb-6 overflow-auto tw:flex tw:flex-col" style="max-height: 500px;">
+    <main class="assistant-shell">
+        <section class="assistant-hero">
+            <div><span>✦</span><p>@L["assistant.heroHi"]</p><h1><b>SoftSync</b> AI Assistant</h1><small>@L["assistant.subtitle"]</small></div>
+            <img src="/images/syncy-fish.png" alt="SYNCY AI" />
+        </section>
+
+    <div class="assistant-chat-card overflow-auto">
         @foreach (var msg in messages)
         {
             <div class="chat-bubble @(msg.Sender == SoftSync.Common.Enums.ChatSender.User ? "chat-user" : "chat-assistant")">
-                @msg.Content
+                <div class="chat-content">@(msg.ContentKey is not null ? L[msg.ContentKey] : (L.Current == SoftSync.Presentation.Services.AppLanguage.Vi ? msg.ViContent : msg.EnContent))</div>
+                @if (msg.Actions.Count > 0)
+                {
+                    <div class="quick-actions">
+                        @foreach (var action in msg.Actions)
+                        {
+                            <button type="button" @onclick="() => HandleAction(action)">@action.Label</button>
+                        }
+                    </div>
+                }
             </div>
         }
         @if (isTyping)
@@ -27,13 +48,22 @@
         }
     </div>
 
-    <div class="input-group">
-        <input type="text" class="form-control form-control-lg tw:p-4" placeholder="@L["assistant.inputPlaceholder"]"
+    <div class="assistant-input">
+        <input type="text" placeholder="@L["assistant.inputPlaceholder"]"
                @bind="userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" />
-        <button class="ss-btn-primary tw:px-6" @onclick="SendMessage" disabled="@(string.IsNullOrWhiteSpace(userInput))">
+        <i class="bi bi-paperclip"></i>
+        <button @onclick="SendMessage" disabled="@(string.IsNullOrWhiteSpace(userInput))">
             <i class="bi bi-send-fill"></i>
         </button>
     </div>
+
+        <section class="assistant-prompts">
+            <button @onclick='() => SetPrompt("lesson")'><i class="bi bi-book"></i><span><b>@L["assistant.prompt.lesson"]</b><small>@L["assistant.prompt.lessonSub"]</small></span></button>
+            <button @onclick='() => SetPrompt("practice")'><i class="bi bi-bullseye"></i><span><b>@L["assistant.prompt.practice"]</b><small>@L["assistant.prompt.practiceSub"]</small></span></button>
+            <button @onclick='() => SetPrompt("advice")'><i class="bi bi-lightbulb"></i><span><b>@L["assistant.prompt.advice"]</b><small>@L["assistant.prompt.adviceSub"]</small></span></button>
+            <button @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-graph-up-arrow"></i><span><b>@L["assistant.prompt.progress"]</b><small>@L["assistant.prompt.progressSub"]</small></span></button>
+        </section>
+    </main>
 </div>
 
 @code {
@@ -41,9 +71,25 @@
     [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
     private string userInput = "";
     private bool isTyping = false;
-    private List<MessageDto> messages = new()
+    private List<AssistantMessage> messages = new()
     {
-        new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.Assistant, Content = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?", CreatedAt = DateTime.Now }
+        new AssistantMessage
+        {
+            ContentKey = "assistant.welcome"
+        }
+    };
+
+    private void NewChat()
+    {
+        messages = [new AssistantMessage { ContentKey = "assistant.welcome" }];
+        userInput = "";
+    }
+
+    private void SetPrompt(string type) => userInput = type switch
+    {
+        "lesson" => L["assistant.prompt.lessonText"],
+        "practice" => L["assistant.prompt.practiceText"],
+        _ => L["assistant.prompt.adviceText"]
     };
 
     protected override async Task OnInitializedAsync()
@@ -58,16 +104,16 @@
 
         var userMsg = userInput;
         userInput = "";
-        messages.Add(new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.User, Content = userMsg, CreatedAt = DateTime.Now });
+        messages.Add(new AssistantMessage { Sender = SoftSync.Common.Enums.ChatSender.User, EnContent = userMsg, ViContent = userMsg });
 
         isTyping = true;
         StateHasChanged();
 
         // Simulate AI response delay
         await Task.Delay(1000);
-        var reply = await AssistantService.GetReplyAsync(userMsg, UserId);
-
-        messages.Add(new MessageDto { Sender = SoftSync.Common.Enums.ChatSender.Assistant, Content = reply, CreatedAt = DateTime.Now });
+        var viReply = await AssistantService.GetReplyAsync("[vi]" + userMsg, UserId);
+        var enReply = await AssistantService.GetReplyAsync("[en]" + userMsg, UserId);
+        messages.Add(new AssistantMessage { ViContent = viReply, EnContent = enReply });
         isTyping = false;
     }
 
@@ -75,9 +121,138 @@
     {
         if (e.Key == "Enter") await SendMessage();
     }
+
+    private void HandleAction(ChatAction action)
+    {
+        switch (action.Key)
+        {
+            case "assessment": Nav.NavigateTo("/assessments"); break;
+            case "roadmap": Nav.NavigateTo("/roadmap"); break;
+            case "cases": Nav.NavigateTo("/case-studies"); break;
+            case "community": Nav.NavigateTo("/community"); break;
+            case "progress": Nav.NavigateTo("/progress"); break;
+            case "upgrade": Nav.NavigateTo("/settings"); break;
+            case "mentor": AddBot("👥 SoftSync hướng tới việc kết nối người dùng với Mentor và Expert trong các phiên bản tiếp theo. Hiện tại, bạn có thể sử dụng AI Mentor để được hỗ trợ, định hướng và khám phá cộng đồng.", new ChatAction("Khám phá cộng đồng", "community")); break;
+            case "about": AddBot("🌊 Chào mừng bạn đến với SoftSync Space!\n\nSoftSync là nền tảng ứng dụng AI giúp học sinh, sinh viên và người trẻ phát triển kỹ năng mềm qua bài đánh giá, tình huống mô phỏng và cộng đồng học tập.\n\nSYNCY giúp bạn rèn luyện giao tiếp, lãnh đạo, quản lý thời gian, tư duy phản biện và giải quyết vấn đề; đồng thời phân tích điểm mạnh và gợi ý lộ trình phù hợp.\n\nBạn muốn tìm hiểu thêm về phần nào?", new ChatAction("❤️ Sứ mệnh", "mission"), new ChatAction("🚀 Cách hoạt động", "how"), new ChatAction("✨ Điểm khác biệt", "difference"), new ChatAction("👥 Mentor", "mentor"), new ChatAction("📈 Dashboard", "dashboard"), new ChatAction("🎮 Game", "game"), new ChatAction("🌍 Tầm nhìn", "vision")); break;
+            case "premium": AddBot("💎 SoftSync Premium – 69.000đ/tháng\n\nNâng cấp để trải nghiệm các tính năng nâng cao và được AI hỗ trợ chuyên sâu hơn.\n\n✅ AI phản hồi nhanh và ưu tiên xử lý\n✅ Truy cập các AI Mentor chuyên biệt\n✅ Phân tích kỹ năng và báo cáo chi tiết\n✅ Lộ trình học tập cá nhân hóa\n✅ Mở khóa tình huống nâng cao\n✅ Thống kê tiến độ theo thời gian\n\nChỉ khoảng 2.300đ/ngày cho hành trình phát triển kỹ năng cùng AI.", new ChatAction("💎 Nâng cấp Premium", "upgrade"), new ChatAction("📋 So sánh Free & Premium", "compare"), new ChatAction("❓ Hỏi thêm về Premium", "ask-premium")); break;
+            case "compare": AddBot("📋 Free: AI Chat, đánh giá kỹ năng, AI Mentor và Dashboard cơ bản.\n\n⭐ Premium (69K/tháng): AI Mentor đầy đủ, phân tích chuyên sâu, Dashboard chi tiết, tình huống nâng cao, báo cáo PDF và hỗ trợ ưu tiên.", new ChatAction("💎 Nâng cấp Premium", "upgrade")); break;
+            case "ask-premium": userInput = "Mình muốn hỏi thêm về SoftSync Premium"; break;
+            case "mission": AddBot("❤️ Sứ mệnh của SoftSync là giúp người trẻ hiểu năng lực của mình và rèn kỹ năng mềm theo cách dễ tiếp cận, thực tế và có định hướng."); break;
+            case "how": AddBot("🚀 Đầu tiên, AI giúp bạn đánh giá kỹ năng. Sau đó, SYNCY phân tích kết quả, đề xuất lộ trình cá nhân hóa và gợi ý bài học, trò chơi hoặc tình huống thực tế. Tiến độ được ghi nhận để bạn thấy sự phát triển theo thời gian."); break;
+            case "difference": AddBot("✨ SoftSync kết hợp đánh giá, AI Mentor, lộ trình cá nhân hóa và luyện tập qua tình huống trong cùng một hành trình."); break;
+            case "dashboard": AddBot("📈 Dashboard giúp bạn theo dõi kết quả đánh giá, kỹ năng đang phát triển và hoạt động đã hoàn thành.", new ChatAction("Xem tiến độ", "progress")); break;
+            case "game": AddBot("🎮 Game và tình huống mô phỏng giúp bạn luyện cách phản ứng trước vấn đề thực tế và nhận phản hồi trong môi trường an toàn.", new ChatAction("Thử tình huống", "cases")); break;
+            case "vision": AddBot("🌍 SoftSync hướng tới một không gian học tập nơi mỗi người trẻ đều có AI đồng hành, lộ trình phù hợp và cơ hội kết nối với cộng đồng Mentor trong tương lai."); break;
+        }
+    }
+
+    private void AddBot(string content, params ChatAction[] actions) => messages.Add(new() { EnContent = content, ViContent = content, Actions = actions.ToList() });
+    private sealed class AssistantMessage { public SoftSync.Common.Enums.ChatSender Sender { get; set; } = SoftSync.Common.Enums.ChatSender.Assistant; public string? ContentKey { get; set; } public string EnContent { get; set; } = ""; public string ViContent { get; set; } = ""; public List<ChatAction> Actions { get; set; } = []; }
+    private sealed record ChatAction(string Label, string Key);
 }
 
 <style>
     .max-800 { max-width: 800px; }
     .overflow-auto { overflow-y: auto; }
+    .chat-content { white-space: pre-line; line-height: 1.65; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1rem; }
+    .quick-actions button { border: 1px solid rgba(99, 102, 241, .3); border-radius: 999px; background: rgba(99, 102, 241, .09); color: #4338ca; padding: .5rem .8rem; font-size: .82rem; font-weight: 700; transition: .18s ease; }
+    .quick-actions button:hover { color: #fff; background: linear-gradient(135deg, #6366f1, #8b5cf6); transform: translateY(-1px); }
+    .assistant-shell {
+        padding-top: 1.25rem;
+    }
+    .assistant-heading {
+        width: fit-content;
+        max-width: min(100%, 620px);
+        padding: 1.05rem 1.35rem;
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        border-radius: 24px;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(238, 232, 255, 0.7)),
+            radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.2), transparent 45%);
+        box-shadow:
+            0 18px 44px rgba(79, 70, 229, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
+        backdrop-filter: blur(18px) saturate(180%);
+    }
+    .assistant-title {
+        color: #111827;
+        letter-spacing: -0.02em;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+    .assistant-title i {
+        filter: drop-shadow(0 8px 18px rgba(99, 102, 241, 0.32));
+    }
+    .assistant-subtitle {
+        margin: 0;
+        color: #475569;
+        font-weight: 700;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+    }
+    .assistant-chat-card {
+        border-color: rgba(255, 255, 255, 0.78);
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 22px 56px rgba(79, 70, 229, 0.18);
+    }
+    .assistant-input .form-control {
+        background: rgba(255, 255, 255, 0.86);
+        border-color: rgba(255, 255, 255, 0.75);
+        color: #111827;
+        font-weight: 600;
+    }
+    .assistant-input .form-control::placeholder {
+        color: #64748b;
+        opacity: 1;
+    }
+    html[data-theme="dark"] .assistant-heading {
+        border-color: rgba(167, 139, 250, 0.45);
+        background:
+            linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(46, 16, 101, 0.78)),
+            radial-gradient(circle at 15% 0%, rgba(129, 140, 248, 0.34), transparent 48%);
+        box-shadow:
+            0 22px 58px rgba(0, 0, 0, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    html[data-theme="dark"] .assistant-title {
+        color: #f8fafc;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.58);
+    }
+    html[data-theme="dark"] .assistant-subtitle {
+        color: #ddd6fe;
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.62);
+    }
+    html[data-theme="dark"] .assistant-chat-card {
+        border-color: rgba(196, 181, 253, 0.48);
+        background:
+            radial-gradient(circle at 12% 0%, rgba(139, 92, 246, 0.22), transparent 42%),
+            linear-gradient(145deg, rgba(45, 39, 86, 0.78), rgba(30, 27, 75, 0.72));
+        box-shadow:
+            0 24px 60px rgba(15, 8, 45, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        -webkit-backdrop-filter: blur(20px) saturate(145%);
+        backdrop-filter: blur(20px) saturate(145%);
+    }
+    html[data-theme="dark"] .assistant-input .form-control {
+        background: rgba(45, 39, 86, 0.76);
+        border-color: rgba(196, 181, 253, 0.48);
+        color: #f8fafc;
+    }
+    html[data-theme="dark"] .assistant-input .form-control::placeholder {
+        color: #c4b5fd;
+    }
+    html[data-theme="dark"] .chat-assistant {
+        background: linear-gradient(135deg, rgba(67, 56, 132, 0.88), rgba(49, 46, 129, 0.78)) !important;
+        border: 1px solid rgba(196, 181, 253, 0.3);
+        box-shadow: 0 10px 28px rgba(15, 8, 45, 0.22);
+    }
+    html[data-theme="dark"] .quick-actions button { color: #ddd6fe; border-color: rgba(167, 139, 250, .42); background: rgba(139, 92, 246, .16); }
+    /* Premium assistant workspace */
+    .assistant-layout{display:grid;grid-template-columns:230px minmax(0,1fr);max-width:1420px;min-height:calc(100vh - 125px);margin:0 auto;border:1px solid rgba(255,255,255,.55);border-radius:28px;overflow:hidden;background:rgba(248,247,255,.94);box-shadow:0 24px 70px rgba(49,46,129,.2)}
+    .assistant-side{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem;background:linear-gradient(165deg,#17133f,#282063);color:#ddd6fe}.assistant-side-brand{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;color:#fff;font-size:1.15rem}.assistant-side-brand img{width:42px;height:42px;border-radius:12px}.assistant-side>button{display:flex;align-items:center;gap:.7rem;width:100%;padding:.75rem;border:0;border-radius:12px;background:transparent;color:#c4b5fd;text-align:left;font-size:.82rem}.assistant-side>button:hover{color:#fff;background:rgba(124,92,252,.18)}.assistant-side .new-chat{justify-content:center;margin-bottom:1.2rem;padding:.85rem;color:#fff;background:linear-gradient(135deg,#7c5cfc,#5b21f4);font-weight:800}.side-label{margin:.6rem 0 .25rem;color:#8b7ccc;font-size:.68rem;font-weight:900;letter-spacing:.12em}.side-mascot{margin-top:auto;text-align:center}.side-mascot img{width:115px;height:115px;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(124,92,252,.4))}.side-mascot p{margin:0;color:#b8afe8;font-size:.72rem;line-height:1.5}
+    .assistant-shell{min-width:0;padding:2rem 3rem;background:radial-gradient(circle at 85% 15%,rgba(216,207,255,.8),transparent 30%),linear-gradient(145deg,rgba(255,255,255,.96),rgba(244,241,255,.92))}.assistant-hero{display:flex;align-items:center;justify-content:space-between;min-height:170px}.assistant-hero>div>span{color:#6d4aff;font-size:1.7rem}.assistant-hero p{display:inline;margin-left:.6rem;color:#334155;font-weight:700}.assistant-hero h1{margin:.35rem 0;color:#111827;font-size:2rem;font-weight:850}.assistant-hero h1 b{color:#6d4aff}.assistant-hero small{color:#64748b;font-size:.95rem}.assistant-hero>img{width:190px;height:170px;object-fit:contain;filter:drop-shadow(0 18px 28px rgba(109,74,255,.25))}
+    .assistant-chat-card{display:flex;flex-direction:column;min-height:190px;max-height:330px;margin:.5rem 0 1rem;padding:1.35rem;border:1px solid #ebe7f6;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 10px 30px rgba(76,29,149,.07)}.assistant-chat-card .chat-assistant{max-width:70%;background:#fff!important;border:0;box-shadow:none;color:#1e293b!important}.assistant-input{display:flex;align-items:center;gap:.75rem;padding:.55rem .65rem .55rem 1.25rem;border:1px solid #e4def7;border-radius:999px;background:#fff;box-shadow:0 10px 28px rgba(76,29,149,.1)}.assistant-input input{flex:1;min-width:0;padding:.65rem 0;border:0;outline:0;background:transparent;color:#1e293b}.assistant-input>i{color:#475569}.assistant-input button{display:grid;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:linear-gradient(135deg,#7c5cfc,#5b21f4);color:#fff}.assistant-input button:disabled{opacity:.45}
+    .assistant-prompts{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.5rem}.assistant-prompts button{display:flex;align-items:flex-start;gap:.7rem;padding:1rem;border:1px solid #ebe7f6;border-radius:18px;background:#fff;color:#334155;text-align:left;box-shadow:0 8px 24px rgba(76,29,149,.06)}.assistant-prompts button:hover{transform:translateY(-2px);border-color:#c4b5fd}.assistant-prompts i{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#f0ebff;color:#6d4aff;font-size:1.1rem}.assistant-prompts b,.assistant-prompts small{display:block}.assistant-prompts b{color:#5b21b6;font-size:.82rem}.assistant-prompts small{margin-top:.25rem;color:#64748b;font-size:.68rem;line-height:1.35}
+    html[data-theme="dark"] .assistant-layout{background:#17132f;border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .assistant-shell{background:radial-gradient(circle at 85% 15%,rgba(76,61,145,.5),transparent 32%),linear-gradient(145deg,#201b42,#17132f)}html[data-theme="dark"] .assistant-hero p,html[data-theme="dark"] .assistant-hero h1{color:#fff}html[data-theme="dark"] .assistant-hero small{color:#cbd5e1}html[data-theme="dark"] .assistant-chat-card,html[data-theme="dark"] .assistant-input,html[data-theme="dark"] .assistant-prompts button{background:rgba(35,30,70,.88);border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .assistant-input input{color:#fff}html[data-theme="dark"] .assistant-prompts button{color:#ddd6fe}html[data-theme="dark"] .assistant-prompts small{color:#cbd5e1}
+    @@media(max-width:1000px){.assistant-layout{grid-template-columns:1fr}.assistant-side{display:none}.assistant-shell{padding:1.5rem}.assistant-prompts{grid-template-columns:1fr 1fr}}@@media(max-width:620px){.assistant-hero>img{width:110px}.assistant-hero h1{font-size:1.45rem}.assistant-prompts{grid-template-columns:1fr}.assistant-chat-card .chat-assistant{max-width:95%}}
 </style>

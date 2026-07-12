@@ -502,6 +502,21 @@
     </div>
 }
 
+<style>
+    .ss-premium {
+        background: radial-gradient(circle at 85% 0%, rgba(250,204,21,.2), transparent 38%), linear-gradient(145deg, rgba(255,255,255,.94), rgba(237,233,254,.92));
+        border-color: rgba(124,58,237,.38);
+        box-shadow: 0 16px 38px rgba(76,29,149,.24), inset 0 1px 0 rgba(255,255,255,.95);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+        backdrop-filter: blur(18px) saturate(150%);
+    }
+    .ss-premium-title { color: #312e81; font-size: 1.05rem; text-shadow: 0 1px 0 rgba(255,255,255,.9); }
+    .ss-premium-sub { color: #475569; font-size: .82rem; font-weight: 600; }
+    html[data-theme="dark"] .ss-premium { background: radial-gradient(circle at 85% 0%, rgba(250,204,21,.16), transparent 40%), linear-gradient(145deg, rgba(49,46,129,.92), rgba(30,27,75,.94)); border-color: rgba(196,181,253,.42); }
+    html[data-theme="dark"] .ss-premium-title { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.55); }
+    html[data-theme="dark"] .ss-premium-sub { color: #ddd6fe; }
+</style>
+
 @code {
     // Bootstrap Icons has no "crown" glyph, so render a gold crown as inline SVG.
     private static Microsoft.AspNetCore.Components.MarkupString Crown(string cssClass = "") =>

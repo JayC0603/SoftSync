@@ -5,6 +5,7 @@
 @using SoftSync.Common.Dtos
 @inject ISkillService SkillService
 @inject IUserService UserService
+@inject IAssessmentService AssessmentService
 @inject NavigationManager Nav
 
 <div class="max-800 mx-auto">
@@ -39,9 +40,23 @@
     </div>
 
     <div class="tw:text-center">
-        <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="HandleSubmit" disabled="@(!selectedSkillIds.Any())">
-            @L["selectSkills.startAssessment"] <i class="bi bi-arrow-right tw:ms-2"></i>
-        </button>
+        @if (hasCompletedAssessment)
+        {
+            <div class="ss-card tw:p-4 tw:mb-4 completed-banner">
+                <strong>@L["assessmentComplete.title"]</strong>
+                <div class="text-muted">@L["assessmentComplete.noteBody"]</div>
+            </div>
+
+            <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="GoToCompletedAssessment">
+                @L["assessmentComplete.cta"] <i class="bi bi-calendar-check tw:ms-2"></i>
+            </button>
+        }
+        else
+        {
+            <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="HandleSubmit" disabled="@(!selectedSkillIds.Any())">
+                @L["selectSkills.startAssessment"] <i class="bi bi-arrow-right tw:ms-2"></i>
+            </button>
+        }
     </div>
 </div>
 
@@ -49,10 +64,12 @@
     [Parameter] public int UserId { get; set; }
     private IEnumerable<SkillDto>? skills;
     private List<int> selectedSkillIds = new();
+    private bool hasCompletedAssessment;
 
     protected override async Task OnInitializedAsync()
     {
         skills = await SkillService.GetAllSkillsAsync();
+        hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(UserId)).Any();
     }
 
     private void ToggleSkill(int id)
@@ -66,8 +83,10 @@
     private async Task HandleSubmit()
     {
         await UserService.AddSkillSelectionsAsync(UserId, selectedSkillIds);
-        Nav.NavigateTo($"/assessment/{UserId}");
+        Nav.NavigateTo(hasCompletedAssessment ? $"/assessment-complete/{UserId}" : $"/assessment/{UserId}");
     }
+
+    private void GoToCompletedAssessment() => Nav.NavigateTo($"/assessment-complete/{UserId}");
 }
 
 <style>
@@ -91,5 +110,12 @@
     .ss-card.selected .skill-icon {
         background: var(--gradient);
         color: white;
+    }
+    .completed-banner {
+        max-width: 520px;
+        margin: 0 auto 1rem;
+        border: 1px solid rgba(99, 102, 241, 0.18);
+        background: rgba(99, 102, 241, 0.08);
+        border-radius: 18px;
     }
 </style>

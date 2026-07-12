@@ -1,0 +1,130 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IUserService UserService
+@inject IProgressService ProgressService
+@inject IRoadmapService RoadmapService
+@inject IAssessmentService AssessmentService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+@if (user is null)
+{
+    <div class="dash-loading">@L["dashboard.loading"]</div>
+}
+else
+{
+    <div class="dash-shell">
+        <aside class="dash-side">
+            <strong>SoftSync<br /><span>Space</span></strong>
+            <nav>
+                <button class="active"><i class="bi bi-house-door-fill"></i><span>Home</span></button>
+                <button @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-robot"></i><span>AI Assistant</span></button>
+                <button @onclick='() => Nav.NavigateTo("/case-studies")'><i class="bi bi-book"></i><span>@L["dashboard.scenarios"]</span></button>
+                <button @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-graph-up-arrow"></i><span>@L["dashboard.progress"]</span></button>
+                <button @onclick='() => Nav.NavigateTo("/community")'><i class="bi bi-people"></i><span>Community</span></button>
+                <button @onclick='() => Nav.NavigateTo("/settings")'><i class="bi bi-gem"></i><span>Premium</span></button>
+            </nav>
+            <div class="side-premium"><i class="bi bi-stars"></i><b>Premium</b><small>Unlock your full learning experience.</small><button @onclick='() => Nav.NavigateTo("/settings")'>Upgrade</button></div>
+        </aside>
+        <header class="dash-welcome">
+            <div><span>@L["dashboard.eyebrow"]</span><h1>@L["dashboard.hello"], @FirstName(user.PublicName)! 👋</h1><p>@L["dashboard.subtitle"]</p></div>
+            <div class="dash-hero-mascot"><div><strong>@L["dashboard.continueTitle"]</strong><button @onclick='() => Nav.NavigateTo("/roadmap")'>@L["dashboard.continueLearning"] →</button></div><img src="/images/syncy-fish.png" alt="SYNCY" /></div>
+        </header>
+
+        <section class="dash-stats">
+            <div><i class="bi bi-stars xp"></i><span><strong>@user.ExperiencePoints</strong>@L["dashboard.xp"]</span></div>
+            <div><i class="bi bi-graph-up-arrow level"></i><span><strong>@user.Level</strong>@L["dashboard.level"]</span></div>
+            <div><i class="bi bi-check2-circle done"></i><span><strong>@completedItems/@totalItems</strong>@L["dashboard.completed"]</span></div>
+            <div><i class="bi bi-fire streak"></i><span><strong>0</strong>@L["dashboard.streak"]</span></div>
+        </section>
+
+        <div class="dash-grid">
+            <section class="dash-card dash-roadmap">
+                <div class="dash-card-head"><h2>@L["dashboard.roadmap"]</h2><button @onclick='() => Nav.NavigateTo("/roadmap")'>@L["dashboard.viewDetails"] →</button></div>
+                @if (progress.Count == 0)
+                {
+                    <div class="dash-empty"><i class="bi bi-compass"></i><p>@L["dashboard.noProgress"]</p><button @onclick='() => Nav.NavigateTo($"/assessment/{user.Id}")'>@L["dashboard.startAssessment"]</button></div>
+                }
+                else
+                {
+                    @foreach (var item in progress.Take(5))
+                    {
+                        <div class="skill-row"><div><span>@item.SkillName</span><b>@item.PercentComplete%</b></div><div class="skill-track"><i style="width:@item.PercentComplete%"></i></div></div>
+                    }
+                }
+            </section>
+
+            <section class="dash-card dash-today">
+                <div class="dash-card-head"><h2>✨ @L["dashboard.today"]</h2></div>
+                <button class="task" @onclick='() => Nav.NavigateTo($"/assessment/{user.Id}")'><i class="bi bi-clipboard-check"></i><span>@L["dashboard.taskAssessment"]</span><b>›</b></button>
+                <button class="task" @onclick='() => Nav.NavigateTo("/case-studies")'><i class="bi bi-controller"></i><span>@L["dashboard.taskScenario"]</span><b>›</b></button>
+                <button class="task" @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-robot"></i><span>@L["dashboard.taskAssistant"]</span><b>›</b></button>
+                <button class="dash-primary" @onclick='() => Nav.NavigateTo("/roadmap")'>@L["dashboard.startNow"]</button>
+            </section>
+
+            <aside class="dash-card dash-mentor">
+                <div class="dash-card-head"><h2>@L["dashboard.mentor"]</h2></div>
+                <div class="mentor-profile"><img src="/images/syncy-fish.png" alt="Nova" /><div><strong>Nova</strong><span>Communication Mentor</span></div></div>
+                <blockquote>“@L["dashboard.mentorQuote"]”</blockquote>
+                <button class="mentor-chat" @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-chat-dots"></i> @L["dashboard.chatNova"]</button>
+            </aside>
+        </div>
+
+        <section class="dash-bottom">
+            <div class="dash-card weekly"><div class="dash-card-head"><h2>📈 @L["dashboard.weekly"]</h2></div>@foreach(var item in progress.Take(3)){<div class="mini-progress"><span>@item.SkillName</span><div><i style="width:@item.PercentComplete%"></i></div><b>@item.PercentComplete%</b></div>}</div>
+            <div class="dash-card achievements"><div class="dash-card-head"><h2>🏆 @L["dashboard.achievements"]</h2></div><div class="badge-row"><span>⭐<small>First Step</small></span><span>🔥<small>Streak</small></span><span>🎓<small>Learner</small></span><span>🏆<small>Listener</small></span></div></div>
+        </section>
+    </div>
+
+    <aside class="dash-syncy @(syncyOpen ? "open" : "")">
+        @if (syncyOpen)
+        {
+            <div class="dash-syncy-panel">
+                <div class="dash-syncy-head">
+                    <img src="/images/syncy-fish.png" alt="SYNCY" />
+                    <div><strong>SYNCY AI</strong><span>@L["chatbot.tagline"]</span></div>
+                    <button title="Close" @onclick="() => syncyOpen = false"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="dash-syncy-message"><strong>👋 @L["chatbot.welcome.title"]</strong><p>@L["chatbot.welcome.desc"]</p></div>
+                <div class="dash-syncy-actions">
+                    <button @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-robot"></i> AI Chat</button>
+                    <button @onclick='() => Nav.NavigateTo($"/assessment/{user.Id}")'><i class="bi bi-clipboard-check"></i> @L["dashboard.assessment"]</button>
+                    <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-signpost-split"></i> @L["dashboard.roadmap"]</button>
+                    <button @onclick='() => Nav.NavigateTo("/community")'><i class="bi bi-people"></i> Community Hub</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <button class="dash-syncy-fab" title="SYNCY AI" @onclick="() => syncyOpen = true">
+                <img src="/images/syncy-fish.png" alt="SYNCY AI" /><span></span><b>@L["dashboard.needHelp"]<small>@L["dashboard.chatSyncy"]</small></b>
+            </button>
+        }
+    </aside>
+}
+
+@code {
+    private UserDto? user; private List<ProgressDto> progress = []; private int completedItems; private int totalItems; private bool syncyOpen;
+    protected override async Task OnInitializedAsync()
+    {
+        var id = await AuthProvider.GetUserIdAsync(); user = await UserService.GetUserByIdAsync(id);
+        if (user is null || user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal)) { Nav.NavigateTo("/profile-setup", true); return; }
+        progress = (await ProgressService.GetUserProgressAsync(id)).ToList();
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id); totalItems = roadmap.Items.Count; completedItems = roadmap.Items.Count(x => x.IsCompleted);
+    }
+    private static string FirstName(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? value;
+}
+
+<style>
+    .dash-shell{position:relative;max-width:1500px!important;padding-left:200px!important}.dash-side{position:absolute;left:0;top:1.25rem;width:176px;min-height:calc(100% - 4.25rem);padding:1.25rem 1rem;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.75);border-radius:24px;background:rgba(255,255,255,.86);box-shadow:0 18px 45px rgba(79,70,229,.12);backdrop-filter:blur(20px)}.dash-side>strong{color:#312e81;font-size:1.15rem;line-height:1.05;margin-bottom:1.4rem}.dash-side>strong span{color:#7c5cfc}.dash-side nav{display:grid;gap:.35rem}.dash-side nav button{display:flex;align-items:center;gap:.65rem;padding:.7rem;border:0;border-radius:12px;background:transparent;color:#475569;text-align:left;font-size:.82rem;font-weight:700}.dash-side nav button i{color:#6366f1;font-size:1rem}.dash-side nav button.active,.dash-side nav button:hover{color:#4f46e5;background:#ede8ff}.side-premium{margin-top:auto;padding:1rem;text-align:center;border-radius:18px;background:linear-gradient(145deg,#ede8ff,#f8f7ff);color:#312e81}.side-premium>i,.side-premium>b,.side-premium small{display:block}.side-premium>i{font-size:1.6rem;color:#7c5cfc}.side-premium small{margin:.4rem 0 .7rem;color:#64748b;font-size:.68rem}.side-premium button{width:100%;padding:.55rem;border:0;border-radius:10px;background:#fff;color:#5b42db;font-weight:800}.dash-hero-mascot{display:flex;align-items:center;min-width:330px;height:120px;padding:1rem 1rem 1rem 1.25rem;border:1px solid rgba(255,255,255,.35);border-radius:24px;background:linear-gradient(135deg,rgba(124,92,252,.9),rgba(168,85,247,.72));box-shadow:0 18px 38px rgba(76,29,149,.22);overflow:hidden}.dash-hero-mascot>div{flex:1;color:#fff}.dash-hero-mascot strong{display:block;font-size:1rem}.dash-hero-mascot button{margin-top:.65rem;padding:.55rem .75rem!important;color:#5b42db!important;background:#fff!important;border:0!important;border-radius:10px!important;font-size:.75rem}.dash-hero-mascot img{width:105px;height:120px;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(49,46,129,.3))}.mentor-profile{display:flex;align-items:center;gap:.8rem}.mentor-profile img{width:72px;height:72px;object-fit:cover;border-radius:50%;background:#ede8ff}.mentor-profile strong,.mentor-profile span{display:block}.mentor-profile strong{color:#111827;font-size:1.15rem}.mentor-profile span{color:#64748b;font-size:.75rem}.dash-mentor blockquote{margin:1rem 0;padding:1rem;border-radius:14px;background:#f7f5ff;color:#475569;font-size:.82rem}.mentor-chat{width:100%;padding:.7rem;border:1px solid #c4b5fd;border-radius:12px;background:#fff;color:#6d4aff;font-weight:800}.dash-bottom{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:1rem;margin-top:1rem}.mini-progress{display:grid;grid-template-columns:90px 1fr 36px;align-items:center;gap:.5rem;margin:.8rem 0;color:#475569;font-size:.72rem}.mini-progress>div{height:7px;border-radius:99px;background:#ede9fe;overflow:hidden}.mini-progress i{display:block;height:100%;border-radius:99px;background:#7c5cfc}.badge-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;text-align:center}.badge-row>span{display:grid;place-items:center;min-height:78px;border-radius:18px;background:linear-gradient(145deg,#f7f5ff,#fff);font-size:1.65rem}.badge-row small{display:block;color:#64748b;font-size:.62rem;font-weight:700}.community-mini>button{display:flex;align-items:center;gap:.6rem;width:100%;padding:.65rem;border:0;border-bottom:1px solid #eeeafc;background:transparent;color:#475569;text-align:left}.community-mini>button i{color:#7c5cfc}.community-mini>button b{margin-left:auto}html[data-theme="dark"] .dash-side{background:rgba(30,27,75,.92);border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .dash-side>strong,html[data-theme="dark"] .mentor-profile strong{color:#fff}html[data-theme="dark"] .dash-side nav button{color:#ddd6fe}html[data-theme="dark"] .side-premium{background:linear-gradient(145deg,#373080,#24204f);color:#fff}html[data-theme="dark"] .dash-mentor blockquote,html[data-theme="dark"] .badge-row>span{background:rgba(67,56,132,.35);color:#ddd6fe}html[data-theme="dark"] .mentor-chat{background:#312e81;color:#fff}html[data-theme="dark"] .mini-progress,html[data-theme="dark"] .community-mini>button{color:#ddd6fe;border-color:rgba(196,181,253,.15)}
+    .dash-shell{max-width:1200px;margin:auto;padding:1.25rem 0 3rem}.dash-loading{text-align:center;padding:5rem}.dash-welcome{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.3rem}.dash-welcome span{color:#ddd6fe;font-size:.75rem;font-weight:900;letter-spacing:.12em;text-shadow:0 2px 12px rgba(15,23,42,.8)}.dash-welcome h1{margin:.25rem 0;color:#fff;font-weight:900;text-shadow:0 3px 18px rgba(15,23,42,.8)}.dash-welcome p{margin:0;color:#f1f5f9;font-weight:600;text-shadow:0 2px 12px rgba(15,23,42,.82)}.dash-welcome>button{color:#fff!important;background:rgba(30,27,75,.38)!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:999px;padding:.65rem 1rem;box-shadow:0 8px 24px rgba(15,23,42,.22);backdrop-filter:blur(12px)}.dash-welcome button,.dash-card-head button{border:0;background:transparent;color:#4f46e5;font-weight:750}.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}.dash-stats>div,.dash-card{background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.8);border-radius:22px;box-shadow:0 14px 36px rgba(79,70,229,.1);backdrop-filter:blur(18px)}.dash-stats>div{display:flex;align-items:center;gap:.8rem;padding:1.15rem}.dash-stats i{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;font-size:1.3rem}.dash-stats span,.dash-stats strong{display:block}.dash-stats span{color:#64748b;font-size:.75rem}.dash-stats strong{color:#111827;font-size:1.15rem}.xp{color:#f59e0b;background:#fff7ed}.level{color:#10b981;background:#ecfdf5}.done{color:#3b82f6;background:#eff6ff}.premium{color:#8b5cf6;background:#f5f3ff}.dash-grid{display:grid;grid-template-columns:1.25fr 1fr .85fr;gap:1rem}.dash-card{padding:1.4rem}.dash-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}.dash-card h2{margin:0;color:#111827;font-size:1.05rem;font-weight:850}.skill-row{margin:.9rem 0}.skill-row>div:first-child{display:flex;justify-content:space-between;color:#334155;font-size:.85rem}.skill-track{height:8px;background:#e8e7f0;border-radius:99px;overflow:hidden;margin-top:.35rem}.skill-track i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px}.task,.dash-quick>button{display:flex;align-items:center;gap:.7rem;width:100%;padding:.75rem;border:0;border-bottom:1px solid #eef2f7;background:transparent;color:#334155;text-align:left}.task span{flex:1}.task i,.dash-quick i{color:#6366f1;font-size:1.1rem}.task b,.dash-quick b{margin-left:auto}.dash-primary,.dash-empty button{width:100%;border:0;border-radius:14px;padding:.75rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;font-weight:800;margin-top:1rem}.dash-empty{text-align:center;color:#64748b;padding:1.5rem}.dash-empty i{font-size:2rem;color:#8b5cf6}html[data-theme="dark"] .dash-welcome h1,html[data-theme="dark"] .dash-card h2,html[data-theme="dark"] .dash-stats strong{color:#f8fafc}html[data-theme="dark"] .dash-welcome p,html[data-theme="dark"] .dash-stats span{color:#cbd5e1}html[data-theme="dark"] .dash-stats>div,html[data-theme="dark"] .dash-card{background:rgba(35,30,70,.82);border-color:rgba(167,139,250,.25)}html[data-theme="dark"] .task,html[data-theme="dark"] .dash-quick>button,html[data-theme="dark"] .skill-row>div:first-child{color:#e2e8f0;border-color:rgba(167,139,250,.15)}
+    @@media(max-width:1100px){.dash-shell{padding-left:0!important}.dash-side{display:none}.dash-hero-mascot{min-width:280px}.dash-bottom{grid-template-columns:1fr 1fr}.community-mini{grid-column:1/-1}}@@media(max-width:950px){.dash-grid{grid-template-columns:1fr 1fr}.dash-mentor{grid-column:1/-1}.dash-stats{grid-template-columns:1fr 1fr}}@@media(max-width:700px){.dash-welcome{align-items:flex-start;gap:1rem;flex-direction:column}.dash-hero-mascot{width:100%;min-width:0}.dash-grid,.dash-stats,.dash-bottom{grid-template-columns:1fr}.community-mini{grid-column:auto}.badge-row{grid-template-columns:1fr 1fr}}
+    .dash-syncy{position:fixed;right:1.5rem;bottom:1.35rem;z-index:1200}.dash-syncy-fab{position:relative;width:74px;height:74px;padding:4px;border:2px solid rgba(196,181,253,.8);border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 16px 40px rgba(76,29,149,.5)}.dash-syncy-fab img{width:100%;height:100%;object-fit:cover;border-radius:50%}.dash-syncy-fab span{position:absolute;right:3px;bottom:6px;width:15px;height:15px;border:3px solid #fff;border-radius:50%;background:#22c55e}.dash-syncy-panel{width:min(380px,calc(100vw - 2rem));padding:1rem;border:1px solid rgba(196,181,253,.35);border-radius:24px;background:rgba(30,27,75,.94);box-shadow:0 24px 70px rgba(15,8,45,.55);backdrop-filter:blur(20px)}.dash-syncy-head{display:flex;align-items:center;gap:.75rem;color:#fff}.dash-syncy-head img{width:48px;height:48px;object-fit:cover;border-radius:50%}.dash-syncy-head div{flex:1}.dash-syncy-head strong,.dash-syncy-head span{display:block}.dash-syncy-head span{color:#cbd5e1;font-size:.78rem}.dash-syncy-head>button{color:#c4b5fd;background:rgba(139,92,246,.15);border:0;border-radius:50%;width:34px;height:34px}.dash-syncy-message{margin:.85rem 0;padding:1rem;color:#f8fafc;border:1px solid rgba(167,139,250,.25);border-radius:16px;background:rgba(49,46,129,.45)}.dash-syncy-message p{margin:.4rem 0 0;color:#cbd5e1;font-size:.85rem;line-height:1.5}.dash-syncy-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}.dash-syncy-actions button{color:#ede9fe;background:rgba(99,102,241,.22);border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:.65rem .5rem;font-size:.8rem;font-weight:750}.dash-syncy-actions button:hover{background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+    /* Clean premium dashboard variant */
+    .dash-shell{max-width:1480px!important;padding:1.5rem!important;border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(247,245,255,.94));box-shadow:0 24px 70px rgba(76,29,149,.12)}.dash-side{display:none!important}.dash-welcome{padding:1.5rem 1.75rem;border:1px solid #ebe7fb;border-radius:24px;background:radial-gradient(circle at 55% 20%,rgba(237,232,255,.9),transparent 38%),linear-gradient(135deg,#fff,#faf8ff);box-shadow:0 10px 32px rgba(76,29,149,.07)}.dash-welcome span{color:#7c5cfc;text-shadow:none}.dash-welcome h1{color:#111827;text-shadow:none}.dash-welcome p{color:#64748b;text-shadow:none}.dash-hero-mascot{border:0;background:linear-gradient(135deg,#ede8ff,#f5f1ff);box-shadow:none}.dash-hero-mascot>div{color:#3730a3}.dash-stats{margin-top:-1rem;padding:0 1.75rem;position:relative;z-index:2}.dash-stats>div,.dash-card{background:#fff;border:1px solid #ebe7f5;box-shadow:0 10px 28px rgba(76,29,149,.07);backdrop-filter:none}.dash-grid{grid-template-columns:1.05fr 1fr 1fr}.dash-bottom{grid-template-columns:1fr 1.35fr}.achievements{grid-column:auto}.streak{color:#f97316;background:#fff7ed}.dash-syncy-fab{display:flex;align-items:center;gap:.65rem;width:auto;height:70px;padding:5px 1rem 5px 5px;border:1px solid #e9e4fb;border-radius:999px;background:#fff;box-shadow:0 16px 45px rgba(76,29,149,.2)}.dash-syncy-fab img{width:58px;height:58px}.dash-syncy-fab span{left:48px;right:auto;bottom:5px}.dash-syncy-fab b{display:block;color:#5b42db;text-align:left;font-size:.85rem;white-space:nowrap}.dash-syncy-fab small{display:block;margin-top:.15rem;color:#64748b;font-size:.7rem;font-weight:600}html[data-theme="dark"] .dash-shell{background:linear-gradient(145deg,rgba(20,18,44,.97),rgba(30,27,75,.95))}html[data-theme="dark"] .dash-welcome{background:linear-gradient(135deg,#25204d,#302862);border-color:rgba(196,181,253,.2)}html[data-theme="dark"] .dash-welcome h1{color:#fff}html[data-theme="dark"] .dash-hero-mascot{background:linear-gradient(135deg,#373080,#4c3c91)}html[data-theme="dark"] .dash-hero-mascot>div{color:#fff}html[data-theme="dark"] .dash-syncy-fab{background:#25204d;border-color:rgba(196,181,253,.25)}html[data-theme="dark"] .dash-syncy-fab small{color:#cbd5e1}
+    @@media(max-width:900px){.dash-grid{grid-template-columns:1fr 1fr}.dash-mentor{grid-column:1/-1}.dash-welcome{flex-direction:column;align-items:stretch}.dash-hero-mascot{width:100%;margin-top:1rem}.dash-stats{margin-top:1rem;padding:0}}@@media(max-width:650px){.dash-shell{padding:1rem!important}.dash-grid,.dash-bottom,.dash-stats{grid-template-columns:1fr}.dash-syncy-fab b{display:none}.dash-syncy-fab{width:68px;padding:4px}}
+</style>

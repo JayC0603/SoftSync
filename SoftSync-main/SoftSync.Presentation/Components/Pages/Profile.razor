@@ -5,6 +5,7 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common
 @using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Services
 @inject IUserService UserService
 @inject IProgressService ProgressService
 @inject IAssessmentService AssessmentService
@@ -95,8 +96,12 @@
                     <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</div>
                 </div>
             </div>
-            <button class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo("/profile-setup")'>
+            <button class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo(profileComplete ? "/settings" : "/profile-setup")'>
                 <i class="bi bi-pencil tw:me-2"></i> @L["profile.edit"]
+            </button>
+
+            <button class="btn btn-outline-primary tw:mt-6 tw:ms-3 tw:px-6 tw:py-3" @onclick="GoJourney">
+                <i class="bi bi-compass tw:me-2"></i> @journeyButtonText
             </button>
         </div>
     }
@@ -112,6 +117,9 @@
     private int completedSkills;
     private int xpIntoLevel;
     private int xpForNext;
+    private bool hasAssessment;
+    private bool profileComplete;
+    private string journeyButtonText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -129,8 +137,34 @@
 
         var results = await AssessmentService.GetLatestResultsAsync(userId);
         assessmentCount = results.Count();
+        hasAssessment = assessmentCount > 0;
         var progress = await ProgressService.GetUserProgressAsync(userId);
         completedSkills = progress.Count();
+        var selectedSkills = await UserService.GetSelectedSkillIdsAsync(userId);
+        profileComplete = user is not null
+            && !string.IsNullOrWhiteSpace(user.FullName)
+            && user.Age > 0
+            && user.Gender != SoftSync.Common.Enums.Gender.Unspecified
+            && !string.IsNullOrWhiteSpace(user.Goal)
+            && selectedSkills.Any();
+        journeyButtonText = ResolveJourneyButtonText();
+    }
+
+    private string ResolveJourneyButtonText() => !profileComplete
+        ? L["home.dashboard.completeProfile"]
+        : hasAssessment
+            ? L["home.dashboard.primaryCta"]
+            : L["home.dashboard.continueAssessment"];
+
+    private void GoJourney()
+    {
+        var route = !profileComplete
+            ? "/profile-setup"
+            : hasAssessment
+                ? $"/roadmap/{userId}"
+                : $"/assessment/{userId}";
+
+        Nav.NavigateTo(route);
     }
 
     private async Task OnAvatarSelected(InputFileChangeEventArgs e)

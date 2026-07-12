@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <section class="ss-landing">
     <div class="ss-hero-grid">
@@ -26,7 +27,7 @@
                     </NotAuthorized>
                 </AuthorizeView>
                 <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/assistant")'>
-                    <i class="bi bi-play-circle-fill"></i> Learn More
+                    <i class="bi bi-play-circle-fill"></i> @L["home.learnMore"]
                 </button>
             </div>
         </div>
@@ -38,24 +39,19 @@
             <div class="ss-planet ss-planet-a"></div>
             <div class="ss-planet ss-planet-b"></div>
             <div class="ss-ai-orb">
-                <img src="/images/syncy-male.png" alt="" />
-            </div>
-            <div class="ss-ai-caption">
-                <strong>Hi! I'm SoftSync AI</strong>
-                <span>Your learning companion</span>
-                <button type="button" @onclick='() => Nav.NavigateTo("/assistant")'>Click to chat</button>
+                <img src="/images/syncy-fish.png" alt="" />
             </div>
             <div class="ss-feature-chip ss-chip-practice ss-glass ss-glass-interactive">
                 <i class="bi bi-controller"></i>
-                <div><strong>Practice</strong><span>Real-world scenarios</span></div>
+                <div><strong>@L["home.orbit.practice.title"]</strong><span>@L["home.orbit.practice.desc"]</span></div>
             </div>
             <div class="ss-feature-chip ss-chip-assess ss-glass ss-glass-interactive">
                 <i class="bi bi-graph-up-arrow"></i>
-                <div><strong>Assess</strong><span>Understand your skills</span></div>
+                <div><strong>@L["home.orbit.assess.title"]</strong><span>@L["home.orbit.assess.desc"]</span></div>
             </div>
             <div class="ss-feature-chip ss-chip-grow ss-glass ss-glass-interactive">
                 <i class="bi bi-leaf"></i>
-                <div><strong>Grow</strong><span>Personalized learning path</span></div>
+                <div><strong>@L["home.orbit.grow.title"]</strong><span>@L["home.orbit.grow.desc"]</span></div>
             </div>
         </div>
     </div>
@@ -67,13 +63,13 @@
                 <p>Learn from AI mentors, here to guide you.</p>
             </div>
             <button type="button" @onclick='() => Nav.NavigateTo("/community")'>
-                View All Mentors <i class="bi bi-arrow-right"></i>
+                @L["home.communityHubCta"] <i class="bi bi-arrow-right"></i>
             </button>
         </div>
 
         <div class="ss-mentor-grid">
             <article class="ss-mentor-card ss-mentor-violet ss-glass ss-glass-interactive">
-                <img src="/images/syncy-female.png" alt="Nova" />
+                <img src="/images/syncy-fish.png" alt="Nova" />
                 <div>
                     <h3>Nova <i class="bi bi-stars"></i></h3>
                     <span>Communication Mentor</span>
@@ -83,7 +79,7 @@
             </article>
 
             <article class="ss-mentor-card ss-mentor-blue ss-glass ss-glass-interactive">
-                <img src="/images/syncy-male.png" alt="Ace" />
+                <img src="/images/syncy-fish.png" alt="Ace" />
                 <div>
                     <h3>Ace <i class="bi bi-lightning-charge-fill"></i></h3>
                     <span>Leadership Mentor</span>
@@ -93,7 +89,7 @@
             </article>
 
             <article class="ss-mentor-card ss-mentor-green ss-glass ss-glass-interactive">
-                <img src="/images/syncy-female.png" alt="Lexi" />
+                <img src="/images/syncy-fish.png" alt="Lexi" />
                 <div>
                     <h3>Lexi <i class="bi bi-leaf-fill"></i></h3>
                     <span>Productivity Mentor</span>
@@ -110,6 +106,92 @@
         <div class="ss-glass ss-glass-interactive"><i class="bi bi-headset"></i><strong>24/7</strong><span>@L["home.stat.support"]</span></div>
         <div class="ss-glass ss-glass-interactive"><i class="bi bi-star-fill"></i><strong>10K+</strong><span>Learners</span></div>
     </section>
+
+    <aside class="ss-chat-widget @(chatbotOpen ? "open" : "")" aria-label="SoftSync assistant preview">
+        @if (chatbotOpen)
+        {
+            <div class="ss-chat-panel ss-glass">
+                <div class="ss-chat-panel-head">
+                    <div class="ss-chat-avatar">
+                        <img src="/images/syncy-fish.png" alt="" />
+                    </div>
+                    <div>
+                        <strong>SYNCY AI</strong>
+                        <span>@L["chatbot.tagline"]</span>
+                    </div>
+                    <button type="button" class="ss-chat-minimize" title="Thu nhỏ" @onclick="() => chatbotOpen = false">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                    <button type="button" class="ss-chat-close" title="Thu về hình tròn" @onclick="() => chatbotOpen = false">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="ss-chat-body">
+                    <div class="ss-chat-bubble">
+                        @if (chatView == "welcome")
+                        {
+                            <strong>👋 @L["chatbot.welcome.title"]</strong>
+                            <span>@L["chatbot.welcome.desc"]</span>
+                        }
+                        else if (chatView == "about")
+                        {
+                            <strong>🌊 @L["chatbot.about.title"]</strong><span>@L["chatbot.about.desc"]</span>
+                        }
+                        else if (chatView == "premium")
+                        {
+                            <strong>💎 @L["chatbot.premium.title"]</strong><span>@L["chatbot.premium.desc"]</span>
+                        }
+                        else if (chatView == "mentor")
+                        {
+                            <strong>👥 @L["chatbot.mentor.title"]</strong><span>@L["chatbot.mentor.desc"]</span>
+                        }
+                        else if (chatView == "how")
+                        {
+                            <strong>🚀 @L["chatbot.how.title"]</strong><span>@L["chatbot.how.desc"]</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="ss-chat-actions ss-chat-actions--choices">
+                    @if (chatView == "welcome")
+                    {
+                        <button type="button" @onclick='() => Nav.NavigateTo("/assessments")'>📋 @L["chatbot.action.assess"]</button>
+                        <button type="button" @onclick='() => Nav.NavigateTo("/roadmap")'>🎯 @L["chatbot.action.roadmap"]</button>
+                        <button type="button" @onclick='() => chatView = "mentor"'>👥 @L["chatbot.action.mentor"]</button>
+                        <button type="button" @onclick='() => Nav.NavigateTo("/progress")'>📈 @L["chatbot.action.progress"]</button>
+                        <button type="button" @onclick='() => chatView = "premium"'>💎 Premium</button>
+                        <button type="button" @onclick='() => chatView = "about"'>ℹ️ @L["chatbot.action.about"]</button>
+                    }
+                    else if (chatView == "about")
+                    {
+                        <button type="button" @onclick='() => chatView = "how"'>🚀 @L["chatbot.action.how"]</button>
+                        <button type="button" @onclick='() => chatView = "mentor"'>👥 Mentor</button>
+                        <button type="button" @onclick='() => Nav.NavigateTo("/case-studies")'>🎮 @L["chatbot.action.cases"]</button>
+                        <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
+                    }
+                    else if (chatView == "premium")
+                    {
+                        <button type="button" @onclick='() => Nav.NavigateTo("/settings")'>💎 @L["chatbot.action.upgrade"]</button>
+                        <button type="button" class="secondary" @onclick='() => Nav.NavigateTo("/assistant")'>❓ @L["chatbot.action.askMore"]</button>
+                        <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
+                    }
+                    else
+                    {
+                        <button type="button" @onclick='() => Nav.NavigateTo(chatView == "mentor" ? "/community" : "/assessments")'>@L["chatbot.action.continue"]</button>
+                        <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <button type="button" class="ss-chat-fab" title="Mở SoftSync AI" @onclick="() => chatbotOpen = true">
+                <img src="/images/syncy-fish.png" alt="" />
+                <span class="ss-chat-pulse"></span>
+            </button>
+        }
+    </aside>
 </section>
 
 <style>
@@ -158,7 +240,7 @@
             radial-gradient(circle at 74% 12%, rgba(236, 72, 153, 0.22), transparent 30rem),
             radial-gradient(circle at 52% 18%, rgba(139, 92, 246, 0.2), transparent 34rem),
             linear-gradient(180deg, rgba(3, 7, 18, 0.28), rgba(3, 7, 18, 0.9)),
-            url('/images/space-bg.jpg');
+            url('/images/background-softsync.png');
         background-size: auto, auto, auto, cover;
         background-position: center;
         pointer-events: none;
@@ -207,7 +289,7 @@
             radial-gradient(circle at 80% 8%, rgba(236, 72, 153, 0.22), transparent 28rem),
             radial-gradient(circle at 62% 42%, rgba(167, 139, 250, 0.26), transparent 34rem),
             linear-gradient(135deg, rgba(248, 250, 252, 0.88), rgba(237, 233, 254, 0.76) 44%, rgba(255, 228, 245, 0.68)),
-            url('/images/space-bg.jpg');
+            url('/images/background-softsync.png');
         background-size: auto, auto, auto, auto, cover;
         background-position: center;
     }
@@ -294,7 +376,7 @@
         border-radius: 50%;
         background:
             radial-gradient(ellipse at center, rgba(255, 236, 202, 0.92), rgba(236, 72, 153, 0.32) 22%, rgba(79, 70, 229, 0.18) 48%, transparent 70%),
-            url('/images/space-bg.jpg');
+            url('/images/background-softsync.png');
         background-size: 160%;
         filter: saturate(1.4);
         transform: rotate(-10deg);
@@ -328,22 +410,143 @@
         justify-content: center;
     }
     .ss-ai-orb img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 24px rgba(15,23,42,0.28)); }
-    .ss-ai-caption {
-        position: absolute;
-        left: 12%;
-        top: 62%;
-        display: grid;
-        gap: 0.25rem;
-        text-align: center;
+    .ss-chat-widget {
+        position: fixed;
+        right: clamp(1rem, 2.5vw, 2rem);
+        bottom: clamp(1rem, 3vw, 2rem);
+        z-index: 80;
     }
-    .ss-ai-caption span { color: var(--ss-home-soft); }
-    .ss-ai-caption button {
-        margin: 0.8rem auto 0;
-        border: 1px solid rgba(139, 92, 246, 0.55);
-        background: rgba(124, 58, 237, 0.36);
-        color: #ddd6fe;
+    .ss-chat-fab {
+        position: relative;
+        width: 82px;
+        height: 82px;
+        border: 2px solid rgba(255, 255, 255, 0.72);
         border-radius: 999px;
-        padding: 0.45rem 1rem;
+        padding: 0.35rem;
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+        box-shadow: 0 20px 45px rgba(79, 70, 229, 0.32), 0 0 0 10px rgba(139, 92, 246, 0.12);
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .ss-chat-fab:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 24px 55px rgba(79, 70, 229, 0.38), 0 0 0 12px rgba(139, 92, 246, 0.14);
+    }
+    .ss-chat-fab img {
+        width: 100%;
+        height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+        display: block;
+    }
+    .ss-chat-pulse {
+        position: absolute;
+        right: 0.55rem;
+        bottom: 0.65rem;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #fff;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18);
+    }
+    .ss-chat-panel {
+        width: min(360px, calc(100vw - 2rem));
+        padding: 1rem;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(255,255,255,0.74);
+        box-shadow: 0 28px 70px rgba(79, 70, 229, 0.24);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+    }
+    .ss-chat-panel-head {
+        display: grid;
+        grid-template-columns: 48px 1fr 34px 34px;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 0.85rem;
+    }
+    .ss-chat-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        padding: 0.25rem;
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+        overflow: hidden;
+    }
+    .ss-chat-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+    .ss-chat-panel-head strong { display: block; color: #111827; font-weight: 900; }
+    .ss-chat-panel-head span { color: #64748b; font-size: 0.88rem; font-weight: 650; }
+    .ss-chat-minimize,
+    .ss-chat-close {
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 999px;
+        background: rgba(99, 102, 241, 0.1);
+        color: #4338ca;
+        display: grid;
+        place-items: center;
+    }
+    .ss-chat-close { background: rgba(244, 63, 94, 0.1); color: #be123c; }
+    .ss-chat-body { display: grid; gap: 0.65rem; }
+    .ss-chat-bubble {
+        display: grid;
+        gap: 0.35rem;
+        padding: 0.85rem;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        color: #334155;
+        border: 1px solid rgba(99, 102, 241, 0.12);
+    }
+    .ss-chat-bubble strong { color: #111827; font-weight: 850; }
+    .ss-chat-bubble span,
+    .ss-chat-bubble small { line-height: 1.5; }
+    .ss-chat-bubble.accent {
+        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.1));
+    }
+    .ss-chat-price {
+        color: #4f46e5;
+        font-weight: 900;
+    }
+    .ss-chat-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+        margin-top: 0.9rem;
+    }
+    .ss-chat-actions--choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ss-chat-actions--choices button { padding: 0.72rem 0.65rem; font-size: 0.82rem; }
+    .ss-chat-actions button {
+        min-height: 42px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+        font-weight: 800;
+    }
+    .ss-chat-actions button.secondary {
+        background: rgba(99, 102, 241, 0.12);
+        color: #4338ca;
+    }
+    html[data-theme="dark"] .ss-chat-panel {
+        background: rgba(15, 23, 42, 0.82);
+        border-color: rgba(167, 139, 250, 0.24);
+        box-shadow: 0 28px 70px rgba(2, 6, 23, 0.5);
+    }
+    html[data-theme="dark"] .ss-chat-panel-head strong,
+    html[data-theme="dark"] .ss-chat-bubble strong { color: #f8fafc; }
+    html[data-theme="dark"] .ss-chat-panel-head span,
+    html[data-theme="dark"] .ss-chat-bubble { color: #cbd5e1; }
+    html[data-theme="dark"] .ss-chat-bubble {
+        background: rgba(30, 27, 75, 0.58);
+        border-color: rgba(167, 139, 250, 0.2);
+    }
+    html[data-theme="dark"] .ss-chat-actions button.secondary {
+        background: rgba(139, 92, 246, 0.18);
+        color: #ddd6fe;
     }
     .ss-feature-chip {
         position: absolute;
@@ -566,7 +769,6 @@
         .ss-hero-actions > * { width: 100%; justify-content: center; }
         .ss-orbit-stage { min-height: 640px; }
         .ss-ai-orb { left: 50%; transform: translateX(-50%); top: 2%; }
-        .ss-ai-caption { left: 50%; transform: translateX(-50%); top: 36%; width: 100%; }
         .ss-galaxy-core { width: 90vw; right: -8%; top: 50%; }
         .ss-orbit { width: 110vw; right: -18%; top: 40%; }
         .ss-feature-chip { position: relative; width: 100%; left: auto; right: auto; top: auto; margin-top: 0.75rem; }
@@ -578,5 +780,20 @@
         .ss-landing-stats { grid-template-columns: 1fr; }
         .ss-landing-stats div { border-right: none; border-bottom: 1px solid rgba(148,163,184,0.18); }
         .ss-landing-stats div:last-child { border-bottom: none; }
+        .ss-chat-fab { width: 68px; height: 68px; }
+        .ss-chat-panel { width: calc(100vw - 1.5rem); }
+        .ss-chat-actions { grid-template-columns: 1fr; }
     }
 </style>
+
+@code {
+    private bool chatbotOpen;
+    private string chatView = "welcome";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+            Nav.NavigateTo("/dashboard", true);
+    }
+}

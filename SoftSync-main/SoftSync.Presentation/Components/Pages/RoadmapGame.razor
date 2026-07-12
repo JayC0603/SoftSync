@@ -1,0 +1,677 @@
+@page "/roadmap/game/{UserId:int}/{ItemId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using System.Globalization
+@using System.Text
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Presentation.Services
+@inject IRoadmapService RoadmapService
+@inject IGameBankService GameBankService
+@inject NavigationManager Nav
+
+<div class="game-page mx-auto">
+    <div class="tw:mb-4">
+        <button class="btn btn-link text-muted tw:no-underline tw:px-0" @onclick="BackToRoadmap">
+            <i class="bi bi-arrow-left tw:me-1"></i> @L["roadmap.backToRoadmap"]
+        </button>
+    </div>
+
+    @if (item is null)
+    {
+        <div class="ss-card tw:p-12 tw:text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (item.WeekNumber != 1)
+    {
+        <div class="ss-card ss-glass-interactive tw:p-10 tw:text-center game-empty-state">
+            <div class="game-empty-badge">Game 1</div>
+            <h2 class="tw:fw-bold tw:mt-3">Chỉ khả dụng cho Week 1</h2>
+            <p class="text-muted tw:mb-0">
+                Hiện tại bài game lý thuyết này chỉ mở cho Week 1 của từng kỹ năng.
+            </p>
+        </div>
+    }
+    else if (item.IsCompleted)
+    {
+        <div class="ss-card ss-glass-interactive tw:p-12 game-complete-shell">
+            <div class="game-complete-icon">
+                <i class="bi bi-patch-check-fill"></i>
+            </div>
+            <div class="game-complete-copy">
+                <div class="game-empty-badge">Game 1</div>
+                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">Bạn đã hoàn thành Game 1</h2>
+                <p class="text-muted tw:mb-0">
+                    Game 1 đã được khóa lại để giữ đúng lộ trình. Bạn có thể quay về Roadmap và tiếp tục Week tiếp theo.
+                </p>
+            </div>
+            <div class="tw:mt-4">
+                <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="BackToRoadmap">
+                    Quay lại Roadmap <i class="bi bi-arrow-right tw:ms-2"></i>
+                </button>
+            </div>
+        </div>
+    }
+    else if (session is null && loadFailed)
+    {
+        <div class="ss-card ss-glass-interactive tw:p-10 tw:text-center game-empty-state">
+            <div class="game-empty-badge">Game 1</div>
+            <h2 class="tw:fw-bold tw:mt-3">Chưa có bộ câu hỏi</h2>
+            <p class="text-muted tw:mb-0">
+                Mình chưa tìm thấy bank câu hỏi cho kỹ năng này.
+            </p>
+        </div>
+    }
+    else if (session is null)
+    {
+        <div class="ss-card tw:p-12 tw:text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else
+    {
+        <div class="game-hero ss-card ss-glass-interactive">
+            <div class="game-hero__copy">
+                <div class="tw:flex tw:flex-wrap tw:gap-2 tw:items-center tw:mb-3">
+                    <span class="game-pill game-pill--accent">Game 1</span>
+                    <span class="game-pill">Week @item.WeekNumber</span>
+                    <span class="game-pill">@session.SkillName</span>
+                </div>
+                <h1 class="tw:fw-bold tw:mb-2">Quiz lý thuyết 5 câu ngẫu nhiên</h1>
+                <p class="text-muted tw:mb-0">
+                    Mỗi lượt làm sẽ lấy ngẫu nhiên 5 câu từ bank câu hỏi của kỹ năng này và đảo thứ tự đáp án.
+                </p>
+            </div>
+
+            <div class="game-hero__stats">
+                <div class="stat-card">
+                    <span class="stat-label">Đã chọn</span>
+                    <strong>@SelectedCount/@session.QuestionLimit</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Trạng thái</span>
+                    <strong>@(submitted ? "Đã nộp" : "Đang làm")</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-grid">
+            <div class="game-quiz">
+                @foreach (var question in session.Questions.Select((value, index) => new { value, index }))
+                {
+                    var q = question.value;
+                    <article class="question-card ss-card">
+                        <div class="question-card__header">
+                            <span class="question-index">Câu @(question.index + 1)</span>
+                            <span class="text-muted">/ @session.QuestionLimit</span>
+                        </div>
+                        <h3 class="question-text">@q.QuestionText</h3>
+
+                        <div class="option-list">
+                            @foreach (var option in q.Options)
+                            {
+                                var selected = IsSelected(q.Id, option.Id);
+                                var optionClass = submitted
+                                    ? GetRevealClass(option, selected)
+                                    : selected ? "option-item option-item--selected" : "option-item";
+
+                                <button type="button"
+                                        class="@optionClass"
+                                        @onclick="() => SelectAnswer(q.Id, option.Id)"
+                                        disabled="@submitted">
+                                    <span class="option-key">@option.DisplayLabel</span>
+                                    <span class="option-text">@option.Text</span>
+                                    @if (submitted)
+                                    {
+                                        @if (option.IsCorrect)
+                                        {
+                                            <span class="option-mark">Đáp án đúng</span>
+                                        }
+                                        else if (selected)
+                                        {
+                                            <span class="option-mark option-mark--wrong">Đã chọn</span>
+                                        }
+                                    }
+                                </button>
+                            }
+                        </div>
+
+                        @if (submitted)
+                        {
+                            var selectedOption = GetSelectedOption(q);
+                            var correctOption = GetCorrectOption(q);
+                            <div class="question-feedback @(selectedOption.IsCorrect ? "question-feedback--ok" : "question-feedback--miss")">
+                                <div>
+                                    <strong>@(selectedOption.IsCorrect ? "Chính xác" : "Chưa đúng")</strong>
+                                    <div class="text-muted">
+                                        Đáp án đúng: <strong>@correctOption.DisplayLabel</strong> - @correctOption.Text
+                                    </div>
+                                </div>
+                                <div class="text-muted">
+                                    Bạn đã chọn: <strong>@selectedOption.DisplayLabel</strong> - @selectedOption.Text
+                                </div>
+                            </div>
+                        }
+                    </article>
+                }
+            </div>
+
+            <aside class="game-side">
+                <div class="ss-card game-side-card">
+                    <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
+                        <h4 class="tw:mb-0 tw:fw-bold">Tiến độ</h4>
+                        <span class="badge bg-primary">5 câu</span>
+                    </div>
+
+                    <div class="progress game-progress">
+                        <div class="progress-bar" role="progressbar" style="@($"width:{ProgressPercent}%")"></div>
+                    </div>
+
+                    <div class="game-side-meta">
+                        <div>
+                            <span class="text-muted">Kỹ năng</span>
+                            <strong>@session.SkillName</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted">Số câu random</span>
+                            <strong>@session.QuestionLimit</strong>
+                        </div>
+                    </div>
+
+                    <button class="ss-btn-primary w-100 tw:mt-4" @onclick="SubmitAsync" disabled="@(!CanSubmit || submitted)">
+                        @(submitted ? "Đã nộp bài" : "Nộp bài")
+                    </button>
+
+                    <button class="btn btn-outline-secondary w-100 tw:mt-2" @onclick="RestartAsync" disabled="@(!submitted)">
+                        Làm lại Game 1
+                    </button>
+                </div>
+
+                @if (submitted)
+                {
+                    <div class="ss-card game-result-card">
+                        <div class="result-score">@correctCount/5</div>
+                        <div class="text-muted tw:mb-2">Số câu đúng</div>
+                        <div class="result-percent">@ScorePercent%</div>
+                        <div class="text-muted tw:mb-4">Bạn đã hoàn thành Game 1 cho @session.SkillName.</div>
+
+                        <div class="result-list">
+                            @foreach (var row in reviewRows)
+                            {
+                                <div class="result-row @(row.IsCorrect ? "result-row--ok" : "result-row--miss")">
+                                    <span>@(row.IsCorrect ? "✓" : "✕")</span>
+                                    <div class="tw:flex-1">
+                                        <div class="result-row__question">@row.QuestionText</div>
+                                        <div class="text-muted">
+                                            Đáp án: @row.CorrectKey - @row.CorrectText
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </aside>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public int ItemId { get; set; }
+
+    private RoadmapItemDto? item;
+    private Game1SessionDto? session;
+    private readonly Dictionary<string, string> selectedOptionIds = new(StringComparer.Ordinal);
+    private readonly List<GameReviewRow> reviewRows = new();
+    private bool submitted;
+    private bool loadFailed;
+    private int correctCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
+        if (item is null)
+        {
+            Nav.NavigateTo($"/roadmap/{UserId}", true);
+            return;
+        }
+
+        if (item.WeekNumber != 1)
+            return;
+
+        await LoadSessionAsync();
+    }
+
+    private async Task LoadSessionAsync()
+    {
+        loadFailed = false;
+        session = null;
+
+        var skillId = ResolveSkillId(item?.SkillName, item?.Title);
+        if (skillId == 0)
+        {
+            loadFailed = true;
+            return;
+        }
+
+        var loaded = await GameBankService.CreateSessionAsync(skillId, 5);
+        if (loaded is null)
+        {
+            loadFailed = true;
+            return;
+        }
+
+        session = loaded;
+        selectedOptionIds.Clear();
+        reviewRows.Clear();
+        submitted = false;
+        correctCount = 0;
+    }
+
+    private static int ResolveSkillId(string? skillName, string? title)
+    {
+        var value = FoldToAscii($"{skillName} {title}");
+
+        if (value.Contains("giao tiep") || value.Contains("communication"))
+            return 1;
+        if (value.Contains("quan ly thoi gian") || value.Contains("time management"))
+            return 3;
+        if (value.Contains("tu duy phan bien") || value.Contains("critical thinking"))
+            return 4;
+
+        return 0;
+    }
+
+    private static string FoldToAscii(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        var builder = new System.Text.StringBuilder(normalized.Length);
+
+        foreach (var ch in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                builder.Append(ch);
+        }
+
+        return builder.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+    }
+
+    private int SelectedCount => selectedOptionIds.Count;
+    private bool CanSubmit => session is not null && session.Questions.All(q => selectedOptionIds.ContainsKey(q.Id));
+    private int ScorePercent => submitted ? (int)Math.Round(correctCount * 100.0 / Math.Max(session?.QuestionLimit ?? 5, 1)) : 0;
+    private double ProgressPercent => session is null ? 0 : SelectedCount * 100.0 / session.QuestionLimit;
+
+    private void SelectAnswer(string questionId, string optionId)
+    {
+        if (submitted)
+            return;
+
+        selectedOptionIds[questionId] = optionId;
+    }
+
+    private bool IsSelected(string questionId, string optionId)
+        => selectedOptionIds.TryGetValue(questionId, out var selectedId) && selectedId == optionId;
+
+    private GameBankOptionDto GetSelectedOption(GameBankQuestionDto question)
+    {
+        if (!selectedOptionIds.TryGetValue(question.Id, out var selectedId))
+            return question.Options[0];
+
+        return question.Options.First(o => o.Id == selectedId);
+    }
+
+    private GameBankOptionDto GetCorrectOption(GameBankQuestionDto question)
+        => question.Options.First(o => o.IsCorrect);
+
+    private string GetRevealClass(GameBankOptionDto option, bool selected)
+    {
+        if (option.IsCorrect)
+            return "option-item option-item--correct";
+
+        if (selected)
+            return "option-item option-item--wrong";
+
+        return "option-item option-item--faded";
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (session is null || submitted || !CanSubmit)
+            return;
+
+        reviewRows.Clear();
+        correctCount = 0;
+
+        foreach (var question in session.Questions)
+        {
+            var selected = GetSelectedOption(question);
+            var correct = GetCorrectOption(question);
+            var isCorrect = selected.IsCorrect;
+
+            if (isCorrect)
+                correctCount++;
+
+            reviewRows.Add(new GameReviewRow(
+                question.QuestionText,
+                selected.DisplayLabel,
+                selected.Text,
+                correct.DisplayLabel,
+                correct.Text,
+                isCorrect));
+        }
+
+        submitted = true;
+        await RoadmapService.MarkCompleteAsync(ItemId);
+    }
+
+    private async Task RestartAsync()
+    {
+        if (item is null)
+            return;
+
+        await LoadSessionAsync();
+    }
+
+    private void BackToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
+
+    private sealed record GameReviewRow(string QuestionText, string SelectedKey, string SelectedText, string CorrectKey, string CorrectText, bool IsCorrect);
+}
+
+<style>
+    .game-page {
+        max-width: 1180px;
+    }
+
+    .game-hero {
+        border-radius: 28px;
+        padding: 28px;
+        display: grid;
+        gap: 20px;
+        grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+
+    .game-pill {
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        background: rgba(15, 23, 42, 0.06);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .game-pill--accent {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary);
+    }
+
+    .game-hero__stats {
+        display: grid;
+        gap: 12px;
+    }
+
+    .stat-card {
+        border-radius: 20px;
+        padding: 18px 20px;
+        background: rgba(15, 23, 42, 0.04);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .stat-label {
+        display: block;
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+
+    .game-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .game-quiz {
+        display: grid;
+        gap: 16px;
+    }
+
+    .question-card {
+        border-radius: 24px;
+        padding: 22px;
+    }
+
+    .question-card__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .question-index {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .question-text {
+        font-size: 1.15rem;
+        line-height: 1.5;
+        margin-bottom: 16px;
+        font-weight: 700;
+    }
+
+    .option-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .option-item {
+        width: 100%;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        background: #fff;
+        border-radius: 18px;
+        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        text-align: left;
+        transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+    }
+
+    .option-item:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: rgba(37, 99, 235, 0.35);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .option-item:disabled {
+        cursor: default;
+        opacity: 1;
+    }
+
+    .option-item--selected {
+        border-color: rgba(37, 99, 235, 0.55);
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+    .option-item--correct {
+        border-color: rgba(16, 185, 129, 0.55);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .option-item--wrong {
+        border-color: rgba(239, 68, 68, 0.55);
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .option-item--faded {
+        opacity: 0.7;
+    }
+
+    .option-key {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.08);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+    }
+
+    .option-text {
+        line-height: 1.45;
+        color: #111827;
+    }
+
+    .option-mark {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #059669;
+        white-space: nowrap;
+    }
+
+    .option-mark--wrong {
+        color: #dc2626;
+    }
+
+    .question-feedback {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .question-feedback--ok {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.16);
+    }
+
+    .question-feedback--miss {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.16);
+    }
+
+    .game-side {
+        position: sticky;
+        top: 90px;
+        display: grid;
+        gap: 16px;
+    }
+
+    .game-side-card,
+    .game-result-card,
+    .game-empty-state {
+        border-radius: 24px;
+        padding: 22px;
+    }
+
+    .game-progress {
+        height: 12px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.08);
+    }
+
+    .game-side-meta {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .game-side-meta span {
+        display: block;
+        font-size: 0.8rem;
+        margin-bottom: 3px;
+    }
+
+    .result-score {
+        font-size: 2.75rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--primary);
+    }
+
+    .result-percent {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .result-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .result-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    .result-row--ok {
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .result-row--miss {
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .result-row__question {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .game-empty-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    .game-complete-shell {
+        border-radius: 28px;
+        display: grid;
+        gap: 16px;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .game-complete-icon {
+        width: 84px;
+        height: 84px;
+        border-radius: 28px;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        color: #059669;
+        background: rgba(16, 185, 129, 0.12);
+    }
+
+    @@media (max-width: 992px) {
+        .game-hero,
+        .game-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .game-side {
+            position: static;
+        }
+    }
+</style>

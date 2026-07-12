@@ -27,11 +27,11 @@
 }
 
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.62);
-    --glass-bg-strong: rgba(255, 255, 255, 0.82);
-    --glass-border: rgba(209, 213, 219, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.65);
     --glass-blur: 18px;
-    --glass-highlight: rgba(255, 255, 255, 0.95);
+    --glass-highlight: rgba(255, 255, 255, 0.9);
 
     /* Plain copies of the brand colors. Tailwind v4 tree-shakes unused @theme
        vars out of the output, so the custom CSS below (gradient, aurora blobs)
@@ -110,6 +110,33 @@
         radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 55%);
 }
 
+/* Shared liquid surface for the app's standard cards and navigation. */
+:where(.ss-card, .ss-navbar, .assistant-chat-card, .dash-card) {
+    border: 1px solid color-mix(in srgb, var(--glass-border) 82%, transparent);
+    box-shadow:
+        0 14px 38px rgba(76, 29, 149, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -1px 0 rgba(124, 92, 252, 0.06);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    backdrop-filter: blur(22px) saturate(165%);
+}
+
+@supports (background: color-mix(in srgb, white 50%, transparent)) {
+    :where(.ss-card, .assistant-chat-card, .dash-card) {
+        background:
+            linear-gradient(145deg,
+                color-mix(in srgb, var(--glass-bg-strong) 78%, white 12%),
+                color-mix(in srgb, var(--glass-bg) 88%, #ddd6fe 12%));
+    }
+}
+
+html[data-theme="dark"] :where(.ss-card, .ss-navbar, .assistant-chat-card, .dash-card) {
+    box-shadow:
+        0 18px 46px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        inset 0 -1px 0 rgba(139, 92, 246, 0.08);
+}
+
 @keyframes ss-glass-sheen {
     0%   { left: -60%; opacity: 0; }
     35%  { opacity: 0.8; }
@@ -128,27 +155,24 @@
     66%      { transform: translate(-5%, 3%) scale(0.95); }
 }
 
-/* Full-page background behind the glass.
-   Light mode: bright airy gradient (white → violet tint → soft sky).
-   Dark mode: overridden below with the galaxy image + dark overlay. */
+/* Full-page cosmic background image behind the glass. The galaxy photo is the
+   top layer; a purple→pink gradient sits underneath as a fallback so the page
+   still looks cosmic if the image is missing (e.g. before it's committed). */
 .ss-aurora {
     position: fixed;
     inset: 0;
     z-index: -10;
     overflow: hidden;
     pointer-events: none;
-    background:
-        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(196, 181, 253, 0.45), transparent 55%),
-        radial-gradient(ellipse 70% 50% at 85% 10%, rgba(224, 231, 255, 0.6), transparent 50%),
-        radial-gradient(ellipse 60% 60% at 50% 100%, rgba(243, 232, 255, 0.4), transparent 55%),
-        linear-gradient(160deg, #f8fafc 0%, #ede9fe 35%, #e0e7ff 65%, #f0f9ff 100%);
+    background-image:
+        url('/images/background-softsync.png'),
+        linear-gradient(135deg, #3b1e78 0%, #8b5cf6 40%, #d8b4fe 68%, #fdf4ff 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transition: background 0.4s ease;
 }
 
-/* The animated blobs are replaced by the gradient now. */
+/* The animated blobs are replaced by the image now. */
 .ss-aurora span { display: none; }
 
 .ss-gradient-text {
@@ -181,15 +205,13 @@ html[data-theme="dark"] {
 html[data-theme="dark"] body { color: #ede9fe; }
 /* Deep navy-purple canvas with a slightly brighter aurora so the page reads as a
    rich dark surface (like the reference) rather than washed-out grey. */
-/* Dark mode: galaxy image with a strong dark overlay so glass cards stay readable. */
+/* Dark theme keeps the same galaxy image but darkens it with an overlay so the
+   glass cards stay readable and the mood matches the dark UI. */
 html[data-theme="dark"] .ss-aurora {
-    background:
-        linear-gradient(rgba(8, 7, 20, 0.68), rgba(12, 10, 30, 0.78)),
-        url('/images/space-bg.jpg'),
-        linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-image:
+        linear-gradient(rgba(10, 9, 24, 0.62), rgba(10, 9, 24, 0.72)),
+        url('/images/background-softsync.png'),
+        linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6b21a8 100%);
 }
 html[data-theme="dark"] .text-muted { color: #9ca3af !important; }
 html[data-theme="dark"] .ss-card,

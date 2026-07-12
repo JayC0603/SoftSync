@@ -5,6 +5,7 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @inject IRoadmapService RoadmapService
+@inject NavigationManager Nav
 
 <div class="max-800 mx-auto">
     <StepIndicator CurrentStep="5" />
@@ -25,27 +26,34 @@
     }
     else
     {
-        <div class="ss-roadmap-line tw:mt-12">
-            @foreach (var item in roadmap.Items)
-            {
-                <div class="tw:mb-12 tw:relative">
-                    <div class="ss-roadmap-dot @(item.IsCompleted ? "active" : "")" style="top: 0.5rem; @(item.IsCompleted ? "" : "background: #cbd5e1;")"></div>
-                    <div class="ss-card ss-glass-interactive tw:p-6 tw:ms-2">
-                        <div class="tw:flex tw:justify-between tw:items-start tw:mb-2">
-                            <div>
-                                <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
-                                <h5 class="tw:font-bold tw:mt-1">@item.Title</h5>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input tw:text-2xl cursor-pointer" type="checkbox" checked="@item.IsCompleted"
-                                       @onchange="() => ToggleComplete(item)" />
-                            </div>
-                        </div>
-                        <p class="text-muted tw:mb-0">@item.Description</p>
+        @foreach (var section in GetSections())
+        {
+            <div class="tw:mb-12">
+                <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+                    <div>
+                        <h4 class="tw:font-bold tw:mb-1">@section.Title</h4>
+                        <p class="text-muted tw:mb-0">3 @L["roadmap.week"]</p>
                     </div>
                 </div>
-            }
-        </div>
+
+                <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-4">
+                    @foreach (var item in section.Items)
+                    {
+                        <button class="ss-card ss-glass-interactive roadmap-week-card tw:p-5 tw:text-start"
+                                @onclick="() => OpenLecture(item)">
+                            <div class="tw:flex tw:justify-between tw:items-start tw:mb-2">
+                                <div>
+                                    <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
+                                    <h5 class="tw:font-bold tw:mt-1 tw:mb-0">@item.Title</h5>
+                                </div>
+                                <i class="bi bi-play-circle-fill roadmap-week-icon"></i>
+                            </div>
+                            <p class="text-muted tw:mb-0">@item.Description</p>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -56,22 +64,43 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Fall back to the signed-in user when no id is supplied via the route.
         if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
         roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
     }
 
-    private async Task ToggleComplete(RoadmapItemDto item)
+    private IEnumerable<RoadmapSection> GetSections()
     {
-        if (!item.IsCompleted)
-        {
-            await RoadmapService.MarkCompleteAsync(item.Id);
-            item.IsCompleted = true;
-        }
+        if (roadmap?.Items == null || roadmap.Items.Count == 0)
+            return Enumerable.Empty<RoadmapSection>();
+
+        return roadmap.Items
+            .GroupBy(item => string.IsNullOrWhiteSpace(item.SkillName) ? L["roadmap.general"] : item.SkillName)
+            .Select(group => new RoadmapSection(
+                group.Key,
+                group.Min(item => item.Id),
+                group.OrderBy(item => item.WeekNumber).ThenBy(item => item.Id).ToList()))
+            .OrderBy(section => section.Order);
     }
+
+    private void OpenLecture(RoadmapItemDto item) =>
+        Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
+
+    private sealed record RoadmapSection(string Title, int Order, List<RoadmapItemDto> Items);
 }
 
 <style>
     .max-800 { max-width: 800px; }
-    .cursor-pointer { cursor: pointer; }
+    .roadmap-week-card {
+        border: 0;
+        border-radius: 20px;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .roadmap-week-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+    }
+    .roadmap-week-icon {
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
 </style>

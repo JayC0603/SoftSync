@@ -14,7 +14,7 @@ public static class Mascot
 
     public static string ImageFor(Gender gender) => gender switch
     {
-        Gender.Female => "/images/syncy-female.png",
-        _ => "/images/syncy-male.png"
+        Gender.Female => "/images/syncy-fish.png",
+        _ => "/images/syncy-fish.png"
     };
 }
