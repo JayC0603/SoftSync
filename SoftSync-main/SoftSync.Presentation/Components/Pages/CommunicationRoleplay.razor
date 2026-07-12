@@ -1,0 +1,159 @@
+@page "/communication-roleplay"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+
+<PageTitle>Quiz 2 · Role-play Giao tiếp</PageTitle>
+
+<main class="rp-page">
+    <button class="rp-back" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-arrow-left"></i> Quay lại Roadmap</button>
+
+    <header class="rp-hero">
+        <div><span><i class="bi bi-robot"></i> QUIZ 2 · AI ROLE-PLAY</span><h1>Đối thoại thực tế<br /><em>trong đời sống sinh viên</em></h1><p>Hoàn thành ba lượt hội thoại. Hệ thống phân tích cách bạn giữ bình tĩnh, lắng nghe, dùng thông điệp “Tôi” và đề xuất giải pháp.</p></div>
+        <div class="rp-hero-meta"><article><b>10</b><span>kịch bản Việt Nam</span></article><article><b>03</b><span>lượt hội thoại</span></article><article><b>10</b><span>điểm tối đa</span></article></div>
+    </header>
+
+    @if (result is not null)
+    {
+        <section class="rp-result">
+            <header><div class="rp-score tier-@result.Css"><strong>@result.Total.ToString("0.0")</strong><span>/ 10 điểm</span></div><div><small>KẾT QUẢ PHÂN TÍCH</small><h2>@result.Tier</h2><p>@result.Summary</p></div><button @onclick="Restart"><i class="bi bi-arrow-repeat"></i> Kịch bản mới</button></header>
+            <div class="rp-rubrics">
+                @foreach (var rubric in result.Rubrics)
+                {
+                    <article><div><span><i class="bi @rubric.Icon"></i>@rubric.Name</span><b>@rubric.Score.ToString("0.0")/@rubric.Max.ToString("0")</b></div><div class="rp-meter"><i style="width:@(rubric.Score * 100 / rubric.Max)%"></i></div><p>@rubric.Feedback</p></article>
+                }
+            </div>
+            <div class="rp-diagnostic">
+                <section><span><i class="bi bi-shield-exclamation"></i> RÀO CẢN ĐƯỢC PHÁT HIỆN</span><div class="rp-flags"><b class="@(result.AdHominem ? "bad" : "good")">@(result.AdHominem ? "×" : "✓") Công kích cá nhân</b><b class="@(result.Defensive ? "bad" : "good")">@(result.Defensive ? "×" : "✓") Kích hoạt phòng vệ</b><b class="@(result.Bypassing ? "bad" : "good")">@(result.Bypassing ? "×" : "✓") Hiểu lệch/không làm rõ</b></div></section>
+                <section><span><i class="bi bi-stars"></i> PHẢN HỒI GỢI Ý</span><blockquote>“@Current.PerfectResponse”</blockquote></section>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="rp-workspace">
+            <aside>
+                <span>KỊCH BẢN @(scenarioIndex + 1)/10</span><h2>@Current.Title</h2><p>@Current.Context</p>
+                <div class="rp-progress"><div><i style="width:@(Turn * 100 / 3)%"></i></div><b>@Turn/3 lượt</b></div>
+                <h3>Tiêu chí quan sát</h3><ul><li><i class="bi bi-heart-pulse"></i> Bình tĩnh, không công kích <b>3đ</b></li><li><i class="bi bi-ear"></i> Lắng nghe & thấu hiểu <b>3đ</b></li><li><i class="bi bi-chat-quote"></i> Thông điệp “Tôi” <b>2đ</b></li><li><i class="bi bi-bullseye"></i> Giải pháp cụ thể <b>2đ</b></li></ul>
+                <button @onclick="NextScenario"><i class="bi bi-shuffle"></i> Đổi tình huống</button>
+            </aside>
+            <section class="rp-chat">
+                <header><span>@Current.Avatar</span><div><b>@Current.Character</b><small><i></i> Đang đối thoại với bạn</small></div><em>Lượt @Math.Min(Turn + 1, 3)/3</em></header>
+                <div class="rp-messages" id="roleplay-messages">
+                    @foreach (var message in messages)
+                    {
+                        <div class="@(message.User ? "user" : "ai")"><span>@(message.User ? "Bạn" : Current.Character)</span><p>@message.Text</p></div>
+                    }
+                </div>
+                <footer>
+                    <textarea @bind="draft" @bind:event="oninput" disabled="@(Turn >= 3)" placeholder="Nhập phản hồi của bạn... Hãy thử lắng nghe, dùng ‘mình cảm thấy’ và đề xuất một bước cụ thể."></textarea>
+                    <div><span>@draft.Length/600 ký tự</span><button disabled="@(string.IsNullOrWhiteSpace(draft) || draft.Length > 600)" @onclick="Send"><i class="bi bi-send-fill"></i> @(Turn == 2 ? "Gửi & chấm điểm" : "Gửi phản hồi")</button></div>
+                </footer>
+            </section>
+        </section>
+    }
+</main>
+
+@code {
+    private int scenarioIndex, Turn;
+    private string draft = string.Empty;
+    private Result? result;
+    private Scenario Current => Scenarios[scenarioIndex];
+    private List<Message> messages { get; } = [];
+    private List<string> userTurns { get; } = [];
+
+    protected override void OnInitialized() => ResetConversation();
+    private void ResetConversation() { messages.Clear(); userTurns.Clear(); Turn = 0; result = null; draft = string.Empty; messages.Add(new(false, Current.Opening)); }
+    private void NextScenario() { scenarioIndex = (scenarioIndex + 1) % Scenarios.Count; ResetConversation(); }
+    private void Restart() { scenarioIndex = Random.Shared.Next(Scenarios.Count); ResetConversation(); }
+
+    private void Send()
+    {
+        var text = draft.Trim();
+        if (string.IsNullOrWhiteSpace(text) || Turn >= 3) return;
+        messages.Add(new(true, text)); userTurns.Add(text); draft = string.Empty; Turn++;
+        if (Turn < 3) messages.Add(new(false, ResponseFor(text, Turn)));
+        else result = Grade(string.Join(" ", userTurns));
+    }
+
+    private string ResponseFor(string text, int turn)
+    {
+        var quality = QuickQuality(text);
+        if (turn == 1) return quality >= 2 ? Current.PositiveFollowup : quality == 1 ? Current.NeutralFollowup : Current.DefensiveFollowup;
+        return quality >= 2 ? Current.PositiveClose : quality == 1 ? "Mình hiểu ý bạn, nhưng bạn có thể nói rõ hơn mình nên làm gì và khi nào không?" : "Cách bạn nói làm mình thấy bị phán xét. Mình chưa nghĩ cuộc trao đổi này đang giải quyết được vấn đề.";
+    }
+
+    private static int QuickQuality(string text)
+    {
+        var value = text.ToLowerInvariant();
+        var positive = CountAny(value, Empathy) + CountAny(value, Solutions) + (text.Contains('?') ? 1 : 0);
+        var negative = CountAny(value, Attacks) + (IsMostlyUpper(text) ? 2 : 0);
+        return negative > 0 ? 0 : positive >= 2 ? 2 : 1;
+    }
+
+    private Result Grade(string transcript)
+    {
+        var value = transcript.ToLowerInvariant();
+        var attackCount = CountAny(value, Attacks);
+        var empathyCount = CountAny(value, Empathy);
+        var solutionCount = CountAny(value, Solutions);
+        var iCount = CountAny(value, IStatements);
+        var hasQuestion = transcript.Contains('?');
+        var hasTime = System.Text.RegularExpressions.Regex.IsMatch(value, @"\b(\d{1,2}([:h]\d{0,2})?|hôm nay|ngày mai|thứ [hai|ba|tư|năm|sáu|bảy]|trước|sau \d+)\b");
+        var upper = IsMostlyUpper(transcript);
+        var adHominem = attackCount > 0;
+        var defensive = adHominem || upper || value.Contains("không quan tâm") || value.Contains("tùy bạn");
+        var bypassing = !hasQuestion && empathyCount == 0;
+
+        var eq = Clamp(1.5 + empathyCount * .45 - attackCount * 1.1 - (upper ? 1 : 0), 0, 3);
+        var listening = Clamp(.75 + empathyCount * .45 + (hasQuestion ? .8 : 0) + (value.Contains("có phải") || value.Contains("ý bạn") ? .6 : 0), 0, 3);
+        var iStatement = Clamp(.5 + iCount * .55 - (value.Contains("tại bạn") || value.Contains("bạn luôn") ? 1 : 0), 0, 2);
+        var solution = Clamp(.35 + solutionCount * .4 + (hasTime ? .8 : 0), 0, 2);
+        var total = Math.Round(eq + listening + iStatement + solution, 1);
+        var tier = total < 5 ? "Yếu" : total < 7 ? "Trung bình" : total < 8.5 ? "Khá" : "Xuất sắc";
+        var css = total < 5 ? "weak" : total < 7 ? "medium" : total < 8.5 ? "good" : "excellent";
+        var summary = total < 5 ? "Bạn cần giảm phản ứng phòng vệ và tập trung hỏi để hiểu nguyên nhân trước khi đưa giải pháp." : total < 8.5 ? "Bạn đã giữ được cuộc trò chuyện tương đối tích cực; hãy làm rõ cảm nhận và chốt hành động cụ thể hơn." : "Bạn thể hiện sự thấu cảm, bình tĩnh và hướng cuộc trò chuyện đến một kế hoạch khả thi.";
+        return new(total, tier, css, summary,
+        [
+            new("Bình tĩnh & EQ", "bi-heart-pulse", eq, 3, eq < 1.5 ? "Ngôn từ còn tạo cảm giác công kích hoặc phòng vệ." : "Bạn giữ tông giọng tương đối ôn hòa và ghi nhận hoàn cảnh đối phương."),
+            new("Lắng nghe chủ động", "bi-ear", listening, 3, listening < 1.5 ? "Hãy đặt câu hỏi mở và diễn giải lại điều đối phương đang gặp." : "Bạn có dấu hiệu hỏi lại, xác nhận và phản hồi thấu hiểu."),
+            new("Thông điệp ‘Tôi’", "bi-chat-quote", iStatement, 2, iStatement < 1 ? "Hãy dùng ‘mình cảm thấy/mình lo rằng’ thay cho lời quy kết ‘tại bạn’." : "Bạn diễn đạt cảm nhận cá nhân mà không đổ lỗi trực tiếp."),
+            new("Giải pháp cụ thể", "bi-bullseye", solution, 2, solution < 1 ? "Giải pháp còn chung chung; cần người thực hiện và mốc thời gian." : "Bạn đã đưa ra hướng xử lý có tính hành động và cam kết.")
+        ], adHominem, defensive, bypassing);
+    }
+
+    private static double Clamp(double value, double min, double max) => Math.Round(Math.Clamp(value, min, max), 1);
+    private static int CountAny(string value, string[] words) => words.Count(value.Contains);
+    private static bool IsMostlyUpper(string value) { var letters = value.Where(char.IsLetter).ToArray(); return letters.Length >= 8 && letters.Count(char.IsUpper) > letters.Length * .7; }
+    private static readonly string[] Empathy = ["mình hiểu", "mình biết", "mình nghe", "cảm ơn", "xin lỗi", "chia sẻ", "khó khăn", "áp lực", "lo lắng", "có phải", "bạn đang"];
+    private static readonly string[] IStatements = ["mình cảm thấy", "mình thấy", "mình lo", "mình nghĩ", "mình mong", "mình cần", "em cảm thấy", "em lo"];
+    private static readonly string[] Solutions = ["hay là", "đề xuất", "cùng", "chia", "hỗ trợ", "gửi", "hoàn thành", "thống nhất", "hẹn", "trước", "ngày mai", "giờ", "kế hoạch", "đổi", "khôi phục"];
+    private static readonly string[] Attacks = ["lười", "vô ý thức", "tại bạn", "bạn luôn", "bạn chẳng", "ngu", "dở", "tệ", "không quan tâm", "im đi", "dẹp ngay", "báo giảng viên", "gạch tên", "oan", "bất công"];
+
+    private static readonly List<Scenario> Scenarios =
+    [
+        new("Thành viên trễ hạn vì làm thêm", "Nhóm Kinh tế vĩ mô còn 3 ngày. Nam chưa nộp phần tóm tắt vì làm ca tối.", "Nam", "N", "Xin lỗi cả nhóm, mình chưa gửi phần tóm tắt được. Dạo này đi làm ca tối về mệt quá, không đọc nổi tài liệu. Mọi người làm trước phần của mình được không?", "Cảm ơn bạn. Tài liệu tiếng Anh nhiều từ khó quá, mình tra hoài không hiểu nên càng đọc càng nản.", "Cảm ơn bạn thông cảm. Chắc tối nay mình cố gắng làm.", "Bạn nói vậy nghe được à? Mình đi làm kiếm tiền đóng tiền nhà chứ có đi chơi đâu!", "Phương án đó giảm tải cho mình nhiều. Mình đồng ý và sẽ gửi đúng thời hạn!", "Nam ơi, mình hiểu bạn đang xoay xở vất vả. Mình hơi lo vì nhóm chỉ còn 3 ngày. Có phải bạn đang khó ở phần tài liệu tiếng Anh không? Nhóm chia bớt một bài, bạn gửi phần còn lại trước 20h tối mai nhé?"),
+        new("Roommate làm ồn trước ngày thi", "Mai bạn thi Toán cao cấp lúc 7h, Huy đang chơi game bằng loa ngoài lúc 22h.", "Huy", "H", "Ê trận này căng quá, cố nốt ván là lên rank luôn rồi!", "Ơ quên mất mai bạn thi. Nhưng trận đang dở, thoát ngang bị trừ điểm uy tín lắm...", "Ừ cảm ơn bạn thông cảm, tụi mình chơi xíu nữa thôi.", "Bạn gắt gì vậy? Phòng chung mà, tụi mình chơi nốt ván thôi!", "Được rồi, tụi mình cắm tai nghe ngay. Xin lỗi làm phiền, chúc mai thi tốt!", "Huy ơi, mình hiểu trận đang dở nhưng mình hơi lo vì mai thi lúc 7h. Bạn chơi nốt 5–10 phút bằng tai nghe hoặc chuyển qua phòng tự học được không?"),
+        new("Xin gia hạn vì ốm đột xuất", "Tiểu luận Triết học hết hạn trưa mai; bạn nhập viện vì sốt xuất huyết.", "Thầy Bình", "B", "Đề cương ghi rõ nộp trễ không lý do chính đáng là điểm 0. Em giải thích thế nào?", "Tôi đã xem giấy nhập viện. Nhưng lịch chấm của khoa khá gấp, tôi không đợi lâu được.", "Em cần nói cụ thể tình trạng và giấy tờ thì tôi mới xem xét được.", "Em nhắn không chào hỏi, không ghi tên lớp. Tôi làm sao biết để xử lý?", "Được, tôi đồng ý gia hạn. Em ráng dưỡng bệnh nhé!", "Dạ em chào thầy, em là A lớp Triết 101. Em đang nhập viện vì sốt xuất huyết và có giấy xác nhận. Em xin nộp bù trước 12h trưa thứ Sáu để thầy kịp nhập điểm ạ."),
+        new("Tự ý sửa bài của bạn", "Lan viết kịch bản video cả đêm; bạn tự ý sửa toàn bộ mà chưa hỏi.", "Lan", "L", "Bạn coi mình là gì trong nhóm vậy? Sao tự ý sửa sạch kịch bản mình thức cả đêm viết mà không nói một lời?", "Thấy lủng củng thì góp ý để mình tự sửa chứ, tự ý đè sửa khác gì bảo mình dở tệ!", "Mình hiểu bạn muốn giúp, nhưng lần sau phải hỏi mình trước chứ.", "Vậy ra bạn coi thường bài mình à? Bạn giỏi thì tự làm hết đi!", "Được, khôi phục bản cũ đi. 20h tối nay mình cùng thảo luận nhé.", "Lan ơi, mình xin lỗi vì tự ý sửa. Mình hiểu bạn đã đầu tư rất nhiều. Mình sẽ khôi phục bản gốc ngay và mong 20h tối nay hai đứa cùng chọn phần tốt nhất nhé?"),
+        new("Giữ đúng ngân sách mô hình", "Nhóm có 500.000đ; Quân muốn mọi người đóng thêm 200.000đ để in 3D.", "Quân", "Q", "In 3D đẹp lắm! Mỗi đứa đóng thêm 200k là có sản phẩm đỉnh nhất khoa. Đóng tiền đi!", "Nhưng làm thủ công tốn thời gian, ai cũng bận ôn thi, lỡ không kịp thì sao?", "Chia ai đóng ai không cũng khó, mình sợ không công bằng.", "Không đầu tư thì đừng đòi điểm cao!", "Chia ca vậy hợp lý. Mình đồng ý làm thủ công và tối nay sẽ vẽ phác thảo.", "Quân ơi, mình hiểu bạn muốn mô hình đẹp nhưng mình lo vài bạn đang khó tài chính. Hay nhóm làm bằng vật liệu ở phòng thực hành, chia ca 1,5 giờ để vừa đúng 500k vừa kịp hạn?"),
+        new("Thư viện hay quán cà phê", "Nhóm sáu người họp môn Xã hội học; Pat và Vy không thoải mái với quán ồn.", "Pat", "P", "Mọi người thống nhất đi quán thì đi đi... chắc mình với Vy xin vắng, tự đọc biên bản sau.", "Họp thư viện thì tốt quá! Yên tĩnh, có wifi và không tốn tiền nước.", "Dạ thôi, tụi mình cũng ráng đi quán vậy.", "Vy đang hẹp tiền còn mình đau đầu chỗ ồn. Mọi người đừng ép tụi mình.", "Cảm ơn bạn đã đổi chỗ họp phù hợp. Tụi mình sẽ có mặt đúng giờ!", "Pat với Vy ơi, mình hiểu quán ồn và tốn chi phí. Nhóm cần ý kiến của hai bạn nên mình đề xuất phòng tự học số 3, thư viện lúc 14h thứ Năm nhé?"),
+        new("Điểm thi bị nhập sai", "Điểm hệ thống là 7.0 nhưng bạn tính theo thành phần được 8.5.", "Cô Mai", "M", "Em có chắc là không tính sai không? Quy trình chấm của tôi khá chặt chẽ.", "Thông tin em khá rõ. Để cô xem file gốc có nhầm dòng giữa các bạn trùng tên không.", "Em cho cô biết cụ thể em tính dựa trên đâu thì cô mới kiểm tra được.", "Em nhắn như thể cô cố tình nhập sai vậy. Em cần bình tĩnh và cung cấp bằng chứng.", "Cô đã kiểm tra, đúng là bị lệch dòng. Cô sẽ cập nhật lại điểm 8.5.", "Dạ em chào cô, em là Minh lớp Tin học nhóm 3. Em thấy hệ thống là 7.0 nhưng bảng thành phần ra 8.5. Cô giúp em đối chiếu file điểm hoặc em gặp cô trong giờ tiếp sinh viên được không ạ?"),
+        new("Bị phê bình trước lớp", "Thầy Sơn nhận xét chương 2 của nhóm chạy theo số đông và thiếu dẫn chứng.", "Thầy Sơn", "S", "Slide đẹp, nhưng lập luận chương 2 phiến diện — các em nói ai trên mạng cũng làm vậy mà không có số liệu. Nhóm em có ý kiến gì?", "Tốt, vậy em chỉ ra giúp thầy nguồn nào có thể bổ sung để sửa lập luận?", "Em cần nói rõ nhóm sẽ sửa điểm nào, không chỉ cảm ơn chung chung.", "Thầy đang góp ý lập luận, không công kích nhóm. Em nên xem lại cách phản hồi.", "Được, hướng sửa đó có bằng chứng hơn. Nhóm bổ sung trước buổi sau nhé.", "Dạ nhóm em cảm ơn thầy. Em hiểu lập luận hiện dựa vào số đông mà thiếu dữ liệu. Nhóm sẽ tìm hai nguồn khảo sát, sửa chương 2 và gửi thầy trước buổi học tuần sau ạ."),
+        new("Xin đổi ca vì trùng lịch thi", "Ca làm tối thứ Bảy trùng lịch thi vấn đáp; bạn cần xin anh Lâm đổi ca.", "Anh Lâm", "A", "Tối thứ Bảy đông khách, em báo nghỉ vậy ai đứng quầy? Anh không duyệt được đâu.", "Em nhờ được Vy rồi thì tốt, nhưng ca chiều Chủ nhật của Vy ai trực thay?", "Em chưa có ai thay thì anh khó duyệt được.", "Em báo nghỉ rồi bắt anh tự tìm người thay à? Anh không duyệt.", "Em xử lý chủ động và có trách nhiệm. Anh duyệt đổi ca, chúc em thi tốt!", "Dạ em hiểu tối thứ Bảy rất đông. Em đã nhờ Vy trực thay và em sẽ trực bù ca Chủ nhật 13h–17h30 cho bạn. Anh duyệt giúp lịch đổi ca này được không ạ?"),
+        new("Trượt môn tiên quyết", "Bạn trượt Toán rời rạc, có nguy cơ không học được Cấu trúc dữ liệu và trễ tốt nghiệp.", "Thầy Hoàng", "H", "Việc trượt Toán rời rạc ảnh hưởng lớn. Em đã nghĩ nguyên nhân vì sao mình bị điểm kém chưa?", "Em nhận ra nguyên nhân là tốt. Không thể học vượt, nhưng có thể đẩy môn đại cương lên trước.", "Em cần tự xem lại nguyên nhân rồi mình mới bàn hướng tiếp được.", "Tôi không can thiệp quy chế. Khi nào em tự nhận vấn đề thì tôi mới giúp được.", "Trường có lớp hè. Thầy sẽ duyệt lộ trình điều chỉnh cho em.", "Dạ em nhận ra mình chưa sắp xếp thời gian ôn hợp lý và em lo trễ tốt nghiệp. Thầy hướng dẫn em đăng ký lớp hè, đẩy môn đại cương lên trước và kết nối trung tâm hỗ trợ học thuật được không ạ?")
+    ];
+
+    private sealed record Scenario(string Title,string Context,string Character,string Avatar,string Opening,string PositiveFollowup,string NeutralFollowup,string DefensiveFollowup,string PositiveClose,string PerfectResponse);
+    private sealed record Message(bool User,string Text);
+    private sealed record Rubric(string Name,string Icon,double Score,double Max,string Feedback);
+    private sealed record Result(double Total,string Tier,string Css,string Summary,List<Rubric> Rubrics,bool AdHominem,bool Defensive,bool Bypassing);
+}
+
+<style>
+    .rp-page{--rp:#6847eb;--ink:#17163e;--muted:#667085;max-width:1280px;margin:auto;padding:clamp(1rem,3vw,2.5rem);color:var(--ink)}.rp-page button,.rp-page textarea{font-family:inherit}.rp-back{display:flex;gap:.5rem;margin-bottom:1rem;padding:.5rem 0;color:#6b7280;border:0;background:transparent;font-weight:750}.rp-hero{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;padding:clamp(1.5rem,4vw,3rem);border:1px solid rgba(109,77,244,.13);border-radius:28px;background:radial-gradient(circle at 90% 10%,rgba(236,72,153,.15),transparent 18rem),linear-gradient(135deg,#fff,#f1ecff);box-shadow:0 24px 60px rgba(76,29,149,.1)}.rp-hero>div>span,.rp-result small,.rp-workspace aside>span{color:var(--rp);font-size:.68rem;font-weight:900;letter-spacing:.09em}.rp-hero h1{margin:.7rem 0;font-size:clamp(2.3rem,5vw,3.8rem);line-height:1.06;letter-spacing:-.04em}.rp-hero h1 em{font-style:normal;color:var(--rp)}.rp-hero p{max-width:720px;margin:0;color:var(--muted);line-height:1.7}.rp-hero-meta{display:grid;grid-template-columns:repeat(3,100px);gap:.6rem}.rp-hero-meta article{padding:1rem .6rem;border-radius:16px;background:rgba(255,255,255,.72);text-align:center}.rp-hero-meta b,.rp-hero-meta span{display:block}.rp-hero-meta b{color:var(--rp);font-size:1.6rem}.rp-hero-meta span{color:#747c8e;font-size:.63rem}
+    .rp-workspace{display:grid;grid-template-columns:300px 1fr;gap:1rem;margin-top:1rem}.rp-workspace>aside,.rp-chat,.rp-result{border:1px solid rgba(109,77,244,.13);border-radius:22px;background:#fff;box-shadow:0 18px 45px rgba(76,29,149,.08)}.rp-workspace>aside{padding:1.3rem}.rp-workspace aside h2{margin:.4rem 0;font-size:1.25rem}.rp-workspace aside>p{color:var(--muted);font-size:.82rem;line-height:1.55}.rp-progress{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.7rem;margin:1rem 0}.rp-progress>div,.rp-meter{height:7px;overflow:hidden;border-radius:9px;background:#e7e1fa}.rp-progress i,.rp-meter i{display:block;height:100%;background:linear-gradient(90deg,#6044e4,#a855f7)}.rp-progress b{font-size:.7rem;color:var(--rp)}.rp-workspace aside h3{font-size:.8rem}.rp-workspace aside ul{display:grid;gap:.55rem;padding:0;list-style:none}.rp-workspace aside li{display:grid;grid-template-columns:24px 1fr auto;align-items:center;color:#626b7c;font-size:.75rem}.rp-workspace aside li i{color:var(--rp)}.rp-workspace aside>button{width:100%;padding:.7rem;color:#6044d9;border:1px solid #dcd3fa;border-radius:11px;background:#f8f6ff;font-weight:800}
+    .rp-chat{overflow:hidden}.rp-chat>header{display:flex;align-items:center;gap:.75rem;padding:1rem 1.2rem;border-bottom:1px solid #ece8f6}.rp-chat>header>span{display:grid;place-items:center;width:43px;height:43px;color:#fff;border-radius:50%;background:linear-gradient(135deg,#6044e4,#a855f7);font-weight:900}.rp-chat>header small{display:block;color:#22a06b;font-size:.68rem}.rp-chat>header small i{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#22a06b}.rp-chat>header em{margin-left:auto;color:#808899;font-size:.7rem;font-style:normal}.rp-messages{min-height:380px;max-height:500px;overflow-y:auto;display:flex;flex-direction:column;gap:.8rem;padding:1.2rem;background:#f8f7fc}.rp-messages>div{max-width:78%}.rp-messages>div>span{display:block;margin:0 .3rem .2rem;color:#858d9d;font-size:.62rem}.rp-messages p{margin:0;padding:.8rem 1rem;border-radius:15px;line-height:1.55;font-size:.85rem}.rp-messages .ai{align-self:flex-start}.rp-messages .ai p{background:#fff}.rp-messages .user{align-self:flex-end}.rp-messages .user>span{text-align:right}.rp-messages .user p{color:#fff;background:linear-gradient(135deg,#6044e4,#8159ed)}.rp-chat>footer{padding:1rem;border-top:1px solid #ece8f6}.rp-chat textarea{width:100%;min-height:90px;resize:vertical;padding:.8rem;color:var(--ink);border:1px solid #ddd8eb;border-radius:12px;background:#fff;outline:0}.rp-chat textarea:focus{border-color:var(--rp);box-shadow:0 0 0 3px rgba(104,71,235,.1)}.rp-chat>footer>div{display:flex;justify-content:space-between;align-items:center;margin-top:.6rem}.rp-chat>footer span{color:#8a92a3;font-size:.65rem}.rp-chat>footer button,.rp-result header>button{padding:.7rem 1rem;color:#fff;border:0;border-radius:11px;background:linear-gradient(135deg,#6044e4,#8b5cf6);font-weight:800}.rp-chat>footer button:disabled{opacity:.4}
+    .rp-result{margin-top:1rem;padding:clamp(1rem,3vw,2rem)}.rp-result>header{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:1.5rem}.rp-score{display:grid;place-items:center;width:120px;height:120px;border:10px solid #ddd6fa;border-top-color:var(--rp);border-radius:50%}.rp-score.tier-weak{border-top-color:#ef6b73}.rp-score.tier-medium{border-top-color:#f59e0b}.rp-score.tier-good{border-top-color:#3b82f6}.rp-score.tier-excellent{border-top-color:#22a06b}.rp-score strong{font-size:2rem}.rp-score span{color:#828a9a;font-size:.65rem}.rp-result h2{margin:.3rem 0}.rp-result header p{margin:0;color:var(--muted);line-height:1.55}.rp-rubrics{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.5rem}.rp-rubrics article{padding:1rem;border-radius:15px;background:#f8f7fc}.rp-rubrics article>div:first-child{display:flex;justify-content:space-between;gap:1rem}.rp-rubrics span{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:800}.rp-rubrics span i{color:var(--rp)}.rp-rubrics b{color:var(--rp)}.rp-rubrics p{margin:.6rem 0 0;color:var(--muted);font-size:.75rem;line-height:1.5}.rp-meter{margin-top:.6rem}.rp-diagnostic{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem}.rp-diagnostic section{padding:1rem;border:1px solid #e8e3f5;border-radius:15px}.rp-diagnostic section>span{color:var(--rp);font-size:.65rem;font-weight:900}.rp-flags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem}.rp-flags b{padding:.45rem .6rem;border-radius:9px;font-size:.68rem}.rp-flags .good{color:#16774f;background:#eaf9f2}.rp-flags .bad{color:#ae4048;background:#fff0f1}.rp-diagnostic blockquote{margin:.6rem 0 0;color:#525b6c;font-size:.8rem;line-height:1.55}
+    html[data-theme="dark"] .rp-page{--ink:#f8fafc;--muted:#cbd5e1}html[data-theme="dark"] .rp-hero,html[data-theme="dark"] .rp-workspace>aside,html[data-theme="dark"] .rp-chat,html[data-theme="dark"] .rp-result,html[data-theme="dark"] .rp-chat textarea{background:#211c47;border-color:rgba(167,139,250,.2)}html[data-theme="dark"] .rp-messages,html[data-theme="dark"] .rp-rubrics article{background:#171532}html[data-theme="dark"] .rp-messages .ai p{background:#2b2557}@@media(max-width:850px){.rp-hero{grid-template-columns:1fr}.rp-hero-meta{grid-template-columns:repeat(3,1fr)}.rp-workspace{grid-template-columns:1fr}.rp-result>header{grid-template-columns:130px 1fr}.rp-result header>button{grid-column:1/-1}.rp-rubrics,.rp-diagnostic{grid-template-columns:1fr}}@@media(max-width:520px){.rp-hero-meta{grid-template-columns:1fr}.rp-result>header{grid-template-columns:1fr}.rp-score{margin:auto}.rp-messages>div{max-width:92%}}
+</style>
