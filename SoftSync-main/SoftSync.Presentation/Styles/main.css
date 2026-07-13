@@ -592,3 +592,274 @@ html[data-theme="dark"] .ss-billing-plan {
 html[data-theme="dark"] .ss-notif-row { border-color: rgba(139,92,246,0.18); }
 
 .ss-danger-zone { border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 16px; }
+
+/* ========================================================================== 
+   Responsive application shell
+   The component pages keep their desktop identity while these rules provide
+   consistent tablet/mobile spacing, safe areas and touch-sized controls.
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .ss-main-content {
+        width: 100%;
+        max-width: 100%;
+        padding-inline: clamp(1rem, 3vw, 1.75rem) !important;
+    }
+
+    .ss-settings-shell,
+    .max-720,
+    .max-800 {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 760px) {
+    html {
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        min-width: 320px;
+        overflow-x: hidden;
+        overscroll-behavior-x: none;
+    }
+
+    .ss-main-content {
+        padding: 1rem 0.75rem calc(6rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* Prevent media and long content from creating horizontal page scroll. */
+    img,
+    video,
+    canvas,
+    iframe {
+        max-width: 100%;
+    }
+
+    video,
+    iframe {
+        height: auto;
+    }
+
+    pre,
+    code,
+    .table-responsive,
+    table {
+        max-width: 100%;
+    }
+
+    .table-responsive,
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 16px prevents iOS Safari from zooming the page when a field receives focus. */
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        font-size: 16px !important;
+    }
+
+    button,
+    [role="button"],
+    a.ss-btn-primary,
+    .btn {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .ss-card,
+    .ss-card--flat,
+    .ss-glass {
+        border-radius: 18px;
+    }
+
+    /* Normalize large desktop utility padding inside cards. */
+    .ss-main-content .tw\:p-8 { padding: 1.25rem !important; }
+    .ss-main-content .tw\:p-6 { padding: 1rem !important; }
+    .ss-main-content .tw\:gap-6 { gap: 1rem !important; }
+
+    /* Profile actions become easy-to-tap full-width controls. */
+    .max-720 .ss-card > button {
+        width: 100%;
+        margin: 0.65rem 0 0 !important;
+    }
+    .max-720 .ss-avatar-upload {
+        width: 92px;
+        height: 92px;
+    }
+
+    /* Settings sidebar becomes a horizontal tab rail instead of a tall block. */
+    .ss-settings-grid { gap: 0.9rem; }
+    .ss-side { gap: 0.75rem; }
+    .ss-side-card { padding: 0.55rem; border-radius: 17px; }
+    .ss-side-eyebrow,
+    .ss-side-title,
+    .ss-side-sub { display: none; }
+    .ss-settings-nav {
+        display: flex;
+        flex-direction: row;
+        gap: 0.35rem;
+        overflow-x: auto;
+        padding: 0.15rem 0.05rem 0.35rem;
+        scrollbar-width: none;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+    .ss-settings-nav::-webkit-scrollbar { display: none; }
+    .ss-settings-nav button {
+        width: auto;
+        min-width: max-content;
+        min-height: 44px;
+        padding: 0.6rem 0.8rem;
+        scroll-snap-align: start;
+    }
+    .ss-settings-nav .ss-nav-caret { display: none; }
+    .ss-premium { display: none; }
+    .ss-hero-inner { gap: 0.9rem; padding: 1.15rem; }
+    .ss-hero-avatar { width: 78px; height: 78px; }
+    .ss-hero-name { font-size: 1.3rem; }
+    .ss-hero-stats {
+        width: 100%;
+        justify-content: space-around;
+        gap: 0.5rem;
+    }
+    .ss-notif-row,
+    .ss-billing-plan {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .ss-linked-grid { grid-template-columns: 1fr; }
+
+    /* Curriculum, progress and assessment content stays within the viewport. */
+    body .sr-page,
+    body .pg-main,
+    body .dash-shell,
+    body .assistant-shell,
+    body .cq-page,
+    body .rp-page,
+    body .vp-page,
+    body .tm-page,
+    body .ir,
+    body .fb,
+    body .tmq,
+    body .tml2,
+    body .tmv3,
+    body .tmv4 {
+        width: 100%;
+        max-width: 100%;
+        padding-inline: 0 !important;
+    }
+
+    .sr-skill-tabs,
+    .sr-level-tabs,
+    .pg-track-tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sr-skill-tabs::-webkit-scrollbar,
+    .sr-level-tabs::-webkit-scrollbar,
+    .pg-track-tabs::-webkit-scrollbar { display: none; }
+
+    .pg-card,
+    .pg-hero,
+    .pg-kpi,
+    .sr-week,
+    .sr-level-panel {
+        min-width: 0;
+        overflow: hidden;
+    }
+    .pg-radar {
+        max-width: 100%;
+        transform-origin: center;
+    }
+    .pg-path-list button {
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+    }
+    .pg-path-list button > :last-child { display: none; }
+
+    /* Quiz options use the entire row and never squeeze answer text. */
+    .answers button,
+    .cq-options button {
+        width: 100%;
+        min-width: 0;
+    }
+    .tmq article footer,
+    .result > div {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .tmq article footer button,
+    .result > div button { width: 100%; }
+
+    /* Game surfaces: compact cards, horizontal task trays and touch scrolling. */
+    .tasks,
+    .inbox,
+    .priority-list,
+    .tm-task-list {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
+    .tasks span,
+    .inbox article,
+    [draggable="true"] {
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+    .slots,
+    .boxes,
+    .legend,
+    .review { grid-template-columns: 1fr !important; }
+    .day footer,
+    .play footer,
+    .actions,
+    .summary {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .day footer button,
+    .play footer button,
+    .actions button { width: 100%; }
+
+    /* Floating assistants remain above the bottom navigation and safe area. */
+    .ss-chat-widget,
+    .ss-chat-fab,
+    .dash-syncy-fab {
+        bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    }
+    .ss-chat-panel {
+        right: 0.75rem !important;
+        bottom: calc(10rem + env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - 12rem);
+        overflow-y: auto;
+    }
+
+    /* Dialogs stay usable in landscape and on short phones. */
+    [role="dialog"],
+    .ss-modal,
+    .ss-mentor-modal {
+        max-width: calc(100vw - 1.5rem) !important;
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 390px) {
+    .ss-main-content { padding-inline: 0.6rem !important; }
+    .ss-card,
+    .ss-card--flat { border-radius: 15px; }
+    .ss-hero-stats { gap: 0.2rem; }
+    .ss-stat { min-width: 0; }
+    .ss-stat-num { font-size: 1.15rem; }
+    .ss-stat-label { font-size: 0.66rem; }
+    .badge-row,
+    .pg-mini,
+    .pg-badges > div { grid-template-columns: 1fr !important; }
+}
