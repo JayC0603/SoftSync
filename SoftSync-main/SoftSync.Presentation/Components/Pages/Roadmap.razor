@@ -162,7 +162,7 @@
         <section class="sr-level-panel level-theme-@selectedLevel">
             <header>
                 <div class="sr-level-badge">@CurrentLevel.Emoji</div>
-                <div><span>@CurrentLevel.Subtitle</span><h2>@LevelName(selectedLevel)</h2><p><b>@Tx("Goal:", "Mục tiêu:")</b> @CurrentLevel.Goal</p></div>
+                <div><span>@LevelSubtitle</span><h2>@LevelName(selectedLevel)</h2><p><b>@Tx("Goal:", "Mục tiêu:")</b> @LevelGoal</p></div>
             </header>
 
             <div class="sr-week-list">
@@ -172,7 +172,7 @@
                     <article class="sr-week @(isOpen ? "open" : "")">
                         <button class="sr-week-head" @onclick="() => ToggleWeek(entry.index)" aria-expanded="@isOpen">
                             <span class="sr-week-index">@GlobalWeekNumber(entry.index).ToString("00")</span>
-                            <span class="sr-week-title"><small>@Tx("WEEK", "TUẦN") @GlobalWeekNumber(entry.index) · @Tx("LEVEL", "CẤP ĐỘ") @(selectedLevel + 1)</small><b>@entry.week.Title</b></span>
+                            <span class="sr-week-title"><small>@Tx("WEEK", "TUẦN") @GlobalWeekNumber(entry.index) · @Tx("LEVEL", "CẤP ĐỘ") @(selectedLevel + 1)</small><b>@WeekTitle(entry.index)</b></span>
                             <span class="sr-week-time"><i class="bi bi-clock"></i> 60–90 @Tx("minutes", "phút")</span>
                             <i class="bi bi-chevron-down sr-chevron"></i>
                         </button>
@@ -181,11 +181,11 @@
                             <div class="sr-week-body">
                                 <section>
                                     <span class="sr-content-icon theory"><i class="bi bi-book"></i></span>
-                                    <div><small>@Tx("CORE KNOWLEDGE", "KIẾN THỨC TRỌNG TÂM")</small><h3>@Tx("Theory", "Lý thuyết")</h3><p>@entry.week.Theory</p></div>
+                                    <div><small>@Tx("CORE KNOWLEDGE", "KIẾN THỨC TRỌNG TÂM")</small><h3>@Tx("Theory", "Lý thuyết")</h3><p>@WeekTheory(entry.index)</p></div>
                                 </section>
                                 <section>
                                     <span class="sr-content-icon practice"><i class="bi bi-rocket-takeoff"></i></span>
-                                    <div><small>@Tx("APPLIED ACTIVITY", "HOẠT ĐỘNG ỨNG DỤNG")</small><h3>@Tx("Practice", "Thực hành")</h3><p>@entry.week.Practice</p></div>
+                                    <div><small>@Tx("APPLIED ACTIVITY", "HOẠT ĐỘNG ỨNG DỤNG")</small><h3>@Tx("Practice", "Thực hành")</h3><p>@WeekPractice(entry.index)</p></div>
                                 </section>
                                 <footer><span><i class="bi bi-check2-circle"></i> @Tx("Complete this week's content", "Hoàn thành nội dung tuần")</span><button @onclick="() => CompleteWeek(entry.index)">@(CompletedWeeks.Contains(WeekKey(entry.index)) ? Tx("Completed", "Đã hoàn thành") : Tx("Mark as completed", "Đánh dấu hoàn thành"))</button></footer>
                             </div>
@@ -212,10 +212,55 @@
     private string SkillTitle(int index) => index switch { 0 => Tx("Time management and procrastination", "Quản lý thời gian và độ trì hoãn"), 1 => Tx("Communication and active listening", "Giao tiếp và lắng nghe chủ động"), _ => Tx("Critical thinking and problem solving", "Tư duy phản biện và giải quyết vấn đề") };
     private string SkillDescription(int index) => index switch { 0 => Tx("Build the ability to organize, prioritize, and use time purposefully for effective study and work.", Skills[index].Description), 1 => Tx("Develop clear expression, empathetic listening, and flexible feedback across different contexts.", Skills[index].Description), _ => Tx("Practice logical reasoning, verify information, and solve root causes with evidence.", Skills[index].Description) };
     private string LevelName(int index) => index switch { 0 => Tx("Foundation", Current.Levels[index].Name), 1 => Tx("Developing", Current.Levels[index].Name), _ => Tx("Mastery", Current.Levels[index].Name) };
+    private string LevelSubtitle => L.Current == AppLanguage.Vi ? CurrentLevel.Subtitle : EnglishCurriculum[selectedSkill][selectedLevel].Subtitle;
+    private string LevelGoal => L.Current == AppLanguage.Vi ? CurrentLevel.Goal : EnglishCurriculum[selectedSkill][selectedLevel].Goal;
+    private string WeekTitle(int week) => L.Current == AppLanguage.Vi ? CurrentLevel.Weeks[week].Title : EnglishCurriculum[selectedSkill][selectedLevel].Weeks[week].Title;
+    private string WeekTheory(int week) => L.Current == AppLanguage.Vi ? CurrentLevel.Weeks[week].Theory : EnglishCurriculum[selectedSkill][selectedLevel].Weeks[week].Theory;
+    private string WeekPractice(int week) => L.Current == AppLanguage.Vi ? CurrentLevel.Weeks[week].Practice : EnglishCurriculum[selectedSkill][selectedLevel].Weeks[week].Practice;
     private void SelectSkill(int index) { selectedSkill = index; selectedLevel = 0; openWeek = 0; }
     private void SelectLevel(int index) { selectedLevel = index; openWeek = 0; }
     private void ToggleWeek(int index) => openWeek = openWeek == index ? -1 : index;
     private void CompleteWeek(int week) { var key = WeekKey(week); if (!CompletedWeeks.Add(key)) CompletedWeeks.Remove(key); }
+
+    private static readonly List<List<EnglishLevel>> EnglishCurriculum =
+    [
+        [
+            new("Overcome procrastination & establish basic order", "Recognize the damage caused by chronic procrastination and begin building basic organizational habits.",
+            [
+                new("Recognize & Eat the Frog", "The Eat the Frog principle recommends completing your largest or most uncomfortable task early in the day. Worrying about and avoiding one task can significantly reduce overall productivity.", "Identify your Daily Top Three. Choose the hardest task—your frog—and complete it in the morning."),
+                new("Break projects down & track reality", "Break large projects into tasks of under 60 minutes and distribute them across several days. Last-minute all-nighters rarely produce good results.", "List tomorrow's tasks and estimate each duration. At the end of the day, record the actual time and compare it with your estimate.")
+            ]),
+            new("Estimate time accurately & optimize focus", "Improve independent learning and your ability to predict the time required for each task.",
+            [
+                new("Evidence-based time-on-task estimates", "Use reference rates for reading, technical material, complex exercises, and academic writing, then adjust them using your own measured pace.", "Measure your personal reading and writing speed for five minutes, convert it to an hourly rate, and build a weekly study schedule from real data."),
+                new("Pomodoro & reclaim wasted time", "Use 25-minute focus sessions followed by 3–5 minute breaks. After four cycles, take a longer 15–30 minute break to reduce mental fatigue.", "Review your daily schedule, identify fragmented time, and set clear limits for social media and news.")
+            ]),
+            new("Master priorities, SMART goals & spaced learning", "Coordinate study and work around your core values and long-term goals.",
+            [
+                new("Master priorities with the Eisenhower Matrix", "Classify tasks by urgency and importance instead of reacting in panic. The four quadrants clarify what to do, schedule, delegate, or limit.", "Draw an Eisenhower Matrix each week and place every task in the correct quadrant before deciding the order of execution."),
+                new("SMART goals, spacing & interleaving", "Connect long-term goals to personal values and the five SMART criteria. Space revision over several days and alternate topics instead of cramming.", "Write one SMART goal for this week and one for this year, ensuring both are Specific, Measurable, Attainable, Relevant, and Time-bound.")
+            ])
+        ],
+        [
+            new("Professional communication & avoiding bypassing", "Understand the communication process, online etiquette, and how different interpretations create misunderstanding.",
+            [new("The eight components of communication", "Communication is the process of understanding and sharing meaning through sender, message, channel, receiver, feedback, environment, context, and interference.", "Analyze a recent group interaction, identify all eight components, and locate the source of interference."),new("Academic email & controlling bypassing", "Professional email needs a clear subject, complete sentences, an assertive but respectful tone, greeting, and signature. Define ambiguous terms to prevent bypassing.", "Write a professional extension request or project progress email and explain specialist terms for a non-specialist reader.")]),
+            new("Active listening & emotional intelligence", "Overcome device distraction, listen empathetically, and regulate emotional responses.",
+            [new("Practice active listening", "Give the speaker your full attention, maintain eye contact, stop multitasking, and listen to understand rather than preparing a rebuttal.", "Take notes and paraphrase the speaker's main idea before responding."),new("Emotional intelligence in conflict", "Recognize emotions in yourself and others to avoid defensive or angry reactions and resolve disagreement calmly.", "Pause and breathe before responding; ask about the issue instead of attacking the person.")]),
+            new("Context, non-verbal cues & empathetic feedback", "Adapt communication across cultures and contexts while managing complex feedback.",
+            [new("Direct, indirect & non-verbal communication", "Direct language suits technical contexts; tactful indirect language can protect dignity when delivering negative feedback.", "Manage posture, tone, facial expression, and personal distance in an important conversation."),new("Carl Rogers' five feedback types", "Feedback may evaluate, interpret, support, probe, or show understanding. Choosing appropriately builds long-term cooperation.", "Write one response of each type for a classmate's proposal.")])
+        ],
+        [
+            new("Separate facts, opinions & fallacies", "Build logical foundations by distinguishing verifiable information from subjective judgment.",
+            [new("Fact and opinion", "Facts can be verified with evidence; opinions are subjective judgments without direct proof.", "Classify five online statements as verifiable facts or personal opinions."),new("Recognize basic logical fallacies", "Ad hominem attacks a person instead of the argument; bandwagon reasoning treats popularity as proof.", "Review a recent discussion and identify any fallacies used by others or yourself.")]),
+            new("Lateral reading & confirmation bias", "Verify online sources independently and reduce personal cognitive bias.",
+            [new("Lateral reading", "Leave an unfamiliar page and open independent sources to evaluate its author and reputation.", "Verify at least two unfamiliar sources before citing them."),new("Counter confirmation bias", "Confirmation bias favors evidence that supports existing beliefs and ignores contradictory evidence.", "Read two credible sources that defend a view opposite to your own and evaluate them fairly.")]),
+            new("Five Whys, evidence-based flexibility & source evaluation", "Develop self-directed reasoning and identify root causes using evidence.",
+            [new("Find root causes with Five Whys", "Repeatedly ask why to move beyond surface symptoms and generate alternative solutions.", "Create a Five Whys diagram and compare at least three solutions."),new("Evidence-based flexibility & source evaluation", "Update conclusions when better evidence appears. Examine author expertise, freshness, bias, and conflicts of interest.", "Audit the sources of an essay before deciding which ones to use.")])
+        ]
+    ];
+
+    private sealed record EnglishLevel(string Subtitle, string Goal, List<EnglishWeek> Weeks);
+    private sealed record EnglishWeek(string Title, string Theory, string Practice);
 
     private static readonly List<Skill> Skills =
     [
