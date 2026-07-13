@@ -4,10 +4,10 @@
 @inject NavigationManager Nav
 @implements IAsyncDisposable
 
-<PageTitle>Game 5 · Luyện giọng nói</PageTitle>
+<PageTitle>Game 3 · Luyện giọng nói</PageTitle>
 <main class="vp-page">
     <button class="vp-back" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-arrow-left"></i> Roadmap</button>
-    <header class="vp-hero"><div><span>GAME 5 · VOICE LAB</span><h1>Luyện giọng nói <em>30 giây</em></h1><p>Ghi âm một tình huống thực tế. Nội dung và tín hiệu cận lời được phân tích bằng hai pipeline độc lập.</p></div><div class="vp-stack"><b>STT</b><span>Nội dung · WA</span><i>+</i><b>DSP</b><span>Nhịp · Pitch · RMS</span></div></header>
+    <header class="vp-hero"><div><span>GAME 3 · VOICE LAB</span><h1>Luyện giọng nói <em>30 giây</em></h1><p>Ghi âm một tình huống thực tế. Nội dung và tín hiệu cận lời được phân tích bằng hai pipeline độc lập.</p></div><div class="vp-stack"><b>STT</b><span>Nội dung · WA</span><i>+</i><b>DSP</b><span>Nhịp · Pitch · RMS</span></div></header>
 
     <section class="vp-grid">
         <aside><label>CHỌN ĐỀ LUYỆN</label><select @bind="selectedIndex" @bind:after="Reset">@for(var i=0;i<Scenarios.Count;i++){<option value="@i">Đề @(i+1): @Scenarios[i].Title</option>}</select><div class="vp-context"><small>BỐI CẢNH</small><p>@Current.Context</p></div><div class="vp-rules"><b>Rubric · 10 điểm</b><span>Pacing <i>3.0</i></span><span>Độ rõ chữ <i>3.0</i></span><span>Từ đệm & khoảng lặng <i>2.0</i></span><span>Tông giọng <i>2.0</i></span></div></aside>
