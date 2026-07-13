@@ -1081,46 +1081,87 @@
         .ss-main-mentor-grid::-webkit-scrollbar { display: none; }
         .ss-main-mentor-grid .ss-main-mentor,
         .ss-main-mentor-grid .ss-advisor-card {
-            flex: 0 0 min(84vw, 330px);
+            flex: 0 0 min(74vw, 290px);
             max-width: none;
             margin: 0;
+            padding: 0.9rem;
+            border-radius: 20px;
             scroll-snap-align: center;
         }
-        .ss-main-mentor-portrait { position: relative; top: auto; width: min(78vw, 320px); margin: 0 auto; }
+        .ss-main-mentor-grid .ss-main-mentor-portrait {
+            width: 108px;
+            margin-bottom: 0.65rem;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-content h2 {
+            margin-top: 0.45rem;
+            font-size: 1.08rem;
+            line-height: 1.25;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-position {
+            min-height: 0;
+            margin-bottom: 0.5rem;
+            font-size: 0.72rem;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-summary {
+            display: -webkit-box;
+            overflow: hidden;
+            font-size: 0.76rem;
+            line-height: 1.5;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-tags {
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-tags span {
+            padding: 0.38rem 0.45rem;
+            white-space: normal;
+            font-size: 0.62rem;
+        }
+        .ss-main-mentor-grid .ss-mentor-detail-btn {
+            min-height: 42px;
+            margin-top: 0.75rem;
+            padding: 0.55rem 0.7rem;
+            font-size: 0.78rem;
+        }
         .ss-main-mentor-content h2 { text-align: center; }
         .ss-main-mentor-position { text-align: center; }
         .ss-mentor-modal header { grid-template-columns: 1fr; text-align: center; }
         .ss-mentor-modal header img { margin: 0 auto; }
         .ss-mentor-modal > ul { grid-template-columns: 1fr; }
         .ss-landing-stats {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.65rem;
             margin-top: 1rem;
-            padding-bottom: 0.5rem;
-            overflow-x: auto;
-            scroll-snap-type: x proximity;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
         }
-        .ss-landing-stats::-webkit-scrollbar { display: none; }
         .ss-landing-stats div {
-            flex: 0 0 min(76vw, 270px);
+            display: grid;
+            grid-template-columns: 40px 1fr;
+            gap: 0.65rem;
+            min-width: 0;
+            padding: 0.75rem;
             border-right: 0;
             border-bottom: 0;
             border: 1px solid var(--ss-home-border);
-            border-radius: 18px;
+            border-radius: 16px;
             background: var(--ss-home-surface);
-            scroll-snap-align: start;
         }
-        .ss-chat-fab { width: 68px; height: 68px; }
+        .ss-landing-stats i { width: 40px; height: 40px; font-size: 1rem; }
+        .ss-landing-stats strong { font-size: 1rem; }
+        .ss-landing-stats span { font-size: 0.68rem; line-height: 1.3; }
+
+        /* The mobile nav already exposes the AI assistant. Removing the
+           floating duplicate keeps it from covering CTA and card content. */
+        .ss-chat-widget { display: none; }
         .ss-chat-panel { width: calc(100vw - 1.5rem); }
         .ss-chat-actions { grid-template-columns: 1fr; }
     }
 
     @@media (max-width: 360px) {
-        .ss-hero-actions { grid-template-columns: 1fr; }
         .ss-main-mentor-grid .ss-main-mentor,
-        .ss-main-mentor-grid .ss-advisor-card { flex-basis: calc(100vw - 2.8rem); }
+        .ss-main-mentor-grid .ss-advisor-card { flex-basis: 76vw; }
     }
 </style>
 
