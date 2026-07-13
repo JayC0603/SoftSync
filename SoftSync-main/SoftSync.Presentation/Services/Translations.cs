@@ -83,6 +83,7 @@ public static class Translations
         ["home.stat.coreSkills"] = ("Core Skills", "Kỹ năng cốt lõi"),
         ["home.stat.assessment"] = ("Assessment", "Đánh giá"),
         ["home.stat.support"] = ("AI Support", "Hỗ trợ AI"),
+        ["home.stat.learners"] = ("Learners", "Người học"),
         ["home.mockup.title"] = ("SoftSync AI", "SoftSync AI"),
         ["home.mockup.roadmap"] = ("Personal Roadmap", "Lộ trình cá nhân"),
         ["home.mockup.chatAssistant"] = ("Hello! How can I help you today?", "Xin chào! Tôi có thể giúp gì cho bạn?"),
