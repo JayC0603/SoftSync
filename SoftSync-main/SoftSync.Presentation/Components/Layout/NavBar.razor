@@ -91,6 +91,24 @@
     </div>
 </nav>
 
+<nav class="ss-mobile-bottom-nav" aria-label="Mobile navigation">
+    <NavLink class="ss-mobile-bottom-link" href="@HomeHref" Match="NavLinkMatch.All">
+        <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/assistant">
+        <i class="bi bi-stars"></i><span>@L["nav.assistant"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/roadmap">
+        <i class="bi bi-signpost-split"></i><span>@L["nav.roadmap"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/progress">
+        <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/community">
+        <i class="bi bi-people-fill"></i><span>@L["nav.community"]</span>
+    </NavLink>
+</nav>
+
 <style>
     .ss-navbar {
         position: sticky;
@@ -250,6 +268,7 @@
         background: var(--gradient);
         box-shadow: 0 10px 24px rgba(99, 102, 241, 0.24);
     }
+    .ss-mobile-bottom-nav { display: none; }
 
     @@media (max-width: 900px) {
         .ss-navpill span { display: none; }
@@ -294,7 +313,9 @@
         .ss-userchip { padding: 2px; border-radius: 50%; }
         .ss-avatar { width: 38px; height: 38px; }
 
-        .ss-navpills {
+        .ss-navpills { display: none !important; }
+
+        .ss-mobile-bottom-nav {
             position: fixed;
             left: 0.65rem;
             right: 0.65rem;
@@ -312,18 +333,23 @@
             -webkit-backdrop-filter: blur(18px) saturate(160%);
             backdrop-filter: blur(18px) saturate(160%);
         }
-        .ss-navpill {
+        .ss-mobile-bottom-link {
+            position: relative;
+            display: flex;
             min-width: 0;
             min-height: 52px;
             padding: 0.35rem 0.15rem;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
             gap: 0.1rem;
             border-radius: 15px;
+            color: #64748b;
             line-height: 1.05;
+            text-decoration: none;
         }
-        .ss-navpill i { font-size: 1.1rem; }
-        .ss-navpill span {
+        .ss-mobile-bottom-link i { font-size: 1.1rem; }
+        .ss-mobile-bottom-link span {
             display: block;
             max-width: 100%;
             overflow: hidden;
@@ -332,9 +358,28 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        html[data-theme="dark"] .ss-navpills {
+        .ss-mobile-bottom-link.active {
+            color: #6847eb;
+            background: rgba(104, 71, 235, 0.08);
+        }
+        .ss-mobile-bottom-link.active::after {
+            content: "";
+            position: absolute;
+            left: 22%;
+            right: 22%;
+            bottom: 0;
+            height: 3px;
+            border-radius: 999px;
+            background: #6847eb;
+        }
+        html[data-theme="dark"] .ss-mobile-bottom-nav {
             background: rgba(28, 24, 57, 0.94);
             border-color: rgba(167, 139, 250, 0.25);
+        }
+        html[data-theme="dark"] .ss-mobile-bottom-link { color: #cbd5e1; }
+        html[data-theme="dark"] .ss-mobile-bottom-link.active {
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.18);
         }
     }
 
