@@ -244,9 +244,6 @@
                         <strong>SYNCY AI</strong>
                         <span>@L["chatbot.tagline"]</span>
                     </div>
-                    <button type="button" class="ss-chat-minimize" title="Thu nhỏ" @onclick="() => chatbotOpen = false">
-                        <i class="bi bi-dash-lg"></i>
-                    </button>
                     <button type="button" class="ss-chat-close" title="Thu về hình tròn" @onclick="() => chatbotOpen = false">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -285,8 +282,6 @@
                         <button type="button" @onclick='() => Nav.NavigateTo("/roadmap")'>🎯 @L["chatbot.action.roadmap"]</button>
                         <button type="button" @onclick='() => chatView = "mentor"'>👥 @L["chatbot.action.mentor"]</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/progress")'>📈 @L["chatbot.action.progress"]</button>
-                        <button type="button" @onclick='() => chatView = "premium"'>💎 Premium</button>
-                        <button type="button" @onclick='() => chatView = "about"'>ℹ️ @L["chatbot.action.about"]</button>
                     }
                     else if (chatView == "about")
                     {
@@ -306,6 +301,16 @@
                         <button type="button" @onclick='() => Nav.NavigateTo(chatView == "mentor" ? "/community" : "/assessments")'>@L["chatbot.action.continue"]</button>
                         <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
                     }
+                </div>
+
+                <div class="ss-chat-composer">
+                    <button type="button" class="ss-chat-attach" title="Đính kèm tệp" aria-label="Đính kèm tệp">
+                        <i class="bi bi-paperclip"></i>
+                    </button>
+                    <input type="text" placeholder='@L["assistant.inputPlaceholder"]' aria-label='@L["assistant.inputPlaceholder"]' />
+                    <button type="button" class="ss-chat-send" title="Gửi tin nhắn" aria-label="Gửi tin nhắn" @onclick='() => Nav.NavigateTo("/assistant")'>
+                        <i class="bi bi-send-fill"></i>
+                    </button>
                 </div>
             </div>
         }
@@ -589,7 +594,7 @@
     }
     .ss-chat-panel-head {
         display: grid;
-        grid-template-columns: 48px 1fr 34px 34px;
+        grid-template-columns: 48px 1fr 34px;
         align-items: center;
         gap: 0.7rem;
         margin-bottom: 0.85rem;
@@ -605,7 +610,6 @@
     .ss-chat-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .ss-chat-panel-head strong { display: block; color: #111827; font-weight: 900; }
     .ss-chat-panel-head span { color: #64748b; font-size: 0.88rem; font-weight: 650; }
-    .ss-chat-minimize,
     .ss-chat-close {
         width: 34px;
         height: 34px;
@@ -616,7 +620,7 @@
         display: grid;
         place-items: center;
     }
-    .ss-chat-close { background: rgba(244, 63, 94, 0.1); color: #be123c; }
+    .ss-chat-close { cursor: pointer; }
     .ss-chat-body { display: grid; gap: 0.65rem; }
     .ss-chat-bubble {
         display: grid;
@@ -657,6 +661,43 @@
         background: rgba(99, 102, 241, 0.12);
         color: #4338ca;
     }
+    .ss-chat-composer {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 36px;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+        padding: 0.3rem;
+        border: 1px solid rgba(99, 102, 241, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+    }
+    .ss-chat-composer input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #1e293b;
+        font-size: 0.85rem;
+    }
+    .ss-chat-attach,
+    .ss-chat-send {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+    }
+    .ss-chat-attach { background: transparent; color: #6366f1; }
+    .ss-chat-send {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+    }
     html[data-theme="dark"] .ss-chat-panel {
         background: rgba(15, 23, 42, 0.82);
         border-color: rgba(167, 139, 250, 0.24);
@@ -674,6 +715,11 @@
         background: rgba(139, 92, 246, 0.18);
         color: #ddd6fe;
     }
+    html[data-theme="dark"] .ss-chat-composer {
+        background: rgba(30, 41, 59, 0.82);
+        border-color: rgba(167, 139, 250, 0.22);
+    }
+    html[data-theme="dark"] .ss-chat-composer input { color: #f8fafc; }
     .ss-feature-chip {
         position: absolute;
         display: flex;
@@ -1216,9 +1262,9 @@
 
         .ss-chat-widget {
             display: block;
-            right: 0.9rem;
+            right: 0.75rem;
             bottom: calc(5.9rem + env(safe-area-inset-bottom));
-            z-index: 1050;
+            z-index: 1200;
         }
         .ss-chat-fab {
             width: 62px;
@@ -1233,11 +1279,53 @@
             height: 12px;
         }
         .ss-chat-panel {
-            width: calc(100vw - 1.5rem);
-            max-height: min(72vh, 620px);
+            width: min(80vw, 320px);
+            max-height: min(64dvh, 440px);
+            padding: 0.75rem;
+            border-radius: 20px;
             overflow-y: auto;
+            box-shadow: 0 24px 65px rgba(49, 46, 129, 0.32);
         }
-        .ss-chat-actions { grid-template-columns: 1fr; }
+        .ss-chat-panel-head {
+            grid-template-columns: 42px minmax(0, 1fr) 34px;
+            gap: 0.55rem;
+            margin-bottom: 0.6rem;
+        }
+        .ss-chat-avatar { width: 42px; height: 42px; }
+        .ss-chat-panel-head strong { font-size: 0.9rem; }
+        .ss-chat-panel-head span { font-size: 0.7rem; }
+        .ss-chat-bubble {
+            gap: 0.2rem;
+            padding: 0.65rem;
+            border-radius: 15px;
+            font-size: 0.78rem;
+        }
+        .ss-chat-bubble span {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-height: 1.4;
+        }
+        .ss-chat-actions,
+        .ss-chat-actions--choices {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.45rem;
+            margin-top: 0.55rem;
+        }
+        .ss-chat-actions button,
+        .ss-chat-actions--choices button {
+            min-height: 38px;
+            padding: 0.42rem 0.35rem;
+            border: 1px solid rgba(99, 102, 241, 0.14);
+            border-radius: 12px;
+            background: rgba(238, 242, 255, 0.94);
+            color: #5145cd;
+            font-size: 0.68rem;
+            line-height: 1.2;
+        }
+        .ss-chat-composer { margin-top: 0.6rem; }
+        .ss-chat-composer input { font-size: 16px; }
     }
 
     @@media (max-width: 360px) {
