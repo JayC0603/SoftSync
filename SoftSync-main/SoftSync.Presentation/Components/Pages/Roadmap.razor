@@ -58,7 +58,7 @@
             <section class="sr-learning-path" aria-labelledby="time-path-title">
                 <header>
                     <div><span>LỘ TRÌNH THỰC HÀNH</span><h2 id="time-path-title">Time Management Lab</h2><p>Lập kế hoạch cá nhân, sắp xếp ưu tiên và ra quyết định bằng ma trận Eisenhower.</p></div>
-                    <span class="sr-path-duration"><i class="bi bi-stopwatch"></i> 3 game thực tế</span>
+                    <span class="sr-path-duration"><i class="bi bi-stopwatch"></i> 4 game thực tế</span>
                 </header>
                 <div class="sr-path-steps">
                     <button @onclick='() => Nav.NavigateTo("/time-management-lesson")'>
@@ -73,12 +73,20 @@
                         <span class="sr-step-number">03</span><i class="bi bi-calendar2-week-fill"></i>
                         <span><small>LẬP KẾ HOẠCH</small><b>My Timetable</b><em>Lịch, nhắc giờ, check-in</em></span>
                     </button>
+                    <button @onclick='() => Nav.NavigateTo("/time-management-lesson-2")'>
+                        <span class="sr-step-number">04</span><i class="bi bi-play-circle-fill"></i>
+                        <span><small>HỌC NÂNG CAO</small><b>Video bài giảng 2</b><em>Ưu tiên · Thích ứng</em></span>
+                    </button>
+                    <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-inbox-rush")'>
+                        <span class="sr-step-number">05</span><i class="bi bi-inboxes-fill"></i>
+                        <span><small>GAME 2</small><b>Inbox Rush</b><em>8 slot · Task phát sinh</em></span>
+                    </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-games/1")'>
-                        <span class="sr-step-number">04</span><i class="bi bi-sort-down"></i>
+                        <span class="sr-step-number">06</span><i class="bi bi-sort-down"></i>
                         <span><small>CHỌN ƯU TIÊN</small><b>Priority Sort</b><em>Kéo thả công việc</em></span>
                     </button>
                     <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-games/2")'>
-                        <span class="sr-step-number">05</span><i class="bi bi-grid-1x2-fill"></i>
+                        <span class="sr-step-number">07</span><i class="bi bi-grid-1x2-fill"></i>
                         <span><small>PHÂN LOẠI</small><b>Eisenhower Matrix</b><em>Quan trọng · Khẩn cấp</em></span>
                     </button>
                 </div>
