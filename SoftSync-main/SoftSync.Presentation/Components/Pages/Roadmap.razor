@@ -10,36 +10,36 @@
     <header class="sr-hero">
         <div class="sr-hero-copy">
             <span class="sr-eyebrow"><i class="bi bi-stars"></i> SOFTSYNC ROADMAP</span>
-            <h1>Lộ trình phát triển<br /><em>năng lực kỹ năng mềm</em></h1>
-            <p>Chương trình học 6 tuần theo từng năng lực, kết hợp kiến thức nền tảng, công cụ thực tế và hoạt động ứng dụng.</p>
+            <h1>@Tx("Your soft-skills", "Lộ trình phát triển")<br /><em>@Tx("development roadmap", "năng lực kỹ năng mềm")</em></h1>
+            <p>@Tx("A six-week program for each competency, combining core knowledge, practical tools, and applied activities.", "Chương trình học 6 tuần theo từng năng lực, kết hợp kiến thức nền tảng, công cụ thực tế và hoạt động ứng dụng.")</p>
             <div class="sr-meta">
-                <span><b>03</b> năng lực cốt lõi</span>
-                <span><b>03</b> cấp độ phát triển</span>
-                <span><b>18</b> chủ đề thực hành</span>
+                <span><b>03</b> @Tx("core competencies", "năng lực cốt lõi")</span>
+                <span><b>03</b> @Tx("development levels", "cấp độ phát triển")</span>
+                <span><b>18</b> @Tx("practice topics", "chủ đề thực hành")</span>
             </div>
         </div>
         <div class="sr-hero-art" aria-hidden="true">
             <div class="sr-orbit"></div>
             <div class="sr-orbit sr-orbit-two"></div>
             <img src="/images/syncy-fish.png" alt="" />
-            <span class="sr-float sr-float-one"><i class="bi bi-clock-history"></i> Quản lý thời gian</span>
-            <span class="sr-float sr-float-two"><i class="bi bi-chat-heart"></i> Giao tiếp</span>
-            <span class="sr-float sr-float-three"><i class="bi bi-lightbulb"></i> Tư duy phản biện</span>
+            <span class="sr-float sr-float-one"><i class="bi bi-clock-history"></i> @Tx("Time management", "Quản lý thời gian")</span>
+            <span class="sr-float sr-float-two"><i class="bi bi-chat-heart"></i> @Tx("Communication", "Giao tiếp")</span>
+            <span class="sr-float sr-float-three"><i class="bi bi-lightbulb"></i> @Tx("Critical thinking", "Tư duy phản biện")</span>
         </div>
     </header>
 
     <section class="sr-curriculum">
         <div class="sr-section-head">
-            <div><span>CHỌN NĂNG LỰC</span><h2>Lộ trình dành cho bạn</h2></div>
-            <div class="sr-progress-copy"><b>@(selectedSkill + 1)/@Skills.Count</b><span>Năng lực</span></div>
+            <div><span>@Tx("SELECT A COMPETENCY", "CHỌN NĂNG LỰC")</span><h2>@Tx("Your learning roadmap", "Lộ trình dành cho bạn")</h2></div>
+            <div class="sr-progress-copy"><b>@(selectedSkill + 1)/@Skills.Count</b><span>@Tx("Competencies", "Năng lực")</span></div>
         </div>
 
-        <nav class="sr-skill-tabs" aria-label="Chọn kỹ năng">
+        <nav class="sr-skill-tabs" aria-label="@Tx("Select a skill", "Chọn kỹ năng")">
             @foreach (var entry in Skills.Select((skill, index) => (skill, index)))
             {
                 <button class="@(selectedSkill == entry.index ? "active" : "")" @onclick="() => SelectSkill(entry.index)">
                     <span class="sr-tab-icon"><i class="bi @entry.skill.Icon"></i></span>
-                    <span><small>NĂNG LỰC 0@(entry.index + 1)</small><b>@entry.skill.ShortTitle</b></span>
+                    <span><small>@Tx("COMPETENCY", "NĂNG LỰC") 0@(entry.index + 1)</small><b>@SkillShortTitle(entry.index)</b></span>
                     <i class="bi bi-arrow-right sr-tab-arrow"></i>
                 </button>
             }
@@ -47,9 +47,9 @@
 
         <article class="sr-skill-intro">
             <div class="sr-skill-number">0@(selectedSkill + 1)</div>
-            <div><span>@Current.EnglishTitle</span><h2>@Current.Title</h2><p>@Current.Description</p></div>
+            <div><span>@Current.EnglishTitle</span><h2>@SkillTitle(selectedSkill)</h2><p>@SkillDescription(selectedSkill)</p></div>
             <div class="sr-skill-actions">
-                <div class="sr-duration"><i class="bi bi-calendar3"></i><span><b>6 tuần</b> · 3 cấp độ</span></div>
+                <div class="sr-duration"><i class="bi bi-calendar3"></i><span><b>@Tx("6 weeks", "6 tuần")</b> · @Tx("3 levels", "3 cấp độ")</span></div>
             </div>
         </article>
 
@@ -57,25 +57,25 @@
         {
             <section class="sr-learning-path" aria-labelledby="time-path-title">
                 <header>
-                    <div><span>LỘ TRÌNH THỰC HÀNH</span><h2 id="time-path-title">Time Management Lab</h2><p>Lập kế hoạch cá nhân, sắp xếp ưu tiên và ra quyết định bằng ma trận Eisenhower.</p></div>
-                    <span class="sr-path-duration"><i class="bi bi-stopwatch"></i> 5 game thực tế</span>
+                    <div><span>@Tx("PRACTICE ROADMAP", "LỘ TRÌNH THỰC HÀNH")</span><h2 id="time-path-title">Time Management Lab</h2><p>@Tx("Build a personal plan, prioritize tasks, and make decisions with the Eisenhower Matrix.", "Lập kế hoạch cá nhân, sắp xếp ưu tiên và ra quyết định bằng ma trận Eisenhower.")</p></div>
+                    <span class="sr-path-duration"><i class="bi bi-stopwatch"></i> @Tx("5 practical games", "5 game thực tế")</span>
                 </header>
                 <div class="sr-path-steps">
                     <button @onclick='() => Nav.NavigateTo("/time-management-lesson")'>
                         <span class="sr-step-number">01</span><i class="bi bi-play-circle-fill"></i>
-                        <span><small>HỌC KIẾN THỨC</small><b>Video bài giảng</b><em>Mentor · Quản lý thời gian</em></span>
+                        <span><small>@Tx("LEARN", "HỌC KIẾN THỨC")</small><b>@Tx("Video lesson", "Video bài giảng")</b><em>Mentor · @Tx("Time management", "Quản lý thời gian")</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-quiz")'>
                         <span class="sr-step-number">02</span><i class="bi bi-ui-checks-grid"></i>
-                        <span><small>KIỂM TRA KIẾN THỨC</small><b>Trắc nghiệm</b><em>20 câu · Chấm ngay</em></span>
+                        <span><small>@Tx("KNOWLEDGE CHECK", "KIỂM TRA KIẾN THỨC")</small><b>@Tx("Quiz", "Trắc nghiệm")</b><em>@Tx("20 questions · Instant results", "20 câu · Chấm ngay")</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-games/0")'>
                         <span class="sr-step-number">03</span><i class="bi bi-calendar2-week-fill"></i>
-                        <span><small>LẬP KẾ HOẠCH</small><b>My Timetable</b><em>Lịch, nhắc giờ, check-in</em></span>
+                        <span><small>@Tx("PLAN", "LẬP KẾ HOẠCH")</small><b>My Timetable</b><em>@Tx("Schedule, reminders, check-in", "Lịch, nhắc giờ, check-in")</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-lesson-2")'>
                         <span class="sr-step-number">04</span><i class="bi bi-play-circle-fill"></i>
-                        <span><small>HỌC NÂNG CAO</small><b>Video bài giảng 2</b><em>Ưu tiên · Thích ứng</em></span>
+                        <span><small>@Tx("ADVANCED LEARNING", "HỌC NÂNG CAO")</small><b>@Tx("Video lesson 2", "Video bài giảng 2")</b><em>@Tx("Prioritize · Adapt", "Ưu tiên · Thích ứng")</em></span>
                     </button>
                     <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-inbox-rush")'>
                         <span class="sr-step-number">05</span><i class="bi bi-inboxes-fill"></i>
@@ -83,23 +83,23 @@
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-lesson-3")'>
                         <span class="sr-step-number">06</span><i class="bi bi-play-circle-fill"></i>
-                        <span><small>VIDEO 3</small><b>Ma trận Eisenhower</b><em>Quan trọng · Khẩn cấp</em></span>
+                        <span><small>VIDEO 3</small><b>@Tx("Eisenhower Matrix", "Ma trận Eisenhower")</b><em>@Tx("Important · Urgent", "Quan trọng · Khẩn cấp")</em></span>
                     </button>
                     <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-four-boxes")'>
                         <span class="sr-step-number">07</span><i class="bi bi-grid-fill"></i>
-                        <span><small>GAME 3</small><b>4 Ô Việc</b><em>20 tình huống · 30 giây</em></span>
+                        <span><small>GAME 3</small><b>@Tx("Four Task Boxes", "4 Ô Việc")</b><em>@Tx("20 scenarios · 30 seconds", "20 tình huống · 30 giây")</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-lesson-4")'>
                         <span class="sr-step-number">08</span><i class="bi bi-play-circle-fill"></i>
-                        <span><small>VIDEO 4</small><b>Bài giảng nâng cao</b><em>Mentor SoftSync</em></span>
+                        <span><small>VIDEO 4</small><b>@Tx("Advanced lesson", "Bài giảng nâng cao")</b><em>Mentor SoftSync</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-games/1")'>
                         <span class="sr-step-number">09</span><i class="bi bi-sort-down"></i>
-                        <span><small>CHỌN ƯU TIÊN</small><b>Priority Sort</b><em>Kéo thả công việc</em></span>
+                        <span><small>@Tx("PRIORITIZE", "CHỌN ƯU TIÊN")</small><b>Priority Sort</b><em>@Tx("Drag and drop tasks", "Kéo thả công việc")</em></span>
                     </button>
                     <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-games/2")'>
                         <span class="sr-step-number">10</span><i class="bi bi-grid-1x2-fill"></i>
-                        <span><small>PHÂN LOẠI</small><b>Eisenhower Matrix</b><em>Quan trọng · Khẩn cấp</em></span>
+                        <span><small>@Tx("CLASSIFY", "PHÂN LOẠI")</small><b>Eisenhower Matrix</b><em>@Tx("Important · Urgent", "Quan trọng · Khẩn cấp")</em></span>
                     </button>
                 </div>
             </section>
@@ -153,7 +153,7 @@
             {
                 <button role="tab" aria-selected="@(selectedLevel == entry.index)" class="level-@entry.index @(selectedLevel == entry.index ? "active" : "")" @onclick="() => SelectLevel(entry.index)">
                     <span>@entry.level.Emoji</span>
-                    <div><small>CẤP ĐỘ @(entry.index + 1)</small><b>@entry.level.Name</b></div>
+                    <div><small>@Tx("LEVEL", "CẤP ĐỘ") @(entry.index + 1)</small><b>@LevelName(entry.index)</b></div>
                     <i class="bi bi-check-circle-fill"></i>
                 </button>
             }
@@ -162,7 +162,7 @@
         <section class="sr-level-panel level-theme-@selectedLevel">
             <header>
                 <div class="sr-level-badge">@CurrentLevel.Emoji</div>
-                <div><span>@CurrentLevel.Subtitle</span><h2>@CurrentLevel.Name</h2><p><b>Mục tiêu:</b> @CurrentLevel.Goal</p></div>
+                <div><span>@CurrentLevel.Subtitle</span><h2>@LevelName(selectedLevel)</h2><p><b>@Tx("Goal:", "Mục tiêu:")</b> @CurrentLevel.Goal</p></div>
             </header>
 
             <div class="sr-week-list">
@@ -172,8 +172,8 @@
                     <article class="sr-week @(isOpen ? "open" : "")">
                         <button class="sr-week-head" @onclick="() => ToggleWeek(entry.index)" aria-expanded="@isOpen">
                             <span class="sr-week-index">@GlobalWeekNumber(entry.index).ToString("00")</span>
-                            <span class="sr-week-title"><small>TUẦN @GlobalWeekNumber(entry.index) · CẤP ĐỘ @(selectedLevel + 1)</small><b>@entry.week.Title</b></span>
-                            <span class="sr-week-time"><i class="bi bi-clock"></i> 60–90 phút</span>
+                            <span class="sr-week-title"><small>@Tx("WEEK", "TUẦN") @GlobalWeekNumber(entry.index) · @Tx("LEVEL", "CẤP ĐỘ") @(selectedLevel + 1)</small><b>@entry.week.Title</b></span>
+                            <span class="sr-week-time"><i class="bi bi-clock"></i> 60–90 @Tx("minutes", "phút")</span>
                             <i class="bi bi-chevron-down sr-chevron"></i>
                         </button>
                         @if (isOpen)
@@ -181,13 +181,13 @@
                             <div class="sr-week-body">
                                 <section>
                                     <span class="sr-content-icon theory"><i class="bi bi-book"></i></span>
-                                    <div><small>KIẾN THỨC TRỌNG TÂM</small><h3>Lý thuyết</h3><p>@entry.week.Theory</p></div>
+                                    <div><small>@Tx("CORE KNOWLEDGE", "KIẾN THỨC TRỌNG TÂM")</small><h3>@Tx("Theory", "Lý thuyết")</h3><p>@entry.week.Theory</p></div>
                                 </section>
                                 <section>
                                     <span class="sr-content-icon practice"><i class="bi bi-rocket-takeoff"></i></span>
-                                    <div><small>HOẠT ĐỘNG ỨNG DỤNG</small><h3>Thực hành</h3><p>@entry.week.Practice</p></div>
+                                    <div><small>@Tx("APPLIED ACTIVITY", "HOẠT ĐỘNG ỨNG DỤNG")</small><h3>@Tx("Practice", "Thực hành")</h3><p>@entry.week.Practice</p></div>
                                 </section>
-                                <footer><span><i class="bi bi-check2-circle"></i> Hoàn thành nội dung tuần</span><button @onclick="() => CompleteWeek(entry.index)">@(CompletedWeeks.Contains(WeekKey(entry.index)) ? "Đã hoàn thành" : "Đánh dấu hoàn thành")</button></footer>
+                                <footer><span><i class="bi bi-check2-circle"></i> @Tx("Complete this week's content", "Hoàn thành nội dung tuần")</span><button @onclick="() => CompleteWeek(entry.index)">@(CompletedWeeks.Contains(WeekKey(entry.index)) ? Tx("Completed", "Đã hoàn thành") : Tx("Mark as completed", "Đánh dấu hoàn thành"))</button></footer>
                             </div>
                         }
                     </article>
@@ -207,6 +207,11 @@
     private Level CurrentLevel => Current.Levels[selectedLevel];
     private string WeekKey(int week) => $"{selectedSkill}-{selectedLevel}-{week}";
     private int GlobalWeekNumber(int week) => selectedLevel * 2 + week + 1;
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+    private string SkillShortTitle(int index) => index switch { 0 => Tx("Time management", "Quản lý thời gian"), 1 => Tx("Active communication", "Giao tiếp chủ động"), _ => Tx("Critical thinking", "Tư duy phản biện") };
+    private string SkillTitle(int index) => index switch { 0 => Tx("Time management and procrastination", "Quản lý thời gian và độ trì hoãn"), 1 => Tx("Communication and active listening", "Giao tiếp và lắng nghe chủ động"), _ => Tx("Critical thinking and problem solving", "Tư duy phản biện và giải quyết vấn đề") };
+    private string SkillDescription(int index) => index switch { 0 => Tx("Build the ability to organize, prioritize, and use time purposefully for effective study and work.", Skills[index].Description), 1 => Tx("Develop clear expression, empathetic listening, and flexible feedback across different contexts.", Skills[index].Description), _ => Tx("Practice logical reasoning, verify information, and solve root causes with evidence.", Skills[index].Description) };
+    private string LevelName(int index) => index switch { 0 => Tx("Foundation", Current.Levels[index].Name), 1 => Tx("Developing", Current.Levels[index].Name), _ => Tx("Mastery", Current.Levels[index].Name) };
     private void SelectSkill(int index) { selectedSkill = index; selectedLevel = 0; openWeek = 0; }
     private void SelectLevel(int index) { selectedLevel = index; openWeek = 0; }
     private void ToggleWeek(int index) => openWeek = openWeek == index ? -1 : index;
