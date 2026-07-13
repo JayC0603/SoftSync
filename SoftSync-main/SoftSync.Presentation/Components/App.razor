@@ -4,11 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    @* SoftSync intentionally keeps the 1440px desktop composition on phones.
-       Mobile browsers render this desktop viewport first, then scale the whole
-       page down uniformly to fit the physical screen. This also prevents the
-       mobile media queries from replacing the desktop layout. *@
-    <meta name="viewport" content="width=1440, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#6847eb" />
     <base href="/" />
     <script>

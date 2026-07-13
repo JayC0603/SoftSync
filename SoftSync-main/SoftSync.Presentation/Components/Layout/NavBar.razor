@@ -339,9 +339,16 @@
     }
 
     @@media (max-width: 390px) {
-        .ss-brand > span { display: none; }
-        .ss-auth-actions .ss-login-link { display: none; }
-        .ss-register-link { padding: 0.55rem 0.7rem; font-size: 0.75rem; }
+        .ss-brand > span { display: inline; font-size: 0.95rem; }
+        .ss-brand-logo { width: 34px; height: 34px; }
+        .ss-auth-actions .ss-register-link { display: none; }
+        .ss-auth-actions .ss-login-link {
+            display: inline-flex;
+            min-height: 38px;
+            padding-inline: 0.55rem;
+            background: transparent;
+            font-size: 0.75rem;
+        }
     }
 
     /* Dark theme: lighten nav text/icons so they read on the deep canvas. */

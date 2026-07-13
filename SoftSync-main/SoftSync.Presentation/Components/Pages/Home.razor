@@ -997,64 +997,76 @@
         .ss-landing {
             padding: 1.5rem 0.85rem calc(5.75rem + env(safe-area-inset-bottom));
         }
-        .ss-hero-grid { gap: 1.25rem; }
+        .ss-hero-grid {
+            grid-template-columns: minmax(0, 1.12fr) minmax(125px, 0.88fr);
+            align-items: start;
+            gap: 0.2rem;
+        }
         .ss-hero-copy { max-width: none; }
-        .ss-eyebrow { margin-bottom: 1rem; font-size: 0.78rem; }
+        .ss-eyebrow {
+            max-width: 100%;
+            margin-bottom: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.68rem;
+            line-height: 1.35;
+        }
         .ss-hero-copy h1 {
-            max-width: 12ch;
-            margin-bottom: 1rem;
-            font-size: clamp(2.25rem, 11vw, 2.8rem);
+            max-width: 9ch;
+            margin-bottom: 0.8rem;
+            font-size: clamp(1.8rem, 8.5vw, 2.35rem);
             line-height: 1.05;
         }
         .ss-hero-copy p {
-            margin-bottom: 1.35rem;
-            font-size: 0.98rem;
-            line-height: 1.65;
+            margin-bottom: 1rem;
+            font-size: 0.78rem;
+            line-height: 1.55;
         }
         .ss-hero-actions {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.65rem;
+            gap: 0.4rem;
         }
         .ss-hero-actions > * {
             width: 100%;
             min-width: 0;
-            height: 48px;
-            padding-inline: 0.7rem;
+            height: 42px;
+            padding-inline: 0.25rem;
             justify-content: center;
-            font-size: 0.86rem;
+            gap: 0.25rem;
+            font-size: 0.66rem;
+            white-space: nowrap;
         }
 
         /* Keep the desktop orbit composition instead of turning it into a
            very tall list. The cards remain readable and alternate around
            SYNCY inside one compact mobile scene. */
-        .ss-orbit-stage { min-height: 490px; }
+        .ss-orbit-stage { min-height: 350px; }
         .ss-ai-orb {
             left: 50%;
-            top: 2.25rem;
-            width: 150px;
-            height: 150px;
-            padding: 14px;
+            top: 2.5rem;
+            width: 112px;
+            height: 112px;
+            padding: 10px;
             transform: translateX(-50%);
-            box-shadow: 0 0 0 12px rgba(124, 58, 237, 0.14), 0 0 44px rgba(96, 165, 250, 0.4);
+            box-shadow: 0 0 0 9px rgba(124, 58, 237, 0.14), 0 0 36px rgba(96, 165, 250, 0.38);
         }
-        .ss-galaxy-core { width: 108%; right: -4%; top: 4%; }
-        .ss-orbit { width: 130%; right: -16%; top: 7%; }
-        .ss-orbit-two { width: 105%; right: -2%; top: 17%; }
-        .ss-planet-a { right: 78%; top: 22%; width: 38px; height: 38px; }
-        .ss-planet-b { right: 8%; top: 34%; width: 30px; height: 30px; }
+        .ss-galaxy-core { width: 145%; right: -28%; top: 12%; }
+        .ss-orbit { width: 170%; right: -35%; top: 12%; }
+        .ss-orbit-two { width: 140%; right: -20%; top: 25%; }
+        .ss-planet-a { right: 76%; top: 34%; width: 25px; height: 25px; }
+        .ss-planet-b { right: 1%; top: 49%; width: 22px; height: 22px; }
         .ss-feature-chip {
-            width: min(82%, 300px);
-            padding: 0.72rem;
-            gap: 0.7rem;
-            border-radius: 16px;
+            width: min(112%, 145px);
+            padding: 0.48rem;
+            gap: 0.42rem;
+            border-radius: 12px;
         }
-        .ss-feature-chip i { width: 42px; height: 42px; font-size: 1.15rem; }
-        .ss-feature-chip strong { font-size: 0.88rem; }
-        .ss-feature-chip span { font-size: 0.76rem; }
-        .ss-chip-practice { left: 0; right: auto; top: 235px; }
-        .ss-chip-assess { left: auto; right: 0; top: 315px; }
-        .ss-chip-grow { left: 0; right: auto; top: 395px; }
+        .ss-feature-chip i { width: 31px; height: 31px; font-size: 0.85rem; }
+        .ss-feature-chip strong { font-size: 0.68rem; }
+        .ss-feature-chip span { font-size: 0.56rem; line-height: 1.25; }
+        .ss-chip-practice { left: 12%; right: auto; top: 172px; }
+        .ss-chip-assess { left: auto; right: -8%; top: 231px; }
+        .ss-chip-grow { left: -9%; right: auto; top: 290px; }
 
         .ss-panel-head { align-items: flex-start; flex-direction: column; }
         .ss-panel-head button { width: 100%; justify-content: center; }
@@ -1081,7 +1093,11 @@
         .ss-main-mentor-grid::-webkit-scrollbar { display: none; }
         .ss-main-mentor-grid .ss-main-mentor,
         .ss-main-mentor-grid .ss-advisor-card {
-            flex: 0 0 min(74vw, 290px);
+            display: grid;
+            grid-template-columns: 92px minmax(0, 1fr);
+            align-items: center;
+            column-gap: 0.8rem;
+            flex: 0 0 min(86vw, 350px);
             max-width: none;
             margin: 0;
             padding: 0.9rem;
@@ -1089,44 +1105,45 @@
             scroll-snap-align: center;
         }
         .ss-main-mentor-grid .ss-main-mentor-portrait {
-            width: 108px;
-            margin-bottom: 0.65rem;
+            width: 92px;
+            margin: 0;
         }
         .ss-main-mentor-grid .ss-main-mentor-content h2 {
-            margin-top: 0.45rem;
-            font-size: 1.08rem;
+            margin: 0.4rem 0 0.2rem;
+            font-size: 0.95rem;
             line-height: 1.25;
+            text-align: left;
         }
         .ss-main-mentor-grid .ss-main-mentor-position {
             min-height: 0;
-            margin-bottom: 0.5rem;
-            font-size: 0.72rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.64rem;
+            text-align: left;
         }
         .ss-main-mentor-grid .ss-main-mentor-summary {
             display: -webkit-box;
             overflow: hidden;
-            font-size: 0.76rem;
-            line-height: 1.5;
+            font-size: 0.68rem;
+            line-height: 1.4;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
         }
         .ss-main-mentor-grid .ss-main-mentor-tags {
             flex-wrap: wrap;
-            margin-top: 0.75rem;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
         }
         .ss-main-mentor-grid .ss-main-mentor-tags span {
-            padding: 0.38rem 0.45rem;
+            padding: 0.3rem 0.38rem;
             white-space: normal;
             font-size: 0.62rem;
         }
         .ss-main-mentor-grid .ss-mentor-detail-btn {
-            min-height: 42px;
-            margin-top: 0.75rem;
-            padding: 0.55rem 0.7rem;
-            font-size: 0.78rem;
+            min-height: 38px;
+            margin-top: 0.55rem;
+            padding: 0.45rem 0.6rem;
+            font-size: 0.7rem;
         }
-        .ss-main-mentor-content h2 { text-align: center; }
-        .ss-main-mentor-position { text-align: center; }
         .ss-mentor-modal header { grid-template-columns: 1fr; text-align: center; }
         .ss-mentor-modal header img { margin: 0 auto; }
         .ss-mentor-modal > ul { grid-template-columns: 1fr; }
@@ -1161,7 +1178,7 @@
 
     @@media (max-width: 360px) {
         .ss-main-mentor-grid .ss-main-mentor,
-        .ss-main-mentor-grid .ss-advisor-card { flex-basis: 76vw; }
+        .ss-main-mentor-grid .ss-advisor-card { flex-basis: 86vw; }
     }
 </style>
 
