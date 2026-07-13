@@ -44,8 +44,7 @@
 
     <!-- Right: actions -->
     <div class="tw:flex tw:items-center tw:gap-3">
-        <button class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle"
-                disabled="@isLanguageSwitching" aria-busy="@isLanguageSwitching">
+        <button class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle">
             <i class="bi bi-translate"></i>
             <span class="ss-lang-code">@CurrentLanguageCode</span>
             <span class="ss-lang-name">@TargetLanguageName</span>
@@ -159,7 +158,6 @@
         width: 142px;
         padding: 0 0.75rem;
     }
-    .ss-lang-btn:disabled { cursor: wait; opacity: 0.82; }
     .ss-lang-code {
         font-size: 0.78rem;
         font-weight: 800;
@@ -175,12 +173,6 @@
         content: "·";
         margin-left: 0.35rem;
         opacity: 0.55;
-    }
-
-    html.ss-lang-transition::view-transition-old(root),
-    html.ss-lang-transition::view-transition-new(root) {
-        animation-duration: 150ms;
-        animation-timing-function: ease-out;
     }
 
     /* Notification bell badge */
@@ -315,7 +307,6 @@
 
 @code {
     private UserDto? profile;
-    private bool isLanguageSwitching;
     private string HomeHref => profile is null ? "/" : "/dashboard";
 
     protected override void OnInitialized()
@@ -339,23 +330,11 @@
 
     private async Task ToggleLanguage()
     {
-        if (isLanguageSwitching) return;
-        isLanguageSwitching = true;
         var next = L.Current == AppLanguage.En ? AppLanguage.Vi : AppLanguage.En;
         var nextCode = next == AppLanguage.Vi ? "vi" : "en";
-        try
-        {
-            using var reference = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("ssLang.switchWithTransition", reference, nextCode);
-        }
-        finally
-        {
-            isLanguageSwitching = false;
-        }
+        await JS.InvokeVoidAsync("ssLang.set", nextCode);
+        L.SetLanguage(next);
     }
-
-    [JSInvokable]
-    public void ApplyLanguage(string code) => L.SetLanguage(LocalizationService.Parse(code));
 
     private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
     private string TargetLanguageName => L.Current == AppLanguage.Vi ? "English" : "Vietnamese";

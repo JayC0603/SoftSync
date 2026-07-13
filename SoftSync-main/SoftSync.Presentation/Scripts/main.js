@@ -57,39 +57,6 @@ window.ssLang = {
         try { localStorage.setItem('ss-lang', code); } catch { /* ignore */ }
         try { document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`; }
         catch { /* ignore */ }
-    },
-    async switchWithTransition(dotnetRef, code) {
-        this.set(code);
-
-        let applied = false;
-        const update = async () => {
-            if (applied) return;
-            applied = true;
-            await dotnetRef.invokeMethodAsync('ApplyLanguage', code);
-
-            // Wait until Blazor has painted all translated components before
-            // the browser captures the new-language frame.
-            await new Promise(resolve => requestAnimationFrame(
-                () => requestAnimationFrame(resolve)));
-        };
-
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-            || document.documentElement.hasAttribute('data-reduce-motion');
-        if (!document.startViewTransition || reduceMotion) {
-            await update();
-            return;
-        }
-
-        const root = document.documentElement;
-        root.classList.add('ss-lang-transition');
-        try {
-            const transition = document.startViewTransition(update);
-            await transition.finished;
-        } catch {
-            await update();
-        } finally {
-            root.classList.remove('ss-lang-transition');
-        }
     }
 };
 
