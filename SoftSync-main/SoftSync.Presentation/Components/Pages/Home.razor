@@ -129,6 +129,9 @@
                 </div>
             </article>
         </div>
+        <div class="ss-mentor-carousel-dots" aria-hidden="true">
+            <span class="active"></span><span></span><span></span>
+        </div>
 
         @if (xuanDetailsOpen)
         {
@@ -822,6 +825,7 @@
     .ss-main-mentor-tags { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.4rem; }
     .ss-main-mentor-tags span { display: inline-flex; align-items: center; gap: .45rem; padding: .65rem .8rem; color: #5b42db; background: rgba(255,255,255,.65); border: 1px solid rgba(124,92,252,.16); border-radius: 14px; font-size: .8rem; font-weight: 750; }
     .ss-main-mentor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+    .ss-mentor-carousel-dots { display: none; }
     .ss-main-mentor-grid .ss-main-mentor {
         grid-column: 2;
         display: block;
@@ -1091,6 +1095,9 @@
             -webkit-overflow-scrolling: touch;
         }
         .ss-main-mentor-grid::-webkit-scrollbar { display: none; }
+        .ss-main-mentor-grid .ss-main-mentor:not(.ss-advisor-card) { order: 1; }
+        .ss-main-mentor-grid .ss-advisor-card:not(.ss-advisor-card-right) { order: 2; }
+        .ss-main-mentor-grid .ss-advisor-card-right { order: 3; }
         .ss-main-mentor-grid .ss-main-mentor,
         .ss-main-mentor-grid .ss-advisor-card {
             display: grid;
@@ -1147,6 +1154,23 @@
         .ss-mentor-modal header { grid-template-columns: 1fr; text-align: center; }
         .ss-mentor-modal header img { margin: 0 auto; }
         .ss-mentor-modal > ul { grid-template-columns: 1fr; }
+        .ss-mentor-carousel-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.38rem;
+            margin: 0.15rem 0 0.45rem;
+        }
+        .ss-mentor-carousel-dots span {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(139, 92, 246, 0.22);
+        }
+        .ss-mentor-carousel-dots .active {
+            width: 28px;
+            background: #7c5cf5;
+        }
         .ss-landing-stats {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1169,10 +1193,29 @@
         .ss-landing-stats strong { font-size: 1rem; }
         .ss-landing-stats span { font-size: 0.68rem; line-height: 1.3; }
 
-        /* The mobile nav already exposes the AI assistant. Removing the
-           floating duplicate keeps it from covering CTA and card content. */
-        .ss-chat-widget { display: none; }
-        .ss-chat-panel { width: calc(100vw - 1.5rem); }
+        .ss-chat-widget {
+            display: block;
+            right: 0.9rem;
+            bottom: calc(5.9rem + env(safe-area-inset-bottom));
+            z-index: 1050;
+        }
+        .ss-chat-fab {
+            width: 62px;
+            height: 62px;
+            padding: 0.25rem;
+            box-shadow: 0 16px 34px rgba(79, 70, 229, 0.34), 0 0 0 7px rgba(139, 92, 246, 0.12);
+        }
+        .ss-chat-pulse {
+            right: 0.3rem;
+            bottom: 0.35rem;
+            width: 12px;
+            height: 12px;
+        }
+        .ss-chat-panel {
+            width: calc(100vw - 1.5rem);
+            max-height: min(72vh, 620px);
+            overflow-y: auto;
+        }
         .ss-chat-actions { grid-template-columns: 1fr; }
     }
 
