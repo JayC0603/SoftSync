@@ -232,7 +232,7 @@
         <div class="ss-glass ss-glass-interactive"><i class="bi bi-star-fill"></i><strong>10K+</strong><span>@L["home.stat.learners"]</span></div>
     </section>
 
-    <aside class="ss-chat-widget @(chatbotOpen ? "open" : "")" aria-label="SoftSync assistant preview">
+    <aside class="ss-chat-widget @(chatbotOpen ? "open" : "") @((mentorDetailsOpen || advisorDetailsOpen || xuanDetailsOpen) ? "hidden-by-modal" : "")" aria-label="SoftSync assistant preview">
         @if (chatbotOpen)
         {
             <div class="ss-chat-panel ss-glass">
@@ -541,6 +541,7 @@
         bottom: clamp(1rem, 3vw, 2rem);
         z-index: 80;
     }
+    .ss-chat-widget.hidden-by-modal { display: none; }
     .ss-chat-fab {
         position: relative;
         width: 82px;
@@ -1002,11 +1003,11 @@
             padding: 1.5rem 0.85rem calc(5.75rem + env(safe-area-inset-bottom));
         }
         .ss-hero-grid {
-            grid-template-columns: minmax(0, 1.12fr) minmax(125px, 0.88fr);
+            grid-template-columns: 1fr;
             align-items: start;
-            gap: 0.2rem;
+            gap: 0.5rem;
         }
-        .ss-hero-copy { max-width: none; }
+        .ss-hero-copy { max-width: none; text-align: center; }
         .ss-eyebrow {
             max-width: 100%;
             margin-bottom: 0.8rem;
@@ -1015,62 +1016,63 @@
             line-height: 1.35;
         }
         .ss-hero-copy h1 {
-            max-width: 9ch;
-            margin-bottom: 0.8rem;
-            font-size: clamp(1.8rem, 8.5vw, 2.35rem);
+            max-width: 11ch;
+            margin: 0 auto 0.8rem;
+            font-size: clamp(2.2rem, 11vw, 2.8rem);
             line-height: 1.05;
         }
         .ss-hero-copy p {
-            margin-bottom: 1rem;
-            font-size: 0.78rem;
-            line-height: 1.55;
+            max-width: 35ch;
+            margin: 0 auto 1.1rem;
+            font-size: 0.92rem;
+            line-height: 1.6;
         }
         .ss-hero-actions {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.4rem;
+            gap: 0.65rem;
         }
         .ss-hero-actions > * {
             width: 100%;
             min-width: 0;
-            height: 42px;
-            padding-inline: 0.25rem;
+            height: 48px;
+            padding-inline: 0.55rem;
             justify-content: center;
             gap: 0.25rem;
-            font-size: 0.66rem;
+            font-size: 0.78rem;
             white-space: nowrap;
         }
 
         /* Keep the desktop orbit composition instead of turning it into a
            very tall list. The cards remain readable and alternate around
            SYNCY inside one compact mobile scene. */
-        .ss-orbit-stage { min-height: 350px; }
+        .ss-orbit-stage { min-height: 440px; }
         .ss-ai-orb {
             left: 50%;
-            top: 2.5rem;
-            width: 112px;
-            height: 112px;
-            padding: 10px;
+            top: 2.25rem;
+            width: 150px;
+            height: 150px;
+            padding: 13px;
             transform: translateX(-50%);
-            box-shadow: 0 0 0 9px rgba(124, 58, 237, 0.14), 0 0 36px rgba(96, 165, 250, 0.38);
+            box-shadow: 0 0 0 11px rgba(124, 58, 237, 0.14), 0 0 42px rgba(96, 165, 250, 0.4);
         }
-        .ss-galaxy-core { width: 145%; right: -28%; top: 12%; }
-        .ss-orbit { width: 170%; right: -35%; top: 12%; }
-        .ss-orbit-two { width: 140%; right: -20%; top: 25%; }
-        .ss-planet-a { right: 76%; top: 34%; width: 25px; height: 25px; }
-        .ss-planet-b { right: 1%; top: 49%; width: 22px; height: 22px; }
+        .ss-galaxy-core { width: 105%; right: -2%; top: 5%; }
+        .ss-orbit { width: 120%; right: -10%; top: 5%; }
+        .ss-orbit-two { width: 98%; right: 1%; top: 14%; }
+        .ss-planet-a { right: 78%; top: 23%; width: 32px; height: 32px; }
+        .ss-planet-b { right: 8%; top: 31%; width: 26px; height: 26px; }
         .ss-feature-chip {
-            width: min(112%, 145px);
-            padding: 0.48rem;
-            gap: 0.42rem;
-            border-radius: 12px;
+            width: min(76%, 260px);
+            padding: 0.65rem;
+            gap: 0.6rem;
+            border-radius: 15px;
         }
-        .ss-feature-chip i { width: 31px; height: 31px; font-size: 0.85rem; }
-        .ss-feature-chip strong { font-size: 0.68rem; }
-        .ss-feature-chip span { font-size: 0.56rem; line-height: 1.25; }
-        .ss-chip-practice { left: 12%; right: auto; top: 172px; }
-        .ss-chip-assess { left: auto; right: -8%; top: 231px; }
-        .ss-chip-grow { left: -9%; right: auto; top: 290px; }
+        .ss-feature-chip i { width: 38px; height: 38px; font-size: 1rem; }
+        .ss-feature-chip strong { font-size: 0.8rem; }
+        .ss-feature-chip span { font-size: 0.68rem; line-height: 1.3; }
+        .ss-chip-practice { left: 0; right: auto; top: 222px; }
+        .ss-chip-assess { left: auto; right: 0; top: 292px; }
+        .ss-chip-grow { left: 0; right: auto; top: 362px; }
 
         .ss-panel-head { align-items: flex-start; flex-direction: column; }
         .ss-panel-head button { width: 100%; justify-content: center; }
@@ -1100,10 +1102,7 @@
         .ss-main-mentor-grid .ss-advisor-card-right { order: 3; }
         .ss-main-mentor-grid .ss-main-mentor,
         .ss-main-mentor-grid .ss-advisor-card {
-            display: grid;
-            grid-template-columns: 92px minmax(0, 1fr);
-            align-items: center;
-            column-gap: 0.8rem;
+            display: block;
             flex: 0 0 min(86vw, 350px);
             max-width: none;
             margin: 0;
@@ -1112,30 +1111,34 @@
             scroll-snap-align: center;
         }
         .ss-main-mentor-grid .ss-main-mentor-portrait {
-            width: 92px;
-            margin: 0;
+            width: 132px;
+            margin: 0 auto 0.75rem;
+        }
+        .ss-main-mentor-grid .ss-main-mentor-portrait img {
+            object-fit: contain;
         }
         .ss-main-mentor-grid .ss-main-mentor-content h2 {
             margin: 0.4rem 0 0.2rem;
-            font-size: 0.95rem;
+            font-size: 1.12rem;
             line-height: 1.25;
-            text-align: left;
+            text-align: center;
         }
         .ss-main-mentor-grid .ss-main-mentor-position {
             min-height: 0;
             margin-bottom: 0.35rem;
-            font-size: 0.64rem;
-            text-align: left;
+            font-size: 0.72rem;
+            text-align: center;
         }
         .ss-main-mentor-grid .ss-main-mentor-summary {
             display: -webkit-box;
             overflow: hidden;
-            font-size: 0.68rem;
+            font-size: 0.75rem;
             line-height: 1.4;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
         }
         .ss-main-mentor-grid .ss-main-mentor-tags {
+            justify-content: center;
             flex-wrap: wrap;
             gap: 0.3rem;
             margin-top: 0.5rem;
@@ -1152,7 +1155,25 @@
             font-size: 0.7rem;
         }
         .ss-mentor-modal header { grid-template-columns: 1fr; text-align: center; }
-        .ss-mentor-modal header img { margin: 0 auto; }
+        .ss-mentor-modal-backdrop {
+            align-items: flex-start;
+            padding: 1rem 0.75rem calc(6.5rem + env(safe-area-inset-bottom));
+            overflow-y: auto;
+        }
+        .ss-mentor-modal {
+            width: 100%;
+            max-height: none;
+            margin: auto 0;
+            overflow: visible;
+        }
+        .ss-mentor-modal header { padding-right: 0; }
+        .ss-mentor-modal header img {
+            width: min(58vw, 210px);
+            height: auto;
+            aspect-ratio: 1;
+            margin: 0 auto;
+            object-fit: contain;
+        }
         .ss-mentor-modal > ul { grid-template-columns: 1fr; }
         .ss-mentor-carousel-dots {
             display: flex;
