@@ -875,21 +875,23 @@
     .ss-mentor-carousel-dots { display: none; }
     .ss-main-mentor-grid .ss-main-mentor {
         grid-column: 2;
-        display: block;
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        height: 100%;
         padding: 1.25rem;
         border-radius: 24px;
         text-align: center;
     }
     .ss-main-mentor-grid .ss-advisor-card {
         grid-column: 1;
-        margin-top: 2.25rem;
     }
     .ss-main-mentor-grid .ss-advisor-card-right { grid-column: 3; }
     .ss-main-mentor-grid .ss-main-mentor-portrait { position: relative; top: auto; width: 150px; margin: 0 auto 1rem; }
+    .ss-main-mentor-grid .ss-main-mentor-content { display: flex; flex: 1; flex-direction: column; align-items: center; }
     .ss-main-mentor-grid .ss-main-mentor-content h2 { margin-top: .65rem; font-size: 1.35rem; }
     .ss-main-mentor-grid .ss-main-mentor-position { min-height: 3.4em; margin-bottom: .75rem; font-size: .82rem; line-height: 1.5; }
-    .ss-main-mentor-summary { color: #64748b; font-size: .86rem; line-height: 1.6; }
+    .ss-main-mentor-summary { flex: 1; color: #64748b; font-size: .86rem; line-height: 1.6; }
     .ss-main-mentor-grid .ss-main-mentor-tags { justify-content: center; gap: .4rem; }
     .ss-main-mentor-grid .ss-main-mentor-tags span { padding: .45rem .55rem; font-size: .7rem; }
     .ss-advisor-card-right .ss-main-mentor-tags { flex-wrap: nowrap; }
