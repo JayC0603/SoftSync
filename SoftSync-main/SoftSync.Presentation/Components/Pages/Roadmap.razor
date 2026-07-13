@@ -61,16 +61,24 @@
                     <span class="sr-path-duration"><i class="bi bi-stopwatch"></i> 3 game thực tế</span>
                 </header>
                 <div class="sr-path-steps">
+                    <button @onclick='() => Nav.NavigateTo("/time-management-lesson")'>
+                        <span class="sr-step-number">01</span><i class="bi bi-play-circle-fill"></i>
+                        <span><small>HỌC KIẾN THỨC</small><b>Video bài giảng</b><em>Mentor · Quản lý thời gian</em></span>
+                    </button>
+                    <button @onclick='() => Nav.NavigateTo("/time-management-quiz")'>
+                        <span class="sr-step-number">02</span><i class="bi bi-ui-checks-grid"></i>
+                        <span><small>KIỂM TRA KIẾN THỨC</small><b>Trắc nghiệm</b><em>20 câu · Chấm ngay</em></span>
+                    </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-games/0")'>
-                        <span class="sr-step-number">01</span><i class="bi bi-calendar2-week-fill"></i>
+                        <span class="sr-step-number">03</span><i class="bi bi-calendar2-week-fill"></i>
                         <span><small>LẬP KẾ HOẠCH</small><b>My Timetable</b><em>Lịch, nhắc giờ, check-in</em></span>
                     </button>
                     <button @onclick='() => Nav.NavigateTo("/time-management-games/1")'>
-                        <span class="sr-step-number">02</span><i class="bi bi-sort-down"></i>
+                        <span class="sr-step-number">04</span><i class="bi bi-sort-down"></i>
                         <span><small>CHỌN ƯU TIÊN</small><b>Priority Sort</b><em>Kéo thả công việc</em></span>
                     </button>
                     <button class="featured" @onclick='() => Nav.NavigateTo("/time-management-games/2")'>
-                        <span class="sr-step-number">03</span><i class="bi bi-grid-1x2-fill"></i>
+                        <span class="sr-step-number">05</span><i class="bi bi-grid-1x2-fill"></i>
                         <span><small>PHÂN LOẠI</small><b>Eisenhower Matrix</b><em>Quan trọng · Khẩn cấp</em></span>
                     </button>
                 </div>
