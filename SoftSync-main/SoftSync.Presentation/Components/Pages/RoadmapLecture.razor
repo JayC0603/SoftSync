@@ -1,6 +1,7 @@
 @page "/roadmap/lecture/{UserId:int}/{ItemId:int}"
 @page "/communication-lesson"
 @page "/communication-lesson-2"
+@page "/communication-lesson-3"
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
@@ -62,7 +63,7 @@
                         Đã hoàn thành Game 1
                     </button>
                 }
-                else if (item.WeekNumber == 1 || IsCommunicationLessonTwo)
+                else if (item.WeekNumber == 1 || IsCommunicationLessonTwo || IsCommunicationLessonThree)
                 {
                     <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="GoToGame">
                         @L["roadmap.continueToGame"] <i class="bi bi-arrow-right tw:ms-2"></i>
@@ -85,10 +86,11 @@
 
     private RoadmapItemDto? item;
     private bool IsCommunicationLessonTwo => Nav.Uri.Contains("/communication-lesson-2", StringComparison.OrdinalIgnoreCase);
-    private int DisplayWeekNumber => IsCommunicationLessonTwo ? 2 : item?.WeekNumber ?? 1;
-    private string VideoSource => IsCommunicationLessonTwo
-        ? "/videos/communication-mentor-lesson-2.mp4"
-        : "/videos/communication-mentor-lesson-1.mp4";
+    private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
+    private int DisplayWeekNumber => IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : item?.WeekNumber ?? 1;
+    private string VideoSource => IsCommunicationLessonThree
+        ? "/videos/communication-mentor-lesson-3.mp4"
+        : IsCommunicationLessonTwo ? "/videos/communication-mentor-lesson-2.mp4" : "/videos/communication-mentor-lesson-1.mp4";
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,13 +99,15 @@
             item = new RoadmapItemDto
             {
                 Id = 0,
-                WeekNumber = IsCommunicationLessonTwo ? 2 : 1,
+                WeekNumber = IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : 1,
                 SkillName = "Kỹ năng Giao tiếp",
-                Title = IsCommunicationLessonTwo
-                    ? "Thực hành giao tiếp qua tình huống"
+                Title = IsCommunicationLessonThree
+                    ? "Làm chủ giọng nói và ngôn ngữ cận lời"
+                    : IsCommunicationLessonTwo ? "Thực hành giao tiếp qua tình huống"
                     : "Nền tảng giao tiếp và lắng nghe chủ động",
-                Description = IsCommunicationLessonTwo
-                    ? "Xem bài giảng từ Mentor trước khi thực hành Quiz 2 với các tình huống giao tiếp mô phỏng."
+                Description = IsCommunicationLessonThree
+                    ? "Tìm hiểu tốc độ nói, độ rõ chữ, khoảng lặng và tông giọng trước khi bước vào bài luyện ghi âm."
+                    : IsCommunicationLessonTwo ? "Xem bài giảng từ Mentor trước khi thực hành Quiz 2 với các tình huống giao tiếp mô phỏng."
                     : "Ôn tập các thành phần cốt lõi của giao tiếp, lắng nghe chủ động, rào cản nhận thức và giao tiếp khẳng định ôn hòa."
             };
             return;
@@ -115,8 +119,9 @@
             Nav.NavigateTo($"/roadmap/{UserId}", true);
     }
 
-    private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonTwo
-        ? "/communication-roleplay"
+    private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
+        ? "/communication-voice-practice"
+        : IsCommunicationLessonTwo ? "/communication-roleplay"
         : UserId == 0 ? "/communication-quiz" : $"/roadmap/game/{UserId}/{ItemId}");
 
     private void BackToRoadmap() => Nav.NavigateTo(UserId == 0 ? "/roadmap" : $"/roadmap/{UserId}");
