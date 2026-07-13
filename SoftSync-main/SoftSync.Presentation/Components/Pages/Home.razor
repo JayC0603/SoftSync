@@ -1089,36 +1089,79 @@
             white-space: nowrap;
         }
 
-        /* Keep the desktop orbit composition instead of turning it into a
-           very tall list. The cards remain readable and alternate around
-           SYNCY inside one compact mobile scene. */
-        .ss-orbit-stage { min-height: 440px; }
+        /* A compact orbital system keeps the three actions visually tied to
+           SYNCY instead of reading as a detached vertical card list. */
+        .ss-orbit-stage {
+            min-height: 370px;
+            margin-inline: auto;
+            isolation: isolate;
+        }
         .ss-ai-orb {
             left: 50%;
-            top: 2.25rem;
-            width: 150px;
-            height: 150px;
-            padding: 13px;
+            top: 108px;
+            width: 136px;
+            height: 136px;
+            padding: 12px;
             transform: translateX(-50%);
-            box-shadow: 0 0 0 11px rgba(124, 58, 237, 0.14), 0 0 42px rgba(96, 165, 250, 0.4);
+            z-index: 3;
+            box-shadow: 0 0 0 10px rgba(124, 58, 237, 0.14), 0 0 38px rgba(96, 165, 250, 0.42);
         }
-        .ss-galaxy-core { width: 105%; right: -2%; top: 5%; }
-        .ss-orbit { width: 120%; right: -10%; top: 5%; }
-        .ss-orbit-two { width: 98%; right: 1%; top: 14%; }
-        .ss-planet-a { right: 78%; top: 23%; width: 32px; height: 32px; }
-        .ss-planet-b { right: 8%; top: 31%; width: 26px; height: 26px; }
+        .ss-galaxy-core {
+            width: 82%;
+            right: 9%;
+            top: 44px;
+            aspect-ratio: 1;
+            transform: none;
+        }
+        .ss-orbit {
+            width: 92%;
+            right: 4%;
+            top: 24px;
+            aspect-ratio: 1;
+            transform: none;
+            border-color: rgba(96, 165, 250, 0.58);
+        }
+        .ss-orbit-two {
+            width: 76%;
+            right: 12%;
+            top: 54px;
+            opacity: 0.42;
+        }
+        .ss-planet-a { right: 76%; top: 47%; width: 22px; height: 22px; }
+        .ss-planet-b { right: 15%; top: 21%; width: 18px; height: 18px; }
         .ss-feature-chip {
-            width: min(76%, 260px);
-            padding: 0.65rem;
-            gap: 0.6rem;
-            border-radius: 15px;
+            width: min(47%, 176px);
+            min-height: 58px;
+            padding: 0.5rem 0.55rem;
+            gap: 0.5rem;
+            border-radius: 16px;
+            z-index: 4;
         }
-        .ss-feature-chip i { width: 38px; height: 38px; font-size: 1rem; }
-        .ss-feature-chip strong { font-size: 0.8rem; }
-        .ss-feature-chip span { font-size: 0.68rem; line-height: 1.3; }
-        .ss-chip-practice { left: 0; right: auto; top: 222px; }
-        .ss-chip-assess { left: auto; right: 0; top: 292px; }
-        .ss-chip-grow { left: 0; right: auto; top: 362px; }
+        .ss-feature-chip::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 3px solid #fff;
+            border-radius: 999px;
+            background: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        .ss-feature-chip i {
+            width: 38px;
+            height: 38px;
+            flex: 0 0 38px;
+            font-size: 1rem;
+            border-radius: 12px;
+        }
+        .ss-feature-chip strong { font-size: 0.88rem; line-height: 1.15; }
+        .ss-feature-chip span { font-size: 0.73rem; line-height: 1.2; }
+        .ss-chip-practice { left: 0; right: auto; top: 36px; }
+        .ss-chip-practice::after { right: -8px; bottom: 7px; }
+        .ss-chip-assess { left: auto; right: 0; top: 162px; }
+        .ss-chip-assess::after { left: -8px; top: 50%; transform: translateY(-50%); }
+        .ss-chip-grow { left: 5%; right: auto; top: 284px; }
+        .ss-chip-grow::after { right: -8px; top: 5px; background: #34d399; }
 
         .ss-panel-head { align-items: flex-start; flex-direction: column; }
         .ss-panel-head button { width: 100%; justify-content: center; }
