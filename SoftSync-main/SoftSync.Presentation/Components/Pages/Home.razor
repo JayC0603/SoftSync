@@ -871,15 +871,14 @@
     .ss-main-mentor-about p { color: #64748b; line-height: 1.72; }
     .ss-main-mentor-tags { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.4rem; }
     .ss-main-mentor-tags span { display: inline-flex; align-items: center; gap: .45rem; padding: .65rem .8rem; color: #5b42db; background: rgba(255,255,255,.65); border: 1px solid rgba(124,92,252,.16); border-radius: 14px; font-size: .8rem; font-weight: 750; }
-    .ss-main-mentor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+    .ss-main-mentor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: 1rem; }
     .ss-mentor-carousel-dots { display: none; }
     .ss-main-mentor-grid .ss-main-mentor {
         grid-column: 2;
         display: flex;
         flex-direction: column;
         width: 100%;
-        height: 100%;
-        padding: 1.25rem;
+        padding: 1rem;
         border-radius: 24px;
         text-align: center;
     }
@@ -887,14 +886,14 @@
         grid-column: 1;
     }
     .ss-main-mentor-grid .ss-advisor-card-right { grid-column: 3; }
-    .ss-main-mentor-grid .ss-main-mentor-portrait { position: relative; top: auto; width: 150px; margin: 0 auto 1rem; }
+    .ss-main-mentor-grid .ss-main-mentor-portrait { position: relative; top: auto; width: 132px; margin: 0 auto .7rem; }
     .ss-main-mentor-grid .ss-main-mentor-content { display: flex; flex: 1; flex-direction: column; align-items: center; }
-    .ss-main-mentor-grid .ss-main-mentor-content h2 { margin-top: .65rem; font-size: 1.35rem; }
-    .ss-main-mentor-grid .ss-main-mentor-position { min-height: 3.4em; margin-bottom: .75rem; font-size: .82rem; line-height: 1.5; }
-    .ss-main-mentor-summary { flex: 1; color: #64748b; font-size: .86rem; line-height: 1.6; }
-    .ss-main-mentor-grid .ss-main-mentor-tags { justify-content: center; gap: .4rem; }
+    .ss-main-mentor-grid .ss-main-mentor-content h2 { margin-top: .5rem; font-size: 1.3rem; }
+    .ss-main-mentor-grid .ss-main-mentor-position { min-height: 3.2em; margin: .15rem 0 .55rem; font-size: .8rem; line-height: 1.45; }
+    .ss-main-mentor-summary { flex: 1; margin: .35rem 0 0; color: #64748b; font-size: .82rem; line-height: 1.55; }
+    .ss-main-mentor-grid .ss-main-mentor-tags { justify-content: center; gap: .35rem; margin-top: .75rem; }
     .ss-main-mentor-grid .ss-main-mentor-tags span { padding: .45rem .55rem; font-size: .7rem; }
-    .ss-mentor-detail-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; width: 100%; margin-top: 1rem; padding: .7rem 1rem; color: #fff; border: 0; border-radius: 14px; background: linear-gradient(135deg,#6d4cf5,#8b5cf6); font-weight: 800; }
+    .ss-mentor-detail-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; width: 100%; margin-top: .75rem; padding: .65rem .9rem; color: #fff; border: 0; border-radius: 14px; background: linear-gradient(135deg,#6d4cf5,#8b5cf6); font-weight: 800; }
     .ss-mentor-modal-backdrop { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 1rem; background: rgba(15,23,42,.58); backdrop-filter: blur(8px); }
     .ss-mentor-modal { position: relative; width: min(860px, 100%); max-height: min(86vh, 900px); overflow-y: auto; padding: clamp(1.25rem, 4vw, 2.5rem); border-radius: 28px; background: rgba(255,255,255,.96); }
     .ss-mentor-modal-close { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; width: 40px; height: 40px; color: #5b42db; border: 1px solid rgba(124,92,252,.18); border-radius: 50%; background: rgba(255,255,255,.9); }
