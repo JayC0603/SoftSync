@@ -26,11 +26,11 @@ public static class Translations
 
         // ===== Home =====
         ["home.tagline"] = ("AI-powered soft skills learning app", "Ứng dụng học kỹ năng mềm bằng AI"),
-        ["home.heroTitlePrefix"] = ("Master your future with ", "Làm chủ tương lai với "),
-        ["home.heroTitleHighlight"] = ("Intelligence", "Trí tuệ"),
+        ["home.heroTitlePrefix"] = ("Build the skills that ", "Phát triển kỹ năng, "),
+        ["home.heroTitleHighlight"] = ("shape your future", "kiến tạo tương lai"),
         ["home.heroDesc"] = (
-            "SoftSync is an AI-powered platform that helps you assess your soft skills, practice through real-world scenarios, and follow a personalized growth path tailored just for you.",
-            "SoftSync là nền tảng ứng dụng AI giúp bạn đánh giá kỹ năng mềm, luyện tập qua các tình huống thực tế, và theo một lộ trình phát triển cá nhân hóa dành riêng cho bạn."),
+            "SoftSync is an AI-powered learning platform that helps you understand your strengths, practice essential soft skills through real-world scenarios, and follow a personalized path toward meaningful growth.",
+            "SoftSync là nền tảng học tập ứng dụng AI, giúp bạn khám phá thế mạnh, rèn luyện các kỹ năng mềm thiết yếu qua tình huống thực tế và phát triển theo lộ trình được cá nhân hóa dành riêng cho bạn."),
         ["home.startJourney"] = ("Start Your Journey", "Bắt đầu hành trình"),
         ["home.learnMore"] = ("Learn More", "Tìm hiểu thêm"),
         ["home.communityHubCta"] = ("Explore Community Hub", "Khám phá Community Hub"),
