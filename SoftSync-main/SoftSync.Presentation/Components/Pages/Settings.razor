@@ -635,8 +635,8 @@
     {
         langCode = code;
         if (user is not null) user.PreferredLanguage = code;
-        L.SetLanguage(LocalizationService.Parse(code));
         await JS.InvokeVoidAsync("ssLang.set", code);
+        L.SetLanguage(LocalizationService.Parse(code));
     }
 
     private async Task SetTheme(ThemePreference th)

@@ -14,7 +14,12 @@ public enum AppLanguage
 /// </summary>
 public class LocalizationService
 {
-    public AppLanguage Current { get; private set; } = AppLanguage.En;
+    public LocalizationService(AppLanguage initialLanguage = AppLanguage.En)
+    {
+        Current = initialLanguage;
+    }
+
+    public AppLanguage Current { get; private set; }
 
     /// <summary>Raised whenever the language changes.</summary>
     public event Action? OnChanged;

@@ -27,13 +27,18 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options =>
         options.DetailedErrors = builder.Environment.IsDevelopment());
 
-// UI localization (EN/VI). Scoped per circuit so each user has their own language.
-builder.Services.AddScoped<LocalizationService>();
-builder.Services.AddScoped<UserProfileState>();
-
-// Needed so App.razor can read the ss-theme cookie during SSR / enhanced
-// navigation and render data-theme on <html> directly (no flash / revert).
+// Needed so App.razor and scoped UI services can read browser preferences during
+// SSR / enhanced navigation and render the first frame without flashing.
 builder.Services.AddHttpContextAccessor();
+
+// UI localization (EN/VI). Seed each circuit from the cookie so SSR and the
+// interactive render always use the same language.
+builder.Services.AddScoped<LocalizationService>(services =>
+{
+    var request = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request;
+    return new LocalizationService(LocalizationService.Parse(request?.Cookies["ss-lang"]));
+});
+builder.Services.AddScoped<UserProfileState>();
 
 // 1. Database Configuration (PostgreSQL).
 // Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value

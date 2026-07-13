@@ -320,14 +320,6 @@
     {
         if (firstRender)
         {
-            // Restore the saved language after the circuit is interactive.
-            var saved = await JS.InvokeAsync<string?>("ssLang.get");
-            var lang = LocalizationService.Parse(saved);
-            if (lang != L.Current)
-            {
-                L.SetLanguage(lang);
-            }
-
             // Load the user's profile (avatar + level) in its own DI scope so we
             // don't share the page's scoped DbContext (avoids a concurrent-query
             // crash when a page also queries the DB during its own init).
@@ -337,8 +329,10 @@
 
     private async Task ToggleLanguage()
     {
-        L.Toggle();
-        await JS.InvokeVoidAsync("ssLang.set", L.Code);
+        var next = L.Current == AppLanguage.En ? AppLanguage.Vi : AppLanguage.En;
+        var nextCode = next == AppLanguage.Vi ? "vi" : "en";
+        await JS.InvokeVoidAsync("ssLang.set", nextCode);
+        L.SetLanguage(next);
     }
 
     private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";

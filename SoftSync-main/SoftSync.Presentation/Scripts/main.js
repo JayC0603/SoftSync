@@ -55,6 +55,8 @@ window.ssLang = {
     },
     set(code) {
         try { localStorage.setItem('ss-lang', code); } catch { /* ignore */ }
+        try { document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`; }
+        catch { /* ignore */ }
     }
 };
 

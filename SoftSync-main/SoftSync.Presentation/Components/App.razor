@@ -1,11 +1,33 @@
 @inject IHttpContextAccessor HttpContextAccessor
 <!DOCTYPE html>
-<html lang="en" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
+<html lang="@ServerLanguage" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <script>
+        // Migrate the old localStorage-only preference before the first paint.
+        // Once the cookie exists, the server renders the selected language
+        // directly and this block becomes a no-op on every later visit.
+        (function () {
+            try {
+                var saved = localStorage.getItem('ss-lang');
+                if (saved !== 'vi' && saved !== 'en') return;
+                var match = document.cookie.match(/(?:^|; )ss-lang=([^;]*)/);
+                var cookie = match ? decodeURIComponent(match[1]) : null;
+                if (cookie === saved) {
+                    sessionStorage.removeItem('ss-lang-cookie-migration');
+                    return;
+                }
+                // Avoid a reload loop if this browser blocks cookies.
+                if (sessionStorage.getItem('ss-lang-cookie-migration') === saved) return;
+                sessionStorage.setItem('ss-lang-cookie-migration', saved);
+                document.cookie = 'ss-lang=' + saved + '; path=/; max-age=31536000; samesite=lax';
+                location.replace(location.href);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/app.css" />
@@ -66,6 +88,9 @@
     // what stops the theme from flashing to light and reverting between pages.
     private string ServerTheme =>
         HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
+
+    private string ServerLanguage =>
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-lang"] is "vi" ? "vi" : "en";
 
     // Returns "1" or null — Blazor omits the attribute entirely when it's null,
     // so we never emit a broken/empty data-reduce-motion.
