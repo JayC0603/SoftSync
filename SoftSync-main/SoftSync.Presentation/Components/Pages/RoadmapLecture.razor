@@ -2,6 +2,7 @@
 @page "/communication-lesson"
 @page "/communication-lesson-2"
 @page "/communication-lesson-3"
+@page "/communication-lesson-4"
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
@@ -87,9 +88,11 @@
     private RoadmapItemDto? item;
     private bool IsCommunicationLessonTwo => Nav.Uri.Contains("/communication-lesson-2", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
-    private int DisplayWeekNumber => IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : item?.WeekNumber ?? 1;
-    private string VideoSource => IsCommunicationLessonThree
-        ? "/videos/communication-mentor-lesson-3.mp4"
+    private bool IsCommunicationLessonFour => Nav.Uri.Contains("/communication-lesson-4", StringComparison.OrdinalIgnoreCase);
+    private int DisplayWeekNumber => IsCommunicationLessonFour ? 4 : IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : item?.WeekNumber ?? 1;
+    private string VideoSource => IsCommunicationLessonFour
+        ? "/videos/communication-mentor-lesson-4.mp4"
+        : IsCommunicationLessonThree ? "/videos/communication-mentor-lesson-3.mp4"
         : IsCommunicationLessonTwo ? "/videos/communication-mentor-lesson-2.mp4" : "/videos/communication-mentor-lesson-1.mp4";
 
     protected override async Task OnInitializedAsync()
@@ -99,14 +102,16 @@
             item = new RoadmapItemDto
             {
                 Id = 0,
-                WeekNumber = IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : 1,
+                WeekNumber = IsCommunicationLessonFour ? 4 : IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : 1,
                 SkillName = "Kỹ năng Giao tiếp",
-                Title = IsCommunicationLessonThree
-                    ? "Làm chủ giọng nói và ngôn ngữ cận lời"
+                Title = IsCommunicationLessonFour
+                    ? "Bài giảng giao tiếp nâng cao"
+                    : IsCommunicationLessonThree ? "Làm chủ giọng nói và ngôn ngữ cận lời"
                     : IsCommunicationLessonTwo ? "Thực hành giao tiếp qua tình huống"
                     : "Nền tảng giao tiếp và lắng nghe chủ động",
-                Description = IsCommunicationLessonThree
-                    ? "Tìm hiểu tốc độ nói, độ rõ chữ, khoảng lặng và tông giọng trước khi bước vào bài luyện ghi âm."
+                Description = IsCommunicationLessonFour
+                    ? "Tiếp tục phát triển kỹ năng giao tiếp qua hướng dẫn chuyên sâu từ Mentor SoftSync."
+                    : IsCommunicationLessonThree ? "Tìm hiểu tốc độ nói, độ rõ chữ, khoảng lặng và tông giọng trước khi bước vào bài luyện ghi âm."
                     : IsCommunicationLessonTwo ? "Xem bài giảng từ Mentor trước khi thực hành Quiz 2 với các tình huống giao tiếp mô phỏng."
                     : "Ôn tập các thành phần cốt lõi của giao tiếp, lắng nghe chủ động, rào cản nhận thức và giao tiếp khẳng định ôn hòa."
             };
