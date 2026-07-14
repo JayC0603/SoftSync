@@ -1,6 +1,4 @@
 @page "/Error"
-@inject NavigationManager Navigation
-
 <PageTitle>Something went wrong | SoftSync</PageTitle>
 
 <main class="guest-error">
@@ -13,9 +11,9 @@
             <h1>Let’s get you back on track</h1>
             <p>We couldn’t open that page right now. You can return home, sign in, or create a free account to start learning.</p>
             <div class="guest-error-actions">
-                <button class="guest-error-primary" @onclick='() => Navigation.NavigateTo("/")'>
+                <a href="/" data-enhance-nav="false" class="guest-error-primary">
                     <i class="bi bi-house-door"></i> Back to home
-                </button>
+                </a>
                 <a href="/Account/Login" class="guest-error-secondary">Sign in</a>
                 <a href="/Account/Register" class="guest-error-link">Create account</a>
             </div>
