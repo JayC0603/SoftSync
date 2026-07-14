@@ -352,13 +352,23 @@ public class RoadmapService : IRoadmapService
             items = items.Where(x => allowedTitles.Contains(x.Title)).ToList();
         }
 
+        // Old review/catalog runs may have inserted the same lesson more than
+        // once. Present one canonical row per lesson so weeks and videos do not
+        // repeat, while preserving the oldest row and its learning progress.
+        items = items
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .GroupBy(x => x.Title.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+
         return new RoadmapDto
         {
             UserId = userId,
-            Items = items.Select(i => new RoadmapItemDto
+            Items = items.Select((i, index) => new RoadmapItemDto
             {
                 Id = i.Id,
-                WeekNumber = i.WeekNumber,
+                WeekNumber = index + 1,
                 SkillName = ResolveRoadmapSkillName(i.Title),
                 Title = i.Title,
                 Description = i.Description,
@@ -561,6 +571,8 @@ public class RoadmapService : IRoadmapService
         var orderedItems = (await _roadmapRepo.GetByUserIdAsync(item.UserId))
             .OrderBy(x => x.WeekNumber)
             .ThenBy(x => x.Id)
+            .GroupBy(x => x.Title.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
             .ToList();
         var index = orderedItems.FindIndex(x => x.Id == item.Id);
         // A completed week must always remain reviewable, even when old/imported

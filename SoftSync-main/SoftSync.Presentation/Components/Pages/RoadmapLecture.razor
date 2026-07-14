@@ -409,7 +409,9 @@
         if (item is null) return string.Empty;
         var value = $"{item.SkillName} {item.Title}";
         var sameSkill = roadmapItems.Where(x => SameSkill(x, item)).ToList();
-        var ordinal = Math.Clamp(sameSkill.FindIndex(x => x.Id == item.Id), 0, 3);
+        var ordinal = sameSkill.FindIndex(x => x.Id == item.Id);
+        if (ordinal < 0 || ordinal >= 4)
+            return string.Empty;
 
         if (value.Contains("Giao tiếp", StringComparison.OrdinalIgnoreCase) || value.Contains("Communication", StringComparison.OrdinalIgnoreCase))
             return new[] { "/videos/communication-mentor-lesson-1.mp4", "/videos/communication-mentor-lesson-2.mp4", "/videos/communication-mentor-lesson-3.mp4", "/videos/communication-mentor-lesson-4.mp4" }[ordinal];
