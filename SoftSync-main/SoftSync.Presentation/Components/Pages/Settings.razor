@@ -138,7 +138,7 @@
                 @switch (tab)
                 {
                     case Tab.Account:
-                        <div class="ss-card ss-card--flat tw:p-6">
+                        <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
                             <div class="tw:flex tw:items-center tw:justify-between tw:mb-5 tw:flex-wrap tw:gap-3">
                                 <h4 class="ss-panel-title">@L["settings.profile.info"]</h4>
                                 <a class="ss-ghost-btn" href="Account/ChangePassword">
@@ -219,6 +219,42 @@
                                 </div>
                                 <button class="ss-btn-primary tw:px-6 tw:py-2" @onclick="SaveAsync" disabled="@saving">
                                     <i class="bi bi-stars tw:me-1"></i> @L["settings.save"]
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
+                            <h5 class="tw:font-bold tw:mb-3">@L["settings.session"]</h5>
+                            <form id="ss-settings-logout" action="Account/Logout" method="post" class="tw:m-0">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="" />
+                                <button type="submit" class="btn btn-light tw:py-2 tw:px-4">
+                                    <i class="bi bi-box-arrow-right tw:me-1"></i> @L["nav.logout"]
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="ss-card ss-card--flat ss-danger-zone tw:p-6">
+                            <h5 class="tw:font-bold tw:mb-1 text-danger">@L["settings.danger"]</h5>
+                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.danger.hint"]</p>
+
+                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:mb-3 tw:flex-wrap">
+                                <div>
+                                    <div class="tw:font-semibold">@L["settings.suspend.title"]</div>
+                                    <div class="text-muted tw:text-sm">@L["settings.suspend.hint"]</div>
+                                </div>
+                                <button class="btn btn-outline-warning tw:py-2 tw:px-4" @onclick="() => showSuspend = true">
+                                    @L["settings.suspend.button"]
+                                </button>
+                            </div>
+                            <hr />
+                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:flex-wrap">
+                                <div>
+                                    <div class="tw:font-semibold text-danger">@L["settings.delete.title"]</div>
+                                    <div class="text-muted tw:text-sm">@L["settings.delete.hint"]</div>
+                                </div>
+                                <button class="btn btn-danger tw:py-2 tw:px-4" @onclick="() => showDelete = true">
+                                    @L["settings.delete.button"]
                                 </button>
                             </div>
                         </div>
@@ -412,41 +448,6 @@
                             </div>
                         </div>
 
-                        <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
-                            <h5 class="tw:font-bold tw:mb-3">@L["settings.session"]</h5>
-                            <form id="ss-settings-logout" action="Account/Logout" method="post" class="tw:m-0">
-                                <AntiforgeryToken />
-                                <input type="hidden" name="ReturnUrl" value="" />
-                                <button type="submit" class="btn btn-light tw:py-2 tw:px-4">
-                                    <i class="bi bi-box-arrow-right tw:me-1"></i> @L["nav.logout"]
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="ss-card ss-card--flat ss-danger-zone tw:p-6">
-                            <h5 class="tw:font-bold tw:mb-1 text-danger">@L["settings.danger"]</h5>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.danger.hint"]</p>
-
-                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:mb-3 tw:flex-wrap">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.suspend.title"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.suspend.hint"]</div>
-                                </div>
-                                <button class="btn btn-outline-warning tw:py-2 tw:px-4" @onclick="() => showSuspend = true">
-                                    @L["settings.suspend.button"]
-                                </button>
-                            </div>
-                            <hr />
-                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:flex-wrap">
-                                <div>
-                                    <div class="tw:font-semibold text-danger">@L["settings.delete.title"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.delete.hint"]</div>
-                                </div>
-                                <button class="btn btn-danger tw:py-2 tw:px-4" @onclick="() => showDelete = true">
-                                    @L["settings.delete.button"]
-                                </button>
-                            </div>
-                        </div>
                         break;
                 }
             </div>
