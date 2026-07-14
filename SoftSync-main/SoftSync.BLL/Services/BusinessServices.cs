@@ -626,6 +626,12 @@ public class RoadmapService : IRoadmapService
 
     private async Task<bool> IsWeekUnlockedAsync(RoadmapItem item)
     {
+        // Content review mode exposes every curriculum item to editors. The
+        // persistence layer must use the same rule as the UI, otherwise an
+        // opened lesson can never save completion or unlock its next step.
+        if (RoadmapReviewMode.Enabled)
+            return true;
+
         var orderedItems = (await _roadmapRepo.GetByUserIdAsync(item.UserId))
             .OrderBy(x => x.WeekNumber)
             .ThenBy(x => x.Id)
