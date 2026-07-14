@@ -1,54 +1,68 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\",
+  "WorkspaceRootPath": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\selectskills.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\selectskills.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\assessment.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\assessment.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\assessmentresult.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\assessmentresult.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\community.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\community.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\community.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\wwwroot\\app.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\softsync.presentation.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\softsync.presentation.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\selectskills.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\selectskills.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\assessment.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\assessment.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\assessmentresult.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\assessmentresult.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\wwwroot\\app.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\wwwroot\\app.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\assistant.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\assistant.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\assistant.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\pages\\roadmap.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\pages\\roadmap.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\pages\\roadmap.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\softsync\\softsync.presentation\\components\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|d:\\caclopfpt\\ki7_se1902.02\\exe\\newsoftsync\\softsync\\softsync-main\\softsync.presentation\\components\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{1746ED61-5D2D-4D05-BF6E-6DB66847C37A}|SoftSync.Presentation\\SoftSync.Presentation.csproj|solutionrelative:softsync.presentation\\components\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SoftSync.Core\\Dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Interfaces.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SoftSync.Core\\Interfaces.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Interfaces.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -58,7 +72,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -73,25 +87,79 @@
               "Name": "ST:138:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "SelectSkills.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
-              "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
-              "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-25T02:38:38.522Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "SoftSync.Presentation\\appsettings.Development.json",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\appsettings.Development.json",
+              "RelativeToolTip": "SoftSync.Presentation\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-14T01:57:38.187Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\appsettings.json",
+              "RelativeDocumentMoniker": "SoftSync.Presentation\\appsettings.json",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\appsettings.json",
+              "RelativeToolTip": "SoftSync.Presentation\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-14T01:57:21.197Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Dockerfile",
+              "RelativeDocumentMoniker": "SoftSync.Presentation\\Dockerfile",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Dockerfile",
+              "RelativeToolTip": "SoftSync.Presentation\\Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-14T01:57:20.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SoftSync.Presentation.csproj",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\SoftSync.Presentation.csproj",
+              "RelativeDocumentMoniker": "SoftSync.Presentation\\SoftSync.Presentation.csproj",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\SoftSync.Presentation.csproj",
+              "RelativeToolTip": "SoftSync.Presentation\\SoftSync.Presentation.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-06-29T03:08:53.981Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "SelectSkills.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
+              "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
+              "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\SelectSkills.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-25T02:38:38.522Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "Counter.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Counter.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Counter.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Counter.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Counter.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Counter.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Counter.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -99,11 +167,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "Assessment.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Assessment.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -111,11 +179,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "AssessmentResult.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\AssessmentResult.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -123,23 +191,24 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "Community.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Community.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Community.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Community.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Community.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Community.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Community.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAkAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-24T15:34:34.125Z"
+              "WhenOpened": "2026-06-24T15:34:34.125Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "app.css",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\wwwroot\\app.css",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\wwwroot\\app.css",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\wwwroot\\app.css",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\wwwroot\\app.css",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\wwwroot\\app.css",
               "RelativeToolTip": "SoftSync.Presentation\\wwwroot\\app.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
@@ -147,11 +216,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "Assistant.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Assistant.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -159,11 +228,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "Roadmap.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Roadmap.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -171,11 +240,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "Home.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Home.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Home.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\Pages\\Home.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\Pages\\Home.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\Pages\\Home.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\Pages\\Home.razor",
               "ViewState": "AgIAAJgAAAAAAAAAAAAwwKcAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -183,11 +252,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 13,
               "Title": "App.razor",
-              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\App.razor",
+              "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\App.razor",
               "RelativeDocumentMoniker": "SoftSync.Presentation\\Components\\App.razor",
-              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Presentation\\Components\\App.razor",
+              "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\NewSoftSync\\SoftSync\\SoftSync-main\\SoftSync.Presentation\\Components\\App.razor",
               "RelativeToolTip": "SoftSync.Presentation\\Components\\App.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -195,24 +264,24 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "Dtos.cs",
               "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Dtos.cs",
-              "RelativeDocumentMoniker": "SoftSync.Core\\Dtos.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\SoftSync\\SoftSync.Core\\Dtos.cs",
               "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Dtos.cs",
-              "RelativeToolTip": "SoftSync.Core\\Dtos.cs",
+              "RelativeToolTip": "..\\..\\..\\SoftSync\\SoftSync.Core\\Dtos.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-24T14:37:36.497Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "Interfaces.cs",
               "DocumentMoniker": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Interfaces.cs",
-              "RelativeDocumentMoniker": "SoftSync.Core\\Interfaces.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\SoftSync\\SoftSync.Core\\Interfaces.cs",
               "ToolTip": "D:\\CacLopFPT\\Ki7_SE1902.02\\EXE\\SoftSync\\SoftSync.Core\\Interfaces.cs",
-              "RelativeToolTip": "SoftSync.Core\\Interfaces.cs",
+              "RelativeToolTip": "..\\..\\..\\SoftSync\\SoftSync.Core\\Interfaces.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-24T14:16:27.276Z"
