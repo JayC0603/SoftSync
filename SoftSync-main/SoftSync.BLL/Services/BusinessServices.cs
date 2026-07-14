@@ -554,7 +554,7 @@ public class RoadmapService : IRoadmapService
         var item = await _roadmapRepo.GetByIdAsync(itemId);
         if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
             || !item.SummaryCompletedAtUtc.HasValue || attempt.Answers.Count == 0
-            || attempt.TotalQuestions <= 0 || attempt.Score < 0 || attempt.Score > attempt.TotalQuestions)
+            || attempt.TotalQuestions <= 0 || attempt.Score < 0 || attempt.Score > attempt.TotalQuestions * 10)
             return false;
 
         var history = DeserializeQuizHistory(item.QuizHistoryJson);
