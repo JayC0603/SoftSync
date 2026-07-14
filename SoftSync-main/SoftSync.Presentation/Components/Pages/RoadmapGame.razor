@@ -174,8 +174,8 @@
                         </div>
                     </div>
 
-                    <button class="ss-btn-primary w-100 tw:mt-4" @onclick="SubmitAsync" disabled="@(!CanSubmit || submitted)">
-                        @(submitted ? "Đã nộp bài" : "Nộp bài")
+                    <button class="ss-btn-primary w-100 tw:mt-4" @onclick="SubmitAsync" disabled="@(!CanSubmit || submitted || savingResult)">
+                        @(savingResult ? Tx("Saving result...", "Đang lưu kết quả...") : submitted ? Tx("Submitted", "Đã nộp bài") : Tx("Submit", "Nộp bài"))
                     </button>
 
                     <button class="btn btn-outline-secondary w-100 tw:mt-2" @onclick="RestartAsync" disabled="@(!submitted)">
@@ -190,10 +190,21 @@
                         <div class="text-muted tw:mb-2">Số câu đúng</div>
                         <div class="result-percent">@ScorePercent%</div>
                         <div class="@(ScorePercent >= 60 ? "text-success" : "text-danger") tw:mb-4">
-                            @(ScorePercent >= 60
-                                ? $"Đạt yêu cầu — kết quả {session.SkillName} đã được lưu."
-                                : "Chưa đạt 60% — hãy làm lại để hoàn thành bài học.")
+                            @(ScorePercent < 60
+                                ? Tx("Below 60% — try again to complete the lesson.", "Chưa đạt 60% — hãy làm lại để hoàn thành bài học.")
+                                : savingResult
+                                    ? Tx("Passed. Your progress is being saved...", "Đã đạt yêu cầu. Tiến độ đang được lưu...")
+                                    : resultSaveFailed
+                                        ? Tx("Passed, but progress could not be saved. Please retry.", "Đã đạt yêu cầu nhưng chưa lưu được tiến độ. Vui lòng thử lại.")
+                                        : Tx($"Passed — your {session.SkillName} result is saved.", $"Đạt yêu cầu — kết quả {session.SkillName} đã được lưu."))
                         </div>
+
+                        @if (resultSaveFailed)
+                        {
+                            <button class="btn btn-outline-primary w-100 tw:mb-3" @onclick="RetrySaveResultAsync" disabled="@savingResult">
+                                @Tx("Retry saving", "Thử lưu lại")
+                            </button>
+                        }
 
                         <div class="result-list">
                             @foreach (var row in reviewRows)
@@ -215,7 +226,7 @@
                                 <button class="game-nav-back" @onclick="BackToSummary">
                                     <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
                                 </button>
-                                <button class="ss-btn-primary game-nav-next" @onclick="GoToScenario">
+                                <button class="ss-btn-primary game-nav-next" @onclick="GoToScenario" disabled="@(savingResult || resultSaveFailed)">
                                     @Tx("Next: Scenario", "Tiếp theo: Tình huống") <i class="bi bi-arrow-right"></i>
                                 </button>
                             </nav>
@@ -237,6 +248,8 @@
     private readonly Dictionary<string, string> selectedOptionIds = new(StringComparer.Ordinal);
     private readonly List<GameReviewRow> reviewRows = new();
     private bool submitted;
+    private bool savingResult;
+    private bool resultSaveFailed;
     private bool loadFailed;
     private int correctCount;
 
@@ -308,6 +321,8 @@
         selectedOptionIds.Clear();
         reviewRows.Clear();
         submitted = false;
+        savingResult = false;
+        resultSaveFailed = false;
         correctCount = 0;
     }
 
@@ -411,13 +426,46 @@
         submitted = true;
         if (ScorePercent >= 60)
         {
-            await RoadmapService.MarkCompleteAsync(ItemId, UserId);
-            if (item is not null)
+            savingResult = true;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+            await PersistPassedResultAsync();
+        }
+    }
+
+    private async Task RetrySaveResultAsync()
+    {
+        if (savingResult || ScorePercent < 60)
+            return;
+
+        savingResult = true;
+        resultSaveFailed = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await PersistPassedResultAsync();
+    }
+
+    private async Task PersistPassedResultAsync()
+    {
+        try
+        {
+            var saved = await RoadmapService.MarkCompleteAsync(ItemId, UserId);
+            resultSaveFailed = !saved;
+            if (saved && item is not null)
             {
                 item.IsPracticeCompleted = true;
-                item.PracticeCompletedAtUtc = DateTime.UtcNow;
-                item.IsCompleted = item.IsVideoCompleted && item.IsScenarioCompleted && item.IsReflectionCompleted;
+                item.PracticeCompletedAtUtc ??= DateTime.UtcNow;
+                item.IsCompleted = item.IsVideoCompleted && item.IsPracticeCompleted
+                    && item.IsScenarioCompleted && item.IsReflectionCompleted;
             }
+        }
+        catch
+        {
+            resultSaveFailed = true;
+        }
+        finally
+        {
+            savingResult = false;
         }
     }
 
