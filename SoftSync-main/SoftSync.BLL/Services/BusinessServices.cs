@@ -362,6 +362,16 @@ public class RoadmapService : IRoadmapService
             .Select(group => group.First())
             .ToList();
 
+        // Once the four-week Communication catalog exists, keep older generic
+        // Communication rows in storage for history but do not count or display
+        // them as extra weeks (which previously made Week 1 appear as Week 5).
+        if (items.Any(x => CommunicationCatalogTitles.Contains(x.Title.Trim())))
+        {
+            items = items
+                .Where(x => !IsCommunicationTitle(x.Title) || CommunicationCatalogTitles.Contains(x.Title.Trim()))
+                .ToList();
+        }
+
         return new RoadmapDto
         {
             UserId = userId,
@@ -401,6 +411,17 @@ public class RoadmapService : IRoadmapService
 
         return string.Empty;
     }
+
+    private static bool IsCommunicationTitle(string title)
+        => RoadmapSkillAliases[0].Aliases.Any(alias => title.Contains(alias, StringComparison.OrdinalIgnoreCase));
+
+    private static readonly HashSet<string> CommunicationCatalogTitles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Tuần 1 - Nền tảng giao tiếp",
+        "Tuần 2 - Lắng nghe chủ động",
+        "Tuần 3 - Phản hồi xây dựng",
+        "Tuần 4 - Giao tiếp nâng cao"
+    };
 
     private static readonly (string SkillName, string[] Aliases)[] RoadmapSkillAliases =
     {

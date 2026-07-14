@@ -77,6 +77,18 @@ public class FakeAiRoadmapService : IAiRoadmapService
         foreach (var skill in weakSkills)
         {
             var vi = ToVietnameseSkillName(skill);
+            if (skill.Equals("Communication", StringComparison.OrdinalIgnoreCase))
+            {
+                items.AddRange(new[]
+                {
+                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 1 - Nền tảng giao tiếp", Description = "Hiểu mô hình giao tiếp hai chiều, các thành phần cơ bản và nguyên tắc giao tiếp hiệu quả." },
+                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 2 - Lắng nghe chủ động", Description = "Phân biệt nghe và lắng nghe; rèn sự tập trung, thấu cảm, xác nhận và đặt câu hỏi làm rõ." },
+                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 3 - Phản hồi xây dựng", Description = "Phản hồi tôn trọng, kiểm soát cảm xúc, tập trung vào vấn đề và đề xuất giải pháp phù hợp." },
+                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 4 - Giao tiếp nâng cao", Description = "Tổng hợp kỹ năng giao tiếp và vận dụng trong các tình huống học tập, làm việc thực tế." }
+                });
+                continue;
+            }
+
             items.Add(new RoadmapItemDto
             {
                 WeekNumber = week++,

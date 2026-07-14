@@ -67,15 +67,7 @@
  private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
  private sealed record LearningModule(string Type,string NameEn,string NameVi,string Route);
  private sealed record LearningTrack(string NameEn,string NameVi,string Icon,string SummaryEn,string SummaryVi,string[] Keys,List<LearningModule> Modules);
- private static readonly List<LearningTrack> Tracks=
- [
-  new("Time Management","Quản lý thời gian","bi-clock-history","4 videos · 1 quiz · 5 practical games","4 video · 1 quiz · 5 game thực hành",["Time","thời gian"],
-  [new("Video","Foundation lesson","Bài giảng nền tảng","/time-management-lesson"),new("Quiz","20-question knowledge check","Trắc nghiệm 20 câu","/time-management-quiz"),new("Game","My Timetable","Thời khóa biểu cá nhân","/time-management-games/0"),new("Video","Priorities & adaptation","Ưu tiên & thích ứng","/time-management-lesson-2"),new("Game","Inbox Rush","Inbox Rush","/time-management-inbox-rush"),new("Video","Eisenhower Matrix","Ma trận Eisenhower","/time-management-lesson-3"),new("Game","Four Task Boxes","4 Ô Việc","/time-management-four-boxes"),new("Video","Advanced lesson","Bài giảng nâng cao","/time-management-lesson-4"),new("Game","Priority Sort","Sắp xếp ưu tiên","/time-management-games/1"),new("Game","Eisenhower practice","Thực hành Eisenhower","/time-management-games/2")]),
-  new("Communication","Giao tiếp","bi-chat-heart","4 videos · 2 quizzes · 1 voice game","4 video · 2 quiz · 1 game giọng nói",["Communication","Giao tiếp"],
-  [new("Video","Communication foundation","Nền tảng giao tiếp","/communication-lesson"),new("Quiz","Knowledge quiz","Quiz kiến thức","/communication-quiz"),new("Video","Scenario communication","Giao tiếp tình huống","/communication-lesson-2"),new("Quiz","Role-play simulation","Mô phỏng hội thoại","/communication-roleplay"),new("Video","Paralanguage","Ngôn ngữ cận lời","/communication-lesson-3"),new("Game","Voice Lab","Luyện giọng nói","/communication-voice-practice"),new("Video","Advanced communication","Giao tiếp nâng cao","/communication-lesson-4")]),
-  new("Critical Thinking","Tư duy phản biện","bi-lightbulb","6 curriculum lessons across 3 levels","6 bài học trong 3 cấp độ",["Critical","phản biện"],
-  [new("Lesson","Fact vs. opinion","Sự thật và ý kiến","/roadmap"),new("Lesson","Logical fallacies","Ngụy biện logic","/roadmap"),new("Lesson","Lateral reading","Đọc ngang","/roadmap"),new("Lesson","Confirmation bias","Thiên kiến xác nhận","/roadmap"),new("Lesson","Five Whys","5 Whys","/roadmap"),new("Lesson","Source evaluation","Đánh giá nguồn tin","/roadmap")])
- ];
+ private static readonly List<LearningTrack> Tracks = [];
 }
 
 <style>
