@@ -169,6 +169,8 @@ public class RoadmapItem
     public string LastLearningStep { get; set; } = "video";
     /// <summary>JSON history of every quiz submission, including answers, score and timestamp.</summary>
     public string QuizHistoryJson { get; set; } = "[]";
+    /// <summary>JSON history of three-turn communication role-play attempts.</summary>
+    public string RoleplayHistoryJson { get; set; } = "[]";
     public bool IsCompleted { get; set; }
 }
 

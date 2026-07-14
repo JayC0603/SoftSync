@@ -58,6 +58,7 @@ public interface IRoadmapService
     Task<bool> SaveLearningStepAsync(int itemId, int userId, string step);
     Task<bool> SaveQuizAttemptAsync(int itemId, int userId, RoadmapQuizAttemptDto attempt);
     Task<IReadOnlyList<RoadmapQuizAttemptDto>> GetQuizHistoryAsync(int itemId, int userId);
+    Task<bool> SaveRoleplayAttemptAsync(int itemId, int userId, RoadmapRoleplayAttemptDto attempt);
 }
 
 public interface IProgressService

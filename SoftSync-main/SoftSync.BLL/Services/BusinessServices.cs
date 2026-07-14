@@ -398,6 +398,7 @@ public class RoadmapService : IRoadmapService
                 ReflectionText = i.ReflectionText ?? string.Empty,
                 LastLearningStep = i.LastLearningStep,
                 QuizHistory = DeserializeQuizHistory(i.QuizHistoryJson),
+                RoleplayHistory = DeserializeRoleplayHistory(i.RoleplayHistoryJson),
                 IsCompleted = i.IsCompleted
             }).ToList()
         };
@@ -581,6 +582,31 @@ public class RoadmapService : IRoadmapService
     {
         if (string.IsNullOrWhiteSpace(json)) return [];
         try { return JsonSerializer.Deserialize<List<RoadmapQuizAttemptDto>>(json) ?? []; }
+        catch (JsonException) { return []; }
+    }
+
+    public async Task<bool> SaveRoleplayAttemptAsync(int itemId, int userId, RoadmapRoleplayAttemptDto attempt)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.PracticeCompletedAtUtc.HasValue || attempt.UserMessages.Count != 3
+            || attempt.TotalScore < 0 || attempt.TotalScore > 10)
+            return false;
+        var history = DeserializeRoleplayHistory(item.RoleplayHistoryJson);
+        attempt.AttemptNumber = history.Count + 1;
+        attempt.SubmittedAtUtc = DateTime.UtcNow;
+        history.Add(attempt);
+        item.RoleplayHistoryJson = JsonSerializer.Serialize(history);
+        item.ScenarioCompletedAtUtc ??= attempt.SubmittedAtUtc;
+        item.LastLearningStep = "reflection";
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
+    }
+
+    private static List<RoadmapRoleplayAttemptDto> DeserializeRoleplayHistory(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try { return JsonSerializer.Deserialize<List<RoadmapRoleplayAttemptDto>>(json) ?? []; }
         catch (JsonException) { return []; }
     }
 

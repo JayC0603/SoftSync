@@ -87,6 +87,7 @@ public class RoadmapItemDto
     public string LastLearningStep { get; set; } = "video";
     public bool IsCompleted { get; set; }
     public List<RoadmapQuizAttemptDto> QuizHistory { get; set; } = new();
+    public List<RoadmapRoleplayAttemptDto> RoleplayHistory { get; set; } = new();
 }
 
 public class RoadmapQuizAttemptDto
@@ -96,6 +97,21 @@ public class RoadmapQuizAttemptDto
     public int Score { get; set; }
     public int TotalQuestions { get; set; }
     public bool Passed { get; set; }
+    public DateTime SubmittedAtUtc { get; set; }
+}
+
+public class RoadmapRoleplayAttemptDto
+{
+    public int AttemptNumber { get; set; }
+    public int ScenarioId { get; set; }
+    public List<string> UserMessages { get; set; } = new();
+    public List<string> AiMessages { get; set; } = new();
+    public double EmotionalIntelligenceScore { get; set; }
+    public double ActiveListeningScore { get; set; }
+    public double IStatementScore { get; set; }
+    public double SolutionScore { get; set; }
+    public double TotalScore { get; set; }
+    public string Feedback { get; set; } = string.Empty;
     public DateTime SubmittedAtUtc { get; set; }
 }
 
