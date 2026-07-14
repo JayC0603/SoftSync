@@ -155,51 +155,51 @@
                                                 </div>
                                                 break;
                                             case ContentTab.Script:
-                                                @if (IsCommunicationVideoOne)
+                                                @if (IsTimeManagementVideoOne)
                                                 {
-                                                    <article class="pr-script-document" lang="vi">
+                                                    <article class="pr-script-document" lang="@(L.Current == AppLanguage.Vi ? "vi" : "en")">
                                                         <header>
                                                             <span><i class="bi bi-file-earmark-text-fill"></i></span>
                                                             <div>
                                                                 <small>VIDEO 1 · SCRIPT</small>
-                                                                <h3>Giới thiệu về kỹ năng giao tiếp</h3>
+                                                                <h3>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h3>
                                                             </div>
                                                         </header>
 
                                                         <section>
-                                                            <h4><span>1</span> Giao tiếp là “con đường hai chiều”</h4>
-                                                            <p>Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Một quá trình giao tiếp cơ bản bao gồm:</p>
+                                                            <h4><span>1</span> @Tx("Communication is a two-way street", "Giao tiếp là “con đường hai chiều”")</h4>
+                                                            <p>@Tx("Effective communication is not only about sending a message, but also receiving feedback. A basic communication process includes:", "Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Một quá trình giao tiếp cơ bản bao gồm:")</p>
                                                             <ul>
-                                                                <li><strong>Người gửi:</strong> Người tạo ra và truyền đạt thông điệp.</li>
-                                                                <li><strong>Thông điệp:</strong> Nội dung, ý nghĩa bạn muốn truyền tải qua lời nói, chữ viết hoặc cử chỉ.</li>
-                                                                <li><strong>Kênh truyền tải:</strong> Cách thức thông điệp được gửi đi như nói trực tiếp, email, điện thoại hoặc mạng xã hội.</li>
-                                                                <li><strong>Người nhận:</strong> Người tiếp nhận và giải mã thông điệp đó.</li>
-                                                                <li><strong>Phản hồi:</strong> Sự hồi đáp của người nhận giúp người gửi biết thông điệp đã được hiểu đúng hay chưa.</li>
+                                                                <li><strong>@Tx("Sender:", "Người gửi:")</strong> @Tx("The person who creates and delivers the message.", "Người tạo ra và truyền đạt thông điệp.")</li>
+                                                                <li><strong>@Tx("Message:", "Thông điệp:")</strong> @Tx("The content and meaning conveyed through speech, writing, or gestures.", "Nội dung, ý nghĩa bạn muốn truyền tải qua lời nói, chữ viết hoặc cử chỉ.")</li>
+                                                                <li><strong>@Tx("Channel:", "Kênh truyền tải:")</strong> @Tx("How the message is delivered, such as face-to-face conversation, email, telephone, or social media.", "Cách thức thông điệp được gửi đi như nói trực tiếp, email, điện thoại hoặc mạng xã hội.")</li>
+                                                                <li><strong>@Tx("Receiver:", "Người nhận:")</strong> @Tx("The person who receives and decodes the message.", "Người tiếp nhận và giải mã thông điệp đó.")</li>
+                                                                <li><strong>@Tx("Feedback:", "Phản hồi:")</strong> @Tx("The receiver's response, which helps the sender know whether the message was understood correctly.", "Sự hồi đáp của người nhận giúp người gửi biết thông điệp đã được hiểu đúng hay chưa.")</li>
                                                             </ul>
                                                         </section>
 
                                                         <section>
-                                                            <h4><span>2</span> Các kỹ năng then chốt cho sinh viên</h4>
+                                                            <h4><span>2</span> @Tx("Essential skills for students", "Các kỹ năng then chốt cho sinh viên")</h4>
                                                             <ul>
-                                                                <li><strong>Lắng nghe chủ động (Active Listening):</strong> Đây là kỹ năng quan trọng nhất. Đừng chỉ “nghe” thấy âm thanh; hãy tập trung hoàn toàn, không ngắt lời và xác nhận lại những gì bạn đã nghe để tránh hiểu lầm.</li>
-                                                                <li><strong>Giao tiếp phi ngôn ngữ:</strong> Ngay cả khi im lặng, bạn vẫn đang giao tiếp thông qua ánh mắt, điệu bộ, trang phục và tư thế ngồi. Ngôn ngữ cơ thể thường có sức nặng hơn cả lời nói.</li>
-                                                                <li><strong>Quy tắc ứng xử mạng (Netiquette):</strong> Trong môi trường học thuật, hãy giữ sự chuyên nghiệp khi viết email cho giảng viên: dùng câu chữ hoàn chỉnh, tiêu đề rõ ràng và lời chào trang trọng.</li>
+                                                                <li><strong>@Tx("Active Listening:", "Lắng nghe chủ động (Active Listening):")</strong> @Tx("This is the most important skill. Do not merely hear sounds; give your full attention, avoid interrupting, and confirm what you heard to prevent misunderstandings.", "Đây là kỹ năng quan trọng nhất. Đừng chỉ “nghe” thấy âm thanh; hãy tập trung hoàn toàn, không ngắt lời và xác nhận lại những gì bạn đã nghe để tránh hiểu lầm.")</li>
+                                                                <li><strong>@Tx("Nonverbal communication:", "Giao tiếp phi ngôn ngữ:")</strong> @Tx("Even in silence, you communicate through eye contact, gestures, clothing, and posture. Body language often carries more weight than words.", "Ngay cả khi im lặng, bạn vẫn đang giao tiếp thông qua ánh mắt, điệu bộ, trang phục và tư thế ngồi. Ngôn ngữ cơ thể thường có sức nặng hơn cả lời nói.")</li>
+                                                                <li><strong>@Tx("Netiquette:", "Quy tắc ứng xử mạng (Netiquette):")</strong> @Tx("In an academic setting, keep emails to lecturers professional by using complete sentences, a clear subject line, and a formal greeting.", "Trong môi trường học thuật, hãy giữ sự chuyên nghiệp khi viết email cho giảng viên: dùng câu chữ hoàn chỉnh, tiêu đề rõ ràng và lời chào trang trọng.")</li>
                                                             </ul>
                                                         </section>
 
                                                         <section>
-                                                            <h4><span>3</span> Bí quyết để giao tiếp thành công</h4>
+                                                            <h4><span>3</span> @Tx("Tips for successful communication", "Bí quyết để giao tiếp thành công")</h4>
                                                             <ul>
-                                                                <li><strong>Luôn chuẩn bị kỹ:</strong> Trước một buổi thuyết trình hay cuộc gặp quan trọng, hãy sắp xếp ý tưởng một cách logic và rõ ràng.</li>
-                                                                <li><strong>Thấu hiểu bối cảnh:</strong> Cách bạn nói chuyện với bạn bè tại căng tin sẽ khác hoàn toàn với cách bạn thảo luận trong lớp học. Một người giao tiếp giỏi luôn biết điều chỉnh phong cách phù hợp với đối tượng và tình huống.</li>
-                                                                <li><strong>Giao tiếp có đạo đức:</strong> Luôn dựa trên sự tôn trọng, trung thực và công bằng với người nghe. Đừng đưa ra những thông tin sai lệch hoặc gây tổn thương người khác.</li>
-                                                                <li><strong>Sử dụng ngôn từ đơn giản:</strong> Hãy chọn từ ngữ chính xác, dễ hiểu và tránh lạm dụng biệt ngữ (jargon) hoặc từ lóng nếu người nghe không quen thuộc với chúng.</li>
+                                                                <li><strong>@Tx("Prepare carefully:", "Luôn chuẩn bị kỹ:")</strong> @Tx("Before a presentation or important meeting, organize your ideas logically and clearly.", "Trước một buổi thuyết trình hay cuộc gặp quan trọng, hãy sắp xếp ý tưởng một cách logic và rõ ràng.")</li>
+                                                                <li><strong>@Tx("Understand the context:", "Thấu hiểu bối cảnh:")</strong> @Tx("Talking with friends in the cafeteria is very different from participating in a classroom discussion. A strong communicator adapts their style to the audience and situation.", "Cách bạn nói chuyện với bạn bè tại căng tin sẽ khác hoàn toàn với cách bạn thảo luận trong lớp học. Một người giao tiếp giỏi luôn biết điều chỉnh phong cách phù hợp với đối tượng và tình huống.")</li>
+                                                                <li><strong>@Tx("Communicate ethically:", "Giao tiếp có đạo đức:")</strong> @Tx("Base communication on respect, honesty, and fairness. Do not share misleading information or content that may harm others.", "Luôn dựa trên sự tôn trọng, trung thực và công bằng với người nghe. Đừng đưa ra những thông tin sai lệch hoặc gây tổn thương người khác.")</li>
+                                                                <li><strong>@Tx("Use simple language:", "Sử dụng ngôn từ đơn giản:")</strong> @Tx("Choose precise, easy-to-understand words and avoid excessive jargon or slang when the listener may not know it.", "Hãy chọn từ ngữ chính xác, dễ hiểu và tránh lạm dụng biệt ngữ (jargon) hoặc từ lóng nếu người nghe không quen thuộc với chúng.")</li>
                                                             </ul>
                                                         </section>
 
                                                         <footer>
                                                             <i class="bi bi-lightbulb-fill"></i>
-                                                            <p>Việc rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Khi bạn giao tiếp tốt, bạn không chỉ học tập hiệu quả hơn mà còn tạo được ấn tượng chuyên nghiệp trong mắt nhà tuyển dụng tương lai.</p>
+                                                            <p>@Tx("Developing communication skills is a long journey that requires patience and self-adjustment. Strong communication helps you learn more effectively and make a professional impression on future employers.", "Việc rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Khi bạn giao tiếp tốt, bạn không chỉ học tập hiệu quả hơn mà còn tạo được ấn tượng chuyên nghiệp trong mắt nhà tuyển dụng tương lai.")</p>
                                                         </footer>
                                                     </article>
                                                 }
@@ -336,7 +336,7 @@
     private string GoalLabel => ResolveGoalLabel(user?.Goal);
     private bool CanOpenVideo => !string.IsNullOrWhiteSpace(VideoRoute(SelectedItem));
     private bool CanOpenPractice => !string.IsNullOrWhiteSpace(PracticeRoute(SelectedItem));
-    private bool IsCommunicationVideoOne => SkillKey(SelectedItem) == "communication" && SkillLessonOrdinal(SelectedItem) == 1;
+    private bool IsTimeManagementVideoOne => SkillKey(SelectedItem) == "time" && SkillLessonOrdinal(SelectedItem) == 1;
 
     private string SelectedRecommendation => AssessmentPercent(SelectedItem) > 0
         ? Tx($"Recommended because your {SelectedSkillName} assessment is {AssessmentPercent(SelectedItem)}%.", $"Đề xuất vì điểm {SelectedSkillName} của bạn đang ở mức {AssessmentPercent(SelectedItem)}%.")
