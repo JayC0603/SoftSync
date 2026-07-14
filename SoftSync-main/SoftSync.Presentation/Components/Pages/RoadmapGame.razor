@@ -23,17 +23,7 @@
             <div class="spinner-border text-primary" role="status"></div>
         </div>
     }
-    else if (item.WeekNumber != 1)
-    {
-        <div class="ss-card ss-glass-interactive tw:p-10 tw:text-center game-empty-state">
-            <div class="game-empty-badge">Game 1</div>
-            <h2 class="tw:fw-bold tw:mt-3">Chỉ khả dụng cho Week 1</h2>
-            <p class="text-muted tw:mb-0">
-                Hiện tại bài game lý thuyết này chỉ mở cho Week 1 của từng kỹ năng.
-            </p>
-        </div>
-    }
-    else if (item.IsCompleted)
+    else if (item.IsPracticeCompleted)
     {
         <div class="ss-card ss-glass-interactive tw:p-12 game-complete-shell">
             <div class="game-complete-icon">
@@ -41,9 +31,9 @@
             </div>
             <div class="game-complete-copy">
                 <div class="game-empty-badge">Game 1</div>
-                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">Bạn đã hoàn thành Game 1</h2>
+                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">Bạn đã hoàn thành bài luyện tập</h2>
                 <p class="text-muted tw:mb-0">
-                    Game 1 đã được khóa lại để giữ đúng lộ trình. Bạn có thể quay về Roadmap và tiếp tục Week tiếp theo.
+                    Kết quả đã được lưu. Hoàn thành cả video để tuần học chuyển sang tích xanh.
                 </p>
             </div>
             <div class="tw:mt-4">
@@ -196,7 +186,7 @@
                         <div class="result-percent">@ScorePercent%</div>
                         <div class="@(ScorePercent >= 60 ? "text-success" : "text-danger") tw:mb-4">
                             @(ScorePercent >= 60
-                                ? $"Đạt yêu cầu — bài học {session.SkillName} đã được hoàn thành."
+                                ? $"Đạt yêu cầu — kết quả {session.SkillName} đã được lưu."
                                 : "Chưa đạt 60% — hãy làm lại để hoàn thành bài học.")
                         </div>
 
@@ -256,9 +246,6 @@
             Nav.NavigateTo($"/roadmap/{UserId}", true);
             return;
         }
-
-        if (item.WeekNumber != 1)
-            return;
 
         await LoadSessionAsync();
     }
@@ -386,7 +373,15 @@
 
         submitted = true;
         if (ScorePercent >= 60)
+        {
             await RoadmapService.MarkCompleteAsync(ItemId, UserId);
+            if (item is not null)
+            {
+                item.IsPracticeCompleted = true;
+                item.PracticeCompletedAtUtc = DateTime.UtcNow;
+                item.IsCompleted = item.IsVideoCompleted;
+            }
+        }
     }
 
     private async Task RestartAsync()

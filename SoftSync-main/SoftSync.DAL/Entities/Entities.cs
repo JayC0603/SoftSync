@@ -151,6 +151,10 @@ public class RoadmapItem
     public string Title { get; set; } = string.Empty;
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
+    /// <summary>Set when the learner reaches the end of the linked video.</summary>
+    public DateTime? VideoCompletedAtUtc { get; set; }
+    /// <summary>Set when the learner passes the linked quiz/practice activity.</summary>
+    public DateTime? PracticeCompletedAtUtc { get; set; }
     public bool IsCompleted { get; set; }
 }
 

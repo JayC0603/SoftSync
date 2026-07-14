@@ -100,7 +100,7 @@
                                 <button class="pr-module-summary" @onclick="() => ToggleVideoPanel()">
                                     <span class="pr-module-icon"><i class="bi bi-play-fill"></i></span>
                                     <span class="pr-module-copy"><b>@Tx("Video: Core lesson", "Video: Bài học trọng tâm")</b><small>12 @Tx("minutes", "phút")</small></span>
-                                    @if (SelectedItem.IsCompleted)
+                                    @if (SelectedItem.IsVideoCompleted)
                                     {
                                         <i class="bi bi-check-circle-fill pr-done"></i>
                                     }
@@ -150,8 +150,8 @@
                             <article class="pr-module @ModuleState(1)">
                                 <span class="pr-module-icon"><i class="bi bi-check2"></i></span>
                                 <span class="pr-module-copy"><b>@Tx("Quick knowledge check", "Kiểm tra nhanh")</b><small>5 @Tx("minutes", "phút")</small></span>
-                                @if (SelectedItem.IsCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
-                                else if (selectedIndex == ActiveIndex && CanOpenPractice) { <button class="pr-continue" @onclick="OpenPractice">@Tx("Start", "Bắt đầu")</button> }
+                                @if (SelectedItem.IsPracticeCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
+                                else if (selectedIndex == ActiveIndex && SelectedItem.IsVideoCompleted && CanOpenPractice) { <button class="pr-continue" @onclick="OpenPractice">@Tx("Start", "Bắt đầu")</button> }
                                 else { <i class="bi bi-lock-fill pr-lock"></i> }
                             </article>
 
@@ -321,9 +321,13 @@
 
     private string ModuleState(int moduleIndex)
     {
-        if (SelectedItem.IsCompleted) return "done";
         if (selectedIndex > ActiveIndex) return "locked";
-        return moduleIndex == 0 ? "current" : "locked";
+        return moduleIndex switch
+        {
+            0 => SelectedItem.IsVideoCompleted ? "done" : "current",
+            1 => SelectedItem.IsPracticeCompleted ? "done" : SelectedItem.IsVideoCompleted ? "current" : "locked",
+            _ => SelectedItem.IsCompleted ? "done" : "locked"
+        };
     }
 
     private string SkillDisplayName(RoadmapItemDto item)
@@ -367,32 +371,20 @@
         return goal.StartsWith("wizard.goal.", StringComparison.OrdinalIgnoreCase) ? L[goal] : goal;
     }
 
-    private int SkillOrdinal(RoadmapItemDto item)
-    {
-        var key = SkillKey(item);
-        return items.Where(x => SkillKey(x) == key).TakeWhile(x => x.Id != item.Id).Count();
-    }
-
     private string VideoRoute(RoadmapItemDto item)
     {
-        var ordinal = Math.Clamp(SkillOrdinal(item), 0, 3);
         return SkillKey(item) switch
         {
-            "time" => new[] { "/time-management-lesson", "/time-management-lesson-2", "/time-management-lesson-3", "/time-management-lesson-4" }[ordinal],
-            "communication" => new[] { "/communication-lesson", "/communication-lesson-2", "/communication-lesson-3", "/communication-lesson-4" }[ordinal],
+            "time" or "communication" => $"/roadmap/lecture/{UserId}/{item.Id}",
             _ => string.Empty
         };
     }
 
     private string PracticeRoute(RoadmapItemDto item)
     {
-        var ordinal = SkillOrdinal(item);
         return SkillKey(item) switch
         {
-            "time" when ordinal == 0 => "/time-management-quiz",
-            "time" => "/time-management-inbox-rush",
-            "communication" when ordinal == 0 => "/communication-quiz",
-            "communication" => "/communication-roleplay",
+            "time" or "communication" or "critical" => $"/roadmap/game/{UserId}/{item.Id}",
             _ => string.Empty
         };
     }

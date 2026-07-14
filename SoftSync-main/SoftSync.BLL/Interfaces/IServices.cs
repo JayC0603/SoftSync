@@ -51,6 +51,7 @@ public class AssessmentOptionDto
 public interface IRoadmapService
 {
     Task<RoadmapDto> GetUserRoadmapAsync(int userId);
+    Task<bool> MarkVideoCompleteAsync(int itemId, int userId);
     Task<bool> MarkCompleteAsync(int itemId, int userId);
 }
 

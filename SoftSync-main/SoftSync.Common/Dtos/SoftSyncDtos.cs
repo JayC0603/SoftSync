@@ -73,6 +73,10 @@ public class RoadmapItemDto
     public string SkillName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public bool IsVideoCompleted { get; set; }
+    public bool IsPracticeCompleted { get; set; }
+    public DateTime? VideoCompletedAtUtc { get; set; }
+    public DateTime? PracticeCompletedAtUtc { get; set; }
     public bool IsCompleted { get; set; }
 }
 

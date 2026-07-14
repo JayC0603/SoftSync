@@ -317,6 +317,12 @@ public class RoadmapService : IRoadmapService
                 SkillName = ResolveRoadmapSkillName(i.Title),
                 Title = i.Title,
                 Description = i.Description,
+                // Existing completed rows predate granular activity tracking;
+                // treat them as fully complete so their green ticks are preserved.
+                IsVideoCompleted = i.IsCompleted || i.VideoCompletedAtUtc.HasValue,
+                IsPracticeCompleted = i.IsCompleted || i.PracticeCompletedAtUtc.HasValue,
+                VideoCompletedAtUtc = i.VideoCompletedAtUtc,
+                PracticeCompletedAtUtc = i.PracticeCompletedAtUtc,
                 IsCompleted = i.IsCompleted
             }).ToList()
         };
@@ -377,17 +383,47 @@ public class RoadmapService : IRoadmapService
             .ToList();
     }
 
-    public async Task<bool> MarkCompleteAsync(int itemId, int userId)
+    public Task<bool> MarkVideoCompleteAsync(int itemId, int userId)
+        => MarkActivityCompleteAsync(itemId, userId, isVideo: true);
+
+    /// <summary>
+    /// Marks the required practice as passed. Kept under the existing method name
+    /// so current games continue to call the same service contract.
+    /// </summary>
+    public Task<bool> MarkCompleteAsync(int itemId, int userId)
+        => MarkActivityCompleteAsync(itemId, userId, isVideo: false);
+
+    private async Task<bool> MarkActivityCompleteAsync(int itemId, int userId, bool isVideo)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
         if (item is null || item.UserId != userId)
             return false;
 
-        if (!item.IsCompleted)
+        var now = DateTime.UtcNow;
+        var activityChanged = false;
+        if (isVideo && !item.VideoCompletedAtUtc.HasValue)
         {
+            item.VideoCompletedAtUtc = now;
+            activityChanged = true;
+        }
+        else if (!isVideo && !item.PracticeCompletedAtUtc.HasValue)
+        {
+            item.PracticeCompletedAtUtc = now;
+            activityChanged = true;
+        }
+
+        var becameComplete = !item.IsCompleted
+            && item.VideoCompletedAtUtc.HasValue
+            && item.PracticeCompletedAtUtc.HasValue;
+
+        if (becameComplete)
             item.IsCompleted = true;
+
+        if (activityChanged || becameComplete)
             await _roadmapRepo.SaveChangesAsync();
 
+        if (becameComplete)
+        {
             // Award XP once, only on the transition to completed.
             var user = await _userRepo.GetByIdAsync(item.UserId);
             if (user != null)

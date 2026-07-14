@@ -4,10 +4,13 @@
 @page "/communication-lesson-3"
 @page "/communication-lesson-4"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
 <div class="max-900 mx-auto">
@@ -34,22 +37,36 @@
                 <span class="badge bg-primary">@item.SkillName</span>
             </div>
 
-            <div class="lecture-video tw:mb-4">
-                <video controls preload="metadata" playsinline poster="/images/background-softsync.png">
-                    <source src="@VideoSource" type="video/mp4" />
-                    Trình duyệt của bạn không hỗ trợ phát video HTML5.
-                </video>
-                <div class="lecture-video-caption">
-                    <span><i class="bi bi-play-circle-fill"></i> VIDEO BÀI GIẢNG</span>
-                    <div><strong>Kỹ năng Giao tiếp · Bài @DisplayWeekNumber</strong><small>Video hướng dẫn từ Mentor SoftSync</small></div>
+            @if (HasVideo)
+            {
+                <div class="lecture-video tw:mb-4">
+                    <video controls preload="metadata" playsinline poster="/images/background-softsync.png" @onended="CompleteVideoAsync">
+                        <source src="@VideoSource" type="video/mp4" />
+                        Trình duyệt của bạn không hỗ trợ phát video HTML5.
+                    </video>
+                    <div class="lecture-video-caption">
+                        <span><i class="bi bi-play-circle-fill"></i> VIDEO BÀI GIẢNG</span>
+                        <div><strong>@item.SkillName · Bài @DisplayWeekNumber</strong><small>Video hướng dẫn từ Mentor SoftSync</small></div>
+                    </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="lecture-placeholder tw:mb-4"><i class="bi bi-camera-video-off tw:me-2"></i> Video đang được cập nhật</div>
+            }
 
             @if (item.IsCompleted)
             {
                 <div class="lecture-complete lecture-complete--compact tw:mb-4">
                     <i class="bi bi-patch-check-fill"></i>
-                    <div><strong>Bạn đã hoàn thành Game 1</strong><span>Bạn vẫn có thể xem lại video bài giảng bất cứ lúc nào.</span></div>
+                    <div><strong>Tuần học đã hoàn thành</strong><span>Video và bài luyện tập đã được lưu. Bạn vẫn có thể xem lại bất cứ lúc nào.</span></div>
+                </div>
+            }
+            else if (item.IsVideoCompleted)
+            {
+                <div class="lecture-complete lecture-complete--compact tw:mb-4">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div><strong>Đã xem xong video</strong><span>Kết quả đã được lưu và video đã chuyển sang tích xanh trên Roadmap.</span></div>
                 </div>
             }
 
@@ -58,13 +75,13 @@
             </p>
 
             <div class="tw:mt-8 tw:text-end">
-                @if (item.IsCompleted)
+                @if (item.IsPracticeCompleted)
                 {
                     <button class="ss-btn-primary tw:px-8 tw:py-3" disabled style="opacity:.65; cursor:not-allowed;">
-                        Đã hoàn thành Game 1
+                        Đã hoàn thành bài luyện tập
                     </button>
                 }
-                else if (item.WeekNumber == 1 || IsCommunicationLessonTwo || IsCommunicationLessonThree)
+                else if (UserId > 0 || IsCommunicationLessonTwo || IsCommunicationLessonThree || !IsCommunicationLessonFour)
                 {
                     <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="GoToGame">
                         @L["roadmap.continueToGame"] <i class="bi bi-arrow-right tw:ms-2"></i>
@@ -86,6 +103,7 @@
     [Parameter] public int ItemId { get; set; }
 
     private RoadmapItemDto? item;
+    private List<RoadmapItemDto> roadmapItems = [];
     private bool IsCommunicationLessonTwo => Nav.Uri.Contains("/communication-lesson-2", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonFour => Nav.Uri.Contains("/communication-lesson-4", StringComparison.OrdinalIgnoreCase);
@@ -93,7 +111,10 @@
     private string VideoSource => IsCommunicationLessonFour
         ? "/videos/communication-mentor-lesson-4.mp4"
         : IsCommunicationLessonThree ? "/videos/communication-mentor-lesson-3.mp4"
-        : IsCommunicationLessonTwo ? "/videos/communication-mentor-lesson-2.mp4" : "/videos/communication-mentor-lesson-1.mp4";
+        : IsCommunicationLessonTwo ? "/videos/communication-mentor-lesson-2.mp4"
+        : UserId == 0 ? "/videos/communication-mentor-lesson-1.mp4"
+        : PersonalizedVideoSource();
+    private bool HasVideo => !string.IsNullOrWhiteSpace(VideoSource);
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,11 +139,56 @@
             return;
         }
 
+        var signedInUserId = await AuthProvider.GetUserIdAsync();
+        if (signedInUserId <= 0)
+        {
+            Nav.NavigateTo("/Account/Login", true);
+            return;
+        }
+
+        if (UserId != signedInUserId)
+        {
+            Nav.NavigateTo($"/roadmap/{signedInUserId}", true);
+            return;
+        }
+
         var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
-        item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
+        roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+        item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
             Nav.NavigateTo($"/roadmap/{UserId}", true);
     }
+
+    private async Task CompleteVideoAsync()
+    {
+        if (item is null || UserId <= 0 || ItemId <= 0 || item.IsVideoCompleted)
+            return;
+
+        if (await RoadmapService.MarkVideoCompleteAsync(ItemId, UserId))
+        {
+            item.IsVideoCompleted = true;
+            item.VideoCompletedAtUtc = DateTime.UtcNow;
+            item.IsCompleted = item.IsPracticeCompleted;
+        }
+    }
+
+    private string PersonalizedVideoSource()
+    {
+        if (item is null) return string.Empty;
+        var value = $"{item.SkillName} {item.Title}";
+        var sameSkill = roadmapItems.Where(x => SameSkill(x, item)).ToList();
+        var ordinal = Math.Clamp(sameSkill.FindIndex(x => x.Id == item.Id), 0, 3);
+
+        if (value.Contains("Giao tiếp", StringComparison.OrdinalIgnoreCase) || value.Contains("Communication", StringComparison.OrdinalIgnoreCase))
+            return new[] { "/videos/communication-mentor-lesson-1.mp4", "/videos/communication-mentor-lesson-2.mp4", "/videos/communication-mentor-lesson-3.mp4", "/videos/communication-mentor-lesson-4.mp4" }[ordinal];
+        if (value.Contains("Quản lý thời gian", StringComparison.OrdinalIgnoreCase) || value.Contains("Time Management", StringComparison.OrdinalIgnoreCase))
+            return new[] { "/videos/time-management-mentor-lesson.mp4", "/videos/time-management-mentor-lesson-2.mp4", "/videos/time-management-mentor-lesson-3.mp4", "/videos/time-management-mentor-lesson-4.mp4" }[ordinal];
+
+        return string.Empty;
+    }
+
+    private static bool SameSkill(RoadmapItemDto left, RoadmapItemDto right)
+        => string.Equals(left.SkillName, right.SkillName, StringComparison.OrdinalIgnoreCase);
 
     private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
         ? "/communication-voice-practice"
