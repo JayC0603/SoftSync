@@ -563,7 +563,9 @@ public class RoadmapService : IRoadmapService
             .ThenBy(x => x.Id)
             .ToList();
         var index = orderedItems.FindIndex(x => x.Id == item.Id);
-        return index == 0 || index > 0 && orderedItems[index - 1].IsCompleted;
+        // A completed week must always remain reviewable, even when old/imported
+        // roadmap data has an inconsistent previous-week completion flag.
+        return item.IsCompleted || index == 0 || index > 0 && orderedItems[index - 1].IsCompleted;
     }
 
     private async Task<bool> PersistActivityAsync(RoadmapItem item, bool activityChanged)

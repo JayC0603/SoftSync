@@ -269,7 +269,7 @@
             return;
         }
 
-        if (!RoadmapReviewMode.Enabled && CurrentItemIndex > 0
+        if (!RoadmapReviewMode.Enabled && !item.IsCompleted && CurrentItemIndex > 0
             && roadmapItems[CurrentItemIndex - 1].IsCompleted != true)
         {
             Nav.NavigateTo($"/roadmap/{UserId}", true);

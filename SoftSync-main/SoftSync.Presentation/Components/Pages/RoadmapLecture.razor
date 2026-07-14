@@ -157,7 +157,7 @@
             {
                 <div class="lecture-complete lecture-complete--compact tw:mb-4">
                     <i class="bi bi-patch-check-fill"></i>
-                    <div><strong>@Tx("Week completed", "Tuần học đã hoàn thành")</strong><span>@Tx("Your video and practice results are saved. You can review them anytime.", "Video và bài luyện tập đã được lưu. Bạn vẫn có thể xem lại bất cứ lúc nào.")</span></div>
+                    <div><strong>@Tx("Week completed", "Tuần học đã hoàn thành")</strong><span>@Tx("All six learning steps are saved. You can review them anytime.", "Cả 6 bước học đã được lưu. Bạn vẫn có thể xem lại bất cứ lúc nào.")</span></div>
                 </div>
             }
             else if (item.IsVideoCompleted)
@@ -307,7 +307,8 @@
         item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
             Nav.NavigateTo($"/roadmap/{UserId}", true);
-        else if (!RoadmapReviewMode.Enabled && CurrentItemIndex > 0 && PreviousItem?.IsCompleted != true)
+        else if (!RoadmapReviewMode.Enabled && !item.IsCompleted
+            && CurrentItemIndex > 0 && PreviousItem?.IsCompleted != true)
         {
             Nav.NavigateTo($"/roadmap/{UserId}", true);
             return;
