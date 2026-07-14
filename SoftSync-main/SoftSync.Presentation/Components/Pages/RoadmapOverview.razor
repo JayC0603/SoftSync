@@ -184,8 +184,46 @@
     private static int CompletedStepCount(RoadmapItemDto x) => x.IsCompleted ? 6 : (x.IsVideoCompleted ? 1 : 0) + (x.ScriptCompletedAtUtc.HasValue ? 1 : 0) + (x.SummaryCompletedAtUtc.HasValue ? 1 : 0) + (x.IsPracticeCompleted ? 1 : 0) + (x.IsScenarioCompleted ? 1 : 0) + (x.IsReflectionCompleted ? 1 : 0);
     private static int CompletedSteps(RoadmapItemDto x) => CompletedStepCount(x) * 100 / 6;
     private int WeekOrdinal(RoadmapItemDto item) => items.Where(x => SkillKey(x) == SkillKey(item)).ToList().FindIndex(x => x.Id == item.Id) + 1;
-    private string WeekTitle(RoadmapItemDto item, int n) => SkillKey(item) == "communication" ? n switch { 1 => Tx("Communication foundations", "Nền tảng giao tiếp"), 2 => Tx("Active listening", "Lắng nghe chủ động"), 3 => Tx("Constructive feedback", "Phản hồi xây dựng"), 4 => Tx("Advanced communication", "Giao tiếp nâng cao"), _ => item.Title } : string.IsNullOrWhiteSpace(item.Title) ? $"{Tx("Week", "Tuần")} {n}" : item.Title;
-    private string WeekDescription(RoadmapItemDto item) => string.IsNullOrWhiteSpace(item.Description) ? Tx("Learn through video, theory, quiz and practical activities.", "Học qua video, lý thuyết, quiz và các hoạt động thực hành.") : item.Description;
+    private string WeekTitle(RoadmapItemDto item, int n) => SkillKey(item) switch
+    {
+        "communication" => n switch
+        {
+            1 => Tx("Communication foundations", "Nền tảng giao tiếp"),
+            2 => Tx("Active listening", "Lắng nghe chủ động"),
+            3 => Tx("Constructive feedback", "Phản hồi xây dựng"),
+            4 => Tx("Advanced communication", "Giao tiếp nâng cao"),
+            _ => Tx($"Communication · Week {n}", $"Giao tiếp · Tuần {n}")
+        },
+        "time" => n switch
+        {
+            1 => Tx("Time management foundations", "Nền tảng kỹ năng quản lý thời gian"),
+            2 => Tx("Time management practice", "Thực hành kỹ năng quản lý thời gian"),
+            _ => Tx($"Time management · Week {n}", $"Quản lý thời gian · Tuần {n}")
+        },
+        "critical" => n switch
+        {
+            1 => Tx("Critical thinking foundations", "Nền tảng tư duy phản biện"),
+            2 => Tx("Critical thinking practice", "Thực hành tư duy phản biện"),
+            _ => Tx($"Critical thinking · Week {n}", $"Tư duy phản biện · Tuần {n}")
+        },
+        _ => string.IsNullOrWhiteSpace(item.Title) ? $"{Tx("Week", "Tuần")} {n}" : item.Title
+    };
+
+    private string WeekDescription(RoadmapItemDto item) => SkillKey(item) switch
+    {
+        "communication" => Tx(
+            "Build communication skills through video, synchronized theory, quizzes, and realistic practice.",
+            "Rèn kỹ năng giao tiếp qua video, lý thuyết đồng bộ, quiz và tình huống thực tế."),
+        "time" => Tx(
+            "Learn the core principles of time management and practice building sustainable study habits.",
+            "Nắm lý thuyết cốt lõi của kỹ năng quản lý thời gian và luyện tập để hình thành thói quen bền vững."),
+        "critical" => Tx(
+            "Strengthen critical thinking through evidence, structured reasoning, and applied exercises.",
+            "Phát triển tư duy phản biện qua bằng chứng, lập luận có cấu trúc và bài tập ứng dụng."),
+        _ => Tx(
+            "Learn through video, theory, quiz and practical activities.",
+            "Học qua video, lý thuyết, quiz và các hoạt động thực hành.")
+    };
     private static string SkillKey(RoadmapItemDto x) { var v = $"{x.SkillName} {x.Title}".ToLowerInvariant(); if (v.Contains("giao tiếp") || v.Contains("communication")) return "communication"; if (v.Contains("quản lý thời gian") || v.Contains("time management")) return "time"; if (v.Contains("tư duy phản biện") || v.Contains("critical")) return "critical"; return "other"; }
     private static int SkillRank(string key) => key switch { "communication" => 0, "time" => 1, "critical" => 2, _ => 3 };
     private string SkillName(string key) => key switch { "communication" => Tx("Communication", "Giao tiếp"), "time" => Tx("Time management", "Quản lý thời gian"), "critical" => Tx("Critical thinking", "Tư duy phản biện"), _ => Tx("Other skills", "Kỹ năng khác") };
