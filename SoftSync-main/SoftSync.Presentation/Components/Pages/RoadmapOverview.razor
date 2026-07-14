@@ -12,146 +12,203 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
-<PageTitle>@Tx("Your skill roadmap", "Lộ trình kỹ năng của bạn") · SoftSync</PageTitle>
+<PageTitle>@Tx("Roadmap", "Lộ trình") · SoftSync</PageTitle>
 
-<main class="rm-page">
+<main class="coursera-roadmap">
     @if (loading)
     {
-        <div class="rm-state"><span class="rm-spinner"></span>@Tx("Loading your roadmap...", "Đang tải lộ trình...")</div>
+        <div class="loading"><span></span>@Tx("Loading roadmap...", "Đang tải lộ trình...")</div>
     }
     else if (items.Count == 0)
     {
-        <div class="rm-state"><i class="bi bi-map"></i><h1>@Tx("Your roadmap is being prepared", "Lộ trình của bạn đang được chuẩn bị")</h1><button @onclick='() => Nav.NavigateTo($"/assessment/{UserId}")'>@Tx("Take assessment", "Làm bài đánh giá")</button></div>
+        <div class="empty"><i class="bi bi-map"></i><h1>@Tx("Your roadmap is being prepared", "Lộ trình của bạn đang được chuẩn bị")</h1></div>
     }
     else
     {
-        <div class="rm-shell">
-            <header class="rm-hero">
-                <div>
-                    <span>@Tx("PERSONAL LEARNING ROADMAP", "LỘ TRÌNH HỌC CÁ NHÂN")</span>
-                    <h1>@Tx("Your skill roadmap", "Lộ trình kỹ năng của bạn")</h1>
-                    <p>@Tx("Choose the current week and continue exactly where you stopped.", "Chọn tuần đang học và tiếp tục đúng vị trí bạn đã dừng lại.")</p>
+        <aside class="roadmap-sidebar">
+            <section class="overall-card">
+                <h3>@Tx("Overall progress", "Tiến độ tổng thể")</h3>
+                <div class="overall-body">
+                    <div class="progress-ring" style="--value:@OverallPercent"><b>@OverallPercent%</b></div>
+                    <div><span>@Tx("You have completed", "Bạn đã hoàn thành")</span><strong>@CompletedStepsTotal / @(items.Count * 6) @Tx("steps", "bước")</strong></div>
                 </div>
-                <div class="rm-total">
-                    <div><span>@Tx("Overall progress", "Tiến độ tổng thể")</span><b>@OverallPercent%</b></div>
-                    <div class="rm-progress"><i style="width:@OverallPercent%"></i></div>
-                    <small>@CompletedWeeks/@items.Count @Tx("weeks completed", "tuần hoàn thành")</small>
-                </div>
-            </header>
+            </section>
 
-            @if (RoadmapReviewMode.Enabled)
-            {
-                <aside class="rm-review"><i class="bi bi-unlock-fill"></i><div><b>@Tx("Content review mode", "Chế độ kiểm tra nội dung")</b><small>@Tx("The old learning content was removed and is ready to be rebuilt.", "Nội dung học cũ đã được xóa và đang chờ nạp lại.")</small></div></aside>
-            }
+            <section class="xp-card"><i class="bi bi-star-fill"></i><span>@Tx("Current XP", "XP hiện tại")</span><b>@(CompletedStepsTotal * 20) XP</b></section>
+            <h4 class="sidebar-heading">@Tx("YOUR ROADMAP", "ROADMAP CỦA BẠN")</h4>
 
-            <div class="rm-skills">
+            <nav class="skill-tree">
                 @foreach (var group in SkillGroups)
                 {
-                    var key = group.Key;
                     var skillItems = group.ToList();
-                    var skillCompleted = skillItems.Count(x => x.IsCompleted);
-                    var skillPercent = skillItems.Count == 0 ? 0 : skillCompleted * 100 / skillItems.Count;
-                    var skillLocked = IsSkillLocked(key);
-                    <section class="rm-skill @(skillLocked ? "locked" : null)">
-                        <header>
-                            <div class="rm-skill-icon"><i class="@SkillIcon(key)"></i></div>
-                            <div class="rm-skill-title"><span>@Tx("SKILL", "KỸ NĂNG") @(@SkillRank(key) + 1)</span><h2>@SkillName(key)</h2></div>
-                            <div class="rm-skill-progress"><b>@skillCompleted/@skillItems.Count @Tx("weeks", "tuần") · @skillPercent%</b><div><i style="width:@skillPercent%"></i></div></div>
-                            @if (skillLocked) { <i class="bi bi-lock-fill rm-skill-lock"></i> }
-                        </header>
-
-                        @if (!skillLocked || RoadmapReviewMode.Enabled)
+                    var skillLocked = IsSkillLocked(group.Key);
+                    <section class="skill-group @(skillLocked ? "skill-locked" : null)">
+                        <button class="skill-row" @onclick="() => ToggleSkill(group.Key)">
+                            <span class="skill-icon"><i class="@SkillIcon(group.Key)"></i></span>
+                            <b>@SkillName(group.Key)</b>
+                            <small>@skillItems.Count @Tx("weeks", "tuần")</small>
+                            <i class="bi @(Expanded(group.Key) ? "bi-chevron-up" : "bi-chevron-right")"></i>
+                        </button>
+                        @if (Expanded(group.Key))
                         {
-                            <div class="rm-week-list">
+                            <div class="week-tree">
                                 @foreach (var item in skillItems)
                                 {
-                                    var globalIndex = items.IndexOf(item);
+                                    var index = items.IndexOf(item);
                                     var ordinal = WeekOrdinal(item);
-                                    var unlocked = RoadmapReviewMode.Enabled || globalIndex <= ActiveIndex;
-                                    var steps = CompletedSteps(item);
-                                    <article class="rm-week @(item.IsCompleted ? "done" : globalIndex == ActiveIndex ? "current" : !unlocked ? "locked" : null)">
-                                        <span class="rm-week-number">@(item.IsCompleted ? "✓" : ordinal)</span>
-                                        <div class="rm-week-copy"><small>@Tx("WEEK", "TUẦN") @ordinal</small><h3>@WeekTitle(item, ordinal)</h3><p>@steps/6 @Tx("steps", "bước") · @EstimatedMinutes(item) @Tx("minutes", "phút")</p></div>
-                                        <div class="rm-step-dots" aria-label="@steps/6">
-                                            @for (var step = 1; step <= 6; step++) { <i class="@(step <= steps ? "filled" : null)"></i> }
-                                        </div>
-                                        @if (!unlocked)
-                                        {
-                                            <span class="rm-locked-label"><i class="bi bi-lock-fill"></i>@Tx("Locked", "Chưa mở")</span>
-                                        }
-                                        else
-                                        {
-                                            <button class="@(globalIndex == ActiveIndex && !item.IsCompleted ? "primary" : null)" @onclick="() => OpenWeek(item)">@(item.IsCompleted ? Tx("Review", "Xem lại") : steps > 0 ? Tx("Continue", "Tiếp tục") : Tx("Start", "Bắt đầu"))<i class="bi bi-arrow-right"></i></button>
-                                        }
-                                    </article>
+                                    var locked = !RoadmapReviewMode.Enabled && index > ActiveIndex;
+                                    <button class="tree-week @(ReferenceEquals(item, SelectedItem) ? "selected" : null) @(item.IsCompleted ? "done" : null)" disabled="@locked" @onclick="() => SelectWeek(item)">
+                                        <span>@(item.IsCompleted ? "✓" : ordinal)</span>
+                                        <div><b>@Tx("Week", "Tuần") @ordinal</b><small>@WeekTitle(item, ordinal)</small></div>
+                                        <em>@CompletedSteps(item)%</em>
+                                        @if (locked) { <i class="bi bi-lock-fill"></i> }
+                                    </button>
                                 }
                             </div>
                         }
-                        else
-                        {
-                            <div class="rm-skill-gate"><i class="bi bi-lock-fill"></i><span>@Tx("Complete the previous skill to unlock this skill.", "Hoàn thành kỹ năng trước để mở kỹ năng này.")</span></div>
-                        }
                     </section>
                 }
-            </div>
+            </nav>
 
-            <footer class="rm-rule"><i class="bi bi-shield-check"></i><div><b>@Tx("Learn in order, progress with confidence", "Học đúng thứ tự, tiến bộ vững chắc")</b><span>@Tx("Complete Reflection to finish a week. Complete every week to unlock the next skill.", "Hoàn thành Phản tư để kết thúc tuần. Hoàn thành tất cả tuần để mở kỹ năng tiếp theo.")</span></div></footer>
-        </div>
+            <section class="streak"><i class="bi bi-fire"></i><div><small>@Tx("LEARNING STREAK", "CHUỖI NGÀY HỌC")</small><b>7 @Tx("days", "ngày")</b><span>@Tx("Keep up the great work!", "Bạn đang duy trì rất tốt!")</span></div><div class="mascot">🐳</div></section>
+        </aside>
+
+        <section class="week-column">
+            <div class="breadcrumb"><span>Roadmap</span><i class="bi bi-chevron-right"></i><span>@SkillName(SkillKey(SelectedItem))</span><i class="bi bi-chevron-right"></i><b>@Tx("Week", "Tuần") @SelectedOrdinal</b></div>
+            <header class="week-header">
+                <h1>@Tx("Week", "Tuần") @SelectedOrdinal: @WeekTitle(SelectedItem, SelectedOrdinal)</h1>
+                <p>@WeekDescription(SelectedItem)</p>
+            </header>
+            <section class="week-stat">
+                <div><i class="bi bi-bullseye"></i><span>@Tx("Weekly progress", "Tiến độ tuần")<b>@SelectedCompletedSteps / 6</b></span></div>
+                <div><i class="bi bi-clock"></i><span>42 @Tx("minutes", "phút")<small>@Tx("Estimated time", "Thời lượng ước tính")</small></span></div>
+                <div><i class="bi bi-journal-text"></i><span>6<small>@Tx("learning activities", "hoạt động học")</small></span></div>
+                <div class="week-bar"><i style="width:@SelectedPercent%"></i></div>
+            </section>
+
+            <div class="lesson-list">
+                @foreach (var lesson in Lessons)
+                {
+                    var status = LessonStatus(lesson.Step);
+                    <article class="lesson @(lesson.Step == CurrentStep ? "active" : null) @(status == 2 ? "complete" : status == 0 ? "locked" : null)" @onclick="() => SelectStep(lesson.Step)">
+                        <div class="lesson-number">@(status == 2 ? "✓" : lesson.Step.ToString())</div>
+                        <div class="lesson-thumb"><i class="@lesson.Icon"></i><span>@lesson.Time</span></div>
+                        <div class="lesson-copy"><small>@Tx("Lesson", "Bài") @lesson.Step</small><h3>@Tx(lesson.En, lesson.Vi)</h3><p>@Tx(lesson.DescEn, lesson.DescVi)</p></div>
+                        <div class="lesson-action">
+                            @if (status == 2) { <span class="complete-label"><i class="bi bi-check-circle-fill"></i>@Tx("Completed", "Hoàn thành")</span><b>+20 XP</b> }
+                            else if (status == 1) { <button @onclick="OpenSelected" @onclick:stopPropagation="true">@Tx("Continue", "Tiếp tục")</button><b>+30 XP</b> }
+                            else { <span><i class="bi bi-lock-fill"></i>@Tx("Locked", "Chưa mở khóa")</span><b>+30 XP</b> }
+                        </div>
+                    </article>
+                }
+                <article class="weekly-challenge"><i class="bi bi-trophy"></i><div><b>@Tx("Weekly challenge", "Thử thách tuần")</b><span>@Tx("Complete all activities to earn your badge!", "Hoàn thành tất cả bài học để nhận huy hiệu!")</span></div><i class="bi bi-lock-fill"></i><b>+100 XP</b></article>
+            </div>
+        </section>
+
+        <aside class="content-panel">
+            <header><div><small>@Tx("CURRENT ACTIVITY", "HOẠT ĐỘNG HIỆN TẠI")</small><h2>@CurrentLessonTitle</h2></div><button><i class="bi bi-three-dots-vertical"></i></button></header>
+            <div class="stepper">
+                @foreach (var step in Steps)
+                {
+                    var stepStatus = StepStatus(step.Id);
+                    <button class="@(step.Id == CurrentStep ? "active" : null) @(stepStatus == 2 ? "done" : stepStatus == 0 ? "locked" : null)" disabled="@(stepStatus == 0)" @onclick="() => SelectStep(step.Id)">
+                        <span>@(stepStatus == 2 ? "✓" : stepStatus == 0 ? "🔒" : step.Id)</span><small>@Tx(step.En, step.Vi)</small>
+                    </button>
+                }
+            </div>
+            <section class="content-card">
+                <div class="content-tools"><b><i class="@CurrentStepIcon"></i>@CurrentStepTitle</b><div><button><i class="bi bi-file-earmark-pdf"></i> PDF</button><button><i class="bi bi-copy"></i>@Tx("Copy", "Sao chép")</button><button><i class="bi bi-volume-up"></i>@Tx("Listen", "Nghe")</button></div></div>
+                <div class="placeholder-content">
+                    <span><i class="bi bi-journal-plus"></i></span>
+                    <h3>@Tx("Content is ready to be added", "Sẵn sàng nạp nội dung mới")</h3>
+                    <p>@Tx("Add the correct video and theory for this week. The learning flow and lock order are already prepared.", "Hãy nạp đúng video và lý thuyết của tuần này. Luồng học và thứ tự mở khóa đã được chuẩn bị sẵn.")</p>
+                    <div class="summary"><b><i class="bi bi-stars"></i> AI Summary</b><ul><li>@Tx("Content will be summarized after it is added.", "Nội dung sẽ được tóm tắt sau khi nạp.")</li><li>@Tx("Each activity saves the learner's progress.", "Mỗi hoạt động tự lưu tiến độ người học.")</li></ul></div>
+                </div>
+            </section>
+            <div class="content-accordions">
+                @foreach (var step in Steps.Where(x => x.Id > CurrentStep))
+                {
+                    <button disabled="@(StepStatus(step.Id) == 0)"><span><i class="@step.Icon"></i>@step.Id. @Tx(step.En, step.Vi)</span><i class="bi bi-chevron-right"></i></button>
+                }
+            </div>
+            <footer><button @onclick="PreviousStep"><i class="bi bi-arrow-left"></i>@Tx("Previous", "Bài trước")</button><button class="next" @onclick="NextStep">@Tx("Next activity", "Hoạt động tiếp theo")<i class="bi bi-arrow-right"></i></button></footer>
+        </aside>
     }
 </main>
 
 @code {
     [Parameter] public int UserId { get; set; }
     private List<RoadmapItemDto> items = [];
+    private RoadmapItemDto? selected;
     private bool loading = true;
+    private int currentStep = 1;
+    private readonly HashSet<string> expandedSkills = ["communication"];
+    private RoadmapItemDto SelectedItem => selected ?? items[0];
+    private int CurrentStep => currentStep;
     private int CompletedWeeks => items.Count(x => x.IsCompleted);
-    private int OverallPercent => items.Count == 0 ? 0 : CompletedWeeks * 100 / items.Count;
-    private int ActiveIndex { get { var i = items.FindIndex(x => !x.IsCompleted); return i < 0 ? Math.Max(0, items.Count - 1) : i; } }
+    private int CompletedStepsTotal => items.Sum(CompletedStepCount);
+    private int OverallPercent => items.Count == 0 ? 0 : CompletedStepsTotal * 100 / (items.Count * 6);
+    private int ActiveIndex { get { var i = items.FindIndex(x => !x.IsCompleted); return i < 0 ? items.Count - 1 : i; } }
+    private int SelectedOrdinal => WeekOrdinal(SelectedItem);
+    private int SelectedCompletedSteps => CompletedStepCount(SelectedItem);
+    private int SelectedPercent => SelectedCompletedSteps * 100 / 6;
     private IEnumerable<IGrouping<string, RoadmapItemDto>> SkillGroups => items.GroupBy(SkillKey).OrderBy(x => SkillRank(x.Key));
+    private string CurrentLessonTitle { get { var l = Lessons.First(x => x.Step == CurrentStep); return $"{Tx("Lesson", "Bài")} {l.Step}: {Tx(l.En, l.Vi)}"; } }
+    private string CurrentStepTitle { get { var s = Steps.First(x => x.Id == CurrentStep); return Tx(s.En, s.Vi); } }
+    private string CurrentStepIcon => Steps.First(x => x.Id == CurrentStep).Icon;
 
     protected override async Task OnInitializedAsync()
     {
-        var signedInUserId = await AuthProvider.GetUserIdAsync();
-        if (signedInUserId <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
-        if (UserId > 0 && UserId != signedInUserId) { Nav.NavigateTo($"/roadmap/{signedInUserId}", true); return; }
-        UserId = signedInUserId;
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        var id = await AuthProvider.GetUserIdAsync();
+        if (id <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+        UserId = id;
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id);
         items = roadmap.Items.Where(x => !string.IsNullOrWhiteSpace(x.SkillName)).OrderBy(x => SkillRank(SkillKey(x))).ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+        selected = items.Count == 0 ? null : items[Math.Max(0, ActiveIndex)];
+        if (selected is not null) currentStep = Math.Clamp(SelectedCompletedSteps + 1, 1, 6);
         loading = false;
     }
 
-    private void OpenWeek(RoadmapItemDto item) => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{item.Id}");
+    private void SelectWeek(RoadmapItemDto item) { selected = item; currentStep = Math.Clamp(CompletedStepCount(item) + 1, 1, 6); }
+    private void SelectStep(int step) { if (StepStatus(step) > 0 || RoadmapReviewMode.Enabled) currentStep = step; }
+    private void PreviousStep() => currentStep = Math.Max(1, currentStep - 1);
+    private void NextStep() { if (currentStep < 6 && (StepStatus(currentStep + 1) > 0 || RoadmapReviewMode.Enabled)) currentStep++; else OpenSelected(); }
+    private void OpenSelected() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{SelectedItem.Id}");
+    private void ToggleSkill(string key) { if (!expandedSkills.Remove(key)) expandedSkills.Add(key); }
+    private bool Expanded(string key) => expandedSkills.Contains(key);
     private bool IsSkillLocked(string key) { var first = items.FindIndex(x => SkillKey(x) == key); return !RoadmapReviewMode.Enabled && first > ActiveIndex; }
-    private int WeekOrdinal(RoadmapItemDto item) { var list = items.Where(x => SkillKey(x) == SkillKey(item)).ToList(); return list.FindIndex(x => x.Id == item.Id) + 1; }
-    private static int CompletedSteps(RoadmapItemDto item) => (item.IsVideoCompleted ? 1 : 0) + (item.ScriptCompletedAtUtc.HasValue || item.IsPracticeCompleted ? 1 : 0) + (item.SummaryCompletedAtUtc.HasValue || item.IsPracticeCompleted ? 1 : 0) + (item.IsPracticeCompleted ? 1 : 0) + (item.IsScenarioCompleted ? 1 : 0) + (item.IsReflectionCompleted ? 1 : 0);
-    private static int EstimatedMinutes(RoadmapItemDto item) => 42;
-    private string WeekTitle(RoadmapItemDto item, int ordinal)
-    {
-        if (SkillKey(item) == "communication") return ordinal switch { 1 => Tx("Communication foundations", "Nền tảng giao tiếp"), 2 => Tx("Active listening", "Lắng nghe chủ động"), 3 => Tx("Constructive feedback", "Phản hồi xây dựng"), 4 => Tx("Advanced communication", "Giao tiếp nâng cao"), _ => item.Title };
-        return string.IsNullOrWhiteSpace(item.Title) ? $"{Tx("Week", "Tuần")} {ordinal}" : item.Title;
-    }
-    private static string SkillKey(RoadmapItemDto item)
-    {
-        var value = $"{item.SkillName} {item.Title}".ToLowerInvariant();
-        if (value.Contains("giao tiếp") || value.Contains("communication")) return "communication";
-        if (value.Contains("quản lý thời gian") || value.Contains("time management")) return "time";
-        if (value.Contains("tư duy phản biện") || value.Contains("critical thinking")) return "critical";
-        return "other";
-    }
+    private int LessonStatus(int step) => StepStatus(step);
+    private int StepStatus(int step) { var complete = SelectedCompletedSteps; return step <= complete ? 2 : step == complete + 1 || RoadmapReviewMode.Enabled ? 1 : 0; }
+    private static int CompletedStepCount(RoadmapItemDto x) => (x.IsVideoCompleted ? 1 : 0) + (x.ScriptCompletedAtUtc.HasValue ? 1 : 0) + (x.SummaryCompletedAtUtc.HasValue ? 1 : 0) + (x.IsPracticeCompleted ? 1 : 0) + (x.IsScenarioCompleted ? 1 : 0) + (x.IsReflectionCompleted ? 1 : 0);
+    private static int CompletedSteps(RoadmapItemDto x) => CompletedStepCount(x) * 100 / 6;
+    private int WeekOrdinal(RoadmapItemDto item) => items.Where(x => SkillKey(x) == SkillKey(item)).ToList().FindIndex(x => x.Id == item.Id) + 1;
+    private string WeekTitle(RoadmapItemDto item, int n) => SkillKey(item) == "communication" ? n switch { 1 => Tx("Communication foundations", "Nền tảng giao tiếp"), 2 => Tx("Active listening", "Lắng nghe chủ động"), 3 => Tx("Constructive feedback", "Phản hồi xây dựng"), 4 => Tx("Advanced communication", "Giao tiếp nâng cao"), _ => item.Title } : string.IsNullOrWhiteSpace(item.Title) ? $"{Tx("Week", "Tuần")} {n}" : item.Title;
+    private string WeekDescription(RoadmapItemDto item) => string.IsNullOrWhiteSpace(item.Description) ? Tx("Learn through video, theory, quiz and practical activities.", "Học qua video, lý thuyết, quiz và các hoạt động thực hành.") : item.Description;
+    private static string SkillKey(RoadmapItemDto x) { var v = $"{x.SkillName} {x.Title}".ToLowerInvariant(); if (v.Contains("giao tiếp") || v.Contains("communication")) return "communication"; if (v.Contains("quản lý thời gian") || v.Contains("time management")) return "time"; if (v.Contains("tư duy phản biện") || v.Contains("critical")) return "critical"; return "other"; }
     private static int SkillRank(string key) => key switch { "communication" => 0, "time" => 1, "critical" => 2, _ => 3 };
-    private string SkillName(string key) => key switch { "communication" => Tx("Communication skills", "Kỹ năng giao tiếp"), "time" => Tx("Time management", "Kỹ năng quản lý thời gian"), "critical" => Tx("Critical thinking", "Kỹ năng tư duy phản biện"), _ => Tx("Other skills", "Kỹ năng khác") };
-    private static string SkillIcon(string key) => key switch { "communication" => "bi bi-chat-dots-fill", "time" => "bi bi-clock-fill", "critical" => "bi bi-lightbulb-fill", _ => "bi bi-stars" };
+    private string SkillName(string key) => key switch { "communication" => Tx("Communication", "Giao tiếp"), "time" => Tx("Time management", "Quản lý thời gian"), "critical" => Tx("Critical thinking", "Tư duy phản biện"), _ => Tx("Other skills", "Kỹ năng khác") };
+    private static string SkillIcon(string key) => key switch { "communication" => "bi bi-chat-heart", "time" => "bi bi-clock", "critical" => "bi bi-mortarboard", _ => "bi bi-stars" };
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+
+    private static readonly (int Step, string En, string Vi, string DescEn, string DescVi, string Icon, string Time)[] Lessons =
+    [
+        (1,"Introduction","Giới thiệu","Watch the core lesson video.","Xem video bài học nền tảng.","bi bi-play-circle-fill","08:45"),
+        (2,"Lesson script","Kịch bản bài học","Review the synchronized theory.","Ôn lại lý thuyết đồng bộ với video.","bi bi-file-text-fill","09:12"),
+        (3,"Summary","Tóm tắt kiến thức","Consolidate the most important ideas.","Củng cố những ý quan trọng nhất.","bi bi-lightbulb-fill","05:00"),
+        (4,"Mini Quiz","Bài kiểm tra ngắn","Check your understanding.","Kiểm tra mức độ hiểu bài.","bi bi-ui-checks","5 câu"),
+        (5,"Practice (Role-play)","Thực hành tình huống","Apply the skill with AI.","Áp dụng kỹ năng cùng AI.","bi bi-chat-dots-fill","10:00"),
+        (6,"Reflection & AI Feedback","Phản tư & AI Feedback","Reflect and receive personalized feedback.","Phản tư và nhận góp ý cá nhân hóa.","bi bi-stars","05:00")
+    ];
+    private static readonly (int Id, string En, string Vi, string Icon)[] Steps =
+    [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"AI Feedback","Phản tư","bi bi-stars")];
 }
 
 <style>
-    .rm-page{--blue:#3157d5;--violet:#6954e8;--green:#2e9d69;--navy:#17233c;--muted:#6c7588;--line:#dfe4ec;min-height:calc(100vh - 72px);padding:clamp(1rem,2.4vw,2.25rem);color:var(--navy);background:#f5f7fa}.rm-shell{max-width:1240px;margin:auto}.rm-state{min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;text-align:center}.rm-state>i{font-size:3rem;color:var(--blue)}.rm-state button{padding:.75rem 1rem;color:#fff;border:0;border-radius:9px;background:var(--blue);font-weight:800}.rm-spinner{width:30px;height:30px;border:3px solid #dbe2fa;border-top-color:var(--blue);border-radius:50%;animation:rm-spin .8s linear infinite}
-    .rm-hero{display:grid;grid-template-columns:1fr minmax(280px,380px);align-items:end;gap:2rem;margin-bottom:1rem}.rm-hero>div:first-child>span{color:var(--blue);font-size:.7rem;font-weight:900;letter-spacing:.12em}.rm-hero h1{margin:.35rem 0 .25rem;font-size:clamp(1.8rem,3vw,2.65rem);letter-spacing:-.045em}.rm-hero p{margin:0;color:var(--muted)}.rm-total{padding:1rem;border:1px solid var(--line);border-radius:13px;background:#fff}.rm-total>div:first-child{display:flex;align-items:center;justify-content:space-between}.rm-total span,.rm-total small{color:var(--muted);font-size:.72rem}.rm-total b{color:var(--blue);font-size:1.35rem}.rm-progress,.rm-skill-progress>div{height:7px;margin:.65rem 0;border-radius:999px;background:#e8ebf1;overflow:hidden}.rm-progress i,.rm-skill-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--violet))}
-    .rm-review{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding:.75rem 1rem;color:#473b86;border:1px solid #d9d2ff;border-radius:12px;background:#f4f1ff}.rm-review>i{font-size:1.2rem}.rm-review>div{flex:1}.rm-review b,.rm-review small{display:block}.rm-review small{margin-top:.1rem}.rm-review button{padding:.52rem .75rem;color:#fff;border:0;border-radius:8px;background:var(--violet);font-size:.72rem;font-weight:800}
-    .rm-skills{display:grid;gap:.85rem}.rm-skill{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(28,40,70,.045)}.rm-skill>header{display:grid;grid-template-columns:auto 1fr minmax(190px,270px) auto;align-items:center;gap:.85rem;padding:1rem 1.1rem}.rm-skill-icon{display:grid;place-items:center;width:44px;height:44px;color:#fff;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--violet));font-size:1.15rem}.rm-skill-title span{color:var(--blue);font-size:.58rem;font-weight:900;letter-spacing:.1em}.rm-skill-title h2{margin:.12rem 0 0;font-size:1.05rem}.rm-skill-progress b{display:block;text-align:right;font-size:.7rem}.rm-skill-progress>div{height:5px;margin:.35rem 0 0}.rm-skill-lock{color:#8a92a2}.rm-skill.locked{background:#fafbfc}.rm-skill.locked .rm-skill-icon{color:#8490a5;background:#edf0f4}
-    .rm-week-list{display:grid;gap:.5rem;padding:.15rem 1rem 1rem}.rm-week{display:grid;grid-template-columns:auto minmax(0,1fr) 120px auto;align-items:center;gap:.85rem;min-height:76px;padding:.7rem .8rem;border:1px solid #e3e7ee;border-radius:11px;background:#fff}.rm-week.current{border-color:#8e9ff0;background:#f7f9ff;box-shadow:inset 3px 0 var(--blue)}.rm-week.done{box-shadow:inset 3px 0 var(--green)}.rm-week.locked{color:#818999;background:#fafbfc}.rm-week-number{display:grid;place-items:center;width:36px;height:36px;color:#5d6678;border:1px solid #d7dce5;border-radius:50%;font-weight:900}.rm-week.current .rm-week-number{color:#fff;border-color:var(--blue);background:var(--blue)}.rm-week.done .rm-week-number{color:#fff;border-color:var(--green);background:var(--green)}.rm-week-copy small{color:var(--blue);font-size:.56rem;font-weight:900;letter-spacing:.08em}.rm-week-copy h3{margin:.1rem 0;font-size:.86rem}.rm-week-copy p{margin:0;color:var(--muted);font-size:.63rem}.rm-step-dots{display:flex;gap:.25rem}.rm-step-dots i{width:15px;height:5px;border-radius:99px;background:#e2e6ed}.rm-step-dots i.filled{background:var(--green)}.rm-week.current .rm-step-dots i.filled{background:var(--blue)}.rm-week button{display:flex;align-items:center;gap:.4rem;padding:.55rem .7rem;color:var(--blue);border:1px solid #b8c4ed;border-radius:8px;background:#fff;font-size:.68rem;font-weight:850;white-space:nowrap}.rm-week button.primary{color:#fff;border-color:var(--blue);background:var(--blue)}.rm-locked-label{display:flex;align-items:center;gap:.3rem;color:#8a92a2;font-size:.65rem;font-weight:800}.rm-skill-gate{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.1rem;color:#7e8798;border-top:1px solid var(--line);font-size:.72rem}.rm-rule{display:flex;align-items:center;justify-content:center;gap:.7rem;margin-top:1rem;padding:1rem;color:#667084}.rm-rule>i{color:var(--blue);font-size:1.2rem}.rm-rule b,.rm-rule span{display:block}.rm-rule b{color:var(--navy);font-size:.75rem}.rm-rule span{margin-top:.15rem;font-size:.66rem}
-    html[data-theme="dark"] .rm-page{--navy:#f4f6fb;--muted:#b9c0cf;--line:rgba(148,163,184,.2);background:#0d1425}html[data-theme="dark"] .rm-total,html[data-theme="dark"] .rm-skill,html[data-theme="dark"] .rm-week{background:#182136}html[data-theme="dark"] .rm-week.current{background:#1c2845}html[data-theme="dark"] .rm-skill.locked,html[data-theme="dark"] .rm-week.locked{background:#141c2e}
-    @@keyframes rm-spin{to{transform:rotate(360deg)}}
-    @@media(max-width:800px){.rm-hero{grid-template-columns:1fr}.rm-skill>header{grid-template-columns:auto 1fr auto}.rm-skill-progress{grid-column:1/-1}.rm-week{grid-template-columns:auto 1fr auto}.rm-step-dots{display:none}.rm-review{align-items:flex-start;flex-wrap:wrap}.rm-review button{margin-left:3rem}}
-    @@media(max-width:520px){.rm-page{padding:.75rem}.rm-week{grid-template-columns:auto 1fr}.rm-week button,.rm-locked-label{grid-column:2}.rm-skill>header{padding:.85rem}.rm-week-list{padding:.1rem .7rem .7rem}.rm-rule{align-items:flex-start}}
+    .coursera-roadmap{--blue:#2860e8;--navy:#0c1d4b;--muted:#64708c;--line:#dce4f3;display:grid;grid-template-columns:310px minmax(520px,1fr) minmax(420px,1.08fr);min-height:calc(100vh - 73px);color:var(--navy);background:#f8faff}.loading,.empty{grid-column:1/-1;min-height:70vh;display:flex;align-items:center;justify-content:center;gap:.7rem}.loading span{width:25px;height:25px;border:3px solid #dce5ff;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}.empty{flex-direction:column}.empty>i{font-size:3rem;color:var(--blue)}
+    .roadmap-sidebar{padding:1.4rem;border-right:1px solid var(--line);background:#fbfcff}.overall-card,.xp-card,.streak{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 4px 14px #21356508}.overall-card{padding:1rem}.overall-card h3{margin:0 0 .8rem;font-size:.75rem}.overall-body{display:flex;align-items:center;gap:.8rem}.progress-ring{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:conic-gradient(var(--blue) calc(var(--value)*1%),#e9edf6 0);position:relative}.progress-ring:after{content:"";position:absolute;inset:7px;border-radius:50%;background:#fff}.progress-ring b{z-index:1;font-size:.9rem}.overall-body span,.overall-body strong{display:block}.overall-body span{font-size:.65rem;color:var(--muted)}.overall-body strong{margin-top:.25rem;font-size:.68rem}.xp-card{display:flex;align-items:center;gap:.55rem;margin-top:.65rem;padding:.8rem;font-size:.67rem}.xp-card>i{color:#ffb11b}.xp-card b{margin-left:auto}.sidebar-heading{margin:1.7rem 0 .7rem;color:#65718e;font-size:.62rem;letter-spacing:.04em}.skill-row{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.55rem;width:100%;padding:.65rem 0;border:0;background:transparent;color:var(--navy);text-align:left;font-size:.7rem}.skill-row small{font-size:.57rem;color:var(--muted)}.skill-icon{display:grid;place-items:center;width:28px;height:28px;color:#fff;border-radius:7px;background:linear-gradient(135deg,#2163ef,#6154e8)}.skill-group.skill-locked .skill-icon{background:#e5e9f3;color:#71809c}.week-tree{position:relative;margin-left:13px;padding-left:12px;border-left:2px solid #dce4f3}.tree-week{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.5rem;width:100%;padding:.58rem;border:0;border-radius:8px;background:transparent;text-align:left;color:var(--navy)}.tree-week>span{display:grid;place-items:center;width:21px;height:21px;margin-left:-24px;color:#607090;border-radius:50%;background:#e7ebf3;font-size:.58rem}.tree-week>div b,.tree-week>div small{display:block}.tree-week>div b{font-size:.64rem}.tree-week>div small{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:.56rem}.tree-week em{font-style:normal;font-size:.55rem}.tree-week.selected{background:#f0f4ff;box-shadow:inset 2px 0 var(--blue)}.tree-week.selected>span{color:#fff;background:var(--blue)}.tree-week.done>span{color:#fff;background:#32a670}.tree-week:disabled{opacity:.62}.streak{display:flex;gap:.6rem;margin-top:1rem;padding:.8rem}.streak>i{color:#ff7e2e}.streak small,.streak b,.streak span{display:block}.streak small{font-size:.5rem}.streak b{margin:.3rem 0;font-size:1.35rem}.streak span{font-size:.55rem}.mascot{margin-left:auto;align-self:end;font-size:2.4rem}
+    .week-column{padding:2.2rem 2rem;border-right:1px solid var(--line);overflow:auto}.breadcrumb{display:flex;gap:.65rem;align-items:center;color:#687694;font-size:.64rem}.week-header h1{margin:1.2rem 0 .3rem;font-size:1.45rem}.week-header p{margin:0;color:var(--muted);font-size:.72rem}.week-stat{display:grid;grid-template-columns:1fr 1fr 1fr;position:relative;margin:1rem 0;padding:1rem;border:1px solid var(--line);border-radius:9px;background:#fff}.week-stat>div{display:flex;align-items:center;gap:.6rem}.week-stat>div+div{padding-left:1rem;border-left:1px solid var(--line)}.week-stat i{color:var(--blue)}.week-stat span,.week-stat b,.week-stat small{display:block;font-size:.63rem}.week-stat b{font-size:.75rem}.week-stat small{color:var(--muted)}.week-stat .week-bar{position:absolute;left:1rem;right:1rem;bottom:0;height:3px;padding:0;border:0;background:#e9edf5}.week-bar i{display:block;height:100%;background:var(--blue)}.lesson-list{display:grid;gap:.55rem}.lesson{display:grid;grid-template-columns:auto 105px 1fr auto;align-items:center;gap:.8rem;padding:.65rem;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer}.lesson.active{border-color:#7ca0ff;box-shadow:inset 3px 0 var(--blue);background:#fbfcff}.lesson.locked{opacity:.72;cursor:default}.lesson-number{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#e8edf7;color:#667591;font-size:.58rem}.lesson.active .lesson-number,.lesson.complete .lesson-number{color:#fff;background:var(--blue)}.lesson.complete .lesson-number{background:#35a56e}.lesson-thumb{height:61px;display:grid;place-items:center;position:relative;color:#fff;border-radius:6px;background:linear-gradient(135deg,#c5cdf1,#6957dc);font-size:1.7rem}.lesson-thumb span{position:absolute;right:3px;bottom:3px;padding:1px 4px;border-radius:3px;background:#17233ccc;font-size:.5rem}.lesson-copy small{color:var(--blue);font-size:.54rem}.lesson-copy h3{margin:.15rem 0;font-size:.73rem}.lesson-copy p{margin:0;color:var(--muted);font-size:.58rem;line-height:1.5}.lesson-action{display:grid;justify-items:end;gap:.3rem;font-size:.55rem}.lesson-action button{padding:.55rem .8rem;border:0;border-radius:6px;color:#fff;background:var(--blue);font-weight:800}.lesson-action>b{color:var(--blue)}.complete-label{color:#28965f}.weekly-challenge{display:flex;align-items:center;gap:.7rem;padding:.8rem;border:1px solid var(--line);border-radius:9px;background:#fff}.weekly-challenge>i:first-child{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#eeeaff;color:#5a4ee0}.weekly-challenge div{flex:1}.weekly-challenge div b,.weekly-challenge div span{display:block;font-size:.62rem}.weekly-challenge div span{margin-top:.2rem;color:var(--muted);font-size:.56rem}.weekly-challenge>b{color:var(--blue);font-size:.58rem}
+    .content-panel{padding:2rem 1.4rem;background:#fff;overflow:auto}.content-panel>header{display:flex;justify-content:space-between;align-items:start}.content-panel>header small{color:var(--blue);font-size:.5rem;font-weight:800}.content-panel>header h2{margin:.2rem 0;font-size:.85rem}.content-panel>header button{border:0;background:transparent}.stepper{display:flex;justify-content:space-between;margin:1rem 0 1.25rem;position:relative}.stepper:before{content:"";position:absolute;top:16px;left:6%;right:6%;height:1px;background:#dce3f0}.stepper button{z-index:1;display:grid;justify-items:center;gap:.25rem;border:0;background:transparent;color:#53617f;font-size:.55rem}.stepper span{display:grid;place-items:center;width:32px;height:32px;border:1px solid #cdd6e7;border-radius:50%;background:#fff}.stepper button.active span{color:#fff;border-color:var(--blue);background:var(--blue)}.stepper button.done span{color:#259361;border-color:#4db583;background:#eefbf5}.stepper button.locked{opacity:.62}.content-card{border:1px solid var(--line);border-radius:9px;padding:.75rem}.content-tools{display:flex;align-items:center;justify-content:space-between;padding:.25rem .15rem .65rem}.content-tools>b{padding:.48rem;color:var(--blue);border-radius:6px;background:#eef3ff;font-size:.6rem}.content-tools button{padding:.35rem;border:1px solid var(--line);background:#fff;font-size:.52rem}.placeholder-content{padding:1.3rem .5rem .5rem;text-align:center}.placeholder-content>span{display:grid;place-items:center;width:48px;height:48px;margin:auto;color:#fff;border-radius:12px;background:linear-gradient(135deg,#2860e8,#6c52e8);font-size:1.2rem}.placeholder-content h3{margin:.7rem 0 .3rem;font-size:.85rem}.placeholder-content p{max-width:440px;margin:auto;color:var(--muted);font-size:.62rem;line-height:1.6}.summary{margin-top:1rem;padding:.8rem;text-align:left;border:1px solid #d9d0ff;border-radius:7px;background:#f7f4ff;font-size:.58rem}.summary b{color:#3157d5}.summary ul{margin:.5rem 0 0;padding-left:1rem;line-height:1.7}.content-accordions{display:grid;gap:.55rem;margin-top:.65rem}.content-accordions button{display:flex;justify-content:space-between;padding:.8rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--navy);font-size:.62rem;font-weight:700}.content-panel>footer{display:grid;grid-template-columns:1fr 1.4fr;gap:.8rem;margin-top:1rem}.content-panel>footer button{display:flex;justify-content:center;align-items:center;gap:.5rem;padding:.75rem;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--navy);font-weight:800;font-size:.65rem}.content-panel>footer .next{color:#fff;border-color:var(--blue);background:var(--blue)}
+    @@keyframes spin{to{transform:rotate(360deg)}}
+    @@media(max-width:1250px){.coursera-roadmap{grid-template-columns:270px 1fr}.content-panel{grid-column:1/-1;border-top:1px solid var(--line)}.week-column{border-right:0}}
+    @@media(max-width:760px){.coursera-roadmap{display:block}.roadmap-sidebar{border-right:0}.week-column,.content-panel{padding:1rem}.lesson{grid-template-columns:auto 80px 1fr}.lesson-action{grid-column:3}.week-stat{grid-template-columns:1fr}.week-stat>div+div{padding:.5rem 0;border:0}.stepper small{display:none}.content-tools{align-items:flex-start;gap:.5rem;flex-direction:column}}
 </style>
