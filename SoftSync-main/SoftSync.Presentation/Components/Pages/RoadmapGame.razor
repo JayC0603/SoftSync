@@ -4,6 +4,7 @@
 @using System.Globalization
 @using System.Text
 @using SoftSync.BLL.Interfaces
+@using SoftSync.Common
 @using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
@@ -24,7 +25,7 @@
             <div class="spinner-border text-primary" role="status"></div>
         </div>
     }
-    else if (item.IsPracticeCompleted)
+    else if (item.IsPracticeCompleted && !RoadmapReviewMode.Enabled)
     {
         <div class="ss-card ss-glass-interactive tw:p-12 game-complete-shell">
             <div class="game-complete-icon">
@@ -208,6 +209,17 @@
                                 </div>
                             }
                         </div>
+                        @if (ScorePercent >= 60)
+                        {
+                            <nav class="game-complete-navigation tw:mt-4">
+                                <button class="game-nav-back" @onclick="BackToSummary">
+                                    <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
+                                </button>
+                                <button class="ss-btn-primary game-nav-next" @onclick="GoToNextWeek">
+                                    @(NextItem is null ? Tx("Finish roadmap", "Hoàn thành lộ trình") : Tx("Next week", "Tuần tiếp theo")) <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </nav>
+                        }
                     </div>
                 }
             </aside>

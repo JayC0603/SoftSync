@@ -307,6 +307,51 @@ public class RoadmapService : IRoadmapService
             items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
         }
 
+        // Content Review Mode needs stable, real item IDs for every active lesson
+        // so editors can open its video, script, summary, and quiz. Add only
+        // missing catalog rows; existing completion data is never overwritten.
+        if (RoadmapReviewMode.Enabled)
+        {
+            var allActiveSkills = (await _skillRepo.GetAllAsync())
+                .Where(s => QuizSeedData.ActiveSkillIds.Contains(s.Id))
+                .Select(s => s.Name)
+                .ToList();
+            var completeCatalog = await _aiService.GenerateRoadmapAsync(userId, allActiveSkills);
+            var nextWeek = items.Count == 0 ? 1 : items.Max(x => x.WeekNumber) + 1;
+            var addedMissingItem = false;
+
+            foreach (var catalogItem in completeCatalog.Items)
+            {
+                if (items.Any(x => string.Equals(x.Title, catalogItem.Title, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                await _roadmapRepo.AddAsync(new RoadmapItem
+                {
+                    UserId = userId,
+                    WeekNumber = nextWeek++,
+                    Title = catalogItem.Title,
+                    Description = catalogItem.Description
+                });
+                addedMissingItem = true;
+            }
+
+            if (addedMissingItem)
+            {
+                await _roadmapRepo.SaveChangesAsync();
+                items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
+            }
+        }
+        else
+        {
+            // Catalog rows may remain in storage after content review. In normal
+            // mode only return the lessons selected by the personalization flow.
+            var personalizedCatalog = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
+            var allowedTitles = personalizedCatalog.Items
+                .Select(x => x.Title)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            items = items.Where(x => allowedTitles.Contains(x.Title)).ToList();
+        }
+
         return new RoadmapDto
         {
             UserId = userId,

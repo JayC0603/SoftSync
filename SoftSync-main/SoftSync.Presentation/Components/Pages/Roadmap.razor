@@ -43,21 +43,33 @@
         <div class="pr-shell">
             <header class="pr-heading">
                 <div class="pr-heading-copy">
-                    <span class="pr-eyebrow">@Tx("YOUR ROADMAP", "LỘ TRÌNH CỦA BẠN")</span>
-                    <h1>@Tx($"Hi {FirstName}, this plan is made for you", $"Chào {FirstName}, đây là kế hoạch dành riêng cho bạn")</h1>
-                    <p>@Tx("Personalized from your assessment, goal, and learning rhythm.", "Được cá nhân hóa từ kết quả đánh giá, mục tiêu và nhịp học của bạn.")</p>
+                    <span class="pr-eyebrow">@(RoadmapReviewMode.Enabled ? Tx("CONTENT REVIEW MODE", "CHẾ ĐỘ KIỂM DUYỆT NỘI DUNG") : Tx("YOUR ROADMAP", "LỘ TRÌNH CỦA BẠN"))</span>
+                    <h1>@(RoadmapReviewMode.Enabled ? Tx("Review all roadmap content", "Kiểm tra toàn bộ nội dung Roadmap") : Tx($"Hi {FirstName}, this plan is made for you", $"Chào {FirstName}, đây là kế hoạch dành riêng cho bạn"))</h1>
+                    <p>@(RoadmapReviewMode.Enabled ? Tx("All available weeks and learning steps are temporarily unlocked.", "Tất cả tuần và các bước học hiện có đang được mở khóa tạm thời.") : Tx("Personalized from your assessment, goal, and learning rhythm.", "Được cá nhân hóa từ kết quả đánh giá, mục tiêu và nhịp học của bạn."))</p>
                     <div class="pr-personal-chips">
-                        <span><i class="bi bi-chat-dots-fill"></i>@CurrentSkillName <b>@CurrentSkillPercent%</b></span>
-                        <span><i class="bi bi-bullseye"></i>@Tx("Goal", "Mục tiêu"): <b>@GoalLabel</b></span>
-                        <span><i class="bi bi-clock"></i><b>@DailyMinutes @Tx("min/day", "phút/ngày") · @StudyDays @Tx("days/week", "ngày/tuần")</b></span>
+                        @if (RoadmapReviewMode.Enabled)
+                        {
+                            <span><i class="bi bi-collection-play-fill"></i><b>@items.Count @Tx("weeks available", "tuần hiện có")</b></span>
+                            <span><i class="bi bi-unlock-fill"></i><b>@Tx("No progress locks", "Không khóa theo tiến độ")</b></span>
+                            <span><i class="bi bi-file-earmark-text-fill"></i><b>@Tx("Ready for script review", "Sẵn sàng kiểm tra script")</b></span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-chat-dots-fill"></i>@CurrentSkillName <b>@CurrentSkillPercent%</b></span>
+                            <span><i class="bi bi-bullseye"></i>@Tx("Goal", "Mục tiêu"): <b>@GoalLabel</b></span>
+                            <span><i class="bi bi-clock"></i><b>@DailyMinutes @Tx("min/day", "phút/ngày") · @StudyDays @Tx("days/week", "ngày/tuần")</b></span>
+                        }
                     </div>
                 </div>
-                <button class="pr-why" @onclick="ToggleReason" aria-expanded="@showReason">
-                    <i class="bi bi-question-circle"></i>@Tx("Why did I get this roadmap?", "Vì sao tôi nhận lộ trình này?")
-                </button>
+                @if (!RoadmapReviewMode.Enabled)
+                {
+                    <button class="pr-why" @onclick="ToggleReason" aria-expanded="@showReason">
+                        <i class="bi bi-question-circle"></i>@Tx("Why did I get this roadmap?", "Vì sao tôi nhận lộ trình này?")
+                    </button>
+                }
             </header>
 
-            @if (showReason)
+            @if (!RoadmapReviewMode.Enabled && showReason)
             {
                 <aside class="pr-reason-panel">
                     <i class="bi bi-stars"></i>
@@ -71,12 +83,12 @@
 
             <div class="pr-grid">
                 <section class="pr-main-card">
-                    <nav class="pr-weeks" style="--week-count:@Math.Min(items.Count, 6)" aria-label="@Tx("Roadmap weeks", "Các tuần trong lộ trình")">
-                        @foreach (var entry in items.Take(6).Select((value, index) => new { value, index }))
+                    <nav class="pr-weeks" style="--week-count:@items.Count" aria-label="@Tx("Roadmap weeks", "Các tuần trong lộ trình")">
+                        @foreach (var entry in items.Select((value, index) => new { value, index }))
                         {
                             <button class="@WeekClass(entry.value, entry.index)"
-                                    disabled="@(entry.index > ActiveIndex)"
-                                    title="@(entry.index > ActiveIndex ? Tx("Complete the current week to unlock this week.", "Hoàn thành tuần hiện tại để mở khóa tuần này.") : null)"
+                                    disabled="@(!RoadmapReviewMode.Enabled && entry.index > ActiveIndex)"
+                                    title="@(!RoadmapReviewMode.Enabled && entry.index > ActiveIndex ? Tx("Complete the current week to unlock this week.", "Hoàn thành tuần hiện tại để mở khóa tuần này.") : null)"
                                     @onclick="() => SelectWeek(entry.index)">
                                 <span>@(entry.value.IsCompleted ? "✓" : (entry.index + 1).ToString())</span>
                                 <div><b>@Tx("Week", "Tuần") @(entry.index + 1)</b><small>@WeekStatus(entry.value, entry.index)</small></div>
@@ -117,7 +129,7 @@
                                     {
                                         <i class="bi bi-check-circle-fill pr-done"></i>
                                     }
-                                    else if (selectedIndex == ActiveIndex && CanOpenVideo)
+                                    else if ((RoadmapReviewMode.Enabled || selectedIndex == ActiveIndex) && CanOpenVideo)
                                     {
                                         <span class="pr-continue" @onclick:stopPropagation="true" @onclick="OpenVideo">@Tx("Continue", "Tiếp tục")</span>
                                     }
@@ -218,7 +230,7 @@
                                     <small class="@(SelectedItem.IsPracticeCompleted ? "pr-saved-copy" : null)">@(SelectedItem.IsPracticeCompleted ? Tx("Passed · Saved", "Đã đạt · Đã lưu") : $"5 {Tx("minutes", "phút")}")</small>
                                 </span>
                                 @if (SelectedItem.IsPracticeCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
-                                else if (selectedIndex == ActiveIndex && SelectedItem.IsVideoCompleted && CanOpenPractice) { <button class="pr-continue" @onclick="OpenPractice">@Tx("Start", "Bắt đầu")</button> }
+                                else if ((RoadmapReviewMode.Enabled || selectedIndex == ActiveIndex && SelectedItem.IsVideoCompleted) && CanOpenPractice) { <button class="pr-continue" @onclick="OpenPractice">@Tx("Start", "Bắt đầu")</button> }
                                 else { <i class="bi bi-lock-fill pr-lock"></i> }
                             </article>
 
@@ -367,7 +379,7 @@
             .ThenBy(x => x.Id)
             .ToList();
 
-        selectedIndex = ActiveIndex;
+        selectedIndex = RoadmapReviewMode.Enabled ? 0 : ActiveIndex;
         loading = false;
     }
 
@@ -375,21 +387,23 @@
     private void ToggleVideoPanel() => videoExpanded = !videoExpanded;
     private void SelectWeek(int index)
     {
-        if (index > ActiveIndex) return;
+        if (!RoadmapReviewMode.Enabled && index > ActiveIndex) return;
         selectedIndex = Math.Clamp(index, 0, items.Count - 1);
         videoExpanded = true;
         contentTab = ContentTab.Script;
     }
 
     private string WeekClass(RoadmapItemDto item, int index)
-        => $"{(item.IsCompleted ? "done" : index == ActiveIndex ? "current" : index > ActiveIndex ? "locked" : "")} {(index == selectedIndex ? "selected" : "")}";
+        => $"{(item.IsCompleted ? "done" : index == selectedIndex || !RoadmapReviewMode.Enabled && index == ActiveIndex ? "current" : !RoadmapReviewMode.Enabled && index > ActiveIndex ? "locked" : "")} {(index == selectedIndex ? "selected" : "")}";
 
     private string WeekStatus(RoadmapItemDto item, int index) => item.IsCompleted
         ? Tx("Completed", "Hoàn thành")
-        : index == ActiveIndex ? Tx("Learning", "Đang học") : Tx("Upcoming", "Sắp tới");
+        : RoadmapReviewMode.Enabled ? Tx("Ready to review", "Sẵn sàng kiểm tra") : index == ActiveIndex ? Tx("Learning", "Đang học") : Tx("Upcoming", "Sắp tới");
 
     private string ModuleState(int moduleIndex)
     {
+        if (RoadmapReviewMode.Enabled)
+            return moduleIndex switch { 0 when SelectedItem.IsVideoCompleted => "done", 1 when SelectedItem.IsPracticeCompleted => "done", _ => "current" };
         if (selectedIndex > ActiveIndex) return "locked";
         return moduleIndex switch
         {

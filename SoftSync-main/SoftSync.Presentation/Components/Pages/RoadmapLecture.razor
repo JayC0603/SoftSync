@@ -7,6 +7,7 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
+@using SoftSync.Common
 @using SoftSync.Common.Dtos
 @using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
@@ -192,7 +193,7 @@
     private bool IsCommunicationVideoOne => item is not null
         && SkillKey(item) == "communication"
         && (UserId == 0 ? !IsCommunicationLessonTwo && !IsCommunicationLessonThree && !IsCommunicationLessonFour : SkillLessonOrdinal(item) == 1);
-    private bool CanContinue => currentStep != LearningStep.Video || item?.IsVideoCompleted == true || !HasVideo;
+    private bool CanContinue => RoadmapReviewMode.Enabled || currentStep != LearningStep.Video || item?.IsVideoCompleted == true || !HasVideo;
     private string BackLabel => currentStep == LearningStep.Video ? Tx("Roadmap", "Lộ trình") : Tx("Back", "Quay lại");
     private string NextLabel => currentStep switch
     {
@@ -335,11 +336,11 @@
     {
         if (step == LearningStep.Quiz)
         {
-            if (item?.IsVideoCompleted == true || !HasVideo) GoToGame();
+            if (RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo) GoToGame();
             return;
         }
 
-        if (step > LearningStep.Video && item?.IsVideoCompleted != true && HasVideo)
+        if (!RoadmapReviewMode.Enabled && step > LearningStep.Video && item?.IsVideoCompleted != true && HasVideo)
             return;
 
         currentStep = step;
