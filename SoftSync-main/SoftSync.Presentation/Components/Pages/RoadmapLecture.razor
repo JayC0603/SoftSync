@@ -110,12 +110,46 @@
                     }
                 </article>
             }
-            else
+            else if (currentStep == LearningStep.Summary)
             {
                 <article class="guided-content guided-summary">
                     <header><i class="bi bi-lightbulb-fill"></i><div><small>@Tx("LESSON SUMMARY", "TÓM TẮT BÀI HỌC")</small><h3>@DisplayTitle</h3></div></header>
                     <p>@DisplayDescription</p>
                     <div class="summary-callout"><i class="bi bi-check2-circle"></i><span>@Tx("Review the key ideas, then continue to the quiz to check your understanding.", "Ôn lại các ý chính, sau đó làm Quiz để kiểm tra mức độ hiểu bài.")</span></div>
+                </article>
+            }
+            else if (currentStep == LearningStep.Scenario)
+            {
+                <article class="guided-content guided-scenario">
+                    <header><i class="bi bi-chat-square-text-fill"></i><div><small>@Tx("APPLIED SCENARIO", "TÌNH HUỐNG ỨNG DỤNG")</small><h3>@Tx("Choose how you would respond", "Chọn cách bạn sẽ xử lý")</h3></div></header>
+                    <p class="scenario-prompt">@ScenarioPrompt</p>
+                    <div class="scenario-options">
+                        @foreach (var option in ScenarioOptions.Select((value, index) => new { value, index }))
+                        {
+                            <button class="@(selectedScenarioOption == option.index ? "selected" : "")" @onclick="() => CompleteScenarioAsync(option.index)">
+                                <span>@((char)('A' + option.index))</span>
+                                <div><strong>@option.value.Title</strong><small>@option.value.Description</small></div>
+                                @if (selectedScenarioOption == option.index) { <i class="bi bi-check-circle-fill"></i> }
+                            </button>
+                        }
+                    </div>
+                    @if (item.IsScenarioCompleted)
+                    {
+                        <div class="scenario-feedback"><i class="bi bi-check2-circle"></i>@Tx("Your choice has been saved. Reflect on why this response is appropriate before continuing.", "Lựa chọn đã được lưu. Hãy suy nghĩ vì sao cách xử lý này phù hợp trước khi tiếp tục.")</div>
+                    }
+                </article>
+            }
+            else if (currentStep == LearningStep.Reflection)
+            {
+                <article class="guided-content guided-reflection">
+                    <header><i class="bi bi-journal-check"></i><div><small>@Tx("REFLECTION", "PHẢN TƯ")</small><h3>@Tx("What will you apply after this lesson?", "Bạn sẽ áp dụng điều gì sau bài học này?")</h3></div></header>
+                    <p>@Tx("Write a short reflection about one idea you learned and one action you will try in a real situation.", "Viết ngắn về một điều bạn học được và một hành động bạn sẽ thử áp dụng trong tình huống thực tế.")</p>
+                    <textarea @bind="reflectionText" maxlength="2000" rows="7" placeholder="@Tx("I learned that... Next time, I will...", "Tôi học được rằng... Lần tới, tôi sẽ...")"></textarea>
+                    <div class="reflection-meta"><span>@reflectionText.Length / 2000</span><button @onclick="SaveReflectionAsync" disabled="@(string.IsNullOrWhiteSpace(reflectionText) || savingReflection)"><i class="bi bi-cloud-check"></i>@(savingReflection ? Tx("Saving...", "Đang lưu...") : Tx("Save reflection", "Lưu phản tư"))</button></div>
+                    @if (!string.IsNullOrWhiteSpace(reflectionMessage))
+                    {
+                        <div class="reflection-message @(item.IsReflectionCompleted ? "success" : "error")">@reflectionMessage</div>
+                    }
                 </article>
             }
 
@@ -158,6 +192,10 @@
     private RoadmapItemDto? item;
     private List<RoadmapItemDto> roadmapItems = [];
     private LearningStep currentStep = LearningStep.Video;
+    private int selectedScenarioOption = -1;
+    private string reflectionText = string.Empty;
+    private string reflectionMessage = string.Empty;
+    private bool savingReflection;
     private bool IsCommunicationLessonTwo => Nav.Uri.Contains("/communication-lesson-2", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonFour => Nav.Uri.Contains("/communication-lesson-4", StringComparison.OrdinalIgnoreCase);
@@ -194,22 +232,32 @@
     private bool IsTimeManagementVideoOne => item is not null
         && SkillKey(item) == "time"
         && (UserId == 0 ? !IsCommunicationLessonTwo && !IsCommunicationLessonThree && !IsCommunicationLessonFour : SkillLessonOrdinal(item) == 1);
-    private bool CanContinue => RoadmapReviewMode.Enabled || currentStep != LearningStep.Video || item?.IsVideoCompleted == true || !HasVideo;
+    private bool CanContinue => currentStep switch
+    {
+        LearningStep.Video => RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo,
+        LearningStep.Scenario => RoadmapReviewMode.Enabled || item?.IsScenarioCompleted == true,
+        LearningStep.Reflection => item?.IsReflectionCompleted == true,
+        _ => true
+    };
     private string BackLabel => currentStep == LearningStep.Video ? Tx("Roadmap", "Lộ trình") : Tx("Back", "Quay lại");
     private string NextLabel => currentStep switch
     {
         LearningStep.Video => Tx("Next: Script", "Tiếp theo: Script"),
         LearningStep.Script => Tx("Next: Summary", "Tiếp theo: Tóm tắt"),
-        _ when item?.IsPracticeCompleted == true && HasNextLesson => Tx("Next week", "Tuần tiếp theo"),
-        _ when item?.IsPracticeCompleted == true => Tx("Finish roadmap", "Hoàn thành lộ trình"),
-        _ => Tx("Start quiz", "Làm Quiz")
+        LearningStep.Summary => Tx("Start quiz", "Làm Quiz"),
+        LearningStep.Scenario => Tx("Next: Reflection", "Tiếp theo: Phản tư"),
+        LearningStep.Reflection when HasNextLesson => Tx("Next week", "Tuần tiếp theo"),
+        LearningStep.Reflection => Tx("Finish roadmap", "Hoàn thành lộ trình"),
+        _ => Tx("Continue", "Tiếp tục")
     };
     private IEnumerable<LearningStepDisplay> LearningSteps =>
     [
         new(1, LearningStep.Video, Tx("Video", "Video")),
         new(2, LearningStep.Script, Tx("Script", "Script")),
         new(3, LearningStep.Summary, Tx("Summary", "Tóm tắt")),
-        new(4, LearningStep.Quiz, Tx("Quiz", "Quiz"))
+        new(4, LearningStep.Quiz, Tx("Quiz", "Quiz")),
+        new(5, LearningStep.Scenario, Tx("Scenario", "Tình huống")),
+        new(6, LearningStep.Reflection, Tx("Reflection", "Phản tư"))
     ];
 
     protected override async Task OnInitializedAsync()
@@ -259,6 +307,27 @@
         item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
             Nav.NavigateTo($"/roadmap/{UserId}", true);
+        else
+        {
+            reflectionText = item.ReflectionText;
+            currentStep = ResolveInitialStep(item, StepName);
+        }
+    }
+
+    private static LearningStep ResolveInitialStep(RoadmapItemDto value, string? requestedStep)
+    {
+        var requested = string.IsNullOrWhiteSpace(requestedStep)
+            ? ParseStep(value.LastLearningStep)
+            : ParseStep(requestedStep);
+
+        var highest = value.IsReflectionCompleted ? LearningStep.Reflection
+            : value.IsScenarioCompleted ? LearningStep.Reflection
+            : value.IsPracticeCompleted ? LearningStep.Scenario
+            : value.SummaryCompletedAtUtc.HasValue ? LearningStep.Quiz
+            : value.ScriptCompletedAtUtc.HasValue ? LearningStep.Summary
+            : value.IsVideoCompleted ? LearningStep.Script
+            : LearningStep.Video;
+        return requested <= highest ? requested : highest;
     }
 
     private async Task CompleteVideoAsync()
@@ -270,7 +339,7 @@
         {
             item.IsVideoCompleted = true;
             item.VideoCompletedAtUtc = DateTime.UtcNow;
-            item.IsCompleted = item.IsPracticeCompleted;
+            item.IsCompleted = item.IsPracticeCompleted && item.IsScenarioCompleted && item.IsReflectionCompleted;
         }
     }
 
@@ -318,6 +387,8 @@
     {
         "script" => LearningStep.Script,
         "summary" => LearningStep.Summary,
+        "scenario" => LearningStep.Scenario,
+        "reflection" => LearningStep.Reflection,
         _ => LearningStep.Video
     };
 
@@ -327,45 +398,117 @@
     private bool StepIsComplete(LearningStep step) => step switch
     {
         LearningStep.Video => item?.IsVideoCompleted == true,
-        LearningStep.Script => currentStep > LearningStep.Script || item?.IsPracticeCompleted == true,
-        LearningStep.Summary => item?.IsPracticeCompleted == true,
+        LearningStep.Script => item?.ScriptCompletedAtUtc.HasValue == true || item?.IsPracticeCompleted == true,
+        LearningStep.Summary => item?.SummaryCompletedAtUtc.HasValue == true || item?.IsPracticeCompleted == true,
         LearningStep.Quiz => item?.IsPracticeCompleted == true,
+        LearningStep.Scenario => item?.IsScenarioCompleted == true,
+        LearningStep.Reflection => item?.IsReflectionCompleted == true,
         _ => false
     };
 
-    private void GoToStep(LearningStep step)
+    private async Task GoToStep(LearningStep step)
     {
         if (step == LearningStep.Quiz)
         {
-            if (RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo) GoToGame();
+            if (RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo)
+            {
+                await SaveStepAsync(LearningStep.Quiz);
+                GoToGame();
+            }
             return;
         }
 
         if (!RoadmapReviewMode.Enabled && step > LearningStep.Video && item?.IsVideoCompleted != true && HasVideo)
             return;
+        if (!RoadmapReviewMode.Enabled && step >= LearningStep.Scenario && item?.IsPracticeCompleted != true)
+            return;
+        if (!RoadmapReviewMode.Enabled && step >= LearningStep.Reflection && item?.IsScenarioCompleted != true)
+            return;
 
-        currentStep = step;
+        await SetStepAsync(step);
     }
 
-    private void GoBackStep()
+    private async Task GoBackStep()
     {
         if (currentStep == LearningStep.Video) { BackToRoadmap(); return; }
-        currentStep--;
+        if (currentStep == LearningStep.Scenario) { GoToGame(); return; }
+        await SetStepAsync(currentStep - 1);
     }
 
-    private void GoNextStep()
+    private async Task GoNextStep()
     {
         if (!CanContinue) return;
-        if (currentStep == LearningStep.Video) { currentStep = LearningStep.Script; return; }
-        if (currentStep == LearningStep.Script) { currentStep = LearningStep.Summary; return; }
-        if (item?.IsPracticeCompleted == true) { GoToNextLesson(); return; }
-        GoToGame();
+        if (currentStep == LearningStep.Video) { await SetStepAsync(LearningStep.Script); return; }
+        if (currentStep == LearningStep.Script) { await SetStepAsync(LearningStep.Summary); return; }
+        if (currentStep == LearningStep.Summary) { await SaveStepAsync(LearningStep.Quiz); GoToGame(); return; }
+        if (currentStep == LearningStep.Scenario) { await SetStepAsync(LearningStep.Reflection); return; }
+        if (currentStep == LearningStep.Reflection) { GoToNextLesson(); return; }
     }
+
+    private async Task SetStepAsync(LearningStep step)
+    {
+        if (await SaveStepAsync(step))
+            currentStep = step;
+    }
+
+    private async Task<bool> SaveStepAsync(LearningStep step)
+    {
+        if (UserId <= 0 || ItemId <= 0)
+            return true;
+
+        var saved = await RoadmapService.SaveLearningStepAsync(ItemId, UserId, StepValue(step));
+        if (saved && item is not null)
+        {
+            item.LastLearningStep = StepValue(step);
+            if (step == LearningStep.Summary)
+                item.ScriptCompletedAtUtc ??= DateTime.UtcNow;
+            if (step == LearningStep.Quiz)
+                item.SummaryCompletedAtUtc ??= DateTime.UtcNow;
+        }
+        return saved;
+    }
+
+    private static string StepValue(LearningStep step) => step.ToString().ToLowerInvariant();
 
     private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
         ? "/communication-voice-practice"
         : IsCommunicationLessonTwo ? "/communication-roleplay"
         : UserId == 0 ? "/communication-quiz" : $"/roadmap/game/{UserId}/{ItemId}");
+
+    private async Task CompleteScenarioAsync(int optionIndex)
+    {
+        selectedScenarioOption = optionIndex;
+        if (item is null || UserId <= 0 || ItemId <= 0 || item.IsScenarioCompleted)
+            return;
+
+        if (await RoadmapService.MarkScenarioCompleteAsync(ItemId, UserId))
+        {
+            item.IsScenarioCompleted = true;
+            item.ScenarioCompletedAtUtc = DateTime.UtcNow;
+        }
+    }
+
+    private async Task SaveReflectionAsync()
+    {
+        if (item is null || UserId <= 0 || ItemId <= 0 || string.IsNullOrWhiteSpace(reflectionText))
+            return;
+
+        savingReflection = true;
+        reflectionMessage = string.Empty;
+        if (await RoadmapService.SaveReflectionAsync(ItemId, UserId, reflectionText))
+        {
+            item.ReflectionText = reflectionText.Trim();
+            item.IsReflectionCompleted = true;
+            item.ReflectionCompletedAtUtc ??= DateTime.UtcNow;
+            item.IsCompleted = item.IsVideoCompleted && item.IsPracticeCompleted && item.IsScenarioCompleted && item.IsReflectionCompleted;
+            reflectionMessage = Tx("Reflection saved. This week is now complete.", "Đã lưu phản tư. Tuần học hiện đã hoàn thành.");
+        }
+        else
+        {
+            reflectionMessage = Tx("Could not save your reflection. Please try again.", "Không thể lưu phản tư. Vui lòng thử lại.");
+        }
+        savingReflection = false;
+    }
 
     private void GoToPreviousLesson()
     {
@@ -405,8 +548,22 @@
 
     private void BackToRoadmap() => Nav.NavigateTo(UserId == 0 ? "/roadmap" : $"/roadmap/{UserId}");
 
-    private enum LearningStep { Video, Script, Summary, Quiz }
+    private string ScenarioPrompt => SkillKey(item!) switch
+    {
+        "time" => Tx("Your group project is due tomorrow, but several tasks are still unfinished and new messages keep interrupting you. What should you do first?", "Dự án nhóm đến hạn vào ngày mai nhưng vẫn còn nhiều việc chưa xong và tin nhắn liên tục làm bạn gián đoạn. Bạn nên làm gì trước?"),
+        "communication" => Tx("A teammate misunderstands your feedback and becomes defensive. How should you respond?", "Một thành viên hiểu sai góp ý của bạn và trở nên phòng thủ. Bạn nên phản hồi thế nào?"),
+        _ => Tx("You receive two conflicting sources for an important assignment. What is the best next step?", "Bạn nhận được hai nguồn thông tin mâu thuẫn cho một bài tập quan trọng. Bước tiếp theo phù hợp nhất là gì?")
+    };
+    private IReadOnlyList<ScenarioOption> ScenarioOptions =>
+    [
+        new(Tx("Pause and prioritize", "Dừng lại và xác định ưu tiên"), Tx("Clarify the goal, rank the remaining tasks, and focus on the highest-impact action.", "Làm rõ mục tiêu, xếp hạng việc còn lại và tập trung vào hành động có tác động lớn nhất.")),
+        new(Tx("React immediately", "Phản ứng ngay lập tức"), Tx("Handle every new request as soon as it appears, without reviewing priorities.", "Xử lý mọi yêu cầu mới ngay khi xuất hiện mà không xem lại mức độ ưu tiên.")),
+        new(Tx("Avoid the situation", "Tránh tình huống"), Tx("Wait for someone else to decide what should happen next.", "Chờ người khác quyết định bước tiếp theo.") )
+    ];
+
+    private enum LearningStep { Video, Script, Summary, Quiz, Scenario, Reflection }
     private sealed record LearningStepDisplay(int Number, LearningStep Value, string Label);
+    private sealed record ScenarioOption(string Title, string Description);
 }
 
 <style>
@@ -416,7 +573,7 @@
     }
     .learning-stepper {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 8px;
         margin: 18px 0 22px;
     }
@@ -517,6 +674,25 @@
     .guided-empty i { color: var(--primary); font-size: 2rem; }
     .guided-summary > p { margin: 24px 0; font-size: 1.05rem; }
     .summary-callout { display: flex; align-items: center; gap: 10px; padding: 16px; color: #5145a5; border-radius: 14px; background: rgba(99,102,241,.08); }
+    .scenario-prompt { margin: 22px 0 16px; color: #475569; font-size: 1rem; line-height: 1.65; }
+    .scenario-options { display: grid; gap: 10px; }
+    .scenario-options button { display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 14px; color: #334155; border: 1px solid rgba(99,102,241,.16); border-radius: 15px; background: #fff; text-align: left; }
+    .scenario-options button:hover,.scenario-options button.selected { border-color: rgba(99,102,241,.55); background: rgba(99,102,241,.07); }
+    .scenario-options button>span { display: grid; place-items: center; width: 34px; height: 34px; color: var(--primary); border-radius: 10px; background: #eeecff; font-weight: 900; }
+    .scenario-options button div { display: grid; gap: 3px; }
+    .scenario-options button small { color: #64748b; line-height: 1.4; }
+    .scenario-options button>i { color: #16a66b; }
+    .scenario-feedback { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 13px 15px; color: #137c53; border-radius: 13px; background: rgba(16,185,129,.09); }
+    .guided-reflection>p { margin: 22px 0 12px; color: #64748b; line-height: 1.65; }
+    .guided-reflection textarea { width: 100%; padding: 15px; color: #334155; border: 1px solid rgba(99,102,241,.22); border-radius: 15px; background: rgba(255,255,255,.85); resize: vertical; outline: none; }
+    .guided-reflection textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+    .reflection-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+    .reflection-meta span { color: #94a3b8; font-size: .75rem; }
+    .reflection-meta button { display: inline-flex; align-items: center; gap: 7px; padding: 10px 15px; color: #fff; border: 0; border-radius: 10px; background: var(--primary); font-weight: 800; }
+    .reflection-meta button:disabled { opacity: .5; cursor: not-allowed; }
+    .reflection-message { margin-top: 12px; padding: 11px 13px; border-radius: 10px; font-size: .85rem; }
+    .reflection-message.success { color: #137c53; background: rgba(16,185,129,.09); }
+    .reflection-message.error { color: #b42318; background: rgba(239,68,68,.08); }
 
     .lecture-complete {
         min-height: 320px;
@@ -569,7 +745,7 @@
     .continue-hint { display: block; margin-top: 9px; color: #8a94a7; text-align: right; }
     @@media (max-width: 560px) {
         .lecture-video-caption { align-items: flex-start; flex-direction: column; gap: 6px; }
-        .learning-stepper { grid-template-columns: repeat(4, minmax(54px,1fr)); }
+        .learning-stepper { grid-template-columns: repeat(6, minmax(42px,1fr)); overflow-x: auto; }
         .learning-stepper button { justify-content: center; padding: 9px 5px; }
         .learning-stepper button small { display: none; }
         .guided-content { min-height: 280px; padding: 18px; }

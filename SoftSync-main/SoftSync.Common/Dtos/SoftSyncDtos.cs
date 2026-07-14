@@ -75,8 +75,16 @@ public class RoadmapItemDto
     public string Description { get; set; } = string.Empty;
     public bool IsVideoCompleted { get; set; }
     public bool IsPracticeCompleted { get; set; }
+    public bool IsScenarioCompleted { get; set; }
+    public bool IsReflectionCompleted { get; set; }
     public DateTime? VideoCompletedAtUtc { get; set; }
+    public DateTime? ScriptCompletedAtUtc { get; set; }
+    public DateTime? SummaryCompletedAtUtc { get; set; }
     public DateTime? PracticeCompletedAtUtc { get; set; }
+    public DateTime? ScenarioCompletedAtUtc { get; set; }
+    public DateTime? ReflectionCompletedAtUtc { get; set; }
+    public string ReflectionText { get; set; } = string.Empty;
+    public string LastLearningStep { get; set; } = "video";
     public bool IsCompleted { get; set; }
 }
 

@@ -153,8 +153,20 @@ public class RoadmapItem
     public string Description { get; set; } = string.Empty;
     /// <summary>Set when the learner reaches the end of the linked video.</summary>
     public DateTime? VideoCompletedAtUtc { get; set; }
+    public DateTime? ScriptCompletedAtUtc { get; set; }
+    public DateTime? SummaryCompletedAtUtc { get; set; }
     /// <summary>Set when the learner passes the linked quiz/practice activity.</summary>
     public DateTime? PracticeCompletedAtUtc { get; set; }
+    /// <summary>Set when the learner completes the applied scenario step.</summary>
+    public DateTime? ScenarioCompletedAtUtc { get; set; }
+    /// <summary>The learner's reflection after completing the weekly activities.</summary>
+    [MaxLength(2000)]
+    public string? ReflectionText { get; set; }
+    /// <summary>Set when a non-empty reflection is saved.</summary>
+    public DateTime? ReflectionCompletedAtUtc { get; set; }
+    /// <summary>Last unlocked learning step, used to resume the lesson after signing in again.</summary>
+    [MaxLength(20)]
+    public string LastLearningStep { get; set; } = "video";
     public bool IsCompleted { get; set; }
 }
 

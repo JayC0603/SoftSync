@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SoftSync.DAL.Data;
@@ -11,9 +12,11 @@ using SoftSync.DAL.Data;
 namespace SoftSync.DAL.Migrations
 {
     [DbContext(typeof(SoftSyncDbContext))]
-    partial class SoftSyncDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260714141840_PersistRoadmapLearningPosition")]
+    partial class RoadmapScenarioAndReflection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2862,11 +2865,6 @@ namespace SoftSync.DAL.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("LastLearningStep")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
                     b.Property<DateTime?>("PracticeCompletedAtUtc")
                         .HasColumnType("timestamp without time zone");
 
@@ -2878,12 +2876,6 @@ namespace SoftSync.DAL.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime?>("ScenarioCompletedAtUtc")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("ScriptCompletedAtUtc")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("SummaryCompletedAtUtc")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")

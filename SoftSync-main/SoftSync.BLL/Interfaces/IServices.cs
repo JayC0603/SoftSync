@@ -53,6 +53,9 @@ public interface IRoadmapService
     Task<RoadmapDto> GetUserRoadmapAsync(int userId);
     Task<bool> MarkVideoCompleteAsync(int itemId, int userId);
     Task<bool> MarkCompleteAsync(int itemId, int userId);
+    Task<bool> MarkScenarioCompleteAsync(int itemId, int userId);
+    Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText);
+    Task<bool> SaveLearningStepAsync(int itemId, int userId, string step);
 }
 
 public interface IProgressService

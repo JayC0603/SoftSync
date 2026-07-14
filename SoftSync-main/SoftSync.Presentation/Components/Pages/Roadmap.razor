@@ -236,15 +236,17 @@
 
                             <article class="pr-module @ModuleState(2)">
                                 <span class="pr-module-icon"><i class="bi bi-chat-dots-fill"></i></span>
-                                <span class="pr-module-copy"><b>@Tx("Applied scenario practice", "Thực hành tình huống")</b><small>20 @Tx("minutes", "phút")</small></span>
-                                @if (SelectedItem.IsCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
+                                <span class="pr-module-copy"><b>@Tx("Applied scenario practice", "Thực hành tình huống")</b><small class="@(SelectedItem.IsScenarioCompleted ? "pr-saved-copy" : null)">@(SelectedItem.IsScenarioCompleted ? Tx("Completed · Saved", "Hoàn thành · Đã lưu") : $"20 {Tx("minutes", "phút")}")</small></span>
+                                @if (SelectedItem.IsScenarioCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
+                                else if (RoadmapReviewMode.Enabled || SelectedItem.IsPracticeCompleted) { <button class="pr-continue" @onclick="OpenScenario">@Tx("Start", "Bắt đầu")</button> }
                                 else { <i class="bi bi-lock-fill pr-lock"></i> }
                             </article>
 
                             <article class="pr-module @ModuleState(3)">
                                 <span class="pr-module-icon"><i class="bi bi-journal-check"></i></span>
-                                <span class="pr-module-copy"><b>@Tx("Reflection and feedback", "Phản tư và nhận phản hồi")</b><small>15 @Tx("minutes", "phút")</small></span>
-                                @if (SelectedItem.IsCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
+                                <span class="pr-module-copy"><b>@Tx("Reflection and feedback", "Phản tư và nhận phản hồi")</b><small class="@(SelectedItem.IsReflectionCompleted ? "pr-saved-copy" : null)">@(SelectedItem.IsReflectionCompleted ? Tx("Saved", "Đã lưu") : $"15 {Tx("minutes", "phút")}")</small></span>
+                                @if (SelectedItem.IsReflectionCompleted) { <i class="bi bi-check-circle-fill pr-done"></i> }
+                                else if (RoadmapReviewMode.Enabled || SelectedItem.IsScenarioCompleted) { <button class="pr-continue" @onclick="OpenReflection">@Tx("Start", "Bắt đầu")</button> }
                                 else { <i class="bi bi-lock-fill pr-lock"></i> }
                             </article>
                         </div>
@@ -326,7 +328,7 @@
     private int PlannedMinutes => 52;
     private int CompletedCount => items.Count(x => x.IsCompleted);
     private int OverallPercent => items.Count == 0 ? 0 : CompletedCount * 100 / items.Count;
-    private int CompletedActivities => CompletedCount * 4;
+    private int CompletedActivities => items.Sum(x => (x.IsVideoCompleted ? 1 : 0) + (x.IsPracticeCompleted ? 1 : 0) + (x.IsScenarioCompleted ? 1 : 0) + (x.IsReflectionCompleted ? 1 : 0));
     private int TotalActivities => items.Count * 4;
     private int ActivityDays => Math.Min(CompletedCount, 7);
     private int StreakDays => Math.Min(CompletedCount, 7);
@@ -403,13 +405,15 @@
     private string ModuleState(int moduleIndex)
     {
         if (RoadmapReviewMode.Enabled)
-            return moduleIndex switch { 0 when SelectedItem.IsVideoCompleted => "done", 1 when SelectedItem.IsPracticeCompleted => "done", _ => "current" };
+            return moduleIndex switch { 0 when SelectedItem.IsVideoCompleted => "done", 1 when SelectedItem.IsPracticeCompleted => "done", 2 when SelectedItem.IsScenarioCompleted => "done", 3 when SelectedItem.IsReflectionCompleted => "done", _ => "current" };
         if (selectedIndex > ActiveIndex) return "locked";
         return moduleIndex switch
         {
             0 => SelectedItem.IsVideoCompleted ? "done" : "current",
             1 => SelectedItem.IsPracticeCompleted ? "done" : SelectedItem.IsVideoCompleted ? "current" : "locked",
-            _ => SelectedItem.IsCompleted ? "done" : "locked"
+            2 => SelectedItem.IsScenarioCompleted ? "done" : SelectedItem.IsPracticeCompleted ? "current" : "locked",
+            3 => SelectedItem.IsReflectionCompleted ? "done" : SelectedItem.IsScenarioCompleted ? "current" : "locked",
+            _ => "locked"
         };
     }
 
@@ -511,6 +515,9 @@
         var route = PracticeRoute(SelectedItem);
         if (!string.IsNullOrWhiteSpace(route)) Nav.NavigateTo(route);
     }
+
+    private void OpenScenario() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{SelectedItem.Id}?step=scenario");
+    private void OpenReflection() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{SelectedItem.Id}?step=reflection");
 
     private string DayClass(int day)
     {

@@ -33,17 +33,17 @@
             </div>
             <div class="game-complete-copy">
                 <div class="game-empty-badge">Game 1</div>
-                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">@Tx("Week completed", "Tuần học đã hoàn thành")</h2>
+                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">@Tx("Quiz completed", "Đã hoàn thành Quiz")</h2>
                 <p class="text-muted tw:mb-0">
-                    @Tx("Your video and quiz results are saved. You can review this lesson anytime.", "Kết quả video và Quiz đã được lưu. Bạn có thể xem lại bài học bất cứ lúc nào.")
+                    @Tx("Your result is saved. Continue to the applied scenario before completing this week.", "Kết quả đã được lưu. Hãy tiếp tục đến tình huống ứng dụng trước khi hoàn thành tuần học.")
                 </p>
             </div>
             <nav class="game-complete-navigation tw:mt-4">
                 <button class="game-nav-back" @onclick="BackToSummary">
                     <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
                 </button>
-                <button class="ss-btn-primary game-nav-next" @onclick="GoToNextWeek">
-                    @(NextItem is null ? Tx("Finish roadmap", "Hoàn thành lộ trình") : Tx("Next week", "Tuần tiếp theo")) <i class="bi bi-arrow-right"></i>
+                <button class="ss-btn-primary game-nav-next" @onclick="GoToScenario">
+                    @Tx("Next: Scenario", "Tiếp theo: Tình huống") <i class="bi bi-arrow-right"></i>
                 </button>
             </nav>
         </div>
@@ -215,8 +215,8 @@
                                 <button class="game-nav-back" @onclick="BackToSummary">
                                     <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
                                 </button>
-                                <button class="ss-btn-primary game-nav-next" @onclick="GoToNextWeek">
-                                    @(NextItem is null ? Tx("Finish roadmap", "Hoàn thành lộ trình") : Tx("Next week", "Tuần tiếp theo")) <i class="bi bi-arrow-right"></i>
+                                <button class="ss-btn-primary game-nav-next" @onclick="GoToScenario">
+                                    @Tx("Next: Scenario", "Tiếp theo: Tình huống") <i class="bi bi-arrow-right"></i>
                                 </button>
                             </nav>
                         }
@@ -403,7 +403,7 @@
             {
                 item.IsPracticeCompleted = true;
                 item.PracticeCompletedAtUtc = DateTime.UtcNow;
-                item.IsCompleted = item.IsVideoCompleted;
+                item.IsCompleted = item.IsVideoCompleted && item.IsScenarioCompleted && item.IsReflectionCompleted;
             }
         }
     }
@@ -418,11 +418,7 @@
 
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
     private void BackToSummary() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=summary");
-    private void GoToNextWeek()
-    {
-        if (NextItem is null) { Nav.NavigateTo($"/roadmap/{UserId}"); return; }
-        Nav.NavigateTo($"/roadmap/lecture/{UserId}/{NextItem.Id}");
-    }
+    private void GoToScenario() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=scenario");
     private void BackToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
 
     private sealed record GameReviewRow(string QuestionText, string SelectedKey, string SelectedText, string CorrectKey, string CorrectText, bool IsCorrect);

@@ -366,8 +366,16 @@ public class RoadmapService : IRoadmapService
                 // treat them as fully complete so their green ticks are preserved.
                 IsVideoCompleted = i.IsCompleted || i.VideoCompletedAtUtc.HasValue,
                 IsPracticeCompleted = i.IsCompleted || i.PracticeCompletedAtUtc.HasValue,
+                IsScenarioCompleted = i.IsCompleted || i.ScenarioCompletedAtUtc.HasValue,
+                IsReflectionCompleted = i.IsCompleted || i.ReflectionCompletedAtUtc.HasValue,
                 VideoCompletedAtUtc = i.VideoCompletedAtUtc,
+                ScriptCompletedAtUtc = i.ScriptCompletedAtUtc,
+                SummaryCompletedAtUtc = i.SummaryCompletedAtUtc,
                 PracticeCompletedAtUtc = i.PracticeCompletedAtUtc,
+                ScenarioCompletedAtUtc = i.ScenarioCompletedAtUtc,
+                ReflectionCompletedAtUtc = i.ReflectionCompletedAtUtc,
+                ReflectionText = i.ReflectionText ?? string.Empty,
+                LastLearningStep = i.LastLearningStep,
                 IsCompleted = i.IsCompleted
             }).ToList()
         };
@@ -438,10 +446,95 @@ public class RoadmapService : IRoadmapService
     public Task<bool> MarkCompleteAsync(int itemId, int userId)
         => MarkActivityCompleteAsync(itemId, userId, isVideo: false);
 
+    public async Task<bool> MarkScenarioCompleteAsync(int itemId, int userId)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !item.PracticeCompletedAtUtc.HasValue)
+            return false;
+
+        var changed = false;
+        if (!item.ScenarioCompletedAtUtc.HasValue)
+        {
+            item.ScenarioCompletedAtUtc = DateTime.UtcNow;
+            changed = true;
+        }
+
+        return await PersistActivityAsync(item, changed);
+    }
+
+    public async Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText)
+    {
+        var value = reflectionText?.Trim() ?? string.Empty;
+        if (value.Length == 0 || value.Length > 2000)
+            return false;
+
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !item.ScenarioCompletedAtUtc.HasValue)
+            return false;
+
+        var changed = !string.Equals(item.ReflectionText, value, StringComparison.Ordinal)
+            || !item.ReflectionCompletedAtUtc.HasValue;
+        item.ReflectionText = value;
+        item.ReflectionCompletedAtUtc ??= DateTime.UtcNow;
+        return await PersistActivityAsync(item, changed);
+    }
+
+    public async Task<bool> SaveLearningStepAsync(int itemId, int userId, string step)
+    {
+        var normalized = step?.Trim().ToLowerInvariant() ?? string.Empty;
+        var stepIndex = Array.IndexOf(LearningStepOrder, normalized);
+        if (stepIndex < 0)
+            return false;
+
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !CanOpenStep(item, normalized))
+            return false;
+
+        var now = DateTime.UtcNow;
+        var changed = false;
+        if (normalized == "summary" && !item.ScriptCompletedAtUtc.HasValue)
+        {
+            item.ScriptCompletedAtUtc = now;
+            changed = true;
+        }
+        if (normalized == "quiz" && !item.SummaryCompletedAtUtc.HasValue)
+        {
+            item.SummaryCompletedAtUtc = now;
+            changed = true;
+        }
+        if (!string.Equals(item.LastLearningStep, normalized, StringComparison.Ordinal))
+        {
+            item.LastLearningStep = normalized;
+            changed = true;
+        }
+        if (changed)
+            await _roadmapRepo.SaveChangesAsync();
+
+        return true;
+    }
+
+    private static readonly string[] LearningStepOrder = ["video", "script", "summary", "quiz", "scenario", "reflection"];
+
+    private static bool CanOpenStep(RoadmapItem item, string step) => item.IsCompleted || step switch
+    {
+        "video" => true,
+        "script" => item.VideoCompletedAtUtc.HasValue,
+        "summary" => item.ScriptCompletedAtUtc.HasValue
+            || string.Equals(item.LastLearningStep, "script", StringComparison.OrdinalIgnoreCase),
+        "quiz" => item.SummaryCompletedAtUtc.HasValue
+            || string.Equals(item.LastLearningStep, "summary", StringComparison.OrdinalIgnoreCase),
+        "scenario" => item.PracticeCompletedAtUtc.HasValue,
+        "reflection" => item.ScenarioCompletedAtUtc.HasValue,
+        _ => false
+    };
+
     private async Task<bool> MarkActivityCompleteAsync(int itemId, int userId, bool isVideo)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
         if (item is null || item.UserId != userId)
+            return false;
+
+        if (!isVideo && (!item.VideoCompletedAtUtc.HasValue || !item.SummaryCompletedAtUtc.HasValue))
             return false;
 
         var now = DateTime.UtcNow;
@@ -451,15 +544,22 @@ public class RoadmapService : IRoadmapService
             item.VideoCompletedAtUtc = now;
             activityChanged = true;
         }
-        else if (!isVideo && !item.PracticeCompletedAtUtc.HasValue)
+        else if (!isVideo && item.VideoCompletedAtUtc.HasValue && !item.PracticeCompletedAtUtc.HasValue)
         {
             item.PracticeCompletedAtUtc = now;
             activityChanged = true;
         }
 
+        return await PersistActivityAsync(item, activityChanged);
+    }
+
+    private async Task<bool> PersistActivityAsync(RoadmapItem item, bool activityChanged)
+    {
         var becameComplete = !item.IsCompleted
             && item.VideoCompletedAtUtc.HasValue
-            && item.PracticeCompletedAtUtc.HasValue;
+            && item.PracticeCompletedAtUtc.HasValue
+            && item.ScenarioCompletedAtUtc.HasValue
+            && item.ReflectionCompletedAtUtc.HasValue;
 
         if (becameComplete)
             item.IsCompleted = true;
