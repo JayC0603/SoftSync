@@ -211,6 +211,7 @@
 @code {
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ItemId { get; set; }
+    [SupplyParameterFromQuery(Name = "step")] public int? RequestedStep { get; set; }
     private RoadmapItemDto? item;
     private bool loading = true;
     private bool isCommunicationLessonOne;
@@ -275,8 +276,17 @@
             isCommunicationLessonOne = communication.FirstOrDefault()?.Id == item.Id;
             currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
-            if (currentStep == 4) StartQuiz();
-            if (currentStep == 5) StartRoleplay();
+            if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
+            if (currentStep == 4 && RequestedStep == 4 && LatestQuiz is not null)
+            {
+                quizScore = LatestQuiz.Score;
+                quizPassed = LatestQuiz.Passed;
+                quizFinished = true;
+            }
+            else if (currentStep == 4) StartQuiz();
+            if (currentStep == 5 && RequestedStep == 5 && LatestRoleplay is not null)
+                roleplayResult = LatestRoleplay;
+            else if (currentStep == 5) StartRoleplay();
             LoadReflection();
         }
         loading = false;
