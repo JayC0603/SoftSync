@@ -1,6 +1,7 @@
 @page "/progress"
 @page "/progress/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [StreamRendering]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
@@ -67,7 +68,27 @@
  private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
  private sealed record LearningModule(string Type,string NameEn,string NameVi,string Route);
  private sealed record LearningTrack(string NameEn,string NameVi,string Icon,string SummaryEn,string SummaryVi,string[] Keys,List<LearningModule> Modules);
- private static readonly List<LearningTrack> Tracks = [];
+ private static readonly List<LearningTrack> Tracks =
+ [
+  new("Communication", "Giao tiếp", "bi-chat-dots", "Build confident communication through listening, feedback and practice.", "Rèn luyện giao tiếp tự tin qua lắng nghe, phản hồi và thực hành.", ["communication", "giao tiếp"],
+  [
+   new("Video", "Communication foundations", "Nền tảng giao tiếp", "/roadmap"),
+   new("Lesson", "Active listening", "Lắng nghe chủ động", "/roadmap"),
+   new("Quiz", "Communication situations", "Tình huống giao tiếp", "/roadmap")
+  ]),
+  new("Time management", "Quản lý thời gian", "bi-clock-history", "Plan priorities and build a sustainable study rhythm.", "Lập kế hoạch ưu tiên và xây dựng nhịp học bền vững.", ["time", "thời gian"],
+  [
+   new("Video", "Time management foundations", "Nền tảng quản lý thời gian", "/roadmap"),
+   new("Game", "Eisenhower Matrix", "Ma trận Eisenhower", "/roadmap"),
+   new("Quiz", "Priority challenge", "Thử thách ưu tiên", "/roadmap")
+  ]),
+  new("Critical thinking", "Tư duy phản biện", "bi-lightbulb", "Analyze information, arguments and decisions more clearly.", "Phân tích thông tin, lập luận và quyết định rõ ràng hơn.", ["critical", "phản biện"],
+  [
+   new("Video", "Thinking foundations", "Nền tảng tư duy", "/roadmap"),
+   new("Lesson", "Argument mapping", "Bản đồ lập luận", "/roadmap"),
+   new("Quiz", "Reasoning challenge", "Thử thách lập luận", "/roadmap")
+  ])
+ ];
 }
 
 <style>

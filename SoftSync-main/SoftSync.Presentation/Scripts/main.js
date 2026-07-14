@@ -158,3 +158,24 @@ window.ssTheme = {
 
 // Apply saved theme as early as the bundle runs.
 try { window.ssTheme.init(); } catch { /* ignore */ }
+
+// Accessible text sizing. Stored per browser and applied to the root so all
+// rem-based screens (including Roadmap and Settings) update immediately.
+window.ssFontSize = {
+    apply(scale) {
+        const value = scale === 'small' ? '93.75%' : scale === 'large' ? '112.5%' : '100%';
+        document.documentElement.style.fontSize = value;
+        document.documentElement.setAttribute('data-font-size', scale || 'normal');
+    },
+    set(scale) {
+        try { localStorage.setItem('ss-font-size', scale); } catch { /* ignore */ }
+        this.apply(scale);
+    },
+    init() {
+        let scale = 'normal';
+        try { scale = localStorage.getItem('ss-font-size') || 'normal'; } catch { /* ignore */ }
+        this.apply(scale);
+        return scale;
+    }
+};
+try { window.ssFontSize.init(); } catch { /* ignore */ }

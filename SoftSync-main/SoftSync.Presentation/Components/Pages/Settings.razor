@@ -22,7 +22,16 @@
 @inject ILogger<Settings> Logger
 
 <div class="ss-settings-shell tw:mx-auto">
-    @if (user is null)
+    @if (loadFailed)
+    {
+        <div class="ss-card tw:p-8 tw:text-center">
+            <i class="bi bi-exclamation-circle tw:text-3xl text-warning"></i>
+            <h3 class="tw:mt-3">@Tx("Settings could not be loaded", "Không thể tải cài đặt")</h3>
+            <p class="text-muted">@Tx("Please reload the page or return to your profile.", "Vui lòng tải lại trang hoặc quay về hồ sơ.")</p>
+            <a class="ss-btn-primary tw:inline-flex tw:px-5 tw:py-2" href="/profile">@Tx("Open profile", "Mở hồ sơ")</a>
+        </div>
+    }
+    else if (user is null)
     {
         <div class="tw:text-center tw:py-12"><div class="spinner-border text-primary" role="status"></div></div>
     }
@@ -394,6 +403,13 @@
                                 }
                             </div>
 
+                            <label class="form-label tw:font-medium">@Tx("Text size", "Cỡ chữ")</label>
+                            <div class="ss-seg tw:mb-4">
+                                <button type="button" class="@(fontScale == "small" ? "active" : "")" @onclick='() => SetFontScale("small")'>@Tx("Small", "Nhỏ")</button>
+                                <button type="button" class="@(fontScale == "normal" ? "active" : "")" @onclick='() => SetFontScale("normal")'>@Tx("Normal", "Vừa")</button>
+                                <button type="button" class="@(fontScale == "large" ? "active" : "")" @onclick='() => SetFontScale("large")'>@Tx("Large", "Lớn")</button>
+                            </div>
+
                             <div class="form-check form-switch tw:mb-2">
                                 <input class="form-check-input" type="checkbox" id="reduceMotion" checked="@user.ReduceMotion"
                                        @onchange="OnReduceMotionChanged" />
@@ -520,6 +536,8 @@
 </style>
 
 @code {
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+
     // Bootstrap Icons has no "crown" glyph, so render a gold crown as inline SVG.
     private static Microsoft.AspNetCore.Components.MarkupString Crown(string cssClass = "") =>
         new($"<svg class=\"ss-crown {cssClass}\" viewBox=\"0 0 576 512\" width=\"1em\" height=\"1em\" aria-hidden=\"true\" focusable=\"false\">" +
@@ -572,6 +590,8 @@
     private string? savedMessage;
     private int toastSeq; // bumped each save so the toast remounts and replays its animation
     private string? avatarError;
+    private bool loadFailed;
+    private string fontScale = "normal";
 
     private bool showSuspend;
     private bool showDelete;
@@ -586,7 +606,16 @@
         email = state.User.FindFirst(ClaimTypes.Email)?.Value ?? state.User.Identity?.Name;
         phone = state.User.FindFirst(ClaimTypes.MobilePhone)?.Value;
 
-        user = await UserService.GetUserByIdAsync(userId);
+        try
+        {
+            user = await UserService.GetUserByIdAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Settings profile failed for user {UserId}", userId);
+            loadFailed = true;
+            return;
+        }
         if (user is null)
         {
             Logger.LogWarning("Settings could not load user profile for authenticated user {UserId}", userId);
@@ -643,6 +672,8 @@
         {
             await JS.InvokeVoidAsync("ssTheme.syncFromServer",
                 user.Theme.ToString().ToLower(), user.ReduceMotion);
+            fontScale = await JS.InvokeAsync<string>("ssFontSize.init");
+            StateHasChanged();
         }
     }
 
@@ -664,6 +695,12 @@
         if (user is null) return;
         user.Theme = th;
         await JS.InvokeVoidAsync("ssTheme.set", th.ToString().ToLower(), user.ReduceMotion);
+    }
+
+    private async Task SetFontScale(string scale)
+    {
+        fontScale = scale;
+        await JS.InvokeVoidAsync("ssFontSize.set", scale);
     }
 
     private async Task OnReduceMotionChanged(ChangeEventArgs e)
