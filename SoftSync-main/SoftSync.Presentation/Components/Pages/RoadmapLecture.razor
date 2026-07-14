@@ -77,9 +77,23 @@
             <div class="tw:mt-8 tw:text-end">
                 @if (item.IsPracticeCompleted)
                 {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled style="opacity:.65; cursor:not-allowed;">
-                        @Tx("Practice completed", "Đã hoàn thành bài luyện tập")
-                    </button>
+                    <nav class="lecture-navigation" aria-label="@Tx("Lesson navigation", "Điều hướng bài học")">
+                        <button class="lecture-nav-back" @onclick="GoToPreviousLesson">
+                            <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
+                        </button>
+                        @if (HasNextLesson)
+                        {
+                            <button class="ss-btn-primary lecture-nav-next" @onclick="GoToNextLesson">
+                                @Tx("Next", "Tiếp theo") <i class="bi bi-arrow-right"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="ss-btn-primary lecture-nav-next" @onclick="BackToRoadmap">
+                                @Tx("Back to roadmap", "Về lộ trình") <i class="bi bi-map"></i>
+                            </button>
+                        }
+                    </nav>
                 }
                 else if (UserId > 0 || IsCommunicationLessonTwo || IsCommunicationLessonThree || !IsCommunicationLessonFour)
                 {
@@ -133,6 +147,10 @@
         : UserId == 0 ? "/videos/communication-mentor-lesson-1.mp4"
         : PersonalizedVideoSource();
     private bool HasVideo => !string.IsNullOrWhiteSpace(VideoSource);
+    private int CurrentItemIndex => item is null ? -1 : roadmapItems.FindIndex(x => x.Id == item.Id);
+    private RoadmapItemDto? PreviousItem => CurrentItemIndex > 0 ? roadmapItems[CurrentItemIndex - 1] : null;
+    private RoadmapItemDto? NextItem => CurrentItemIndex >= 0 && CurrentItemIndex < roadmapItems.Count - 1 ? roadmapItems[CurrentItemIndex + 1] : null;
+    private bool HasNextLesson => UserId > 0 ? NextItem is not null : !IsCommunicationLessonFour;
 
     protected override async Task OnInitializedAsync()
     {
@@ -171,7 +189,11 @@
         }
 
         var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
-        roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+        roadmapItems = roadmap.Items
+            .Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
         item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
             Nav.NavigateTo($"/roadmap/{UserId}", true);
@@ -227,6 +249,42 @@
         ? "/communication-voice-practice"
         : IsCommunicationLessonTwo ? "/communication-roleplay"
         : UserId == 0 ? "/communication-quiz" : $"/roadmap/game/{UserId}/{ItemId}");
+
+    private void GoToPreviousLesson()
+    {
+        if (UserId > 0 && PreviousItem is not null)
+        {
+            Nav.NavigateTo($"/roadmap/lecture/{UserId}/{PreviousItem.Id}");
+            return;
+        }
+
+        if (UserId == 0)
+        {
+            if (IsCommunicationLessonFour) { Nav.NavigateTo("/communication-lesson-3"); return; }
+            if (IsCommunicationLessonThree) { Nav.NavigateTo("/communication-lesson-2"); return; }
+            if (IsCommunicationLessonTwo) { Nav.NavigateTo("/communication-lesson"); return; }
+        }
+
+        BackToRoadmap();
+    }
+
+    private void GoToNextLesson()
+    {
+        if (UserId > 0 && NextItem is not null)
+        {
+            Nav.NavigateTo($"/roadmap/lecture/{UserId}/{NextItem.Id}");
+            return;
+        }
+
+        if (UserId == 0)
+        {
+            if (IsCommunicationLessonTwo) { Nav.NavigateTo("/communication-lesson-3"); return; }
+            if (IsCommunicationLessonThree) { Nav.NavigateTo("/communication-lesson-4"); return; }
+            if (!IsCommunicationLessonFour) { Nav.NavigateTo("/communication-lesson-2"); return; }
+        }
+
+        BackToRoadmap();
+    }
 
     private void BackToRoadmap() => Nav.NavigateTo(UserId == 0 ? "/roadmap" : $"/roadmap/{UserId}");
 }
@@ -308,7 +366,30 @@
     .lecture-complete--compact i { font-size: 1.6rem; }
     .lecture-complete--compact div { display: flex; flex-direction: column; }
     .lecture-complete--compact span { font-size: .82rem; }
+    .lecture-navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .lecture-navigation button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 132px;
+        padding: 12px 22px;
+        border-radius: 12px;
+        font-weight: 800;
+    }
+    .lecture-nav-back {
+        color: var(--primary);
+        border: 1px solid rgba(99, 102, 241, .3);
+        background: rgba(255, 255, 255, .82);
+    }
+    .lecture-nav-next { border: 0; }
     @@media (max-width: 560px) {
         .lecture-video-caption { align-items: flex-start; flex-direction: column; gap: 6px; }
+        .lecture-navigation button { min-width: 0; flex: 1; padding-inline: 14px; }
     }
 </style>
