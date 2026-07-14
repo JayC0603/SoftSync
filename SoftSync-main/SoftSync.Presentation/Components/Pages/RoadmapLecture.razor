@@ -71,7 +71,7 @@
             else if (currentStep == LearningStep.Script)
             {
                 <article class="guided-content guided-script">
-                    <header><i class="bi bi-file-earmark-text-fill"></i><div><small>VIDEO @DisplayWeekNumber · SCRIPT</small><h3>@(IsTimeManagementVideoOne ? Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") : DisplayTitle)</h3></div></header>
+                    <header><i class="bi bi-file-earmark-text-fill"></i><div><small>VIDEO @DisplayWeekNumber · SCRIPT</small><h3>@(IsListeningVideoTwo ? Tx("Introduction to Listening Skills", "Giới thiệu về kỹ năng lắng nghe") : IsTimeManagementVideoOne ? Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") : DisplayTitle)</h3></div></header>
                     @if (IsTimeManagementVideoOne)
                     {
                         <section>
@@ -104,6 +104,46 @@
                             <p>@Tx("Developing communication skills is a long journey that requires patience and self-adjustment. Strong communication helps you learn more effectively and make a professional impression on future employers.", "Việc rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Khi bạn giao tiếp tốt, bạn không chỉ học tập hiệu quả hơn mà còn tạo được ấn tượng chuyên nghiệp trong mắt nhà tuyển dụng tương lai.")</p>
                         </section>
                     }
+                    else if (IsListeningVideoTwo)
+                    {
+                        <section>
+                            <p>@Tx("Listening is not merely receiving sound. It is an active process of understanding and sharing meaning with others. Effective communication is a two-way street, so genuine connection starts with understanding the other person's message.", "Lắng nghe không chỉ là việc tiếp nhận âm thanh, mà là một quá trình chủ động nhằm thấu hiểu và chia sẻ ý nghĩa với người khác. Đây là kỹ năng nền tảng vì giao tiếp hiệu quả luôn là “con đường hai chiều”: bạn không thể kết nối tốt nếu không hiểu thông điệp của đối phương.")</p>
+                        </section>
+                        <section>
+                            <h4>@Tx("1. Hearing versus listening", "1. Phân biệt giữa “Nghe” và “Lắng nghe”")</h4>
+                            <ul>
+                                <li><strong>@Tx("Hearing:", "Nghe (Hearing):")</strong> @Tx("A passive physical response of the ears to sound.", "Là phản xạ vật lý thụ động của tai đối với âm thanh.")</li>
+                                <li><strong>@Tx("Listening:", "Lắng nghe (Listening):")</strong> @Tx("An active mental process that requires concentration to interpret and remember information. You may hear a lecture, but without listening you will not truly understand it.", "Là một quá trình tâm lý chủ động, đòi hỏi sự tập trung để diễn giải và ghi nhớ thông tin. Bạn có thể nghe thấy tiếng giảng bài nhưng nếu không lắng nghe, bạn sẽ không thực sự hiểu nội dung đó.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("2. Principles of active listening", "2. Các nguyên tắc của Lắng nghe chủ động")</h4>
+                            <ul>
+                                <li><strong>@Tx("Stop talking:", "Ngừng nói:")</strong> @Tx("You cannot listen while talking or rehearsing your answer in your head.", "Bạn không thể lắng nghe khi đang mải nói hoặc chuẩn bị sẵn câu trả lời trong đầu.")</li>
+                                <li><strong>@Tx("Remove distractions:", "Loại bỏ xao nhãng:")</strong> @Tx("Put away your phone, turn off music, and focus completely on the speaker.", "Cất điện thoại, tắt nhạc và tập trung hoàn toàn vào người đối diện.")</li>
+                                <li><strong>@Tx("Show empathy:", "Thấu cảm (Empathy):")</strong> @Tx("Try to understand the speaker's emotions and perspective before judging or giving advice.", "Cố gắng hiểu cảm xúc và góc nhìn của người nói thay vì vội vàng phán xét hay đưa ra lời khuyên.")</li>
+                                <li><strong>@Tx("Confirm the message:", "Xác nhận lại thông tin:")</strong> @Tx("Repeat or summarize what you heard to make sure you understood correctly.", "Nhắc lại hoặc tóm tắt những gì bạn vừa nghe để đảm bảo mình đã hiểu đúng ý đối phương.")</li>
+                                <li><strong>@Tx("Notice nonverbal cues:", "Chú ý tín hiệu phi ngôn ngữ:")</strong> @Tx("Observe eye contact, facial expressions, and gestures because they often reveal feelings more clearly than words.", "Quan sát ánh mắt, nét mặt và cử chỉ tay vì chúng thường phản ánh cảm xúc thật hơn cả lời nói.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("3. Effective listening in class", "3. Bí quyết lắng nghe hiệu quả trong lớp học")</h4>
+                            <ul>
+                                <li><strong>@Tx("Choose your seat:", "Chọn vị trí ngồi:")</strong> @Tx("Sitting near the front helps maintain eye contact and reduces distractions.", "Ngồi ở những bàn đầu giúp bạn duy trì tương tác mắt với giảng viên và giảm thiểu sự xao nhãng.")</li>
+                                <li><strong>@Tx("Recognize lecturer signals:", "Nhận diện tín hiệu từ giảng viên:")</strong> @Tx("Repeated ideas, a change in tone, or notes on the board often signal important content.", "Chú ý khi giảng viên lặp lại một ý tưởng, thay đổi tông giọng hoặc viết lên bảng—đây thường là nội dung quan trọng.")</li>
+                                <li><strong>@Tx("Ask questions:", "Đặt câu hỏi:")</strong> @Tx("Questions clarify uncertainty and show that you are actively processing information.", "Đặt câu hỏi giúp làm rõ điểm chưa hiểu và thể hiện bạn đang thực sự xử lý thông tin.")</li>
+                                <li><strong>@Tx("Take notes:", "Ghi chú (Note-taking):")</strong> @Tx("Note-taking keeps your attention on key ideas and supports later recall.", "Ghi chép giúp duy trì sự tập trung vào các điểm chính và hỗ trợ ghi nhớ sau này.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("4. Benefits of strong listening", "4. Lợi ích của việc rèn luyện kỹ năng lắng nghe")</h4>
+                            <ul>
+                                <li><strong>@Tx("Build trust:", "Xây dựng lòng tin:")</strong> @Tx("People feel respected and understood, strengthening relationships with friends and teachers.", "Người khác cảm thấy được tôn trọng và thấu hiểu, giúp quan hệ với bạn bè và thầy cô tốt đẹp hơn.")</li>
+                                <li><strong>@Tx("Support career success:", "Thành công trong sự nghiệp:")</strong> @Tx("Employers value listening because it is foundational to conflict resolution and effective teamwork.", "Nhà tuyển dụng đánh giá cao người biết lắng nghe vì đây là nền tảng để giải quyết xung đột và làm việc nhóm hiệu quả.")</li>
+                            </ul>
+                            <p>@Tx("Good listening takes time and persistence to develop, but it helps you learn better and create a professional impression.", "Lắng nghe giỏi cần thời gian và sự kiên trì để rèn luyện, nhưng sẽ giúp bạn học tập tốt hơn và tạo ấn tượng chuyên nghiệp trong tương lai.")</p>
+                        </section>
+                    }
                     else
                     {
                         <div class="guided-empty"><i class="bi bi-hourglass-split"></i><p>@Tx("This lesson's script will be updated soon.", "Script của bài học này sẽ sớm được cập nhật.")</p></div>
@@ -114,7 +154,19 @@
             {
                 <article class="guided-content guided-summary">
                     <header><i class="bi bi-lightbulb-fill"></i><div><small>@Tx("LESSON SUMMARY", "TÓM TẮT BÀI HỌC")</small><h3>@DisplayTitle</h3></div></header>
-                    <p>@DisplayDescription</p>
+                    @if (IsListeningVideoTwo)
+                    {
+                        <ul>
+                            <li>@Tx("Hearing is passive; listening is an active process of understanding and remembering.", "Nghe là phản xạ thụ động; lắng nghe là quá trình chủ động để hiểu và ghi nhớ.")</li>
+                            <li>@Tx("Active listening requires focus, empathy, confirmation, and attention to nonverbal cues.", "Lắng nghe chủ động cần sự tập trung, thấu cảm, xác nhận lại và chú ý tín hiệu phi ngôn ngữ.")</li>
+                            <li>@Tx("In class, sit strategically, notice lecturer signals, ask questions, and take notes.", "Trong lớp học, hãy chọn vị trí phù hợp, nhận diện tín hiệu giảng viên, đặt câu hỏi và ghi chú.")</li>
+                            <li>@Tx("Strong listening builds trust and supports teamwork, conflict resolution, and career success.", "Lắng nghe tốt giúp xây dựng lòng tin, làm việc nhóm, giải quyết xung đột và phát triển sự nghiệp.")</li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>@DisplayDescription</p>
+                    }
                     <div class="summary-callout"><i class="bi bi-check2-circle"></i><span>@Tx("Review the key ideas, then continue to the quiz to check your understanding.", "Ôn lại các ý chính, sau đó làm Quiz để kiểm tra mức độ hiểu bài.")</span></div>
                 </article>
             }
@@ -232,6 +284,9 @@
     private bool IsTimeManagementVideoOne => item is not null
         && SkillKey(item) == "time"
         && (UserId == 0 ? !IsCommunicationLessonTwo && !IsCommunicationLessonThree && !IsCommunicationLessonFour : SkillLessonOrdinal(item) == 1);
+    private bool IsListeningVideoTwo => item is not null
+        && SkillKey(item) == "communication"
+        && (UserId == 0 ? IsCommunicationLessonTwo : SkillLessonOrdinal(item) == 2);
     private bool CanContinue => currentStep switch
     {
         LearningStep.Video => RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo,
