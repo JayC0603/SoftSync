@@ -37,22 +37,84 @@
                 <span class="badge bg-primary">@DisplaySkillName</span>
             </div>
 
-            @if (HasVideo)
+            <nav class="learning-stepper" aria-label="@Tx("Learning steps", "Các bước học")">
+                @foreach (var step in LearningSteps)
+                {
+                    <button class="@StepClass(step.Value)" @onclick="() => GoToStep(step.Value)">
+                        <span>@(StepIsComplete(step.Value) ? "✓" : step.Number.ToString())</span>
+                        <small>@step.Label</small>
+                    </button>
+                }
+            </nav>
+
+            @if (currentStep == LearningStep.Video)
             {
-                <div class="lecture-video tw:mb-4">
-                    <video controls preload="metadata" playsinline poster="/images/background-softsync.png" @onended="CompleteVideoAsync">
-                        <source src="@VideoSource" type="video/mp4" />
-                        @Tx("Your browser does not support HTML5 video.", "Trình duyệt của bạn không hỗ trợ video HTML5.")
-                    </video>
-                    <div class="lecture-video-caption">
-                        <span><i class="bi bi-play-circle-fill"></i> @Tx("VIDEO LESSON", "VIDEO BÀI GIẢNG")</span>
-                        <div><strong>@DisplaySkillName · @Tx("Lesson", "Bài") @DisplayWeekNumber</strong><small>@Tx("Guided by a SoftSync Mentor", "Video hướng dẫn từ Mentor SoftSync")</small></div>
+                @if (HasVideo)
+                {
+                    <div class="lecture-video tw:mb-4">
+                        <video controls preload="metadata" playsinline poster="/images/background-softsync.png" @onended="CompleteVideoAsync">
+                            <source src="@VideoSource" type="video/mp4" />
+                            @Tx("Your browser does not support HTML5 video.", "Trình duyệt của bạn không hỗ trợ video HTML5.")
+                        </video>
+                        <div class="lecture-video-caption">
+                            <span><i class="bi bi-play-circle-fill"></i> @Tx("VIDEO LESSON", "VIDEO BÀI GIẢNG")</span>
+                            <div><strong>@DisplaySkillName · @Tx("Lesson", "Bài") @DisplayWeekNumber</strong><small>@Tx("Guided by a SoftSync Mentor", "Video hướng dẫn từ Mentor SoftSync")</small></div>
+                        </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="lecture-placeholder tw:mb-4"><i class="bi bi-camera-video-off tw:me-2"></i> @Tx("Video coming soon", "Video đang được cập nhật")</div>
+                }
+            }
+            else if (currentStep == LearningStep.Script)
+            {
+                <article class="guided-content guided-script">
+                    <header><i class="bi bi-file-earmark-text-fill"></i><div><small>VIDEO @DisplayWeekNumber · SCRIPT</small><h3>@DisplayTitle</h3></div></header>
+                    @if (IsCommunicationVideoOne)
+                    {
+                        <section>
+                            <h4>1. Giao tiếp là “con đường hai chiều”</h4>
+                            <p>Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Quá trình này gồm người gửi, thông điệp, kênh truyền tải, người nhận và phản hồi.</p>
+                            <ul>
+                                <li><strong>Người gửi:</strong> Người tạo ra và truyền đạt thông điệp.</li>
+                                <li><strong>Thông điệp:</strong> Nội dung được truyền tải qua lời nói, chữ viết hoặc cử chỉ.</li>
+                                <li><strong>Kênh truyền tải:</strong> Nói trực tiếp, email, điện thoại hoặc mạng xã hội.</li>
+                                <li><strong>Người nhận và phản hồi:</strong> Tiếp nhận, giải mã và hồi đáp để xác nhận mức độ thấu hiểu.</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>2. Các kỹ năng then chốt cho sinh viên</h4>
+                            <ul>
+                                <li><strong>Lắng nghe chủ động:</strong> Tập trung hoàn toàn, không ngắt lời và xác nhận lại nội dung đã nghe.</li>
+                                <li><strong>Giao tiếp phi ngôn ngữ:</strong> Chú ý ánh mắt, điệu bộ, trang phục và tư thế.</li>
+                                <li><strong>Quy tắc ứng xử mạng:</strong> Viết email chuyên nghiệp với tiêu đề rõ ràng và lời chào trang trọng.</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>3. Bí quyết để giao tiếp thành công</h4>
+                            <ul>
+                                <li>Chuẩn bị và sắp xếp ý tưởng logic trước những cuộc trao đổi quan trọng.</li>
+                                <li>Điều chỉnh phong cách theo đối tượng và bối cảnh.</li>
+                                <li>Giao tiếp dựa trên sự tôn trọng, trung thực và công bằng.</li>
+                                <li>Dùng từ ngữ chính xác, dễ hiểu và hạn chế biệt ngữ không cần thiết.</li>
+                            </ul>
+                            <p>Rèn luyện giao tiếp là hành trình cần sự kiên nhẫn và tự điều chỉnh, giúp bạn học tập hiệu quả và tạo ấn tượng chuyên nghiệp.</p>
+                        </section>
+                    }
+                    else
+                    {
+                        <div class="guided-empty"><i class="bi bi-hourglass-split"></i><p>@Tx("This lesson's script will be updated soon.", "Script của bài học này sẽ sớm được cập nhật.")</p></div>
+                    }
+                </article>
             }
             else
             {
-                <div class="lecture-placeholder tw:mb-4"><i class="bi bi-camera-video-off tw:me-2"></i> @Tx("Video coming soon", "Video đang được cập nhật")</div>
+                <article class="guided-content guided-summary">
+                    <header><i class="bi bi-lightbulb-fill"></i><div><small>@Tx("LESSON SUMMARY", "TÓM TẮT BÀI HỌC")</small><h3>@DisplayTitle</h3></div></header>
+                    <p>@DisplayDescription</p>
+                    <div class="summary-callout"><i class="bi bi-check2-circle"></i><span>@Tx("Review the key ideas, then continue to the quiz to check your understanding.", "Ôn lại các ý chính, sau đó làm Quiz để kiểm tra mức độ hiểu bài.")</span></div>
+                </article>
             }
 
             @if (item.IsCompleted)
@@ -70,44 +132,18 @@
                 </div>
             }
 
-            <p class="text-muted tw:mb-0">
-                @DisplayDescription
-            </p>
-
-            <div class="tw:mt-8 tw:text-end">
-                @if (item.IsPracticeCompleted)
-                {
-                    <nav class="lecture-navigation" aria-label="@Tx("Lesson navigation", "Điều hướng bài học")">
-                        <button class="lecture-nav-back" @onclick="GoToPreviousLesson">
-                            <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
-                        </button>
-                        @if (HasNextLesson)
-                        {
-                            <button class="ss-btn-primary lecture-nav-next" @onclick="GoToNextLesson">
-                                @Tx("Next", "Tiếp theo") <i class="bi bi-arrow-right"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="ss-btn-primary lecture-nav-next" @onclick="BackToRoadmap">
-                                @Tx("Back to roadmap", "Về lộ trình") <i class="bi bi-map"></i>
-                            </button>
-                        }
-                    </nav>
-                }
-                else if (UserId > 0 || IsCommunicationLessonTwo || IsCommunicationLessonThree || !IsCommunicationLessonFour)
-                {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="GoToGame">
-                        @L["roadmap.continueToGame"] <i class="bi bi-arrow-right tw:ms-2"></i>
-                    </button>
-                }
-                else
-                {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled title="@L["roadmap.gameUnavailable"]" style="opacity:.65; cursor:not-allowed;">
-                        @L["roadmap.gameUnavailable"]
-                    </button>
-                }
-            </div>
+            <nav class="lecture-navigation tw:mt-8" aria-label="@Tx("Lesson navigation", "Điều hướng bài học")">
+                <button class="lecture-nav-back" @onclick="GoBackStep">
+                    <i class="bi bi-arrow-left"></i> @BackLabel
+                </button>
+                <button class="ss-btn-primary lecture-nav-next" @onclick="GoNextStep" disabled="@(!CanContinue)">
+                    @NextLabel <i class="bi bi-arrow-right"></i>
+                </button>
+            </nav>
+            @if (!CanContinue)
+            {
+                <small class="continue-hint">@Tx("Watch the video to the end to unlock the next step.", "Hãy xem hết video để mở khóa bước tiếp theo.")</small>
+            }
         </div>
     }
 </div>
@@ -115,9 +151,11 @@
 @code {
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ItemId { get; set; }
+    [SupplyParameterFromQuery(Name = "step")] public string? StepName { get; set; }
 
     private RoadmapItemDto? item;
     private List<RoadmapItemDto> roadmapItems = [];
+    private LearningStep currentStep = LearningStep.Video;
     private bool IsCommunicationLessonTwo => Nav.Uri.Contains("/communication-lesson-2", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonFour => Nav.Uri.Contains("/communication-lesson-4", StringComparison.OrdinalIgnoreCase);
@@ -151,9 +189,31 @@
     private RoadmapItemDto? PreviousItem => CurrentItemIndex > 0 ? roadmapItems[CurrentItemIndex - 1] : null;
     private RoadmapItemDto? NextItem => CurrentItemIndex >= 0 && CurrentItemIndex < roadmapItems.Count - 1 ? roadmapItems[CurrentItemIndex + 1] : null;
     private bool HasNextLesson => UserId > 0 ? NextItem is not null : !IsCommunicationLessonFour;
+    private bool IsCommunicationVideoOne => item is not null
+        && SkillKey(item) == "communication"
+        && (UserId == 0 ? !IsCommunicationLessonTwo && !IsCommunicationLessonThree && !IsCommunicationLessonFour : SkillLessonOrdinal(item) == 1);
+    private bool CanContinue => currentStep != LearningStep.Video || item?.IsVideoCompleted == true || !HasVideo;
+    private string BackLabel => currentStep == LearningStep.Video ? Tx("Roadmap", "Lộ trình") : Tx("Back", "Quay lại");
+    private string NextLabel => currentStep switch
+    {
+        LearningStep.Video => Tx("Next: Script", "Tiếp theo: Script"),
+        LearningStep.Script => Tx("Next: Summary", "Tiếp theo: Tóm tắt"),
+        _ when item?.IsPracticeCompleted == true && HasNextLesson => Tx("Next week", "Tuần tiếp theo"),
+        _ when item?.IsPracticeCompleted == true => Tx("Finish roadmap", "Hoàn thành lộ trình"),
+        _ => Tx("Start quiz", "Làm Quiz")
+    };
+    private IEnumerable<LearningStepDisplay> LearningSteps =>
+    [
+        new(1, LearningStep.Video, Tx("Video", "Video")),
+        new(2, LearningStep.Script, Tx("Script", "Script")),
+        new(3, LearningStep.Summary, Tx("Summary", "Tóm tắt")),
+        new(4, LearningStep.Quiz, Tx("Quiz", "Quiz"))
+    ];
 
     protected override async Task OnInitializedAsync()
     {
+        currentStep = ParseStep(StepName);
+
         if (UserId == 0 && ItemId == 0)
         {
             item = new RoadmapItemDto
@@ -230,6 +290,13 @@
     private static bool SameSkill(RoadmapItemDto left, RoadmapItemDto right)
         => string.Equals(left.SkillName, right.SkillName, StringComparison.OrdinalIgnoreCase);
 
+    private int SkillLessonOrdinal(RoadmapItemDto value)
+    {
+        var sameSkill = roadmapItems.Where(x => SameSkill(x, value)).ToList();
+        var index = sameSkill.FindIndex(x => x.Id == value.Id);
+        return index < 0 ? 0 : index + 1;
+    }
+
     private static bool IsPracticeItem(RoadmapItemDto value)
         => value.Title.Contains("Thực hành", StringComparison.OrdinalIgnoreCase)
             || value.Title.Contains("Practice", StringComparison.OrdinalIgnoreCase);
@@ -244,6 +311,54 @@
     }
 
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+
+    private static LearningStep ParseStep(string? value) => value?.ToLowerInvariant() switch
+    {
+        "script" => LearningStep.Script,
+        "summary" => LearningStep.Summary,
+        _ => LearningStep.Video
+    };
+
+    private string StepClass(LearningStep step)
+        => $"{(step == currentStep ? "active" : "")} {(StepIsComplete(step) ? "complete" : "")}";
+
+    private bool StepIsComplete(LearningStep step) => step switch
+    {
+        LearningStep.Video => item?.IsVideoCompleted == true,
+        LearningStep.Script => currentStep > LearningStep.Script || item?.IsPracticeCompleted == true,
+        LearningStep.Summary => item?.IsPracticeCompleted == true,
+        LearningStep.Quiz => item?.IsPracticeCompleted == true,
+        _ => false
+    };
+
+    private void GoToStep(LearningStep step)
+    {
+        if (step == LearningStep.Quiz)
+        {
+            if (item?.IsVideoCompleted == true || !HasVideo) GoToGame();
+            return;
+        }
+
+        if (step > LearningStep.Video && item?.IsVideoCompleted != true && HasVideo)
+            return;
+
+        currentStep = step;
+    }
+
+    private void GoBackStep()
+    {
+        if (currentStep == LearningStep.Video) { BackToRoadmap(); return; }
+        currentStep--;
+    }
+
+    private void GoNextStep()
+    {
+        if (!CanContinue) return;
+        if (currentStep == LearningStep.Video) { currentStep = LearningStep.Script; return; }
+        if (currentStep == LearningStep.Script) { currentStep = LearningStep.Summary; return; }
+        if (item?.IsPracticeCompleted == true) { GoToNextLesson(); return; }
+        GoToGame();
+    }
 
     private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
         ? "/communication-voice-practice"
@@ -287,6 +402,9 @@
     }
 
     private void BackToRoadmap() => Nav.NavigateTo(UserId == 0 ? "/roadmap" : $"/roadmap/{UserId}");
+
+    private enum LearningStep { Video, Script, Summary, Quiz }
+    private sealed record LearningStepDisplay(int Number, LearningStep Value, string Label);
 }
 
 <style>
@@ -294,6 +412,40 @@
     .lecture-shell {
         border-radius: 24px;
     }
+    .learning-stepper {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin: 18px 0 22px;
+    }
+    .learning-stepper button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        color: #64748b;
+        border: 1px solid rgba(99, 102, 241, .14);
+        border-radius: 13px;
+        background: rgba(248, 250, 252, .82);
+        text-align: left;
+    }
+    .learning-stepper button > span {
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        background: #e9e7ff;
+        color: var(--primary);
+        font-size: .7rem;
+        font-weight: 900;
+    }
+    .learning-stepper button small { font-weight: 800; }
+    .learning-stepper button.active { color: var(--primary); border-color: rgba(99,102,241,.4); background: rgba(99,102,241,.08); }
+    .learning-stepper button.active > span { color: #fff; background: var(--primary); }
+    .learning-stepper button.complete > span { color: #fff; background: #22a66f; }
     .lecture-placeholder {
         min-height: 320px;
         border-radius: 22px;
@@ -340,6 +492,29 @@
     }
     .lecture-video-caption div { display: flex; flex-direction: column; }
     .lecture-video-caption small { color: rgba(233, 231, 255, .68); }
+    .guided-content {
+        min-height: 330px;
+        max-height: 520px;
+        padding: 24px;
+        overflow: auto;
+        border: 1px solid rgba(99, 102, 241, .16);
+        border-radius: 22px;
+        background: rgba(255,255,255,.72);
+    }
+    .guided-content > header { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(99,102,241,.12); }
+    .guided-content > header > i { display: grid; place-items: center; width: 42px; height: 42px; color: #fff; border-radius: 13px; background: var(--primary); }
+    .guided-content header small { color: var(--primary); font-size: .68rem; font-weight: 900; letter-spacing: .08em; }
+    .guided-content h3 { margin: 2px 0 0; font-size: 1.15rem; }
+    .guided-script section { padding: 18px 0; border-bottom: 1px solid rgba(99,102,241,.1); }
+    .guided-script section:last-child { border-bottom: 0; }
+    .guided-script h4 { margin: 0 0 9px; font-size: 1rem; }
+    .guided-script p,.guided-script li,.guided-summary p { color: #64748b; line-height: 1.7; }
+    .guided-script ul { display: grid; gap: 7px; margin-bottom: 0; }
+    .guided-script strong { color: #312e63; }
+    .guided-empty { min-height: 230px; display: grid; place-items: center; align-content: center; gap: 8px; color: #64748b; text-align: center; }
+    .guided-empty i { color: var(--primary); font-size: 2rem; }
+    .guided-summary > p { margin: 24px 0; font-size: 1.05rem; }
+    .summary-callout { display: flex; align-items: center; gap: 10px; padding: 16px; color: #5145a5; border-radius: 14px; background: rgba(99,102,241,.08); }
 
     .lecture-complete {
         min-height: 320px;
@@ -388,8 +563,14 @@
         background: rgba(255, 255, 255, .82);
     }
     .lecture-nav-next { border: 0; }
+    .lecture-nav-next:disabled { opacity: .52; cursor: not-allowed; }
+    .continue-hint { display: block; margin-top: 9px; color: #8a94a7; text-align: right; }
     @@media (max-width: 560px) {
         .lecture-video-caption { align-items: flex-start; flex-direction: column; gap: 6px; }
+        .learning-stepper { grid-template-columns: repeat(4, minmax(54px,1fr)); }
+        .learning-stepper button { justify-content: center; padding: 9px 5px; }
+        .learning-stepper button small { display: none; }
+        .guided-content { min-height: 280px; padding: 18px; }
         .lecture-navigation button { min-width: 0; flex: 1; padding-inline: 14px; }
     }
 </style>

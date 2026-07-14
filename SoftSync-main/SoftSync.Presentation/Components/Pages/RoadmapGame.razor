@@ -4,6 +4,7 @@
 @using System.Globalization
 @using System.Text
 @using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
 @inject IGameBankService GameBankService
@@ -12,8 +13,8 @@
 
 <div class="game-page mx-auto">
     <div class="tw:mb-4">
-        <button class="btn btn-link text-muted tw:no-underline tw:px-0" @onclick="BackToRoadmap">
-            <i class="bi bi-arrow-left tw:me-1"></i> @L["roadmap.backToRoadmap"]
+        <button class="btn btn-link text-muted tw:no-underline tw:px-0" @onclick="BackToSummary">
+            <i class="bi bi-arrow-left tw:me-1"></i> @Tx("Back to summary", "Quay lại tóm tắt")
         </button>
     </div>
 
@@ -31,16 +32,19 @@
             </div>
             <div class="game-complete-copy">
                 <div class="game-empty-badge">Game 1</div>
-                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">Bạn đã hoàn thành bài luyện tập</h2>
+                <h2 class="tw:fw-bold tw:mt-3 tw:mb-2">@Tx("Week completed", "Tuần học đã hoàn thành")</h2>
                 <p class="text-muted tw:mb-0">
-                    Kết quả đã được lưu. Hoàn thành cả video để tuần học chuyển sang tích xanh.
+                    @Tx("Your video and quiz results are saved. You can review this lesson anytime.", "Kết quả video và Quiz đã được lưu. Bạn có thể xem lại bài học bất cứ lúc nào.")
                 </p>
             </div>
-            <div class="tw:mt-4">
-                <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="BackToRoadmap">
-                    Quay lại Roadmap <i class="bi bi-arrow-right tw:ms-2"></i>
+            <nav class="game-complete-navigation tw:mt-4">
+                <button class="game-nav-back" @onclick="BackToSummary">
+                    <i class="bi bi-arrow-left"></i> @Tx("Back", "Quay lại")
                 </button>
-            </div>
+                <button class="ss-btn-primary game-nav-next" @onclick="GoToNextWeek">
+                    @(NextItem is null ? Tx("Finish roadmap", "Hoàn thành lộ trình") : Tx("Next week", "Tuần tiếp theo")) <i class="bi bi-arrow-right"></i>
+                </button>
+            </nav>
         </div>
     }
     else if (session is null && loadFailed)
@@ -216,6 +220,7 @@
     [Parameter] public int ItemId { get; set; }
 
     private RoadmapItemDto? item;
+    private List<RoadmapItemDto> roadmapItems = [];
     private Game1SessionDto? session;
     private readonly Dictionary<string, string> selectedOptionIds = new(StringComparer.Ordinal);
     private readonly List<GameReviewRow> reviewRows = new();
@@ -240,7 +245,12 @@
         }
 
         var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
-        item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
+        roadmapItems = roadmap.Items
+            .Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
+        item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
         {
             Nav.NavigateTo($"/roadmap/{UserId}", true);
@@ -308,6 +318,8 @@
     }
 
     private int SelectedCount => selectedOptionIds.Count;
+    private int CurrentItemIndex => roadmapItems.FindIndex(x => x.Id == ItemId);
+    private RoadmapItemDto? NextItem => CurrentItemIndex >= 0 && CurrentItemIndex < roadmapItems.Count - 1 ? roadmapItems[CurrentItemIndex + 1] : null;
     private bool CanSubmit => session is not null && session.Questions.All(q => selectedOptionIds.ContainsKey(q.Id));
     private int ScorePercent => submitted ? (int)Math.Round(correctCount * 100.0 / Math.Max(session?.QuestionLimit ?? 5, 1)) : 0;
     private double ProgressPercent => session is null ? 0 : SelectedCount * 100.0 / session.QuestionLimit;
@@ -392,6 +404,13 @@
         await LoadSessionAsync();
     }
 
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+    private void BackToSummary() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=summary");
+    private void GoToNextWeek()
+    {
+        if (NextItem is null) { Nav.NavigateTo($"/roadmap/{UserId}"); return; }
+        Nav.NavigateTo($"/roadmap/lecture/{UserId}/{NextItem.Id}");
+    }
     private void BackToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
 
     private sealed record GameReviewRow(string QuestionText, string SelectedKey, string SelectedText, string CorrectKey, string CorrectText, bool IsCorrect);
@@ -678,6 +697,10 @@
         color: #059669;
         background: rgba(16, 185, 129, 0.12);
     }
+    .game-complete-navigation { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .game-complete-navigation button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 150px; padding: 12px 22px; border-radius: 12px; font-weight: 800; }
+    .game-nav-back { color: var(--primary); border: 1px solid rgba(99,102,241,.3); background: rgba(255,255,255,.82); }
+    .game-nav-next { border: 0; }
 
     @@media (max-width: 992px) {
         .game-hero,
@@ -688,5 +711,8 @@
         .game-side {
             position: static;
         }
+    }
+    @@media (max-width: 560px) {
+        .game-complete-navigation button { min-width: 0; flex: 1; padding-inline: 12px; }
     }
 </style>
