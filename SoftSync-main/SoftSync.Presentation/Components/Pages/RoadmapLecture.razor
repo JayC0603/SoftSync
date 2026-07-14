@@ -400,4 +400,40 @@
     .roleplay{max-width:900px;margin:auto}.roleplay>header{display:flex;justify-content:space-between;gap:1rem}.roleplay>header small{color:#2860e8;font-size:.6rem;font-weight:900}.roleplay>header h2{margin:.25rem 0}.roleplay>header p{margin:0;color:#68758e}.roleplay>header>span{display:grid;place-items:center;width:48px;height:48px;color:#2860e8;border-radius:50%;background:#eef3ff;font-weight:900}.rubric-strip,.roleplay-result>div{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0}.rubric-strip span,.roleplay-result span{padding:.55rem;text-align:center;border-radius:7px;background:#f1f4f9;font-size:.63rem}.chat-box{display:grid;gap:.65rem;min-height:260px;max-height:480px;padding:1rem;overflow:auto;border:1px solid #dce4f2;border-radius:10px;background:#f7f9fc}.chat-message{max-width:75%;padding:.7rem .85rem;border-radius:10px;background:#fff;box-shadow:0 2px 8px #2135650d}.chat-message.user{justify-self:end;color:#fff;background:#2860e8}.chat-message b{font-size:.58rem}.chat-message p{margin:.25rem 0 0;line-height:1.55}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:.6rem;margin-top:.75rem}.chat-compose textarea{min-height:90px;padding:.75rem;resize:vertical;border:1px solid #cfd9e9;border-radius:9px}.chat-compose button{padding:0 1rem;color:#fff;border:0;border-radius:9px;background:#2860e8;font-weight:800}.roleplay-result{margin-top:1rem;padding:1rem;border:1px solid #bde7d1;border-radius:10px;background:#effbf5}.roleplay-result h3{margin-top:0;color:#247950}.roleplay-result>p{line-height:1.6}@@media(max-width:600px){.rubric-strip,.roleplay-result>div{grid-template-columns:repeat(2,1fr)}.chat-message{max-width:90%}}
     .reflection-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:1rem}.reflection-form,.learning-review{padding:1.2rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.reflection-form>header small{color:#2860e8;font-size:.6rem;font-weight:900}.reflection-form>header h2{margin:.25rem 0}.reflection-form>header p{margin:0 0 1.2rem;color:#68758e}.reflection-form>label{display:grid;position:relative;gap:.4rem;margin-top:1rem}.reflection-form>label>b{font-size:.78rem}.reflection-form textarea{min-height:95px;padding:.75rem;border:1px solid #ccd7e8;border-radius:8px;resize:vertical}.reflection-form label>small{position:absolute;right:.5rem;bottom:.35rem;color:#8993a7;font-size:.55rem}.reflection-form .commitment{padding:1rem;border-radius:10px;background:#f3f6ff}.commitment>b{color:#2860e8}.commitment>span{font-size:.68rem;color:#68758e}.confidence{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}.confidence>div{display:grid;grid-template-columns:1fr auto;gap:.4rem;padding:.8rem;border:1px solid #dce4f2;border-radius:8px}.confidence b{grid-column:1/-1;font-size:.68rem}.confidence input{width:100%}.confidence span{color:#2860e8;font-weight:900}.reflection-done{display:flex;align-items:center;gap:.6rem;padding:.75rem;color:#247950;border:1px solid #bde7d1;border-radius:8px;background:#effbf5}.reflection-done>i{font-size:1.3rem}.reflection-done b,.reflection-done span{display:block}.reflection-done span{font-size:.65rem}.learning-review h3{margin-top:0}.result-tile{display:flex;align-items:center;gap:.7rem;margin:.6rem 0;padding:.8rem;border-radius:9px;background:#f3f6ff}.result-tile>i{color:#2860e8;font-size:1.2rem}.result-tile span,.result-tile b{display:block}.result-tile span{font-size:.65rem}.result-tile b{font-size:1rem}.mini-rubric{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.8rem}.mini-rubric span{padding:.55rem;border-radius:7px;background:#f3f5f9;font-size:.6rem}.mini-rubric b{display:block}.ai-reflection{margin-top:1rem;padding:1rem;border:1px solid #d9d0ff;border-radius:9px;background:#f7f4ff}.ai-reflection b{color:#4e45b8}.ai-reflection p{font-size:.7rem;line-height:1.6}.confidence-change{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding:.8rem;border-top:1px solid #e0e6ef;font-size:.65rem}.confidence-change b{font-size:1rem}.confidence-change em{color:#268b5d;font-style:normal}.reflection-actions{display:flex;gap:.6rem}.reflection-actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;font-weight:800}.reflection-message{margin-top:1rem;padding:.65rem;color:#247950;border-radius:8px;background:#effbf5}.reflection-message.error{color:#9c3838;background:#fff0f0}@@media(max-width:850px){.reflection-layout{grid-template-columns:1fr}.confidence{grid-template-columns:1fr}}
     .reflection-requirement{display:flex;align-items:center;gap:.4rem;padding:.65rem .75rem;color:#2859b8;border-radius:8px;background:#eef4ff;font-size:.7rem;font-weight:700}
+    /* Shared SoftSync purple/indigo palette and readable lesson typography. */
+    .lesson-page{--lesson-primary:#6847ed;--lesson-primary-2:#7c55f5;font-size:1rem;background:radial-gradient(circle at 0 0,#edf3ff 0,transparent 28rem),radial-gradient(circle at 100% 0,#f8eaff 0,transparent 30rem),#f9faff}
+    .back,.lesson-top>button,.lesson-top small,.content-heading small,.summary-card small,
+    .quiz-card small,.quiz-result small,.quiz-card>header>b,.quiz-result h3,
+    .quiz-sheet>header small,.quiz-sheet>header>b,.roleplay>header small,
+    .roleplay>header>span,.reflection-form>header small,.commitment>b,
+    .confidence span,.result-tile>i{color:var(--lesson-primary)}
+    .primary,.quiz-progress i,.quiz-sheet .quiz-card>h3>span,.chat-message.user,
+    .chat-compose button{background:linear-gradient(135deg,var(--lesson-primary),var(--lesson-primary-2))}
+    .lesson-steps button.active{color:var(--lesson-primary);background:#f3efff}
+    .lesson-steps button.active span{border-color:var(--lesson-primary);background:var(--lesson-primary)}
+    .lesson-top>span{color:var(--lesson-primary);background:#f1edff}
+    .conclusion{border-left-color:var(--lesson-primary);background:#f6f3ff}
+    .quiz-result button{color:var(--lesson-primary);border-color:var(--lesson-primary)}
+    .roleplay>header>span{background:#f1edff}
+    .reflection-requirement{color:#5941c6;background:#f3efff}
+    .lesson-top h1{font-size:1.5rem}
+    .lesson-top small,.content-heading small,.quiz-card small,.quiz-result small,
+    .quiz-sheet>header small,.roleplay>header small,.reflection-form>header small{font-size:.72rem}
+    .lesson-top>span,.content-heading>span{font-size:.8rem}
+    .lesson-steps button{font-size:.78rem}
+    .content-heading h2{font-size:1.6rem}
+    .content-heading p,.roleplay>header p,.reflection-form>header p{font-size:1rem;line-height:1.6}
+    .theory{font-size:1.02rem;line-height:1.8}
+    .summary-grid p{font-size:.94rem}
+    .quiz-card>h3,.quiz-sheet .quiz-card>h3{font-size:1.08rem}
+    .quiz-options button,.answer-feedback p,.quiz-result p{font-size:.96rem}
+    .rubric-strip span,.roleplay-result span{font-size:.76rem}
+    .chat-message b{font-size:.7rem}.chat-message p{font-size:.96rem}
+    .reflection-form>label>b{font-size:.94rem}
+    .reflection-form textarea,.chat-compose textarea{font-size:1rem}
+    .reflection-form label>small{font-size:.7rem}
+    .commitment>span,.confidence b,.reflection-done span,.result-tile span,
+    .ai-reflection p,.confidence-change{font-size:.8rem}
+    .mini-rubric span{font-size:.72rem}
+    .reflection-requirement{font-size:.84rem}
 </style>
