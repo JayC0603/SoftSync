@@ -253,6 +253,18 @@
     .lesson.active{border-color:#a99cf3;box-shadow:inset 3px 0 var(--blue);background:#fcfbff}
     .tree-week.selected,.content-tools>b{background:#f1eeff}
     .stepper button.active span{box-shadow:0 0 0 4px #f0edff}
+    /* Roadmap liquid-glass composition: keep the page transparent so the
+       SoftSync background can refract through all three workspace columns. */
+    .coursera-roadmap{position:relative;isolation:isolate;background:linear-gradient(135deg,rgba(249,248,255,.34),rgba(238,242,255,.18))}
+    .roadmap-sidebar,.content-panel{border-color:rgba(255,255,255,.58)!important;border-radius:0!important}
+    .week-column{background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(238,233,255,.12));-webkit-backdrop-filter:blur(10px) saturate(135%);backdrop-filter:blur(10px) saturate(135%)}
+    .overall-card,.xp-card,.streak,.week-stat,.lesson,.weekly-challenge,.content-card{border-radius:14px!important}
+    .lesson,.weekly-challenge{background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(246,243,255,.42))!important}
+    .lesson.active{background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(237,232,255,.62))!important;border-color:rgba(167,139,250,.58)!important}
+    .tree-week.selected,.content-tools>b,.summary{background:rgba(239,235,255,.58);border-color:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%)}
+    .content-accordions button,.content-tools button,.content-panel>footer button{border-color:rgba(255,255,255,.72);background:rgba(255,255,255,.5);box-shadow:inset 1px 1px 0 rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px) saturate(145%);backdrop-filter:blur(12px) saturate(145%)}
+    .lesson-action button,.review-activity,.content-panel>footer .next{border:1px solid rgba(255,255,255,.36);box-shadow:0 10px 25px rgba(104,71,235,.22),inset 1px 1px 0 rgba(255,255,255,.34)}
+    html[data-theme="dark"] .coursera-roadmap{background:linear-gradient(135deg,rgba(20,18,44,.32),rgba(49,46,129,.16))}html[data-theme="dark"] .week-column{background:rgba(30,27,75,.16)}html[data-theme="dark"] .lesson,html[data-theme="dark"] .weekly-challenge{color:#f8fafc;background:linear-gradient(145deg,rgba(49,46,129,.5),rgba(30,27,75,.38))!important}html[data-theme="dark"] .content-accordions button,html[data-theme="dark"] .content-tools button,html[data-theme="dark"] .content-panel>footer button{color:#f8fafc;background:rgba(49,46,129,.42)}
     @@keyframes spin{to{transform:rotate(360deg)}}
     @@media(max-width:1250px){.coursera-roadmap{grid-template-columns:270px 1fr}.content-panel{grid-column:1/-1;border-top:1px solid var(--line)}.week-column{border-right:0}}
     @@media(max-width:760px){.coursera-roadmap{display:block}.roadmap-sidebar{border-right:0}.week-column,.content-panel{padding:1rem}.lesson{grid-template-columns:auto 80px 1fr}.lesson-action{grid-column:3}.week-stat{grid-template-columns:1fr}.week-stat>div+div{padding:.5rem 0;border:0}.stepper small{display:none}.content-tools{align-items:flex-start;gap:.5rem;flex-direction:column}}

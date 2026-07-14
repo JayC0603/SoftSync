@@ -6,7 +6,7 @@
 }
 
 /* Runtime liquid-glass layer. Loaded after the generated bundle on purpose. */
-:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch) {
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card) {
     position: relative;
     isolation: isolate;
     background:
@@ -22,7 +22,7 @@
     backdrop-filter: blur(26px) saturate(185%) contrast(105%) !important;
 }
 
-:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch)::before {
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card)::before {
     content: "";
     position: absolute;
     inset: 1px;
@@ -62,7 +62,7 @@ html[data-theme="dark"] {
     --liquid-shadow: rgba(2, 6, 23, 0.38);
 }
 
-html[data-theme="dark"] :where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch) {
+html[data-theme="dark"] :where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card) {
     background:
         radial-gradient(120% 90% at 0% 0%, rgba(139,92,246,.2), transparent 48%),
         radial-gradient(80% 90% at 100% 100%, rgba(79,70,229,.16), transparent 60%),
