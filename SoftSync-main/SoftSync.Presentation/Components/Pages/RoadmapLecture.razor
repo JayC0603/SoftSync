@@ -2,49 +2,120 @@
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
+@inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
-<PageTitle>@Tx("Roadmap content", "Nội dung Roadmap") · SoftSync</PageTitle>
+<PageTitle>Giới thiệu về kỹ năng giao tiếp · SoftSync</PageTitle>
 
-<main class="empty-content-page">
-    <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>@Tx("Back to Roadmap", "Quay lại Roadmap")</button>
-    <section>
-        <span><i class="bi bi-journal-plus"></i></span>
-        <small>@Tx("WEEKLY LEARNING CONTENT", "NỘI DUNG HỌC THEO TUẦN")</small>
-        <h1>@Tx("Content has not been loaded", "Chưa nạp nội dung")</h1>
-        <p>@Tx("This week is ready for new Video, Script, Summary, Quiz, Scenario, and Reflection content.", "Tuần này đang chờ nạp mới Video, Script, Tóm tắt, Quiz, Tình huống và Phản tư.")</p>
-        <div class="steps">
-            @foreach (var step in Steps)
-            {
-                <div><i class="@step.Icon"></i><b>@Tx(step.En, step.Vi)</b><em>@Tx("Pending", "Chờ nạp")</em></div>
-            }
+<main class="lesson-page">
+    @if (loading)
+    {
+        <div class="state"><span></span>Đang tải bài học...</div>
+    }
+    else if (!isCommunicationLessonOne)
+    {
+        <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>Quay lại Roadmap</button>
+        <section class="empty"><i class="bi bi-journal-plus"></i><h1>Chưa nạp nội dung</h1><p>Tuần này đang chờ video và lý thuyết mới.</p></section>
+    }
+    else
+    {
+        <div class="lesson-shell">
+            <header class="lesson-top">
+                <button @onclick="Back"><i class="bi bi-arrow-left"></i>Roadmap</button>
+                <div><small>KỸ NĂNG GIAO TIẾP · TUẦN 1</small><h1>Giới thiệu về kỹ năng giao tiếp</h1></div>
+                <span>@CompletedCount / 6 bước</span>
+            </header>
+
+            <nav class="lesson-steps">
+                @foreach (var step in Steps)
+                {
+                    var unlocked = CanOpen(step.Id);
+                    <button class="@(currentStep == step.Id ? "active" : null) @(IsComplete(step.Id) ? "done" : null)" disabled="@(!unlocked)" @onclick="() => OpenStep(step.Id)">
+                        <span>@(IsComplete(step.Id) ? "✓" : step.Id.ToString())</span><b>@step.Name</b>@if (!unlocked) { <i class="bi bi-lock-fill"></i> }
+                    </button>
+                }
+            </nav>
+
+            <section class="lesson-content">
+                @if (currentStep == 1)
+                {
+                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="/videos/communication-mentor-lesson-1.mp4" type="video/mp4" />Trình duyệt không hỗ trợ video.</video></div>
+                    <div class="content-heading"><div><small>BƯỚC 1 · VIDEO</small><h2>Giới thiệu về kỹ năng giao tiếp</h2><p>Hãy xem hết video để mở phần Script.</p></div><span><i class="bi bi-clock"></i> Video Mentor 1</span></div>
+                    @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>Script sẽ tự mở khi video phát hết.</div> }
+                    else { <button class="primary" @onclick="() => OpenStep(2)">Tiếp theo: Script <i class="bi bi-arrow-right"></i></button> }
+                }
+                else if (currentStep == 2)
+                {
+                    <article class="theory">
+                        <div class="content-heading"><div><small>BƯỚC 2 · SCRIPT</small><h2>Giới thiệu về kỹ năng giao tiếp</h2><p>Nội dung lý thuyết đồng bộ với Video Mentor 1.</p></div></div>
+                        <h3>1. Giao tiếp là “con đường hai chiều”</h3>
+                        <p>Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Một quá trình giao tiếp cơ bản gồm:</p>
+                        <ul><li><b>Người gửi:</b> Người tạo ra và truyền đạt thông điệp.</li><li><b>Thông điệp:</b> Nội dung, ý nghĩa muốn truyền tải qua lời nói, chữ viết hoặc cử chỉ.</li><li><b>Kênh truyền tải:</b> Nói trực tiếp, email, điện thoại hoặc mạng xã hội.</li><li><b>Người nhận:</b> Người tiếp nhận và giải mã thông điệp.</li><li><b>Phản hồi:</b> Sự hồi đáp giúp người gửi biết thông điệp đã được hiểu đúng hay chưa.</li></ul>
+                        <h3>2. Các kỹ năng then chốt cho sinh viên</h3>
+                        <ul><li><b>Lắng nghe chủ động:</b> Tập trung hoàn toàn, không ngắt lời và xác nhận lại điều đã nghe để tránh hiểu lầm.</li><li><b>Giao tiếp phi ngôn ngữ:</b> Ánh mắt, điệu bộ, trang phục và tư thế đều truyền tải thông điệp.</li><li><b>Quy tắc ứng xử mạng:</b> Viết email chuyên nghiệp, có tiêu đề rõ ràng, câu chữ hoàn chỉnh và lời chào trang trọng.</li></ul>
+                        <h3>3. Bí quyết để giao tiếp thành công</h3>
+                        <ul><li><b>Luôn chuẩn bị kỹ:</b> Sắp xếp ý tưởng logic trước khi thuyết trình hoặc gặp gỡ quan trọng.</li><li><b>Thấu hiểu bối cảnh:</b> Điều chỉnh phong cách phù hợp với đối tượng và tình huống.</li><li><b>Giao tiếp có đạo đức:</b> Tôn trọng, trung thực và công bằng với người nghe.</li><li><b>Sử dụng ngôn từ đơn giản:</b> Chọn từ chính xác, dễ hiểu và hạn chế biệt ngữ không cần thiết.</li></ul>
+                        <p class="conclusion">Rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Giao tiếp tốt giúp bạn học tập hiệu quả và tạo ấn tượng chuyên nghiệp trong tương lai.</p>
+                    </article>
+                    <div class="actions"><button @onclick="() => OpenStep(1)"><i class="bi bi-arrow-left"></i>Video</button><button class="primary" @onclick="FinishScript">Đã đọc xong · Tóm tắt<i class="bi bi-arrow-right"></i></button></div>
+                }
+                else if (currentStep == 3)
+                {
+                    <article class="summary-card"><i class="bi bi-stars"></i><small>BƯỚC 3 · SUMMARY</small><h2>Tóm tắt bài học</h2><div class="summary-grid"><div><b>Giao tiếp hai chiều</b><p>Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.</p></div><div><b>Ba kỹ năng nền tảng</b><p>Lắng nghe chủ động, ngôn ngữ phi ngôn ngữ và ứng xử mạng chuyên nghiệp.</p></div><div><b>Giao tiếp phù hợp</b><p>Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.</p></div></div></article>
+                    <div class="actions"><button @onclick="() => OpenStep(2)"><i class="bi bi-arrow-left"></i>Script</button><button class="primary" @onclick="FinishSummary">Hoàn thành ôn tập<i class="bi bi-arrow-right"></i></button></div>
+                }
+                else
+                {
+                    <section class="empty inner"><i class="@Steps.First(x => x.Id == currentStep).Icon"></i><h2>@Steps.First(x => x.Id == currentStep).Name</h2><p>Phần này đang chờ nạp nội dung tiếp theo.</p></section>
+                    <div class="actions"><button @onclick="Previous"><i class="bi bi-arrow-left"></i>Quay lại</button><button class="primary" @onclick="Back">Về Roadmap</button></div>
+                }
+            </section>
         </div>
-    </section>
+    }
 </main>
 
 @code {
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ItemId { get; set; }
-    private void Back() => Nav.NavigateTo(UserId > 0 ? $"/roadmap/{UserId}" : "/roadmap");
-    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
-    private static readonly (string En, string Vi, string Icon)[] Steps =
-    [
-        ("Video", "Video", "bi bi-play-circle"),
-        ("Script", "Script", "bi bi-file-text"),
-        ("Summary", "Tóm tắt", "bi bi-lightbulb"),
-        ("Quiz", "Quiz", "bi bi-ui-checks"),
-        ("Scenario", "Tình huống", "bi bi-chat-square-text"),
-        ("Reflection", "Phản tư", "bi bi-journal-check")
-    ];
+    private RoadmapItemDto? item;
+    private bool loading = true;
+    private bool isCommunicationLessonOne;
+    private int currentStep = 1;
+    private int CompletedCount => item is null ? 0 : (item.IsVideoCompleted ? 1 : 0) + (item.ScriptCompletedAtUtc.HasValue ? 1 : 0) + (item.SummaryCompletedAtUtc.HasValue ? 1 : 0) + (item.IsPracticeCompleted ? 1 : 0) + (item.IsScenarioCompleted ? 1 : 0) + (item.IsReflectionCompleted ? 1 : 0);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var signedIn = await AuthProvider.GetUserIdAsync();
+        if (signedIn <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+        UserId = signedIn;
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        item = roadmap.Items.FirstOrDefault(x => x.Id == ItemId);
+        if (item is not null)
+        {
+            var communication = roadmap.Items.Where(IsCommunication).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+            isCommunicationLessonOne = communication.FirstOrDefault()?.Id == item.Id;
+            currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
+            if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
+        }
+        loading = false;
+    }
+
+    private static bool IsCommunication(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("giao tiếp") || value.Contains("communication"); }
+    private bool CanOpen(int step) => item is not null && (step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
+    private bool IsComplete(int step) => item is not null && step switch { 1 => item.IsVideoCompleted, 2 => item.ScriptCompletedAtUtc.HasValue, 3 => item.SummaryCompletedAtUtc.HasValue, 4 => item.IsPracticeCompleted, 5 => item.IsScenarioCompleted, 6 => item.IsReflectionCompleted, _ => false };
+    private async Task VideoEnded() { if (item is null || item.IsVideoCompleted) return; if (await RoadmapService.MarkVideoCompleteAsync(ItemId, UserId)) { item.IsVideoCompleted = true; item.VideoCompletedAtUtc = DateTime.UtcNow; item.LastLearningStep = "script"; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "script"); StateHasChanged(); } }
+    private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "scenario", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
+    private async Task FinishScript() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "summary")) { item!.ScriptCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "summary"; currentStep = 3; } }
+    private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; } }
+    private void Previous() => currentStep = Math.Max(1, currentStep - 1);
+    private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
+    private static readonly (int Id, string Name, string Icon)[] Steps = [(1,"Video","bi bi-play-circle"),(2,"Script","bi bi-file-text"),(3,"Tóm tắt","bi bi-lightbulb"),(4,"Quiz","bi bi-ui-checks"),(5,"Thực hành","bi bi-chat-dots"),(6,"Phản tư","bi bi-stars")];
 }
 
 <style>
-    .empty-content-page{min-height:calc(100vh - 72px);padding:2rem;background:#f5f7fa;color:#17233c}
-    .empty-content-page>.back{display:flex;align-items:center;gap:.45rem;max-width:1100px;margin:0 auto 1rem;padding:.6rem 0;color:#3157d5;border:0;background:transparent;font-weight:800}
-    .empty-content-page section{max-width:1100px;margin:auto;padding:clamp(2rem,5vw,4.5rem);text-align:center;border:1px solid #dfe4ec;border-radius:18px;background:#fff}
-    .empty-content-page section>span{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 1rem;color:#fff;border-radius:18px;background:linear-gradient(135deg,#3157d5,#6954e8);font-size:1.7rem}
-    .empty-content-page small{color:#3157d5;font-weight:900;letter-spacing:.1em}.empty-content-page h1{margin:.5rem 0;font-size:2rem}.empty-content-page p{max-width:700px;margin:0 auto;color:#6c7588}
-    .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:.55rem;margin-top:2rem}.steps div{display:grid;gap:.35rem;padding:1rem .5rem;border:1px dashed #ccd3df;border-radius:12px;color:#737d90}.steps i{font-size:1.25rem}.steps b{color:#28334a;font-size:.75rem}.steps em{font-size:.6rem;font-style:normal}
-    @@media(max-width:800px){.steps{grid-template-columns:repeat(2,1fr)}}
+    .lesson-page{min-height:calc(100vh - 72px);padding:1.5rem;background:#f5f7fb;color:#17233c}.lesson-shell,.back{max-width:1180px;margin:auto}.state,.empty{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;text-align:center}.state span{width:28px;height:28px;border:3px solid #dce4fa;border-top-color:#2860e8;border-radius:50%;animation:spin .8s linear infinite}.back,.lesson-top>button{border:0;background:transparent;color:#2860e8;font-weight:800}.lesson-top{display:grid;grid-template-columns:180px 1fr auto;align-items:center;padding:1rem 1.3rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.lesson-top small{color:#2860e8;font-size:.6rem;font-weight:900}.lesson-top h1{margin:.2rem 0;font-size:1.25rem}.lesson-top>span{padding:.45rem .65rem;border-radius:99px;background:#eef3ff;color:#2860e8;font-size:.65rem;font-weight:800}.lesson-steps{display:grid;grid-template-columns:repeat(6,1fr);margin:1rem 0;border:1px solid #dce4f2;border-radius:12px;background:#fff;overflow:hidden}.lesson-steps button{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem .4rem;border:0;border-right:1px solid #e7ebf3;background:#fff;color:#68758e;font-size:.65rem}.lesson-steps button:last-child{border:0}.lesson-steps span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #cbd5e7;border-radius:50%;font-size:.58rem}.lesson-steps button.active{color:#2860e8;background:#f2f6ff}.lesson-steps button.active span{color:#fff;border-color:#2860e8;background:#2860e8}.lesson-steps button.done span{color:#fff;border-color:#2ba06a;background:#2ba06a}.lesson-content{padding:1.25rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.video-wrap{overflow:hidden;border-radius:10px;background:#090d18}.video-wrap video{display:block;width:100%;max-height:620px}.content-heading{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}.content-heading small{color:#2860e8;font-size:.6rem;font-weight:900}.content-heading h2{margin:.25rem 0;font-size:1.35rem}.content-heading p{margin:0;color:#68758e}.content-heading>span{font-size:.7rem;color:#68758e}.notice{padding:.8rem;color:#725d25;border:1px solid #f0d98f;border-radius:8px;background:#fff9e7}.primary{display:flex;align-items:center;gap:.5rem;margin-left:auto;padding:.75rem 1rem;border:0;border-radius:8px;color:#fff;background:#2860e8;font-weight:800}.theory{max-width:850px;margin:auto;font-size:.9rem;line-height:1.75}.theory h3{margin-top:1.5rem;color:#12224a}.theory li{margin:.35rem 0}.conclusion{padding:1rem;border-left:4px solid #2860e8;background:#f2f6ff}.actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e3e8f1}.actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;color:#273755;font-weight:800}.summary-card{padding:2rem;text-align:center;border-radius:12px;background:linear-gradient(135deg,#f1f5ff,#f7f1ff)}.summary-card>i{font-size:2rem;color:#5f51dc}.summary-card small{display:block;color:#2860e8;font-weight:900}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;text-align:left}.summary-grid div{padding:1rem;border:1px solid #dbe2f2;border-radius:9px;background:#fff}.summary-grid p{color:#68758e;font-size:.8rem;line-height:1.6}.empty>i{font-size:3rem;color:#2860e8}.empty.inner{min-height:340px}.empty.inner>i{font-size:2rem}.empty p{color:#68758e}@@keyframes spin{to{transform:rotate(360deg)}}@@media(max-width:760px){.lesson-page{padding:.7rem}.lesson-top{grid-template-columns:1fr}.lesson-top>button{text-align:left}.lesson-top>span{justify-self:start}.lesson-steps{grid-template-columns:repeat(3,1fr)}.lesson-steps button{border-bottom:1px solid #e7ebf3}.lesson-steps b{display:none}.summary-grid{grid-template-columns:1fr}.content-heading{display:block}}
 </style>
