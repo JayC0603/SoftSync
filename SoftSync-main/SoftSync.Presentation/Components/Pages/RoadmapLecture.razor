@@ -168,7 +168,12 @@
                 }
                 else if (currentStep == 5)
                 {
-                    @if (roleplayScenario is not null)
+                    @if (communicationLessonNumber == 2)
+                    {
+                        <section class="voice-practice-launch"><i class="bi bi-mic-fill"></i><small>@Tx("PRACTICE · VOICE LAB", "THỰC HÀNH · PHÒNG LUYỆN GIỌNG")</small><h2>@Tx("30-second communication challenge", "Thử thách giao tiếp 30 giây")</h2><p>@Tx("Choose one of 20 student scenarios, record your response, and review pacing, articulation, pauses, fillers, pitch, and energy.", "Chọn một trong 20 tình huống sinh viên, ghi âm và xem phân tích tốc độ, độ rõ chữ, khoảng lặng, từ đệm, cao độ và năng lượng giọng nói.")</p><div><span><b>3.0</b>Pacing</span><span><b>3.0</b>@Tx("Articulation", "Rõ chữ")</span><span><b>2.0</b>@Tx("Pauses", "Ngắt nghỉ")</span><span><b>2.0</b>@Tx("Tone", "Tông giọng")</span></div><button class="primary" @onclick="OpenVoicePractice"><i class="bi bi-mic"></i>@Tx("Open Voice Lab", "Mở phòng luyện giọng")</button></section>
+                        <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                    else if (roleplayScenario is not null)
                     {
                         <section class="roleplay">
                             <header><div><small>@Tx("PRACTICE · 3-TURN ROLE-PLAY", "THỰC HÀNH · HỘI THOẠI 3 LƯỢT")</small><h2>@(IsVi ? roleplayScenario.TitleVi : roleplayScenario.TitleEn)</h2><p>@(IsVi ? roleplayScenario.ContextVi : roleplayScenario.ContextEn)</p></div><span>@Math.Min(roleplayUserMessages.Count + 1, 3) / 3</span></header>
@@ -356,6 +361,7 @@
     private void Previous() => currentStep = Math.Max(1, currentStep - 1);
     private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
     private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
+    private void OpenVoicePractice() => Nav.NavigateTo($"/roadmap/voice-practice/{UserId}/{ItemId}");
     private bool IsVi => L.Current == AppLanguage.Vi;
     private string Tx(string en, string vi) => IsVi ? vi : en;
     private void StartQuiz()
@@ -479,4 +485,8 @@
     .ai-reflection p,.confidence-change{font-size:.8rem}
     .mini-rubric span{font-size:.72rem}
     .reflection-requirement{font-size:.84rem}
+</style>
+<style>
+    .voice-practice-launch{display:flex;flex-direction:column;align-items:center;max-width:820px;margin:auto;padding:2.5rem;text-align:center;border:1px solid #dcd3ff;border-radius:18px;background:linear-gradient(145deg,#fff,#f5f1ff)}
+    .voice-practice-launch>i{display:grid;place-items:center;width:72px;height:72px;color:#fff;border-radius:50%;background:linear-gradient(135deg,#6847ed,#a855f7);font-size:1.7rem}.voice-practice-launch>small{margin-top:1rem;color:#6847ed;font-weight:900}.voice-practice-launch h2{margin:.35rem 0}.voice-practice-launch>p{max-width:650px;color:#68758e;line-height:1.65}.voice-practice-launch>div{display:grid;grid-template-columns:repeat(4,1fr);width:100%;gap:.6rem;margin:1rem 0}.voice-practice-launch span{padding:.75rem;border-radius:10px;background:#fff;color:#68758e}.voice-practice-launch span b{display:block;color:#6847ed;font-size:1.1rem}.voice-practice-launch .primary{margin:1rem auto 0}@@media(max-width:600px){.voice-practice-launch>div{grid-template-columns:repeat(2,1fr)}}
 </style>
