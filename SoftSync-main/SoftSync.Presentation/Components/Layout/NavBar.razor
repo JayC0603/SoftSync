@@ -60,7 +60,9 @@
                     <span class="ss-bell-badge">3</span>
                 </button>
 
-                <div class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]">
+                <div class="ss-user-menu">
+                    <button type="button" class="ss-userchip" @onclick="ToggleUserMenu"
+                            aria-expanded="@userMenuOpen" aria-haspopup="menu" title="@L["nav.settings"]">
                     <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
                         @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
                         {
@@ -79,6 +81,29 @@
                         <span class="tw:font-semibold tw:text-sm">@(profile?.PublicName ?? context.User.Identity?.Name)</span>
                         <span class="ss-userchip-sub">@L["nav.level"] @(profile?.Level ?? 1)</span>
                     </div>
+                        <i class="bi bi-chevron-down ss-user-chevron"></i>
+                    </button>
+
+                    @if (userMenuOpen)
+                    {
+                        <div class="ss-user-dropdown" role="menu">
+                            <a href="/profile" role="menuitem" @onclick="CloseUserMenu">
+                                <i class="bi bi-person-circle"></i>
+                                <span>@(L.Current == AppLanguage.Vi ? "Hồ sơ" : "Profile")</span>
+                            </a>
+                            <a href="/settings" role="menuitem" @onclick="CloseUserMenu">
+                                <i class="bi bi-gear"></i><span>@L["nav.settings"]</span>
+                            </a>
+                            <div class="ss-user-dropdown-divider"></div>
+                            <form action="Account/Logout" method="post">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="" />
+                                <button type="submit" role="menuitem">
+                                    <i class="bi bi-box-arrow-right"></i><span>@L["nav.logout"]</span>
+                                </button>
+                            </form>
+                        </div>
+                    }
                 </div>
             </Authorized>
             <NotAuthorized>
@@ -212,14 +237,19 @@
     }
 
     /* User chip */
+    .ss-user-menu { position: relative; }
     .ss-userchip {
-        position: relative;
         display: inline-flex;
         align-items: center;
         gap: 0.55rem;
         padding: 0.3rem 0.6rem 0.3rem 0.35rem;
         border-radius: 999px;
         cursor: pointer;
+        border: 0;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        background: transparent;
         transition: background 0.18s ease;
     }
     .ss-userchip:hover { background: rgba(255, 255, 255, 0.6); }
@@ -242,6 +272,40 @@
         color: var(--color-brand);
         font-weight: 600;
     }
+    .ss-user-chevron { color: #64748b; font-size: 0.72rem; transition: transform 0.18s ease; }
+    .ss-userchip[aria-expanded="true"] .ss-user-chevron { transform: rotate(180deg); }
+    .ss-user-dropdown {
+        position: absolute;
+        z-index: 1100;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 210px;
+        padding: 0.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 18px 50px rgba(30, 41, 59, 0.18);
+        backdrop-filter: blur(18px);
+    }
+    .ss-user-dropdown a, .ss-user-dropdown form button {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.7rem 0.8rem;
+        border: 0;
+        border-radius: 11px;
+        color: #334155;
+        background: transparent;
+        font: inherit;
+        font-weight: 650;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .ss-user-dropdown a:hover, .ss-user-dropdown form button:hover { color: #4f46e5; background: #eef2ff; }
+    .ss-user-dropdown form { margin: 0; }
+    .ss-user-dropdown-divider { height: 1px; margin: 0.35rem 0.5rem; background: #e2e8f0; }
     .ss-auth-actions {
         display: inline-flex;
         align-items: center;
@@ -434,7 +498,11 @@
 
 @code {
     private UserDto? profile;
+    private bool userMenuOpen;
     private string HomeHref => profile is null ? "/" : "/dashboard";
+
+    private void ToggleUserMenu() => userMenuOpen = !userMenuOpen;
+    private void CloseUserMenu() => userMenuOpen = false;
 
     protected override void OnInitialized()
     {
@@ -499,6 +567,7 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
+        userMenuOpen = false;
         _ = LoadProfileAsync();
     }
 
