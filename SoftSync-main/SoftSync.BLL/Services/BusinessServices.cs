@@ -283,16 +283,14 @@ public class RoadmapService : IRoadmapService
     public async Task<RoadmapDto> GetUserRoadmapAsync(int userId)
     {
         var focusSkills = await GetFocusSkillNamesAsync(userId);
-        var expectedItemCount = focusSkills.Count * 3;
 
         var items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
-        if (!items.Any() || NeedsRoadmapRefresh(items, expectedItemCount))
+        // A read operation must never destroy a learner's roadmap. The previous
+        // refresh check regenerated plans containing the very migration titles it
+        // considered stale, so IDs and IsCompleted could be lost on every visit.
+        // Plan regeneration should be an explicit, versioned action in the future.
+        if (!items.Any())
         {
-            foreach (var oldItem in items)
-                _roadmapRepo.Delete(oldItem);
-
-            await _roadmapRepo.SaveChangesAsync();
-
             var freshRoadmap = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
             foreach (var item in freshRoadmap.Items)
             {
@@ -322,20 +320,6 @@ public class RoadmapService : IRoadmapService
                 IsCompleted = i.IsCompleted
             }).ToList()
         };
-    }
-
-    private static bool NeedsRoadmapRefresh(List<RoadmapItem> items, int expectedItemCount)
-    {
-        if (expectedItemCount <= 0)
-            return false;
-
-        if (items.Count != expectedItemCount)
-            return true;
-
-        return items.Any(item =>
-            item.Title.Contains("Khám phá bản thân", StringComparison.OrdinalIgnoreCase) ||
-            item.Title.Contains("Tổng kết", StringComparison.OrdinalIgnoreCase) ||
-            item.Title.Contains("đánh giá lại", StringComparison.OrdinalIgnoreCase));
     }
 
     private static string ResolveRoadmapSkillName(string title)

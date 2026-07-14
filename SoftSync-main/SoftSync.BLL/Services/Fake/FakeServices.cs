@@ -62,7 +62,8 @@ public class FakeAiAssistantService : IAiAssistantService
 //
 // Hiện tại roadmap được sinh cơ học từ danh sách kỹ năng yếu (do RoadmapService
 // truyền vào, đã lọc theo QuizSeedData.ActiveSkillIds — chỉ 3 kỹ năng active).
-// Mỗi kỹ năng cấp 2 tuần (nền tảng → thực hành), rồi 1 tuần tổng kết ở cuối.
+// Mỗi kỹ năng cấp 2 tuần (nền tảng → thực hành). Số tuần vì vậy thay đổi theo
+// đúng số kỹ năng người học cần cải thiện thay vì chèn các tuần chung giống nhau.
 // Nội dung mô tả bám theo tên kỹ năng lấy từ DB, không tham chiếu tài liệu ngoài.
 public class FakeAiRoadmapService : IAiRoadmapService
 {
@@ -70,15 +71,6 @@ public class FakeAiRoadmapService : IAiRoadmapService
     {
         var items = new List<RoadmapItemDto>();
         var week = 1;
-
-        // Tuần 1: luôn bắt đầu bằng bước tự đánh giá — không phụ thuộc kỹ năng nào.
-        items.Add(new RoadmapItemDto
-        {
-            WeekNumber = week++,
-            Title = "Khám phá bản thân",
-            Description = "Hoàn thành bài đánh giá đầu vào và xác định mục tiêu học tập cho những tuần tiếp theo.",
-            IsCompleted = false
-        });
 
         // 2 tuần cho mỗi kỹ năng người dùng cần cải thiện (đã được caller giới hạn
         // trong 3 kỹ năng active, sắp xếp theo điểm yếu → mạnh).
@@ -98,14 +90,6 @@ public class FakeAiRoadmapService : IAiRoadmapService
                 Description = $"Áp dụng {vi.ToLower()} vào tình huống thực tế qua case study và tự phản tư sau mỗi buổi."
             });
         }
-
-        // Tuần cuối: tổng kết + đánh giá lại.
-        items.Add(new RoadmapItemDto
-        {
-            WeekNumber = week,
-            Title = "Tổng kết & đánh giá lại",
-            Description = "Xem lại tiến độ toàn lộ trình, làm bài đánh giá lại để đo tiến bộ và điều chỉnh mục tiêu tiếp theo."
-        });
 
         return Task.FromResult(new RoadmapDto { UserId = userId, Items = items });
     }
