@@ -18,7 +18,7 @@
     {
         <div class="state"><span></span>@Tx("Loading lesson...", "Đang tải bài học...")</div>
     }
-    else if (!isCommunicationLessonOne)
+    else if (!isSupportedCommunicationLesson)
     {
         <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>@Tx("Back to Roadmap", "Quay lại Roadmap")</button>
         <section class="empty"><i class="bi bi-journal-plus"></i><h1>@Tx("Content not available", "Chưa nạp nội dung")</h1><p>@Tx("This week is waiting for new video and theory content.", "Tuần này đang chờ video và lý thuyết mới.")</p></section>
@@ -28,7 +28,7 @@
         <div class="lesson-shell">
             <header class="lesson-top">
                 <button @onclick="Back"><i class="bi bi-arrow-left"></i>Roadmap</button>
-                <div><small>@Tx("COMMUNICATION SKILLS · WEEK 1", "KỸ NĂNG GIAO TIẾP · TUẦN 1")</small><h1>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h1></div>
+                <div><small>@Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}")</small><h1>@LessonTitle</h1></div>
                 @if (item!.IsCompleted)
                 {
                     <span class="week-complete"><i class="bi bi-check-circle-fill"></i>@Tx("Week completed", "Đã hoàn thành tuần")</span>
@@ -56,8 +56,8 @@
                 }
                 @if (currentStep == 1)
                 {
-                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="/videos/communication-mentor-lesson-1.mp4" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
-                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> Video Mentor 1</span></div>
+                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="@VideoSource" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
+                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> Video Mentor @communicationLessonNumber</span></div>
                     @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>@Tx("The Script unlocks automatically when the video ends.", "Script sẽ tự mở khi video phát hết.")</div> }
                     @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error"><i class="bi bi-exclamation-triangle"></i>@saveError</div> }
                     <div class="actions video-actions">
@@ -70,8 +70,25 @@
                 else if (currentStep == 2)
                 {
                     <article class="theory">
-                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h2><p>@Tx("Theory synchronized with Video Mentor 1.", "Nội dung lý thuyết đồng bộ với Video Mentor 1.")</p></div></div>
-                        @if (!IsVi)
+                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@Tx($"Theory synchronized with Video Mentor {communicationLessonNumber}.", $"Nội dung lý thuyết đồng bộ với Video Mentor {communicationLessonNumber}.")</p></div></div>
+                        @if (communicationLessonNumber == 2)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Hearing and listening are different</h3><p><b>Hearing</b> is the ear's passive physical response to sound. <b>Listening</b> is an active mental process that requires focus, interpretation, and memory.</p>
+                                <h3>2. Principles of active listening</h3><ul><li><b>Stop talking:</b> Give the speaker your full attention instead of preparing your reply.</li><li><b>Remove distractions:</b> Put away your phone and turn off unrelated sounds.</li><li><b>Show empathy:</b> Understand feelings and perspectives before judging or advising.</li><li><b>Confirm information:</b> Paraphrase or summarize to check that you understood correctly.</li><li><b>Notice non-verbal signals:</b> Observe eye contact, facial expressions, and gestures.</li></ul>
+                                <h3>3. Listening effectively in class</h3><ul><li>Sit where you can maintain eye contact and avoid distractions.</li><li>Notice repeated ideas, changes in tone, and information written on the board.</li><li>Ask questions to clarify and actively process information.</li><li>Take notes to maintain focus and improve recall.</li></ul>
+                                <h3>4. Benefits</h3><p>Active listening builds trust, strengthens relationships, supports conflict resolution, and improves teamwork and career readiness.</p><p class="conclusion">Strong listening takes patience and consistent practice, but it helps you learn better and communicate more professionally.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Phân biệt “Nghe” và “Lắng nghe”</h3><p><b>Nghe</b> là phản xạ vật lý thụ động của tai đối với âm thanh. <b>Lắng nghe</b> là quá trình tâm lý chủ động, đòi hỏi tập trung để diễn giải và ghi nhớ thông tin.</p>
+                                <h3>2. Các nguyên tắc của lắng nghe chủ động</h3><ul><li><b>Ngừng nói:</b> Tập trung vào người nói thay vì chuẩn bị sẵn câu trả lời.</li><li><b>Loại bỏ xao nhãng:</b> Cất điện thoại, tắt nhạc và tập trung hoàn toàn.</li><li><b>Thấu cảm:</b> Hiểu cảm xúc và góc nhìn trước khi phán xét hoặc đưa lời khuyên.</li><li><b>Xác nhận lại:</b> Nhắc lại hoặc tóm tắt để bảo đảm đã hiểu đúng.</li><li><b>Chú ý phi ngôn ngữ:</b> Quan sát ánh mắt, nét mặt và cử chỉ.</li></ul>
+                                <h3>3. Lắng nghe hiệu quả trong lớp học</h3><ul><li>Chọn vị trí dễ tương tác với giảng viên và ít xao nhãng.</li><li>Nhận diện ý được lặp lại, thay đổi tông giọng hoặc nội dung viết trên bảng.</li><li>Đặt câu hỏi để làm rõ và chủ động xử lý thông tin.</li><li>Ghi chú để duy trì tập trung và hỗ trợ ghi nhớ.</li></ul>
+                                <h3>4. Lợi ích</h3><p>Lắng nghe chủ động xây dựng lòng tin, cải thiện quan hệ, hỗ trợ giải quyết xung đột và làm việc nhóm hiệu quả.</p><p class="conclusion">Lắng nghe giỏi cần thời gian và sự kiên trì, nhưng sẽ giúp bạn học tập tốt hơn và giao tiếp chuyên nghiệp hơn.</p>
+                            }
+                        }
+                        else if (!IsVi)
                         {
                             <h3>1. Communication is a “two-way street”</h3>
                             <p>Effective communication means both sending a message and receiving feedback. A basic communication process includes:</p>
@@ -98,7 +115,14 @@
                 }
                 else if (currentStep == 3)
                 {
-                    <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Lesson summary", "Tóm tắt bài học")</h2><div class="summary-grid"><div><b>@Tx("Two-way communication", "Giao tiếp hai chiều")</b><p>@Tx("A message is complete only with a sender, receiver, and feedback.", "Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.")</p></div><div><b>@Tx("Three foundations", "Ba kỹ năng nền tảng")</b><p>@Tx("Active listening, non-verbal language, and professional netiquette.", "Lắng nghe chủ động, giao tiếp phi ngôn ngữ và ứng xử mạng chuyên nghiệp.")</p></div><div><b>@Tx("Context-aware communication", "Giao tiếp phù hợp")</b><p>@Tx("Prepare, understand context, and communicate clearly and ethically.", "Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.")</p></div></div></article>
+                    @if (communicationLessonNumber == 2)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Active listening summary", "Tóm tắt lắng nghe chủ động")</h2><div class="summary-grid"><div><b>@Tx("Hearing vs. listening", "Nghe và lắng nghe")</b><p>@Tx("Hearing is passive; listening requires focus, interpretation, and memory.", "Nghe là thụ động; lắng nghe cần tập trung, diễn giải và ghi nhớ.")</p></div><div><b>@Tx("Five active principles", "Năm nguyên tắc chủ động")</b><p>@Tx("Stop talking, remove distractions, empathize, confirm, and observe non-verbal cues.", "Ngừng nói, bỏ xao nhãng, thấu cảm, xác nhận và quan sát phi ngôn ngữ.")</p></div><div><b>@Tx("Learn and build trust", "Học tốt và xây dựng lòng tin")</b><p>@Tx("Questions and note-taking improve learning while attentive listening strengthens relationships.", "Đặt câu hỏi và ghi chú giúp học tốt; lắng nghe chăm chú giúp củng cố quan hệ.")</p></div></div></article>
+                    }
+                    else
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Lesson summary", "Tóm tắt bài học")</h2><div class="summary-grid"><div><b>@Tx("Two-way communication", "Giao tiếp hai chiều")</b><p>@Tx("A message is complete only with a sender, receiver, and feedback.", "Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.")</p></div><div><b>@Tx("Three foundations", "Ba kỹ năng nền tảng")</b><p>@Tx("Active listening, non-verbal language, and professional netiquette.", "Lắng nghe chủ động, giao tiếp phi ngôn ngữ và ứng xử mạng chuyên nghiệp.")</p></div><div><b>@Tx("Context-aware communication", "Giao tiếp phù hợp")</b><p>@Tx("Prepare, understand context, and communicate clearly and ethically.", "Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.")</p></div></div></article>
+                    }
                     <div class="actions"><button @onclick="() => OpenStep(2)"><i class="bi bi-arrow-left"></i>@Tx("Back: Script", "Quay lại: Script")</button><button class="primary" @onclick="FinishSummary">@Tx("Next: Quiz", "Tiếp theo: Quiz")<i class="bi bi-arrow-right"></i></button></div>
                 }
                 else if (currentStep == 4)
@@ -214,7 +238,12 @@
     [SupplyParameterFromQuery(Name = "step")] public int? RequestedStep { get; set; }
     private RoadmapItemDto? item;
     private bool loading = true;
-    private bool isCommunicationLessonOne;
+    private bool isSupportedCommunicationLesson;
+    private int communicationLessonNumber;
+    private string VideoSource => $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
+    private string LessonTitle => communicationLessonNumber == 2
+        ? Tx("Active Listening: A Foundation of Communication", "Kỹ năng lắng nghe - nền tảng của giao tiếp")
+        : Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp");
     private int currentStep = 1;
     private string? saveError;
     private List<CommunicationQuizQuestion> quizQuestions = [];
@@ -273,7 +302,8 @@
         if (item is not null)
         {
             var communication = roadmap.Items.Where(IsCommunication).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-            isCommunicationLessonOne = communication.FirstOrDefault()?.Id == item.Id;
+            communicationLessonNumber = communication.FindIndex(x => x.Id == item.Id) + 1;
+            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2;
             currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
