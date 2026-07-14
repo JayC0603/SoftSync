@@ -6,5 +6,5 @@ namespace SoftSync.Common;
 /// </summary>
 public static class RoadmapReviewMode
 {
-    public static bool Enabled { get; set; } = false;
+    public static bool Enabled { get; set; } = true;
 }
