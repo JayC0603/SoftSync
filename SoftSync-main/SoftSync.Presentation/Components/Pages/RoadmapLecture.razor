@@ -352,7 +352,7 @@
     }
     private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; if (step == 4 && quizQuestions.Count == 0) StartQuiz(); if (step == 5 && roleplayScenario is null) StartRoleplay(); var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "scenario", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
     private async Task FinishScript() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "summary")) { item!.ScriptCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "summary"; currentStep = 3; } }
-    private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; } }
+    private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; StartQuiz(); } }
     private void Previous() => currentStep = Math.Max(1, currentStep - 1);
     private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
     private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
@@ -360,12 +360,15 @@
     private string Tx(string en, string vi) => IsVi ? vi : en;
     private void StartQuiz()
     {
+        var questionBank = communicationLessonNumber == 2
+            ? ActiveListeningQuizBank.Questions
+            : CommunicationQuizBank.Questions;
         var recentIds = item?.QuizHistory.SelectMany(x => x.Answers.Keys).Select(x => int.TryParse(x, out var id) ? id : 0).Where(x => x > 0).ToList() ?? [];
-        var unseen = CommunicationQuizBank.Questions.Where(x => !recentIds.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()).ToList();
+        var unseen = questionBank.Where(x => !recentIds.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()).ToList();
         if (unseen.Count < 5)
         {
             var lastFive = recentIds.TakeLast(5).ToHashSet();
-            unseen.AddRange(CommunicationQuizBank.Questions.Where(x => !unseen.Contains(x) && !lastFive.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()));
+            unseen.AddRange(questionBank.Where(x => !unseen.Contains(x) && !lastFive.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()));
         }
         quizQuestions = unseen.Take(5).ToList(); quizAnswers.Clear(); quizOptionOrders.Clear(); selectedAnswers.Clear(); revealedQuestions.Clear(); quizScore = 0; quizFinished = false; quizPassed = false; saveError = null;
         foreach (var question in quizQuestions) quizOptionOrders[question.Id] = Enumerable.Range(0, 4).OrderBy(_ => Random.Shared.Next()).ToArray();
