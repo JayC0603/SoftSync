@@ -307,6 +307,11 @@
         item = roadmapItems.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
             Nav.NavigateTo($"/roadmap/{UserId}", true);
+        else if (!RoadmapReviewMode.Enabled && CurrentItemIndex > 0 && PreviousItem?.IsCompleted != true)
+        {
+            Nav.NavigateTo($"/roadmap/{UserId}", true);
+            return;
+        }
         else
         {
             reflectionText = item.ReflectionText;

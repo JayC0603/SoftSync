@@ -449,7 +449,8 @@ public class RoadmapService : IRoadmapService
     public async Task<bool> MarkScenarioCompleteAsync(int itemId, int userId)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item is null || item.UserId != userId || !item.PracticeCompletedAtUtc.HasValue)
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.PracticeCompletedAtUtc.HasValue)
             return false;
 
         var changed = false;
@@ -469,7 +470,8 @@ public class RoadmapService : IRoadmapService
             return false;
 
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item is null || item.UserId != userId || !item.ScenarioCompletedAtUtc.HasValue)
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.ScenarioCompletedAtUtc.HasValue)
             return false;
 
         var changed = !string.Equals(item.ReflectionText, value, StringComparison.Ordinal)
@@ -487,7 +489,8 @@ public class RoadmapService : IRoadmapService
             return false;
 
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item is null || item.UserId != userId || !CanOpenStep(item, normalized))
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !CanOpenStep(item, normalized))
             return false;
 
         var now = DateTime.UtcNow;
@@ -531,7 +534,7 @@ public class RoadmapService : IRoadmapService
     private async Task<bool> MarkActivityCompleteAsync(int itemId, int userId, bool isVideo)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item is null || item.UserId != userId)
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item))
             return false;
 
         if (!isVideo && (!item.VideoCompletedAtUtc.HasValue || !item.SummaryCompletedAtUtc.HasValue))
@@ -551,6 +554,16 @@ public class RoadmapService : IRoadmapService
         }
 
         return await PersistActivityAsync(item, activityChanged);
+    }
+
+    private async Task<bool> IsWeekUnlockedAsync(RoadmapItem item)
+    {
+        var orderedItems = (await _roadmapRepo.GetByUserIdAsync(item.UserId))
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
+        var index = orderedItems.FindIndex(x => x.Id == item.Id);
+        return index == 0 || index > 0 && orderedItems[index - 1].IsCompleted;
     }
 
     private async Task<bool> PersistActivityAsync(RoadmapItem item, bool activityChanged)

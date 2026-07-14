@@ -269,6 +269,19 @@
             return;
         }
 
+        if (!RoadmapReviewMode.Enabled && CurrentItemIndex > 0
+            && roadmapItems[CurrentItemIndex - 1].IsCompleted != true)
+        {
+            Nav.NavigateTo($"/roadmap/{UserId}", true);
+            return;
+        }
+
+        if (!RoadmapReviewMode.Enabled && item.SummaryCompletedAtUtc is null && !item.IsCompleted)
+        {
+            Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=summary", true);
+            return;
+        }
+
         await LoadSessionAsync();
     }
 
