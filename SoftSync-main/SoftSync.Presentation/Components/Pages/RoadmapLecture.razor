@@ -32,9 +32,9 @@
             <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
                 <div>
                     <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @DisplayWeekNumber</span>
-                    <h2 class="tw:font-bold tw:mb-0">@item.Title</h2>
+                    <h2 class="tw:font-bold tw:mb-0">@DisplayTitle</h2>
                 </div>
-                <span class="badge bg-primary">@item.SkillName</span>
+                <span class="badge bg-primary">@DisplaySkillName</span>
             </div>
 
             @if (HasVideo)
@@ -42,43 +42,43 @@
                 <div class="lecture-video tw:mb-4">
                     <video controls preload="metadata" playsinline poster="/images/background-softsync.png" @onended="CompleteVideoAsync">
                         <source src="@VideoSource" type="video/mp4" />
-                        Trình duyệt của bạn không hỗ trợ phát video HTML5.
+                        @Tx("Your browser does not support HTML5 video.", "Trình duyệt của bạn không hỗ trợ video HTML5.")
                     </video>
                     <div class="lecture-video-caption">
-                        <span><i class="bi bi-play-circle-fill"></i> VIDEO BÀI GIẢNG</span>
-                        <div><strong>@item.SkillName · Bài @DisplayWeekNumber</strong><small>Video hướng dẫn từ Mentor SoftSync</small></div>
+                        <span><i class="bi bi-play-circle-fill"></i> @Tx("VIDEO LESSON", "VIDEO BÀI GIẢNG")</span>
+                        <div><strong>@DisplaySkillName · @Tx("Lesson", "Bài") @DisplayWeekNumber</strong><small>@Tx("Guided by a SoftSync Mentor", "Video hướng dẫn từ Mentor SoftSync")</small></div>
                     </div>
                 </div>
             }
             else
             {
-                <div class="lecture-placeholder tw:mb-4"><i class="bi bi-camera-video-off tw:me-2"></i> Video đang được cập nhật</div>
+                <div class="lecture-placeholder tw:mb-4"><i class="bi bi-camera-video-off tw:me-2"></i> @Tx("Video coming soon", "Video đang được cập nhật")</div>
             }
 
             @if (item.IsCompleted)
             {
                 <div class="lecture-complete lecture-complete--compact tw:mb-4">
                     <i class="bi bi-patch-check-fill"></i>
-                    <div><strong>Tuần học đã hoàn thành</strong><span>Video và bài luyện tập đã được lưu. Bạn vẫn có thể xem lại bất cứ lúc nào.</span></div>
+                    <div><strong>@Tx("Week completed", "Tuần học đã hoàn thành")</strong><span>@Tx("Your video and practice results are saved. You can review them anytime.", "Video và bài luyện tập đã được lưu. Bạn vẫn có thể xem lại bất cứ lúc nào.")</span></div>
                 </div>
             }
             else if (item.IsVideoCompleted)
             {
                 <div class="lecture-complete lecture-complete--compact tw:mb-4">
                     <i class="bi bi-check-circle-fill"></i>
-                    <div><strong>Đã xem xong video</strong><span>Kết quả đã được lưu và video đã chuyển sang tích xanh trên Roadmap.</span></div>
+                    <div><strong>@Tx("Video completed", "Đã xem xong video")</strong><span>@Tx("Your result is saved and the video now has a green tick on the Roadmap.", "Kết quả đã được lưu và video đã chuyển sang tích xanh trên Roadmap.")</span></div>
                 </div>
             }
 
             <p class="text-muted tw:mb-0">
-                @item.Description
+                @DisplayDescription
             </p>
 
             <div class="tw:mt-8 tw:text-end">
                 @if (item.IsPracticeCompleted)
                 {
                     <button class="ss-btn-primary tw:px-8 tw:py-3" disabled style="opacity:.65; cursor:not-allowed;">
-                        Đã hoàn thành bài luyện tập
+                        @Tx("Practice completed", "Đã hoàn thành bài luyện tập")
                     </button>
                 }
                 else if (UserId > 0 || IsCommunicationLessonTwo || IsCommunicationLessonThree || !IsCommunicationLessonFour)
@@ -108,6 +108,24 @@
     private bool IsCommunicationLessonThree => Nav.Uri.Contains("/communication-lesson-3", StringComparison.OrdinalIgnoreCase);
     private bool IsCommunicationLessonFour => Nav.Uri.Contains("/communication-lesson-4", StringComparison.OrdinalIgnoreCase);
     private int DisplayWeekNumber => IsCommunicationLessonFour ? 4 : IsCommunicationLessonThree ? 3 : IsCommunicationLessonTwo ? 2 : item?.WeekNumber ?? 1;
+    private string DisplaySkillName => item is null ? string.Empty : SkillKey(item) switch
+    {
+        "communication" => Tx("Communication", "Giao tiếp"),
+        "time" => Tx("Time Management", "Quản lý thời gian"),
+        "critical" => Tx("Critical Thinking", "Tư duy phản biện"),
+        _ => item.SkillName
+    };
+    private string DisplayTitle => item is null ? string.Empty : UserId > 0
+        ? IsPracticeItem(item) ? Tx($"{DisplaySkillName} Practice", $"Thực hành {DisplaySkillName}") : Tx($"{DisplaySkillName} Foundations", $"Nền tảng {DisplaySkillName}")
+        : IsCommunicationLessonFour ? Tx("Advanced Communication", "Bài giảng giao tiếp nâng cao")
+        : IsCommunicationLessonThree ? Tx("Mastering Voice and Paralanguage", "Làm chủ giọng nói và ngôn ngữ cận lời")
+        : IsCommunicationLessonTwo ? Tx("Situational Communication Practice", "Thực hành giao tiếp qua tình huống")
+        : Tx("Communication and Active Listening Foundations", "Nền tảng giao tiếp và lắng nghe chủ động");
+    private string DisplayDescription => item is null ? string.Empty : UserId > 0
+        ? IsPracticeItem(item)
+            ? Tx($"Apply {DisplaySkillName.ToLowerInvariant()} in realistic situations, review feedback, and reflect after each attempt.", $"Áp dụng {DisplaySkillName.ToLowerInvariant()} vào tình huống thực tế, xem phản hồi và tự đánh giá sau mỗi lượt thực hành.")
+            : Tx($"Learn the core principles of {DisplaySkillName.ToLowerInvariant()} and complete short guided exercises.", $"Nắm kiến thức cốt lõi của {DisplaySkillName.ToLowerInvariant()} và hoàn thành các bài luyện tập ngắn có hướng dẫn.")
+        : item.Description;
     private string VideoSource => IsCommunicationLessonFour
         ? "/videos/communication-mentor-lesson-4.mp4"
         : IsCommunicationLessonThree ? "/videos/communication-mentor-lesson-3.mp4"
@@ -189,6 +207,21 @@
 
     private static bool SameSkill(RoadmapItemDto left, RoadmapItemDto right)
         => string.Equals(left.SkillName, right.SkillName, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsPracticeItem(RoadmapItemDto value)
+        => value.Title.Contains("Thực hành", StringComparison.OrdinalIgnoreCase)
+            || value.Title.Contains("Practice", StringComparison.OrdinalIgnoreCase);
+
+    private static string SkillKey(RoadmapItemDto value)
+    {
+        var text = $"{value.SkillName} {value.Title}";
+        if (text.Contains("Giao tiếp", StringComparison.OrdinalIgnoreCase) || text.Contains("Communication", StringComparison.OrdinalIgnoreCase)) return "communication";
+        if (text.Contains("Quản lý thời gian", StringComparison.OrdinalIgnoreCase) || text.Contains("Time Management", StringComparison.OrdinalIgnoreCase)) return "time";
+        if (text.Contains("Tư duy phản biện", StringComparison.OrdinalIgnoreCase) || text.Contains("Critical Thinking", StringComparison.OrdinalIgnoreCase)) return "critical";
+        return "other";
+    }
+
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
 
     private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
         ? "/communication-voice-practice"
