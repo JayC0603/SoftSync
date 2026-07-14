@@ -71,7 +71,7 @@
             else if (currentStep == LearningStep.Script)
             {
                 <article class="guided-content guided-script">
-                    <header><i class="bi bi-file-earmark-text-fill"></i><div><small>VIDEO @DisplayWeekNumber · SCRIPT</small><h3>@(IsListeningVideoTwo ? Tx("Introduction to Listening Skills", "Giới thiệu về kỹ năng lắng nghe") : IsTimeManagementVideoOne ? Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") : DisplayTitle)</h3></div></header>
+                    <header><i class="bi bi-file-earmark-text-fill"></i><div><small>VIDEO @DisplayWeekNumber · SCRIPT</small><h3>@(IsFeedbackVideoThree ? Tx("Rules for Giving Feedback", "Những quy tắc, lưu ý khi phản hồi người khác") : IsListeningVideoTwo ? Tx("Introduction to Listening Skills", "Giới thiệu về kỹ năng lắng nghe") : IsTimeManagementVideoOne ? Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") : DisplayTitle)</h3></div></header>
                     @if (IsTimeManagementVideoOne)
                     {
                         <section>
@@ -144,6 +144,50 @@
                             <p>@Tx("Good listening takes time and persistence to develop, but it helps you learn better and create a professional impression.", "Lắng nghe giỏi cần thời gian và sự kiên trì để rèn luyện, nhưng sẽ giúp bạn học tập tốt hơn và tạo ấn tượng chuyên nghiệp trong tương lai.")</p>
                         </section>
                     }
+                    else if (IsFeedbackVideoThree)
+                    {
+                        <section>
+                            <p>@Tx("Feedback is the final piece of an effective communication cycle, turning one-way delivery into two-way interaction. For students, good feedback prevents misunderstanding and builds trust with teachers and peers.", "Phản hồi là mảnh ghép cuối cùng để hoàn tất một chu kỳ giao tiếp hiệu quả, giúp chuyển quá trình truyền đạt một chiều thành tương tác hai chiều. Với học sinh, sinh viên, kỹ năng này giúp tránh hiểu lầm và xây dựng lòng tin với thầy cô, bạn bè.")</p>
+                        </section>
+                        <section>
+                            <h4>@Tx("1. Apply the Golden Rule and show respect", "1. Áp dụng “Quy tắc Vàng” và sự tôn trọng")</h4>
+                            <ul>
+                                <li><strong>@Tx("The Golden Rule:", "Quy tắc Vàng:")</strong> @Tx("Treat others as you want to be treated. Lead with empathy and kindness in both face-to-face and online interactions.", "Đối xử với người khác theo cách bạn muốn họ đối xử với mình. Hãy dẫn dắt bằng sự thấu cảm và tử tế trong cả tương tác trực tiếp lẫn trực tuyến.")</li>
+                                <li><strong>@Tx("Respect differences:", "Tôn trọng sự khác biệt:")</strong> @Tx("Respect differences in culture, viewpoint, and background. Avoid personal attacks and insulting language.", "Tôn trọng khác biệt về văn hóa, quan điểm và vùng miền. Tránh tấn công cá nhân hoặc miệt thị.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("2. Listen actively before responding", "2. Luôn lắng nghe chủ động trước khi phản hồi")</h4>
+                            <ul>
+                                <li><strong>@Tx("Confirm information:", "Xác nhận lại thông tin:")</strong> @Tx("Repeat or summarize what you heard—for example, 'Do you mean that...?'—before answering.", "Lặp lại hoặc tóm tắt điều vừa nghe, chẳng hạn “Có phải ý bạn là...?”, để đảm bảo mình hiểu đúng trước khi trả lời.")</li>
+                                <li><strong>@Tx("Ask clarifying questions:", "Đặt câu hỏi làm rõ:")</strong> @Tx("Ask rather than assume when something is unclear. Questions show genuine participation in the conversation.", "Nếu có điểm chưa rõ, hãy đặt câu hỏi thay vì tự giả định. Việc hỏi lại cho thấy bạn thực sự tham gia vào cuộc hội thoại.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("3. Respond professionally and politely", "3. Phản hồi chuyên nghiệp và lịch sự")</h4>
+                            <ul>
+                                <li><strong>@Tx("Use appropriate language:", "Sử dụng ngôn ngữ phù hợp:")</strong> @Tx("Use complete sentences, correct grammar, and formal greetings in academic email; avoid excessive slang and abbreviations.", "Trong email học thuật, dùng câu hoàn chỉnh, ngữ pháp chuẩn và lời chào trang trọng; tránh từ lóng và viết tắt quá mức.")</li>
+                                <li><strong>@Tx("Manage emotions:", "Kiểm soát cảm xúc (EQ):")</strong> @Tx("If you feel angry or defensive, pause before replying. A calm response leads to clearer communication.", "Nếu đang tức giận hoặc phòng thủ, hãy tạm dừng trước khi trả lời. Phản hồi khi bình tĩnh giúp giao tiếp sáng suốt hơn.")</li>
+                                <li><strong>@Tx("Avoid all caps:", "Không dùng chữ IN HOA:")</strong> @Tx("Writing an entire message in capital letters is commonly interpreted as shouting online.", "Viết hoa toàn bộ câu trên môi trường mạng thường được hiểu là đang quát tháo người đọc.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("4. Give negative feedback constructively", "4. Cách đưa ra phản hồi tiêu cực hoặc góp ý")</h4>
+                            <ul>
+                                <li><strong>@Tx("Use a buffer:", "Phương pháp “Đệm” (Buffer):")</strong> @Tx("Begin difficult news or a refusal with neutral or positive context before stating the main point.", "Khi đưa tin không vui hoặc lời từ chối, hãy bắt đầu bằng thông tin trung lập hoặc tích cực trước khi đi vào nội dung chính.")</li>
+                                <li><strong>@Tx("Focus on the issue:", "Tập trung vào vấn đề, không phải cá nhân:")</strong> @Tx("Comment on behavior or results, not character. Say 'This section is difficult to understand' instead of 'You write badly.'", "Nhận xét hành động hoặc kết quả, không phán xét con người. Hãy nói “Phần này hơi khó hiểu” thay vì “Bạn viết tệ quá”.")</li>
+                                <li><strong>@Tx("Offer solutions:", "Đưa ra giải pháp:")</strong> @Tx("Make feedback constructive by suggesting a next step or asking how you can help improve the situation.", "Biến góp ý thành phản hồi xây dựng bằng cách đề xuất hướng giải quyết hoặc hỏi bạn có thể hỗ trợ cải thiện như thế nào.")</li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h4>@Tx("5. Feedback in learning", "5. Phản hồi trong học tập")</h4>
+                            <ul>
+                                <li><strong>@Tx("Communicate after an absence:", "Giao tiếp khi vắng mặt:")</strong> @Tx("Proactively contact the lecturer and ask classmates for materials instead of asking whether you missed anything important.", "Khi nghỉ học, hãy chủ động liên hệ giảng viên và xin bài từ bạn học thay vì hỏi “Hôm nay em có lỡ điều gì quan trọng không?”.")</li>
+                                <li><strong>@Tx("Participate in class:", "Tương tác trong lớp:")</strong> @Tx("Nodding, asking questions, and taking notes are nonverbal feedback that helps the lecturer know you are following.", "Gật đầu, đặt câu hỏi và ghi chép là những phản hồi phi ngôn ngữ giúp giảng viên biết bạn đang theo kịp bài.")</li>
+                            </ul>
+                            <p>@Tx("Trust is difficult to build and easy to lose. Honest, accurate, and responsible feedback is essential to lasting relationships in study and work.", "Sự tin tưởng rất khó xây dựng nhưng dễ mất đi. Phản hồi trung thực, chính xác và có trách nhiệm là chìa khóa duy trì các mối quan hệ bền vững trong học tập và sự nghiệp.")</p>
+                        </section>
+                    }
                     else
                     {
                         <div class="guided-empty"><i class="bi bi-hourglass-split"></i><p>@Tx("This lesson's script will be updated soon.", "Script của bài học này sẽ sớm được cập nhật.")</p></div>
@@ -154,7 +198,17 @@
             {
                 <article class="guided-content guided-summary">
                     <header><i class="bi bi-lightbulb-fill"></i><div><small>@Tx("LESSON SUMMARY", "TÓM TẮT BÀI HỌC")</small><h3>@DisplayTitle</h3></div></header>
-                    @if (IsListeningVideoTwo)
+                    @if (IsFeedbackVideoThree)
+                    {
+                        <ul>
+                            <li>@Tx("Lead with respect, empathy, and the Golden Rule.", "Phản hồi bằng sự tôn trọng, thấu cảm và Quy tắc Vàng.")</li>
+                            <li>@Tx("Listen, confirm, and clarify before answering.", "Lắng nghe, xác nhận và làm rõ trước khi trả lời.")</li>
+                            <li>@Tx("Stay professional, regulate emotion, and use appropriate language.", "Giữ sự chuyên nghiệp, kiểm soát cảm xúc và dùng ngôn ngữ phù hợp.")</li>
+                            <li>@Tx("Address the issue rather than the person, and offer a practical solution.", "Tập trung vào vấn đề thay vì cá nhân và đưa ra giải pháp cụ thể.")</li>
+                            <li>@Tx("Give honest, accurate, and responsible feedback to preserve trust.", "Phản hồi trung thực, chính xác và có trách nhiệm để duy trì lòng tin.")</li>
+                        </ul>
+                    }
+                    else if (IsListeningVideoTwo)
                     {
                         <ul>
                             <li>@Tx("Hearing is passive; listening is an active process of understanding and remembering.", "Nghe là phản xạ thụ động; lắng nghe là quá trình chủ động để hiểu và ghi nhớ.")</li>
@@ -259,7 +313,9 @@
         "critical" => Tx("Critical Thinking", "Tư duy phản biện"),
         _ => item.SkillName
     };
-    private string DisplayTitle => item is null ? string.Empty : UserId > 0
+    private string DisplayTitle => item is null ? string.Empty : IsFeedbackVideoThree
+        ? Tx("Rules for Giving Feedback", "Những quy tắc, lưu ý khi phản hồi người khác")
+        : UserId > 0
         ? IsPracticeItem(item) ? Tx($"{DisplaySkillName} Practice", $"Thực hành {DisplaySkillName}") : Tx($"{DisplaySkillName} Foundations", $"Nền tảng {DisplaySkillName}")
         : IsCommunicationLessonFour ? Tx("Advanced Communication", "Bài giảng giao tiếp nâng cao")
         : IsCommunicationLessonThree ? Tx("Mastering Voice and Paralanguage", "Làm chủ giọng nói và ngôn ngữ cận lời")
@@ -287,6 +343,9 @@
     private bool IsListeningVideoTwo => item is not null
         && SkillKey(item) == "communication"
         && (UserId == 0 ? IsCommunicationLessonTwo : SkillLessonOrdinal(item) == 2);
+    private bool IsFeedbackVideoThree => item is not null
+        && SkillKey(item) == "communication"
+        && (UserId == 0 ? IsCommunicationLessonThree : SkillLessonOrdinal(item) == 3);
     private bool CanContinue => currentStep switch
     {
         LearningStep.Video => RoadmapReviewMode.Enabled || item?.IsVideoCompleted == true || !HasVideo,
@@ -534,7 +593,7 @@
     private static string StepValue(LearningStep step) => step.ToString().ToLowerInvariant();
 
     private void GoToGame() => Nav.NavigateTo(IsCommunicationLessonThree
-        ? "/communication-voice-practice"
+        ? "/communication-quiz"
         : IsCommunicationLessonTwo ? "/communication-roleplay"
         : UserId == 0 ? "/communication-quiz" : $"/roadmap/game/{UserId}/{ItemId}");
 
