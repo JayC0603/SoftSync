@@ -26,6 +26,8 @@ public static class Translations
 
         // ===== Home / About SoftSync Space =====
         ["home.about.heading"] = ("Welcome to SoftSync Space", "Chào mừng bạn đến với SoftSync Space"),
+        ["home.about.eyebrow"] = ("About SoftSync Space", "Giới thiệu SoftSync Space"),
+        ["home.about.cta"] = ("Explore Community", "Khám phá Community"),
         ["home.about.headingDesc"] = (
             "An AI-powered platform for young people to grow soft skills, connect with community, and grow more confident.",
             "Nền tảng ứng dụng AI giúp người trẻ phát triển kỹ năng mềm, kết nối cộng đồng và tự tin hơn."),

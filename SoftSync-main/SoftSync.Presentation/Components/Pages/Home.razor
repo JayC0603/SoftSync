@@ -226,15 +226,22 @@
     </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-water"></i> @L["home.about.heading"]</div>
-                <p>@L["home.about.headingDesc"]</p>
+        <div class="ss-about-hero-grid">
+            <div class="ss-about-visual" aria-hidden="true">
+                <div class="ss-about-glow"></div>
+                <img src="/images/syncy-fish.png" alt="" />
+            </div>
+            <div class="ss-about-copy">
+                <div class="ss-eyebrow"><i class="bi bi-water"></i> @L["home.about.eyebrow"]</div>
+                <h2>@L["home.about.heading"]</h2>
+                <p>@L["home.about.intro1"]</p>
+                <p>@L["home.about.intro2"]</p>
+                <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/community")'>
+                    <i class="bi bi-people-fill"></i> @L["home.about.cta"]
+                </button>
             </div>
         </div>
-        <p class="ss-about-text">@L["home.about.intro1"]</p>
-        <p class="ss-about-text">@L["home.about.intro2"]</p>
-        <p class="ss-about-text">@L["home.about.intro3"]</p>
+        <p class="ss-about-text" style="margin-top:1.5rem;">@L["home.about.intro3"]</p>
     </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
@@ -243,11 +250,14 @@
                 <div class="ss-panel-title"><i class="bi bi-question-circle-fill"></i> @L["home.why.heading"]</div>
             </div>
         </div>
-        <p class="ss-about-text">@L["home.why.p1"]</p>
-        <p class="ss-about-text">@L["home.why.p2"]</p>
-        <p class="ss-about-text">@L["home.why.p3"]</p>
-        <p class="ss-about-text">@L["home.why.p4"]</p>
+        <div class="ss-about-row ss-about-row-4">
+            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-cpu-fill"></i><p>@L["home.why.p1"]</p></article>
+            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-emoji-frown"></i><p>@L["home.why.p2"]</p></article>
+            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-universal-access"></i><p>@L["home.why.p3"]</p></article>
+            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><p>@L["home.why.p4"]</p></article>
+        </div>
     </section>
+
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
         <div class="ss-panel-head ss-glass">
@@ -271,7 +281,7 @@
                 <p>@L["home.about.space.desc"]</p>
             </article>
         </div>
-        <p class="ss-about-text" style="margin-top:1rem;">@L["home.meaning.closing"]</p>
+        <p class="ss-about-caption">@L["home.meaning.closing"]</p>
     </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
@@ -282,30 +292,36 @@
             </div>
         </div>
 
-        <div class="ss-about-row">
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-clipboard-check"></i> @L["home.how.step1.title"]</span>
-                <p>@L["home.how.step1.desc"]</p>
+        <div class="ss-steps-track">
+            <article class="ss-step">
+                <div class="ss-step-badge">1</div>
+                <div class="ss-step-card ss-glass ss-glass-interactive">
+                    <span class="ss-main-mentor-kicker"><i class="bi bi-clipboard-check"></i> @L["home.how.step1.title"]</span>
+                    <p>@L["home.how.step1.desc"]</p>
+                </div>
             </article>
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-people-fill"></i> @L["home.how.step2.title"]</span>
-                <p>@L["home.how.step2.desc"]</p>
+            <article class="ss-step">
+                <div class="ss-step-badge">2</div>
+                <div class="ss-step-card ss-glass ss-glass-interactive">
+                    <span class="ss-main-mentor-kicker"><i class="bi bi-people-fill"></i> @L["home.how.step2.title"]</span>
+                    <p>@L["home.how.step2.desc"]</p>
+                </div>
             </article>
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-person-video3"></i> @L["home.how.step3.title"]</span>
-                <p>@L["home.how.step3.desc"]</p>
+            <article class="ss-step">
+                <div class="ss-step-badge">3</div>
+                <div class="ss-step-card ss-glass ss-glass-interactive">
+                    <span class="ss-main-mentor-kicker"><i class="bi bi-person-video3"></i> @L["home.how.step3.title"]</span>
+                    <p>@L["home.how.step3.desc"]</p>
+                </div>
             </article>
         </div>
-        <p class="ss-about-text" style="margin-top:1rem;">@L["home.how.closing"]</p>
+        <p class="ss-about-caption">@L["home.how.closing"]</p>
     </section>
 
+
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-lightning-charge-fill"></i> @L["home.diff.heading"]</div>
-                <p>@L["home.diff.headingDesc"]</p>
-            </div>
-        </div>
+        <div class="ss-panel-title"><i class="bi bi-lightning-charge-fill"></i> @L["home.diff.heading"]</div>
+        <p style="color:var(--ss-home-muted); margin: 0.35rem 0 1.25rem;">@L["home.diff.headingDesc"]</p>
         <div class="ss-about-row ss-about-row-5">
             <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-cpu-fill"></i><p>@L["home.diff.item1"]</p></article>
             <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><p>@L["home.diff.item2"]</p></article>
@@ -316,16 +332,18 @@
     </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-about-row">
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-heart-fill"></i> @L["home.mission.heading"]</span>
-                <p>@L["home.mission.p1"]</p>
+        <div class="ss-about-hero-grid ss-about-hero-grid-reverse">
+            <div class="ss-about-visual ss-about-visual-alt" aria-hidden="true">
+                <div class="ss-about-glow ss-about-glow-alt"></div>
+                <img src="/images/syncy-fish.png" alt="" />
+            </div>
+            <div class="ss-about-copy">
+                <div class="ss-eyebrow"><i class="bi bi-heart-fill"></i> @L["home.mission.heading"]</div>
+                <h2>@L["home.mission.p1"]</h2>
                 <p>@L["home.mission.p2"]</p>
-            </article>
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-globe-americas"></i> @L["home.vision.heading"]</span>
+                <div class="ss-eyebrow" style="margin-top:0.6rem;"><i class="bi bi-globe-americas"></i> @L["home.vision.heading"]</div>
                 <p>@L["home.vision.desc"]</p>
-            </article>
+            </div>
         </div>
     </section>
 
@@ -335,25 +353,6 @@
         </p>
         <p style="color:var(--ss-home-muted); max-width:640px; margin:0 auto;">@L["home.mission.quote2"]</p>
     </section>
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-chat-dots-fill"></i> @L["home.contact.heading"]</div>
-                <p>@L["home.contact.desc"]</p>
-            </div>
-        </div>
-        <div class="ss-about-row ss-about-row-6">
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-envelope-fill"></i><strong>@L["home.contact.email"]</strong><span>softsync.system@gmail.com</span></div>
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-telephone-fill"></i><strong>@L["home.contact.hotline"]</strong><span>0775 184 816</span></div>
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-facebook"></i><strong>@L["home.contact.facebook"]</strong><span>SoftSync Space</span></div>
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-geo-alt-fill"></i><strong>@L["home.contact.address"]</strong><span>600 Nguyễn Văn Cừ, Ninh Kiều, Cần Thơ</span></div>
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-person-badge-fill"></i><strong>@L["home.contact.mentor"]</strong><span>Nguyễn Thụy Tố Trâm</span></div>
-            <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-flag-fill"></i><strong>@L["home.contact.lead"]</strong><span>Phạm Kim Ngân</span></div>
-        </div>
-    </section>
-
-
 
     <section class="ss-landing-stats">
         <div class="ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><strong>7+</strong><span>@L["home.stat.coreSkills"]</span></div>
@@ -452,6 +451,24 @@
             </button>
         }
     </aside>
+</section>
+
+
+<section class="ss-mentor-panel ss-glass ss-glass-interactive">
+    <div class="ss-panel-head ss-glass">
+        <div>
+            <div class="ss-panel-title"><i class="bi bi-chat-dots-fill"></i> @L["home.contact.heading"]</div>
+            <p>@L["home.contact.desc"]</p>
+        </div>
+    </div>
+    <div class="ss-about-row ss-about-row-6">
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-envelope-fill"></i><strong>@L["home.contact.email"]</strong><span>softsync.system@gmail.com</span></div>
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-telephone-fill"></i><strong>@L["home.contact.hotline"]</strong><span>0775 184 816</span></div>
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-facebook"></i><strong>@L["home.contact.facebook"]</strong><span>SoftSync Space</span></div>
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-geo-alt-fill"></i><strong>@L["home.contact.address"]</strong><span>600 Nguyễn Văn Cừ, Ninh Kiều, Cần Thơ</span></div>
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-person-badge-fill"></i><strong>@L["home.contact.mentor"]</strong><span>Nguyễn Thụy Tố Trâm</span></div>
+        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-flag-fill"></i><strong>@L["home.contact.lead"]</strong><span>Phạm Kim Ngân</span></div>
+    </div>
 </section>
 
 <style>
@@ -1593,6 +1610,225 @@
                 scroll-snap-align: center;
             }
     }
+
+    /* ===== About hero (image + text, GlowTech-style intro) ===== */
+    .ss-about-hero-grid {
+        display: grid;
+        grid-template-columns: minmax(200px, 0.7fr) minmax(0, 1.3fr);
+        align-items: center;
+        gap: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    .ss-about-visual {
+        position: relative;
+        aspect-ratio: 1;
+        max-width: 280px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ss-about-glow {
+        position: absolute;
+        inset: 6%;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.75), transparent 23%), linear-gradient(135deg, rgba(168, 85, 247, 0.92), rgba(37, 99, 235, 0.9));
+        box-shadow: 0 0 0 16px rgba(124, 58, 237, 0.16), 0 0 55px rgba(96, 165, 250, 0.46);
+    }
+
+    .ss-about-visual img {
+        position: relative;
+        width: 62%;
+        height: 62%;
+        object-fit: contain;
+        filter: drop-shadow(0 18px 24px rgba(15,23,42,0.28));
+    }
+
+    .ss-about-copy h2 {
+        font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+        font-weight: 800;
+        line-height: 1.25;
+        margin: 0 0 1rem;
+        color: var(--ss-home-text);
+    }
+
+    .ss-about-copy p {
+        color: var(--ss-home-muted);
+        line-height: 1.7;
+        margin: 0 0 1rem;
+    }
+
+    .ss-about-row-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @@media (max-width: 900px) {
+        .ss-about-hero-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .ss-about-visual {
+            max-width: 200px;
+        }
+
+        .ss-about-copy .ss-eyebrow {
+            margin-inline: auto;
+        }
+    }
+
+    /* ===== Compact captions (replaces bulky closing paragraphs) ===== */
+    .ss-about-caption {
+        margin: 1.1rem 0 0;
+        text-align: center;
+        font-size: 0.88rem;
+        font-style: italic;
+        color: var(--ss-home-soft);
+        max-width: 640px;
+        margin-inline: auto;
+    }
+
+    /* ===== Mission/Vision hero (reversed image side + alt color) ===== */
+    .ss-about-hero-grid-reverse {
+        grid-template-columns: minmax(0, 1.3fr) minmax(200px, 0.7fr);
+    }
+
+        .ss-about-hero-grid-reverse .ss-about-visual {
+            order: 2;
+        }
+
+    .ss-about-visual-alt img {
+        transform: scaleX(-1);
+    }
+
+    .ss-about-glow-alt {
+        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.75), transparent 23%), linear-gradient(135deg, rgba(236, 72, 153, 0.92), rgba(59, 130, 246, 0.9));
+        box-shadow: 0 0 0 16px rgba(236, 72, 153, 0.16), 0 0 55px rgba(139, 92, 246, 0.46);
+    }
+
+    .ss-about-copy h2 {
+        font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+    }
+
+    @@media (max-width: 900px) {
+        .ss-about-hero-grid-reverse {
+            grid-template-columns: 1fr;
+        }
+
+            .ss-about-hero-grid-reverse .ss-about-visual {
+                order: -1;
+            }
+    }
+
+    /* ===== Step connector (How it works) ===== */
+    .ss-steps-track {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+        .ss-steps-track::before {
+            content: "";
+            position: absolute;
+            top: 24px;
+            left: calc(100% / 6);
+            right: calc(100% / 6);
+            height: 2px;
+            background: repeating-linear-gradient( 90deg, rgba(139, 92, 246, 0.55) 0 10px, transparent 10px 20px );
+            z-index: 0;
+        }
+
+    .ss-step {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .ss-step-badge {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.9rem;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        box-shadow: 0 10px 26px rgba(99, 102, 241, 0.4), 0 0 0 6px rgba(10, 16, 45, 0.55);
+    }
+
+    html[data-theme="light"] .ss-step-badge {
+        box-shadow: 0 10px 26px rgba(99, 102, 241, 0.3), 0 0 0 6px rgba(245, 241, 255, 0.9);
+    }
+
+    .ss-step-card {
+        width: 100%;
+        padding: 1.1rem;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        text-align: center;
+    }
+
+        .ss-step-card .ss-main-mentor-kicker {
+            align-self: center;
+        }
+
+        .ss-step-card p {
+            margin: 0;
+            color: var(--ss-home-muted);
+            font-size: 0.85rem;
+            line-height: 1.55;
+        }
+
+    @@media (max-width: 900px) {
+        .ss-steps-track {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+            .ss-steps-track::before {
+                top: 0;
+                bottom: 0;
+                left: 23px;
+                right: auto;
+                width: 2px;
+                height: auto;
+                background: repeating-linear-gradient( 180deg, rgba(139, 92, 246, 0.55) 0 10px, transparent 10px 20px );
+            }
+
+        .ss-step {
+            flex-direction: row;
+            align-items: flex-start;
+            text-align: left;
+            gap: 1rem;
+        }
+
+        .ss-step-badge {
+            margin-bottom: 0;
+        }
+
+        .ss-step-card {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+            .ss-step-card .ss-main-mentor-kicker {
+                align-self: flex-start;
+            }
+    }
+
 </style>
 
 @code {
