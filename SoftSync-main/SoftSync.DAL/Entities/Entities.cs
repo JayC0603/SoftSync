@@ -160,7 +160,7 @@ public class RoadmapItem
     /// <summary>Set when the learner completes the applied scenario step.</summary>
     public DateTime? ScenarioCompletedAtUtc { get; set; }
     /// <summary>The learner's reflection after completing the weekly activities.</summary>
-    [MaxLength(2000)]
+    [MaxLength(8000)]
     public string? ReflectionText { get; set; }
     /// <summary>Set when a non-empty reflection is saved.</summary>
     public DateTime? ReflectionCompletedAtUtc { get; set; }

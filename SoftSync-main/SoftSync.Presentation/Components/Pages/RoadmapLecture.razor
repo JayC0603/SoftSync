@@ -6,6 +6,7 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
+@using System.Text.Json
 @inject IRoadmapService RoadmapService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
@@ -166,6 +167,36 @@
                         <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (roleplayResult is not null) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
                     }
                 }
+                else if (currentStep == 6)
+                {
+                    <section class="reflection-layout">
+                        <div class="reflection-form">
+                            <header><small>@Tx("STEP 6 · REFLECTION", "BƯỚC 6 · PHẢN TƯ")</small><h2>@Tx("Look back, then move forward", "Nhìn lại để tiến bộ")</h2><p>@Tx("Your answers are private and help turn this lesson into a practical habit.", "Câu trả lời giúp bạn biến bài học thành thói quen thực tế.")</p></header>
+                            @if (item!.IsReflectionCompleted)
+                            {
+                                <div class="reflection-done"><i class="bi bi-check-circle-fill"></i><div><b>@Tx("Week completed", "Đã hoàn thành tuần")</b><span>@Tx("Your reflection is saved. You can review it at any time.", "Phản tư đã được lưu. Bạn có thể xem lại bất kỳ lúc nào.")</span></div></div>
+                            }
+                            <label><b>1. @Tx("What is the most important thing you learned?", "Điều quan trọng nhất bạn học được là gì?")</b><textarea @bind="reflection.Learning" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@reflection.Learning.Length / 1500</small></label>
+                            <label><b>2. @Tx("What did you handle well in the Quiz or Role-play?", "Trong Quiz hoặc Role-play, bạn đã làm tốt điều gì?")</b><textarea @bind="reflection.Strength" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@reflection.Strength.Length / 1500</small></label>
+                            <label><b>3. @Tx("What would you change next time?", "Nếu gặp lại tình huống tương tự, bạn sẽ thay đổi điều gì?")</b><textarea @bind="reflection.Improvement" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@reflection.Improvement.Length / 1500</small></label>
+                            <label class="commitment"><b><i class="bi bi-bullseye"></i>@Tx("My action commitment", "Cam kết hành động")</b><span>@Tx("Next week, I will...", "Trong tuần tới, tôi sẽ...")</span><textarea @bind="reflection.Commitment" disabled="@item.IsReflectionCompleted" maxlength="1000"></textarea><small>@reflection.Commitment.Length / 1000</small></label>
+                            <div class="confidence"><div><b>@Tx("Confidence before", "Tự tin trước bài học")</b><input type="range" min="1" max="5" @bind="reflection.ConfidenceBefore" disabled="@item.IsReflectionCompleted" /><span>@reflection.ConfidenceBefore/5</span></div><div><b>@Tx("Confidence now", "Tự tin hiện tại")</b><input type="range" min="1" max="5" @bind="reflection.ConfidenceAfter" disabled="@item.IsReflectionCompleted" /><span>@reflection.ConfidenceAfter/5</span></div></div>
+                            @if (!string.IsNullOrWhiteSpace(reflectionMessage)) { <div class="reflection-message @(reflectionError ? "error" : null)">@reflectionMessage</div> }
+                        </div>
+                        <aside class="learning-review">
+                            <h3>@Tx("Your weekly results", "Kết quả tuần học")</h3>
+                            <div class="result-tile"><i class="bi bi-ui-checks"></i><span>Quiz<b>@LatestQuizScore / 50</b></span></div>
+                            <div class="result-tile"><i class="bi bi-chat-heart"></i><span>Role-play<b>@LatestRoleplayScore / 10</b></span></div>
+                            @if (LatestRoleplay is not null)
+                            {
+                                <div class="mini-rubric"><span>EQ <b>@LatestRoleplay.EmotionalIntelligenceScore/3</b></span><span>@Tx("Listening", "Lắng nghe") <b>@LatestRoleplay.ActiveListeningScore/3</b></span><span>I-statement <b>@LatestRoleplay.IStatementScore/2</b></span><span>@Tx("Solution", "Giải pháp") <b>@LatestRoleplay.SolutionScore/2</b></span></div>
+                            }
+                            <div class="ai-reflection"><b><i class="bi bi-stars"></i>AI Feedback</b><p>@ReflectionFeedback</p></div>
+                            <div class="confidence-change"><span>@Tx("Confidence change", "Thay đổi tự tin")</span><b>@reflection.ConfidenceBefore → @reflection.ConfidenceAfter</b><em>@ConfidenceDelta</em></div>
+                        </aside>
+                    </section>
+                    <div class="actions"><button @onclick="() => OpenStep(5)"><i class="bi bi-arrow-left"></i>@Tx("Back: Practice", "Quay lại: Thực hành")</button><div class="reflection-actions">@if (!item!.IsReflectionCompleted) { <button @onclick="SaveReflectionDraft" disabled="@savingReflection">@Tx("Save draft", "Lưu bản nháp")</button><button class="primary" disabled="@(!ReflectionValid || savingReflection)" @onclick="CompleteReflection">@Tx("Complete week", "Hoàn thành tuần")<i class="bi bi-check-circle"></i></button> } else { <button class="primary" @onclick="Back">@Tx("View Roadmap", "Xem Roadmap")<i class="bi bi-arrow-right"></i></button> }</div></div>
+                }
                 else
                 {
                     <section class="empty inner"><i class="@Steps.First(x => x.Id == currentStep).Icon"></i><h2>@Tx(Steps.First(x => x.Id == currentStep).En, Steps.First(x => x.Id == currentStep).Vi)</h2><p>@Tx("This section is waiting for content.", "Phần này đang chờ nạp nội dung tiếp theo.")</p></section>
@@ -198,6 +229,17 @@
     private string roleplayInput = string.Empty;
     private bool sendingRoleplay;
     private RoadmapRoleplayAttemptDto? roleplayResult;
+    private ReflectionForm reflection = new();
+    private bool savingReflection;
+    private bool reflectionError;
+    private string? reflectionMessage;
+    private RoadmapQuizAttemptDto? LatestQuiz => item?.QuizHistory.LastOrDefault();
+    private RoadmapRoleplayAttemptDto? LatestRoleplay => item?.RoleplayHistory.LastOrDefault();
+    private int LatestQuizScore => LatestQuiz?.Score ?? 0;
+    private double LatestRoleplayScore => LatestRoleplay?.TotalScore ?? 0;
+    private int ConfidenceDelta => reflection.ConfidenceAfter - reflection.ConfidenceBefore;
+    private bool ReflectionValid => reflection.Learning.Trim().Length >= 20 && reflection.Strength.Trim().Length >= 20 && reflection.Improvement.Trim().Length >= 20 && reflection.Commitment.Trim().Length >= 20;
+    private string ReflectionFeedback => LatestRoleplayScore switch { < 5 => Tx("Focus on staying calm, asking a clarifying question, and proposing one concrete next step.", "Hãy tập trung giữ bình tĩnh, đặt câu hỏi làm rõ và đề xuất một bước tiếp theo cụ thể."), < 8.5 => Tx("You are progressing well. Make your I-statements and deadlines more specific.", "Bạn đang tiến bộ tốt. Hãy làm rõ hơn câu I-statement và thời hạn hành động."), _ => Tx("You communicate with empathy and a solution mindset. Keep applying this pattern in real situations.", "Bạn giao tiếp thấu cảm và hướng giải pháp tốt. Hãy tiếp tục áp dụng vào tình huống thực tế.") };
     private IEnumerable<(bool User, string Text)> RoleplayTranscript
     {
         get
@@ -233,6 +275,7 @@
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (currentStep == 4) StartQuiz();
             if (currentStep == 5) StartRoleplay();
+            LoadReflection();
         }
         loading = false;
     }
@@ -322,7 +365,30 @@
         }
         sendingRoleplay = false;
     }
+    private void LoadReflection()
+    {
+        if (string.IsNullOrWhiteSpace(item?.ReflectionText)) return;
+        try { reflection = JsonSerializer.Deserialize<ReflectionForm>(item.ReflectionText) ?? new(); }
+        catch (JsonException) { reflection = new() { Learning = item.ReflectionText }; }
+    }
+    private string SerializeReflection() => JsonSerializer.Serialize(reflection);
+    private async Task SaveReflectionDraft()
+    {
+        savingReflection = true; reflectionError = false;
+        var ok = await RoadmapService.SaveReflectionDraftAsync(ItemId, UserId, SerializeReflection());
+        reflectionMessage = ok ? Tx("Draft saved.", "Đã lưu bản nháp.") : Tx("Could not save draft.", "Không thể lưu bản nháp."); reflectionError = !ok; savingReflection = false;
+        if (ok && item is not null) item.ReflectionText = SerializeReflection();
+    }
+    private async Task CompleteReflection()
+    {
+        if (!ReflectionValid || item is null) return; savingReflection = true; reflectionError = false;
+        var payload = SerializeReflection(); var ok = await RoadmapService.SaveReflectionAsync(ItemId, UserId, payload);
+        if (ok) { item.ReflectionText = payload; item.IsReflectionCompleted = true; item.ReflectionCompletedAtUtc = DateTime.UtcNow; item.IsCompleted = true; reflectionMessage = Tx("Week completed. The next week is now unlocked.", "Đã hoàn thành tuần. Tuần tiếp theo đã được mở."); }
+        else { reflectionMessage = Tx("Could not complete the week.", "Không thể hoàn thành tuần."); reflectionError = true; }
+        savingReflection = false;
+    }
     private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"Reflection","Phản tư","bi bi-stars")];
+    private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
 }
 
 <style>
@@ -330,4 +396,5 @@
     .quiz-card{max-width:900px;margin:auto;padding:1rem}.quiz-card>header{display:flex;justify-content:space-between;align-items:center}.quiz-card small,.quiz-result small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-card h2{margin:.2rem 0}.quiz-card>header>b{color:#2860e8}.quiz-progress{height:6px;margin:1rem 0 1.5rem;border-radius:99px;background:#e8edf5;overflow:hidden}.quiz-progress i{display:block;height:100%;background:#2860e8}.quiz-card>h3{font-size:1.05rem;line-height:1.55}.quiz-options{display:grid;gap:.65rem;margin-top:1rem}.quiz-options button{display:flex;align-items:center;gap:.75rem;padding:.85rem;text-align:left;border:1px solid #d8e0ed;border-radius:9px;background:#fff;color:#263653}.quiz-options button span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:7px;background:#edf1f7;font-weight:900}.quiz-options button.optimal{border-color:#41aa78;background:#effbf5}.quiz-options button.neutral{border-color:#e2b54a;background:#fff9e9}.quiz-options button.negative{border-color:#e58b8b;background:#fff3f3}.answer-feedback{margin-top:1rem;padding:1rem;border-radius:9px}.answer-feedback p{margin:.35rem 0 0;line-height:1.55}.answer-feedback.good{color:#246f4d;background:#ebf9f2}.answer-feedback.middle{color:#765b17;background:#fff8e3}.answer-feedback.bad{color:#8d3939;background:#fff0f0}.quiz-next{margin-top:1rem}.quiz-result{max-width:720px;margin:auto;padding:2.5rem;text-align:center;border-radius:14px;background:linear-gradient(135deg,#eef4ff,#f7f1ff)}.quiz-result>i{display:block;color:#6554dd;font-size:2.5rem}.quiz-result h2{margin:.5rem 0;font-size:2rem}.quiz-result h3{color:#2860e8}.quiz-result p{line-height:1.65}.quiz-result button{padding:.7rem 1rem;border:1px solid #2860e8;border-radius:8px;background:#fff;color:#2860e8;font-weight:800}
     .quiz-sheet{max-width:940px;margin:auto}.quiz-sheet>header{display:flex;justify-content:space-between;align-items:center}.quiz-sheet>header small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-sheet>header h2{margin:.2rem 0}.quiz-sheet>header>b{color:#2860e8}.quiz-sheet .quiz-card{max-width:none;margin:0 0 1rem;padding:1.15rem;border:1px solid #dce4f2;border-radius:11px;background:#fbfcff}.quiz-sheet .quiz-card>h3{display:flex;align-items:flex-start;gap:.7rem;margin-top:0;font-size:1rem}.quiz-sheet .quiz-card>h3>span{display:grid;place-items:center;flex:0 0 28px;height:28px;color:#fff;border-radius:50%;background:#2860e8;font-size:.7rem}
     .roleplay{max-width:900px;margin:auto}.roleplay>header{display:flex;justify-content:space-between;gap:1rem}.roleplay>header small{color:#2860e8;font-size:.6rem;font-weight:900}.roleplay>header h2{margin:.25rem 0}.roleplay>header p{margin:0;color:#68758e}.roleplay>header>span{display:grid;place-items:center;width:48px;height:48px;color:#2860e8;border-radius:50%;background:#eef3ff;font-weight:900}.rubric-strip,.roleplay-result>div{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0}.rubric-strip span,.roleplay-result span{padding:.55rem;text-align:center;border-radius:7px;background:#f1f4f9;font-size:.63rem}.chat-box{display:grid;gap:.65rem;min-height:260px;max-height:480px;padding:1rem;overflow:auto;border:1px solid #dce4f2;border-radius:10px;background:#f7f9fc}.chat-message{max-width:75%;padding:.7rem .85rem;border-radius:10px;background:#fff;box-shadow:0 2px 8px #2135650d}.chat-message.user{justify-self:end;color:#fff;background:#2860e8}.chat-message b{font-size:.58rem}.chat-message p{margin:.25rem 0 0;line-height:1.55}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:.6rem;margin-top:.75rem}.chat-compose textarea{min-height:90px;padding:.75rem;resize:vertical;border:1px solid #cfd9e9;border-radius:9px}.chat-compose button{padding:0 1rem;color:#fff;border:0;border-radius:9px;background:#2860e8;font-weight:800}.roleplay-result{margin-top:1rem;padding:1rem;border:1px solid #bde7d1;border-radius:10px;background:#effbf5}.roleplay-result h3{margin-top:0;color:#247950}.roleplay-result>p{line-height:1.6}@@media(max-width:600px){.rubric-strip,.roleplay-result>div{grid-template-columns:repeat(2,1fr)}.chat-message{max-width:90%}}
+    .reflection-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:1rem}.reflection-form,.learning-review{padding:1.2rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.reflection-form>header small{color:#2860e8;font-size:.6rem;font-weight:900}.reflection-form>header h2{margin:.25rem 0}.reflection-form>header p{margin:0 0 1.2rem;color:#68758e}.reflection-form>label{display:grid;position:relative;gap:.4rem;margin-top:1rem}.reflection-form>label>b{font-size:.78rem}.reflection-form textarea{min-height:95px;padding:.75rem;border:1px solid #ccd7e8;border-radius:8px;resize:vertical}.reflection-form label>small{position:absolute;right:.5rem;bottom:.35rem;color:#8993a7;font-size:.55rem}.reflection-form .commitment{padding:1rem;border-radius:10px;background:#f3f6ff}.commitment>b{color:#2860e8}.commitment>span{font-size:.68rem;color:#68758e}.confidence{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}.confidence>div{display:grid;grid-template-columns:1fr auto;gap:.4rem;padding:.8rem;border:1px solid #dce4f2;border-radius:8px}.confidence b{grid-column:1/-1;font-size:.68rem}.confidence input{width:100%}.confidence span{color:#2860e8;font-weight:900}.reflection-done{display:flex;align-items:center;gap:.6rem;padding:.75rem;color:#247950;border:1px solid #bde7d1;border-radius:8px;background:#effbf5}.reflection-done>i{font-size:1.3rem}.reflection-done b,.reflection-done span{display:block}.reflection-done span{font-size:.65rem}.learning-review h3{margin-top:0}.result-tile{display:flex;align-items:center;gap:.7rem;margin:.6rem 0;padding:.8rem;border-radius:9px;background:#f3f6ff}.result-tile>i{color:#2860e8;font-size:1.2rem}.result-tile span,.result-tile b{display:block}.result-tile span{font-size:.65rem}.result-tile b{font-size:1rem}.mini-rubric{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.8rem}.mini-rubric span{padding:.55rem;border-radius:7px;background:#f3f5f9;font-size:.6rem}.mini-rubric b{display:block}.ai-reflection{margin-top:1rem;padding:1rem;border:1px solid #d9d0ff;border-radius:9px;background:#f7f4ff}.ai-reflection b{color:#4e45b8}.ai-reflection p{font-size:.7rem;line-height:1.6}.confidence-change{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding:.8rem;border-top:1px solid #e0e6ef;font-size:.65rem}.confidence-change b{font-size:1rem}.confidence-change em{color:#268b5d;font-style:normal}.reflection-actions{display:flex;gap:.6rem}.reflection-actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;font-weight:800}.reflection-message{margin-top:1rem;padding:.65rem;color:#247950;border-radius:8px;background:#effbf5}.reflection-message.error{color:#9c3838;background:#fff0f0}@@media(max-width:850px){.reflection-layout{grid-template-columns:1fr}.confidence{grid-template-columns:1fr}}
 </style>

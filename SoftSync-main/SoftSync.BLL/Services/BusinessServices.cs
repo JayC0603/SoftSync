@@ -500,7 +500,7 @@ public class RoadmapService : IRoadmapService
     public async Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText)
     {
         var value = reflectionText?.Trim() ?? string.Empty;
-        if (value.Length == 0 || value.Length > 2000)
+        if (value.Length == 0 || value.Length > 8000)
             return false;
 
         var item = await _roadmapRepo.GetByIdAsync(itemId);
@@ -513,6 +513,20 @@ public class RoadmapService : IRoadmapService
         item.ReflectionText = value;
         item.ReflectionCompletedAtUtc ??= DateTime.UtcNow;
         return await PersistActivityAsync(item, changed);
+    }
+
+    public async Task<bool> SaveReflectionDraftAsync(int itemId, int userId, string reflectionText)
+    {
+        var value = reflectionText?.Trim() ?? string.Empty;
+        if (value.Length == 0 || value.Length > 8000)
+            return false;
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.ScenarioCompletedAtUtc.HasValue || item.ReflectionCompletedAtUtc.HasValue)
+            return false;
+        item.ReflectionText = value;
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> SaveLearningStepAsync(int itemId, int userId, string step)
