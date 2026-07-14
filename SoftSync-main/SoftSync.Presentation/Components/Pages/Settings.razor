@@ -19,6 +19,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject UserProfileState UserProfileState
 @inject IJSRuntime JS
+@inject ILogger<Settings> Logger
 
 <div class="ss-settings-shell tw:mx-auto">
     @if (user is null)
@@ -586,6 +587,15 @@
         phone = state.User.FindFirst(ClaimTypes.MobilePhone)?.Value;
 
         user = await UserService.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            Logger.LogWarning("Settings could not load user profile for authenticated user {UserId}", userId);
+            Nav.NavigateTo("/profile-setup");
+            return;
+        }
+
+        try
+        {
         skills = await SkillService.GetAllSkillsAsync();
         selectedSkillIds.AddRange(await UserService.GetSelectedSkillIdsAsync(userId));
 
@@ -610,6 +620,15 @@
             new("Facebook",  "Facebook",  "bi-facebook",  "#dbeafe", "#1d4ed8", configured.Contains("Facebook"),  currentLogins.Contains("Facebook")),
             new("Microsoft", "Microsoft", "bi-microsoft", "#e0f2fe", "#0369a1", configured.Contains("Microsoft"), currentLogins.Contains("Microsoft")),
         };
+        }
+        catch (Exception ex)
+        {
+            // Skill/stat/provider panels are optional. Keep account settings usable
+            // even when one of those data sources is temporarily unavailable.
+            Logger.LogWarning(ex, "Optional Settings data failed for user {UserId}", userId);
+            skills ??= [];
+            linkedProviders = [];
+        }
 
         langCode = L.Code;
         if (user is not null && string.IsNullOrEmpty(user.PreferredLanguage))
