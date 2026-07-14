@@ -5,29 +5,37 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
-<PageTitle>Giới thiệu về kỹ năng giao tiếp · SoftSync</PageTitle>
+<PageTitle>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") · SoftSync</PageTitle>
 
 <main class="lesson-page">
     @if (loading)
     {
-        <div class="state"><span></span>Đang tải bài học...</div>
+        <div class="state"><span></span>@Tx("Loading lesson...", "Đang tải bài học...")</div>
     }
     else if (!isCommunicationLessonOne)
     {
-        <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>Quay lại Roadmap</button>
-        <section class="empty"><i class="bi bi-journal-plus"></i><h1>Chưa nạp nội dung</h1><p>Tuần này đang chờ video và lý thuyết mới.</p></section>
+        <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>@Tx("Back to Roadmap", "Quay lại Roadmap")</button>
+        <section class="empty"><i class="bi bi-journal-plus"></i><h1>@Tx("Content not available", "Chưa nạp nội dung")</h1><p>@Tx("This week is waiting for new video and theory content.", "Tuần này đang chờ video và lý thuyết mới.")</p></section>
     }
     else
     {
         <div class="lesson-shell">
             <header class="lesson-top">
                 <button @onclick="Back"><i class="bi bi-arrow-left"></i>Roadmap</button>
-                <div><small>KỸ NĂNG GIAO TIẾP · TUẦN 1</small><h1>Giới thiệu về kỹ năng giao tiếp</h1></div>
-                <span>@CompletedCount / 6 bước</span>
+                <div><small>@Tx("COMMUNICATION SKILLS · WEEK 1", "KỸ NĂNG GIAO TIẾP · TUẦN 1")</small><h1>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h1></div>
+                @if (item!.IsCompleted)
+                {
+                    <span class="week-complete"><i class="bi bi-check-circle-fill"></i>@Tx("Week completed", "Đã hoàn thành tuần")</span>
+                }
+                else
+                {
+                    <span>@CompletedCount / 6 @Tx("steps", "bước")</span>
+                }
             </header>
 
             <nav class="lesson-steps">
@@ -35,23 +43,40 @@
                 {
                     var unlocked = CanOpen(step.Id);
                     <button class="@(currentStep == step.Id ? "active" : null) @(IsComplete(step.Id) ? "done" : null)" disabled="@(!unlocked)" @onclick="() => OpenStep(step.Id)">
-                        <span>@(IsComplete(step.Id) ? "✓" : step.Id.ToString())</span><b>@step.Name</b>@if (!unlocked) { <i class="bi bi-lock-fill"></i> }
+                        <span>@(IsComplete(step.Id) ? "✓" : step.Id.ToString())</span><b>@Tx(step.En, step.Vi)</b>@if (!unlocked) { <i class="bi bi-lock-fill"></i> }
                     </button>
                 }
             </nav>
 
             <section class="lesson-content">
+                @if (IsComplete(currentStep))
+                {
+                    <div class="saved-complete"><i class="bi bi-check-circle-fill"></i><div><b>@Tx("Completed", "Đã học xong")</b><small>@Tx("Your progress is saved. You can review this section at any time.", "Tiến độ đã được lưu. Bạn có thể xem lại phần này bất kỳ lúc nào.")</small></div></div>
+                }
                 @if (currentStep == 1)
                 {
-                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="/videos/communication-mentor-lesson-1.mp4" type="video/mp4" />Trình duyệt không hỗ trợ video.</video></div>
-                    <div class="content-heading"><div><small>BƯỚC 1 · VIDEO</small><h2>Giới thiệu về kỹ năng giao tiếp</h2><p>Hãy xem hết video để mở phần Script.</p></div><span><i class="bi bi-clock"></i> Video Mentor 1</span></div>
-                    @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>Script sẽ tự mở khi video phát hết.</div> }
-                    else { <button class="primary" @onclick="() => OpenStep(2)">Tiếp theo: Script <i class="bi bi-arrow-right"></i></button> }
+                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="/videos/communication-mentor-lesson-1.mp4" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
+                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> Video Mentor 1</span></div>
+                    @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>@Tx("The Script unlocks automatically when the video ends.", "Script sẽ tự mở khi video phát hết.")</div> }
+                    else { <button class="primary" @onclick="() => OpenStep(2)">@Tx("Next: Script", "Tiếp theo: Script") <i class="bi bi-arrow-right"></i></button> }
                 }
                 else if (currentStep == 2)
                 {
                     <article class="theory">
-                        <div class="content-heading"><div><small>BƯỚC 2 · SCRIPT</small><h2>Giới thiệu về kỹ năng giao tiếp</h2><p>Nội dung lý thuyết đồng bộ với Video Mentor 1.</p></div></div>
+                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h2><p>@Tx("Theory synchronized with Video Mentor 1.", "Nội dung lý thuyết đồng bộ với Video Mentor 1.")</p></div></div>
+                        @if (!IsVi)
+                        {
+                            <h3>1. Communication is a “two-way street”</h3>
+                            <p>Effective communication means both sending a message and receiving feedback. A basic communication process includes:</p>
+                            <ul><li><b>Sender:</b> The person who creates and delivers the message.</li><li><b>Message:</b> The meaning conveyed through speech, writing, or gestures.</li><li><b>Channel:</b> Face-to-face conversation, email, telephone, or social media.</li><li><b>Receiver:</b> The person who receives and interprets the message.</li><li><b>Feedback:</b> The response that confirms whether the message was understood correctly.</li></ul>
+                            <h3>2. Essential skills for students</h3>
+                            <ul><li><b>Active listening:</b> Focus fully, avoid interrupting, and confirm what you heard.</li><li><b>Non-verbal communication:</b> Eye contact, gestures, clothing, and posture all convey meaning.</li><li><b>Netiquette:</b> Write professional emails with clear subjects, complete sentences, and respectful greetings.</li></ul>
+                            <h3>3. Tips for successful communication</h3>
+                            <ul><li><b>Prepare carefully:</b> Organize ideas logically before presentations or important meetings.</li><li><b>Understand context:</b> Adapt your style to the audience and situation.</li><li><b>Communicate ethically:</b> Be respectful, honest, and fair.</li><li><b>Use simple language:</b> Choose precise, clear words and avoid unnecessary jargon.</li></ul>
+                            <p class="conclusion">Communication takes patience and continuous adjustment. Strong communication improves learning and builds a professional impression for your future career.</p>
+                        }
+                        else
+                        {
                         <h3>1. Giao tiếp là “con đường hai chiều”</h3>
                         <p>Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Một quá trình giao tiếp cơ bản gồm:</p>
                         <ul><li><b>Người gửi:</b> Người tạo ra và truyền đạt thông điệp.</li><li><b>Thông điệp:</b> Nội dung, ý nghĩa muốn truyền tải qua lời nói, chữ viết hoặc cử chỉ.</li><li><b>Kênh truyền tải:</b> Nói trực tiếp, email, điện thoại hoặc mạng xã hội.</li><li><b>Người nhận:</b> Người tiếp nhận và giải mã thông điệp.</li><li><b>Phản hồi:</b> Sự hồi đáp giúp người gửi biết thông điệp đã được hiểu đúng hay chưa.</li></ul>
@@ -60,18 +85,19 @@
                         <h3>3. Bí quyết để giao tiếp thành công</h3>
                         <ul><li><b>Luôn chuẩn bị kỹ:</b> Sắp xếp ý tưởng logic trước khi thuyết trình hoặc gặp gỡ quan trọng.</li><li><b>Thấu hiểu bối cảnh:</b> Điều chỉnh phong cách phù hợp với đối tượng và tình huống.</li><li><b>Giao tiếp có đạo đức:</b> Tôn trọng, trung thực và công bằng với người nghe.</li><li><b>Sử dụng ngôn từ đơn giản:</b> Chọn từ chính xác, dễ hiểu và hạn chế biệt ngữ không cần thiết.</li></ul>
                         <p class="conclusion">Rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Giao tiếp tốt giúp bạn học tập hiệu quả và tạo ấn tượng chuyên nghiệp trong tương lai.</p>
+                        }
                     </article>
-                    <div class="actions"><button @onclick="() => OpenStep(1)"><i class="bi bi-arrow-left"></i>Video</button><button class="primary" @onclick="FinishScript">Đã đọc xong · Tóm tắt<i class="bi bi-arrow-right"></i></button></div>
+                    <div class="actions"><button @onclick="() => OpenStep(1)"><i class="bi bi-arrow-left"></i>@Tx("Back: Video", "Quay lại: Video")</button><button class="primary" @onclick="FinishScript">@Tx("Next: Summary", "Tiếp theo: Tóm tắt")<i class="bi bi-arrow-right"></i></button></div>
                 }
                 else if (currentStep == 3)
                 {
-                    <article class="summary-card"><i class="bi bi-stars"></i><small>BƯỚC 3 · SUMMARY</small><h2>Tóm tắt bài học</h2><div class="summary-grid"><div><b>Giao tiếp hai chiều</b><p>Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.</p></div><div><b>Ba kỹ năng nền tảng</b><p>Lắng nghe chủ động, ngôn ngữ phi ngôn ngữ và ứng xử mạng chuyên nghiệp.</p></div><div><b>Giao tiếp phù hợp</b><p>Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.</p></div></div></article>
-                    <div class="actions"><button @onclick="() => OpenStep(2)"><i class="bi bi-arrow-left"></i>Script</button><button class="primary" @onclick="FinishSummary">Hoàn thành ôn tập<i class="bi bi-arrow-right"></i></button></div>
+                    <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Lesson summary", "Tóm tắt bài học")</h2><div class="summary-grid"><div><b>@Tx("Two-way communication", "Giao tiếp hai chiều")</b><p>@Tx("A message is complete only with a sender, receiver, and feedback.", "Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.")</p></div><div><b>@Tx("Three foundations", "Ba kỹ năng nền tảng")</b><p>@Tx("Active listening, non-verbal language, and professional netiquette.", "Lắng nghe chủ động, giao tiếp phi ngôn ngữ và ứng xử mạng chuyên nghiệp.")</p></div><div><b>@Tx("Context-aware communication", "Giao tiếp phù hợp")</b><p>@Tx("Prepare, understand context, and communicate clearly and ethically.", "Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.")</p></div></div></article>
+                    <div class="actions"><button @onclick="() => OpenStep(2)"><i class="bi bi-arrow-left"></i>@Tx("Back: Script", "Quay lại: Script")</button><button class="primary" @onclick="FinishSummary">@Tx("Next: Quiz", "Tiếp theo: Quiz")<i class="bi bi-arrow-right"></i></button></div>
                 }
                 else
                 {
-                    <section class="empty inner"><i class="@Steps.First(x => x.Id == currentStep).Icon"></i><h2>@Steps.First(x => x.Id == currentStep).Name</h2><p>Phần này đang chờ nạp nội dung tiếp theo.</p></section>
-                    <div class="actions"><button @onclick="Previous"><i class="bi bi-arrow-left"></i>Quay lại</button><button class="primary" @onclick="Back">Về Roadmap</button></div>
+                    <section class="empty inner"><i class="@Steps.First(x => x.Id == currentStep).Icon"></i><h2>@Tx(Steps.First(x => x.Id == currentStep).En, Steps.First(x => x.Id == currentStep).Vi)</h2><p>@Tx("This section is waiting for content.", "Phần này đang chờ nạp nội dung tiếp theo.")</p></section>
+                    <div class="actions"><button @onclick="Previous"><i class="bi bi-arrow-left"></i>@Tx("Back", "Quay lại")</button><button class="primary" @onclick="NextOrRoadmap">@Tx(currentStep < 6 ? "Next" : "Roadmap", currentStep < 6 ? "Tiếp theo" : "Về Roadmap")<i class="bi bi-arrow-right"></i></button></div>
                 }
             </section>
         </div>
@@ -105,17 +131,20 @@
     }
 
     private static bool IsCommunication(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("giao tiếp") || value.Contains("communication"); }
-    private bool CanOpen(int step) => item is not null && (step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
-    private bool IsComplete(int step) => item is not null && step switch { 1 => item.IsVideoCompleted, 2 => item.ScriptCompletedAtUtc.HasValue, 3 => item.SummaryCompletedAtUtc.HasValue, 4 => item.IsPracticeCompleted, 5 => item.IsScenarioCompleted, 6 => item.IsReflectionCompleted, _ => false };
+    private bool CanOpen(int step) => item is not null && (item.IsCompleted || step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
+    private bool IsComplete(int step) => item is not null && (item.IsCompleted || step switch { 1 => item.IsVideoCompleted, 2 => item.ScriptCompletedAtUtc.HasValue, 3 => item.SummaryCompletedAtUtc.HasValue, 4 => item.IsPracticeCompleted, 5 => item.IsScenarioCompleted, 6 => item.IsReflectionCompleted, _ => false });
     private async Task VideoEnded() { if (item is null || item.IsVideoCompleted) return; if (await RoadmapService.MarkVideoCompleteAsync(ItemId, UserId)) { item.IsVideoCompleted = true; item.VideoCompletedAtUtc = DateTime.UtcNow; item.LastLearningStep = "script"; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "script"); StateHasChanged(); } }
     private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "scenario", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
     private async Task FinishScript() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "summary")) { item!.ScriptCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "summary"; currentStep = 3; } }
     private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; } }
     private void Previous() => currentStep = Math.Max(1, currentStep - 1);
+    private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
     private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
-    private static readonly (int Id, string Name, string Icon)[] Steps = [(1,"Video","bi bi-play-circle"),(2,"Script","bi bi-file-text"),(3,"Tóm tắt","bi bi-lightbulb"),(4,"Quiz","bi bi-ui-checks"),(5,"Thực hành","bi bi-chat-dots"),(6,"Phản tư","bi bi-stars")];
+    private bool IsVi => L.Current == AppLanguage.Vi;
+    private string Tx(string en, string vi) => IsVi ? vi : en;
+    private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"Reflection","Phản tư","bi bi-stars")];
 }
 
 <style>
-    .lesson-page{min-height:calc(100vh - 72px);padding:1.5rem;background:#f5f7fb;color:#17233c}.lesson-shell,.back{max-width:1180px;margin:auto}.state,.empty{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;text-align:center}.state span{width:28px;height:28px;border:3px solid #dce4fa;border-top-color:#2860e8;border-radius:50%;animation:spin .8s linear infinite}.back,.lesson-top>button{border:0;background:transparent;color:#2860e8;font-weight:800}.lesson-top{display:grid;grid-template-columns:180px 1fr auto;align-items:center;padding:1rem 1.3rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.lesson-top small{color:#2860e8;font-size:.6rem;font-weight:900}.lesson-top h1{margin:.2rem 0;font-size:1.25rem}.lesson-top>span{padding:.45rem .65rem;border-radius:99px;background:#eef3ff;color:#2860e8;font-size:.65rem;font-weight:800}.lesson-steps{display:grid;grid-template-columns:repeat(6,1fr);margin:1rem 0;border:1px solid #dce4f2;border-radius:12px;background:#fff;overflow:hidden}.lesson-steps button{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem .4rem;border:0;border-right:1px solid #e7ebf3;background:#fff;color:#68758e;font-size:.65rem}.lesson-steps button:last-child{border:0}.lesson-steps span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #cbd5e7;border-radius:50%;font-size:.58rem}.lesson-steps button.active{color:#2860e8;background:#f2f6ff}.lesson-steps button.active span{color:#fff;border-color:#2860e8;background:#2860e8}.lesson-steps button.done span{color:#fff;border-color:#2ba06a;background:#2ba06a}.lesson-content{padding:1.25rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.video-wrap{overflow:hidden;border-radius:10px;background:#090d18}.video-wrap video{display:block;width:100%;max-height:620px}.content-heading{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}.content-heading small{color:#2860e8;font-size:.6rem;font-weight:900}.content-heading h2{margin:.25rem 0;font-size:1.35rem}.content-heading p{margin:0;color:#68758e}.content-heading>span{font-size:.7rem;color:#68758e}.notice{padding:.8rem;color:#725d25;border:1px solid #f0d98f;border-radius:8px;background:#fff9e7}.primary{display:flex;align-items:center;gap:.5rem;margin-left:auto;padding:.75rem 1rem;border:0;border-radius:8px;color:#fff;background:#2860e8;font-weight:800}.theory{max-width:850px;margin:auto;font-size:.9rem;line-height:1.75}.theory h3{margin-top:1.5rem;color:#12224a}.theory li{margin:.35rem 0}.conclusion{padding:1rem;border-left:4px solid #2860e8;background:#f2f6ff}.actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e3e8f1}.actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;color:#273755;font-weight:800}.summary-card{padding:2rem;text-align:center;border-radius:12px;background:linear-gradient(135deg,#f1f5ff,#f7f1ff)}.summary-card>i{font-size:2rem;color:#5f51dc}.summary-card small{display:block;color:#2860e8;font-weight:900}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;text-align:left}.summary-grid div{padding:1rem;border:1px solid #dbe2f2;border-radius:9px;background:#fff}.summary-grid p{color:#68758e;font-size:.8rem;line-height:1.6}.empty>i{font-size:3rem;color:#2860e8}.empty.inner{min-height:340px}.empty.inner>i{font-size:2rem}.empty p{color:#68758e}@@keyframes spin{to{transform:rotate(360deg)}}@@media(max-width:760px){.lesson-page{padding:.7rem}.lesson-top{grid-template-columns:1fr}.lesson-top>button{text-align:left}.lesson-top>span{justify-self:start}.lesson-steps{grid-template-columns:repeat(3,1fr)}.lesson-steps button{border-bottom:1px solid #e7ebf3}.lesson-steps b{display:none}.summary-grid{grid-template-columns:1fr}.content-heading{display:block}}
+    .lesson-page{min-height:calc(100vh - 72px);padding:1.5rem;background:#f5f7fb;color:#17233c}.lesson-shell,.back{max-width:1180px;margin:auto}.state,.empty{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;text-align:center}.state span{width:28px;height:28px;border:3px solid #dce4fa;border-top-color:#2860e8;border-radius:50%;animation:spin .8s linear infinite}.back,.lesson-top>button{border:0;background:transparent;color:#2860e8;font-weight:800}.lesson-top{display:grid;grid-template-columns:180px 1fr auto;align-items:center;padding:1rem 1.3rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.lesson-top small{color:#2860e8;font-size:.6rem;font-weight:900}.lesson-top h1{margin:.2rem 0;font-size:1.25rem}.lesson-top>span{display:flex;align-items:center;gap:.35rem;padding:.45rem .65rem;border-radius:99px;background:#eef3ff;color:#2860e8;font-size:.65rem;font-weight:800}.lesson-top>span.week-complete{color:#237d55;background:#eaf8f1}.lesson-steps{display:grid;grid-template-columns:repeat(6,1fr);margin:1rem 0;border:1px solid #dce4f2;border-radius:12px;background:#fff;overflow:hidden}.lesson-steps button{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem .4rem;border:0;border-right:1px solid #e7ebf3;background:#fff;color:#68758e;font-size:.65rem}.lesson-steps button:last-child{border:0}.lesson-steps span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #cbd5e7;border-radius:50%;font-size:.58rem}.lesson-steps button.active{color:#2860e8;background:#f2f6ff}.lesson-steps button.active span{color:#fff;border-color:#2860e8;background:#2860e8}.lesson-steps button.done span{color:#fff;border-color:#2ba06a;background:#2ba06a}.lesson-content{padding:1.25rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.saved-complete{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;padding:.7rem .85rem;color:#237d55;border:1px solid #bde7d1;border-radius:9px;background:#effbf5}.saved-complete>i{font-size:1.2rem}.saved-complete b,.saved-complete small{display:block}.saved-complete small{margin-top:.1rem;color:#4f7965;font-size:.65rem}.video-wrap{overflow:hidden;border-radius:10px;background:#090d18}.video-wrap video{display:block;width:100%;max-height:620px}.content-heading{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}.content-heading small{color:#2860e8;font-size:.6rem;font-weight:900}.content-heading h2{margin:.25rem 0;font-size:1.35rem}.content-heading p{margin:0;color:#68758e}.content-heading>span{font-size:.7rem;color:#68758e}.notice{padding:.8rem;color:#725d25;border:1px solid #f0d98f;border-radius:8px;background:#fff9e7}.primary{display:flex;align-items:center;gap:.5rem;margin-left:auto;padding:.75rem 1rem;border:0;border-radius:8px;color:#fff;background:#2860e8;font-weight:800}.theory{max-width:850px;margin:auto;font-size:.9rem;line-height:1.75}.theory h3{margin-top:1.5rem;color:#12224a}.theory li{margin:.35rem 0}.conclusion{padding:1rem;border-left:4px solid #2860e8;background:#f2f6ff}.actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e3e8f1}.actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;color:#273755;font-weight:800}.summary-card{padding:2rem;text-align:center;border-radius:12px;background:linear-gradient(135deg,#f1f5ff,#f7f1ff)}.summary-card>i{font-size:2rem;color:#5f51dc}.summary-card small{display:block;color:#2860e8;font-weight:900}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;text-align:left}.summary-grid div{padding:1rem;border:1px solid #dbe2f2;border-radius:9px;background:#fff}.summary-grid p{color:#68758e;font-size:.8rem;line-height:1.6}.empty>i{font-size:3rem;color:#2860e8}.empty.inner{min-height:340px}.empty.inner>i{font-size:2rem}.empty p{color:#68758e}@@keyframes spin{to{transform:rotate(360deg)}}@@media(max-width:760px){.lesson-page{padding:.7rem}.lesson-top{grid-template-columns:1fr}.lesson-top>button{text-align:left}.lesson-top>span{justify-self:start}.lesson-steps{grid-template-columns:repeat(3,1fr)}.lesson-steps button{border-bottom:1px solid #e7ebf3}.lesson-steps b{display:none}.summary-grid{grid-template-columns:1fr}.content-heading{display:block}}
 </style>

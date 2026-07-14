@@ -167,6 +167,8 @@ public class RoadmapItem
     /// <summary>Last unlocked learning step, used to resume the lesson after signing in again.</summary>
     [MaxLength(20)]
     public string LastLearningStep { get; set; } = "video";
+    /// <summary>JSON history of every quiz submission, including answers, score and timestamp.</summary>
+    public string QuizHistoryJson { get; set; } = "[]";
     public bool IsCompleted { get; set; }
 }
 

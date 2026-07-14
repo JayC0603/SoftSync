@@ -86,6 +86,17 @@ public class RoadmapItemDto
     public string ReflectionText { get; set; } = string.Empty;
     public string LastLearningStep { get; set; } = "video";
     public bool IsCompleted { get; set; }
+    public List<RoadmapQuizAttemptDto> QuizHistory { get; set; } = new();
+}
+
+public class RoadmapQuizAttemptDto
+{
+    public int AttemptNumber { get; set; }
+    public Dictionary<string, string> Answers { get; set; } = new();
+    public int Score { get; set; }
+    public int TotalQuestions { get; set; }
+    public bool Passed { get; set; }
+    public DateTime SubmittedAtUtc { get; set; }
 }
 
 public class CaseStudyDto

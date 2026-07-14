@@ -56,6 +56,8 @@ public interface IRoadmapService
     Task<bool> MarkScenarioCompleteAsync(int itemId, int userId);
     Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText);
     Task<bool> SaveLearningStepAsync(int itemId, int userId, string step);
+    Task<bool> SaveQuizAttemptAsync(int itemId, int userId, RoadmapQuizAttemptDto attempt);
+    Task<IReadOnlyList<RoadmapQuizAttemptDto>> GetQuizHistoryAsync(int itemId, int userId);
 }
 
 public interface IProgressService

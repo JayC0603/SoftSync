@@ -5,6 +5,7 @@ using SoftSync.Common.Enums;
 using SoftSync.DAL.Data;
 using SoftSync.DAL.Entities;
 using SoftSync.DAL.Repositories;
+using System.Text.Json;
 
 namespace SoftSync.BLL.Services;
 
@@ -396,6 +397,7 @@ public class RoadmapService : IRoadmapService
                 ReflectionCompletedAtUtc = i.ReflectionCompletedAtUtc,
                 ReflectionText = i.ReflectionText ?? string.Empty,
                 LastLearningStep = i.LastLearningStep,
+                QuizHistory = DeserializeQuizHistory(i.QuizHistoryJson),
                 IsCompleted = i.IsCompleted
             }).ToList()
         };
@@ -545,6 +547,41 @@ public class RoadmapService : IRoadmapService
             await _roadmapRepo.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<bool> SaveQuizAttemptAsync(int itemId, int userId, RoadmapQuizAttemptDto attempt)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.SummaryCompletedAtUtc.HasValue || attempt.Answers.Count == 0
+            || attempt.TotalQuestions <= 0 || attempt.Score < 0 || attempt.Score > attempt.TotalQuestions)
+            return false;
+
+        var history = DeserializeQuizHistory(item.QuizHistoryJson);
+        attempt.AttemptNumber = history.Count + 1;
+        attempt.SubmittedAtUtc = DateTime.UtcNow;
+        history.Add(attempt);
+        item.QuizHistoryJson = JsonSerializer.Serialize(history);
+        if (attempt.Passed && !item.PracticeCompletedAtUtc.HasValue)
+            item.PracticeCompletedAtUtc = attempt.SubmittedAtUtc;
+        item.LastLearningStep = attempt.Passed ? "scenario" : "quiz";
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<IReadOnlyList<RoadmapQuizAttemptDto>> GetQuizHistoryAsync(int itemId, int userId)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        return item is null || item.UserId != userId
+            ? Array.Empty<RoadmapQuizAttemptDto>()
+            : DeserializeQuizHistory(item.QuizHistoryJson);
+    }
+
+    private static List<RoadmapQuizAttemptDto> DeserializeQuizHistory(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try { return JsonSerializer.Deserialize<List<RoadmapQuizAttemptDto>>(json) ?? []; }
+        catch (JsonException) { return []; }
     }
 
     private static readonly string[] LearningStepOrder = ["video", "script", "summary", "quiz", "scenario", "reflection"];
