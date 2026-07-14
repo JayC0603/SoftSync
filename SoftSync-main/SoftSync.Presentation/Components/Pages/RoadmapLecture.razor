@@ -111,27 +111,34 @@
                     }
                     else if (quizQuestions.Count > 0)
                     {
-                        var question = quizQuestions[quizIndex];
-                        <section class="quiz-card">
-                            <header><div><small>@Tx("COMMUNICATION QUIZ", "QUIZ KỸ NĂNG GIAO TIẾP")</small><h2>@Tx("Question", "Câu") @(quizIndex + 1) / 5</h2></div><b>@quizScore @Tx("points", "điểm")</b></header>
-                            <div class="quiz-progress"><i style="width:@((quizIndex + (answerRevealed ? 1 : 0)) * 20)%"></i></div>
-                            <h3>@(IsVi ? question.Vi : question.En)</h3>
-                            <div class="quiz-options">
-                                @for (var optionIndex = 0; optionIndex < 4; optionIndex++)
-                                {
-                                    var index = optionIndex;
-                                    var points = PointsFor(question, index);
-                                    <button class="@(answerRevealed && selectedOption == index ? points == 10 ? "optimal" : points == 5 ? "neutral" : "negative" : null)" disabled="@answerRevealed" @onclick="() => SelectAnswer(index)"><span>@("ABCD"[index])</span>@(IsVi ? question.OptionsVi[index] : question.OptionsEn[index])</button>
-                                }
-                            </div>
-                            @if (answerRevealed)
+                        <section class="quiz-sheet">
+                            <header><div><small>@Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN")</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
+                            <div class="quiz-progress"><i style="width:@(revealedQuestions.Count * 20)%"></i></div>
+                            @foreach (var entry in quizQuestions.Select((question, index) => (question, index)))
                             {
-                                var earned = PointsFor(question, selectedOption);
-                                <div class="answer-feedback @(earned == 10 ? "good" : earned == 5 ? "middle" : "bad")"><b>@Tx($"You earned {earned} points", $"Bạn được {earned} điểm")</b><p>@(earned == 10 ? (IsVi ? question.FeedbackVi : question.FeedbackEn) : Tx("This response is not optimal yet. The best option is the one that stays respectful and solves the issue directly.", "Cách xử lý này chưa tối ưu. Phương án tốt nhất là bình tĩnh, tôn trọng và giải quyết trực tiếp vấn đề."))</p></div>
-                                <button class="primary quiz-next" @onclick="NextQuizQuestion">@(quizIndex == 4 ? Tx("View result", "Xem kết quả") : Tx("Next question", "Câu tiếp theo"))<i class="bi bi-arrow-right"></i></button>
+                                var question = entry.question;
+                                var revealed = revealedQuestions.Contains(question.Id);
+                                <article class="quiz-card">
+                                    <h3><span>@(entry.index + 1)</span>@(IsVi ? question.Vi : question.En)</h3>
+                                    <div class="quiz-options">
+                                        @foreach (var display in quizOptionOrders[question.Id].Select((original, displayIndex) => (original, displayIndex)))
+                                        {
+                                            var original = display.original;
+                                            var selected = selectedAnswers.GetValueOrDefault(question.Id, -1) == original;
+                                            var points = PointsFor(question, original);
+                                            <button class="@(revealed && selected ? points == 10 ? "optimal" : points == 5 ? "neutral" : "negative" : null)" disabled="@revealed" @onclick="() => SelectAnswer(question, original)"><span>@("ABCD"[display.displayIndex])</span>@(IsVi ? question.OptionsVi[original] : question.OptionsEn[original])</button>
+                                        }
+                                    </div>
+                                    @if (revealed)
+                                    {
+                                        var earned = PointsFor(question, selectedAnswers[question.Id]);
+                                        <div class="answer-feedback @(earned == 10 ? "good" : earned == 5 ? "middle" : "bad")"><b>@Tx($"You earned {earned} points", $"Bạn được {earned} điểm")</b><p>@(earned == 10 ? (IsVi ? question.FeedbackVi : question.FeedbackEn) : Tx("This response is not optimal yet. A stronger response stays respectful and addresses the issue directly.", "Cách này chưa tối ưu. Phản hồi tốt hơn cần tôn trọng và giải quyết trực tiếp vấn đề."))</p></div>
+                                    }
+                                </article>
                             }
+                            @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error">@saveError</div> }
                         </section>
-                        <div class="actions"><button @onclick="() => OpenStep(3)"><i class="bi bi-arrow-left"></i>@Tx("Back: Summary", "Quay lại: Tóm tắt")</button></div>
+                        <div class="actions"><button @onclick="() => OpenStep(3)"><i class="bi bi-arrow-left"></i>@Tx("Back: Summary", "Quay lại: Tóm tắt")</button><button class="primary" disabled="@(revealedQuestions.Count < 5)" @onclick="SubmitQuiz">@Tx("Submit and view result", "Nộp bài và xem kết quả")<i class="bi bi-arrow-right"></i></button></div>
                     }
                 }
                 else
@@ -154,10 +161,10 @@
     private string? saveError;
     private List<CommunicationQuizQuestion> quizQuestions = [];
     private readonly Dictionary<string, string> quizAnswers = [];
-    private int quizIndex;
-    private int selectedOption = -1;
+    private readonly Dictionary<int, int[]> quizOptionOrders = [];
+    private readonly Dictionary<int, int> selectedAnswers = [];
+    private readonly HashSet<int> revealedQuestions = [];
     private int quizScore;
-    private bool answerRevealed;
     private bool quizFinished;
     private bool quizPassed;
     private int QuizPercent => quizScore * 100 / 50;
@@ -234,14 +241,21 @@
             var lastFive = recentIds.TakeLast(5).ToHashSet();
             unseen.AddRange(CommunicationQuizBank.Questions.Where(x => !unseen.Contains(x) && !lastFive.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()));
         }
-        quizQuestions = unseen.Take(5).ToList(); quizAnswers.Clear(); quizIndex = 0; quizScore = 0; selectedOption = -1; answerRevealed = false; quizFinished = false; quizPassed = false;
+        quizQuestions = unseen.Take(5).ToList(); quizAnswers.Clear(); quizOptionOrders.Clear(); selectedAnswers.Clear(); revealedQuestions.Clear(); quizScore = 0; quizFinished = false; quizPassed = false; saveError = null;
+        foreach (var question in quizQuestions) quizOptionOrders[question.Id] = Enumerable.Range(0, 4).OrderBy(_ => Random.Shared.Next()).ToArray();
     }
     private static int PointsFor(CommunicationQuizQuestion question, int option) => option == question.Optimal ? 10 : option == question.Neutral ? 5 : 0;
-    private void SelectAnswer(int option) { if (answerRevealed) return; selectedOption = option; quizScore += PointsFor(quizQuestions[quizIndex], option); quizAnswers[quizQuestions[quizIndex].Id.ToString()] = "ABCD"[option].ToString(); answerRevealed = true; }
-    private async Task NextQuizQuestion()
+    private void SelectAnswer(CommunicationQuizQuestion question, int originalOption)
     {
-        if (!answerRevealed) return;
-        if (quizIndex < 4) { quizIndex++; selectedOption = -1; answerRevealed = false; return; }
+        if (revealedQuestions.Contains(question.Id)) return;
+        selectedAnswers[question.Id] = originalOption;
+        revealedQuestions.Add(question.Id);
+        quizScore += PointsFor(question, originalOption);
+        quizAnswers[question.Id.ToString()] = "ABCD"[originalOption].ToString();
+    }
+    private async Task SubmitQuiz()
+    {
+        if (revealedQuestions.Count != 5) return;
         quizPassed = QuizPercent >= 56;
         var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed };
         if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "scenario"; } quizFinished = true; }
@@ -253,4 +267,5 @@
 <style>
     .lesson-page{min-height:calc(100vh - 72px);padding:1.5rem;background:#f5f7fb;color:#17233c}.lesson-shell,.back{max-width:1180px;margin:auto}.state,.empty{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;text-align:center}.state span{width:28px;height:28px;border:3px solid #dce4fa;border-top-color:#2860e8;border-radius:50%;animation:spin .8s linear infinite}.back,.lesson-top>button{border:0;background:transparent;color:#2860e8;font-weight:800}.lesson-top{display:grid;grid-template-columns:180px 1fr auto;align-items:center;padding:1rem 1.3rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.lesson-top small{color:#2860e8;font-size:.6rem;font-weight:900}.lesson-top h1{margin:.2rem 0;font-size:1.25rem}.lesson-top>span{display:flex;align-items:center;gap:.35rem;padding:.45rem .65rem;border-radius:99px;background:#eef3ff;color:#2860e8;font-size:.65rem;font-weight:800}.lesson-top>span.week-complete{color:#237d55;background:#eaf8f1}.lesson-steps{display:grid;grid-template-columns:repeat(6,1fr);margin:1rem 0;border:1px solid #dce4f2;border-radius:12px;background:#fff;overflow:hidden}.lesson-steps button{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem .4rem;border:0;border-right:1px solid #e7ebf3;background:#fff;color:#68758e;font-size:.65rem}.lesson-steps button:last-child{border:0}.lesson-steps span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #cbd5e7;border-radius:50%;font-size:.58rem}.lesson-steps button.active{color:#2860e8;background:#f2f6ff}.lesson-steps button.active span{color:#fff;border-color:#2860e8;background:#2860e8}.lesson-steps button.done span{color:#fff;border-color:#2ba06a;background:#2ba06a}.lesson-content{padding:1.25rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.saved-complete{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;padding:.7rem .85rem;color:#237d55;border:1px solid #bde7d1;border-radius:9px;background:#effbf5}.saved-complete>i{font-size:1.2rem}.saved-complete b,.saved-complete small{display:block}.saved-complete small{margin-top:.1rem;color:#4f7965;font-size:.65rem}.video-wrap{overflow:hidden;border-radius:10px;background:#090d18}.video-wrap video{display:block;width:100%;max-height:620px}.content-heading{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}.content-heading small{color:#2860e8;font-size:.6rem;font-weight:900}.content-heading h2{margin:.25rem 0;font-size:1.35rem}.content-heading p{margin:0;color:#68758e}.content-heading>span{font-size:.7rem;color:#68758e}.notice{padding:.8rem;color:#725d25;border:1px solid #f0d98f;border-radius:8px;background:#fff9e7}.save-error{display:flex;gap:.45rem;margin-top:.6rem;padding:.75rem;color:#a83b3b;border:1px solid #efbcbc;border-radius:8px;background:#fff2f2}.primary{display:flex;align-items:center;gap:.5rem;margin-left:auto;padding:.75rem 1rem;border:0;border-radius:8px;color:#fff;background:#2860e8;font-weight:800}.primary:disabled{cursor:not-allowed;color:#7f8a9f;background:#e3e8f1}.theory{max-width:850px;margin:auto;font-size:.9rem;line-height:1.75}.theory h3{margin-top:1.5rem;color:#12224a}.theory li{margin:.35rem 0}.conclusion{padding:1rem;border-left:4px solid #2860e8;background:#f2f6ff}.actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e3e8f1}.video-actions{align-items:center}.actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;color:#273755;font-weight:800}.summary-card{padding:2rem;text-align:center;border-radius:12px;background:linear-gradient(135deg,#f1f5ff,#f7f1ff)}.summary-card>i{font-size:2rem;color:#5f51dc}.summary-card small{display:block;color:#2860e8;font-weight:900}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;text-align:left}.summary-grid div{padding:1rem;border:1px solid #dbe2f2;border-radius:9px;background:#fff}.summary-grid p{color:#68758e;font-size:.8rem;line-height:1.6}.empty>i{font-size:3rem;color:#2860e8}.empty.inner{min-height:340px}.empty.inner>i{font-size:2rem}.empty p{color:#68758e}@@keyframes spin{to{transform:rotate(360deg)}}@@media(max-width:760px){.lesson-page{padding:.7rem}.lesson-top{grid-template-columns:1fr}.lesson-top>button{text-align:left}.lesson-top>span{justify-self:start}.lesson-steps{grid-template-columns:repeat(3,1fr)}.lesson-steps button{border-bottom:1px solid #e7ebf3}.lesson-steps b{display:none}.summary-grid{grid-template-columns:1fr}.content-heading{display:block}}
     .quiz-card{max-width:900px;margin:auto;padding:1rem}.quiz-card>header{display:flex;justify-content:space-between;align-items:center}.quiz-card small,.quiz-result small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-card h2{margin:.2rem 0}.quiz-card>header>b{color:#2860e8}.quiz-progress{height:6px;margin:1rem 0 1.5rem;border-radius:99px;background:#e8edf5;overflow:hidden}.quiz-progress i{display:block;height:100%;background:#2860e8}.quiz-card>h3{font-size:1.05rem;line-height:1.55}.quiz-options{display:grid;gap:.65rem;margin-top:1rem}.quiz-options button{display:flex;align-items:center;gap:.75rem;padding:.85rem;text-align:left;border:1px solid #d8e0ed;border-radius:9px;background:#fff;color:#263653}.quiz-options button span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:7px;background:#edf1f7;font-weight:900}.quiz-options button.optimal{border-color:#41aa78;background:#effbf5}.quiz-options button.neutral{border-color:#e2b54a;background:#fff9e9}.quiz-options button.negative{border-color:#e58b8b;background:#fff3f3}.answer-feedback{margin-top:1rem;padding:1rem;border-radius:9px}.answer-feedback p{margin:.35rem 0 0;line-height:1.55}.answer-feedback.good{color:#246f4d;background:#ebf9f2}.answer-feedback.middle{color:#765b17;background:#fff8e3}.answer-feedback.bad{color:#8d3939;background:#fff0f0}.quiz-next{margin-top:1rem}.quiz-result{max-width:720px;margin:auto;padding:2.5rem;text-align:center;border-radius:14px;background:linear-gradient(135deg,#eef4ff,#f7f1ff)}.quiz-result>i{display:block;color:#6554dd;font-size:2.5rem}.quiz-result h2{margin:.5rem 0;font-size:2rem}.quiz-result h3{color:#2860e8}.quiz-result p{line-height:1.65}.quiz-result button{padding:.7rem 1rem;border:1px solid #2860e8;border-radius:8px;background:#fff;color:#2860e8;font-weight:800}
+    .quiz-sheet{max-width:940px;margin:auto}.quiz-sheet>header{display:flex;justify-content:space-between;align-items:center}.quiz-sheet>header small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-sheet>header h2{margin:.2rem 0}.quiz-sheet>header>b{color:#2860e8}.quiz-sheet .quiz-card{max-width:none;margin:0 0 1rem;padding:1.15rem;border:1px solid #dce4f2;border-radius:11px;background:#fbfcff}.quiz-sheet .quiz-card>h3{display:flex;align-items:flex-start;gap:.7rem;margin-top:0;font-size:1rem}.quiz-sheet .quiz-card>h3>span{display:grid;place-items:center;flex:0 0 28px;height:28px;color:#fff;border-radius:50%;background:#2860e8;font-size:.7rem}
 </style>

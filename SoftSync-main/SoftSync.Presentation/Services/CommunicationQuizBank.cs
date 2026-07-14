@@ -29,7 +29,32 @@ public static class CommunicationQuizBank
     ];
 
     private static CommunicationQuizQuestion Q(int id, string vi, string en, string[] viOptions, int optimal, int neutral)
-        => new(id, vi, en, viOptions, viOptions, optimal, neutral,
+        => new(id, vi, en, viOptions, EnglishOptions(id), optimal, neutral,
             "Phương án tối ưu tập trung vào sự bình tĩnh, tôn trọng và cùng giải quyết vấn đề.",
             "The optimal response stays calm, respectful, and focused on solving the problem together.");
+
+    private static string[] EnglishOptions(int id) => id switch
+    {
+        1 => ["How could you work like this and delay everyone?", "I'll do your part too so we can finish faster.", "This part is behind schedule. Are you having difficulties that the group can help with?", "I will report your delay to the supervisor."],
+        2 => ["Everyone already chose this place, so please go along with it.", "Let's move somewhere quiet to focus and get drinks afterward.", "Let's cancel and work separately through messages.", "Let's vote again and follow the majority."],
+        3 => ["Stay silent and follow the majority.", "Everyone chose A only because it is easy; it is not actually good.", "A is reasonable, but I would like to share some strengths of B so we can choose the best option.", "I lean toward A, but B has useful points. Would you like to hear them?"],
+        4 => ["My work is good, so why is my grade low? Please check it again.", "I reviewed my work and have a question. Could you show me where points were deducted?", "Your grading is too strict. I want it graded again.", "Can I do another assignment to improve my grade?"],
+        5 => ["Prepare your response and speak as soon as they pause.", "Check your phone while listening.", "Listen fully, restate the main point to confirm understanding, then share your view.", "Keep saying 'I understand' so they speak faster."],
+        6 => ["Hello, I am exploring this field. Could you spare 15–20 minutes to share your experience?", "HELLO, I URGENTLY NEED TO ASK ABOUT YOUR EXPERIENCE.", "Let me know whenever you have a few free minutes.", "I sent my work; please tell me whether it is okay."],
+        7 => ["Can you do anything better before criticizing me?", "I feel a little confused. Could you point out which part is unclear so I can improve it?", "Then rewrite it yourself.", "Sorry, I will rewrite everything."],
+        8 => ["Write a long comment attacking the author.", "Report the post for removal.", "Ignore it to avoid trouble.", "Respond calmly with reasons while respecting different viewpoints."],
+        9 => ["The computer caused the loss, so any delay is the machine's fault.", "I am sorry I failed to save it. I take responsibility, will rebuild it now, and ask everyone to review it.", "The file is gone; blaming me will not solve anything.", "Say nothing and rebuild it alone."],
+        10 => ["Use unexplained technical jargon.", "There is a small technical issue; we are fixing it.", "The data display has an issue. We found the cause and will fix it by tomorrow.", "It is a code error; you do not need to understand."],
+        11 => ["Speak louder over them.", "Panic and lose your place.", "Thank them, finish the current section, then set aside time to answer carefully.", "Answer immediately and rush back to the presentation."],
+        12 => ["This is a complete mess; nobody can understand it.", "This is difficult to follow. Organizing it step by step may make it clearer. What do you think?", "This is terrible and will cost the whole group points.", "I will redo it for you."],
+        13 => ["Send a very long explanation of the breakdown.", "Our group will be about ten minutes late due to a breakdown. We apologize for the inconvenience.", "We are ten minutes late because the vehicle broke down.", "Say nothing and explain after arriving."],
+        14 => ["I submitted everything. Please look more carefully.", "Apologize and resend without explanation.", "Thank you for the feedback. The filename may be unclear; the data is in Bao_cao_2.xlsx, which I am resending now.", "Do not respond."],
+        15 => ["Wait fifteen minutes for late members.", "Send an agenda, start on time, allocate time, and gently redirect off-topic discussion.", "Let everyone speak freely without structure.", "Extend the meeting by an hour."],
+        16 => ["Yes, let us do careless work quickly.", "You are deliberately twisting my words.", "I mean doing the key parts very well first. Let us identify the highest priorities together.", "Stay silent because the disagreement is too large."],
+        17 => ["Everyone is stressed; endure it.", "Sleep earlier and exercise; that will fix it.", "I am concerned. Could the group share your workload so you can rest for a few days?", "That explains why you are slow and hurting the group."],
+        18 => ["Assume they are lazy.", "Ask publicly why they never speak.", "Talk privately and offer other ways to contribute, such as writing or messaging beforehand.", "Ignore them to stay on schedule."],
+        19 => ["Stop being lazy and do your own work.", "I need to study for tomorrow's exam, so I cannot do this part. Could you complete it after your personal task?", "Fine, give it to me.", "Do not reply."],
+        20 => ["Shout back at them.", "Stay calm, acknowledge their concern, and ask which part worries them most so you can review it together.", "Walk out.", "Agree completely to end the conflict."],
+        _ => []
+    };
 }
