@@ -452,15 +452,36 @@
         margin-bottom: 1.4rem;
     }
     .ss-hero-copy h1 {
-        font-size: clamp(3rem, 5vw, 4.75rem);
-        line-height: 1.08;
-        font-weight: 850;
-        letter-spacing: 0;
+        position: relative;
+        width: fit-content;
+        max-width: 9.5ch;
+        padding-bottom: .28rem;
+        font-family: 'Inter', 'Arial Rounded MT Bold', system-ui, sans-serif;
+        font-size: clamp(3.25rem, 5.4vw, 5.15rem);
+        line-height: .98;
+        font-weight: 900;
+        letter-spacing: -.055em;
         margin: 0 0 1.4rem;
     }
     .ss-hero-copy h1 span {
+        display: block;
         color: #6ea8ff;
-        text-shadow: 0 0 30px rgba(99, 102, 241, 0.55);
+        background: linear-gradient(100deg, #50a7ff 2%, #6c7cff 48%, #b94cff 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 12px 36px rgba(99, 102, 241, 0.18);
+    }
+    .ss-hero-copy h1::after {
+        content: '';
+        position: absolute;
+        left: .08em;
+        bottom: -.08em;
+        width: 3.15em;
+        height: .12em;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #386bff, #8b5cf6 60%, transparent);
+        transform: rotate(-3deg);
     }
     .ss-hero-copy p {
         color: var(--ss-home-muted);
