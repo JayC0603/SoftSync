@@ -137,12 +137,14 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IMentorRepository, MentorRepository>();
 
 // 3. Register AI Services (BLL - Mocked)
-builder.Services.AddScoped<IAiAssessmentService, FakeAiAssessmentService>();
+builder.Services.AddScoped<IAiAssessmentService, HuggingFaceAiAssessmentService>();
 builder.Services.AddSingleton(_ => AssistantKnowledgeBase.Load(
     Path.Combine(builder.Environment.ContentRootPath, "Assets", "AiKnowledge", "softsync-assistant.vi-en.json")));
 builder.Services.AddScoped<KnowledgeBasedAiAssistantService>();
 builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
 builder.Services.AddSingleton<PdfDocumentKnowledge>();
+builder.Services.AddScoped<HuggingFaceJsonClient>();
+builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
 builder.Services.AddScoped<IAiRoadmapService, FakeAiRoadmapService>();
 
 // 4. Register Business Services (BLL)

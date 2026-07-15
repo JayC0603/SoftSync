@@ -11,6 +11,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject IAiLearningEvaluationService AiEvaluator
 
 <PageTitle>@LessonTitle · SoftSync</PageTitle>
 
@@ -335,7 +336,7 @@
     private int ConfidenceDelta => reflection.ConfidenceAfter - reflection.ConfidenceBefore;
     private static int WordCount(string value) => value.Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length;
     private bool ReflectionValid => WordCount(reflection.Learning) > 5 && WordCount(reflection.Strength) > 5 && WordCount(reflection.Improvement) > 5 && WordCount(reflection.Commitment) > 5;
-    private string ReflectionFeedback => LatestRoleplayScore switch { < 5 => Tx("Focus on staying calm, asking a clarifying question, and proposing one concrete next step.", "Hãy tập trung giữ bình tĩnh, đặt câu hỏi làm rõ và đề xuất một bước tiếp theo cụ thể."), < 8.5 => Tx("You are progressing well. Make your I-statements and deadlines more specific.", "Bạn đang tiến bộ tốt. Hãy làm rõ hơn câu I-statement và thời hạn hành động."), _ => Tx("You communicate with empathy and a solution mindset. Keep applying this pattern in real situations.", "Bạn giao tiếp thấu cảm và hướng giải pháp tốt. Hãy tiếp tục áp dụng vào tình huống thực tế.") };
+    private string ReflectionFeedback => !string.IsNullOrWhiteSpace(reflection.AiFeedback) ? reflection.AiFeedback : LatestRoleplayScore switch { < 5 => Tx("Focus on staying calm, asking a clarifying question, and proposing one concrete next step.", "Hãy tập trung giữ bình tĩnh, đặt câu hỏi làm rõ và đề xuất một bước tiếp theo cụ thể."), < 8.5 => Tx("You are progressing well. Make your I-statements and deadlines more specific.", "Bạn đang tiến bộ tốt. Hãy làm rõ hơn câu I-statement và thời hạn hành động."), _ => Tx("You communicate with empathy and a solution mindset. Keep applying this pattern in real situations.", "Bạn giao tiếp thấu cảm và hướng giải pháp tốt. Hãy tiếp tục áp dụng vào tình huống thực tế.") };
     private IEnumerable<(bool User, string Text)> RoleplayTranscript
     {
         get
@@ -347,7 +348,7 @@
     }
     private int QuizPercent => quizScore * 100 / 50;
     private string QuizLevel => QuizPercent switch { <= 30 => Tx("Passive", "Bị động"), <= 55 => Tx("Developing", "Đang phát triển"), <= 80 => Tx("Proactive", "Chủ động"), _ => Tx("Exceptional", "Làm chủ") };
-    private string QuizComment => QuizPercent switch
+    private string QuizComment => !string.IsNullOrWhiteSpace(LatestQuiz?.Feedback) ? LatestQuiz.Feedback : QuizPercent switch
     {
         <= 30 => Tx("You tend to avoid issues or react emotionally. Pause before responding and ask questions instead of judging.", "Bạn có xu hướng né tránh hoặc phản ứng theo cảm xúc. Hãy dừng lại trước khi phản hồi và đặt câu hỏi thay vì phán xét."),
         <= 55 => Tx("You are developing better responses, but sometimes still avoid real dialogue. Practice expressing your needs clearly and gently.", "Bạn đang đi đúng hướng nhưng đôi khi vẫn né tránh đối thoại. Hãy diễn đạt mong muốn rõ ràng và nhẹ nhàng hơn."),
@@ -534,7 +535,13 @@
     {
         if (revealedQuestions.Count != 5) return;
         quizPassed = QuizPercent >= 56;
-        var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed };
+        var answers = quizQuestions.Select(question => new AiQuizAnswer(
+            IsVi ? question.Vi : question.En,
+            (IsVi ? question.OptionsVi : question.OptionsEn)[selectedAnswers[question.Id]],
+            (IsVi ? question.OptionsVi : question.OptionsEn)[question.Optimal],
+            PointsFor(question, selectedAnswers[question.Id]))).ToList();
+        var feedback = await AiEvaluator.EvaluateQuizAsync(LessonTitle, answers, quizScore, IsVi);
+        var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed, Feedback = feedback };
         if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "scenario"; } quizFinished = true; await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId); }
         else saveError = Tx("Could not save quiz result. Please try again.", "Không thể lưu kết quả Quiz. Hãy thử lại.");
     }
@@ -556,14 +563,18 @@
     {
         var value = roleplayInput.Trim(); if (value.Length == 0 || roleplayScenario is null || roleplayResult is not null) return;
         sendingRoleplay = true; roleplayUserMessages.Add(value); roleplayInput = string.Empty;
-        if (roleplayUserMessages.Count < 3) roleplayAiMessages.Add(CommunicationRoleplayEngine.Reply(value, roleplayUserMessages.Count, IsVi));
-        else
+        try
         {
-            var result = CommunicationRoleplayEngine.Grade(roleplayScenario.Id, [.. roleplayUserMessages], [.. roleplayAiMessages], IsVi);
-            if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, result)) { roleplayResult = result; item!.RoleplayHistory.Add(result); item.IsScenarioCompleted = true; item.ScenarioCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "reflection"; }
-            else saveError = Tx("Could not save role-play history.", "Không thể lưu lịch sử thực hành.");
+            if (roleplayUserMessages.Count < 3)
+                roleplayAiMessages.Add(await AiEvaluator.ContinueRoleplayAsync(roleplayScenario, roleplayUserMessages, roleplayAiMessages, IsVi));
+            else
+            {
+                var result = await AiEvaluator.GradeRoleplayAsync(roleplayScenario, [.. roleplayUserMessages], [.. roleplayAiMessages], IsVi);
+                if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, result)) { roleplayResult = result; item!.RoleplayHistory.Add(result); item.IsScenarioCompleted = true; item.ScenarioCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "reflection"; }
+                else saveError = Tx("Could not save role-play history.", "Không thể lưu lịch sử thực hành.");
+            }
         }
-        sendingRoleplay = false;
+        finally { sendingRoleplay = false; }
     }
     private void LoadReflection()
     {
@@ -582,13 +593,14 @@
     private async Task CompleteReflection()
     {
         if (!ReflectionValid || item is null) return; savingReflection = true; reflectionError = false;
+        reflection.AiFeedback = await AiEvaluator.EvaluateReflectionAsync(item.Title, SerializeReflection(), LatestQuizScore, LatestRoleplayScore, IsVi);
         var payload = SerializeReflection(); var ok = await RoadmapService.SaveReflectionAsync(ItemId, UserId, payload);
         if (ok) { item.ReflectionText = payload; item.IsReflectionCompleted = true; item.ReflectionCompletedAtUtc = DateTime.UtcNow; item.IsCompleted = true; reflectionMessage = Tx("Week completed. The next week is now unlocked.", "Đã hoàn thành tuần. Tuần tiếp theo đã được mở."); }
         else { reflectionMessage = Tx("Could not complete the week.", "Không thể hoàn thành tuần."); reflectionError = true; }
         savingReflection = false;
     }
     private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"Reflection","Phản tư","bi bi-stars")];
-    private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
+    private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public string AiFeedback { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
 }
 
 <style>

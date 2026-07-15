@@ -97,6 +97,7 @@ public class RoadmapQuizAttemptDto
     public int Score { get; set; }
     public int TotalQuestions { get; set; }
     public bool Passed { get; set; }
+    public string Feedback { get; set; } = string.Empty;
     public DateTime SubmittedAtUtc { get; set; }
 }
 

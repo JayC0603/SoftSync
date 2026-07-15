@@ -215,7 +215,11 @@ public class AssessmentService : IAssessmentService
         {
             // Store the raw summed score (8 questions × 1–4 = 8–32) and classify
             // it into a band. See SoftSync.Common.AssessmentScoring.
-            var score = agg.sum;
+            var skillAnswers = answers
+                .Where(answer => chosen.TryGetValue(answer.OptionId, out var option) && option.Question?.SkillId == skillId)
+                .ToList();
+            var aiResult = await _aiService.EvaluateAsync(skillAnswers);
+            var score = Math.Clamp(aiResult.Score, AssessmentScoring.MinScore, AssessmentScoring.MaxScore);
             var level = AssessmentScoring.BandFor(score);
 
             results.Add(new AssessmentResult
