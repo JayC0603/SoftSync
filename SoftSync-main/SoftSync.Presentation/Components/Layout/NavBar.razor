@@ -529,6 +529,9 @@
         var nextCode = next == AppLanguage.Vi ? "vi" : "en";
         await JS.InvokeVoidAsync("ssLang.set", nextCode);
         L.SetLanguage(next);
+        // NavBar and the routed page can be separate interactive roots. A full
+        // reload lets SSR and every circuit start from the same language cookie.
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
     }
 
     private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";

@@ -14,7 +14,7 @@ public enum AppLanguage
 /// </summary>
 public class LocalizationService
 {
-    public LocalizationService(AppLanguage initialLanguage = AppLanguage.En)
+    public LocalizationService(AppLanguage initialLanguage = AppLanguage.Vi)
     {
         Current = initialLanguage;
     }
@@ -42,7 +42,7 @@ public class LocalizationService
 
     /// <summary>Parse a stored culture string (e.g. from localStorage) into a language.</summary>
     public static AppLanguage Parse(string? value) =>
-        string.Equals(value, "vi", StringComparison.OrdinalIgnoreCase) ? AppLanguage.Vi : AppLanguage.En;
+        string.Equals(value, "en", StringComparison.OrdinalIgnoreCase) ? AppLanguage.En : AppLanguage.Vi;
 
     /// <summary>The short code persisted to localStorage.</summary>
     public string Code => Current == AppLanguage.Vi ? "vi" : "en";

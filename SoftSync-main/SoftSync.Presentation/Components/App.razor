@@ -57,7 +57,7 @@
             }
             function apply() {
                 try {
-                    var pref = localStorage.getItem('ss-theme') || 'system';
+                    var pref = localStorage.getItem('ss-theme') || 'light';
                     var rm = localStorage.getItem('ss-reduce-motion') === '1';
                     var resolved = (pref === 'light' || pref === 'dark') ? pref
                         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -75,7 +75,7 @@
             // If the user chose "system", follow OS theme changes.
             try {
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                    if ((localStorage.getItem('ss-theme') || 'system') === 'system') apply();
+                    if (localStorage.getItem('ss-theme') === 'system') apply();
                 });
             } catch (e) { /* older browsers */ }
         })();
@@ -100,7 +100,7 @@
     private string BrowserThemeColor => ServerTheme == "dark" ? "#100d24" : "#f7f6fc";
 
     private string ServerLanguage =>
-        HttpContextAccessor.HttpContext?.Request.Cookies["ss-lang"] is "vi" ? "vi" : "en";
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-lang"] is "en" ? "en" : "vi";
 
     // Returns "1" or null — Blazor omits the attribute entirely when it's null,
     // so we never emit a broken/empty data-reduce-motion.

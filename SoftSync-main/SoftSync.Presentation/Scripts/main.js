@@ -122,7 +122,7 @@ window.ssTheme = {
     apply(pref, reduceMotion) {
         try {
             const el = document.documentElement;
-            const resolved = this.resolve(pref || 'system');
+            const resolved = this.resolve(pref || 'light');
             el.setAttribute('data-theme', resolved);
             if (reduceMotion) el.setAttribute('data-reduce-motion', '1');
             else el.removeAttribute('data-reduce-motion');
@@ -139,9 +139,9 @@ window.ssTheme = {
     },
     // Re-apply from storage; called on startup by the App.razor bootstrap.
     init() {
-        let pref = 'system', rm = false;
+        let pref = 'light', rm = false;
         try {
-            pref = localStorage.getItem('ss-theme') || 'system';
+            pref = localStorage.getItem('ss-theme') || 'light';
             rm = localStorage.getItem('ss-reduce-motion') === '1';
         } catch { /* ignore */ }
         this.apply(pref, rm);
@@ -152,7 +152,7 @@ window.ssTheme = {
         try {
             if (localStorage.getItem('ss-theme')) return;
         } catch { /* ignore */ }
-        this.set(pref || 'system', !!reduceMotion);
+        this.set(pref || 'light', !!reduceMotion);
     }
 };
 

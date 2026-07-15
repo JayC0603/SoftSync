@@ -25,7 +25,7 @@ public class UserDto
 
     // Settings: appearance
     public string PreferredLanguage { get; set; } = string.Empty;
-    public ThemePreference Theme { get; set; }
+    public ThemePreference Theme { get; set; } = ThemePreference.Light;
     public bool ReduceMotion { get; set; }
 
     // Derived from ExperiencePoints — not stored.

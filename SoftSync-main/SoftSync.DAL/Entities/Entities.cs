@@ -42,7 +42,7 @@ public class ApplicationUser : IdentityUser<int>
     /// <summary>Preferred UI language code ("en"/"vi"); empty means follow the browser.</summary>
     [MaxLength(5)]
     public string PreferredLanguage { get; set; } = string.Empty;
-    public ThemePreference Theme { get; set; }
+    public ThemePreference Theme { get; set; } = ThemePreference.Light;
     /// <summary>Accessibility: reduce non-essential motion/animation.</summary>
     public bool ReduceMotion { get; set; }
 
