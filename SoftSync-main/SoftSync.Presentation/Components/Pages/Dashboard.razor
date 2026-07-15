@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
+@implements IDisposable
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @using SoftSync.Presentation.Services
@@ -96,7 +97,10 @@ else
                 <button class="syncy-task" @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-bar-chart-fill"></i><span><strong>@T("Xem tiến độ kỹ năng", "View skill progress")</strong><small><i class="bi bi-clock"></i> 3 @T("phút", "minutes")</small></span><b>›</b></button>
                 <button class="syncy-chat" @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-chat-dots-fill"></i> @T("Chat với SYNCY", "Chat with SYNCY")</button>
             </section>
-            <section class="did-you-know"><i class="bi bi-lightbulb-fill"></i><div><strong>@T("Bạn có biết?", "Did you know?")</strong><p>@T("Học 15 phút mỗi ngày giúp bạn ghi nhớ tốt hơn 80% kiến thức!", "Studying 15 minutes a day can help you retain up to 80% more!")</p></div><img src="/images/syncy-fish.png" alt="SYNCY" /></section>
+            @if (tipVisible)
+            {
+                <section class="did-you-know @(tipHiding ? "tip-hiding" : "")"><i class="bi bi-lightbulb-fill"></i><div><strong>@T("Bạn có biết?", "Did you know?")</strong><p>@T("Học 15 phút mỗi ngày giúp bạn ghi nhớ tốt hơn 80% kiến thức!", "Studying 15 minutes a day can help you retain up to 80% more!")</p></div><img src="/images/syncy-fish.png" alt="SYNCY" /></section>
+            }
         </aside>
     </main>
 }
@@ -107,6 +111,9 @@ else
     private List<RoadmapItemDto> roadmapItems = [];
     private int completedItems;
     private int totalItems;
+    private bool tipVisible = true;
+    private bool tipHiding;
+    private readonly CancellationTokenSource tipTimer = new();
 
     private bool Vi => L.Current == AppLanguage.Vi;
     private string T(string vi, string en) => Vi ? vi : en;
@@ -129,6 +136,26 @@ else
         roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
         totalItems = roadmapItems.Count;
         completedItems = roadmapItems.Count(x => x.IsCompleted);
+        _ = HideTipAfterDelayAsync();
+    }
+
+    private async Task HideTipAfterDelayAsync()
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(9.5), tipTimer.Token);
+            await InvokeAsync(() => { tipHiding = true; StateHasChanged(); });
+            await Task.Delay(TimeSpan.FromMilliseconds(500), tipTimer.Token);
+            await InvokeAsync(() => { tipVisible = false; StateHasChanged(); });
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    public new void Dispose()
+    {
+        tipTimer.Cancel();
+        tipTimer.Dispose();
+        base.Dispose();
     }
 
     private IEnumerable<ProgressDto> DefaultSkills()
@@ -216,6 +243,7 @@ else
     .skills-panel{grid-column:1/2}.skill-rings{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}.skill-rings>div{text-align:center}.ring{--value:0;--ring:#7657f6;position:relative;width:72px;height:72px;margin:auto;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--value)*1%),#e9ebf3 0)}.ring:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}.ring span{position:relative;z-index:1;color:var(--ring);font-weight:900}.skill-rings small{display:block;margin-top:.45rem;font-size:.62rem;line-height:1.2}
     .achievements-panel{grid-column:2/3}.achievement-list{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;text-align:center}.achievement-list>div{min-width:0}.achievement-list i{display:grid;place-items:center;width:55px;height:55px;margin:auto;border:7px solid #d7d4ff;clip-path:polygon(50% 0,90% 20%,100% 65%,72% 100%,28% 100%,0 65%,10% 20%);color:#fff;font-size:1.3rem}.achievement-list .violet{background:#6634bc}.achievement-list .green{background:#119b74}.achievement-list .blue{background:#176bd7}.achievement-list .orange{background:#ed741d}.achievement-list strong,.achievement-list small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.achievement-list strong{margin-top:.5rem;font-size:.64rem}.achievement-list small{margin-top:.2rem;color:var(--muted);font-size:.56rem}
     .syncy-column{min-width:0}.syncy-panel{position:sticky;top:90px;padding:1.35rem;border:1px solid #e1e5f3;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 18px 45px rgba(67,56,152,.1)}.syncy-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}.syncy-title h3{margin:0;color:#5e35e1}.syncy-title h3 i{margin-right:.45rem}.syncy-title button{width:38px;height:38px;border:1px solid #e5e7f3;border-radius:50%;color:#67718d;background:#fff}.syncy-message{padding:1.1rem;border:1px solid #e7e8f2;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(60,50,130,.06)}.syncy-message p{margin:.55rem 0 0;color:#303956;font-size:.78rem;line-height:1.65}.syncy-task{display:flex;align-items:center;gap:.8rem;width:100%;margin-top:.9rem;padding:.85rem;border:1px solid #e7e8f2;border-radius:16px;color:var(--ink);background:#fff;text-align:left}.syncy-task>i{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:13px;color:#6534e9;background:#f0eaff;font-size:1.55rem}.syncy-task:nth-of-type(3)>i{color:#1683e8;background:#e7f3ff}.syncy-task:nth-of-type(4)>i{color:#16a77a;background:#e4f9f3}.syncy-task span{min-width:0;flex:1}.syncy-task strong,.syncy-task small{display:block}.syncy-task strong{font-size:.8rem}.syncy-task small{margin-top:.35rem;color:#65708d;font-size:.65rem}.syncy-task>b{display:grid;place-items:center;width:30px;height:30px;border:1px solid #dedffa;border-radius:50%;color:#5939df}.syncy-chat{width:100%;margin-top:1rem;padding:.9rem;border:0;border-radius:14px;color:#fff;background:linear-gradient(90deg,#3e75ee,#9335ef);font-weight:800}.did-you-know{position:relative;margin-top:1.1rem;min-height:100px;padding:1rem 105px 1rem 1rem;display:flex;align-items:flex-start;gap:.8rem;border:1px solid #e2e6f2;border-radius:18px;background:#fff;overflow:hidden}.did-you-know>i{color:#ffae13;font-size:1.5rem}.did-you-know strong{font-size:.78rem}.did-you-know p{margin:.35rem 0 0;font-size:.67rem;line-height:1.5}.did-you-know img{position:absolute;right:-5px;bottom:-12px;width:115px;height:110px;object-fit:contain}
+    .did-you-know{transition:opacity .5s ease,transform .5s ease,max-height .5s ease,margin .5s ease,padding .5s ease}.did-you-know.tip-hiding{max-height:0;min-height:0;margin-top:0;padding-top:0;padding-bottom:0;opacity:0;transform:translateY(-8px)}
     html[data-theme="dark"] .home-v2{--ink:#f7f7ff;--muted:#b7bdd2}html[data-theme="dark"] .streak-card,html[data-theme="dark"] .stat-grid article,html[data-theme="dark"] .panel,html[data-theme="dark"] .syncy-panel,html[data-theme="dark"] .syncy-message,html[data-theme="dark"] .syncy-task,html[data-theme="dark"] .did-you-know{border-color:rgba(166,150,255,.18);background:rgba(28,25,61,.9)}html[data-theme="dark"] .ring:after{background:#1c193d}html[data-theme="dark"] .roadmap-row{color:#f7f7ff;border-color:rgba(166,150,255,.12)}html[data-theme="dark"] .roadmap-row.current{background:rgba(90,65,220,.16)}html[data-theme="dark"] .syncy-title button{color:#ddd6fe;background:#28234f;border-color:#463e75}
     @@media(max-width:1200px){.home-v2{grid-template-columns:1fr}.syncy-column{display:grid;grid-template-columns:2fr 1fr;gap:1rem}.syncy-panel{position:static}.did-you-know{margin-top:0}.syncy-column .syncy-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}.syncy-title,.syncy-message,.syncy-chat{grid-column:1/-1}.syncy-task{margin-top:0}}
     @@media(max-width:850px){.home-main{grid-template-columns:1fr}.welcome-copy{display:grid;grid-template-columns:1fr auto;align-items:end}.welcome-copy .morning,.welcome-copy h1,.welcome-copy>p{grid-column:1}.welcome-copy h1{font-size:2rem}.welcome-copy .streak-card{grid-column:2;grid-row:1/4}.stat-grid{grid-template-columns:1fr 1fr}.content-grid{grid-template-columns:1fr}.skills-panel,.achievements-panel{grid-column:auto}.syncy-column{grid-template-columns:1fr}.syncy-column .syncy-panel{grid-template-columns:1fr}.syncy-title,.syncy-message,.syncy-chat{grid-column:auto}}
