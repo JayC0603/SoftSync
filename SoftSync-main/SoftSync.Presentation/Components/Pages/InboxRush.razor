@@ -1,0 +1,137 @@
+@page "/roadmap/inbox-rush/{UserId:int}/{ItemId:int}"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IRoadmapService RoadmapService
+@inject NavigationManager Nav
+
+<PageTitle>Inbox Rush · SoftSync</PageTitle>
+
+<main class="inbox-rush">
+    <header class="ir-hero">
+        <button @onclick="Back"><i class="bi bi-arrow-left"></i></button>
+        <div><small>@Tx("TIME MANAGEMENT PRACTICE", "THỰC HÀNH QUẢN LÝ THỜI GIAN")</small><h1>Inbox Rush</h1><p>@Tx("Prioritize tasks, estimate their duration, and build an eight-slot day.", "Ưu tiên công việc, ước lượng thời lượng và sắp xếp một ngày gồm 8 khung giờ.")</p></div>
+        <div class="ir-count"><b>@FilledSlots/8</b><span>@Tx("slots planned", "khung đã xếp")</span></div>
+    </header>
+
+    @if (!finished)
+    {
+        <section class="ir-guide"><span><b>1</b>@Tx("Choose an estimate", "Chọn thời lượng dự đoán")</span><span><b>2</b>@Tx("Drag a task", "Kéo một công việc")</span><span><b>3</b>@Tx("Drop it into the schedule", "Thả vào thời khóa biểu")</span></section>
+        <div class="ir-grid">
+            <section class="ir-inbox">
+                <header><div><small>INBOX</small><h2>@Tx("Tasks waiting", "Công việc đang chờ")</h2></div><b>@Unscheduled.Count()</b></header>
+                <div class="ir-task-list">
+                    @foreach (var task in Unscheduled)
+                    {
+                        <article class="@($"ir-task q{task.Quadrant} {(task.Interrupt ? "interrupt" : "")}")" draggable="true" @ondragstart="() => Drag(task)">
+                            <div class="ir-task-top"><span>@(task.Interrupt ? "⚡ " + Tx("INTERRUPT", "PHÁT SINH") : $"Q{task.Quadrant}")</span><em>U@task.U · I@task.I</em></div>
+                            <h3>@Tx(task.En, task.Vi)</h3>
+                            <label>@Tx("Your estimate", "Bạn dự đoán")
+                                <select value="@task.Estimate" @onchange="e => ChangeEstimate(task, e)"><option value="1">1 slot</option><option value="2">2 slots</option><option value="3">3 slots</option></select>
+                            </label>
+                            <small>@Tx("Drag to a free starting slot", "Kéo vào khung bắt đầu còn trống")</small>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="ir-day">
+                <header><small>@Tx("YOUR DAY", "NGÀY CỦA BẠN")</small><h2>@Tx("Eight available slots", "8 khung giờ khả dụng")</h2></header>
+                <div class="ir-slots">
+                    @for (var index = 0; index < slots.Length; index++)
+                    {
+                        var slotIndex = index;
+                        var task = slots[index];
+                        <div class="ir-slot @(task is null ? "empty" : "filled")" @ondragover:preventDefault @ondrop="() => Drop(slotIndex)">
+                            <b>@(8 + index):00</b>
+                            @if (task is null) { <span><i class="bi bi-plus-circle"></i>@Tx("Drop task here", "Thả công việc vào đây")</span> }
+                            else { <span><strong>@Tx(task.En, task.Vi)</strong><small>U@task.U · I@task.I · @task.D slot</small></span> }
+                        </div>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(message)) { <p class="ir-message">@message</p> }
+                <footer><button @onclick="Reset">@Tx("Reset schedule", "Xếp lại lịch")</button><button class="primary" disabled="@(FilledSlots == 0 || saving)" @onclick="Finish">@(saving ? Tx("Saving...", "Đang lưu...") : Tx("Finish and score", "Hoàn thành và chấm điểm"))</button></footer>
+            </section>
+        </div>
+    }
+    else
+    {
+        <section class="ir-result">
+            <div class="ir-score"><b>@Total.ToString("0.0")</b><span>/10</span></div>
+            <div><small>@Tx("PERSONAL RESULT", "KẾT QUẢ CÁ NHÂN")</small><h2>@ResultTitle</h2><p>@ResultFeedback</p></div>
+        </section>
+        <section class="ir-metrics">
+            <article><i class="bi bi-list-stars"></i><span>@Tx("Prioritization", "Ưu tiên hóa")<b>@PriorityScore.ToString("0")/100</b></span></article>
+            <article><i class="bi bi-hourglass-split"></i><span>@Tx("Estimation", "Ước lượng")<b>@CalibrationScore.ToString("0")/100</b></span></article>
+            <article><i class="bi bi-lightning-charge"></i><span>@Tx("Adaptation", "Thích ứng")<b>@AdaptationScore.ToString("0")/100</b></span></article>
+            <article><i class="bi bi-calendar-check"></i><span>@Tx("Schedule use", "Sử dụng lịch")<b>@(FilledSlots * 100 / 8)%</b></span></article>
+        </section>
+        <div class="ir-result-actions"><button @onclick="Reset">@Tx("Play again", "Chơi lại")</button><button class="primary" @onclick="Back">@Tx("Continue to reflection", "Tiếp tục đến Phản tư")<i class="bi bi-arrow-right"></i></button></div>
+    }
+</main>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public int ItemId { get; set; }
+    private readonly TaskCard?[] slots = new TaskCard?[8];
+    private List<TaskCard> tasks = [];
+    private TaskCard? dragging;
+    private bool finished, saving;
+    private string message = "";
+    private double PriorityScore, CalibrationScore, AdaptationScore, Total;
+    private DateTime startedAt;
+    private int FilledSlots => slots.Count(x => x is not null);
+    private IEnumerable<TaskCard> Unscheduled => tasks.Where(x => !slots.Contains(x));
+    private bool IsVi => L.Current == AppLanguage.Vi;
+    private string Tx(string en, string vi) => IsVi ? vi : en;
+    private string ResultTitle => Total >= 8 ? Tx("Time management master", "Làm chủ thời gian") : Total >= 6 ? Tx("Developing a solid plan", "Kế hoạch đang tiến bộ") : Tx("Keep practicing", "Cần luyện tập thêm");
+    private string ResultFeedback => PriorityScore < 60 ? Tx("Your estimates are useful, but urgent tasks can distract you from important work. Compare importance before reacting to urgency.", "Bạn dễ bị việc gấp cuốn đi và quên việc quan trọng. Hãy so sánh mức độ quan trọng trước khi phản ứng với độ khẩn cấp.") : CalibrationScore < 60 ? Tx("Your priorities are sound, but duration estimates need practice. Break large work into smaller parts.", "Bạn ưu tiên khá tốt nhưng cần luyện ước lượng thời gian. Hãy chia việc lớn thành các phần nhỏ.") : AdaptationScore < 60 ? Tx("Your plan is good. Practice making faster, calmer decisions when interruptions appear.", "Kế hoạch của bạn tốt. Hãy luyện ra quyết định nhanh và bình tĩnh hơn khi có việc phát sinh.") : Tx("You balance priorities, realistic estimates, and interruptions effectively.", "Bạn cân bằng tốt giữa ưu tiên, ước lượng thực tế và công việc phát sinh.");
+
+    protected override void OnInitialized() => StartGame();
+    private void StartGame()
+    {
+        var bank = Bank.OrderBy(_ => Random.Shared.Next()).Take(12).Select((x, i) => new TaskCard(i + 1, x.Vi, x.En, x.U, x.I, x.D, x.Interrupt, x.Q, 1)).ToList();
+        tasks = bank; Array.Clear(slots); dragging = null; finished = false; saving = false; message = ""; startedAt = DateTime.UtcNow;
+    }
+    private void Drag(TaskCard task) { dragging = task; task.FirstTouchedAt ??= DateTime.UtcNow; }
+    private static void ChangeEstimate(TaskCard task, ChangeEventArgs args) => task.Estimate = int.TryParse(args.Value?.ToString(), out var value) ? value : 1;
+    private void Drop(int start)
+    {
+        if (dragging is null) return;
+        if (start + dragging.D > slots.Length || Enumerable.Range(start, dragging.D).Any(i => slots[i] is not null)) { message = Tx("This task needs consecutive free slots.", "Công việc này cần các khung trống liên tiếp."); return; }
+        for (var i = 0; i < dragging.D; i++) slots[start + i] = dragging;
+        dragging.Position = start; message = ""; dragging = null;
+    }
+    private void Reset() => StartGame();
+    private async Task Finish()
+    {
+        saving = true;
+        var planned = tasks.Where(t => slots.Contains(t)).Distinct().ToList();
+        var rawPriority = planned.Sum(t => (t.U + 2 * t.I) * (t.Position <= 2 ? 1.5 : t.Position <= 5 ? 1.0 : .5));
+        var idealPriority = tasks.OrderByDescending(t => t.U + 2 * t.I).Take(Math.Max(1, planned.Count)).Sum(t => (t.U + 2 * t.I) * 1.5);
+        PriorityScore = idealPriority == 0 ? 0 : Math.Clamp(rawPriority / idealPriority * 100, 0, 100);
+        CalibrationScore = planned.Count == 0 ? 0 : planned.Average(t => Math.Max(0, 100 - Math.Abs(t.Estimate - t.D) * 20));
+        var interrupts = planned.Where(t => t.Interrupt).ToList();
+        AdaptationScore = interrupts.Count == 0 ? 40 : interrupts.Average(t => Math.Max(0, 100 - ((t.FirstTouchedAt ?? DateTime.UtcNow) - startedAt).TotalSeconds * 2));
+        var schedule = FilledSlots * 100d / 8;
+        var emptySlotPenalty = (8 - FilledSlots) * .1;
+        Total = Math.Round(Math.Clamp(PriorityScore * .05 + CalibrationScore * .03 + AdaptationScore * .02 - emptySlotPenalty, 0, 10), 1);
+        var attempt = new RoadmapRoleplayAttemptDto { ScenarioId = 1000 + Random.Shared.Next(1, 999), UserMessages = [$"PS:{PriorityScore:0.0}", $"CS:{CalibrationScore:0.0}", $"AS:{AdaptationScore:0.0}"], AiMessages = [ResultFeedback], EmotionalIntelligenceScore = PriorityScore * .03, ActiveListeningScore = CalibrationScore * .03, IStatementScore = AdaptationScore * .02, SolutionScore = schedule * .02, TotalScore = Total, Feedback = ResultFeedback };
+        if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, attempt)) finished = true;
+        else message = Tx("Could not save this result. Please try again.", "Không thể lưu kết quả. Vui lòng thử lại.");
+        saving = false;
+    }
+    private void Back() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}");
+    private sealed class TaskCard(int id, string vi, string en, int u, int i, int d, bool interrupt, int quadrant, int estimate) { public int Id=id; public string Vi=vi; public string En=en; public int U=u; public int I=i; public int D=d; public bool Interrupt=interrupt; public int Quadrant=quadrant; public int Estimate=estimate; public int Position=8; public DateTime? FirstTouchedAt; }
+    private static readonly (string Vi,string En,int U,int I,int D,bool Interrupt,int Q)[] Bank =
+    [
+        ("Ôn tập cho bài kiểm tra 15 phút","Review for a 15-minute test",4,4,1,false,1),("Làm bài tập Toán về nhà","Complete math homework",2,4,2,false,2),("Viết bài luận Văn","Write a literature essay",2,3,2,false,2),("Bạn thân nhờ giúp giải bài gấp","A friend asks for urgent homework help",5,1,1,true,3),("Học từ vựng tiếng Anh","Study English vocabulary",2,3,1,false,2),("Họp câu lạc bộ","Attend a club meeting",4,1,1,false,3),("Nộp báo cáo thí nghiệm","Submit the lab report",5,5,2,false,1),("Xem video giải trí","Watch an entertainment video",4,1,1,false,4),("Tập văn nghệ cho lễ hội trường","Rehearse for the school festival",3,2,2,false,4),("Giáo viên đổi lịch kiểm tra sớm hơn","Teacher moves the test earlier",5,5,1,true,1),("Ôn tập chương 3 môn Hoá","Review chemistry chapter 3",3,4,2,false,2),("Dọn lại góc học tập","Tidy the study corner",1,2,1,false,4),("Hoàn thành bài tập nhóm môn Lý","Complete the physics group assignment",3,3,2,false,2),("Trả lời tin nhắn nhóm lớp","Reply to class group messages",4,1,1,false,3),("Bố mẹ nhờ việc nhà gấp","Parents request an urgent chore",5,2,1,true,3),("Luyện đề thi thử","Complete a mock exam",3,5,2,false,2),("Hoàn thiện đồ án môn học","Finish the course project",4,5,3,false,1),("Nộp bài thuyết trình PowerPoint","Submit the presentation",5,4,2,false,1)
+    ];
+}
+
+<style>
+    .inbox-rush{min-height:calc(100vh - 74px);padding:2rem clamp(1rem,4vw,4rem);color:#13224b;background:radial-gradient(circle at 85% 5%,#dcd4ff99,transparent 32%),linear-gradient(145deg,#f9f8ff,#eef2ff)}
+    .ir-hero,.ir-inbox,.ir-day,.ir-result,.ir-metrics article{border:1px solid #ffffffb8;background:#ffffffa8;box-shadow:0 18px 50px #6b55d617,inset 1px 1px #fff;border-radius:20px;backdrop-filter:blur(18px) saturate(150%)}.ir-hero{display:flex;align-items:center;gap:1rem;padding:1.3rem 1.5rem}.ir-hero>button{width:42px;height:42px;border:0;border-radius:12px;background:#eeeaff;color:#6847eb}.ir-hero>div:nth-child(2){flex:1}.ir-hero small,.ir-day>header small,.ir-inbox header small,.ir-result small{color:#6847eb;font-weight:900}.ir-hero h1{margin:.15rem 0;font-size:2rem}.ir-hero p{margin:0;color:#68758e}.ir-count{text-align:center}.ir-count b,.ir-count span{display:block}.ir-count b{font-size:1.4rem;color:#6847eb}.ir-guide{display:flex;justify-content:center;gap:2rem;margin:1.2rem}.ir-guide span{display:flex;align-items:center;gap:.5rem}.ir-guide b{display:grid;place-items:center;width:26px;height:26px;color:#fff;border-radius:50%;background:#8068eb}.ir-grid{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(440px,1.25fr);gap:1.2rem}.ir-inbox,.ir-day{padding:1.2rem}.ir-inbox>header{display:flex;justify-content:space-between}.ir-inbox header h2,.ir-day h2{margin:.2rem 0 1rem}.ir-inbox>header>b{display:grid;place-items:center;width:35px;height:35px;border-radius:50%;background:#eeeaff;color:#6847eb}.ir-task-list{display:grid;gap:.65rem;max-height:620px;overflow:auto}.ir-task{padding:.8rem;border:1px solid #e1dcf7;border-left:4px solid #846bed;border-radius:12px;background:#fff;cursor:grab}.ir-task.interrupt{border-color:#ffb4b4;border-left-color:#ef4444;background:#fff7f7}.ir-task-top{display:flex;justify-content:space-between;color:#6847eb;font-size:.7rem;font-weight:900}.ir-task-top em{font-style:normal;color:#68758e}.ir-task h3{margin:.4rem 0;font-size:.9rem}.ir-task label{display:flex;align-items:center;justify-content:space-between;font-size:.72rem}.ir-task select{padding:.25rem;border:1px solid #ddd5fa;border-radius:6px}.ir-task>small{display:block;margin-top:.4rem;color:#8490a8}.ir-slots{display:grid;gap:.55rem}.ir-slot{display:grid;grid-template-columns:70px 1fr;align-items:center;min-height:58px;padding:.6rem .8rem;border:1px dashed #c9c1ec;border-radius:11px}.ir-slot>b{color:#6847eb}.ir-slot>span{display:flex;justify-content:center;gap:.5rem;color:#8190aa}.ir-slot.filled{border-style:solid;background:#f4f1ff}.ir-slot.filled span{display:block;color:#15244d}.ir-slot span strong,.ir-slot span small{display:block}.ir-slot span small{color:#68758e}.ir-message{color:#b45309}.ir-day footer,.ir-result-actions{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1rem}.ir-day button,.ir-result-actions button{padding:.75rem 1rem;border:1px solid #d8d0f7;border-radius:10px;background:#fff;font-weight:800}.primary{color:#fff!important;border:0!important;background:linear-gradient(135deg,#6847eb,#8d73ee)!important}.ir-result{display:flex;align-items:center;gap:1.5rem;margin-top:1.2rem;padding:2rem}.ir-score{display:flex;align-items:baseline;color:#6847eb}.ir-score b{font-size:4rem}.ir-result h2{margin:.2rem 0}.ir-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}.ir-metrics article{display:flex;align-items:center;gap:.8rem;padding:1rem}.ir-metrics i{font-size:1.5rem;color:#6847eb}.ir-metrics span,.ir-metrics b{display:block}.ir-metrics b{margin-top:.2rem;font-size:1.1rem}@@media(max-width:850px){.ir-grid{grid-template-columns:1fr}.ir-metrics{grid-template-columns:repeat(2,1fr)}.ir-guide{display:none}}
+</style>

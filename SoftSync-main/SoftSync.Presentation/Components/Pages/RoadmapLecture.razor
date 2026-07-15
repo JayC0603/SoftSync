@@ -191,7 +191,12 @@
                 }
                 else if (currentStep == 5)
                 {
-                    @if (communicationLessonNumber == 2)
+                    @if (isTimeManagementLessonOne)
+                    {
+                        <section class="voice-practice-launch"><i class="bi bi-inboxes-fill"></i><small>@Tx("PRACTICE · INBOX RUSH", "THỰC HÀNH · INBOX RUSH")</small><h2>@Tx("Plan an eight-slot day", "Lập kế hoạch một ngày 8 khung giờ")</h2><p>@Tx("Prioritize realistic student tasks, estimate their duration, and adapt to urgent interruptions.", "Ưu tiên các công việc sinh viên thực tế, ước lượng thời lượng và thích ứng với việc phát sinh khẩn cấp.")</p><div><span><b>50%</b>@Tx("Priority", "Ưu tiên")</span><span><b>30%</b>@Tx("Estimate", "Ước lượng")</span><span><b>20%</b>@Tx("Adapt", "Thích ứng")</span><span><b>8</b>@Tx("Time slots", "Khung giờ")</span></div><button class="primary" @onclick="OpenInboxRush"><i class="bi bi-calendar2-week"></i>@Tx("Open Inbox Rush", "Mở Inbox Rush")</button></section>
+                        <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                    else if (communicationLessonNumber == 2)
                     {
                         <section class="voice-practice-launch"><i class="bi bi-mic-fill"></i><small>@Tx("PRACTICE · VOICE LAB", "THỰC HÀNH · PHÒNG LUYỆN GIỌNG")</small><h2>@Tx("30-second communication challenge", "Thử thách giao tiếp 30 giây")</h2><p>@Tx("Choose one of 20 student scenarios, record your response, and review pacing, articulation, pauses, fillers, pitch, and energy.", "Chọn một trong 20 tình huống sinh viên, ghi âm và xem phân tích tốc độ, độ rõ chữ, khoảng lặng, từ đệm, cao độ và năng lượng giọng nói.")</p><div><span><b>3.0</b>Pacing</span><span><b>3.0</b>@Tx("Articulation", "Rõ chữ")</span><span><b>2.0</b>@Tx("Pauses", "Ngắt nghỉ")</span><span><b>2.0</b>@Tx("Tone", "Tông giọng")</span></div><button class="primary" @onclick="OpenVoicePractice"><i class="bi bi-mic"></i>@Tx("Open Voice Lab", "Mở phòng luyện giọng")</button></section>
                         <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
@@ -391,6 +396,7 @@
     private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
     private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
     private void OpenVoicePractice() => Nav.NavigateTo($"/roadmap/voice-practice/{UserId}/{ItemId}");
+    private void OpenInboxRush() => Nav.NavigateTo($"/roadmap/inbox-rush/{UserId}/{ItemId}");
     private bool IsVi => L.Current == AppLanguage.Vi;
     private string Tx(string en, string vi) => IsVi ? vi : en;
     private void StartQuiz()
