@@ -153,6 +153,7 @@ builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IAssessmentService, AssessmentService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IGameBankService, GameBankService>();

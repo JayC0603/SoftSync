@@ -793,3 +793,38 @@ public class MentorService : IMentorService
         return list.Select(m => new MentorDto { Id = m.Id, Name = m.Name, Expertise = m.Expertise, ShortBio = m.ShortBio, AvatarUrl = m.AvatarUrl });
     }
 }
+
+public class ChatHistoryService : IChatHistoryService
+{
+    private readonly IChatRepository _repository;
+    public ChatHistoryService(IChatRepository repository) => _repository = repository;
+
+    public async Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId)
+    {
+        if (userId <= 0) return [];
+        var messages = await _repository.GetByUserIdAsync(userId);
+        return messages.Select(ToDto).ToList();
+    }
+
+    public async Task SaveAsync(int userId, ChatSender sender, string viContent, string enContent)
+    {
+        if (userId <= 0 || string.IsNullOrWhiteSpace(viContent) && string.IsNullOrWhiteSpace(enContent)) return;
+        var payload = JsonSerializer.Serialize(new StoredChatContent(viContent, enContent));
+        await _repository.AddAsync(new ChatMessage { UserId = userId, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
+        await _repository.SaveChangesAsync();
+    }
+
+    private static ChatHistoryMessageDto ToDto(ChatMessage message)
+    {
+        try
+        {
+            var content = JsonSerializer.Deserialize<StoredChatContent>(message.Content);
+            if (content is not null)
+                return new() { Id = message.Id, Sender = message.Sender, ViContent = content.Vi, EnContent = content.En, CreatedAt = message.CreatedAt };
+        }
+        catch (JsonException) { }
+        return new() { Id = message.Id, Sender = message.Sender, ViContent = message.Content, EnContent = message.Content, CreatedAt = message.CreatedAt };
+    }
+
+    private sealed record StoredChatContent(string Vi, string En);
+}

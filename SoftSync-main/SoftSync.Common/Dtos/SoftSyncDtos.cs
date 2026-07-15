@@ -150,6 +150,15 @@ public class MessageDto
     public DateTime CreatedAt { get; set; }
 }
 
+public class ChatHistoryMessageDto
+{
+    public int Id { get; set; }
+    public ChatSender Sender { get; set; }
+    public string ViContent { get; set; } = string.Empty;
+    public string EnContent { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}
+
 public class MentorDto
 {
     public int Id { get; set; }

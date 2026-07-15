@@ -1,4 +1,5 @@
 using SoftSync.Common.Dtos;
+using SoftSync.Common.Enums;
 
 namespace SoftSync.BLL.Interfaces;
 
@@ -87,6 +88,12 @@ public interface IAiAssessmentService
 public interface IAiAssistantService
 {
     Task<string> GetReplyAsync(string userMessage, int userId);
+}
+
+public interface IChatHistoryService
+{
+    Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId);
+    Task SaveAsync(int userId, ChatSender sender, string viContent, string enContent);
 }
 
 public interface IAiRoadmapService

@@ -5,6 +5,7 @@
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @inject IAiAssistantService AssistantService
+@inject IChatHistoryService ChatHistoryService
 @inject NavigationManager Nav
 
 <div class="assistant-layout">
@@ -94,8 +95,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Fall back to the signed-in user when no id is supplied via the route.
-        if (UserId == 0) UserId = await AuthProvider.GetUserIdAsync();
+        // Never trust a user id supplied in the URL for private chat history.
+        UserId = await AuthProvider.GetUserIdAsync();
+        try
+        {
+            var history = await ChatHistoryService.GetHistoryAsync(UserId);
+            if (history.Count > 0)
+                messages = history.Select(x => new AssistantMessage { Sender = x.Sender, ViContent = x.ViContent, EnContent = x.EnContent }).ToList();
+        }
+        catch { }
     }
 
     private async Task SendMessage()
@@ -105,6 +113,7 @@
         var userMsg = userInput;
         userInput = "";
         messages.Add(new AssistantMessage { Sender = SoftSync.Common.Enums.ChatSender.User, EnContent = userMsg, ViContent = userMsg });
+        await TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender.User, userMsg, userMsg);
 
         isTyping = true;
         StateHasChanged();
@@ -114,14 +123,17 @@
             var viReply = await AssistantService.GetReplyAsync("[vi]" + userMsg, UserId);
             var enReply = await AssistantService.GetReplyAsync("[en]" + userMsg, UserId);
             messages.Add(new AssistantMessage { ViContent = viReply, EnContent = enReply });
+            await TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender.Assistant, viReply, enReply);
         }
         catch
         {
-            messages.Add(new AssistantMessage
+            var error = new AssistantMessage
             {
                 ViContent = "SYNCY chưa thể kết nối với AI. Vui lòng thử lại sau.",
                 EnContent = "SYNCY could not connect to AI. Please try again later."
-            });
+            };
+            messages.Add(error);
+            await TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender.Assistant, error.ViContent, error.EnContent);
         }
         finally
         {
@@ -132,6 +144,12 @@
     private async Task HandleKeyUp(KeyboardEventArgs e)
     {
         if (e.Key == "Enter") await SendMessage();
+    }
+
+    private async Task TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender sender, string viContent, string enContent)
+    {
+        try { await ChatHistoryService.SaveAsync(UserId, sender, viContent, enContent); }
+        catch { }
     }
 
     private void HandleAction(ChatAction action)

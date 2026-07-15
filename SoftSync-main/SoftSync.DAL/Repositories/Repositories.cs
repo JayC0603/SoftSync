@@ -179,8 +179,11 @@ public class ChatRepository : Repository<ChatMessage>, IChatRepository
     public ChatRepository(Data.SoftSyncDbContext context) : base(context) { }
     public async Task<IEnumerable<ChatMessage>> GetByUserIdAsync(int userId)
     {
-        return await _dbSet.Where(c => c.UserId == userId).OrderBy(c => c.CreatedAt).ToListAsync();
+        return await _dbSet.Where(c => c.UserId == userId)
+            .OrderByDescending(c => c.CreatedAt).Take(100)
+            .OrderBy(c => c.CreatedAt).ToListAsync();
     }
+
 }
 
 public interface IMentorRepository : IRepository<Mentor> { }
