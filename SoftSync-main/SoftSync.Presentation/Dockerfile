@@ -35,5 +35,10 @@ COPY --from=build /app/publish ./
 # Render (and most PaaS) inject the port to listen on via $PORT. Bind to it,
 # falling back to 8080 for local `docker run`.
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Render's shared Free instances can exhaust the Linux inotify quota. Production
+# config is immutable, so disable JSON config hot reload and avoid inotify-based
+# file watchers instead of crashing while WebApplication.CreateBuilder starts.
+ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
+ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 EXPOSE 8080
 ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet SoftSync.Presentation.dll"]
