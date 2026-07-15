@@ -87,10 +87,6 @@
                     @if (userMenuOpen)
                     {
                         <div class="ss-user-dropdown" role="menu">
-                            <a href="/profile" role="menuitem" @onclick="CloseUserMenu">
-                                <i class="bi bi-person-circle"></i>
-                                <span>@(L.Current == AppLanguage.Vi ? "Hồ sơ" : "Profile")</span>
-                            </a>
                             <a href="/settings" role="menuitem" @onclick="CloseUserMenu">
                                 <i class="bi bi-gear"></i><span>@L["nav.settings"]</span>
                             </a>
