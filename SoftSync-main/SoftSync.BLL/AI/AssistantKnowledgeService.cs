@@ -67,9 +67,6 @@ public sealed class KnowledgeBasedAiAssistantService : IAiAssistantService
             ranked.Add(new { Entry = knowledge.Entries.First(x => x.Id == "softsync-overview"), Score = 1 });
 
         var answer = string.Join("\n\n", ranked.Select(x => english ? x.Entry.AnswerEn : x.Entry.AnswerVi));
-        var primaryRoute = ranked.Select(x => x.Entry.Route).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-        if (primaryRoute == "/assessment" && userId > 0) primaryRoute = $"/assessment/{userId}";
-
         if (IsRecommendationQuery(query) && userId > 0)
         {
             var progress = (await progressService.GetUserProgressAsync(userId)).OrderBy(x => x.PercentComplete).FirstOrDefault();
@@ -78,12 +75,9 @@ public sealed class KnowledgeBasedAiAssistantService : IAiAssistantService
                 answer += english
                     ? $"\n\nBased on your progress, prioritize {LocalizeSkill(progress.SkillName, true)} ({progress.PercentComplete}% complete)."
                     : $"\n\nDựa trên tiến độ hiện tại, bạn nên ưu tiên {LocalizeSkill(progress.SkillName, false)} (đã hoàn thành {progress.PercentComplete}%).";
-                primaryRoute = "/roadmap";
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(primaryRoute))
-            answer += english ? $"\n\nOpen in SoftSync: {primaryRoute}" : $"\n\nMở trong SoftSync: {primaryRoute}";
         return answer;
     }
 

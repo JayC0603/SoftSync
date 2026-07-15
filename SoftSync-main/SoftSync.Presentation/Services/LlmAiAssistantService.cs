@@ -118,7 +118,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
                 return await FallbackAsync(message, userId);
             }
             logger.LogInformation("AI Assistant received a Hugging Face response from model {Model}", request.model);
-            return AppendRoute(modelReply, userId);
+            return modelReply;
         }
         catch (Exception ex)
         {
@@ -132,19 +132,6 @@ public sealed class LlmAiAssistantService : IAiAssistantService
         var vi = await fallback.GetReplyAsync("[vi]" + message, userId);
         var en = await fallback.GetReplyAsync("[en]" + message, userId);
         return new BilingualReply { AnswerVi = vi, AnswerEn = en };
-    }
-
-    private static BilingualReply AppendRoute(BilingualReply reply, int userId)
-    {
-        var route = reply.Route?.Trim() ?? string.Empty;
-        if (route == "/assessment" && userId > 0) route = $"/assessment/{userId}";
-        if (!route.StartsWith('/')) route = string.Empty;
-        if (route.Length > 0)
-        {
-            reply.AnswerVi += $"\n\nMở trong SoftSync: {route}";
-            reply.AnswerEn += $"\n\nOpen in SoftSync: {route}";
-        }
-        return reply;
     }
 
     private sealed class BilingualReply
