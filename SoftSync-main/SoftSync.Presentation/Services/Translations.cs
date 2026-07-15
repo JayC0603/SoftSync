@@ -32,7 +32,7 @@ public static class Translations
             "SoftSync is an AI-powered learning platform that helps you understand your strengths, practice essential soft skills through real-world scenarios, and follow a personalized path toward meaningful growth.",
             "SoftSync là nền tảng học tập ứng dụng AI, giúp bạn khám phá thế mạnh, rèn luyện các kỹ năng mềm thiết yếu qua tình huống thực tế và phát triển theo lộ trình được cá nhân hóa dành riêng cho bạn."),
         ["home.startJourney"] = ("Start Your Journey", "Bắt đầu hành trình"),
-        ["home.learnMore"] = ("Watch Demo", "Xem demo"),
+        ["home.learnMore"] = ("Learn More", "Tìm hiểu thêm"),
         ["home.communityHubCta"] = ("Explore Community Hub", "Khám phá Community Hub"),
         ["mentor.main.heading"] = ("Meet the Project Mentor", "Gặp gỡ Mentor chính của dự án"),
         ["mentor.main.headingDesc"] = ("Expert guidance at the heart of SoftSync Space.", "Định hướng chuyên môn đồng hành cùng SoftSync Space."),
