@@ -22,6 +22,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<CaseStudyOption> CaseStudyOptions { get; set; }
     public DbSet<ProgressLog> ProgressLogs { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 

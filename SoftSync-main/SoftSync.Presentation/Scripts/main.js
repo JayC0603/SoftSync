@@ -64,15 +64,15 @@ window.ssLang = {
 // Keep AI chat usable across refreshes even when the remote database is
 // temporarily unavailable. PostgreSQL remains the primary history store.
 window.ssChatHistory = {
-    key(userId) { return `ss-chat-history-${userId}`; },
-    load(userId) {
+    key(userId, sessionId) { return `ss-chat-history-${userId}-${sessionId || 'draft'}`; },
+    load(userId, sessionId) {
         try {
-            const raw = localStorage.getItem(this.key(userId));
+            const raw = localStorage.getItem(this.key(userId, sessionId));
             return raw ? JSON.parse(raw) : [];
         } catch { return []; }
     },
-    save(userId, messages) {
-        try { localStorage.setItem(this.key(userId), JSON.stringify(messages)); }
+    save(userId, sessionId, messages) {
+        try { localStorage.setItem(this.key(userId, sessionId), JSON.stringify(messages)); }
         catch { /* ignore storage quota/privacy-mode failures */ }
     },
     scrollTo(elementId) {

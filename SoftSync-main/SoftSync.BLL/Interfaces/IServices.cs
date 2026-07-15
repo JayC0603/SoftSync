@@ -92,8 +92,9 @@ public interface IAiAssistantService
 
 public interface IChatHistoryService
 {
-    Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId);
-    Task SaveAsync(int userId, ChatSender sender, string viContent, string enContent);
+    Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(int userId);
+    Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId, int sessionId = 0);
+    Task<int> SaveAsync(int userId, int sessionId, ChatSender sender, string viContent, string enContent);
 }
 
 public interface IAiRoadmapService

@@ -52,6 +52,7 @@ public class ApplicationUser : IdentityUser<int>
     public ICollection<RoadmapItem> RoadmapItems { get; set; } = new List<RoadmapItem>();
     public ICollection<ProgressLog> ProgressLogs { get; set; } = new List<ProgressLog>();
     public ICollection<ChatMessage> ChatMessages { get; set; } = new List<ChatMessage>();
+    public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
 }
 
 /// <summary>
@@ -212,12 +213,26 @@ public class ProgressLog
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
+public class ChatSession
+{
+    [Key] public int Id { get; set; }
+    public int UserId { get; set; }
+    public ApplicationUser User { get; set; } = null!;
+    [MaxLength(120)] public string TitleVi { get; set; } = "Cuộc trò chuyện mới";
+    [MaxLength(120)] public string TitleEn { get; set; } = "New conversation";
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+}
+
 public class ChatMessage
 {
     [Key]
     public int Id { get; set; }
     public int UserId { get; set; }
     public ApplicationUser User { get; set; } = null!;
+    public int? ChatSessionId { get; set; }
+    public ChatSession? ChatSession { get; set; }
     public ChatSender Sender { get; set; }
     [Required]
     public string Content { get; set; } = string.Empty;

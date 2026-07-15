@@ -159,6 +159,14 @@ public class ChatHistoryMessageDto
     public DateTime CreatedAt { get; set; }
 }
 
+public class ChatSessionDto
+{
+    public int Id { get; set; }
+    public string TitleVi { get; set; } = string.Empty;
+    public string TitleEn { get; set; } = string.Empty;
+    public DateTime UpdatedAt { get; set; }
+}
+
 public class MentorDto
 {
     public int Id { get; set; }

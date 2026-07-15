@@ -797,14 +797,28 @@ public class MentorService : IMentorService
 public class ChatHistoryService : IChatHistoryService
 {
     private readonly IChatRepository _repository;
-    public ChatHistoryService(IChatRepository repository) => _repository = repository;
+    private readonly IChatSessionRepository _sessions;
+    public ChatHistoryService(IChatRepository repository, IChatSessionRepository sessions)
+    {
+        _repository = repository;
+        _sessions = sessions;
+    }
 
-    public async Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId)
+    public async Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(int userId)
+    {
+        if (userId <= 0) return [];
+        var sessions = await _sessions.GetByUserIdAsync(userId);
+        return sessions.Select(x => new ChatSessionDto { Id = x.Id, TitleVi = x.TitleVi, TitleEn = x.TitleEn, UpdatedAt = x.UpdatedAt }).ToList();
+    }
+
+    public async Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId, int sessionId = 0)
     {
         if (userId <= 0) return [];
         try
         {
-            var messages = await _repository.GetByUserIdAsync(userId);
+            var messages = sessionId > 0
+                ? await _repository.GetBySessionAsync(userId, sessionId)
+                : await _repository.GetByUserIdAsync(userId);
             var history = messages.Select(ToDto).ToList();
             return history;
         }
@@ -814,15 +828,31 @@ public class ChatHistoryService : IChatHistoryService
         }
     }
 
-    public async Task SaveAsync(int userId, ChatSender sender, string viContent, string enContent)
+    public async Task<int> SaveAsync(int userId, int sessionId, ChatSender sender, string viContent, string enContent)
     {
-        if (userId <= 0 || string.IsNullOrWhiteSpace(viContent) && string.IsNullOrWhiteSpace(enContent)) return;
+        if (userId <= 0 || string.IsNullOrWhiteSpace(viContent) && string.IsNullOrWhiteSpace(enContent)) return sessionId;
         try
         {
+            ChatSession? session = sessionId > 0 ? await _sessions.GetForUserAsync(sessionId, userId) : null;
+            if (session is null)
+            {
+                session = new ChatSession { UserId = userId, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+                await _sessions.AddAsync(session);
+                await _sessions.SaveChangesAsync();
+            }
+            if (sender == ChatSender.User && session.TitleVi == "Cuộc trò chuyện mới")
+            {
+                var title = viContent.Trim();
+                session.TitleVi = title.Length <= 60 ? title : title[..60] + "…";
+                var englishTitle = enContent.Trim();
+                session.TitleEn = englishTitle.Length <= 60 ? englishTitle : englishTitle[..60] + "…";
+            }
+            session.UpdatedAt = DateTime.UtcNow;
             var payload = JsonSerializer.Serialize(new StoredChatContent(viContent, enContent));
-            await _repository.AddAsync(new ChatMessage { UserId = userId, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
+            await _repository.AddAsync(new ChatMessage { UserId = userId, ChatSessionId = session.Id, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
             var saved = await _repository.SaveChangesAsync();
             if (!saved) throw new InvalidOperationException("The chat message insert did not affect any row.");
+            return session.Id;
         }
         catch
         {

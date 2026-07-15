@@ -172,6 +172,7 @@ public class ProgressRepository : Repository<ProgressLog>, IProgressRepository
 public interface IChatRepository : IRepository<ChatMessage>
 {
     Task<IEnumerable<ChatMessage>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<ChatMessage>> GetBySessionAsync(int userId, int sessionId);
 }
 
 public class ChatRepository : Repository<ChatMessage>, IChatRepository
@@ -184,6 +185,25 @@ public class ChatRepository : Repository<ChatMessage>, IChatRepository
         return recent.OrderBy(c => c.CreatedAt).ThenBy(c => c.Id);
     }
 
+    public async Task<IEnumerable<ChatMessage>> GetBySessionAsync(int userId, int sessionId) =>
+        await _dbSet.AsNoTracking().Where(c => c.UserId == userId && c.ChatSessionId == sessionId)
+            .OrderBy(c => c.CreatedAt).ThenBy(c => c.Id).Take(100).ToListAsync();
+
+}
+
+public interface IChatSessionRepository : IRepository<ChatSession>
+{
+    Task<IEnumerable<ChatSession>> GetByUserIdAsync(int userId);
+    Task<ChatSession?> GetForUserAsync(int sessionId, int userId);
+}
+
+public class ChatSessionRepository : Repository<ChatSession>, IChatSessionRepository
+{
+    public ChatSessionRepository(Data.SoftSyncDbContext context) : base(context) { }
+    public async Task<IEnumerable<ChatSession>> GetByUserIdAsync(int userId) =>
+        await _dbSet.AsNoTracking().Where(x => x.UserId == userId).OrderByDescending(x => x.UpdatedAt).Take(30).ToListAsync();
+    public Task<ChatSession?> GetForUserAsync(int sessionId, int userId) =>
+        _dbSet.FirstOrDefaultAsync(x => x.Id == sessionId && x.UserId == userId);
 }
 
 public interface IMentorRepository : IRepository<Mentor> { }
