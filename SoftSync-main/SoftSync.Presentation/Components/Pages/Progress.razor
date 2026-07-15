@@ -13,7 +13,7 @@
 
 <div class="pg-shell">
     <aside class="pg-side">
-        <div class="pg-user"><img src="@(user?.AvatarUrl?.Length > 0 ? user.AvatarUrl : "/images/syncy-fish.png")" alt=""/><div><b>@(user?.PublicName ?? "SoftSync Learner")</b><span>@Tx("Level", "Cấp") @(user?.Level ?? 1) · @(user?.ExperiencePoints ?? 0) XP</span></div></div>
+        <div class="pg-user"><img src="@(user?.AvatarUrl?.Length > 0 ? user.AvatarUrl : "/images/syncy-robot.png")" alt=""/><div><b>@(user?.PublicName ?? "SoftSync Learner")</b><span>@Tx("Level", "Cấp") @(user?.Level ?? 1) · @(user?.ExperiencePoints ?? 0) XP</span></div></div>
         <div class="pg-label">@Tx("LEARNING PROGRESS", "TIẾN ĐỘ HỌC TẬP")</div>
         <nav>
             <button class="active"><i class="bi bi-bar-chart-fill"></i>@Tx("Overview", "Tổng quan")</button>
@@ -23,7 +23,7 @@
             <button @onclick='ScrollToAchievements'><i class="bi bi-trophy"></i>@Tx("Achievements", "Thành tích")</button>
             <button @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-briefcase"></i>@Tx("AI Report", "Báo cáo AI")</button>
         </nav>
-        <div class="pg-nova"><img src="/images/syncy-fish.png" alt="Nova"/><div><b>Nova AI</b><p>@Tx("Always by your side to help you improve every day!", "Luôn đồng hành và giúp bạn tiến bộ mỗi ngày!")</p></div></div>
+        <div class="pg-nova"><img src="/images/syncy-robot.png" alt="Nova"/><div><b>Nova AI</b><p>@Tx("Always by your side to help you improve every day!", "Luôn đồng hành và giúp bạn tiến bộ mỗi ngày!")</p></div></div>
     </aside>
 
     <main class="pg-main">

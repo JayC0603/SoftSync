@@ -32,7 +32,7 @@ else
         </aside>
         <header class="dash-welcome">
             <div><span>@L["dashboard.eyebrow"]</span><h1>@L["dashboard.hello"], @FirstName(user.PublicName)! 👋</h1><p>@L["dashboard.subtitle"]</p></div>
-            <div class="dash-hero-mascot"><div><strong>@L["dashboard.continueTitle"]</strong><button @onclick='() => Nav.NavigateTo("/roadmap")'>@L["dashboard.continueLearning"] →</button></div><img src="/images/syncy-fish.png" alt="SYNCY" /></div>
+            <div class="dash-hero-mascot"><div><strong>@L["dashboard.continueTitle"]</strong><button @onclick='() => Nav.NavigateTo("/roadmap")'>@L["dashboard.continueLearning"] →</button></div><img src="/images/syncy-robot.png" alt="SYNCY" /></div>
         </header>
 
         <section class="dash-stats">
@@ -68,7 +68,7 @@ else
 
             <aside class="dash-card dash-mentor">
                 <div class="dash-card-head"><h2>@L["dashboard.mentor"]</h2></div>
-                <div class="mentor-profile"><img src="/images/syncy-fish.png" alt="Nova" /><div><strong>Nova</strong><span>Communication Mentor</span></div></div>
+                <div class="mentor-profile"><img src="/images/syncy-robot.png" alt="Nova" /><div><strong>Nova</strong><span>Communication Mentor</span></div></div>
                 <blockquote>“@L["dashboard.mentorQuote"]”</blockquote>
                 <button class="mentor-chat" @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-chat-dots"></i> @L["dashboard.chatNova"]</button>
             </aside>
@@ -85,7 +85,7 @@ else
         {
             <div class="dash-syncy-panel">
                 <div class="dash-syncy-head">
-                    <img src="/images/syncy-fish.png" alt="SYNCY" />
+                    <img src="/images/syncy-robot.png" alt="SYNCY" />
                     <div><strong>SYNCY AI</strong><span>@L["chatbot.tagline"]</span></div>
                     <button title="Close" @onclick="() => syncyOpen = false"><i class="bi bi-x-lg"></i></button>
                 </div>
@@ -101,7 +101,7 @@ else
         else
         {
             <button class="dash-syncy-fab" title="SYNCY AI" @onclick="() => syncyOpen = true">
-                <img src="/images/syncy-fish.png" alt="SYNCY AI" /><span></span><b>@L["dashboard.needHelp"]<small>@L["dashboard.chatSyncy"]</small></b>
+                <img src="/images/syncy-robot.png" alt="SYNCY AI" /><span></span><b>@L["dashboard.needHelp"]<small>@L["dashboard.chatSyncy"]</small></b>
             </button>
         }
     </aside>
