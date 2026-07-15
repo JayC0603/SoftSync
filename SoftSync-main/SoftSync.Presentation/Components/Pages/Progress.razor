@@ -30,11 +30,11 @@
         <header class="pg-head"><div><h1>@Tx("Progress overview", "Tổng quan tiến độ")</h1><p>@Tx("Track and understand your learning journey", "Cập nhật hành trình học tập của bạn")</p></div><button><i class="bi bi-calendar3"></i> @DateRange <i class="bi bi-chevron-down"></i></button></header>
 
         <section class="pg-kpis">
-            <article><div class="pg-donut" style="--p:@Overall"><b>@Overall%</b></div><div><strong>@Tx("Overall progress", "Tiến độ tổng thể")</strong><p>@Tx("Completed", "Hoàn thành") @CompletedRoadmap / @TotalRoadmap @Tx("lessons", "bài học")</p></div></article>
+            <article><div class="pg-donut" style="--p:@Overall"><b>@Overall%</b></div><div><strong>@Tx("Overall progress", "Tiến độ tổng thể")</strong><p>@Tx("Completed", "Hoàn thành") @CompletedActivities / @TotalActivities @Tx("activities", "hoạt động")</p></div></article>
             <article><i class="bi bi-stars violet"></i><div><strong>@Tx("Level", "Cấp độ")</strong><b class="big">@(user?.Level ?? 1)</b><p>@Tx("Keep learning to level up", "Tiếp tục học để lên cấp")</p></div></article>
             <article><i class="bi bi-star-fill violet"></i><div><strong>@Tx("Current XP", "XP hiện tại")</strong><b class="big">@((user?.ExperiencePoints ?? 0).ToString("N0"))</b><em>@Tx("Saved from your learning activity", "Được lưu từ hoạt động học tập")</em></div></article>
             <article><i class="bi bi-fire orange"></i><div><strong>@Tx("Learning streak", "Ngày học liên tiếp")</strong><b class="big">@ActiveDays</b><em>@Tx("active days recorded", "ngày có hoạt động được ghi nhận")</em></div></article>
-            <article><i class="bi bi-clock violet"></i><div><strong>@Tx("Study time this week", "Thời gian học tuần này")</strong><b class="big">@UpdatedThisWeek</b><em>@Tx("skills updated this week", "kỹ năng cập nhật tuần này")</em></div></article>
+            <article><i class="bi bi-clock violet"></i><div><strong>@Tx("Study time this week", "Thời gian học tuần này")</strong><b class="big">@StudyTimeThisWeek</b><em>@CompletedThisWeek @Tx("activities completed", "hoạt động hoàn thành")</em></div></article>
         </section>
 
         <div class="pg-grid">
@@ -42,26 +42,54 @@
 
             <section class="pg-card pg-path"><header><h2>@Tx("Complete roadmap catalog", "Danh mục lộ trình đầy đủ")</h2><a @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("View all", "Xem tất cả")</a></header><div class="pg-track-tabs">@foreach(var entry in Tracks.Select((x,i)=>(x,i))){<button class="@(selectedTrack==entry.i?"active":"")" @onclick="()=>selectedTrack=entry.i"><i class="bi @entry.x.Icon"></i><span>@TrackName(entry.x)<small>@entry.x.Modules.Count @Tx("activities", "hoạt động")</small></span></button>}</div><h3>@TrackName(CurrentTrack) <span>@TrackProgress(CurrentTrack)%</span></h3><div class="pg-path-list">@foreach(var entry in CurrentTrack.Modules.Select((x,i)=>(x,i))){var state=ModuleState(CurrentTrack,entry.i);<button class="@state" @onclick="()=>Nav.NavigateTo(entry.x.Route)"><i>@(state=="done"?"✓":(entry.i+1).ToString())</i><b>@ModuleType(entry.x.Type) · @ModuleName(entry.x)</b><span>@(state=="done"?"100%":state=="current"?Tx("Continue","Tiếp tục"):Tx("Not started","Chưa học"))</span><i class="bi bi-chevron-right"></i></button>}</div><footer>▣ Video　▣ @Tx("Theory", "Lý thuyết")　🔗 Quiz　🎮 Game</footer></section>
 
-            <section class="pg-card pg-week" id="progress-statistics"><header><h2>@Tx("Current learning statistics", "Thống kê học tập hiện tại")</h2></header><div class="pg-mini"><span><i class="bi bi-check-circle"></i><b>@CompletedRoadmap</b><small>@Tx("completed lessons", "bài đã hoàn thành")</small></span><span><i class="bi bi-list-task"></i><b>@TotalRoadmap</b><small>@Tx("roadmap lessons", "bài trong lộ trình")</small></span><span><i class="bi bi-graph-up"></i><b>@Overall%</b><small>@Tx("average progress", "tiến độ trung bình")</small></span><span><i class="bi bi-activity"></i><b>@UpdatedThisWeek</b><small>@Tx("updated this week", "cập nhật tuần này")</small></span><span><i class="bi bi-stars"></i><b>@(user?.ExperiencePoints ?? 0)</b><small>XP</small></span></div>@if(progressLogs.Count==0){<p class="pg-no-data">@Tx("No progress has been recorded yet. Start a roadmap lesson to see statistics here.", "Chưa có tiến độ được ghi nhận. Hãy bắt đầu một bài trong lộ trình để xem thống kê tại đây.")</p>}else{<div class="skill-progress-grid">@foreach(var item in progressLogs){<article><div><strong>@item.SkillName</strong><b>@item.PercentComplete%</b></div><span><i style="width:@item.PercentComplete%"></i></span><small>@Tx("Updated", "Cập nhật") @item.UpdatedAt.ToString("dd/MM/yyyy")</small></article>}</div>}</section>
+            <section class="pg-card pg-week" id="progress-statistics"><header><h2>@Tx("Current learning statistics", "Thống kê học tập hiện tại")</h2></header><div class="pg-mini"><span><i class="bi bi-check-circle"></i><b>@CompletedActivities</b><small>@Tx("completed activities", "hoạt động đã xong")</small></span><span><i class="bi bi-list-task"></i><b>@TotalActivities</b><small>@Tx("roadmap activities", "hoạt động lộ trình")</small></span><span><i class="bi bi-graph-up"></i><b>@Overall%</b><small>@Tx("overall progress", "tiến độ tổng thể")</small></span><span><i class="bi bi-activity"></i><b>@CompletedThisWeek</b><small>@Tx("completed this week", "hoàn thành tuần này")</small></span><span><i class="bi bi-stars"></i><b>@(user?.ExperiencePoints ?? 0)</b><small>XP</small></span></div>@if(progressLogs.Count==0){<p class="pg-no-data">@Tx("No progress has been recorded yet. Start a roadmap lesson to see statistics here.", "Chưa có tiến độ được ghi nhận. Hãy bắt đầu một bài trong lộ trình để xem thống kê tại đây.")</p>}else{<div class="skill-progress-grid">@foreach(var item in progressLogs){<article><div><strong>@LocalizedSkillName(item.SkillName)</strong><b>@item.PercentComplete%</b></div><span><i style="width:@item.PercentComplete%"></i></span><small>@Tx("Updated", "Cập nhật") @item.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy")</small></article>}</div>}</section>
 
-            <section class="pg-card pg-badges" id="progress-achievements"><header><h2>@Tx("Earned achievements", "Thành tích đã đạt")</h2></header><div>@if(CompletedRoadmap>=1){<article><i>⭐</i><b>@Tx("First Step", "Bước đầu tiên")</b><p>@Tx("Completed the first lesson", "Hoàn thành bài học đầu tiên")</p></article>}@if(CompletedRoadmap>=5){<article><i>🎧</i><b>@Tx("Committed Learner", "Người học chăm chỉ")</b><p>@Tx("Completed 5 lessons", "Hoàn thành 5 bài học")</p></article>}@if(Overall>=80){<article><i>🏆</i><b>@Tx("Progress Master", "Bậc thầy tiến độ")</b><p>@Tx("Reached 80% overall progress", "Đạt 80% tiến độ tổng thể")</p></article>}@if((user?.ExperiencePoints??0)>=1000){<article><i>🪶</i><b>XP 1000</b><p>@Tx("Earned 1,000 experience points", "Đạt 1.000 điểm kinh nghiệm")</p></article>}@if(CompletedRoadmap==0&&Overall<80&&(user?.ExperiencePoints??0)<1000){<p class="pg-no-data">@Tx("Complete lessons to unlock achievements.", "Hoàn thành bài học để mở khóa thành tích.")</p>}</div></section>
+            <section class="pg-card pg-badges" id="progress-achievements"><header><h2>@Tx("Earned achievements", "Thành tích đã đạt")</h2></header><div>@if(CompletedActivities>=1){<article><i>⭐</i><b>@Tx("First Step", "Bước đầu tiên")</b><p>@Tx("Completed the first activity", "Hoàn thành hoạt động đầu tiên")</p></article>}@if(CompletedActivities>=5){<article><i>🎧</i><b>@Tx("Committed Learner", "Người học chăm chỉ")</b><p>@Tx("Completed 5 activities", "Hoàn thành 5 hoạt động")</p></article>}@if(Overall>=80){<article><i>🏆</i><b>@Tx("Progress Master", "Bậc thầy tiến độ")</b><p>@Tx("Reached 80% overall progress", "Đạt 80% tiến độ tổng thể")</p></article>}@if((user?.ExperiencePoints??0)>=1000){<article><i>🪶</i><b>XP 1000</b><p>@Tx("Earned 1,000 experience points", "Đạt 1.000 điểm kinh nghiệm")</p></article>}@if(CompletedActivities==0&&Overall<80&&(user?.ExperiencePoints??0)<1000){<p class="pg-no-data">@Tx("Complete activities to unlock achievements.", "Hoàn thành hoạt động để mở khóa thành tích.")</p>}</div></section>
         </div>
     </main>
 </div>
 
 @code{
  [Parameter]public int UserId{get;set;} [Inject]AuthenticationStateProvider AuthProvider{get;set;}=default!; private UserDto? user;private List<ProgressDto> progressLogs=[];private List<RoadmapItemDto> roadmapItems=[];private int selectedTrack;
- private int TotalRoadmap=>Tracks.Sum(x=>x.Modules.Count);private int CompletedRoadmap=>Tracks.Sum(EstimatedCompleted);private int Overall=>progressLogs.Count>0?(int)progressLogs.Average(x=>x.PercentComplete):(roadmapItems.Count==0?0:roadmapItems.Count(x=>x.IsCompleted)*100/roadmapItems.Count);private LearningTrack CurrentTrack=>Tracks[selectedTrack];
- private int ActiveDays=>progressLogs.Select(x=>x.UpdatedAt.Date).Distinct().Count();
- private int UpdatedThisWeek=>progressLogs.Count(x=>x.UpdatedAt>=DateTime.Today.AddDays(-6));
+ private int TotalActivities=>roadmapItems.Count*6;private int CompletedActivities=>roadmapItems.Sum(CompletedStepCount);private int Overall=>TotalActivities==0?0:CompletedActivities*100/TotalActivities;private LearningTrack CurrentTrack=>Tracks[selectedTrack];
+ private IEnumerable<DateTime> ActivityDates=>roadmapItems.SelectMany(ActivityTimestamps).Select(x=>x.ToLocalTime());
+ private int ActiveDays=>ConsecutiveActiveDays(ActivityDates.Select(x=>x.Date));
+ private int CompletedThisWeek=>ActivityDates.Count(x=>x.Date>=DateTime.Today.AddDays(-6));
+ private string StudyTimeThisWeek=>FormatMinutes(roadmapItems.Sum(x=>StepMinutesThisWeek(x,DateTime.Today.AddDays(-6))));
  private string DateRange=>$"{DateTime.Today.AddDays(-6):dd/MM/yyyy} - {DateTime.Today:dd/MM/yyyy}";
- private int ProgressAt(int index)=>index<progressLogs.Count?progressLogs[index].PercentComplete:0;
- private string SkillNameAt(int index)=>index<progressLogs.Count?progressLogs[index].SkillName:Tx("No data","Chưa có dữ liệu");
- private ProgressDto TopSkill=>progressLogs.OrderByDescending(x=>x.PercentComplete).First();
- private ProgressDto NeedsSkill=>progressLogs.OrderBy(x=>x.PercentComplete).First();
- private int TrackProgress(LearningTrack track){var keys=track.Keys;var matches=progressLogs.Where(x=>keys.Any(k=>x.SkillName.Contains(k,StringComparison.OrdinalIgnoreCase))).ToList();return matches.Count>0?(int)matches.Average(x=>x.PercentComplete):0;}
+ private int TrackProgress(LearningTrack track){var matches=roadmapItems.Where(x=>track.Keys.Any(k=>$"{x.SkillName} {x.Title}".Contains(k,StringComparison.OrdinalIgnoreCase))).ToList();var total=matches.Count*6;return total==0?0:matches.Sum(CompletedStepCount)*100/total;}
  private int EstimatedCompleted(LearningTrack track)=>(int)Math.Round(track.Modules.Count*TrackProgress(track)/100d);
  private string ModuleState(LearningTrack track,int index){var completed=EstimatedCompleted(track);return index<completed?"done":index==completed?"current":"locked";}
+ private static int CompletedStepCount(RoadmapItemDto item)=>(item.IsVideoCompleted||item.VideoCompletedAtUtc.HasValue?1:0)+(item.ScriptCompletedAtUtc.HasValue?1:0)+(item.SummaryCompletedAtUtc.HasValue?1:0)+(item.IsPracticeCompleted||item.PracticeCompletedAtUtc.HasValue?1:0)+(item.IsScenarioCompleted||item.ScenarioCompletedAtUtc.HasValue?1:0)+(item.IsReflectionCompleted||item.ReflectionCompletedAtUtc.HasValue?1:0);
+ private static IEnumerable<DateTime> ActivityTimestamps(RoadmapItemDto item)
+ {
+  if(item.VideoCompletedAtUtc is { } video)yield return video;
+  if(item.ScriptCompletedAtUtc is { } script)yield return script;
+  if(item.SummaryCompletedAtUtc is { } summary)yield return summary;
+  if(item.PracticeCompletedAtUtc is { } practice)yield return practice;
+  if(item.ScenarioCompletedAtUtc is { } scenario)yield return scenario;
+  if(item.ReflectionCompletedAtUtc is { } reflection)yield return reflection;
+ }
+ private static int ConsecutiveActiveDays(IEnumerable<DateTime> dates)
+ {
+  var days=dates.Distinct().OrderByDescending(x=>x).ToHashSet();
+  var cursor=days.Contains(DateTime.Today)?DateTime.Today:DateTime.Today.AddDays(-1);
+  var streak=0;
+  while(days.Contains(cursor)){streak++;cursor=cursor.AddDays(-1);}
+  return streak;
+ }
+ private static int StepMinutesThisWeek(RoadmapItemDto item,DateTime since)
+ {
+  var stamps=new[]{item.VideoCompletedAtUtc,item.ScriptCompletedAtUtc,item.SummaryCompletedAtUtc,item.PracticeCompletedAtUtc,item.ScenarioCompletedAtUtc,item.ReflectionCompletedAtUtc};
+  var minutes=new[]{9,9,5,4,10,5};
+  return stamps.Select((stamp,index)=>(stamp,index)).Where(x=>x.stamp.HasValue&&x.stamp.Value.ToLocalTime().Date>=since).Sum(x=>minutes[x.index]);
+ }
+ private string FormatMinutes(int minutes)=>minutes>=60?$"{minutes/60}h {minutes%60:D2}m":$"{minutes} min";
+ private string LocalizedSkillName(string name)
+ {
+  if(L.Current==AppLanguage.Vi)return name.Replace("Time Management","Quản lý thời gian",StringComparison.OrdinalIgnoreCase).Replace("Critical Thinking","Tư duy phản biện",StringComparison.OrdinalIgnoreCase).Replace("Communication","Giao tiếp",StringComparison.OrdinalIgnoreCase);
+  return name.Replace("Quản lý thời gian","Time Management",StringComparison.OrdinalIgnoreCase).Replace("Tư duy phản biện","Critical Thinking",StringComparison.OrdinalIgnoreCase).Replace("Giao tiếp","Communication",StringComparison.OrdinalIgnoreCase);
+ }
  private string TrackName(LearningTrack x)=>Tx(x.NameEn,x.NameVi);private string TrackSummary(LearningTrack x)=>Tx(x.SummaryEn,x.SummaryVi);private string ModuleName(LearningModule x)=>Tx(x.NameEn,x.NameVi);private string ModuleType(string type)=>type switch{"Video"=>"Video","Quiz"=>"Quiz","Lesson"=>Tx("Lesson","Bài học"),_=>Tx("Game","Trò chơi")};
  protected override async Task OnInitializedAsync(){if(UserId==0)UserId=await AuthProvider.GetUserIdAsync();if(UserId>0)user=await UserService.GetUserByIdAsync(UserId);progressLogs=(await ProgressService.GetUserProgressAsync(UserId)).ToList();roadmapItems=(await RoadmapService.GetUserRoadmapAsync(UserId)).Items.OrderBy(x=>x.WeekNumber).ToList();}
  private void ScrollToStatistics()=>Nav.NavigateTo("/progress#progress-statistics");
