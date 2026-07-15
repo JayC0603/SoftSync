@@ -109,12 +109,24 @@
         isTyping = true;
         StateHasChanged();
 
-        // Simulate AI response delay
-        await Task.Delay(1000);
-        var viReply = await AssistantService.GetReplyAsync("[vi]" + userMsg, UserId);
-        var enReply = await AssistantService.GetReplyAsync("[en]" + userMsg, UserId);
-        messages.Add(new AssistantMessage { ViContent = viReply, EnContent = enReply });
-        isTyping = false;
+        try
+        {
+            var viReply = await AssistantService.GetReplyAsync("[vi]" + userMsg, UserId);
+            var enReply = await AssistantService.GetReplyAsync("[en]" + userMsg, UserId);
+            messages.Add(new AssistantMessage { ViContent = viReply, EnContent = enReply });
+        }
+        catch
+        {
+            messages.Add(new AssistantMessage
+            {
+                ViContent = "SYNCY chưa thể kết nối với AI. Vui lòng thử lại sau.",
+                EnContent = "SYNCY could not connect to AI. Please try again later."
+            });
+        }
+        finally
+        {
+            isTyping = false;
+        }
     }
 
     private async Task HandleKeyUp(KeyboardEventArgs e)

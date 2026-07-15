@@ -14,6 +14,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
     private readonly IProgressService progressService;
     private readonly KnowledgeBasedAiAssistantService fallback;
     private readonly PdfDocumentKnowledge pdfKnowledge;
+    private readonly ILogger<LlmAiAssistantService> logger;
     private readonly Dictionary<string, BilingualReply> requestCache = new(StringComparer.Ordinal);
 
     public LlmAiAssistantService(
@@ -22,7 +23,8 @@ public sealed class LlmAiAssistantService : IAiAssistantService
         AssistantKnowledgeBase knowledge,
         IProgressService progressService,
         KnowledgeBasedAiAssistantService fallback,
-        PdfDocumentKnowledge pdfKnowledge)
+        PdfDocumentKnowledge pdfKnowledge,
+        ILogger<LlmAiAssistantService> logger)
     {
         this.clients = clients;
         this.configuration = configuration;
@@ -30,6 +32,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
         this.progressService = progressService;
         this.fallback = fallback;
         this.pdfKnowledge = pdfKnowledge;
+        this.logger = logger;
     }
 
     public async Task<string> GetReplyAsync(string userMessage, int userId)
@@ -52,7 +55,11 @@ public sealed class LlmAiAssistantService : IAiAssistantService
     {
         var apiKey = configuration["AiApi:ApiKey"];
         var enabled = configuration.GetValue("AiApi:Enabled", false);
-        if (!enabled || string.IsNullOrWhiteSpace(apiKey)) return await FallbackAsync(message, userId);
+        if (!enabled || string.IsNullOrWhiteSpace(apiKey))
+        {
+            logger.LogWarning("AI Assistant is using fallback. Enabled={Enabled}, ApiKeyConfigured={ApiKeyConfigured}", enabled, !string.IsNullOrWhiteSpace(apiKey));
+            return await FallbackAsync(message, userId);
+        }
 
         try
         {
@@ -87,16 +94,25 @@ public sealed class LlmAiAssistantService : IAiAssistantService
             var client = clients.CreateClient("AiApi");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             using var response = await client.PostAsJsonAsync("v1/chat/completions", request);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("Hugging Face request failed with HTTP {StatusCode} for model {Model}", (int)response.StatusCode, request.model);
+                return await FallbackAsync(message, userId);
+            }
             using var payload = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
             var content = payload.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
             var modelReply = JsonSerializer.Deserialize<BilingualReply>(content ?? "", new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (modelReply is null || string.IsNullOrWhiteSpace(modelReply.AnswerVi) || string.IsNullOrWhiteSpace(modelReply.AnswerEn))
+            {
+                logger.LogError("Hugging Face returned an invalid structured response for model {Model}", request.model);
                 return await FallbackAsync(message, userId);
+            }
+            logger.LogInformation("AI Assistant received a Hugging Face response from model {Model}", request.model);
             return AppendRoute(modelReply, userId);
         }
-        catch (Exception ex) when (ex is HttpRequestException or JsonException or TaskCanceledException)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "AI Assistant request failed; using the local knowledge fallback");
             return await FallbackAsync(message, userId);
         }
     }
