@@ -672,17 +672,48 @@ public class RoadmapService : IRoadmapService
         if (RoadmapReviewMode.Enabled)
             return true;
 
+        // Use the same personalized, de-duplicated catalog and skill ordering as
+        // the learner-facing Roadmap. Raw WeekNumber order can contain legacy or
+        // review-mode rows that aren't visible in the UI, causing the visible
+        // active week to be rejected when it tries to save progress.
+        var focusSkills = await GetFocusSkillNamesAsync(item.UserId);
+        var personalizedCatalog = await _aiService.GenerateRoadmapAsync(item.UserId, focusSkills);
+        var allowedTitles = personalizedCatalog.Items
+            .Select(x => x.Title)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var orderedItems = (await _roadmapRepo.GetByUserIdAsync(item.UserId))
+            .Where(x => allowedTitles.Contains(x.Title))
             .OrderBy(x => x.WeekNumber)
             .ThenBy(x => x.Id)
             .GroupBy(x => x.Title.Trim(), StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
-        var index = orderedItems.FindIndex(x => x.Id == item.Id);
+
+        if (orderedItems.Any(x => CommunicationCatalogTitles.Contains(x.Title.Trim())))
+            orderedItems = orderedItems
+                .Where(x => !IsCommunicationTitle(x.Title) || CommunicationCatalogTitles.Contains(x.Title.Trim()))
+                .ToList();
+
+        orderedItems = orderedItems
+            .OrderBy(x => RoadmapSkillRank(ResolveRoadmapSkillName(x.Title)))
+            .ThenBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
+
+        var activeItem = orderedItems.FirstOrDefault(x => !x.IsCompleted);
         // A completed week must always remain reviewable, even when old/imported
         // roadmap data has an inconsistent previous-week completion flag.
-        return item.IsCompleted || index == 0 || index > 0 && orderedItems[index - 1].IsCompleted;
+        return item.IsCompleted || activeItem?.Id == item.Id;
     }
+
+    private static int RoadmapSkillRank(string skillName) => skillName switch
+    {
+        "Giao tiếp" => 0,
+        "Quản lý thời gian" => 1,
+        "Tư duy phản biện" => 2,
+        _ => 3
+    };
 
     private async Task<bool> PersistActivityAsync(RoadmapItem item, bool activityChanged)
     {
