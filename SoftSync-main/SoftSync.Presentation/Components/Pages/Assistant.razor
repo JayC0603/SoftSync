@@ -7,6 +7,7 @@
 @inject IAiAssistantService AssistantService
 @inject IChatHistoryService ChatHistoryService
 @inject NavigationManager Nav
+@inject ILogger<Assistant> Logger
 
 <div class="assistant-layout">
     <aside class="assistant-side">
@@ -103,7 +104,7 @@
             if (history.Count > 0)
                 messages = history.Select(x => new AssistantMessage { Sender = x.Sender, ViContent = x.ViContent, EnContent = x.EnContent }).ToList();
         }
-        catch { }
+        catch (Exception ex) { Logger.LogError(ex, "Failed to load AI chat history for user {UserId}", UserId); }
     }
 
     private async Task SendMessage()
@@ -149,7 +150,7 @@
     private async Task TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender sender, string viContent, string enContent)
     {
         try { await ChatHistoryService.SaveAsync(UserId, sender, viContent, enContent); }
-        catch { }
+        catch (Exception ex) { Logger.LogError(ex, "Failed to save AI chat history for user {UserId} with sender {Sender}", UserId, sender); }
     }
 
     private void HandleAction(ChatAction action)

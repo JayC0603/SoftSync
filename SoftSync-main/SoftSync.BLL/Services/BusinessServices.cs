@@ -802,16 +802,32 @@ public class ChatHistoryService : IChatHistoryService
     public async Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId)
     {
         if (userId <= 0) return [];
-        var messages = await _repository.GetByUserIdAsync(userId);
-        return messages.Select(ToDto).ToList();
+        try
+        {
+            var messages = await _repository.GetByUserIdAsync(userId);
+            var history = messages.Select(ToDto).ToList();
+            return history;
+        }
+        catch
+        {
+            throw;
+        }
     }
 
     public async Task SaveAsync(int userId, ChatSender sender, string viContent, string enContent)
     {
         if (userId <= 0 || string.IsNullOrWhiteSpace(viContent) && string.IsNullOrWhiteSpace(enContent)) return;
-        var payload = JsonSerializer.Serialize(new StoredChatContent(viContent, enContent));
-        await _repository.AddAsync(new ChatMessage { UserId = userId, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
-        await _repository.SaveChangesAsync();
+        try
+        {
+            var payload = JsonSerializer.Serialize(new StoredChatContent(viContent, enContent));
+            await _repository.AddAsync(new ChatMessage { UserId = userId, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
+            var saved = await _repository.SaveChangesAsync();
+            if (!saved) throw new InvalidOperationException("The chat message insert did not affect any row.");
+        }
+        catch
+        {
+            throw;
+        }
     }
 
     private static ChatHistoryMessageDto ToDto(ChatMessage message)
