@@ -28,7 +28,7 @@
         <div class="lesson-shell">
             <header class="lesson-top">
                 <button @onclick="Back"><i class="bi bi-arrow-left"></i>Roadmap</button>
-                <div><small>@(isTimeManagementLessonOne ? Tx("TIME MANAGEMENT · WEEK 1", "QUẢN LÝ THỜI GIAN · TUẦN 1") : Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}"))</small><h1>@LessonTitle</h1></div>
+                <div><small>@(IsTimeManagementLesson ? Tx($"TIME MANAGEMENT · WEEK {timeManagementLessonNumber}", $"QUẢN LÝ THỜI GIAN · TUẦN {timeManagementLessonNumber}") : Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}"))</small><h1>@LessonTitle</h1></div>
                 @if (item!.IsCompleted)
                 {
                     <span class="week-complete"><i class="bi bi-check-circle-fill"></i>@Tx("Week completed", "Đã hoàn thành tuần")</span>
@@ -90,6 +90,25 @@
                                 <h3>5. Linh hoạt và kiên trì</h3><p>Kế hoạch không nên cứng nhắc. Hãy đặt hạn chót thực tế, chừa khoảng dự phòng và điều chỉnh khi có tình huống bất ngờ. Quản lý thời gian là một cuộc chạy marathon giúp học tốt hơn, giảm căng thẳng và chuẩn bị cho sự nghiệp.</p>
                             }
                         }
+                        else if (timeManagementLessonNumber == 2)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Prevent a negative Domino effect</h3><p>A small delay can trigger a chain of problems: postponing an assignment leads to staying up late, fatigue, and poor performance the next morning. Correct prioritization stops this spiral before it grows.</p>
+                                <h3>2. Manage a heavy workload</h3><p>University study requires strong independence, often including at least two hours of self-study for every classroom hour. Ordering work by value and need prevents overload and protects the quality of your work.</p>
+                                <h3>3. Protect important goals</h3><p>Every task contributes to larger outcomes such as strong grades, graduation, and career readiness. A sensible order ensures that time goes to work that creates meaningful results instead of low-value distractions.</p>
+                                <h3>4. Reduce stress and anxiety</h3><p>Procrastination and disorganization create guilt and panic. A clear plan helps you focus on the most important work and respond calmly when something unexpected appears.</p>
+                                <h3>Core prioritization methods</h3><ul><li><b>Understand requirements:</b> Estimate the time and resources a task truly needs.</li><li><b>Eisenhower Matrix:</b> Classify work by importance and urgency.</li><li><b>Eat the Frog:</b> Complete the hardest or most unpleasant important task early.</li><li><b>Daily Top Three:</b> Select the three most important outcomes for the day.</li></ul><p class="conclusion">Prioritization is the art of managing yourself, not the clock. A thoughtful plan creates room for study, rest, relationships, and personal interests.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Tránh “hiệu ứng Domino” tiêu cực</h3><p>Một trì hoãn nhỏ có thể kéo theo chuỗi vấn đề: thức khuya làm bài, mệt mỏi và làm bài kiểm tra sáng hôm sau không tốt. Ưu tiên đúng giúp chặn vòng xoáy này trước khi mất kiểm soát.</p>
+                                <h3>2. Quản lý khối lượng công việc lớn</h3><p>Học đại học đòi hỏi tính tự chủ cao, thường cần ít nhất hai giờ tự học cho mỗi giờ trên lớp. Sắp xếp theo giá trị và nhu cầu giúp tránh choáng ngợp và duy trì chất lượng công việc.</p>
+                                <h3>3. Bảo đảm đạt mục tiêu quan trọng</h3><p>Mỗi nhiệm vụ là một bước hướng tới điểm số, tốt nghiệp và sự nghiệp. Sắp xếp hợp lý giúp thời gian được đầu tư vào những việc tạo ra kết quả thay vì các hoạt động ít giá trị.</p>
+                                <h3>4. Giảm căng thẳng và lo âu</h3><p>Trì hoãn và thiếu tổ chức tạo ra cảm giác tội lỗi, hoảng loạn. Một kế hoạch rõ ràng giúp bạn tập trung vào việc quan trọng và bình tĩnh xử lý tình huống phát sinh.</p>
+                                <h3>Các phương pháp ưu tiên cốt lõi</h3><ul><li><b>Hiểu rõ yêu cầu:</b> Xác định đúng thời gian và nguồn lực cần thiết.</li><li><b>Ma trận Eisenhower:</b> Phân loại theo mức độ quan trọng và khẩn cấp.</li><li><b>Ăn con ếch:</b> Giải quyết nhiệm vụ quan trọng khó nhất từ sớm.</li><li><b>Top 3 mỗi ngày:</b> Chọn ba kết quả quan trọng nhất cần hoàn thành.</li></ul><p class="conclusion">Ưu tiên là nghệ thuật quản lý bản thân thay vì quản lý đồng hồ. Kế hoạch hợp lý tạo thêm không gian cho học tập, nghỉ ngơi, quan hệ và sở thích cá nhân.</p>
+                            }
+                        }
                         else if (communicationLessonNumber == 2)
                         {
                             @if (!IsVi)
@@ -137,6 +156,10 @@
                     @if (isTimeManagementLessonOne)
                     {
                         <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Time management summary", "Tóm tắt kỹ năng quản lý thời gian")</h2><div class="summary-grid"><div><b>@Tx("Manage yourself", "Quản lý bản thân")</b><p>@Tx("Take responsibility for your schedule and measure how long work actually takes.", "Chủ động chịu trách nhiệm với lịch trình và đo thời gian thực tế của công việc.")</p></div><div><b>@Tx("Prioritize with purpose", "Ưu tiên có mục đích")</b><p>@Tx("Use importance, urgency, and SMART goals to decide what deserves attention.", "Dùng mức độ quan trọng, khẩn cấp và mục tiêu SMART để chọn đúng việc cần tập trung.")</p></div><div><b>@Tx("Adjust consistently", "Điều chỉnh bền bỉ")</b><p>@Tx("Work during your best hours, reduce distractions, and adapt when plans change.", "Làm việc vào giờ hiệu quả nhất, giảm xao nhãng và linh hoạt khi kế hoạch thay đổi.")</p></div></div></article>
+                    }
+                    else if (timeManagementLessonNumber == 2)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Prioritization summary", "Tóm tắt sắp xếp và ưu tiên công việc")</h2><div class="summary-grid"><div><b>@Tx("Stop the Domino effect", "Chặn hiệu ứng Domino")</b><p>@Tx("Handle high-value work before delays create fatigue, stress, and missed goals.", "Xử lý việc có giá trị trước khi trì hoãn gây mệt mỏi, căng thẳng và lỡ mục tiêu.")</p></div><div><b>@Tx("Focus on meaningful results", "Tập trung vào kết quả quan trọng")</b><p>@Tx("Order tasks by importance and urgency so your time supports academic and career goals.", "Sắp xếp theo mức độ quan trọng và khẩn cấp để thời gian phục vụ mục tiêu học tập và nghề nghiệp.")</p></div><div><b>@Tx("Use practical methods", "Dùng phương pháp thực tế")</b><p>@Tx("Apply the Eisenhower Matrix, Eat the Frog, and Daily Top Three to build a calm, realistic plan.", "Áp dụng Ma trận Eisenhower, Ăn con ếch và Top 3 mỗi ngày để lập kế hoạch bình tĩnh, thực tế.")</p></div></div></article>
                     }
                     else if (communicationLessonNumber == 2)
                     {
@@ -274,9 +297,13 @@
     private bool isSupportedCommunicationLesson;
     private bool isTimeManagementLessonOne;
     private int communicationLessonNumber;
-    private string VideoSource => isTimeManagementLessonOne ? "/videos/time-management-mentor-lesson-1.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
-    private string LessonTitle => isTimeManagementLessonOne
+    private int timeManagementLessonNumber;
+    private bool IsTimeManagementLesson => timeManagementLessonNumber > 0;
+    private string VideoSource => IsTimeManagementLesson ? $"/videos/time-management-mentor-lesson-{timeManagementLessonNumber}.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
+    private string LessonTitle => timeManagementLessonNumber == 1
         ? Tx("Introduction to Time Management Skills", "Giới thiệu về kỹ năng quản lý thời gian")
+        : timeManagementLessonNumber == 2
+        ? Tx("Organizing and Prioritizing Important Work", "Sắp xếp và ưu tiên những công việc quan trọng")
         : communicationLessonNumber == 2
         ? Tx("Active Listening: A Foundation of Communication", "Kỹ năng lắng nghe - nền tảng của giao tiếp")
         : Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp");
@@ -340,8 +367,9 @@
             var communication = roadmap.Items.Where(IsCommunication).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
             communicationLessonNumber = communication.FindIndex(x => x.Id == item.Id) + 1;
             var timeManagement = roadmap.Items.Where(IsTimeManagement).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-            isTimeManagementLessonOne = timeManagement.FindIndex(x => x.Id == item.Id) == 0;
-            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2 || isTimeManagementLessonOne;
+            timeManagementLessonNumber = timeManagement.FindIndex(x => x.Id == item.Id) + 1;
+            isTimeManagementLessonOne = timeManagementLessonNumber == 1;
+            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2 || timeManagementLessonNumber is 1 or 2;
             currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
@@ -401,7 +429,7 @@
     private string Tx(string en, string vi) => IsVi ? vi : en;
     private void StartQuiz()
     {
-        var questionBank = isTimeManagementLessonOne
+        var questionBank = IsTimeManagementLesson
             ? TimeManagementQuizBank.Questions
             : communicationLessonNumber == 2
                 ? ActiveListeningQuizBank.Questions
