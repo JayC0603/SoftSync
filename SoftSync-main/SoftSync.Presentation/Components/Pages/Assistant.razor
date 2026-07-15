@@ -13,6 +13,16 @@
     <aside class="assistant-side">
         <div class="assistant-side-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong></div>
         <button class="new-chat" @onclick="NewChat"><i class="bi bi-plus-lg"></i> @L["assistant.newChat"]</button>
+        @if (RecentUserMessages.Count > 0)
+        {
+            <span class="side-label">@(L.Current == SoftSync.Presentation.Services.AppLanguage.Vi ? "LỊCH SỬ GẦN ĐÂY" : "RECENT HISTORY")</span>
+            <nav class="chat-history-list">
+                @foreach (var historyMessage in RecentUserMessages)
+                {
+                    <a href="#chat-@historyMessage.ClientKey" title="@historyMessage.ViContent"><i class="bi bi-chat-left-text"></i><span>@HistoryTitle(historyMessage)</span></a>
+                }
+            </nav>
+        }
         <span class="side-label">@L["assistant.suggested"]</span>
         <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-book"></i> @L["assistant.exploreLessons"]</button>
         <button @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-graph-up-arrow"></i> @L["assistant.trackProgress"]</button>
@@ -29,7 +39,7 @@
     <div class="assistant-chat-card overflow-auto">
         @foreach (var msg in messages)
         {
-            <div class="chat-bubble @(msg.Sender == SoftSync.Common.Enums.ChatSender.User ? "chat-user" : "chat-assistant")">
+            <div id="chat-@msg.ClientKey" class="chat-bubble @(msg.Sender == SoftSync.Common.Enums.ChatSender.User ? "chat-user" : "chat-assistant")">
                 <div class="chat-content">@(msg.ContentKey is not null ? L[msg.ContentKey] : (L.Current == SoftSync.Presentation.Services.AppLanguage.Vi ? msg.ViContent : msg.EnContent))</div>
                 @if (msg.Actions.Count > 0)
                 {
@@ -73,6 +83,7 @@
     [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
     private string userInput = "";
     private bool isTyping = false;
+    private List<AssistantMessage> RecentUserMessages => messages.Where(x => x.Sender == SoftSync.Common.Enums.ChatSender.User).TakeLast(12).Reverse().ToList();
     private List<AssistantMessage> messages = new()
     {
         new AssistantMessage
@@ -93,6 +104,13 @@
         "practice" => L["assistant.prompt.practiceText"],
         _ => L["assistant.prompt.adviceText"]
     };
+
+    private string HistoryTitle(AssistantMessage message)
+    {
+        var value = L.Current == SoftSync.Presentation.Services.AppLanguage.Vi ? message.ViContent : message.EnContent;
+        value = value.Trim();
+        return value.Length <= 34 ? value : value[..34] + "…";
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -178,7 +196,7 @@
     }
 
     private void AddBot(string content, params ChatAction[] actions) => messages.Add(new() { EnContent = content, ViContent = content, Actions = actions.ToList() });
-    private sealed class AssistantMessage { public SoftSync.Common.Enums.ChatSender Sender { get; set; } = SoftSync.Common.Enums.ChatSender.Assistant; public string? ContentKey { get; set; } public string EnContent { get; set; } = ""; public string ViContent { get; set; } = ""; public List<ChatAction> Actions { get; set; } = []; }
+    private sealed class AssistantMessage { public string ClientKey { get; } = Guid.NewGuid().ToString("N"); public SoftSync.Common.Enums.ChatSender Sender { get; set; } = SoftSync.Common.Enums.ChatSender.Assistant; public string? ContentKey { get; set; } public string EnContent { get; set; } = ""; public string ViContent { get; set; } = ""; public List<ChatAction> Actions { get; set; } = []; }
     private sealed record ChatAction(string Label, string Key);
 }
 
@@ -281,6 +299,7 @@
     /* Premium assistant workspace */
     .assistant-layout{display:grid;grid-template-columns:230px minmax(0,1fr);max-width:1420px;min-height:calc(100vh - 125px);margin:0 auto;border:1px solid rgba(255,255,255,.55);border-radius:28px;overflow:hidden;background:rgba(248,247,255,.94);box-shadow:0 24px 70px rgba(49,46,129,.2)}
     .assistant-side{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem;background:linear-gradient(165deg,#17133f,#282063);color:#ddd6fe}.assistant-side-brand{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;color:#fff;font-size:1.15rem}.assistant-side-brand img{width:42px;height:42px;border-radius:12px}.assistant-side>button{display:flex;align-items:center;gap:.7rem;width:100%;padding:.75rem;border:0;border-radius:12px;background:transparent;color:#c4b5fd;text-align:left;font-size:.82rem}.assistant-side>button:hover{color:#fff;background:rgba(124,92,252,.18)}.assistant-side .new-chat{justify-content:center;margin-bottom:1.2rem;padding:.85rem;color:#fff;background:linear-gradient(135deg,#7c5cfc,#5b21f4);font-weight:800}.side-label{margin:.6rem 0 .25rem;color:#8b7ccc;font-size:.68rem;font-weight:900;letter-spacing:.12em}.side-mascot{margin-top:auto;text-align:center}.side-mascot img{width:115px;height:115px;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(124,92,252,.4))}.side-mascot p{margin:0;color:#b8afe8;font-size:.72rem;line-height:1.5}
+    .chat-history-list{display:grid;gap:.25rem;max-height:230px;overflow:auto}.chat-history-list a{display:flex;align-items:center;gap:.6rem;padding:.62rem .7rem;color:#c4b5fd;border-radius:10px;text-decoration:none;font-size:.76rem}.chat-history-list a:hover{color:#fff;background:rgba(124,92,252,.2)}.chat-history-list span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .assistant-shell{min-width:0;padding:2rem 3rem;background:radial-gradient(circle at 85% 15%,rgba(216,207,255,.8),transparent 30%),linear-gradient(145deg,rgba(255,255,255,.96),rgba(244,241,255,.92))}.assistant-hero{display:flex;align-items:center;justify-content:space-between;min-height:170px}.assistant-hero>div>span{color:#6d4aff;font-size:1.7rem}.assistant-hero p{display:inline;margin-left:.6rem;color:#334155;font-weight:700}.assistant-hero h1{margin:.35rem 0;color:#111827;font-size:2rem;font-weight:850}.assistant-hero h1 b{color:#6d4aff}.assistant-hero small{color:#64748b;font-size:.95rem}.assistant-hero>img{width:190px;height:170px;object-fit:contain;filter:drop-shadow(0 18px 28px rgba(109,74,255,.25))}
     .assistant-chat-card{display:flex;flex-direction:column;min-height:190px;max-height:330px;margin:.5rem 0 1rem;padding:1.35rem;border:1px solid #ebe7f6;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 10px 30px rgba(76,29,149,.07)}.assistant-chat-card .chat-assistant{max-width:70%;background:#fff!important;border:0;box-shadow:none;color:#1e293b!important}.assistant-input{display:flex;align-items:center;gap:.75rem;padding:.55rem .65rem .55rem 1.25rem;border:1px solid #e4def7;border-radius:999px;background:#fff;box-shadow:0 10px 28px rgba(76,29,149,.1)}.assistant-input input{flex:1;min-width:0;padding:.65rem 0;border:0;outline:0;background:transparent;color:#1e293b}.assistant-input>i{color:#475569}.assistant-input button{display:grid;place-items:center;width:46px;height:46px;border:0;border-radius:50%;background:linear-gradient(135deg,#7c5cfc,#5b21f4);color:#fff}.assistant-input button:disabled{opacity:.45}
     .assistant-prompts{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.5rem}.assistant-prompts button{display:flex;align-items:flex-start;gap:.7rem;padding:1rem;border:1px solid #ebe7f6;border-radius:18px;background:#fff;color:#334155;text-align:left;box-shadow:0 8px 24px rgba(76,29,149,.06)}.assistant-prompts button:hover{transform:translateY(-2px);border-color:#c4b5fd}.assistant-prompts i{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#f0ebff;color:#6d4aff;font-size:1.1rem}.assistant-prompts b,.assistant-prompts small{display:block}.assistant-prompts b{color:#5b21b6;font-size:.82rem}.assistant-prompts small{margin-top:.25rem;color:#64748b;font-size:.68rem;line-height:1.35}
