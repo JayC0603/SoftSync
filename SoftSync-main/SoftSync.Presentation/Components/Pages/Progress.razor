@@ -1,6 +1,7 @@
 @page "/progress"
 @page "/progress/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @attribute [StreamRendering]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
