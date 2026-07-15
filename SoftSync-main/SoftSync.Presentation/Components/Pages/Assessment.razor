@@ -7,14 +7,15 @@
 @inject IAssessmentService AssessmentService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
+@inject IJSRuntime JS
 
 <div class="max-800 tw:mx-auto">
-    @if (questions is not null && questions.Count > 0)
+    @if (storageRestored && questions is not null && questions.Count > 0)
     {
         <StepIndicator CurrentStep="@(currentQuestionIndex + 1)" TotalSteps="@questions.Count" />
     }
 
-    @if (questions == null)
+    @if (questions == null || !storageRestored)
     {
         <div class="tw:text-center tw:py-12">
             <div class="spinner-border text-primary" role="status"></div>
@@ -57,14 +58,14 @@
                 @foreach (var opt in q.Options)
                 {
                     <button class="btn btn-outline-primary tw:text-start tw:p-6 tw:text-xl @(selectedOptionId == opt.Id ? "active" : "")"
-                            @onclick="() => SelectOption(opt.Id)">
+                            @onclick="() => SelectOptionAsync(opt.Id)">
                         @OptionLabel(opt)
                     </button>
                 }
             </div>
 
             <div class="tw:mt-12 tw:flex tw:justify-between tw:gap-4">
-                <button class="btn btn-outline-primary tw:px-8" @onclick="PreviousQuestion" disabled="@(currentQuestionIndex == 0)">
+                <button class="btn btn-outline-primary tw:px-8" @onclick="PreviousQuestionAsync" disabled="@(currentQuestionIndex == 0)">
                     <i class="bi bi-arrow-left tw:me-2"></i>@L["assessment.back"]
                 </button>
                 <button class="ss-btn-primary tw:px-12" @onclick="NextQuestion" disabled="@(selectedOptionId == 0)">
@@ -92,6 +93,7 @@
     private int currentQuestionIndex = 0;
     private int selectedOptionId = 0;
     private readonly Dictionary<int, int> answers = new();
+    private bool storageRestored;
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,10 +117,38 @@
         await LoadQuestionsAsync();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || questions is null)
+            return;
+
+        if (questions.Count == 0)
+        {
+            storageRestored = true;
+            StateHasChanged();
+            return;
+        }
+
+        var draft = await JS.InvokeAsync<AssessmentDraft?>("ssAssessment.get", UserId);
+        if (!TryRestoreDraft(draft))
+            await PersistDraftAsync();
+
+        storageRestored = true;
+        StateHasChanged();
+    }
+
     private async Task ReloadQuestionsAsync()
     {
         questions = null;
+        storageRestored = false;
         await LoadQuestionsAsync();
+        if (questions is { Count: > 0 })
+        {
+            var draft = await JS.InvokeAsync<AssessmentDraft?>("ssAssessment.get", UserId);
+            if (!TryRestoreDraft(draft))
+                await PersistDraftAsync();
+        }
+        storageRestored = true;
     }
 
     private async Task LoadQuestionsAsync()
@@ -148,6 +178,55 @@
         questions = skillGroups.SelectMany(group => group).ToList();
     }
 
+    private bool TryRestoreDraft(AssessmentDraft? draft)
+    {
+        if (draft is null || questions is null ||
+            draft.QuestionIds.Count != questions.Count ||
+            draft.QuestionIds.ToHashSet().SetEquals(questions.Select(q => q.Id)) == false)
+            return false;
+
+        var questionLookup = questions.ToDictionary(q => q.Id);
+        questions = draft.QuestionIds.Select(id => questionLookup[id]).ToList();
+
+        foreach (var question in questions)
+        {
+            if (!draft.OptionIds.TryGetValue(question.Id, out var savedOptionIds) ||
+                savedOptionIds.Count != question.Options.Count ||
+                !savedOptionIds.ToHashSet().SetEquals(question.Options.Select(o => o.Id)))
+                continue;
+
+            var optionLookup = question.Options.ToDictionary(o => o.Id);
+            question.Options = savedOptionIds.Select(id => optionLookup[id]).ToList();
+        }
+
+        answers.Clear();
+        foreach (var answer in draft.Answers)
+        {
+            if (questionLookup.TryGetValue(answer.Key, out var question) &&
+                question.Options.Any(option => option.Id == answer.Value))
+                answers[answer.Key] = answer.Value;
+        }
+
+        currentQuestionIndex = Math.Clamp(draft.CurrentQuestionIndex, 0, questions.Count - 1);
+        RestoreCurrentAnswer();
+        return true;
+    }
+
+    private async Task PersistDraftAsync()
+    {
+        if (questions is null || questions.Count == 0)
+            return;
+
+        var draft = new AssessmentDraft
+        {
+            CurrentQuestionIndex = currentQuestionIndex,
+            QuestionIds = questions.Select(q => q.Id).ToList(),
+            OptionIds = questions.ToDictionary(q => q.Id, q => q.Options.Select(o => o.Id).ToList()),
+            Answers = new Dictionary<int, int>(answers)
+        };
+        await JS.InvokeVoidAsync("ssAssessment.set", UserId, draft);
+    }
+
     private static void Shuffle<T>(IList<T> items, Random rng)
     {
         for (var i = items.Count - 1; i > 0; i--)
@@ -161,6 +240,7 @@
     // string is missing. The page inherits LocalizedComponentBase, so a
     // mid-quiz language toggle re-renders and swaps these instantly.
     private bool IsVi => L.Current == SoftSync.Presentation.Services.AppLanguage.Vi;
+    private string Tx(string en, string vi) => IsVi ? vi : en;
 
     private string QuestionLabel(AssessmentQuestionDto q) =>
         IsVi && !string.IsNullOrWhiteSpace(q.QuestionTextVi) ? q.QuestionTextVi : q.QuestionText;
@@ -188,21 +268,27 @@
                 .Replace("{skill}", SkillLabel(previous), StringComparison.Ordinal);
         }
 
-        return positionInSkill switch
-        {
-            4 => L["assessment.milestone.oneThird"],
-            7 => L["assessment.milestone.twoThirds"],
-            8 => L["assessment.milestone.lastQuestion"],
-            _ => null
-        };
+        var totalInSkill = questions.Count(q => q.SkillId == current.SkillId);
+        var oneThird = (int)Math.Ceiling(totalInSkill / 3d);
+        var twoThirds = (int)Math.Ceiling(totalInSkill * 2d / 3d);
+
+        if (positionInSkill == totalInSkill)
+            return Tx($"Question {positionInSkill}/{totalInSkill} for this skill — you've got this!",
+                $"Câu {positionInSkill}/{totalInSkill} của kỹ năng này — cố lên nào!");
+        if (positionInSkill == oneThird || positionInSkill == twoThirds)
+            return Tx($"You are on question {positionInSkill}/{totalInSkill} for this skill. Keep going! 💪",
+                $"Bạn đang ở câu {positionInSkill}/{totalInSkill} của kỹ năng này, tiếp tục nhé! 💪");
+        return null;
     }
 
-    private void SelectOption(int id)
+    private async Task SelectOptionAsync(int id)
     {
         selectedOptionId = id;
+        SaveCurrentAnswer();
+        await PersistDraftAsync();
     }
 
-    private void PreviousQuestion()
+    private async Task PreviousQuestionAsync()
     {
         SaveCurrentAnswer();
         if (currentQuestionIndex == 0)
@@ -210,6 +296,7 @@
 
         currentQuestionIndex--;
         RestoreCurrentAnswer();
+        await PersistDraftAsync();
     }
 
     private void SaveCurrentAnswer()
@@ -234,6 +321,7 @@
         {
             currentQuestionIndex++;
             RestoreCurrentAnswer();
+            await PersistDraftAsync();
         }
         else
         {
@@ -242,8 +330,17 @@
                 .Select(answer => new UserAnswerDto { QuestionId = answer.Key, OptionId = answer.Value })
                 .ToList();
             await AssessmentService.SubmitAssessmentAsync(UserId, submittedAnswers);
+            await JS.InvokeVoidAsync("ssAssessment.clear", UserId);
             Nav.NavigateTo($"/assessment-result/{UserId}");
         }
+    }
+
+    private sealed class AssessmentDraft
+    {
+        public int CurrentQuestionIndex { get; set; }
+        public List<int> QuestionIds { get; set; } = [];
+        public Dictionary<int, List<int>> OptionIds { get; set; } = [];
+        public Dictionary<int, int> Answers { get; set; } = [];
     }
 }
 

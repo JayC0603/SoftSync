@@ -94,6 +94,27 @@ window.ssWizard = {
     }
 };
 
+// Keep an unfinished entrance assessment stable across refreshes. The draft is
+// scoped to the signed-in user and contains only question/option ids, never
+// question text or scores.
+window.ssAssessment = {
+    key(userId) { return `ss-assessment-${userId}`; },
+    get(userId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, state) {
+        try { localStorage.setItem(this.key(userId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId) {
+        try { localStorage.removeItem(this.key(userId)); }
+        catch { /* ignore */ }
+    }
+};
+
 // Submit a plain HTML form by id (used to POST the logout form after the
 // "Leave your learning journey?" modal is confirmed).
 window.ssSubmitForm = function (id) {
