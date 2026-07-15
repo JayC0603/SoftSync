@@ -44,14 +44,17 @@
             <div class="ss-feature-chip ss-chip-practice ss-glass ss-glass-interactive">
                 <i class="bi bi-controller"></i>
                 <div><strong>@L["home.orbit.practice.title"]</strong><span>@L["home.orbit.practice.desc"]</span></div>
+                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
             </div>
             <div class="ss-feature-chip ss-chip-assess ss-glass ss-glass-interactive">
                 <i class="bi bi-graph-up-arrow"></i>
                 <div><strong>@L["home.orbit.assess.title"]</strong><span>@L["home.orbit.assess.desc"]</span></div>
+                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
             </div>
             <div class="ss-feature-chip ss-chip-grow ss-glass ss-glass-interactive">
-                <i class="bi bi-leaf"></i>
+                <i class="bi bi-person-fill"></i>
                 <div><strong>@L["home.orbit.grow.title"]</strong><span>@L["home.orbit.grow.desc"]</span></div>
+                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
             </div>
         </div>
     </div>
@@ -436,6 +439,7 @@
         gap: clamp(2rem, 5vw, 5rem);
         max-width: 1360px;
         margin: 0 auto;
+        min-height: min(760px, calc(100vh - 120px));
     }
     .ss-hero-copy { max-width: 520px; }
     .ss-eyebrow {
@@ -496,7 +500,7 @@
     }
 
     .ss-orbit-stage {
-        min-height: 470px;
+        min-height: 590px;
         position: relative;
     }
     .ss-galaxy-core {
@@ -527,10 +531,10 @@
     .ss-orbit-two { inset: 22% 2% auto auto; width: min(38vw, 520px); opacity: 0.55; }
     .ss-ai-orb {
         position: absolute;
-        left: 8%;
-        top: 12%;
-        width: 200px;
-        height: 200px;
+        left: 18%;
+        top: 19%;
+        width: 310px;
+        height: 310px;
         border-radius: 999px;
         padding: 20px;
         background:
@@ -727,7 +731,7 @@
         display: flex;
         gap: 0.9rem;
         align-items: center;
-        width: 190px;
+        width: 255px;
         padding: 1rem;
         border: 1px solid var(--ss-home-border);
         border-radius: 14px;
@@ -746,10 +750,28 @@
     }
     .ss-feature-chip strong,
     .ss-feature-chip span { display: block; }
+    .ss-feature-chip > div { min-width: 0; flex: 1; }
     .ss-feature-chip span { color: var(--ss-home-soft); font-size: 0.9rem; }
-    .ss-chip-practice { right: 11%; top: 3%; }
-    .ss-chip-assess { right: 0; top: 43%; }
-    .ss-chip-grow { right: 28%; top: 66%; }
+    .ss-feature-chip .ss-chip-arrow {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 999px;
+        color: #6366f1;
+        background: rgba(255,255,255,.52);
+    }
+    .ss-feature-chip .ss-chip-arrow i {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        color: inherit;
+        background: transparent;
+        font-size: .95rem;
+    }
+    .ss-chip-practice { right: 7%; top: 3%; }
+    .ss-chip-assess { right: 0; top: 45%; }
+    .ss-chip-grow { right: 26%; top: 73%; }
     .ss-chip-assess i { background: linear-gradient(135deg, #38bdf8, #2563eb); }
     .ss-chip-grow i { background: linear-gradient(135deg, #34d399, #0f766e); }
     .ss-planet { position: absolute; border-radius: 999px; box-shadow: inset -14px -16px 24px rgba(2,6,23,0.34), 0 0 22px rgba(139,92,246,0.28); }
@@ -1038,6 +1060,7 @@
     @@media (max-width: 1024px) {
         .ss-hero-grid { grid-template-columns: 1fr; }
         .ss-orbit-stage { min-height: 520px; }
+        .ss-ai-orb { width: 240px; height: 240px; }
         .ss-mentor-grid { grid-template-columns: 1fr; }
         .ss-mentor-card { grid-template-columns: 130px 1fr; }
         .ss-main-mentor-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1155,6 +1178,7 @@
         }
         .ss-feature-chip strong { font-size: 0.88rem; line-height: 1.15; }
         .ss-feature-chip span { font-size: 0.73rem; line-height: 1.2; }
+        .ss-feature-chip .ss-chip-arrow { display: none; }
         .ss-chip-practice { left: 0; right: auto; top: 36px; }
         .ss-chip-practice::after { right: -8px; bottom: 7px; }
         .ss-chip-assess { left: auto; right: 0; top: 162px; }
