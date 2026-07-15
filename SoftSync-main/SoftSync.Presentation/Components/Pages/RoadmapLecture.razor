@@ -10,6 +10,7 @@
 @inject IRoadmapService RoadmapService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>@LessonTitle · SoftSync</PageTitle>
 
@@ -176,7 +177,7 @@
                     @if (quizFinished)
                     {
                         <section class="quiz-result">
-                            <i class="bi bi-award-fill"></i><small>@Tx("QUIZ RESULT", "KẾT QUẢ QUIZ")</small><h2>@quizScore / 50 · @QuizPercent%</h2><h3>@QuizLevel</h3><p>@QuizComment</p><button @onclick="StartQuiz">@Tx("Try another 5 questions", "Làm 5 câu khác")</button>
+                            <i class="bi bi-award-fill"></i><small>@Tx("QUIZ RESULT", "KẾT QUẢ QUIZ")</small><h2>@quizScore / 50 · @QuizPercent%</h2><h3>@QuizLevel</h3><p>@QuizComment</p><button @onclick="StartNewQuizAsync">@Tx("Try another 5 questions", "Làm 5 câu khác")</button>
                         </section>
                         <div class="actions"><button @onclick="() => OpenStep(3)"><i class="bi bi-arrow-left"></i>@Tx("Back: Summary", "Quay lại: Tóm tắt")</button>@if (quizPassed) { <button class="primary" @onclick="() => OpenStep(5)">@Tx("Next: Practice", "Tiếp theo: Thực hành")<i class="bi bi-arrow-right"></i></button> }</div>
                     }
@@ -197,7 +198,7 @@
                                             var original = display.original;
                                             var selected = selectedAnswers.GetValueOrDefault(question.Id, -1) == original;
                                             var points = PointsFor(question, original);
-                                            <button class="@(revealed && selected ? points == 10 ? "optimal" : points == 5 ? "neutral" : "negative" : null)" disabled="@revealed" @onclick="() => SelectAnswer(question, original)"><span>@("ABCD"[display.displayIndex])</span>@(IsVi ? question.OptionsVi[original] : question.OptionsEn[original])</button>
+                                            <button class="@(revealed && selected ? points == 10 ? "optimal" : points == 5 ? "neutral" : "negative" : null)" disabled="@revealed" @onclick="() => SelectAnswerAsync(question, original)"><span>@("ABCD"[display.displayIndex])</span>@(IsVi ? question.OptionsVi[original] : question.OptionsEn[original])</button>
                                         }
                                     </div>
                                     @if (revealed)
@@ -388,6 +389,18 @@
         loading = false;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || item is null || currentStep != 4 || quizFinished)
+            return;
+
+        var draft = await JS.InvokeAsync<RoadmapQuizDraft?>("ssRoadmapQuiz.get", UserId, ItemId);
+        if (TryRestoreQuizDraft(draft))
+            StateHasChanged();
+        else
+            await PersistQuizDraftAsync();
+    }
+
     private static bool IsCommunication(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("giao tiếp") || value.Contains("communication"); }
     private static bool IsTimeManagement(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("quản lý thời gian") || value.Contains("time management"); }
     private bool CanOpen(int step) => item is not null && (item.IsCompleted || step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
@@ -444,22 +457,93 @@
         quizQuestions = unseen.Take(5).ToList(); quizAnswers.Clear(); quizOptionOrders.Clear(); selectedAnswers.Clear(); revealedQuestions.Clear(); quizScore = 0; quizFinished = false; quizPassed = false; saveError = null;
         foreach (var question in quizQuestions) quizOptionOrders[question.Id] = Enumerable.Range(0, 4).OrderBy(_ => Random.Shared.Next()).ToArray();
     }
+
+    private async Task StartNewQuizAsync()
+    {
+        await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId);
+        StartQuiz();
+        await PersistQuizDraftAsync();
+    }
+
+    private bool TryRestoreQuizDraft(RoadmapQuizDraft? draft)
+    {
+        if (draft is null || draft.QuestionIds.Count != 5)
+            return false;
+
+        var bank = IsTimeManagementLesson
+            ? TimeManagementQuizBank.Questions
+            : communicationLessonNumber == 2
+                ? ActiveListeningQuizBank.Questions
+                : CommunicationQuizBank.Questions;
+        var lookup = bank.ToDictionary(question => question.Id);
+        if (draft.QuestionIds.Distinct().Count() != 5 || draft.QuestionIds.Any(id => !lookup.ContainsKey(id)))
+            return false;
+
+        foreach (var id in draft.QuestionIds)
+        {
+            if (!draft.OptionOrders.TryGetValue(id, out var order) || order.Length != 4 ||
+                !order.OrderBy(x => x).SequenceEqual([0, 1, 2, 3]))
+                return false;
+        }
+
+        quizQuestions = draft.QuestionIds.Select(id => lookup[id]).ToList();
+        quizOptionOrders.Clear();
+        selectedAnswers.Clear();
+        revealedQuestions.Clear();
+        quizAnswers.Clear();
+        foreach (var id in draft.QuestionIds)
+            quizOptionOrders[id] = draft.OptionOrders[id];
+        foreach (var answer in draft.SelectedAnswers)
+        {
+            if (!lookup.ContainsKey(answer.Key) || answer.Value is < 0 or > 3 || !draft.QuestionIds.Contains(answer.Key))
+                continue;
+            selectedAnswers[answer.Key] = answer.Value;
+            revealedQuestions.Add(answer.Key);
+            quizAnswers[answer.Key.ToString()] = "ABCD"[answer.Value].ToString();
+        }
+        quizScore = selectedAnswers.Sum(answer => PointsFor(lookup[answer.Key], answer.Value));
+        quizFinished = false;
+        quizPassed = false;
+        saveError = null;
+        return true;
+    }
+
+    private async Task PersistQuizDraftAsync()
+    {
+        if (quizQuestions.Count != 5 || quizFinished)
+            return;
+        var draft = new RoadmapQuizDraft
+        {
+            QuestionIds = quizQuestions.Select(question => question.Id).ToList(),
+            OptionOrders = quizOptionOrders.ToDictionary(entry => entry.Key, entry => entry.Value),
+            SelectedAnswers = new Dictionary<int, int>(selectedAnswers)
+        };
+        await JS.InvokeVoidAsync("ssRoadmapQuiz.set", UserId, ItemId, draft);
+    }
     private static int PointsFor(CommunicationQuizQuestion question, int option) => option == question.Optimal ? 10 : option == question.Neutral ? 5 : 0;
-    private void SelectAnswer(CommunicationQuizQuestion question, int originalOption)
+    private async Task SelectAnswerAsync(CommunicationQuizQuestion question, int originalOption)
     {
         if (revealedQuestions.Contains(question.Id)) return;
         selectedAnswers[question.Id] = originalOption;
         revealedQuestions.Add(question.Id);
         quizScore += PointsFor(question, originalOption);
         quizAnswers[question.Id.ToString()] = "ABCD"[originalOption].ToString();
+        await PersistQuizDraftAsync();
     }
     private async Task SubmitQuiz()
     {
         if (revealedQuestions.Count != 5) return;
         quizPassed = QuizPercent >= 56;
         var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed };
-        if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "scenario"; } quizFinished = true; }
+        if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "scenario"; } quizFinished = true; await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId); }
         else saveError = Tx("Could not save quiz result. Please try again.", "Không thể lưu kết quả Quiz. Hãy thử lại.");
+    }
+
+    private sealed class RoadmapQuizDraft
+    {
+        public List<int> QuestionIds { get; set; } = [];
+        public Dictionary<int, int[]> OptionOrders { get; set; } = [];
+        public Dictionary<int, int> SelectedAnswers { get; set; } = [];
     }
     private void StartRoleplay()
     {

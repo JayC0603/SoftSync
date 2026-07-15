@@ -115,6 +115,27 @@ window.ssAssessment = {
     }
 };
 
+// Preserve an in-progress roadmap mini quiz across refreshes. Submitted
+// attempts are still persisted by the server; this only keeps the unfinished
+// five-question attempt in the current browser.
+window.ssRoadmapQuiz = {
+    key(userId, itemId) { return `ss-roadmap-quiz-${userId}-${itemId}`; },
+    get(userId, itemId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId, itemId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, itemId, state) {
+        try { localStorage.setItem(this.key(userId, itemId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId, itemId) {
+        try { localStorage.removeItem(this.key(userId, itemId)); }
+        catch { /* ignore */ }
+    }
+};
+
 // Submit a plain HTML form by id (used to POST the logout form after the
 // "Leave your learning journey?" modal is confirmed).
 window.ssSubmitForm = function (id) {
