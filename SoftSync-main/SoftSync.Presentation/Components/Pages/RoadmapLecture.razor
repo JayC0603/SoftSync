@@ -11,7 +11,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
-<PageTitle>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp") · SoftSync</PageTitle>
+<PageTitle>@LessonTitle · SoftSync</PageTitle>
 
 <main class="lesson-page">
     @if (loading)
@@ -28,7 +28,7 @@
         <div class="lesson-shell">
             <header class="lesson-top">
                 <button @onclick="Back"><i class="bi bi-arrow-left"></i>Roadmap</button>
-                <div><small>@Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}")</small><h1>@LessonTitle</h1></div>
+                <div><small>@(isTimeManagementLessonOne ? Tx("TIME MANAGEMENT · WEEK 1", "QUẢN LÝ THỜI GIAN · TUẦN 1") : Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}"))</small><h1>@LessonTitle</h1></div>
                 @if (item!.IsCompleted)
                 {
                     <span class="week-complete"><i class="bi bi-check-circle-fill"></i>@Tx("Week completed", "Đã hoàn thành tuần")</span>
@@ -57,7 +57,7 @@
                 @if (currentStep == 1)
                 {
                     <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="@VideoSource" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
-                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> Video Mentor @communicationLessonNumber</span></div>
+                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> Video Mentor @MentorNumber</span></div>
                     @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>@Tx("The Script unlocks automatically when the video ends.", "Script sẽ tự mở khi video phát hết.")</div> }
                     @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error"><i class="bi bi-exclamation-triangle"></i>@saveError</div> }
                     <div class="actions video-actions">
@@ -70,8 +70,27 @@
                 else if (currentStep == 2)
                 {
                     <article class="theory">
-                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@Tx($"Theory synchronized with Video Mentor {communicationLessonNumber}.", $"Nội dung lý thuyết đồng bộ với Video Mentor {communicationLessonNumber}.")</p></div></div>
-                        @if (communicationLessonNumber == 2)
+                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@Tx($"Theory synchronized with Video Mentor {MentorNumber}.", $"Nội dung lý thuyết đồng bộ với Video Mentor {MentorNumber}.")</p></div></div>
+                        @if (isTimeManagementLessonOne)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Self-management and personal responsibility</h3><p>Time management is not about controlling the clock; it is about managing yourself and your priorities. At university, learning happens largely outside class. A useful guideline is to schedule at least two hours of independent study for every hour of instruction.</p>
+                                <h3>2. Prioritization</h3><ul><li><b>Understand the task:</b> Clarify its requirements, effort, and expected duration before starting.</li><li><b>Use the Eisenhower Matrix:</b> Sort work by importance and urgency so you respond deliberately instead of reacting to everything.</li></ul>
+                                <h3>3. Set SMART goals</h3><p>Effective goals are Specific, Measurable, Attainable, Relevant, and Time-bound. Clear goals connect daily actions with long-term motivation.</p>
+                                <h3>4. Understand yourself and reality</h3><ul><li><b>Track actual time:</b> Compare estimates with the time tasks truly take.</li><li><b>Use your best hours:</b> Schedule demanding work when you are most alert and choose a distraction-free environment.</li></ul>
+                                <h3>5. Stay flexible and persistent</h3><p>A schedule is not rigid. Set realistic deadlines, leave room for unexpected events, and adjust consistently. Time management is a marathon that improves learning, reduces stress, and prepares you for your career.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Tự quản lý và trách nhiệm cá nhân</h3><p>Quản lý thời gian không phải là quản lý kim đồng hồ mà là quản lý chính bản thân và các ưu tiên. Ở đại học, việc học chủ yếu diễn ra ngoài lớp; với mỗi giờ nghe giảng, bạn nên dành ít nhất hai giờ tự học để làm chủ kiến thức.</p>
+                                <h3>2. Kỹ năng ưu tiên</h3><ul><li><b>Hiểu rõ yêu cầu:</b> Xác định nhiệm vụ cần gì, mất bao lâu và phải hoàn thành như thế nào trước khi bắt đầu.</li><li><b>Dùng Ma trận Eisenhower:</b> Phân loại theo mức độ quan trọng và khẩn cấp để tập trung đúng việc thay vì phản ứng với mọi phát sinh.</li></ul>
+                                <h3>3. Thiết lập mục tiêu SMART</h3><p>Mục tiêu hiệu quả cần Cụ thể, Đo lường được, Khả thi, Liên quan và có Thời hạn. Mục tiêu rõ ràng tạo động lực và kết nối hành động hằng ngày với định hướng dài hạn.</p>
+                                <h3>4. Hiểu rõ bản thân và thực tế</h3><ul><li><b>Đo thời gian thực tế:</b> Theo dõi thời gian thật của từng việc để dự tính chính xác hơn.</li><li><b>Chọn thời điểm và không gian:</b> Làm việc khó khi tỉnh táo nhất và tạo môi trường không xao nhãng.</li></ul>
+                                <h3>5. Linh hoạt và kiên trì</h3><p>Kế hoạch không nên cứng nhắc. Hãy đặt hạn chót thực tế, chừa khoảng dự phòng và điều chỉnh khi có tình huống bất ngờ. Quản lý thời gian là một cuộc chạy marathon giúp học tốt hơn, giảm căng thẳng và chuẩn bị cho sự nghiệp.</p>
+                            }
+                        }
+                        else if (communicationLessonNumber == 2)
                         {
                             @if (!IsVi)
                             {
@@ -115,7 +134,11 @@
                 }
                 else if (currentStep == 3)
                 {
-                    @if (communicationLessonNumber == 2)
+                    @if (isTimeManagementLessonOne)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Time management summary", "Tóm tắt kỹ năng quản lý thời gian")</h2><div class="summary-grid"><div><b>@Tx("Manage yourself", "Quản lý bản thân")</b><p>@Tx("Take responsibility for your schedule and measure how long work actually takes.", "Chủ động chịu trách nhiệm với lịch trình và đo thời gian thực tế của công việc.")</p></div><div><b>@Tx("Prioritize with purpose", "Ưu tiên có mục đích")</b><p>@Tx("Use importance, urgency, and SMART goals to decide what deserves attention.", "Dùng mức độ quan trọng, khẩn cấp và mục tiêu SMART để chọn đúng việc cần tập trung.")</p></div><div><b>@Tx("Adjust consistently", "Điều chỉnh bền bỉ")</b><p>@Tx("Work during your best hours, reduce distractions, and adapt when plans change.", "Làm việc vào giờ hiệu quả nhất, giảm xao nhãng và linh hoạt khi kế hoạch thay đổi.")</p></div></div></article>
+                    }
+                    else if (communicationLessonNumber == 2)
                     {
                         <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Active listening summary", "Tóm tắt lắng nghe chủ động")</h2><div class="summary-grid"><div><b>@Tx("Hearing vs. listening", "Nghe và lắng nghe")</b><p>@Tx("Hearing is passive; listening requires focus, interpretation, and memory.", "Nghe là thụ động; lắng nghe cần tập trung, diễn giải và ghi nhớ.")</p></div><div><b>@Tx("Five active principles", "Năm nguyên tắc chủ động")</b><p>@Tx("Stop talking, remove distractions, empathize, confirm, and observe non-verbal cues.", "Ngừng nói, bỏ xao nhãng, thấu cảm, xác nhận và quan sát phi ngôn ngữ.")</p></div><div><b>@Tx("Learn and build trust", "Học tốt và xây dựng lòng tin")</b><p>@Tx("Questions and note-taking improve learning while attentive listening strengthens relationships.", "Đặt câu hỏi và ghi chú giúp học tốt; lắng nghe chăm chú giúp củng cố quan hệ.")</p></div></div></article>
                     }
@@ -244,9 +267,13 @@
     private RoadmapItemDto? item;
     private bool loading = true;
     private bool isSupportedCommunicationLesson;
+    private bool isTimeManagementLessonOne;
     private int communicationLessonNumber;
-    private string VideoSource => $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
-    private string LessonTitle => communicationLessonNumber == 2
+    private int MentorNumber => isTimeManagementLessonOne ? 5 : communicationLessonNumber;
+    private string VideoSource => isTimeManagementLessonOne ? "/videos/time-management-mentor-lesson-1.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
+    private string LessonTitle => isTimeManagementLessonOne
+        ? Tx("Introduction to Time Management Skills", "Giới thiệu về kỹ năng quản lý thời gian")
+        : communicationLessonNumber == 2
         ? Tx("Active Listening: A Foundation of Communication", "Kỹ năng lắng nghe - nền tảng của giao tiếp")
         : Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp");
     private int currentStep = 1;
@@ -308,7 +335,9 @@
         {
             var communication = roadmap.Items.Where(IsCommunication).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
             communicationLessonNumber = communication.FindIndex(x => x.Id == item.Id) + 1;
-            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2;
+            var timeManagement = roadmap.Items.Where(IsTimeManagement).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+            isTimeManagementLessonOne = timeManagement.FindIndex(x => x.Id == item.Id) == 0;
+            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2 || isTimeManagementLessonOne;
             currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
@@ -328,6 +357,7 @@
     }
 
     private static bool IsCommunication(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("giao tiếp") || value.Contains("communication"); }
+    private static bool IsTimeManagement(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("quản lý thời gian") || value.Contains("time management"); }
     private bool CanOpen(int step) => item is not null && (item.IsCompleted || step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
     private bool IsComplete(int step) => item is not null && (item.IsCompleted || step switch { 1 => item.IsVideoCompleted, 2 => item.ScriptCompletedAtUtc.HasValue, 3 => item.SummaryCompletedAtUtc.HasValue, 4 => item.IsPracticeCompleted, 5 => item.IsScenarioCompleted, 6 => item.IsReflectionCompleted, _ => false });
     private async Task VideoEnded()
