@@ -26,7 +26,7 @@
                     @foreach (var task in Unscheduled)
                     {
                         <article class="@($"ir-task q{task.Quadrant} {(task.Interrupt ? "interrupt" : "")}")" draggable="true" @ondragstart="() => Drag(task)">
-                            <div class="ir-task-top"><span>@(task.Interrupt ? "⚡ " + Tx("INTERRUPT", "PHÁT SINH") : $"Q{task.Quadrant}")</span><em>U@task.U · I@task.I</em></div>
+                            <div class="ir-task-top"><span>@(task.Interrupt ? "⚡ " + Tx("INTERRUPT", "PHÁT SINH") : $"Q{task.Quadrant}")</span><em>U@(task.U) · I@(task.I)</em></div>
                             <h3>@Tx(task.En, task.Vi)</h3>
                             <label>@Tx("Your estimate", "Bạn dự đoán")
                                 <select value="@task.Estimate" @onchange="e => ChangeEstimate(task, e)"><option value="1">1 slot</option><option value="2">2 slots</option><option value="3">3 slots</option></select>
@@ -44,10 +44,10 @@
                     {
                         var slotIndex = index;
                         var task = slots[index];
-                        <div class="ir-slot @(task is null ? "empty" : "filled")" @ondragover:preventDefault @ondrop="() => Drop(slotIndex)">
+                        <div class="ir-slot @(task is null ? "empty" : "filled") @(hoverSlot == slotIndex ? "drop-ready" : null) @(flashSlot == slotIndex ? "drop-success" : null)" @ondragover:preventDefault @ondragenter="() => Hover(slotIndex)" @ondragleave="() => Leave(slotIndex)" @ondrop="() => Drop(slotIndex)">
                             <b>@(8 + index):00</b>
                             @if (task is null) { <span><i class="bi bi-plus-circle"></i>@Tx("Drop task here", "Thả công việc vào đây")</span> }
-                            else { <span><strong>@Tx(task.En, task.Vi)</strong><small>U@task.U · I@task.I · @task.D slot</small></span> }
+                            else { <span><strong>@Tx(task.En, task.Vi)</strong><small>U@(task.U) · I@(task.I) · @task.D slot</small></span> }
                         </div>
                     }
                 </div>
@@ -78,6 +78,7 @@
     private readonly TaskCard?[] slots = new TaskCard?[8];
     private List<TaskCard> tasks = [];
     private TaskCard? dragging;
+    private int? hoverSlot, flashSlot;
     private bool finished, saving;
     private string message = "";
     private double PriorityScore, CalibrationScore, AdaptationScore, Total;
@@ -93,16 +94,21 @@
     private void StartGame()
     {
         var bank = Bank.OrderBy(_ => Random.Shared.Next()).Take(12).Select((x, i) => new TaskCard(i + 1, x.Vi, x.En, x.U, x.I, x.D, x.Interrupt, x.Q, 1)).ToList();
-        tasks = bank; Array.Clear(slots); dragging = null; finished = false; saving = false; message = ""; startedAt = DateTime.UtcNow;
+        tasks = bank; Array.Clear(slots); dragging = null; hoverSlot = null; flashSlot = null; finished = false; saving = false; message = ""; startedAt = DateTime.UtcNow;
     }
     private void Drag(TaskCard task) { dragging = task; task.FirstTouchedAt ??= DateTime.UtcNow; }
     private static void ChangeEstimate(TaskCard task, ChangeEventArgs args) => task.Estimate = int.TryParse(args.Value?.ToString(), out var value) ? value : 1;
-    private void Drop(int start)
+    private void Hover(int index) { if (slots[index] is null) hoverSlot = index; }
+    private void Leave(int index) { if (hoverSlot == index) hoverSlot = null; }
+    private async Task Drop(int start)
     {
         if (dragging is null) return;
-        if (start + dragging.D > slots.Length || Enumerable.Range(start, dragging.D).Any(i => slots[i] is not null)) { message = Tx("This task needs consecutive free slots.", "Công việc này cần các khung trống liên tiếp."); return; }
-        for (var i = 0; i < dragging.D; i++) slots[start + i] = dragging;
+        if (slots[start] is not null) { message = Tx("This slot is already occupied.", "Khung giờ này đã có công việc."); hoverSlot = null; return; }
+        slots[start] = dragging;
         dragging.Position = start; message = ""; dragging = null;
+        hoverSlot = null; flashSlot = start;
+        await Task.Delay(550);
+        if (flashSlot == start) flashSlot = null;
     }
     private void Reset() => StartGame();
     private async Task Finish()
@@ -134,4 +140,8 @@
 <style>
     .inbox-rush{min-height:calc(100vh - 74px);padding:2rem clamp(1rem,4vw,4rem);color:#13224b;background:radial-gradient(circle at 85% 5%,#dcd4ff99,transparent 32%),linear-gradient(145deg,#f9f8ff,#eef2ff)}
     .ir-hero,.ir-inbox,.ir-day,.ir-result,.ir-metrics article{border:1px solid #ffffffb8;background:#ffffffa8;box-shadow:0 18px 50px #6b55d617,inset 1px 1px #fff;border-radius:20px;backdrop-filter:blur(18px) saturate(150%)}.ir-hero{display:flex;align-items:center;gap:1rem;padding:1.3rem 1.5rem}.ir-hero>button{width:42px;height:42px;border:0;border-radius:12px;background:#eeeaff;color:#6847eb}.ir-hero>div:nth-child(2){flex:1}.ir-hero small,.ir-day>header small,.ir-inbox header small,.ir-result small{color:#6847eb;font-weight:900}.ir-hero h1{margin:.15rem 0;font-size:2rem}.ir-hero p{margin:0;color:#68758e}.ir-count{text-align:center}.ir-count b,.ir-count span{display:block}.ir-count b{font-size:1.4rem;color:#6847eb}.ir-guide{display:flex;justify-content:center;gap:2rem;margin:1.2rem}.ir-guide span{display:flex;align-items:center;gap:.5rem}.ir-guide b{display:grid;place-items:center;width:26px;height:26px;color:#fff;border-radius:50%;background:#8068eb}.ir-grid{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(440px,1.25fr);gap:1.2rem}.ir-inbox,.ir-day{padding:1.2rem}.ir-inbox>header{display:flex;justify-content:space-between}.ir-inbox header h2,.ir-day h2{margin:.2rem 0 1rem}.ir-inbox>header>b{display:grid;place-items:center;width:35px;height:35px;border-radius:50%;background:#eeeaff;color:#6847eb}.ir-task-list{display:grid;gap:.65rem;max-height:620px;overflow:auto}.ir-task{padding:.8rem;border:1px solid #e1dcf7;border-left:4px solid #846bed;border-radius:12px;background:#fff;cursor:grab}.ir-task.interrupt{border-color:#ffb4b4;border-left-color:#ef4444;background:#fff7f7}.ir-task-top{display:flex;justify-content:space-between;color:#6847eb;font-size:.7rem;font-weight:900}.ir-task-top em{font-style:normal;color:#68758e}.ir-task h3{margin:.4rem 0;font-size:.9rem}.ir-task label{display:flex;align-items:center;justify-content:space-between;font-size:.72rem}.ir-task select{padding:.25rem;border:1px solid #ddd5fa;border-radius:6px}.ir-task>small{display:block;margin-top:.4rem;color:#8490a8}.ir-slots{display:grid;gap:.55rem}.ir-slot{display:grid;grid-template-columns:70px 1fr;align-items:center;min-height:58px;padding:.6rem .8rem;border:1px dashed #c9c1ec;border-radius:11px}.ir-slot>b{color:#6847eb}.ir-slot>span{display:flex;justify-content:center;gap:.5rem;color:#8190aa}.ir-slot.filled{border-style:solid;background:#f4f1ff}.ir-slot.filled span{display:block;color:#15244d}.ir-slot span strong,.ir-slot span small{display:block}.ir-slot span small{color:#68758e}.ir-message{color:#b45309}.ir-day footer,.ir-result-actions{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1rem}.ir-day button,.ir-result-actions button{padding:.75rem 1rem;border:1px solid #d8d0f7;border-radius:10px;background:#fff;font-weight:800}.primary{color:#fff!important;border:0!important;background:linear-gradient(135deg,#6847eb,#8d73ee)!important}.ir-result{display:flex;align-items:center;gap:1.5rem;margin-top:1.2rem;padding:2rem}.ir-score{display:flex;align-items:baseline;color:#6847eb}.ir-score b{font-size:4rem}.ir-result h2{margin:.2rem 0}.ir-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}.ir-metrics article{display:flex;align-items:center;gap:.8rem;padding:1rem}.ir-metrics i{font-size:1.5rem;color:#6847eb}.ir-metrics span,.ir-metrics b{display:block}.ir-metrics b{margin-top:.2rem;font-size:1.1rem}@@media(max-width:850px){.ir-grid{grid-template-columns:1fr}.ir-metrics{grid-template-columns:repeat(2,1fr)}.ir-guide{display:none}}
+    .ir-slot{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+    .ir-slot.drop-ready{border-color:#8068eb;background:#eeeaff;box-shadow:0 0 0 4px #8068eb24,0 10px 25px #6847eb28;transform:translateY(-2px) scale(1.01)}
+    .ir-slot.drop-success{border-color:#36a871;background:#ecfff5;box-shadow:0 0 0 5px #36a87124,0 12px 28px #36a8712e;animation:slot-pop .5s ease}
+    @@keyframes slot-pop{0%{transform:scale(.97)}55%{transform:scale(1.025)}100%{transform:scale(1)}}
 </style>
