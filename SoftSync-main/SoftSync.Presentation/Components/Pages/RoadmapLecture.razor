@@ -160,7 +160,7 @@
                     else if (quizQuestions.Count > 0)
                     {
                         <section class="quiz-sheet">
-                            <header><div><small>@Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN")</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
+                            <header><div><small>@(isTimeManagementLessonOne ? Tx("TIME MANAGEMENT QUIZ · 5 RANDOM QUESTIONS", "QUIZ QUẢN LÝ THỜI GIAN · 5 CÂU NGẪU NHIÊN") : Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN"))</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
                             <div class="quiz-progress"><i style="width:@(revealedQuestions.Count * 20)%"></i></div>
                             @foreach (var entry in quizQuestions.Select((question, index) => (question, index)))
                             {
@@ -395,9 +395,11 @@
     private string Tx(string en, string vi) => IsVi ? vi : en;
     private void StartQuiz()
     {
-        var questionBank = communicationLessonNumber == 2
-            ? ActiveListeningQuizBank.Questions
-            : CommunicationQuizBank.Questions;
+        var questionBank = isTimeManagementLessonOne
+            ? TimeManagementQuizBank.Questions
+            : communicationLessonNumber == 2
+                ? ActiveListeningQuizBank.Questions
+                : CommunicationQuizBank.Questions;
         var recentIds = item?.QuizHistory.SelectMany(x => x.Answers.Keys).Select(x => int.TryParse(x, out var id) ? id : 0).Where(x => x > 0).ToList() ?? [];
         var unseen = questionBank.Where(x => !recentIds.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()).ToList();
         if (unseen.Count < 5)
