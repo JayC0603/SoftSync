@@ -57,7 +57,7 @@
                 @if (currentStep == 1)
                 {
                     <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="@VideoSource" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
-                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> @(isTimeManagementLessonOne ? LessonTitle : $"Video Mentor {MentorNumber}")</span></div>
+                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> @LessonTitle</span></div>
                     @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>@Tx("The Script unlocks automatically when the video ends.", "Script sẽ tự mở khi video phát hết.")</div> }
                     @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error"><i class="bi bi-exclamation-triangle"></i>@saveError</div> }
                     <div class="actions video-actions">
@@ -70,7 +70,7 @@
                 else if (currentStep == 2)
                 {
                     <article class="theory">
-                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@(isTimeManagementLessonOne ? Tx("Theory synchronized with the Time Management introduction video.", "Nội dung lý thuyết đồng bộ với video Giới thiệu về kỹ năng quản lý thời gian.") : Tx($"Theory synchronized with Video Mentor {MentorNumber}.", $"Nội dung lý thuyết đồng bộ với Video Mentor {MentorNumber}."))</p></div></div>
+                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@Tx("Theory synchronized with this lesson video.", "Nội dung lý thuyết đồng bộ với video của bài học này.")</p></div></div>
                         @if (isTimeManagementLessonOne)
                         {
                             @if (!IsVi)
@@ -269,7 +269,6 @@
     private bool isSupportedCommunicationLesson;
     private bool isTimeManagementLessonOne;
     private int communicationLessonNumber;
-    private int MentorNumber => isTimeManagementLessonOne ? 5 : communicationLessonNumber;
     private string VideoSource => isTimeManagementLessonOne ? "/videos/time-management-mentor-lesson-1.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
     private string LessonTitle => isTimeManagementLessonOne
         ? Tx("Introduction to Time Management Skills", "Giới thiệu về kỹ năng quản lý thời gian")

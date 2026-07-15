@@ -160,7 +160,7 @@
                                             case ContentTab.Video:
                                                 <div class="pr-content-row">
                                                     <i class="bi bi-play-circle"></i>
-                                                    <div><b>@LocalizedItemTitle(SelectedItem)</b><small>@Tx("Mentor video · your progress is saved automatically when the video ends.", "Video Mentor · tiến độ tự động được lưu khi video phát hết.")</small></div>
+                                                    <div><b>@LocalizedItemTitle(SelectedItem)</b><small>@Tx("Lesson video · your progress is saved automatically when the video ends.", "Video bài học · tiến độ tự động được lưu khi video phát hết.")</small></div>
                                                     <button @onclick="OpenVideo" disabled="@(!CanOpenVideo)">@(CanOpenVideo ? Tx("Open video", "Mở video") : Tx("Coming soon", "Sắp cập nhật"))</button>
                                                 </div>
                                                 break;
