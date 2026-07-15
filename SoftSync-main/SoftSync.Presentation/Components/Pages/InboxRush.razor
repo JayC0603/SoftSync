@@ -26,10 +26,10 @@
                     @foreach (var task in Unscheduled)
                     {
                         <article class="@($"ir-task q{task.Quadrant} {(task.Interrupt ? "interrupt" : "")}")" draggable="true" @ondragstart="() => Drag(task)">
-                            <div class="ir-task-top"><span>@(task.Interrupt ? "⚡ " + Tx("INTERRUPT", "PHÁT SINH") : $"Q{task.Quadrant}")</span><em>U@(task.U) · I@(task.I)</em></div>
+                            <div class="ir-task-top"><span>@(task.Interrupt ? "⚡ " + Tx("INTERRUPT", "PHÁT SINH") : $"Q{task.Quadrant}")</span><em>@Tx($"Urgency {task.U} · Importance {task.I}", $"Khẩn cấp {task.U} · Quan trọng {task.I}")</em></div>
                             <h3>@Tx(task.En, task.Vi)</h3>
                             <label>@Tx("Your estimate", "Bạn dự đoán")
-                                <select value="@task.Estimate" @onchange="e => ChangeEstimate(task, e)"><option value="1">1 slot</option><option value="2">2 slots</option><option value="3">3 slots</option></select>
+                                <select value="@task.Estimate" @onchange="e => ChangeEstimate(task, e)"><option value="1">@Tx("1 slot", "1 khung")</option><option value="2">@Tx("2 slots", "2 khung")</option><option value="3">@Tx("3 slots", "3 khung")</option></select>
                             </label>
                             <small>@Tx("Drag to a free starting slot", "Kéo vào khung bắt đầu còn trống")</small>
                         </article>
@@ -47,7 +47,7 @@
                         <div class="ir-slot @(task is null ? "empty" : "filled") @(hoverSlot == slotIndex ? "drop-ready" : null) @(flashSlot == slotIndex ? "drop-success" : null)" @ondragover:preventDefault @ondragenter="() => Hover(slotIndex)" @ondragleave="() => Leave(slotIndex)" @ondrop="() => Drop(slotIndex)">
                             <b>@(8 + index):00</b>
                             @if (task is null) { <span><i class="bi bi-plus-circle"></i>@Tx("Drop task here", "Thả công việc vào đây")</span> }
-                            else { <span><strong>@Tx(task.En, task.Vi)</strong><small>U@(task.U) · I@(task.I) · @task.D slot</small></span> }
+                            else { <span><strong>@Tx(task.En, task.Vi)</strong><small>@Tx($"Urgency {task.U} · Importance {task.I} · {task.D} {(task.D == 1 ? "slot" : "slots")}", $"Khẩn cấp {task.U} · Quan trọng {task.I} · {task.D} khung")</small></span> }
                         </div>
                     }
                 </div>
