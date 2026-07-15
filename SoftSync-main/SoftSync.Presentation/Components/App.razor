@@ -5,8 +5,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#6847eb" />
+    <meta name="theme-color" content="@BrowserThemeColor" />
     <base href="/" />
+    <style>
+        /* Critical first-paint canvas. This is intentionally inline and appears
+           before external styles so refresh never exposes the purple fallback
+           while Blazor/CSS is still loading. */
+        html, body { min-height: 100%; margin: 0; background: #f7f6fc; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background: #100d24; }
+    </style>
     <script>
         // Migrate the old localStorage-only preference before the first paint.
         // Once the cookie exists, the server renders the selected language
@@ -89,6 +96,8 @@
     // what stops the theme from flashing to light and reverting between pages.
     private string ServerTheme =>
         HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
+
+    private string BrowserThemeColor => ServerTheme == "dark" ? "#100d24" : "#f7f6fc";
 
     private string ServerLanguage =>
         HttpContextAccessor.HttpContext?.Request.Cookies["ss-lang"] is "vi" ? "vi" : "en";

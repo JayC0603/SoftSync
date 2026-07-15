@@ -165,8 +165,10 @@ html[data-theme="dark"] :where(.ss-card, .ss-navbar, .assistant-chat-card, .dash
     overflow: hidden;
     pointer-events: none;
     background-image:
+        linear-gradient(rgba(248,247,255,.72), rgba(248,247,255,.78)),
         url('/images/background-softsync.png'),
-        linear-gradient(135deg, #3b1e78 0%, #8b5cf6 40%, #d8b4fe 68%, #fdf4ff 100%);
+        linear-gradient(135deg, #eef2ff 0%, #f5f3ff 48%, #fdf4ff 100%);
+    background-color: #f7f6fc;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
