@@ -61,6 +61,26 @@ window.ssLang = {
     }
 };
 
+// Keep AI chat usable across refreshes even when the remote database is
+// temporarily unavailable. PostgreSQL remains the primary history store.
+window.ssChatHistory = {
+    key(userId) { return `ss-chat-history-${userId}`; },
+    load(userId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId));
+            return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+    },
+    save(userId, messages) {
+        try { localStorage.setItem(this.key(userId), JSON.stringify(messages)); }
+        catch { /* ignore storage quota/privacy-mode failures */ }
+    },
+    scrollTo(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+};
+
 // Welcome flag — set as a short-lived cookie by the server right after a
 // successful login, read once by the WelcomeToast component, then cleared so
 // the greeting animation shows exactly once per sign-in.
