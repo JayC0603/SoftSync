@@ -14,6 +14,18 @@ services:
         fromDatabase:
           name: softsync-db
           property: connectionString
+      - key: AiApi__Enabled
+        value: "true"
+      - key: AiApi__Provider
+        value: HuggingFace
+      - key: AiApi__BaseUrl
+        value: https://router.huggingface.co/
+      - key: AiApi__Model
+        value: Qwen/Qwen3-4B-Instruct-2507:cheapest
+      # Render asks for this secret during Blueprint creation/update. Never put
+      # the hf_ token directly in this file.
+      - key: AiApi__ApiKey
+        sync: false
 
 databases:
   - name: softsync-db

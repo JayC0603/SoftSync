@@ -1,0 +1,135 @@
+[
+  {
+    "id": "softsync-overview", "category": "platform",
+    "titleEn": "About SoftSync", "titleVi": "Giới thiệu SoftSync",
+    "answerEn": "SoftSync is a soft-skills learning platform combining assessment, a personalized roadmap, short lessons, quizzes, practical scenarios, reflection, progress tracking, community, and an AI learning companion.",
+    "answerVi": "SoftSync là nền tảng phát triển kỹ năng mềm kết hợp đánh giá đầu vào, lộ trình cá nhân hóa, bài học ngắn, quiz, tình huống thực hành, phản tư, theo dõi tiến độ, cộng đồng và trợ lý học tập AI.",
+    "route": "/dashboard", "keywords": ["softsync", "platform", "nền tảng", "giới thiệu", "about", "tính năng"], "tags": ["product", "help"]
+  },
+  {
+    "id": "assessment", "category": "platform",
+    "titleEn": "Skills assessment", "titleVi": "Đánh giá kỹ năng",
+    "answerEn": "The assessment identifies your current level in Communication, Time Management, and Critical Thinking. Answer from your real behavior rather than the ideal response so SoftSync can build a useful roadmap.",
+    "answerVi": "Bài đánh giá xác định mức hiện tại của bạn ở Giao tiếp, Quản lý thời gian và Tư duy phản biện. Hãy trả lời theo hành vi thật thay vì đáp án lý tưởng để SoftSync tạo lộ trình phù hợp.",
+    "route": "/assessment", "keywords": ["assessment", "đánh giá", "kiểm tra đầu vào", "test kỹ năng", "skill test"], "tags": ["assessment", "start"]
+  },
+  {
+    "id": "roadmap", "category": "platform",
+    "titleEn": "Personalized roadmap", "titleVi": "Lộ trình cá nhân hóa",
+    "answerEn": "Your roadmap prioritizes weaker skills and organizes each week into six activities: video, lesson script, summary, mini quiz, applied practice, and reflection with AI feedback. Complete them in order to unlock the next step.",
+    "answerVi": "Lộ trình ưu tiên kỹ năng còn yếu và chia mỗi tuần thành 6 hoạt động: video, nội dung bài học, tóm tắt, mini quiz, thực hành tình huống và phản tư kèm phản hồi AI. Hãy hoàn thành lần lượt để mở bước tiếp theo.",
+    "route": "/roadmap", "keywords": ["roadmap", "lộ trình", "bài học", "lesson", "học gì", "tiếp theo"], "tags": ["learning", "plan"]
+  },
+  {
+    "id": "progress", "category": "platform",
+    "titleEn": "Progress and learning calendar", "titleVi": "Tiến độ và lịch học",
+    "answerEn": "Progress is calculated from completed roadmap activities. The Progress page shows level, XP, learning streak, skill percentages, achievements, and study time. Use the calendar filter to review activity in any date range.",
+    "answerVi": "Tiến độ được tính từ các hoạt động lộ trình đã hoàn thành. Trang Tiến độ hiển thị cấp độ, XP, chuỗi ngày học, phần trăm kỹ năng, thành tích và thời gian học. Dùng bộ lọc lịch để kiểm tra hoạt động trong khoảng ngày bất kỳ.",
+    "route": "/progress", "keywords": ["progress", "tiến độ", "xp", "level", "cấp độ", "streak", "chuỗi ngày", "lịch học", "calendar", "thời gian học"], "tags": ["statistics", "tracking"]
+  },
+  {
+    "id": "communication-foundations", "category": "communication",
+    "titleEn": "Communication foundations", "titleVi": "Nền tảng giao tiếp",
+    "answerEn": "Communication is a two-way process: sender, message, channel, receiver, and feedback. Communicate clearly, choose language for the audience and context, observe non-verbal signals, and confirm understanding instead of assuming it.",
+    "answerVi": "Giao tiếp là quá trình hai chiều gồm người gửi, thông điệp, kênh truyền, người nhận và phản hồi. Hãy diễn đạt rõ, chọn ngôn từ phù hợp đối tượng/bối cảnh, quan sát tín hiệu phi ngôn ngữ và xác nhận lại thay vì tự suy đoán.",
+    "route": "/roadmap", "keywords": ["communication", "giao tiếp", "truyền đạt", "thông điệp", "phi ngôn ngữ", "nonverbal"], "tags": ["communication", "foundation"]
+  },
+  {
+    "id": "active-listening", "category": "communication",
+    "titleEn": "Active listening", "titleVi": "Lắng nghe chủ động",
+    "answerEn": "Active listening means giving full attention, removing distractions, not preparing a reply while the other person speaks, noticing emotion and body language, paraphrasing the key point, and asking one clarifying question before advising.",
+    "answerVi": "Lắng nghe chủ động là tập trung hoàn toàn, loại bỏ xao nhãng, không chuẩn bị câu đáp khi người kia đang nói, chú ý cảm xúc/ngôn ngữ cơ thể, diễn giải lại ý chính và hỏi một câu làm rõ trước khi đưa lời khuyên.",
+    "route": "/roadmap", "keywords": ["active listening", "lắng nghe", "ngắt lời", "thấu cảm", "empathy", "paraphrase", "diễn giải"], "tags": ["communication", "listening"]
+  },
+  {
+    "id": "constructive-feedback", "category": "communication",
+    "titleEn": "Constructive feedback", "titleVi": "Phản hồi xây dựng",
+    "answerEn": "Give feedback about observable behavior, its impact, and a specific next action. A useful pattern is: “When X happened, I noticed Y impact. Could we try Z?” Avoid labels, public blame, sarcasm, and vague criticism.",
+    "answerVi": "Hãy phản hồi về hành vi quan sát được, tác động và hành động tiếp theo cụ thể. Mẫu hữu ích: “Khi X xảy ra, mình nhận thấy tác động Y. Chúng ta thử Z nhé?” Tránh gắn nhãn, trách móc công khai, mỉa mai và phê bình mơ hồ.",
+    "route": "/roadmap", "keywords": ["feedback", "phản hồi", "góp ý", "mâu thuẫn", "conflict", "chỉ trích"], "tags": ["communication", "feedback"]
+  },
+  {
+    "id": "professional-message", "category": "communication",
+    "titleEn": "Professional messages and email", "titleVi": "Tin nhắn và email chuyên nghiệp",
+    "answerEn": "Use a clear subject, polite greeting, concise context, one explicit request, a realistic deadline, and a thank-you. For a delay, notify early, state the impact, take responsibility, and propose the recovery plan.",
+    "answerVi": "Hãy dùng tiêu đề rõ, lời chào lịch sự, bối cảnh ngắn gọn, một yêu cầu cụ thể, thời hạn hợp lý và lời cảm ơn. Khi trễ hạn, hãy báo sớm, nêu tác động, nhận trách nhiệm và đề xuất kế hoạch khắc phục.",
+    "route": "/roadmap", "keywords": ["email", "tin nhắn", "chuyên nghiệp", "xin lỗi", "trễ hạn", "deadline", "nhờ giúp"], "tags": ["communication", "netiquette"]
+  },
+  {
+    "id": "time-prioritization", "category": "time-management",
+    "titleEn": "Prioritization and Eisenhower Matrix", "titleVi": "Ưu tiên và Ma trận Eisenhower",
+    "answerEn": "Classify tasks by importance and urgency: do urgent-important work now; schedule important-not-urgent work; delegate urgent-not-important work when appropriate; eliminate or limit work that is neither. Protect important-not-urgent time because it prevents future crises.",
+    "answerVi": "Phân loại công việc theo quan trọng và khẩn cấp: làm ngay việc khẩn cấp-quan trọng; lên lịch việc quan trọng-chưa khẩn; giao phù hợp việc khẩn-không quan trọng; loại bỏ hoặc giới hạn việc không thuộc cả hai. Hãy bảo vệ nhóm quan trọng-chưa khẩn vì nó ngăn khủng hoảng tương lai.",
+    "route": "/roadmap", "keywords": ["eisenhower", "ma trận", "ưu tiên", "priority", "khẩn cấp", "quan trọng", "urgent", "important"], "tags": ["time-management", "planning"]
+  },
+  {
+    "id": "time-procrastination", "category": "time-management",
+    "titleEn": "Overcoming procrastination", "titleVi": "Vượt qua trì hoãn",
+    "answerEn": "Reduce the starting cost: define the smallest visible next action, work for five minutes, remove the main distraction, and use a timer. For a large project, split it into milestones and put each milestone on the calendar before the final deadline.",
+    "answerVi": "Hãy giảm chi phí bắt đầu: xác định hành động nhỏ nhất có thể nhìn thấy, làm trong 5 phút, loại bỏ nguồn xao nhãng chính và dùng hẹn giờ. Với dự án lớn, chia thành mốc nhỏ và đưa từng mốc lên lịch trước hạn cuối.",
+    "route": "/roadmap", "keywords": ["procrastination", "trì hoãn", "lười", "không bắt đầu", "quá tải", "overwhelmed", "deadline"], "tags": ["time-management", "habit"]
+  },
+  {
+    "id": "pomodoro-focus", "category": "time-management",
+    "titleEn": "Pomodoro and focused work", "titleVi": "Pomodoro và tập trung",
+    "answerEn": "A basic Pomodoro is 25 minutes of single-task focus followed by a 5-minute break; after four rounds, take a longer break. Put the phone out of reach, close unrelated tabs, and record interruptions instead of acting on them immediately.",
+    "answerVi": "Một Pomodoro cơ bản gồm 25 phút tập trung một việc và 5 phút nghỉ; sau bốn phiên, nghỉ dài hơn. Đặt điện thoại ngoài tầm với, đóng tab không liên quan và ghi lại điều chen ngang thay vì xử lý ngay.",
+    "route": "/roadmap", "keywords": ["pomodoro", "tập trung", "focus", "xao nhãng", "điện thoại", "25 phút", "nghỉ"], "tags": ["time-management", "focus"]
+  },
+  {
+    "id": "smart-goals", "category": "time-management",
+    "titleEn": "SMART goals and daily planning", "titleVi": "Mục tiêu SMART và kế hoạch ngày",
+    "answerEn": "A SMART goal is Specific, Measurable, Attainable, Relevant, and Time-bound. Turn it into a Daily Top Three, estimate each task, reserve buffer time, and review at day-end: completed, moved with reason, or removed.",
+    "answerVi": "Mục tiêu SMART cần Cụ thể, Đo lường được, Khả thi, Liên quan và Có thời hạn. Chuyển mục tiêu thành Top 3 trong ngày, ước lượng từng việc, chừa thời gian dự phòng và cuối ngày rà soát: đã xong, chuyển có lý do hay loại bỏ.",
+    "route": "/roadmap", "keywords": ["smart", "mục tiêu", "goal", "top three", "top 3", "kế hoạch ngày", "daily plan"], "tags": ["time-management", "goal"]
+  },
+  {
+    "id": "critical-foundations", "category": "critical-thinking",
+    "titleEn": "Critical thinking foundations", "titleVi": "Nền tảng tư duy phản biện",
+    "answerEn": "Critical thinking is careful judgment based on evidence, context, alternative explanations, and the quality of reasoning—not arguing for its own sake. Separate facts, interpretations, assumptions, and opinions before reaching a conclusion.",
+    "answerVi": "Tư duy phản biện là phán đoán cẩn trọng dựa trên bằng chứng, bối cảnh, cách giải thích thay thế và chất lượng lập luận—không phải tranh cãi cho bằng được. Hãy tách sự thật, diễn giải, giả định và ý kiến trước khi kết luận.",
+    "route": "/roadmap", "keywords": ["critical thinking", "tư duy phản biện", "fact", "opinion", "sự thật", "ý kiến", "bằng chứng"], "tags": ["critical-thinking", "foundation"]
+  },
+  {
+    "id": "source-evaluation", "category": "critical-thinking",
+    "titleEn": "Evaluate information and sources", "titleVi": "Đánh giá thông tin và nguồn",
+    "answerEn": "Check who produced the claim, their expertise and incentives, publication date, supporting evidence, original source, and whether independent reliable sources agree. A confident tone, popularity, or many shares is not evidence.",
+    "answerVi": "Hãy kiểm tra ai đưa ra tuyên bố, chuyên môn và động cơ của họ, ngày xuất bản, bằng chứng, nguồn gốc ban đầu và các nguồn độc lập đáng tin có đồng thuận không. Giọng chắc chắn, độ phổ biến hay nhiều lượt chia sẻ không phải là bằng chứng.",
+    "route": "/roadmap", "keywords": ["nguồn tin", "source", "tin giả", "fake news", "kiểm chứng", "verify", "information literacy", "độ tin cậy"], "tags": ["critical-thinking", "information"]
+  },
+  {
+    "id": "logical-fallacies", "category": "critical-thinking",
+    "titleEn": "Common logical fallacies", "titleVi": "Các ngụy biện thường gặp",
+    "answerEn": "Watch for ad hominem (attacking the person), bandwagon (popular means true), red herring (changing the issue), appeal to tradition (old means best), straw man (distorting a claim), non sequitur (conclusion does not follow), and false certainty. Ask which premise actually supports the conclusion.",
+    "answerVi": "Hãy nhận diện công kích cá nhân, ngụy biện số đông, đánh lạc hướng, viện dẫn truyền thống, người rơm, kết luận không liên quan và giả vờ chắc chắn. Luôn hỏi: tiền đề nào thực sự hỗ trợ kết luận này?",
+    "route": "/roadmap", "keywords": ["fallacy", "ngụy biện", "ad hominem", "bandwagon", "red herring", "straw man", "lập luận", "logic"], "tags": ["critical-thinking", "reasoning"]
+  },
+  {
+    "id": "five-whys", "category": "critical-thinking",
+    "titleEn": "Root cause analysis with Five Whys", "titleVi": "Phân tích nguyên nhân gốc bằng 5 Whys",
+    "answerEn": "State the observable problem, ask why it happened, then test each answer with evidence before asking why again. Stop when you reach a cause the team can act on; do not force exactly five questions or use the method to blame a person.",
+    "answerVi": "Nêu vấn đề quan sát được, hỏi vì sao xảy ra, rồi kiểm tra từng câu trả lời bằng bằng chứng trước khi hỏi tiếp. Dừng khi tìm được nguyên nhân mà nhóm có thể tác động; không cần ép đủ đúng 5 câu và không dùng phương pháp để đổ lỗi cá nhân.",
+    "route": "/roadmap", "keywords": ["5 whys", "five whys", "tại sao", "nguyên nhân gốc", "root cause", "giải quyết vấn đề"], "tags": ["critical-thinking", "problem-solving"]
+  },
+  {
+    "id": "metacognition", "category": "critical-thinking",
+    "titleEn": "Metacognition", "titleVi": "Siêu nhận thức",
+    "answerEn": "Metacognition means thinking about how you think and learn. Use a three-part loop: plan a strategy and success criterion, monitor understanding while working, then evaluate the result and adjust the next attempt.",
+    "answerVi": "Siêu nhận thức là suy nghĩ về cách mình suy nghĩ và học. Dùng vòng lặp ba phần: lập kế hoạch và tiêu chí thành công, theo dõi mức hiểu khi thực hiện, sau đó đánh giá kết quả và điều chỉnh lần tiếp theo.",
+    "route": "/roadmap", "keywords": ["metacognition", "siêu nhận thức", "planning tracking assessing", "tự học", "phản tư", "reflection"], "tags": ["critical-thinking", "learning"]
+  },
+  {
+    "id": "study-recommendation", "category": "coaching",
+    "titleEn": "What should I learn next?", "titleVi": "Tôi nên học gì tiếp?",
+    "answerEn": "Start with the lowest-progress active skill, complete one unlocked roadmap activity, and end with a short reflection. A sustainable target is 15–25 focused minutes per day rather than an occasional long session.",
+    "answerVi": "Hãy bắt đầu từ kỹ năng đang có tiến độ thấp nhất, hoàn thành một hoạt động đã mở trong lộ trình và kết thúc bằng phản tư ngắn. Mục tiêu bền vững là 15–25 phút tập trung mỗi ngày thay vì thỉnh thoảng học một buổi quá dài.",
+    "route": "/roadmap", "keywords": ["nên học gì", "gợi ý", "bắt đầu", "cải thiện", "recommend", "what should", "improve", "kế hoạch học"], "tags": ["coaching", "recommendation"]
+  },
+  {
+    "id": "safety-scope", "category": "policy",
+    "titleEn": "Assistant scope and safety", "titleVi": "Phạm vi và an toàn",
+    "answerEn": "SYNCY supports learning and soft-skills practice, but it is not a replacement for a teacher, counselor, doctor, lawyer, or emergency service. For urgent safety or health concerns, contact a trusted person and qualified local support.",
+    "answerVi": "SYNCY hỗ trợ học tập và luyện kỹ năng mềm, nhưng không thay thế giáo viên, chuyên gia tâm lý, bác sĩ, luật sư hoặc dịch vụ khẩn cấp. Với vấn đề an toàn hay sức khỏe khẩn cấp, hãy liên hệ người đáng tin và hỗ trợ chuyên môn tại địa phương.",
+    "route": "", "keywords": ["khẩn cấp", "tự làm hại", "sức khỏe", "y tế", "pháp lý", "emergency", "medical", "legal", "danger"], "tags": ["safety", "scope"]
+  }
+]

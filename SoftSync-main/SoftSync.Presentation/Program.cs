@@ -6,6 +6,7 @@ using SoftSync.DAL.Data;
 using SoftSync.DAL.Entities;
 using SoftSync.DAL.Repositories;
 using SoftSync.BLL.Auth;
+using SoftSync.BLL.AI;
 using SoftSync.BLL.Interfaces;
 using SoftSync.BLL.Services;
 using SoftSync.BLL.Services.Fake;
@@ -44,7 +45,9 @@ builder.Services.AddScoped<UserProfileState>();
 // Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
 // cannot override the managed database's current internal connection URL.
 // Local/other environments can still use ConnectionStrings:SoftSyncDb.
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+// IConfiguration includes environment variables and Development User Secrets,
+// allowing the same DATABASE_URL key to work on Render and on a local machine.
+var databaseUrl = builder.Configuration["DATABASE_URL"];
 var connectionString = !string.IsNullOrWhiteSpace(databaseUrl)
     ? BuildNpgsqlConnectionString(databaseUrl)
     : builder.Configuration.GetConnectionString("SoftSyncDb");
@@ -135,7 +138,11 @@ builder.Services.AddScoped<IMentorRepository, MentorRepository>();
 
 // 3. Register AI Services (BLL - Mocked)
 builder.Services.AddScoped<IAiAssessmentService, FakeAiAssessmentService>();
-builder.Services.AddScoped<IAiAssistantService, FakeAiAssistantService>();
+builder.Services.AddSingleton(_ => AssistantKnowledgeBase.Load(
+    Path.Combine(builder.Environment.ContentRootPath, "Assets", "AiKnowledge", "softsync-assistant.vi-en.json")));
+builder.Services.AddScoped<KnowledgeBasedAiAssistantService>();
+builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
+builder.Services.AddSingleton<PdfDocumentKnowledge>();
 builder.Services.AddScoped<IAiRoadmapService, FakeAiRoadmapService>();
 
 // 4. Register Business Services (BLL)
@@ -151,7 +158,9 @@ builder.Services.AddScoped<IGameBankService, GameBankService>();
 // 5. HttpClient for future AI integration
 builder.Services.AddHttpClient("AiApi", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["AiApi:BaseUrl"] ?? "http://localhost:5000");
+    var baseUrl = builder.Configuration["AiApi:BaseUrl"];
+    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(baseUrl) ? "https://router.huggingface.co/" : baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiApi:TimeoutSeconds", 45));
 });
 
 var app = builder.Build();
