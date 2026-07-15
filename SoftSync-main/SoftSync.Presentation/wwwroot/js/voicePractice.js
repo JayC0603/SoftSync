@@ -1,6 +1,6 @@
 let state;
 
-export async function startRecording() {
+export async function startRecording(language = "vi-VN") {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
   const context = new AudioContext();
   const source = context.createMediaStreamSource(stream);
@@ -14,7 +14,7 @@ export async function startRecording() {
   let transcript = "", confidence = 0, recognition;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition) {
-    recognition = new SpeechRecognition(); recognition.lang = "vi-VN"; recognition.continuous = true; recognition.interimResults = false;
+    recognition = new SpeechRecognition(); recognition.lang = language; recognition.continuous = true; recognition.interimResults = false;
     recognition.onresult = e => { for (let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal){ transcript += " " + e.results[i][0].transcript; confidence = Math.max(confidence, e.results[i][0].confidence || 0); } };
     try { recognition.start(); } catch {}
   }
