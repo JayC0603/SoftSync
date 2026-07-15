@@ -6,7 +6,10 @@
 }
 
 /* Runtime liquid-glass layer. Loaded after the generated bundle on purpose. */
-:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card) {
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card,
+       .home-v2 .streak-card, .home-v2 .stat-grid article, .home-v2 .panel,
+       .home-v2 .syncy-panel, .home-v2 .syncy-message, .home-v2 .syncy-task,
+       .home-v2 .did-you-know) {
     position: relative;
     isolation: isolate;
     background:
@@ -22,7 +25,10 @@
     backdrop-filter: blur(26px) saturate(185%) contrast(105%) !important;
 }
 
-:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card)::before {
+:where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card,
+       .home-v2 .streak-card, .home-v2 .stat-grid article, .home-v2 .panel,
+       .home-v2 .syncy-panel, .home-v2 .syncy-message, .home-v2 .syncy-task,
+       .home-v2 .did-you-know)::before {
     content: "";
     position: absolute;
     inset: 1px;
@@ -36,6 +42,17 @@
 
 :where(.ss-glass-interactive, .ss-card, .dash-card) {
     transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+/* Dashboard cards keep their grid position while the liquid highlight follows
+   the same visual system as the rest of the application. */
+.home-v2 :where(.stat-grid article, .panel, .syncy-task, .did-you-know) {
+    transition: box-shadow .24s ease, border-color .24s ease, background .24s ease;
+}
+
+.home-v2 :where(.stat-grid article, .panel, .syncy-task, .did-you-know):hover {
+    border-color: rgba(255,255,255,.96) !important;
+    box-shadow: 0 22px 54px rgba(76,29,149,.17), inset 1px 1px 0 #fff !important;
 }
 
 :where(.ss-glass-interactive, .ss-card, .dash-card):hover {
@@ -62,7 +79,10 @@ html[data-theme="dark"] {
     --liquid-shadow: rgba(2, 6, 23, 0.38);
 }
 
-html[data-theme="dark"] :where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card, .vp-hero, .vp-grid > aside, .vp-studio, .vp-results, .voice-practice-launch, .roadmap-sidebar, .overall-card, .xp-card, .streak, .week-stat, .lesson, .weekly-challenge, .content-panel, .content-card) {
+html[data-theme="dark"] :where(.ss-glass, .ss-card, .dash-card, .assistant-chat-card, .ss-chat-panel, .ss-side-card,
+       .home-v2 .streak-card, .home-v2 .stat-grid article, .home-v2 .panel,
+       .home-v2 .syncy-panel, .home-v2 .syncy-message, .home-v2 .syncy-task,
+       .home-v2 .did-you-know) {
     background:
         radial-gradient(120% 90% at 0% 0%, rgba(139,92,246,.2), transparent 48%),
         radial-gradient(80% 90% at 100% 100%, rgba(79,70,229,.16), transparent 60%),
