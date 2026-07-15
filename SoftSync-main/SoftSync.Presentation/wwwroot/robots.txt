@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /settings
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /profile-setup
+Disallow: /assessment/
+Disallow: /roadmap/lecture/
+Disallow: /roadmap/game/
+Disallow: /roadmap/voice-practice/
+Disallow: /Account/
+
+Sitemap: https://softsync.id.vn/sitemap.xml

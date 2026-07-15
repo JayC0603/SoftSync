@@ -4,6 +4,29 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 
+<PageTitle>@SeoTitle</PageTitle>
+<HeadContent>
+    <meta name="description" content="@SeoDescription" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://softsync.id.vn/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SoftSync Space" />
+    <meta property="og:title" content="@SeoTitle" />
+    <meta property="og:description" content="@SeoDescription" />
+    <meta property="og:url" content="https://softsync.id.vn/" />
+    <meta property="og:image" content="https://softsync.id.vn/images/syncy-fish.png" />
+    <meta property="og:image:alt" content="SoftSync Space - Nền tảng học kỹ năng mềm bằng AI" />
+    <meta property="og:locale" content="@(L.Current == AppLanguage.Vi ? "vi_VN" : "en_US")" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@SeoTitle" />
+    <meta name="twitter:description" content="@SeoDescription" />
+    <meta name="twitter:image" content="https://softsync.id.vn/images/syncy-fish.png" />
+
+    <script type="application/ld+json">@((MarkupString)StructuredData)</script>
+</HeadContent>
+
 <section class="ss-landing">
     <div class="ss-hero-grid">
         <div class="ss-hero-copy">
@@ -1422,6 +1445,47 @@
 </style>
 
 @code {
+    private string SeoTitle => L.Current == AppLanguage.Vi
+        ? "SoftSync Space - Học và phát triển kỹ năng mềm bằng AI"
+        : "SoftSync Space - AI-Powered Soft Skills Learning";
+
+    private string SeoDescription => L.Current == AppLanguage.Vi
+        ? "SoftSync Space giúp học sinh, sinh viên đánh giá, luyện tập và phát triển kỹ năng giao tiếp, quản lý thời gian và tư duy phản biện bằng AI."
+        : "SoftSync Space helps students assess, practice, and develop communication, time management, and critical-thinking skills with AI.";
+
+    private const string StructuredData = """
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://softsync.id.vn/#organization",
+          "name": "SoftSync Space",
+          "alternateName": "SoftSync",
+          "url": "https://softsync.id.vn/",
+          "logo": "https://softsync.id.vn/images/logo.png",
+          "description": "Nền tảng ứng dụng AI giúp học sinh, sinh viên đánh giá và phát triển kỹ năng mềm."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://softsync.id.vn/#website",
+          "url": "https://softsync.id.vn/",
+          "name": "SoftSync Space",
+          "inLanguage": ["vi", "en"],
+          "publisher": { "@id": "https://softsync.id.vn/#organization" }
+        },
+        {
+          "@type": "EducationalOrganization",
+          "@id": "https://softsync.id.vn/#education",
+          "name": "SoftSync Space",
+          "url": "https://softsync.id.vn/",
+          "description": "Ứng dụng học kỹ năng mềm bằng AI với bài đánh giá, tình huống thực tế và lộ trình cá nhân hóa.",
+          "parentOrganization": { "@id": "https://softsync.id.vn/#organization" }
+        }
+      ]
+    }
+    """;
+
     private bool chatbotOpen;
     private bool mentorDetailsOpen;
     private bool advisorDetailsOpen;
