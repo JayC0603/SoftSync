@@ -183,7 +183,7 @@
                     else if (quizQuestions.Count > 0)
                     {
                         <section class="quiz-sheet">
-                            <header><div><small>@(isTimeManagementLessonOne ? Tx("TIME MANAGEMENT QUIZ · 5 RANDOM QUESTIONS", "QUIZ QUẢN LÝ THỜI GIAN · 5 CÂU NGẪU NHIÊN") : Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN"))</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
+                            <header><div><small>@(IsTimeManagementLesson ? Tx("TIME MANAGEMENT PRACTICE · 5 RANDOM QUESTIONS", "THỰC HÀNH QUẢN LÝ THỜI GIAN · 5 CÂU NGẪU NHIÊN") : Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN"))</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
                             <div class="quiz-progress"><i style="width:@(revealedQuestions.Count * 20)%"></i></div>
                             @foreach (var entry in quizQuestions.Select((question, index) => (question, index)))
                             {
