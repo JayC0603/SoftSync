@@ -45,9 +45,9 @@
     <!-- Right: actions -->
     <div class="ss-nav-actions tw:flex tw:items-center tw:gap-3">
         <button class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle">
-            <i class="bi bi-translate"></i>
+            <i class="bi bi-globe2"></i>
             <span class="ss-lang-code">@CurrentLanguageCode</span>
-            <span class="ss-lang-name">@TargetLanguageName</span>
+            <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
         </button>
 
         <AuthorizeView>
@@ -193,26 +193,17 @@
     }
     .ss-icon-btn i { font-size: 1.05rem; }
     .ss-lang-btn {
-        gap: 0.4rem;
-        width: 142px;
-        padding: 0 0.75rem;
+        gap: 0.38rem;
+        width: 76px;
+        padding: 0 0.65rem;
+        border: 1px solid rgba(99, 102, 241, 0.18);
     }
     .ss-lang-code {
         font-size: 0.78rem;
         font-weight: 800;
         letter-spacing: 0.02em;
     }
-    .ss-lang-name {
-        color: inherit;
-        font-size: 0.78rem;
-        font-weight: 650;
-        opacity: 0.82;
-    }
-    .ss-lang-code::after {
-        content: "·";
-        margin-left: 0.35rem;
-        opacity: 0.55;
-    }
+    .ss-lang-chevron { margin-left: auto; font-size: 0.68rem !important; }
 
     /* Notification bell badge */
     .ss-bell { position: relative; }
@@ -344,8 +335,7 @@
         .ss-navpill { padding: 0.5rem 0.55rem; }
         .ss-icon-btn { min-width: 36px; height: 36px; padding: 0 0.4rem; }
         .ss-lang-btn { width: 36px; }
-        .ss-lang-name,
-        .ss-lang-code::after { display: none; }
+        .ss-lang-chevron { display: none; }
     }
 
     /* Mobile app shell: compact header plus thumb-friendly bottom navigation. */
@@ -369,7 +359,6 @@
             height: 38px;
             padding-inline: 0.55rem;
         }
-        .ss-lang-name, .ss-lang-code::after { display: none; }
         .ss-userchip { padding: 2px; border-radius: 50%; }
         .ss-avatar { width: 38px; height: 38px; }
 
@@ -528,7 +517,6 @@
     }
 
     private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
-    private string TargetLanguageName => L.Current == AppLanguage.Vi ? "English" : "Vietnamese";
     private string LanguageSwitchTitle => L.Current == AppLanguage.Vi
         ? "Switch to English"
         : "Chuyển sang tiếng Việt";
