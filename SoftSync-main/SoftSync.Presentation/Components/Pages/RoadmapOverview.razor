@@ -96,7 +96,7 @@
                         <div class="lesson-copy"><small>@Tx("Lesson", "Bài") @lesson.Step</small><h3>@Tx(lesson.En, lesson.Vi)</h3><p>@Tx(lesson.DescEn, lesson.DescVi)</p></div>
                         <div class="lesson-action">
                             @if (status == 2) { <span class="complete-label"><i class="bi bi-check-circle-fill"></i>@Tx("Completed", "Hoàn thành")</span><button @onclick="() => OpenSelectedStep(lesson.Step)" @onclick:stopPropagation="true">@Tx("Review", "Xem lại")</button> }
-                            else if (status == 1) { <button @onclick="OpenSelected" @onclick:stopPropagation="true">@Tx("Continue", "Tiếp tục")</button><b>+30 XP</b> }
+                            else if (status == 1) { <button @onclick="() => OpenSelectedStep(lesson.Step)" @onclick:stopPropagation="true">@Tx("Continue", "Tiếp tục")</button><b>+30 XP</b> }
                             else { <span><i class="bi bi-lock-fill"></i>@Tx("Locked", "Chưa mở khóa")</span><b>+30 XP</b> }
                         </div>
                     </article>
