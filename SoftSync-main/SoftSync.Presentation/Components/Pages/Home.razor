@@ -306,7 +306,7 @@
                 <div class="ss-chat-actions ss-chat-actions--choices">
                     @if (chatView == "welcome")
                     {
-                        <button type="button" @onclick='() => Nav.NavigateTo("/assessments")'>📋 @L["chatbot.action.assess"]</button>
+                        <button type="button" @onclick="NavigateToAssessmentAsync">📋 @L["chatbot.action.assess"]</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/roadmap")'>🎯 @L["chatbot.action.roadmap"]</button>
                         <button type="button" @onclick='() => chatView = "mentor"'>👥 @L["chatbot.action.mentor"]</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/progress")'>📈 @L["chatbot.action.progress"]</button>
@@ -326,7 +326,7 @@
                     }
                     else
                     {
-                        <button type="button" @onclick='() => Nav.NavigateTo(chatView == "mentor" ? "/community" : "/assessments")'>@L["chatbot.action.continue"]</button>
+                        <button type="button" @onclick="ContinueChatActionAsync">@L["chatbot.action.continue"]</button>
                         <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
                     }
                 </div>
@@ -1491,6 +1491,23 @@
     private bool advisorDetailsOpen;
     private bool xuanDetailsOpen;
     private string chatView = "welcome";
+
+    private async Task NavigateToAssessmentAsync()
+    {
+        var userId = await AuthProvider.GetUserIdAsync();
+        Nav.NavigateTo(userId > 0 ? $"/assessment/{userId}" : "/Account/Login");
+    }
+
+    private async Task ContinueChatActionAsync()
+    {
+        if (chatView == "mentor")
+        {
+            Nav.NavigateTo("/community");
+            return;
+        }
+
+        await NavigateToAssessmentAsync();
+    }
 
     protected override async Task OnInitializedAsync()
     {

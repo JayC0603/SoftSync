@@ -53,7 +53,7 @@ else
                             var current = !item.IsCompleted && index == CurrentStep;
                             <button class="roadmap-row @(item.IsCompleted ? "done" : current ? "current" : "locked")" disabled="@(!item.IsCompleted && !current)" @onclick='() => Nav.NavigateTo("/roadmap")'>
                                 <i class="bi @(item.IsCompleted ? "bi-check-lg" : current ? "bi-stars" : "bi-lock-fill")"></i>
-                                <span><strong>@DisplayTitle(item, index)</strong><small>@item.Description</small></span>
+                                <span><strong>@DisplayTitle(item, index)</strong><small>@LocalizeRoadmapDescription(item)</small></span>
                                 <em>@(item.IsCompleted ? T("Đã hoàn thành", "Completed") : current ? T("Đang học", "Learning") : T("Bị khóa", "Locked"))</em>
                             </button>
                         }
@@ -70,7 +70,7 @@ else
                     <div class="skill-rings">
                         @foreach (var item in SkillCards)
                         {
-                            <div><div class="ring" style="--value:@item.PercentComplete;--ring:@RingColor(item.PercentComplete)"><span>@item.PercentComplete%</span></div><small>@item.SkillName</small></div>
+                            <div><div class="ring" style="--value:@item.PercentComplete;--ring:@RingColor(item.PercentComplete)"><span>@item.PercentComplete%</span></div><small>@LocalizeSkillName(item.SkillName)</small></div>
                         }
                     </div>
                 </section>
@@ -112,7 +112,7 @@ else
     private string T(string vi, string en) => Vi ? vi : en;
     private int CurrentStep => Math.Max(1, roadmapItems.FindIndex(x => !x.IsCompleted) + 1);
     private RoadmapItemDto? CurrentItem => roadmapItems.FirstOrDefault(x => !x.IsCompleted) ?? roadmapItems.LastOrDefault();
-    private string CurrentTitle => CurrentItem?.Title ?? T("Ưu tiên công việc", "Prioritizing tasks");
+    private string CurrentTitle => CurrentItem is null ? T("Ưu tiên công việc", "Prioritizing tasks") : LocalizeRoadmapTitle(CurrentItem.Title);
     private int CurrentPercent => progress.Count == 0 ? 0 : Math.Clamp(progress.Max(x => x.PercentComplete), 0, 100);
     private int CompletionPercent => totalItems == 0 ? 0 : completedItems * 100 / totalItems;
     private IEnumerable<RoadmapItemDto> VisibleRoadmap => roadmapItems.Take(5);
@@ -139,7 +139,65 @@ else
                 yield return new ProgressDto { SkillName = name, PercentComplete = index == 0 ? CompletionPercent : 0 };
     }
 
-    private string DisplayTitle(RoadmapItemDto item, int index) => index == 1 ? $"{T("Video giới thiệu", "Introduction video")}" : $"{T("Bài", "Lesson")} {index - 1}: {item.Title}";
+    private string DisplayTitle(RoadmapItemDto item, int index) => index == 1
+        ? T("Video giới thiệu", "Introduction video")
+        : $"{T("Bài", "Lesson")} {index - 1}: {LocalizeRoadmapTitle(item.Title)}";
+
+    private string LocalizeRoadmapTitle(string title)
+    {
+        if (Vi || string.IsNullOrWhiteSpace(title)) return title;
+
+        var skill = EnglishSkillIn(title);
+        if (title.Contains("Nền tảng", StringComparison.OrdinalIgnoreCase)) return $"{skill} Foundations";
+        if (title.Contains("Thực hành", StringComparison.OrdinalIgnoreCase)) return $"Practicing {skill}";
+        if (title.Contains("Lắng nghe chủ động", StringComparison.OrdinalIgnoreCase)) return "Active Listening";
+        if (title.Contains("Phản hồi xây dựng", StringComparison.OrdinalIgnoreCase)) return "Constructive Feedback";
+        if (title.Contains("Giao tiếp nâng cao", StringComparison.OrdinalIgnoreCase)) return "Advanced Communication";
+
+        return ReplaceSkillNames(title)
+            .Replace("Tuần", "Week", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string LocalizeRoadmapDescription(RoadmapItemDto item)
+    {
+        if (Vi || string.IsNullOrWhiteSpace(item.Description)) return item.Description;
+
+        var skill = EnglishSkillIn(item.Title);
+        if (item.Description.Contains("Nắm lý thuyết", StringComparison.OrdinalIgnoreCase))
+            return $"Learn the core theory of {skill.ToLowerInvariant()} and complete basic exercises to build lasting habits.";
+        if (item.Description.Contains("Áp dụng", StringComparison.OrdinalIgnoreCase))
+            return $"Apply {skill.ToLowerInvariant()} in practical situations through case studies and reflection after each session.";
+        if (item.Description.Contains("mô hình giao tiếp hai chiều", StringComparison.OrdinalIgnoreCase))
+            return "Understand the two-way communication model, its core components, and principles of effective communication.";
+        if (item.Description.Contains("Phân biệt nghe", StringComparison.OrdinalIgnoreCase))
+            return "Distinguish hearing from active listening and practice focus, empathy, confirmation, and clarifying questions.";
+        if (item.Description.Contains("Phản hồi tôn trọng", StringComparison.OrdinalIgnoreCase))
+            return "Give respectful feedback, manage emotions, focus on the issue, and propose appropriate solutions.";
+        if (item.Description.Contains("Tổng hợp kỹ năng giao tiếp", StringComparison.OrdinalIgnoreCase))
+            return "Combine communication skills and apply them in real study and workplace situations.";
+
+        return ReplaceSkillNames(item.Description);
+    }
+
+    private string LocalizeSkillName(string name) => Vi ? name : ReplaceSkillNames(name);
+
+    private static string EnglishSkillIn(string value)
+    {
+        if (value.Contains("Quản lý thời gian", StringComparison.OrdinalIgnoreCase)) return "Time Management";
+        if (value.Contains("Tư duy phản biện", StringComparison.OrdinalIgnoreCase)) return "Critical Thinking";
+        if (value.Contains("Giao tiếp", StringComparison.OrdinalIgnoreCase)) return "Communication";
+        if (value.Contains("Làm việc nhóm", StringComparison.OrdinalIgnoreCase)) return "Teamwork";
+        return "Soft Skills";
+    }
+
+    private static string ReplaceSkillNames(string value) => value
+        .Replace("Kỹ năng Quản lý thời gian", "Time Management", StringComparison.OrdinalIgnoreCase)
+        .Replace("Quản lý thời gian", "Time Management", StringComparison.OrdinalIgnoreCase)
+        .Replace("Kỹ năng Tư duy phản biện", "Critical Thinking", StringComparison.OrdinalIgnoreCase)
+        .Replace("Tư duy phản biện", "Critical Thinking", StringComparison.OrdinalIgnoreCase)
+        .Replace("Kỹ năng Giao tiếp", "Communication", StringComparison.OrdinalIgnoreCase)
+        .Replace("Giao tiếp", "Communication", StringComparison.OrdinalIgnoreCase)
+        .Replace("Làm việc nhóm", "Teamwork", StringComparison.OrdinalIgnoreCase);
     private static string RingColor(int value) => value >= 60 ? "#7657f6" : value >= 40 ? "#2698ec" : value >= 30 ? "#35ad66" : "#ff841c";
     private static string FirstName(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? value;
 }
