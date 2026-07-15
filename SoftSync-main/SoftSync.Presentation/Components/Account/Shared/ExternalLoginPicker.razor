@@ -4,14 +4,9 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-@if (externalLogins.Length == 0)
+@if (externalLogins.Length > 0)
 {
-    <div class="tw:text-center text-muted tw:text-sm tw:mt-2">
-        @L["auth.googleNotConfigured"]
-    </div>
-}
-else
-{
+    <div class="external-divider"><span>@L["auth.or"]</span></div>
     <form class="tw:mt-2" action="Account/PerformExternalLogin" method="post">
         <AntiforgeryToken />
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
@@ -24,6 +19,11 @@ else
         }
     </form>
 }
+
+<style>
+    .external-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 16px; color: #9297a6; font-size: .8rem; }
+    .external-divider::before, .external-divider::after { content: ""; height: 1px; flex: 1; background: #e4e6ef; }
+</style>
 
 @code {
     private AuthenticationScheme[] externalLogins = [];

@@ -542,6 +542,12 @@ public static class Translations
         ["auth.loginWithOtp"] = ("Sign in with a code", "Đăng nhập bằng mã OTP"),
         ["auth.noAccount"] = ("No account yet?", "Chưa có tài khoản?"),
         ["auth.haveAccount"] = ("Already have an account?", "Đã có tài khoản?"),
+        ["auth.or"] = ("or", "hoặc"),
+        ["auth.backHome"] = ("Back to home", "Về trang chủ"),
+        ["auth.brand.eyebrow"] = ("AI-POWERED SOFT-SKILLS LEARNING", "HỌC KỸ NĂNG MỀM CÙNG AI"),
+        ["auth.brand.title"] = ("Build your skills,", "Phát triển kỹ năng,"),
+        ["auth.brand.titleAccent"] = ("shape your future.", "kiến tạo tương lai."),
+        ["auth.brand.description"] = ("Practice with real-world scenarios and grow through a learning path designed for you.", "Rèn luyện qua tình huống thực tế và phát triển theo lộ trình dành riêng cho bạn."),
 
         // ===== Auth: register =====
         ["auth.register"] = ("Create account", "Tạo tài khoản"),

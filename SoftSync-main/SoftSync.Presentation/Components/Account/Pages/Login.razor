@@ -13,8 +13,10 @@
 
 <PageTitle>@L["auth.login.title"]</PageTitle>
 
-<h2 class="tw:font-bold tw:mb-2 tw:text-center">@L["auth.login.title"]</h2>
-<p class="text-muted tw:text-center tw:mb-6">@L["auth.login.subtitle"]</p>
+<div class="login-heading">
+    <h2>@L["auth.login.title"]</h2>
+    <p>@L["auth.login.subtitle"]</p>
+</div>
 
 @if (Suspended == 1)
 {
@@ -41,25 +43,38 @@
         <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" />
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
-    <div class="form-check tw:mb-4">
-        <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
-        <label class="form-check-label" for="rememberMe">@L["auth.rememberMe"]</label>
+    <div class="login-options">
+        <div class="form-check">
+            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
+            <label class="form-check-label" for="rememberMe">@L["auth.rememberMe"]</label>
+        </div>
+        <a href="Account/ForgotPassword">@L["auth.forgot"]</a>
     </div>
 
     <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.login.submit"]</button>
 </EditForm>
 
-<div class="tw:flex tw:justify-between tw:mt-4 tw:text-sm">
-    <a href="Account/ForgotPassword">@L["auth.forgot"]</a>
-    <a href="Account/LoginWithOtp">@L["auth.loginWithOtp"]</a>
-</div>
-
-<hr class="tw:my-4" />
+<a class="login-otp" href="Account/LoginWithOtp">@L["auth.loginWithOtp"]</a>
 <ExternalLoginPicker />
 
-<div class="tw:text-center tw:mt-4 tw:text-sm">
+<div class="login-register">
     @L["auth.noAccount"] <a href="Account/Register">@L["auth.register"]</a>
 </div>
+
+<style>
+    .login-heading { margin-bottom: 28px; }
+    .login-heading h2 { margin: 0 0 8px; color: #1f2937; font-size: 2rem; font-weight: 800; letter-spacing: -.025em; }
+    .login-heading p { margin: 0; color: #7b8291; }
+    .login-options { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 2px 0 22px; font-size: .9rem; }
+    .login-options a, .login-register a { color: #5368ed; font-weight: 600; text-decoration: none; }
+    .login-options a:hover, .login-register a:hover { text-decoration: underline; }
+    .login-otp { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 12px; padding: 11px 16px; border: 1px solid #d9dcf5; border-radius: 12px; color: #4e55b8; font-weight: 650; text-decoration: none; background: rgba(255,255,255,.72); }
+    .login-otp:hover { border-color: #8b8cf6; color: #4f46e5; background: #fff; }
+    .login-register { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e7e8f1; text-align: center; color: #626978; font-size: .92rem; }
+    .form-control { border-radius: 12px; border-color: #d9dce7; background: rgba(255,255,255,.84); }
+    .form-control:focus { border-color: #7778ef; box-shadow: 0 0 0 4px rgba(99,102,241,.11); }
+    @@media (max-width: 420px) { .login-options { align-items: flex-start; flex-direction: column; gap: 10px; } }
+</style>
 
 @code {
     private string? errorMessage;
