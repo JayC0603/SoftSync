@@ -25,7 +25,14 @@
                     <h2>@channel.Name</h2>
                     <p>@L[channel.DescriptionKey]</p>
                 </div>
-                <button type="button" @onclick="() => ShowPending(channel.Name)">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></button>
+                @if (channel.Url is not null)
+                {
+                    <a href="@channel.Url" target="_blank" rel="noopener noreferrer" class="community-link-btn">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></a>
+                }
+                else
+                {
+                    <button type="button" @onclick="() => ShowPending(channel.Name)">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></button>
+                }
             </article>
         }
     </section>
@@ -42,7 +49,7 @@
     private static readonly Channel[] Channels =
     [
         new("Discord", "bi-discord", "discord", "community.discord.desc", "community.action.join"),
-        new("Facebook", "bi-facebook", "facebook", "community.facebook.desc", "community.action.follow"),
+        new("Facebook", "bi-facebook", "facebook", "community.facebook.desc", "community.action.follow", "https://www.facebook.com/SoftSyncSpace?locale=vi_VN"),
         new("TikTok", "bi-tiktok", "tiktok", "community.tiktok.desc", "community.action.follow"),
         new("YouTube", "bi-youtube", "youtube", "community.youtube.desc", "community.action.subscribe"),
         new("Website", "bi-globe2", "website", "community.website.desc", "community.action.visit"),
@@ -50,7 +57,7 @@
     ];
 
     private void ShowPending(string channel) => notification = string.Format(L["community.linkPending"], channel);
-    private sealed record Channel(string Name, string Icon, string ColorClass, string DescriptionKey, string ActionKey);
+    private sealed record Channel(string Name, string Icon, string ColorClass, string DescriptionKey, string ActionKey, string? Url = null);
 }
 
 <style>
@@ -72,8 +79,28 @@
     .website { color: #7c3aed; background: #f3e8ff; } .events { color: #ea580c; background: #fff7ed; }
     .community-copy h2 { color: #111827; margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 850; }
     .community-copy p { color: #64748b; margin: 0; font-size: .85rem; }
-    .community-card button { color: #4f46e5; background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.22); border-radius: 999px; padding: .5rem .75rem; font-size: .8rem; font-weight: 800; white-space: nowrap; }
-    .community-card button:hover { color: white; background: linear-gradient(135deg,#6366f1,#8b5cf6); }
+
+    .community-card button,
+    .community-card .community-link-btn {
+        color: #4f46e5;
+        background: rgba(99,102,241,.1);
+        border: 1px solid rgba(99,102,241,.22);
+        border-radius: 999px;
+        padding: .5rem .75rem;
+        font-size: .8rem;
+        font-weight: 800;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        text-decoration: none;
+    }
+
+        .community-card button:hover,
+        .community-card .community-link-btn:hover {
+            color: white;
+            background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        }
     .community-notice { display: flex; align-items: center; gap: .55rem; margin-top: 1rem; padding: .9rem 1rem; color: #4338ca; background: rgba(238,242,255,.88); border: 1px solid rgba(99,102,241,.25); border-radius: 14px; font-weight: 650; }
     html[data-theme="dark"] .community-hero { background: linear-gradient(135deg,rgba(45,39,86,.86),rgba(30,27,75,.78)); }
     html[data-theme="dark"] .community-hero h1, html[data-theme="dark"] .community-copy h2 { color: #f8fafc; }

@@ -24,6 +24,127 @@ public static class Translations
         ["nav.progress"] = ("Progress", "Tiến độ"),
         ["nav.community"] = ("Community", "Cộng đồng"),
 
+        // ===== Home / About SoftSync Space =====
+        ["home.about.heading"] = ("Welcome to SoftSync Space", "Chào mừng bạn đến với SoftSync Space"),
+        ["home.about.eyebrow"] = ("About SoftSync Space", "Giới thiệu SoftSync Space"),
+        ["home.about.cta"] = ("Explore Community", "Khám phá Community"),
+        ["home.about.headingDesc"] = (
+            "An AI-powered platform for young people to grow soft skills, connect with community, and grow more confident.",
+            "Nền tảng ứng dụng AI giúp người trẻ phát triển kỹ năng mềm, kết nối cộng đồng và tự tin hơn."),
+        ["home.about.intro1"] = (
+            "We are SoftSync Space — a platform that applies artificial intelligence (AI) to help young people develop soft skills, connect with community, and grow more confident on their journey through learning, work, and life.",
+            "Chúng mình là SoftSync Space – một nền tảng ứng dụng trí tuệ nhân tạo (AI) được tạo ra với mong muốn giúp người trẻ phát triển kỹ năng mềm, kết nối cộng đồng và tự tin hơn trên hành trình học tập, làm việc cũng như cuộc sống."),
+        ["home.about.intro2"] = (
+            "We believe that in a world moving fast with technology, knowledge alone is not enough. What sets each person apart is the ability to communicate, think critically, manage time, solve problems, and adapt to a constantly changing society. That is exactly why SoftSync Space was created.",
+            "Chúng mình tin rằng, trong một thế giới phát triển rất nhanh bởi công nghệ, kiến thức thôi là chưa đủ. Điều tạo nên sự khác biệt của mỗi người chính là khả năng giao tiếp, tư duy phản biện, quản lý thời gian, giải quyết vấn đề và thích nghi với những thay đổi không ngừng của xã hội. Đó cũng chính là lý do SoftSync Space được ra đời."),
+        ["home.about.intro3"] = (
+            "SoftSync Space is not simply an app for learning soft skills — it aims to be a companion that always listens, supports, and walks with you step by step as you grow. AI in SoftSync does not replace people; it acts as a smart assistant that helps you understand your strengths and what to improve, builds a learning path suited to you, and connects you with people who can help you progress every day.",
+            "Không đơn thuần là một ứng dụng học kỹ năng mềm, SoftSync Space mong muốn trở thành một người bạn đồng hành, luôn lắng nghe, hỗ trợ và cùng bạn từng bước phát triển bản thân. AI trong SoftSync không thay thế con người mà đóng vai trò như một trợ lý thông minh, giúp bạn hiểu rõ điểm mạnh, điểm cần cải thiện, xây dựng lộ trình học tập phù hợp và kết nối với những người có thể giúp bạn tiến bộ mỗi ngày."),
+
+        ["home.why.heading"] = ("Why SoftSync Space was created", "Tại sao SoftSync Space ra đời?"),
+        ["home.why.p1"] = (
+            "Today, many students and young people struggle to develop the skills that matter most for success in study and work. While the Internet and AI help us access knowledge faster, they also make many people more dependent on technology, weakening independent thinking, communication, and real-world problem solving.",
+            "Ngày nay, rất nhiều học sinh, sinh viên và người trẻ đang gặp khó khăn trong việc phát triển những kỹ năng quan trọng để thành công trong học tập và công việc. Mặc dù Internet và AI giúp chúng ta tiếp cận tri thức nhanh hơn, nhưng cũng khiến không ít người trở nên phụ thuộc vào công nghệ, giảm khả năng tư duy độc lập, giao tiếp và giải quyết vấn đề trong thực tế."),
+        ["home.why.p2"] = (
+            "Beyond that, many young people feel lonely, not knowing who to turn to, where to start improving themselves, or lacking a positive environment to learn and grow together.",
+            "Bên cạnh đó, nhiều bạn trẻ cảm thấy cô đơn khi không biết tìm ai để chia sẻ, không biết bắt đầu cải thiện bản thân từ đâu hoặc thiếu một môi trường tích cực để cùng nhau học hỏi và phát triển."),
+        ["home.why.p3"] = (
+            "Especially for students with disabilities, access to learning platforms or community activities still faces many barriers. We believe everyone deserves an equal opportunity to learn and grow.",
+            "Đặc biệt hơn, đối với học sinh và sinh viên khuyết tật, việc tiếp cận các nền tảng học tập hay hoạt động cộng đồng vẫn còn nhiều rào cản. Chúng mình tin rằng mọi người đều xứng đáng có cơ hội học tập và phát triển một cách bình đẳng."),
+        ["home.why.p4"] = (
+            "From these concerns, SoftSync Space was built as a space where technology, people, and community connect to create positive change.",
+            "Từ những trăn trở đó, SoftSync Space được xây dựng như một không gian nơi công nghệ, con người và cộng đồng cùng kết nối để tạo nên những thay đổi tích cực."),
+
+        ["home.meaning.heading"] = ("What does \"SoftSync Space\" mean?", "SoftSync Space có ý nghĩa gì?"),
+        ["home.meaning.headingDesc"] = (
+            "The name carries three core values.",
+            "Tên gọi SoftSync Space mang trong mình ba giá trị cốt lõi."),
+        ["home.about.soft.title"] = ("Soft", "Soft"),
+        ["home.about.soft.desc"] = (
+            "Stands for Soft Skills — the essential skills for confidently learning, working, and building relationships in life.",
+            "Đại diện cho Soft Skills – những kỹ năng mềm cần thiết để mỗi người tự tin học tập, làm việc và xây dựng các mối quan hệ trong cuộc sống."),
+        ["home.about.sync.title"] = ("Sync", "Sync"),
+        ["home.about.sync.desc"] = (
+            "Carries the meaning of connection and companionship: between users and AI, between learners and community, between those who need help and those ready to share their experience.",
+            "Mang ý nghĩa của sự kết nối và đồng hành. Đó là sự kết nối giữa người dùng với AI, giữa người học với cộng đồng, giữa những người đang cần giúp đỡ với những người sẵn sàng chia sẻ kinh nghiệm và hỗ trợ."),
+        ["home.about.space.title"] = ("Space", "Space"),
+        ["home.about.space.desc"] = (
+            "An open, friendly, and safe space where anyone can learn, grow, and become a better version of themselves, regardless of circumstance or ability.",
+            "Là một không gian mở, thân thiện và an toàn, nơi bất kỳ ai cũng có thể học hỏi, phát triển và trở thành phiên bản tốt hơn của chính mình, bất kể hoàn cảnh hay khả năng của họ."),
+        ["home.meaning.closing"] = (
+            "SoftSync Space is not just a name — it is a commitment to a modern, humane, and inclusive learning environment for everyone.",
+            "SoftSync Space không chỉ là một cái tên, mà còn là lời cam kết về một môi trường học tập hiện đại, nhân văn và hòa nhập dành cho tất cả mọi người."),
+
+        ["home.how.heading"] = ("How does SoftSync Space work?", "SoftSync Space hoạt động như thế nào?"),
+        ["home.how.headingDesc"] = (
+            "SoftSync Space is designed as a skill-development journey, where every user has their own path suited to their needs.",
+            "SoftSync Space được thiết kế như một hành trình phát triển kỹ năng, nơi mỗi người dùng đều có một lộ trình riêng phù hợp với nhu cầu của bản thân."),
+        ["home.how.step1.title"] = ("AI Assessment", "Đánh giá bằng AI"),
+        ["home.how.step1.desc"] = (
+            "First, AI helps you complete soft-skill assessments through tests, games, or realistic simulated situations. The system then analyzes your strengths and gaps, and proposes the most suitable development path.",
+            "Trước tiên, AI sẽ giúp bạn thực hiện các bài đánh giá kỹ năng mềm thông qua những bài kiểm tra, trò chơi hoặc tình huống mô phỏng thực tế. Từ đó, hệ thống sẽ phân tích điểm mạnh, điểm còn hạn chế và đề xuất lộ trình phát triển phù hợp nhất."),
+        ["home.how.step2.title"] = ("Community & Peers", "Cộng đồng & Peer"),
+        ["home.how.step2.desc"] = (
+            "Once you understand yourself better, you'll be connected with peers, study groups, or communities sharing the same goals — to practice, share experience, and grow together through real activities.",
+            "Sau khi hiểu rõ bản thân, bạn sẽ được kết nối với những người bạn đồng hành (Peer), các nhóm học tập hoặc cộng đồng có cùng mục tiêu để cùng nhau luyện tập, chia sẻ kinh nghiệm và phát triển kỹ năng thông qua những hoạt động thực tế."),
+        ["home.how.step3.title"] = ("Mentors & Experts", "Mentor & Chuyên gia"),
+        ["home.how.step3.desc"] = (
+            "When you need deeper support, you can book a session with a Mentor or Expert for direct guidance. Common questions are always supported by AI 24/7, while issues needing real-world experience or specialized direction are accompanied by experts in each field.",
+            "Khi cần được hỗ trợ chuyên sâu, bạn có thể đặt lịch gặp Mentor hoặc Expert để được tư vấn trực tiếp. Những câu hỏi phổ biến sẽ luôn được AI hỗ trợ 24/7, còn các vấn đề cần kinh nghiệm thực tiễn hoặc định hướng chuyên môn sẽ được đồng hành bởi những chuyên gia trong từng lĩnh vực."),
+        ["home.how.closing"] = (
+            "Thanks to the combination of AI and people, SoftSync Space doesn't just help you learn — it helps you practice and grow every day.",
+            "Nhờ sự kết hợp giữa AI và con người, SoftSync Space không chỉ giúp bạn học, mà còn giúp bạn thực hành và trưởng thành từng ngày."),
+
+        ["home.diff.heading"] = ("What makes SoftSync Space different?", "Điều gì làm SoftSync Space khác biệt?"),
+        ["home.diff.headingDesc"] = (
+            "Our biggest difference isn't using AI — it's how we use AI to support people instead of replacing them.",
+            "Điểm khác biệt lớn nhất của SoftSync Space không nằm ở việc sử dụng AI, mà ở cách chúng mình ứng dụng AI để hỗ trợ con người thay vì thay thế con người."),
+        ["home.diff.item1"] = (
+            "AI accompanies you in assessing skills, building a personalized path, and tracking your progress.",
+            "AI sẽ đồng hành cùng bạn trong việc đánh giá kỹ năng, xây dựng lộ trình cá nhân hóa và theo dõi quá trình phát triển."),
+        ["home.diff.item2"] = (
+            "A peer community gives you extra motivation to learn, practice, and share real experiences.",
+            "Cộng đồng đồng đẳng giúp bạn có thêm động lực học tập, luyện tập và chia sẻ những trải nghiệm thực tế."),
+        ["home.diff.item3"] = (
+            "Mentors and Experts help solve deeper issues that AI cannot replace.",
+            "Mentor và Expert sẽ hỗ trợ giải quyết những vấn đề chuyên sâu mà AI không thể thay thế."),
+        ["home.diff.item4"] = (
+            "Tests, games, simulations, and real challenges make learning soft skills fun and easy to apply in life.",
+            "Hệ thống bài kiểm tra, trò chơi, tình huống mô phỏng và thử thách thực tế giúp việc học kỹ năng mềm trở nên thú vị và dễ áp dụng hơn vào cuộc sống."),
+        ["home.diff.item5"] = (
+            "The whole platform is built on Universal Design principles, so students and people with disabilities can access and use it conveniently, equally, and safely.",
+            "Toàn bộ nền tảng được phát triển theo nguyên tắc Universal Design, đảm bảo học sinh, sinh viên và cả người khuyết tật đều có thể tiếp cận và sử dụng ứng dụng một cách thuận tiện, bình đẳng và an toàn."),
+
+        ["home.mission.heading"] = ("Our mission", "Sứ mệnh của chúng mình"),
+        ["home.mission.p1"] = (
+            "SoftSync Space wants to build a community where every young person has the opportunity to grow soft skills, connect with people who inspire them, and step confidently into the future.",
+            "SoftSync Space mong muốn xây dựng một cộng đồng nơi mỗi người trẻ đều có cơ hội phát triển kỹ năng mềm, kết nối với những người truyền cảm hứng và tự tin bước vào tương lai."),
+        ["home.mission.p2"] = (
+            "We believe a small skill practiced every day can create huge changes in life. That's why SoftSync Space doesn't just walk with you in learning, but also helps you build confidence, initiative, and adaptability — key factors for success in the 21st century.",
+            "Chúng mình tin rằng, một kỹ năng nhỏ được rèn luyện mỗi ngày có thể tạo nên những thay đổi rất lớn trong cuộc sống. Vì vậy, SoftSync Space không chỉ đồng hành cùng bạn trong việc học, mà còn giúp bạn xây dựng sự tự tin, tinh thần chủ động và khả năng thích nghi – những yếu tố quan trọng để thành công trong thế kỷ 21."),
+        ["home.vision.heading"] = ("Our vision", "Tầm nhìn"),
+        ["home.vision.desc"] = (
+            "SoftSync Space aims to become Vietnam's leading AI-powered soft-skills development platform for students and young people — while building a modern digital learning environment where technology connects people, drives inclusion, and creates equal opportunities for everyone.",
+            "SoftSync Space hướng đến trở thành nền tảng phát triển kỹ năng mềm ứng dụng AI hàng đầu tại Việt Nam dành cho học sinh, sinh viên và người trẻ. Đồng thời, chúng mình mong muốn xây dựng một môi trường học tập số hiện đại, nơi công nghệ được sử dụng để kết nối con người, thúc đẩy sự hòa nhập và mang đến cơ hội phát triển bình đẳng cho tất cả mọi người."),
+
+        ["home.mission.quote"] = (
+            "Develop skills – Connect people – Accompany the future.",
+            "Phát triển kỹ năng – Kết nối con người – Đồng hành cùng tương lai."),
+        ["home.mission.quote2"] = (
+            "Every skill you practice today opens more opportunities for tomorrow. SoftSync Space is always here to walk this journey with you. 💙",
+            "Mỗi kỹ năng bạn rèn luyện hôm nay sẽ mở ra nhiều cơ hội cho ngày mai. SoftSync Space luôn ở đây để đồng hành cùng bạn trên hành trình ấy. 💙"),
+
+        ["home.contact.heading"] = ("Get in touch", "Liên hệ với SoftSync"),
+        ["home.contact.desc"] = (
+            "Need advice, partnership, or support related to the project? Connect with the SoftSync team below — we're always ready to hear your ideas and discuss suitable collaboration opportunities.",
+            "Bạn cần tư vấn, hợp tác hoặc hỗ trợ liên quan đến dự án? Hãy kết nối với đội ngũ SoftSync qua các kênh dưới đây. Chúng tôi luôn sẵn sàng tiếp nhận ý kiến và trao đổi về các cơ hội hợp tác phù hợp."),
+        ["home.contact.email"] = ("Email", "Email"),
+        ["home.contact.hotline"] = ("Hotline", "Hotline"),
+        ["home.contact.facebook"] = ("Facebook", "Facebook"),
+        ["home.contact.address"] = ("Address", "Địa chỉ"),
+        ["home.contact.mentor"] = ("Project Mentor", "Mentor dự án"),
+        ["home.contact.lead"] = ("Team Lead", "Trưởng nhóm dự án"),
+
         // ===== Home =====
         ["home.tagline"] = ("AI-powered soft skills learning app", "Ứng dụng học kỹ năng mềm bằng AI"),
         ["home.heroTitlePrefix"] = ("Build the skills that ", "Phát triển kỹ năng, "),

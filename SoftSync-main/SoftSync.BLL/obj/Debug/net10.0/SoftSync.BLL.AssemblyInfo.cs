@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SoftSync.BLL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1dff6f074b4c97cf600935465984db113311c90e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SoftSync.BLL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SoftSync.BLL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
