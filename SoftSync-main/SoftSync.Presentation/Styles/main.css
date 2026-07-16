@@ -45,6 +45,24 @@
        light aurora background. */
     --gradient: linear-gradient(135deg, var(--color-brand), var(--color-brand-violet));
     --gradient-action: linear-gradient(135deg, #2563eb, #3b82f6);
+
+    /* Shared interaction tokens: quick enough to feel immediate, consistent
+       across mouse, keyboard and touch input. */
+    --ss-motion-fast: 180ms;
+    --ss-focus-ring: #4f46e5;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--ss-focus-ring) 78%, white);
+    outline-offset: 3px;
+}
+
+:where(button, a, [role="button"]) {
+    touch-action: manipulation;
+}
+
+html[data-theme="dark"] {
+    --ss-focus-ring: #c4b5fd;
 }
 
 /* ===== Liquid Glass System ===== */

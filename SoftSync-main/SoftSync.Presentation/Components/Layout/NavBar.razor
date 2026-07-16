@@ -16,12 +16,12 @@
 
 <nav class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center">
     <!-- Brand -->
-    <div class="ss-brand tw:flex tw:items-center tw:gap-2 cursor-pointer" @onclick='() => Nav.NavigateTo(HomeHref)'>
+    <a class="ss-brand tw:flex tw:items-center tw:gap-2 cursor-pointer" href="@HomeHref" aria-label="SoftSync - @L["nav.home"]">
         <div class="ss-brand-logo tw:flex tw:items-center tw:justify-center">
             <img src="images/logo.png" alt="S" class="tw:w-full tw:h-full tw:object-cover" />
         </div>
         <span class="tw:text-xl tw:font-bold ss-gradient-text">SoftSync</span>
-    </div>
+    </a>
 
     <!-- Center: nav pills -->
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
@@ -44,7 +44,7 @@
 
     <!-- Right: actions -->
     <div class="ss-nav-actions tw:flex tw:items-center tw:gap-3">
-        <button class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle">
+                <button type="button" class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle" aria-label="@LanguageSwitchTitle">
             <span class="ss-lang-flag" aria-hidden="true">@(L.Current == AppLanguage.Vi ? "🇻🇳" : "🇬🇧")</span>
             <span class="ss-lang-code">@CurrentLanguageCode</span>
             <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
@@ -52,15 +52,15 @@
 
         <AuthorizeView>
             <Authorized>
-                <button class="ss-icon-btn ss-search-btn" title="@L["nav.search"]">
+                <button type="button" class="ss-icon-btn ss-search-btn" title="@L["nav.search"]" aria-label="@L["nav.search"]">
                     <i class="bi bi-search"></i>
                 </button>
-                <button class="ss-icon-btn ss-bell" title="@L["nav.notifications"]">
+                <button type="button" class="ss-icon-btn ss-bell" title="@L["nav.notifications"]" aria-label="@L["nav.notifications"]">
                     <i class="bi bi-bell"></i>
                     <span class="ss-bell-badge">3</span>
                 </button>
 
-                <div class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]">
+                <button type="button" class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]" aria-label="@L["nav.settings"]">
                     <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
                         @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
                         {
@@ -80,7 +80,7 @@
                         <span class="ss-userchip-sub">@L["nav.level"] @(profile?.Level ?? 1)</span>
                     </div>
                     <i class="bi bi-chevron-down ss-user-chevron" aria-hidden="true"></i>
-                </div>
+                </button>
             </Authorized>
             <NotAuthorized>
                 <div class="ss-auth-actions">
@@ -128,6 +128,7 @@
         overflow: hidden;
     }
     .cursor-pointer { cursor: pointer; }
+    .ss-brand { color: inherit; text-decoration: none; }
 
     /* Center nav pills */
     .ss-navpill {
@@ -227,6 +228,10 @@
         border-radius: 999px;
         cursor: pointer;
         transition: background 0.18s ease;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
     }
     .ss-userchip:hover { background: rgba(255, 255, 255, 0.6); }
     .ss-avatar {
