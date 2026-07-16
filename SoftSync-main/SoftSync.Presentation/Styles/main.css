@@ -50,6 +50,27 @@
        across mouse, keyboard and touch input. */
     --ss-motion-fast: 180ms;
     --ss-focus-ring: #4f46e5;
+
+    /* SoftSync product design system — semantic tokens shared by every page. */
+    --ss-canvas: #f8f9fc;
+    --ss-surface: #ffffff;
+    --ss-surface-soft: #f3f4fb;
+    --ss-surface-accent: #eef2ff;
+    --ss-text: #151a35;
+    --ss-text-muted: #667085;
+    --ss-border: #e2e5ef;
+    --ss-primary: #4f46e5;
+    --ss-primary-hover: #4338ca;
+    --ss-success: #16845b;
+    --ss-warning: #b25e09;
+    --ss-danger: #c83c4b;
+    --ss-radius-sm: 10px;
+    --ss-radius-md: 14px;
+    --ss-radius-lg: 20px;
+    --ss-radius-xl: 28px;
+    --ss-shadow-sm: 0 6px 18px rgba(24, 32, 72, 0.06);
+    --ss-shadow-md: 0 16px 42px rgba(24, 32, 72, 0.09);
+    --ss-content-width: 1280px;
 }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
@@ -63,6 +84,17 @@
 
 html[data-theme="dark"] {
     --ss-focus-ring: #c4b5fd;
+    --ss-canvas: #101225;
+    --ss-surface: #191b33;
+    --ss-surface-soft: #22243f;
+    --ss-surface-accent: #27264d;
+    --ss-text: #f5f6ff;
+    --ss-text-muted: #b1b8cc;
+    --ss-border: rgba(196, 181, 253, 0.18);
+    --ss-primary: #a78bfa;
+    --ss-primary-hover: #c4b5fd;
+    --ss-shadow-sm: 0 8px 22px rgba(2, 6, 23, 0.22);
+    --ss-shadow-md: 0 18px 50px rgba(2, 6, 23, 0.32);
 }
 
 /* ===== Liquid Glass System ===== */
@@ -613,7 +645,7 @@ html[data-theme="dark"] .ss-notif-row { border-color: rgba(139,92,246,0.18); }
 
 .ss-danger-zone { border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 16px; }
 
-/* ========================================================================== 
+/* ===========================================================================
    Responsive application shell
    The component pages keep their desktop identity while these rules provide
    consistent tablet/mobile spacing, safe areas and touch-sized controls.
@@ -882,4 +914,332 @@ html[data-theme="dark"] .ss-notif-row { border-color: rgba(139,92,246,0.18); }
     .badge-row,
     .pg-mini,
     .pg-badges > div { grid-template-columns: 1fr !important; }
+}
+
+/* ===========================================================================
+   SoftSync cohesion layer
+   Normalizes the visual language across dashboard, roadmap, lessons, quizzes,
+   assistant, profile/settings and practice games without changing their flows.
+   ========================================================================== */
+html { background: var(--ss-canvas); }
+body {
+    color: var(--ss-text);
+    background: var(--ss-canvas);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+}
+
+.ss-main-content {
+    width: min(100%, calc(var(--ss-content-width) + 2rem));
+    margin-inline: auto;
+}
+
+.ss-main-content :is(h1, h2, h3, h4) {
+    color: var(--ss-text);
+    line-height: 1.15;
+    text-wrap: balance;
+}
+.ss-main-content h1 { letter-spacing: -0.04em; }
+.ss-main-content :is(p, small, .text-muted) { text-wrap: pretty; }
+
+/* One canvas across every signed-in product surface. */
+body :is(
+    .pr-page,.lesson-page,.vp-page,.pg-main,.pg-shell,.assistant-layout,
+    .assistant-shell,.community-shell,.case-workspace,.inbox-rush,
+    .coursera-roadmap,.wizard-shell,.ss-settings-shell,.dash-home,
+    .max-720,.max-800,.completed-shell,.guest-error
+) {
+    color: var(--ss-text);
+}
+body :is(.pr-page,.lesson-page,.pg-main,.assistant-shell,.case-workspace,.inbox-rush,.coursera-roadmap) {
+    background-color: var(--ss-canvas) !important;
+}
+
+/* Shared surface geometry: restrained corners and one elevation scale. */
+body .ss-main-content :is(
+    .ss-card,.ss-card--flat,.dash-card,.week-card,.community-card,
+    .pr-week-card,.pr-side-card,.lesson-top,.lesson-content,.quiz-card,
+    .quiz-result,.assistant-chat-card,.vp-studio,.vp-results,.vp-grid > aside,
+    .pg-card,.overall-card,.content-card,.weekly-challenge,.wiz-card,
+    .case-card,.result-card,.completed-card
+) {
+    border-color: var(--ss-border) !important;
+    border-radius: var(--ss-radius-lg) !important;
+    box-shadow: var(--ss-shadow-sm) !important;
+}
+
+body .ss-main-content :is(
+    .lesson-top,.lesson-content,.quiz-card,.vp-studio,.vp-results,
+    .vp-grid > aside,.assistant-chat-card,.community-card,.pr-week-card
+) {
+    background-color: color-mix(in srgb, var(--ss-surface) 94%, transparent) !important;
+}
+
+/* Hero blocks use the same spatial rhythm while retaining page illustrations. */
+body .ss-main-content :is(
+    .community-hero,.vp-hero,.assistant-hero,.pg-hero,.pr-hero,
+    .assessment-hero,.result-hero,.ss-hero
+) {
+    border: 1px solid var(--ss-border);
+    border-radius: var(--ss-radius-xl) !important;
+    box-shadow: var(--ss-shadow-sm);
+}
+
+/* Buttons: stable hit area, weight and motion. Existing semantic colors remain. */
+body .ss-main-content :is(button,.btn,[role="button"]) {
+    min-height: 44px;
+    border-radius: var(--ss-radius-md);
+    font-family: inherit;
+    font-weight: 750;
+    transition:
+        color var(--ss-motion-fast) ease,
+        background-color var(--ss-motion-fast) ease,
+        border-color var(--ss-motion-fast) ease,
+        box-shadow var(--ss-motion-fast) ease,
+        transform var(--ss-motion-fast) ease;
+}
+body .ss-main-content :is(button,.btn,[role="button"]):active:not(:disabled) {
+    transform: scale(0.985);
+}
+body .ss-main-content :is(button,.btn):disabled {
+    cursor: not-allowed;
+    opacity: .48;
+}
+body .ss-main-content :is(.primary,.dash-primary,.ss-btn-primary,.btn-primary,.quiz-next) {
+    border-color: transparent !important;
+    color: #fff !important;
+    background: var(--ss-primary) !important;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--ss-primary) 24%, transparent) !important;
+}
+body .ss-main-content :is(.primary,.dash-primary,.ss-btn-primary,.btn-primary,.quiz-next):hover:not(:disabled) {
+    background: var(--ss-primary-hover) !important;
+}
+
+/* Forms share field height, border, focus and dark-mode behavior. */
+body .ss-main-content :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select) {
+    min-height: 46px;
+    border: 1px solid var(--ss-border) !important;
+    border-radius: var(--ss-radius-md) !important;
+    color: var(--ss-text) !important;
+    background-color: var(--ss-surface) !important;
+    box-shadow: none !important;
+    font-family: inherit;
+}
+body .ss-main-content :is(input,select,textarea,.form-control,.form-select):focus {
+    border-color: var(--ss-primary) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-primary) 14%, transparent) !important;
+}
+body .ss-main-content :is(input,textarea)::placeholder { color: var(--ss-text-muted); opacity: .78; }
+
+/* Tabs, progress and feedback states use semantic tokens consistently. */
+body .ss-main-content :is(.quiz-progress,.journey-progress,.progress,.skill-track) {
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--ss-surface-soft) !important;
+}
+body .ss-main-content :is(.quiz-progress i,.journey-progress span,.progress-bar,.skill-track i) {
+    background: var(--ss-primary) !important;
+}
+body .ss-main-content :is(.saved-complete,.success,.alert-success) {
+    color: var(--ss-success) !important;
+    border-color: color-mix(in srgb, var(--ss-success) 28%, transparent) !important;
+}
+body .ss-main-content :is(.save-error,.alert-danger,.validation-message) { color: var(--ss-danger) !important; }
+
+/* Dark mode parity for component-local styles that only define light surfaces. */
+html[data-theme="dark"] body .ss-main-content :is(
+    .lesson-top,.lesson-content,.quiz-card,.quiz-result,.pr-week-card,
+    .community-card,.week-card,.assistant-chat-card,.vp-studio,.vp-results,
+    .vp-grid > aside,.wiz-card,.ss-card,.ss-card--flat
+) {
+    color: var(--ss-text) !important;
+    background: var(--ss-surface) !important;
+    border-color: var(--ss-border) !important;
+}
+html[data-theme="dark"] body .ss-main-content :is(p,small,.text-muted) { color: var(--ss-text-muted); }
+
+@media (hover: hover) and (pointer: fine) {
+    body .ss-main-content :is(
+        .community-card,.pr-week-card,.pg-card,.course-cards button,
+        .quick-links button,.mentor-cards article
+    ):hover {
+        border-color: color-mix(in srgb, var(--ss-primary) 34%, var(--ss-border)) !important;
+        box-shadow: var(--ss-shadow-md) !important;
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 760px) {
+    body { font-size: 1rem; }
+    .ss-main-content :is(h1,.display-1,.display-2) { font-size: clamp(2rem, 10vw, 3rem) !important; }
+    body .ss-main-content :is(.community-hero,.vp-hero,.assistant-hero,.pg-hero,.pr-hero,.ss-hero) {
+        border-radius: var(--ss-radius-lg) !important;
+    }
+    body .ss-main-content :is(
+        .ss-card,.ss-card--flat,.dash-card,.week-card,.community-card,
+        .pr-week-card,.pr-side-card,.lesson-top,.lesson-content,.quiz-card,
+        .assistant-chat-card,.vp-studio,.vp-results
+    ) { border-radius: 16px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .ss-main-content *, body .ss-main-content *::before, body .ss-main-content *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+/* ===========================================================================
+   Senior review corrections
+   Breaks the "everything is a card" pattern and restores page-specific focus.
+   ========================================================================== */
+
+/* Dashboard: learning first; utilities read as navigation, not mini products. */
+body .dash-home .dash-content {
+    width: min(100%, 1240px);
+    margin: 2.5rem auto 0;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, .75fr);
+    gap: 2rem;
+}
+body .dash-home :is(.quick-section,.recommend-section) > h3 {
+    margin-bottom: 1rem;
+    font-size: 1.12rem;
+    letter-spacing: -.02em;
+}
+body .dash-home .quick-links {
+    gap: .5rem;
+    padding: .45rem;
+    border: 1px solid var(--ss-border);
+    border-radius: 18px;
+    background: var(--ss-surface);
+}
+body .dash-home .quick-links button {
+    min-height: 58px;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .dash-home .quick-links button:hover { background: var(--ss-surface-accent) !important; transform: none; }
+body .dash-home .quick-links button > i { width: 36px; height: 36px; flex-basis: 36px; border-radius: 10px; }
+body .dash-home .recommend-section { margin-top: 2rem; }
+body .dash-home .course-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--ss-border);
+}
+body .dash-home .course-cards button {
+    min-height: 96px;
+    padding: 1rem .25rem;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ss-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .dash-home .course-cards button:hover { padding-left: .65rem; background: var(--ss-surface-soft) !important; transform: none; }
+body .dash-home .course-cards strong { font-size: .98rem; }
+body .dash-home .course-cards small { max-width: 64ch; font-size: .82rem; }
+body .dash-home .week-card { align-self: start; position: sticky; top: 108px; padding: 1.35rem; }
+body .dash-home .mentor-bar {
+    width: min(100%, 1240px);
+    margin: 3.5rem auto 0;
+    padding: 2rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--ss-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+body .dash-home .mentor-cards article { box-shadow: none; }
+
+/* Roadmap: emphasize sequence and current state; remove ornamental glass. */
+body .pr-page { background: var(--ss-canvas) !important; }
+body .pr-page .pr-shell { max-width: 1320px; }
+body .pr-page .pr-grid { gap: 1.5rem; }
+body .pr-page .pr-main-card {
+    border: 1px solid var(--ss-border) !important;
+    border-radius: 22px !important;
+    background: var(--ss-surface) !important;
+    box-shadow: var(--ss-shadow-sm) !important;
+}
+body .pr-page .pr-week-card {
+    border-radius: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .pr-page .pr-week-card.current,
+body .pr-page .pr-week-card.selected {
+    border-color: color-mix(in srgb, var(--ss-primary) 46%, var(--ss-border)) !important;
+    background: var(--ss-surface-accent) !important;
+}
+body .pr-page .pr-module-list { gap: .65rem; }
+body .pr-page .pr-module {
+    min-height: 68px;
+    border-color: var(--ss-border) !important;
+    border-radius: 12px !important;
+    background: var(--ss-surface) !important;
+    box-shadow: none !important;
+}
+body .pr-page .pr-module.current { border-left: 4px solid var(--ss-primary) !important; }
+body .pr-page .pr-side-card { box-shadow: none !important; }
+body .pr-page .pr-suggestion { background: var(--ss-surface-soft) !important; }
+
+/* Lesson + quiz: reading and answering are the focus, chrome recedes. */
+body .lesson-page { background: var(--ss-canvas) !important; }
+body .lesson-page .lesson-shell { max-width: 1120px; }
+body .lesson-page .lesson-top {
+    padding: 1.1rem 1.4rem;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+}
+body .lesson-page .lesson-steps {
+    border-color: var(--ss-border);
+    border-radius: 14px;
+    box-shadow: none;
+}
+body .lesson-page .lesson-steps button { min-height: 56px; border-radius: 0; }
+body .lesson-page .lesson-content { padding: clamp(1.25rem, 3vw, 2.5rem); box-shadow: none !important; }
+body .lesson-page :is(.theory,.quiz-card,.quiz-result,.learning-review,.ai-reflection) { max-width: 820px; margin-inline: auto; }
+body .lesson-page .quiz-options button {
+    min-height: 58px;
+    border-color: var(--ss-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+body .lesson-page .quiz-options button:hover:not(:disabled) { border-color: var(--ss-primary); background: var(--ss-surface-accent); }
+body .lesson-page .summary-card { border: 1px solid var(--ss-border); background: var(--ss-surface-soft); }
+
+/* Assistant: chat dominates; mascot and suggestions become supporting context. */
+body .assistant-shell { background: var(--ss-canvas) !important; }
+body .assistant-hero { min-height: 120px; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
+body .assistant-hero > img { width: 130px; height: 120px; }
+body .assistant-chat-card { min-height: 360px; max-height: 58dvh; box-shadow: none !important; }
+body .assistant-prompts button { box-shadow: none !important; }
+
+html[data-theme="dark"] body :is(.dash-home .quick-links,.pr-page .pr-main-card,.lesson-page .summary-card) {
+    background: var(--ss-surface) !important;
+    border-color: var(--ss-border) !important;
+}
+
+@media (max-width: 1000px) {
+    body .dash-home .dash-content { grid-template-columns: 1fr; }
+    body .dash-home .week-card { position: static; }
+}
+
+@media (max-width: 760px) {
+    body .dash-home .dash-content { margin-top: 1.5rem; gap: 1.5rem; }
+    body .dash-home .quick-links { grid-template-columns: 1fr 1fr; }
+    body .dash-home .course-cards button { min-height: 108px; }
+    body .dash-home .mentor-bar { margin-top: 2.25rem; padding-top: 1.5rem; }
+    body .pr-page .pr-main-card { border-radius: 16px !important; }
+    body .lesson-page .lesson-content { padding: 1rem; }
+    body .lesson-page .lesson-steps { overflow-x: auto; grid-template-columns: repeat(6, minmax(92px, 1fr)); }
+    body .assistant-hero > img { display: none; }
+    body .assistant-chat-card { min-height: 52dvh; max-height: 62dvh; }
 }
