@@ -4,6 +4,7 @@
 @inherits LocalizedComponentBase
 @using SoftSync.Common.Enums
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <PageTitle>@Tx("Roadmap quiz", "Quiz Roadmap") · SoftSync</PageTitle>
 
@@ -14,6 +15,11 @@
 @code {
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ItemId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (UserId <= 0) Nav.NavigateTo("/Account/Login", true);
+    }
     private void Back() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=summary");
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
 }

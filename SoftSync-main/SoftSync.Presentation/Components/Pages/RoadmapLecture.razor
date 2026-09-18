@@ -343,7 +343,11 @@
         {
             if (roleplayScenario is null) yield break;
             yield return (false, IsVi ? roleplayScenario.OpeningVi : roleplayScenario.OpeningEn);
-            for (var i = 0; i < roleplayUserMessages.Count; i++) { yield return (true, roleplayUserMessages[i]); if (i < roleplayAiMessages.Count) yield return (false, roleplayAiMessages[i]); }
+            for (var i = 0; i < roleplayUserMessages.Count; i++)
+            {
+                yield return (true, roleplayUserMessages[i]);
+                if (i < roleplayAiMessages.Count) yield return (false, roleplayAiMessages[i]);
+            }
         }
     }
     private int QuizPercent => quizScore * 100 / 50;
@@ -362,7 +366,7 @@
         var signedIn = await AuthProvider.GetUserIdAsync();
         if (signedIn <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
         UserId = signedIn;
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId, UserId);
         item = roadmap.Items.FirstOrDefault(x => x.Id == ItemId);
         if (item is not null)
         {

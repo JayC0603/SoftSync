@@ -1,0 +1,48 @@
+@page "/game/result/{AttemptId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Quiz Result · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-3xl" aria-busy="@loading">
+        @if (loading)
+        {
+            <h1 class="tw:text-3xl tw:font-bold">Kết quả bài kiểm tra</h1>
+            <p role="status">Đang tải kết quả...</p>
+        }
+        else if (result is null)
+        {
+            <div class="alert alert-warning" role="alert"><h1 class="h4">Không tìm thấy kết quả</h1><p>Kết quả không tồn tại, chưa hoàn tất hoặc không thuộc tài khoản của bạn.</p></div>
+        }
+        else
+        {
+            <article class="ss-glass tw:rounded-2xl tw:p-8" aria-labelledby="result-title">
+                <span class="badge @(result.Passed ? "bg-success" : "bg-danger")">@(result.Passed ? "PASS" : "NOT PASS")</span>
+                <h1 id="result-title" class="tw:mt-4 tw:text-3xl tw:font-bold">@result.QuizTitle</h1>
+                <dl><dt>Điểm</dt><dd>@result.CorrectAnswers trên @result.TotalQuestions (@result.ScorePercentage.ToString("0")%)</dd><dt>Kết quả</dt><dd>@(result.Passed ? "PASS" : "NOT PASS")</dd><dt>Câu trả lời đúng</dt><dd>@result.CorrectAnswers</dd><dt>Câu trả lời sai</dt><dd>@(result.TotalQuestions - result.CorrectAnswers)</dd><dt>Bắt đầu</dt><dd>@result.StartedAtUtc.ToLocalTime().ToString("g")</dd><dt>Hoàn thành</dt><dd>@result.CompletedAtUtc.ToLocalTime().ToString("g")</dd></dl>
+                <div class="tw:flex tw:flex-wrap tw:gap-2">
+                    <a class="btn btn-primary" href="/game/review/@result.AttemptId">Review đáp án</a>
+                    <a class="btn btn-outline-primary" href="/game/history">Lịch sử</a>
+                    <a class="btn btn-outline-secondary" href="/game">Làm bài khác</a>
+                </div>
+            </article>
+        }
+    </section>
+</main>
+
+@code {
+    [Parameter] public int AttemptId { get; set; }
+    private QuizAttemptResultDto? result;
+    private bool loading = true;
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        var userId = await Auth.GetUserIdAsync();
+        result = await Challenges.GetAttemptAsync(AttemptId, userId);
+        loading = false;
+    }
+}

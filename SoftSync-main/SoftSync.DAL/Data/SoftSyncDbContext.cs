@@ -18,6 +18,8 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<AssessmentOption> AssessmentOptions { get; set; }
     public DbSet<AssessmentResult> AssessmentResults { get; set; }
     public DbSet<RoadmapItem> RoadmapItems { get; set; }
+    public DbSet<RoleplaySession> RoleplaySessions { get; set; }
+    public DbSet<RoleplayTurn> RoleplayTurns { get; set; }
     public DbSet<CaseStudy> CaseStudies { get; set; }
     public DbSet<CaseStudyOption> CaseStudyOptions { get; set; }
     public DbSet<ProgressLog> ProgressLogs { get; set; }
@@ -25,6 +27,15 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<Course> Courses { get; set; }
+    public DbSet<CourseLesson> CourseLessons { get; set; }
+    public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+    public DbSet<CourseLessonProgress> CourseLessonProgress { get; set; }
+    public DbSet<SkillChallenge> SkillChallenges { get; set; }
+    public DbSet<ChallengeQuestion> ChallengeQuestions { get; set; }
+    public DbSet<ChallengeOption> ChallengeOptions { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<QuizAttemptAnswer> QuizAttemptAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +54,27 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
             .HasOne(us => us.Skill)
             .WithMany()
             .HasForeignKey(us => us.SkillId);
+
+        modelBuilder.Entity<RoleplaySession>()
+            .HasMany(session => session.Turns)
+            .WithOne(turn => turn.Session)
+            .HasForeignKey(turn => turn.RoleplaySessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RoleplayTurn>()
+            .HasIndex(turn => new { turn.RoleplaySessionId, turn.Sequence })
+            .IsUnique();
+
+        modelBuilder.Entity<CourseLesson>().HasIndex(x => new { x.CourseId, x.Order }).IsUnique();
+        modelBuilder.Entity<Course>().HasOne(x => x.Creator).WithMany().HasForeignKey(x => x.CreatorUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<CourseEnrollment>().HasIndex(x => new { x.CourseId, x.UserId }).IsUnique();
+        modelBuilder.Entity<CourseLessonProgress>().HasIndex(x => new { x.EnrollmentId, x.LessonId }).IsUnique();
+        modelBuilder.Entity<ChallengeQuestion>().HasIndex(x => new { x.QuizId, x.Order }).IsUnique();
+        modelBuilder.Entity<ChallengeOption>().HasIndex(x => new { x.QuestionId, x.Order }).IsUnique();
+        modelBuilder.Entity<QuizAttempt>().HasIndex(x => new { x.UserId, x.QuizId, x.CompletedAtUtc });
+        modelBuilder.Entity<QuizAttempt>().Property(x => x.ScorePercentage).HasPrecision(5, 2);
+        modelBuilder.Entity<QuizAttemptAnswer>().HasIndex(x => new { x.AttemptId, x.QuestionId }).IsUnique();
+        modelBuilder.Entity<QuizAttemptAnswer>().HasOne(x => x.SelectedOption).WithMany().HasForeignKey(x => x.SelectedOptionId).OnDelete(DeleteBehavior.Restrict);
 
         // Seed Data
         SeedData(modelBuilder);

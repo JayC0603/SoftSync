@@ -1,7 +1,9 @@
 @page "/assessment-complete/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="max-800 mx-auto">
     <StepIndicator CurrentStep="4" />
@@ -27,6 +29,11 @@
 
 @code {
     [Parameter] public int UserId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (UserId <= 0) Nav.NavigateTo("/Account/Login", true);
+    }
 
     private void GoToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
 }

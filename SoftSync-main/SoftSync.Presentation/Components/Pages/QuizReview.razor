@@ -1,0 +1,66 @@
+@page "/game/review/{AttemptId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Quiz Review · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-4xl" aria-labelledby="review-title" aria-busy="@loading">
+        @if (loading)
+        {
+            <h1 id="review-title" class="tw:text-3xl tw:font-bold">Review đáp án</h1>
+            <p role="status">Đang tải phần review...</p>
+        }
+        else if (review is null)
+        {
+            <div class="alert alert-warning" role="alert"><h1 class="h4">Không thể mở review</h1><p>Attempt chưa hoàn tất hoặc bạn không có quyền xem.</p></div>
+        }
+        else
+        {
+            <a href="/game/result/@AttemptId" class="btn btn-link tw:px-0">← Kết quả</a>
+            <h1 id="review-title" class="tw:text-3xl tw:font-bold">Review: @review.Result.QuizTitle</h1>
+            <p><strong>@review.Result.CorrectAnswers / @review.Result.TotalQuestions</strong> · <span class="badge @(review.Result.Passed ? "bg-success" : "bg-danger")">@(review.Result.Passed ? "PASS" : "NOT PASS")</span></p>
+            @if (isOwner)
+            {
+                <button type="button" class="btn btn-outline-primary tw:mt-3" disabled="@feedbackBusy" @onclick="GetFeedback">@(feedbackBusy ? "Đang tạo phản hồi..." : "Nhận phản hồi cá nhân hóa")</button>
+                <div aria-live="polite" aria-atomic="true">@if(!string.IsNullOrWhiteSpace(feedbackStatus)){<p class="tw:mt-2" role="status">@feedbackStatus</p>}</div>
+                @if(feedback is not null){<section class="alert alert-info tw:mt-3" aria-labelledby="ai-feedback-title"><h2 id="ai-feedback-title" class="h5">Phản hồi AI</h2><p>@feedback.Summary</p><h3 class="h6">Điểm mạnh trong bài này</h3><ul>@foreach(var item in feedback.Strengths){<li>@item</li>}</ul><h3 class="h6">Nội dung nên luyện thêm</h3><ul>@foreach(var item in feedback.WeakAreas){<li>@item</li>}</ul><h3 class="h6">Bước luyện tập tiếp theo</h3><ul>@foreach(var item in feedback.SuggestedNextPractice){<li>@item</li>}</ul></section>}
+            }
+            <ol class="tw:mt-6 tw:grid tw:gap-5 tw:list-none tw:p-0">
+                @foreach (var answer in review.Answers)
+                {
+                    <li class="ss-glass tw:rounded-2xl tw:p-6">
+                        <h2 class="tw:text-xl tw:font-bold">Câu @answer.Order: @answer.QuestionText</h2>
+                        @if (!string.IsNullOrWhiteSpace(answer.Scenario)) { <p><strong>Tình huống:</strong> @answer.Scenario</p> }
+                        @if (!string.IsNullOrWhiteSpace(answer.ImageUrl)) { <img src="@answer.ImageUrl" alt="@answer.ImageAltText" class="tw:my-4 tw:max-h-72 tw:w-full tw:rounded-xl tw:object-cover" /> }
+                        <p><strong>Đáp án đã chọn:</strong> @answer.SelectedAnswer <span class="badge @(answer.IsCorrect ? "bg-success" : "bg-danger")">@(answer.IsCorrect ? "Đúng" : "Sai")</span></p>
+                        <p><strong>Đáp án đúng:</strong> @answer.CorrectAnswer</p>
+                        @if (!string.IsNullOrWhiteSpace(answer.Explanation)) { <div class="alert alert-info"><strong>Giải thích:</strong> @answer.Explanation</div> }
+                        @if(isOwner){<button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(explainingQuestionId != 0)" @onclick="() => Explain(answer.QuestionId)">@(explainingQuestionId == answer.QuestionId ? "Đang giải thích..." : "Giải thích câu trả lời này")</button>@if(explanations.TryGetValue(answer.QuestionId,out var aiExplanation)){<div class="alert alert-light tw:mt-2" role="status"><strong>AI giải thích thêm:</strong> @aiExplanation</div>}}
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+</main>
+
+@code {
+    [Parameter] public int AttemptId { get; set; }
+    private QuizAttemptReviewDto? review;
+    private bool loading = true;
+    private int userId; private bool isOwner; private bool feedbackBusy; private int explainingQuestionId; private string feedbackStatus=""; private AiQuizFeedbackDto? feedback; private readonly Dictionary<int,string> explanations=[];
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        var state = await Auth.GetAuthenticationStateAsync();
+        userId = state.User.GetUserId();
+        review = await Challenges.GetReviewAsync(AttemptId, userId, state.User.IsInRole("Teacher"), state.User.IsInRole("Admin"));
+        isOwner = review is not null && await Challenges.GetAttemptAsync(AttemptId,userId) is not null;
+        loading = false;
+    }
+    private async Task Explain(int questionId){if(explainingQuestionId!=0)return;explainingQuestionId=questionId;var text=await Challenges.ExplainCompletedAnswerAsync(AttemptId,questionId,userId);if(string.IsNullOrWhiteSpace(text))feedbackStatus="AI hiện không khả dụng. Phần review và kết quả vẫn không thay đổi.";else explanations[questionId]=text;explainingQuestionId=0;}
+    private async Task GetFeedback(){if(feedbackBusy)return;feedbackBusy=true;feedbackStatus="Đang tạo phản hồi từ kết quả đã hoàn tất...";feedback=await Challenges.GetPersonalizedFeedbackAsync(AttemptId,userId);feedbackStatus=feedback is null?"AI hiện không khả dụng hoặc phản hồi không hợp lệ. Kết quả chấm điểm vẫn được giữ nguyên.":"Đã tạo phản hồi; AI không thay đổi điểm hoặc PASS/NOT PASS.";feedbackBusy=false;}
+}

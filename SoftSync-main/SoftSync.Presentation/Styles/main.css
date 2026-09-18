@@ -78,6 +78,33 @@
     outline-offset: 3px;
 }
 
+.ss-skip-link {
+    position: fixed;
+    z-index: 10000;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--ss-radius-sm);
+    color: #fff;
+    background: var(--ss-primary);
+    box-shadow: var(--ss-shadow-md);
+    transform: translateY(-200%);
+}
+
+.ss-skip-link:focus {
+    color: #fff;
+    transform: translateY(0);
+}
+
+.ss-quiz-option {
+    overflow-wrap: anywhere;
+}
+
+.ss-quiz-option:focus-within {
+    border-color: var(--ss-primary) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-primary) 18%, transparent);
+}
+
 :where(button, a, [role="button"]) {
     touch-action: manipulation;
 }
@@ -1091,6 +1118,19 @@ html[data-theme="dark"] body .ss-main-content :is(p,small,.text-muted) { color: 
         animation-iteration-count: 1 !important;
         transition-duration: .01ms !important;
     }
+}
+
+html[data-reduce-motion="1"] body .ss-main-content *,
+html[data-reduce-motion="1"] body .ss-main-content *::before,
+html[data-reduce-motion="1"] body .ss-main-content *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+}
+
+body .ss-main-content :is(h1, h2, h3, p, li, dd, label, legend, summary, .btn) {
+    overflow-wrap: anywhere;
 }
 
 /* ===========================================================================

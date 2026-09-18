@@ -40,6 +40,7 @@ builder.Services.AddScoped<LocalizationService>(services =>
     return new LocalizationService(LocalizationService.Parse(request?.Cookies["ss-lang"]));
 });
 builder.Services.AddScoped<UserProfileState>();
+builder.Services.AddScoped<CourseUploadService>();
 
 // 1. Database Configuration (PostgreSQL).
 // Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
@@ -108,6 +109,16 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(CourseAuthorization.UserPolicy, policy =>
+        policy.RequireAuthenticatedUser())
+    .AddPolicy(CourseAuthorization.TeacherPolicy, policy =>
+        policy.RequireAuthenticatedUser().RequireRole(
+            CourseAuthorization.TeacherRole,
+            CourseAuthorization.AdminRole))
+    .AddPolicy(CourseAuthorization.AdminPolicy, policy =>
+        policy.RequireAuthenticatedUser().RequireRole(CourseAuthorization.AdminRole));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "SoftSync.Auth";
@@ -131,6 +142,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IAssessmentRepository, AssessmentRepository>();
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+builder.Services.AddScoped<IRoleplayRepository, RoleplayRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICaseStudyRepository, CaseStudyRepository>();
 builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
@@ -146,6 +159,8 @@ builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
 builder.Services.AddSingleton<PdfDocumentKnowledge>();
 builder.Services.AddScoped<HuggingFaceJsonClient>();
 builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
+builder.Services.AddScoped<IAiQuizService, AiQuizService>();
+builder.Services.AddScoped<IRoleplayAiService, HuggingFaceRoleplayAiService>();
 builder.Services.AddScoped<IAiRoadmapService, FakeAiRoadmapService>();
 
 // 4. Register Business Services (BLL)
@@ -153,11 +168,15 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IAssessmentService, AssessmentService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+builder.Services.AddScoped<IRoleplayService, RoleplayService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IGameBankService, GameBankService>();
+builder.Services.AddScoped<IdentityRoleManagementService>();
 
 // 5. HttpClient for future AI integration
 builder.Services.AddHttpClient("AiApi", client =>
@@ -208,8 +227,8 @@ app.MapRazorComponents<App>()
 // Logout + external-login endpoints backing the static Account UI.
 app.MapAdditionalIdentityEndpoints();
 
-// Apply migrations and seed the demo account at startup.
-await DbInitializer.SeedAsync(app.Services);
+// Apply migrations at startup; never provision the known demo account outside Development.
+await DbInitializer.SeedAsync(app.Services, seedDemoAccount: app.Environment.IsDevelopment());
 
 app.Run();
 

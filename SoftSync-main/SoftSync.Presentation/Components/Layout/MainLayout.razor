@@ -5,12 +5,13 @@
 </div>
 
 <div class="page">
+    <a class="ss-skip-link" href="#main-content">Skip to main content</a>
     <NavBar />
     <WelcomeToast />
 
-    <main class="container tw:py-12 ss-main-content">
+    <div id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">
         @Body
-    </main>
+    </div>
 </div>
 
 <div id="blazor-error-ui">

@@ -40,6 +40,9 @@
         <NavLink class="ss-navpill" href="/community">
             <i class="bi bi-people"></i> <span>@L["nav.community"]</span>
         </NavLink>
+        <NavLink class="ss-navpill" href="/game">
+            <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
+        </NavLink>
     </div>
 
     <!-- Right: actions -->
@@ -49,6 +52,10 @@
             <span class="ss-lang-code">@CurrentLanguageCode</span>
             <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
         </button>
+
+        <AuthorizeView Roles="Admin" Context="adminNavContext">
+            <Authorized><a class="btn btn-sm btn-outline-primary" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Users</span></a></Authorized>
+        </AuthorizeView>
 
         <AuthorizeView>
             <Authorized>
@@ -107,6 +114,9 @@
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/community">
         <i class="bi bi-people-fill"></i><span>@L["nav.community"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/game">
+        <i class="bi bi-controller"></i><span>Mini Game</span>
     </NavLink>
 </nav>
 
@@ -335,7 +345,7 @@
             bottom: max(0.65rem, env(safe-area-inset-bottom));
             z-index: 1000;
             display: grid !important;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 0.2rem !important;
             min-height: 64px;
             padding: 0.4rem;

@@ -1,0 +1,55 @@
+@page "/game/history"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Quiz History · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-5xl" aria-labelledby="history-title" aria-busy="@loading">
+        <a href="/game" class="btn btn-link tw:px-0">← Mini Game</a>
+        <h1 id="history-title" class="tw:text-3xl tw:font-bold">Lịch sử làm bài</h1>
+        @if (loading)
+        {
+            <p role="status">Đang tải lịch sử làm bài...</p>
+        }
+        else if (attempts.Count == 0)
+        {
+            <div class="alert alert-info tw:mt-5" role="status">Bạn chưa hoàn thành bài kiểm tra nào.</div>
+        }
+        else
+        {
+            <div class="table-responsive tw:mt-5">
+                <table class="table table-hover align-middle">
+                    <caption class="visually-hidden">Các lần làm quiz đã hoàn thành</caption>
+                    <thead><tr><th scope="col">Bài kiểm tra</th><th scope="col">Hoàn thành</th><th scope="col">Điểm</th><th scope="col">Kết quả</th><th scope="col">Thao tác</th></tr></thead>
+                    <tbody>
+                    @foreach (var attempt in attempts)
+                    {
+                        <tr>
+                            <td>@attempt.QuizTitle</td>
+                            <td>@attempt.CompletedAtUtc.ToLocalTime().ToString("g")</td>
+                            <td>@attempt.CorrectAnswers / @attempt.TotalQuestions (@attempt.ScorePercentage.ToString("0")%)</td>
+                            <td><span class="badge @(attempt.Passed ? "bg-success" : "bg-danger")">@(attempt.Passed ? "PASS" : "NOT PASS")</span></td>
+                            <td><a class="btn btn-sm btn-outline-primary" href="/game/result/@attempt.AttemptId">Xem kết quả</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</main>
+
+@code {
+    private IReadOnlyList<QuizAttemptResultDto> attempts = [];
+    private bool loading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = await Auth.GetUserIdAsync();
+        attempts = await Challenges.GetHistoryAsync(userId);
+        loading = false;
+    }
+}

@@ -1,0 +1,35 @@
+@page "/courses"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
+@inject ICourseService CoursesService
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Courses · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
+<header class="tw:mb-8"><span class="badge bg-primary">Inclusive Learning</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">Courses</h1><p>Video, caption, transcript and persistent learning progress.</p></header>
+@if(loading){<p role="status">Loading courses...</p>}
+@if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@message</div>}
+<div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">@foreach(var course in courses){<article class="ss-glass tw:rounded-2xl tw:p-6" aria-labelledby="course-title-@course.Id">
+@if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText" class="tw:mb-4 tw:h-48 tw:w-full tw:rounded-xl tw:object-cover"/>}
+<h2 id="course-title-@course.Id" class="tw:text-xl tw:font-bold">@course.Title</h2><p>@course.Description</p><div class="progress" role="progressbar" aria-label="Course progress for @course.Title" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="@course.ProgressPercentage percent complete"><div class="progress-bar" style="width:@course.ProgressPercentage%">@course.ProgressPercentage%</div></div>
+<dl class="tw:mt-3"><dt>Lessons completed</dt><dd>@course.CompletedLessons / @course.TotalLessons</dd><dt>Final Quiz</dt><dd>@(course.FinalQuizId is null ? "Not required" : course.FinalQuizResult is null ? "Not Started" : course.FinalQuizResult == QuizAttemptResult.Pass ? "Pass" : "Not Pass")</dd><dt>Course Status</dt><dd>@(course.IsCompleted ? "Completed" : "In Progress")</dd></dl>
+@if(course.IsCompleted){<div class="alert alert-success" role="status"><strong>Course Completed</strong></div>}
+else if(course.FinalQuizResult == QuizAttemptResult.NotPass){<div class="alert alert-warning" role="status">Final quiz not passed yet. You may retry.</div>}
+else if(course.FinalQuizId is not null){<p>Complete all required lessons and pass the final quiz.</p>}
+else {<p>Complete all required lessons to finish this course.</p>}
+<button type="button" class="btn btn-primary tw:my-3" @onclick="()=>Enroll(course.Id)">Enroll / Continue</button>
+<ol>@foreach(var lesson in course.Lessons){<li class="tw:mb-4"><h3 class="tw:text-lg tw:font-semibold">@lesson.Title</h3>@if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video class="tw:w-full" controls preload="metadata" aria-label="Video lesson: @lesson.Title"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="Vietnamese captions" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p class="tw:text-sm tw:text-slate-700">Captions are not available for this video.</p>}}@if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details><summary>Transcript for @lesson.Title</summary><div class="tw:whitespace-pre-wrap">@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p class="tw:text-sm tw:text-slate-700">A transcript is not available for this video.</p>}<button type="button" class="btn btn-sm btn-outline-success tw:mt-2" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? "Lesson completed" : "Mark lesson completed")</button></li>}</ol>
+@if(course.FinalQuizId is int finalQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? "Retry Final Quiz" : "Open Final Quiz")</a>}
+</article>}</div>
+</section></main>
+@code{
+private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
+protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
+private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
+private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
+private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Lesson progress saved.":"Enroll before completing a lesson.";await Reload();}
+}

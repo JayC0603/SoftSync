@@ -17,6 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.20" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

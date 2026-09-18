@@ -26,7 +26,8 @@ public interface IAssessmentService
 {
     Task<IEnumerable<AssessmentQuestionDto>> GetAssessmentQuestionsAsync(int userId);
     Task SubmitAssessmentAsync(int userId, List<UserAnswerDto> answers);
-    Task<IEnumerable<AssessmentResultDto>> GetLatestResultsAsync(int userId);
+    Task<IEnumerable<AssessmentResultDto>> GetLatestResultsAsync(int authenticatedUserId, int ownerUserId);
+    Task<IReadOnlyList<AssessmentAttemptDto>> GetHistoryAsync(int authenticatedUserId, int ownerUserId);
 }
 
 public class AssessmentQuestionDto // Local DTO for BLL to UI
@@ -37,6 +38,7 @@ public class AssessmentQuestionDto // Local DTO for BLL to UI
     /// <summary>Vietnamese text; empty means fall back to <see cref="QuestionText"/>.</summary>
     public string QuestionTextVi { get; set; } = string.Empty;
     public int SkillId { get; set; }
+    public QuestionType Type { get; set; }
     public string SkillName { get; set; } = string.Empty;
     public string SkillNameVi { get; set; } = string.Empty;
     public List<AssessmentOptionDto> Options { get; set; } = new();
@@ -51,7 +53,7 @@ public class AssessmentOptionDto
 
 public interface IRoadmapService
 {
-    Task<RoadmapDto> GetUserRoadmapAsync(int userId);
+    Task<RoadmapDto> GetUserRoadmapAsync(int authenticatedUserId, int ownerUserId);
     Task<bool> MarkVideoCompleteAsync(int itemId, int userId);
     Task<bool> MarkCompleteAsync(int itemId, int userId);
     Task<bool> MarkScenarioCompleteAsync(int itemId, int userId);
@@ -66,6 +68,61 @@ public interface IRoadmapService
 public interface IProgressService
 {
     Task<IEnumerable<ProgressDto>> GetUserProgressAsync(int userId);
+}
+
+public interface ICourseService
+{
+    Task<IReadOnlyList<CourseDto>> GetPublishedAsync(int authenticatedUserId);
+    Task<IReadOnlyList<CourseDto>> GetManagedAsync(int authenticatedUserId, bool isAdmin);
+    Task<CourseDto?> GetForManagementAsync(int id, int authenticatedUserId, bool isAdmin);
+    Task<int?> SaveCourseAsync(CourseDto input, int authenticatedUserId, bool isAdmin);
+    Task<bool> PublishCourseAsync(int id, int authenticatedUserId, bool isAdmin);
+    Task<int?> SaveLessonAsync(CourseLessonDto input, int authenticatedUserId, bool isAdmin);
+    Task<bool> EnrollAsync(int courseId, int authenticatedUserId);
+    Task<bool> CompleteLessonAsync(int lessonId, int authenticatedUserId);
+    Task<CourseAnalyticsDto?> GetAnalyticsAsync(int courseId, int authenticatedUserId, bool isAdmin);
+}
+
+public interface IChallengeService
+{
+    Task<IReadOnlyList<StudentChallengeDto>> GetPublishedAsync();
+    Task<StudentQuizDto?> GetPublishedQuizAsync(int quizId);
+    Task<StudentQuizSessionDto?> StartAttemptAsync(int quizId, int authenticatedUserId);
+    Task<QuizAttemptResultDto?> SubmitAsync(int attemptId, int authenticatedUserId, IReadOnlyCollection<StudentQuizAnswerDto> answers);
+    Task<QuizAttemptResultDto?> GetAttemptAsync(int attemptId, int authenticatedUserId);
+    Task<IReadOnlyList<QuizAttemptResultDto>> GetHistoryAsync(int authenticatedUserId);
+    Task<QuizAttemptReviewDto?> GetReviewAsync(int attemptId, int authenticatedUserId, bool isTeacher, bool isAdmin);
+    Task<IReadOnlyList<QuizAttemptResultDto>> GetQuizResultsAsync(int quizId, int authenticatedUserId, bool isAdmin);
+    Task<QuizAnalyticsDto?> GetAnalyticsAsync(int quizId, int authenticatedUserId, bool isAdmin);
+    Task<ChallengeQuizDto?> GetForManagementAsync(int id, int authenticatedUserId, bool isAdmin);
+    Task<int?> SaveQuizAsync(ChallengeQuizDto input, int authenticatedUserId, bool isAdmin);
+    Task<bool> SaveQuestionAsync(int quizId, ChallengeQuestionEditorDto input, int authenticatedUserId, bool isAdmin);
+    Task<bool> PublishAsync(int quizId, int authenticatedUserId, bool isAdmin);
+    Task<AiQuizQuestionDraftDto?> GenerateQuestionDraftAsync(AiQuizDraftRequestDto input, int authenticatedUserId, bool isAdmin, CancellationToken cancellationToken = default);
+    Task<string?> ExplainCompletedAnswerAsync(int attemptId, int questionId, int authenticatedUserId, CancellationToken cancellationToken = default);
+    Task<AiQuizFeedbackDto?> GetPersonalizedFeedbackAsync(int attemptId, int authenticatedUserId, CancellationToken cancellationToken = default);
+}
+
+public interface IAiQuizService
+{
+    Task<AiQuizQuestionDraftDto?> GenerateQuestionDraftAsync(AiQuizDraftRequestDto input, CancellationToken cancellationToken = default);
+    Task<string?> ExplainAnswerAsync(QuizAnswerReviewDto answer, CancellationToken cancellationToken = default);
+    Task<AiQuizFeedbackDto?> GenerateFeedbackAsync(QuizAttemptReviewDto review, CancellationToken cancellationToken = default);
+}
+
+public interface IRoleplayService
+{
+    IReadOnlyList<RoleplayScenarioDto> GetScenarios();
+    Task<RoleplaySessionDto?> StartAsync(int authenticatedUserId, int roadmapItemId, int scenarioId, bool vietnamese);
+    Task<RoleplaySessionDto?> GetAsync(int authenticatedUserId, int sessionId);
+    Task<IReadOnlyList<RoleplaySessionDto>> GetHistoryAsync(int authenticatedUserId, int roadmapItemId);
+    Task<RoleplaySessionDto?> SendAsync(int authenticatedUserId, int sessionId, string message, bool vietnamese);
+}
+
+public interface IRoleplayAiService
+{
+    Task<string?> ReplyAsync(RoleplayScenarioDto scenario, IReadOnlyList<RoleplayTurnDto> turns, bool vietnamese);
+    Task<RoleplayAiEvaluationDto?> EvaluateAsync(RoleplayScenarioDto scenario, IReadOnlyList<RoleplayTurnDto> turns, bool vietnamese);
 }
 
 public interface ICaseStudyService

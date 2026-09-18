@@ -13,6 +13,7 @@
 *.user
 
 # Local secrets / uploads
+.env
 **/appsettings.*.local.json
 **/wwwroot/uploads/
 
