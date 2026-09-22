@@ -135,7 +135,7 @@
             xpForNext = LevelSystem.XpForNextLevel(user.ExperiencePoints);
         }
 
-        var results = await AssessmentService.GetLatestResultsAsync(userId);
+        var results = await AssessmentService.GetLatestResultsAsync(userId, userId);
         assessmentCount = results.Count();
         hasAssessment = assessmentCount > 0;
         var progress = await ProgressService.GetUserProgressAsync(userId);

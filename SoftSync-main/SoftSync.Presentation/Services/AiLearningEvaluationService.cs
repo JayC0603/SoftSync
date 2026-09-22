@@ -19,7 +19,7 @@ public sealed class HuggingFaceJsonClient(
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public async Task<T?> AskAsync<T>(string task, string systemPrompt, object input)
+    public async Task<T?> AskAsync<T>(string task, string systemPrompt, object input, CancellationToken cancellationToken = default)
     {
         var enabled = configuration.GetValue("AiApi:Enabled", false);
         var apiKey = configuration["AiApi:ApiKey"];
@@ -45,13 +45,14 @@ public sealed class HuggingFaceJsonClient(
             };
             var client = clients.CreateClient("AiApi");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            using var response = await client.PostAsJsonAsync("v1/chat/completions", request);
+            using var response = await client.PostAsJsonAsync("v1/chat/completions", request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError("AI evaluation {Task} failed with HTTP {StatusCode}", task, (int)response.StatusCode);
                 return default;
             }
-            using var payload = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var payload = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
             var content = payload.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
             var result = JsonSerializer.Deserialize<T>(content ?? "", JsonOptions);
             logger.LogInformation("AI evaluation {Task} completed with model {Model}", task, model);
@@ -143,11 +144,22 @@ public sealed class HuggingFaceAiAssessmentService(HuggingFaceJsonClient ai, IAs
         var options = (await repository.GetAnsweredOptionsAsync(optionIds)).ToList();
         var skillId = options.FirstOrDefault()?.Question?.SkillId ?? 1;
         var fixedScore = options.Sum(x => x.ScoreValue);
-        var result = await ai.AskAsync<AssessmentGrade>("entry-assessment", """
-            Evaluate one soft-skill assessment from the selected behavioral options. Preserve the validated 1-4 option weights: return a raw score from 8 to 32 and do not deviate more than 2 points from fixedScore. Return JSON only: {"score":0}. Do not reward ideal-sounding behavior beyond the supplied weights.
-            """, new { skillId, fixedScore, responses = options.Select(x => new { x.QuestionId, x.OptionText, x.OptionTextVi, x.ScoreValue }) });
-        var score = Math.Clamp(result?.Score ?? fixedScore, Math.Max(8, fixedScore - 2), Math.Min(32, fixedScore + 2));
-        return new AssessmentResultDto { SkillId = skillId, Score = score, Level = SoftSync.Common.AssessmentScoring.BandFor(score), CreatedAt = DateTime.UtcNow };
+        var diagnosis = await ai.AskAsync<AssessmentDiagnosisDto>("entry-assessment", """
+            Interpret one soft-skill assessment using only the supplied behavioral responses and fixedScore. fixedScore is authoritative: never recalculate or replace it. Do not invent behavior that is not supported by the responses. If evidence is limited, use cautious wording. Return bilingual JSON matching: {"english":{"strengths":["..."],"weaknesses":["..."],"evidence":["..."],"feedback":"...","recommendedActions":["..."]},"vietnamese":{"strengths":["..."],"weaknesses":["..."],"evidence":["..."],"feedback":"...","recommendedActions":["..."]}}. Each list must contain 1-3 concise items. Recommended actions must be observable and practical.
+            """, new
+            {
+                skillId,
+                fixedScore,
+                maxScore = SoftSync.Common.AssessmentScoring.MaxScore,
+                responses = options.Select(x => new { x.QuestionId, question = x.Question?.QuestionText, questionVi = x.Question?.QuestionTextVi, selectedAnswer = x.OptionText, selectedAnswerVi = x.OptionTextVi, x.ScoreValue })
+            });
+        return new AssessmentResultDto
+        {
+            SkillId = skillId,
+            Score = fixedScore,
+            Level = SoftSync.Common.AssessmentScoring.BandFor(fixedScore),
+            Diagnosis = diagnosis ?? new(),
+            CreatedAt = DateTime.UtcNow
+        };
     }
-    private sealed class AssessmentGrade { public int Score { get; set; } }
 }

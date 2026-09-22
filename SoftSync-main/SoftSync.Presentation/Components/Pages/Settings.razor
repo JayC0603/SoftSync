@@ -629,7 +629,7 @@
         selectedSkillIds.AddRange(await UserService.GetSelectedSkillIdsAsync(userId));
 
         // Hero stats — pull real data where we have it.
-        var results = await AssessmentService.GetLatestResultsAsync(userId);
+        var results = await AssessmentService.GetLatestResultsAsync(userId, userId);
         badgeCount = results.Count();
         var progress = await ProgressService.GetUserProgressAsync(userId);
         // No streak schema yet — approximate with number of tracked skills so the tile isn't hollow.

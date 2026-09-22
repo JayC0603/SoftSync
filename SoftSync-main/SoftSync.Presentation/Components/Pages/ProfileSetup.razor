@@ -209,7 +209,7 @@
 
         selectedSkillIds.AddRange(await UserService.GetSelectedSkillIdsAsync(userId));
 
-        var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(userId)).Any();
+        var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(userId, userId)).Any();
         if (hasCompletedAssessment)
         {
             Nav.NavigateTo($"/assessment-complete/{userId}", true);

@@ -90,7 +90,12 @@
                 @foreach (var lesson in Lessons)
                 {
                     var status = LessonStatus(lesson.Step);
-                    <article class="lesson @(lesson.Step == CurrentStep ? "active" : null) @(status == 2 ? "complete" : status == 0 ? "locked" : null)" @onclick="() => SelectStep(lesson.Step)">
+                    <article class="lesson @(lesson.Step == CurrentStep ? "active" : null) @(status == 2 ? "complete" : status == 0 ? "locked" : null)"
+                             role="button"
+                             tabindex="@(status == 0 && !RoadmapReviewMode.Enabled ? -1 : 0)"
+                             aria-disabled="@(status == 0 && !RoadmapReviewMode.Enabled)"
+                             @onclick="() => SelectStep(lesson.Step)"
+                             @onkeydown="args => SelectStepFromKeyboard(args, lesson.Step)">
                         <div class="lesson-number">@(status == 2 ? "✓" : lesson.Step.ToString())</div>
                         <div class="lesson-thumb"><i class="@lesson.Icon"></i><span>@lesson.Time</span></div>
                         <div class="lesson-copy"><small>@Tx("Lesson", "Bài") @lesson.Step</small><h3>@Tx(lesson.En, lesson.Vi)</h3><p>@Tx(lesson.DescEn, lesson.DescVi)</p></div>
@@ -134,7 +139,7 @@
         var id = await AuthProvider.GetUserIdAsync();
         if (id <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
         UserId = id;
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(id);
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
         items = roadmap.Items.Where(x => !string.IsNullOrWhiteSpace(x.SkillName)).OrderBy(x => SkillRank(SkillKey(x))).ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
         selected = items.Count == 0 ? null : items[Math.Max(0, ActiveIndex)];
         if (selected is not null) currentStep = Math.Clamp(SelectedCompletedSteps + 1, 1, 6);
@@ -143,6 +148,10 @@
 
     private void SelectWeek(RoadmapItemDto item) { selected = item; currentStep = Math.Clamp(CompletedStepCount(item) + 1, 1, 6); }
     private void SelectStep(int step) { if (StepStatus(step) > 0 || RoadmapReviewMode.Enabled) currentStep = step; }
+    private void SelectStepFromKeyboard(KeyboardEventArgs args, int step)
+    {
+        if (args.Key is "Enter" or " ") SelectStep(step);
+    }
     private void PreviousStep() => currentStep = Math.Max(1, currentStep - 1);
     private void NextStep() { if (currentStep < 6 && (StepStatus(currentStep + 1) > 0 || RoadmapReviewMode.Enabled)) currentStep++; else OpenSelected(); }
     private void OpenSelected() => OpenSelectedStep(CurrentStep);
@@ -152,8 +161,8 @@
     private bool IsSkillLocked(string key) { var first = items.FindIndex(x => SkillKey(x) == key); return !RoadmapReviewMode.Enabled && first > ActiveIndex; }
     private int LessonStatus(int step) => StepStatus(step);
     private int StepStatus(int step) { var complete = SelectedCompletedSteps; return step <= complete ? 2 : step == complete + 1 || RoadmapReviewMode.Enabled ? 1 : 0; }
-    private static int CompletedStepCount(RoadmapItemDto x) => x.IsCompleted ? 6 : (x.IsVideoCompleted ? 1 : 0) + (x.ScriptCompletedAtUtc.HasValue ? 1 : 0) + (x.SummaryCompletedAtUtc.HasValue ? 1 : 0) + (x.IsPracticeCompleted ? 1 : 0) + (x.IsScenarioCompleted ? 1 : 0) + (x.IsReflectionCompleted ? 1 : 0);
-    private static int CompletedSteps(RoadmapItemDto x) => CompletedStepCount(x) * 100 / 6;
+    private static int CompletedStepCount(RoadmapItemDto x) => x.CompletedActivityCount;
+    private static int CompletedSteps(RoadmapItemDto x) => x.ProgressPercent;
     private int WeekOrdinal(RoadmapItemDto item) => items.Where(x => SkillKey(x) == SkillKey(item)).ToList().FindIndex(x => x.Id == item.Id) + 1;
     private string WeekTitle(RoadmapItemDto item, int n) => SkillKey(item) switch
     {

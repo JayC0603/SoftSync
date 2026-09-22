@@ -119,6 +119,20 @@
                             <i class="bi bi-star-fill"></i>
                             <span>@SelectedRecommendation</span>
                         </div>
+                        @if (SelectedItem.IsNextRecommended)
+                        {
+                            <p class="pr-next-action"><strong>@Tx("Next recommended activity", "Hoạt động được đề xuất tiếp theo"):</strong> @ActivityLabel(SelectedItem.NextActivity)</p>
+                        }
+
+                        <section class="pr-plan-context" aria-labelledby="plan-objective-title">
+                            <div><h3 id="plan-objective-title">@Tx("Learning objective", "Mục tiêu học tập")</h3><p>@SelectedItem.Objective</p></div>
+                            <div>
+                                <h3>@Tx("Current progress", "Tiến độ hiện tại")</h3>
+                                <div class="progress" role="progressbar" aria-label="@Tx("Activity completion", "Mức hoàn thành hoạt động")" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@SelectedItem.ProgressPercent"><div class="progress-bar" style="width:@SelectedItem.ProgressPercent%"></div></div>
+                                <small>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount @Tx("activities completed", "hoạt động đã hoàn thành")</small>
+                            </div>
+                            <div><h3>@Tx("Content source", "Nguồn nội dung")</h3><p><strong>@SelectedItem.SourceTitle</strong> · @SelectedItem.SourceOrganization</p><small>@Tx("Review status", "Trạng thái kiểm duyệt"): @SelectedItem.SourceReviewStatus</small></div>
+                        </section>
 
                         <div class="pr-module-list">
                             <article class="pr-module pr-module-video @ModuleState(0)">
@@ -141,7 +155,7 @@
                                     }
                                     else if ((RoadmapReviewMode.Enabled || selectedIndex == ActiveIndex) && CanOpenVideo)
                                     {
-                                        <span class="pr-continue" @onclick:stopPropagation="true" @onclick="OpenVideo">@Tx("Continue", "Tiếp tục")</span>
+                                        <button type="button" class="pr-continue" @onclick:stopPropagation="true" @onclick="OpenVideo">@Tx("Continue", "Tiếp tục")</button>
                                     }
                                     <i class="bi bi-chevron-down pr-chevron @(videoExpanded ? "open" : "")"></i>
                                 </button>
@@ -305,6 +319,7 @@
 
     private UserDto? user;
     private List<RoadmapItemDto> items = [];
+    private RoadmapDto roadmap = new();
     private List<AssessmentResultDto> assessments = [];
     private bool loading = true;
     private bool showReason;
@@ -337,9 +352,9 @@
     private int WeeklyCapacity => DailyMinutes * StudyDays;
     private int PlannedMinutes => 52;
     private int CompletedCount => items.Count(x => x.IsCompleted);
-    private int OverallPercent => items.Count == 0 ? 0 : CompletedCount * 100 / items.Count;
-    private int CompletedActivities => items.Sum(x => (x.IsVideoCompleted ? 1 : 0) + (x.IsPracticeCompleted ? 1 : 0) + (x.IsScenarioCompleted ? 1 : 0) + (x.IsReflectionCompleted ? 1 : 0));
-    private int TotalActivities => items.Count * 4;
+    private int OverallPercent => roadmap.ProgressPercent;
+    private int CompletedActivities => items.Sum(x => x.CompletedActivityCount);
+    private int TotalActivities => items.Sum(x => x.TotalActivityCount);
     private int ActivityDays => Math.Min(CompletedCount, 7);
     private int StreakDays => Math.Min(CompletedCount, 7);
     private string CurrentSkillName => items.Count == 0 ? Tx("Soft skills", "Kỹ năng mềm") : SkillDisplayName(items[ActiveIndex]);
@@ -379,8 +394,8 @@
 
         UserId = signedInUserId;
         user = await UserService.GetUserByIdAsync(UserId);
-        assessments = (await AssessmentService.GetLatestResultsAsync(UserId)).ToList();
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        assessments = (await AssessmentService.GetLatestResultsAsync(UserId, UserId)).ToList();
+        roadmap = await RoadmapService.GetUserRoadmapAsync(UserId, UserId);
 
         // Old plans can contain generic intro/summary rows without a SkillName.
         // Keep them in the database to preserve history, but do not present them
@@ -397,6 +412,16 @@
     }
 
     private void ToggleReason() => showReason = !showReason;
+    private string ActivityLabel(RoadmapActivityType? activity) => activity switch
+    {
+        RoadmapActivityType.VideoLesson => Tx("Video lesson", "Bài học video"),
+        RoadmapActivityType.LessonScript => Tx("Lesson script", "Kịch bản bài học"),
+        RoadmapActivityType.LessonSummary => Tx("Lesson summary", "Tóm tắt bài học"),
+        RoadmapActivityType.Quiz => Tx("Quiz", "Bài kiểm tra"),
+        RoadmapActivityType.Roleplay => Tx("Roleplay", "Tình huống thực hành"),
+        RoadmapActivityType.Reflection => Tx("Reflection", "Bài phản tư"),
+        _ => Tx("Plan completed", "Đã hoàn thành lộ trình")
+    };
     private void ToggleVideoPanel() => videoExpanded = !videoExpanded;
     private void SelectWeek(int index)
     {
@@ -615,4 +640,8 @@
     .pr-days small{font-size:.7rem}
     .pr-data-note{font-size:.68rem}
     .pr-skill-group>h3{font-size:.9rem}
+    .pr-next-action{margin:.1rem 0 .8rem;color:var(--pr-primary);font-size:.82rem}
+    .pr-plan-context{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:.8rem;margin:.4rem 0 1rem;padding:.9rem;border:1px solid #e6e1f6;border-radius:13px;background:rgba(248,246,255,.72)}
+    .pr-plan-context h3{margin:0 0 .35rem;font-size:.78rem}.pr-plan-context p{margin:0;color:#667085;font-size:.74rem;line-height:1.5}.pr-plan-context small{color:#7d8799;font-size:.68rem}.pr-plan-context .progress{height:8px;margin:.4rem 0}.pr-plan-context .progress-bar{background:var(--gradient)}
+    @@media(max-width:760px){.pr-plan-context{grid-template-columns:1fr}}
 </style>

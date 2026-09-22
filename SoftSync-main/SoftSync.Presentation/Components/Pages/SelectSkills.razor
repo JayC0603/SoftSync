@@ -1,5 +1,6 @@
 @page "/select-skills/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
@@ -7,6 +8,7 @@
 @inject IUserService UserService
 @inject IAssessmentService AssessmentService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="max-800 mx-auto">
     <StepIndicator CurrentStep="2" />
@@ -26,14 +28,16 @@
             @foreach (var skill in skills)
             {
                 <div>
-                    <div class="ss-card ss-glass-interactive tw:p-6 tw:text-center tw:h-full cursor-pointer @(selectedSkillIds.Contains(skill.Id) ? "selected" : "")"
-                         @onclick="() => ToggleSkill(skill.Id)">
-                        <div class="skill-icon tw:mb-4">
+                    <button type="button"
+                            class="skill-choice ss-card ss-glass-interactive tw:p-6 tw:text-center tw:h-full tw:w-full @(selectedSkillIds.Contains(skill.Id) ? "selected" : "")"
+                            aria-pressed="@selectedSkillIds.Contains(skill.Id)"
+                            @onclick="() => ToggleSkill(skill.Id)">
+                        <span class="skill-icon tw:mb-4">
                             <i class="bi @skill.IconName tw:text-2xl"></i>
-                        </div>
-                        <h5 class="tw:font-bold">@SkillName(skill)</h5>
-                        <p class="tw:text-sm text-muted tw:mb-0">@skill.Description</p>
-                    </div>
+                        </span>
+                        <span class="skill-choice-title tw:font-bold">@SkillName(skill)</span>
+                        <span class="skill-choice-description tw:text-sm text-muted tw:mb-0">@skill.Description</span>
+                    </button>
                 </div>
             }
         }
@@ -68,8 +72,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // The route is useful for legacy links, but it must never authorize access
+        // to another learner's selections or assessment history.
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (UserId <= 0)
+        {
+            Nav.NavigateTo("/Account/Login", true);
+            return;
+        }
+
         skills = await SkillService.GetAllSkillsAsync();
-        hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(UserId)).Any();
+        hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(UserId, UserId)).Any();
     }
 
     private void ToggleSkill(int id)
@@ -97,7 +110,8 @@
 
 <style>
     .max-800 { max-width: 800px; }
-    .cursor-pointer { cursor: pointer; }
+    .skill-choice { cursor: pointer; font: inherit; }
+    .skill-choice-title, .skill-choice-description { display: block; }
     .ss-card.selected {
         border: 2px solid var(--primary);
         background: var(--gradient-soft);

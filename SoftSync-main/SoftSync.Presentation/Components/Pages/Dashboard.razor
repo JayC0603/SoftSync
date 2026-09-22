@@ -148,7 +148,7 @@ else
         user = await UserService.GetUserByIdAsync(id);
         if (user is null || user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal)) { Nav.NavigateTo("/profile-setup", true); return; }
         progress = (await ProgressService.GetUserProgressAsync(id)).ToList();
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(id);
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
         roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
         completedItems = roadmapItems.Count(x => x.IsCompleted);
     }

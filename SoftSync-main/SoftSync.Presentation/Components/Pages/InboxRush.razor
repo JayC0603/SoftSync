@@ -4,8 +4,10 @@
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Services
 @inject IRoadmapService RoadmapService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 
 <PageTitle>Inbox Rush · SoftSync</PageTitle>
 
@@ -90,7 +92,17 @@
     private string ResultTitle => Total >= 8 ? Tx("Time management master", "Làm chủ thời gian") : Total >= 6 ? Tx("Developing a solid plan", "Kế hoạch đang tiến bộ") : Tx("Keep practicing", "Cần luyện tập thêm");
     private string ResultFeedback => PriorityScore < 60 ? Tx("Your estimates are useful, but urgent tasks can distract you from important work. Compare importance before reacting to urgency.", "Bạn dễ bị việc gấp cuốn đi và quên việc quan trọng. Hãy so sánh mức độ quan trọng trước khi phản ứng với độ khẩn cấp.") : CalibrationScore < 60 ? Tx("Your priorities are sound, but duration estimates need practice. Break large work into smaller parts.", "Bạn ưu tiên khá tốt nhưng cần luyện ước lượng thời gian. Hãy chia việc lớn thành các phần nhỏ.") : AdaptationScore < 60 ? Tx("Your plan is good. Practice making faster, calmer decisions when interruptions appear.", "Kế hoạch của bạn tốt. Hãy luyện ra quyết định nhanh và bình tĩnh hơn khi có việc phát sinh.") : Tx("You balance priorities, realistic estimates, and interruptions effectively.", "Bạn cân bằng tốt giữa ưu tiên, ước lượng thực tế và công việc phát sinh.");
 
-    protected override void OnInitialized() => StartGame();
+    protected override async Task OnInitializedAsync()
+    {
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (UserId <= 0)
+        {
+            Nav.NavigateTo("/Account/Login", true);
+            return;
+        }
+
+        StartGame();
+    }
     private void StartGame()
     {
         var bank = Bank.OrderBy(_ => Random.Shared.Next()).Take(12).Select((x, i) => new TaskCard(i + 1, x.Vi, x.En, x.U, x.I, x.D, x.Interrupt, x.Q, 1)).ToList();

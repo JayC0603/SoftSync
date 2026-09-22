@@ -92,6 +92,13 @@
             return;
         }
 
+        var roleResult = await UserManager.AddToRoleAsync(user, SoftSync.BLL.Auth.CourseAuthorization.UserRole);
+        if (!roleResult.Succeeded)
+        {
+            errorMessage = "Error: " + string.Join(" ", roleResult.Errors.Select(e => e.Description));
+            return;
+        }
+
         Logger.LogInformation("User created a new account with password.");
         await SignInManager.SignInAsync(user, isPersistent: true);
         WelcomeCookie.Set(HttpContext, user.FullName, isFirstLogin: true);

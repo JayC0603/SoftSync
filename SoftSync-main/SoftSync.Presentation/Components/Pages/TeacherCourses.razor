@@ -1,0 +1,87 @@
+@page "/teacher"
+@page "/teacher/courses"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.TeacherPolicy)]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
+@inject ICourseService Courses
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider Auth
+@inject CourseUploadService Uploads
+
+<PageTitle>Teacher Studio · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-8"><div class="tw:mx-auto tw:max-w-6xl">
+<header class="tw:mb-6"><span class="badge bg-primary">Teacher Studio</span><h1 class="tw:mt-2 tw:text-3xl tw:font-bold">Courses & Inclusive Skill Challenge</h1></header>
+@if (!string.IsNullOrWhiteSpace(message)) { <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@message</div> }
+<div class="tw:grid tw:gap-6 tw:lg:grid-cols-3">
+<aside class="ss-glass tw:rounded-2xl tw:p-5" aria-labelledby="managed-courses-title"><h2 id="managed-courses-title" class="tw:text-xl tw:font-bold">My Courses</h2><button type="button" class="btn btn-primary tw:my-3" @onclick="NewCourse"><i class="bi bi-plus-lg" aria-hidden="true"></i> Create Course</button>
+@foreach (var c in courses) { <button type="button" class="btn btn-outline-secondary tw:mb-2 tw:w-full tw:text-left" aria-pressed="@(course.Id == c.Id)" @onclick="() => SelectCourse(c.Id)">@c.Title <span class="badge bg-secondary">@c.Status</span></button> }
+</aside>
+<section class="ss-glass tw:rounded-2xl tw:p-6 tw:lg:col-span-2">
+<h2 class="tw:text-xl tw:font-bold">@(course.Id == 0 ? "Create Course" : "Edit Course")</h2>
+@if(course.Id > 0){<a class="btn btn-outline-info tw:mb-3" href="/teacher/courses/@course.Id/analytics"><i class="bi bi-bar-chart" aria-hidden="true"></i> Course analytics</a>}
+<label class="form-label" for="course-title">Title</label><input id="course-title" class="form-control" maxlength="200" @bind="course.Title" />
+<label class="form-label tw:mt-3" for="course-description">Description</label><textarea id="course-description" class="form-control" @bind="course.Description"></textarea>
+<label class="form-label tw:mt-3" for="course-skill">Skill ID</label><input id="course-skill" type="number" min="1" max="7" class="form-control" @bind="course.SkillId" />
+<label class="form-label tw:mt-3" for="thumbnail-url">Thumbnail URL</label><input id="thumbnail-url" class="form-control" @bind="course.ThumbnailUrl" />
+<label class="form-label tw:mt-2" for="thumbnail-file">Or upload thumbnail (JPG, PNG, WEBP; max 5 MB)</label><InputFile id="thumbnail-file" class="form-control" OnChange="UploadThumbnail" accept=".jpg,.jpeg,.png,.webp" />
+<label class="form-label tw:mt-3" for="thumbnail-alt">Thumbnail alt text</label><input id="thumbnail-alt" class="form-control" maxlength="300" aria-describedby="thumbnail-alt-help" @bind="course.ThumbnailAltText" /><div id="thumbnail-alt-help" class="form-text">Describe meaningful information in the image; leave empty only when it is decorative.</div>
+<div class="tw:mt-4 tw:flex tw:flex-wrap tw:gap-2"><button type="button" class="btn btn-primary" @onclick="SaveCourse">Save</button>@if(course.Id>0){<button type="button" class="btn btn-success" @onclick="PublishCourse">Publish</button>}</div>
+
+@if (course.Id > 0) {
+<hr/><h2 class="tw:text-xl tw:font-bold">Lessons</h2>
+<label class="form-label" for="lesson-title">Lesson title</label><input id="lesson-title" class="form-control" @bind="lesson.Title" />
+<label class="form-label tw:mt-2" for="video-url">Video URL (.mp4/.webm)</label><input id="video-url" class="form-control" @bind="lesson.VideoUrl" />
+<label class="form-label tw:mt-2" for="video-file">Or upload video (max 200 MB)</label><InputFile id="video-file" class="form-control" OnChange="UploadVideo" accept=".mp4,.webm" />
+<label class="form-label tw:mt-2" for="caption-url">Caption URL (.vtt)</label><input id="caption-url" class="form-control" @bind="lesson.CaptionUrl" />
+<label class="form-label tw:mt-2" for="transcript">Transcript</label><textarea id="transcript" class="form-control" @bind="lesson.Transcript"></textarea>
+<button type="button" class="btn btn-outline-primary tw:mt-3" @onclick="SaveLesson">Add lesson</button>
+<ol class="tw:mt-3">@foreach(var l in course.Lessons){<li>@l.Order. @l.Title</li>}</ol>
+
+<hr/><h2 class="tw:text-xl tw:font-bold">Final Quiz</h2>
+@if (quiz.Id == 0) { <label class="form-label" for="quiz-title">Quiz title</label><input id="quiz-title" class="form-control" @bind="quiz.Title"/><button type="button" class="btn btn-outline-primary tw:mt-2" @onclick="CreateQuiz">Create quiz</button> }
+else {
+<p><b>@quiz.Title</b> · @quiz.Questions.Count/10 questions · @quiz.Status</p>
+<a class="btn btn-outline-info tw:mb-3" href="/teacher/quizzes/@quiz.Id/results"><i class="bi bi-bar-chart" aria-hidden="true"></i> Learner results</a>
+<a class="btn btn-outline-info tw:mb-3 tw:ms-2" href="/teacher/quizzes/@quiz.Id/analytics"><i class="bi bi-graph-up" aria-hidden="true"></i> Quiz analytics</a>
+<fieldset><legend class="tw:text-lg tw:font-bold">Add question</legend>
+<div class="alert alert-info" role="note"><strong>AI creates an editable draft only.</strong> Review every field and explicitly confirm the correct answer before saving.</div>
+<label class="form-label" for="ai-learning-context">Learning context for AI</label><textarea id="ai-learning-context" class="form-control" maxlength="6000" @bind="aiLearningContext" aria-describedby="ai-context-help"></textarea><div id="ai-context-help" class="form-text">Paste only lesson content needed for this question; do not include student data.</div>
+<button type="button" class="btn btn-outline-primary tw:my-2" disabled="@aiBusy" @onclick="GenerateQuestionDraft"><i class="bi bi-stars" aria-hidden="true"></i> @(aiBusy ? "Generating draft..." : "Generate with AI")</button>
+<span class="visually-hidden" role="status" aria-live="polite">@aiStatus</span>
+@if(!string.IsNullOrWhiteSpace(aiStatus)){<div class="alert @(aiError ? "alert-warning" : "alert-success")" role="@(aiError ? "alert" : "status")">@aiStatus</div>}
+<label class="form-label" for="question-type">Question type</label><select id="question-type" class="form-select" @bind="question.Type"><option value="@ChallengeQuestionType.Knowledge">Knowledge</option><option value="@ChallengeQuestionType.Scenario">Scenario</option></select>
+<label class="form-label" for="question-text">Question</label><textarea id="question-text" class="form-control" @bind="question.QuestionText"></textarea>
+<label class="form-label tw:mt-2" for="scenario">Scenario</label><textarea id="scenario" class="form-control" @bind="question.Scenario"></textarea>
+<label class="form-label tw:mt-2" for="explanation">Explanation</label><textarea id="explanation" class="form-control" @bind="question.Explanation"></textarea>
+<label class="form-label tw:mt-2" for="question-image">Question image</label><InputFile id="question-image" class="form-control" OnChange="UploadQuestionImage" accept=".jpg,.jpeg,.png,.webp" />
+<label class="form-label tw:mt-2" for="question-alt">Image alt text</label><input id="question-alt" class="form-control" aria-describedby="question-alt-help" @bind="question.ImageAltText" /><div id="question-alt-help" class="form-text">Required when the question image communicates information needed to answer.</div>
+<fieldset class="tw:mt-3"><legend class="tw:text-base tw:font-semibold">Answer options and correct answer</legend>@for(var i=0;i<question.Options.Count;i++){var index=i;var correctId=$"correct-option-{index}";var textId=$"option-text-{index}";<div class="input-group tw:mt-2"><span class="input-group-text"><input id="@correctId" type="radio" name="correct-answer" checked="@question.Options[index].IsCorrect" @onchange="() => SetCorrect(index)" /><label class="visually-hidden" for="@correctId">Mark option @(index + 1) as correct</label></span><label class="visually-hidden" for="@textId">Option @(index + 1) text</label><input id="@textId" class="form-control" @bind="question.Options[index].Text" /></div>}@if(aiDraftNeedsConfirmation){<p class="text-danger tw:mt-2" role="alert">Select the correct answer yourself to confirm the AI suggestion.</p>}</fieldset>
+<button type="button" class="btn btn-primary tw:mt-3" @onclick="AddQuestion">Add question</button> <button type="button" class="btn btn-success tw:mt-3" disabled="@(quiz.Questions.Count != 10)" @onclick="PublishQuiz">Publish exactly 10</button>
+</fieldset><ol class="tw:mt-3">@foreach(var q in quiz.Questions){<li>@q.Order. @q.QuestionText</li>}</ol>
+}
+}
+</section></div></div></main>
+
+@code {
+private int userId; private bool isAdmin; private IReadOnlyList<CourseDto> courses=[]; private CourseDto course=new(); private CourseLessonDto lesson=new(); private ChallengeQuizDto quiz=new(); private ChallengeQuestionEditorDto question=NewQuestion(); private string? message; private bool error; private string aiLearningContext=""; private string aiStatus=""; private bool aiBusy; private bool aiError; private bool aiDraftNeedsConfirmation;
+protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync(); userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0; isAdmin=state.User.IsInRole("Admin"); await Reload();}
+private async Task Reload()=>courses=await Courses.GetManagedAsync(userId,isAdmin);
+private void NewCourse(){course=new();lesson=new();quiz=new();}
+private async Task SelectCourse(int id){course=await Courses.GetForManagementAsync(id,userId,isAdmin)??new();lesson=new(){CourseId=id};quiz=course.Quizzes.FirstOrDefault() is { } summary ? await Challenges.GetForManagementAsync(summary.Id,userId,isAdmin)??new():new();}
+private async Task SaveCourse(){try{var id=await Courses.SaveCourseAsync(course,userId,isAdmin);error=id is null;message=error?"Could not save course. Check the entered data and try again.":"Course saved.";if(id is not null){await SelectCourse(id.Value);await Reload();}}catch(Exception){error=true;message="Could not save course because the server rejected the operation. Please reload and try again.";}}
+private async Task PublishCourse(){error=!await Courses.PublishCourseAsync(course.Id,userId,isAdmin);message=error?"Add at least one lesson before publishing.":"Course published.";await SelectCourse(course.Id);}
+private async Task SaveLesson(){lesson.CourseId=course.Id;var id=await Courses.SaveLessonAsync(lesson,userId,isAdmin);error=id is null;message=error?"Could not save lesson.":"Lesson saved.";await SelectCourse(course.Id);}
+private async Task CreateQuiz(){quiz.CourseId=course.Id;quiz.SkillId=course.SkillId;var id=await Challenges.SaveQuizAsync(quiz,userId,isAdmin);error=id is null;message=error?"Could not create quiz.":"Quiz created.";if(id is not null)quiz=await Challenges.GetForManagementAsync(id.Value,userId,isAdmin)??new();}
+private void SetCorrect(int index){for(var i=0;i<question.Options.Count;i++)question.Options[i].IsCorrect=i==index;aiDraftNeedsConfirmation=false;}
+private async Task GenerateQuestionDraft(){if(aiBusy)return;aiBusy=true;aiError=false;aiStatus="Generating an editable draft. The quiz is not being saved or published.";var draft=await Challenges.GenerateQuestionDraftAsync(new(){QuizId=quiz.Id,LessonTitle=lesson.Title,LessonContent=aiLearningContext,TargetSkill=$"Skill {quiz.SkillId}",Difficulty=quiz.Difficulty,QuestionType=question.Type},userId,isAdmin);if(draft is null){aiError=true;aiStatus="AI is unavailable or returned an invalid draft. You can continue creating the question manually, or retry.";}else{question.QuestionText=draft.QuestionText;question.Scenario=draft.Scenario;question.Explanation=draft.Explanation;question.ImageAltText=draft.SuggestedAltText;question.Options=draft.Options.Select((text,index)=>new ChallengeOptionEditorDto{Text=text,IsCorrect=index==draft.SuggestedCorrectOptionIndex,Order=index+1}).ToList();aiDraftNeedsConfirmation=true;aiStatus="Draft generated. Review and edit it, then select the correct answer yourself before saving.";}aiBusy=false;}
+private async Task AddQuestion(){if(aiDraftNeedsConfirmation){error=true;message="Confirm the correct answer yourself before saving this AI draft.";return;}error=!await Challenges.SaveQuestionAsync(quiz.Id,question,userId,isAdmin);message=error?"Enter one question, four options and select exactly one correct answer.":"Question saved.";if(!error){quiz=await Challenges.GetForManagementAsync(quiz.Id,userId,isAdmin)??new();question=NewQuestion();aiStatus="";}}
+private async Task PublishQuiz(){error=!await Challenges.PublishAsync(quiz.Id,userId,isAdmin);message=error?"Quiz must contain exactly 10 valid questions.":"Quiz published.";quiz=await Challenges.GetForManagementAsync(quiz.Id,userId,isAdmin)??new();}
+private async Task UploadThumbnail(InputFileChangeEventArgs e)=>await Upload(e, path=>course.ThumbnailUrl=path, true);
+private async Task UploadVideo(InputFileChangeEventArgs e)=>await Upload(e, path=>lesson.VideoUrl=path, false);
+private async Task UploadQuestionImage(InputFileChangeEventArgs e)=>await Upload(e, path=>question.ImageUrl=path, true);
+private async Task Upload(InputFileChangeEventArgs e,Action<string> set,bool image){try{set(image?await Uploads.SaveImageAsync(e.File):await Uploads.SaveVideoAsync(e.File));error=false;message="Upload complete.";}catch(InvalidOperationException ex){error=true;message=ex.Message;}}
+private static ChallengeQuestionEditorDto NewQuestion()=>new(){Options=[new(),new(),new(),new()]};
+}

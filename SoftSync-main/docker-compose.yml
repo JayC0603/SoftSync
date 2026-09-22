@@ -14,7 +14,7 @@ services:
     volumes:
       - softsync-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U softsync -d softsync"]
+      test: [ "CMD-SHELL", "pg_isready -U softsync -d softsync" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -43,9 +43,12 @@ services:
 
       # Inside the compose network the DB host is the service name "db".
       ConnectionStrings__SoftSyncDb: "Host=db;Port=5432;Database=softsync;Username=softsync;Password=softsync"
+      # Values come from a local .env or the shell; never hard-code credentials here.
+      BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
+      BootstrapAdmin__Password: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
 
     ports:
-      - "8080:8080"
+      - "8081:8080"
 
     depends_on:
       db:

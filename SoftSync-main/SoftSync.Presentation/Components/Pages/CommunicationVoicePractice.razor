@@ -5,6 +5,7 @@
 @using SoftSync.Presentation.Services
 @inject IJSRuntime JS
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
 @inject SoftSync.BLL.Interfaces.IRoadmapService RoadmapService
 @inject IAiLearningEvaluationService AiEvaluator
 @implements IAsyncDisposable
@@ -38,6 +39,7 @@
     private string ScenarioTitle(int index)=>IsVi?Scenarios[index].Title:EnglishScenarios[index].Title;
     private string CurrentContext=>IsVi?Current.Context:CurrentEnglish.Context;
     private string CurrentScript=>IsVi?Current.Script:CurrentEnglish.Script;
+    protected override async Task OnInitializedAsync(){UserId=await AuthProvider.GetUserIdAsync();if(UserId<=0)Nav.NavigateTo("/Account/Login",true);}
     protected override async Task OnAfterRenderAsync(bool first){if(first)module=await JS.InvokeAsync<IJSObjectReference>("import","/js/voicePractice.js");}
     private async Task ToggleRecording(){if(module is null)return;busy=true;try{if(!recording){Reset();await module.InvokeVoidAsync("startRecording",IsVi?"vi-VN":"en-US");recording=true;}else{result=await module.InvokeAsync<AudioMetrics>("stopRecording");recording=false;transcript=result.Transcript??"";await Score();}}finally{busy=false;}}
     private void Reset(){result=null;scores=null;transcript="";}

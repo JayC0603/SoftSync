@@ -1,0 +1,114 @@
+@page "/teacher/courses/{CourseId:int}/analytics"
+@page "/teacher/quizzes/{QuizId:int}/analytics"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.TeacherPolicy)]
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject ICourseService Courses
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Teacher Analytics · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="analytics-title" aria-busy="@loading">
+        <a href="/teacher/courses" class="btn btn-link tw:px-0">← Teacher Studio</a>
+        <h1 id="analytics-title" class="tw:text-3xl tw:font-bold">Teacher Analytics</h1>
+        <p>Metrics use persisted enrollments and completed quiz attempts. In-progress attempts are reported separately.</p>
+
+        @if (loading)
+        {
+            <p role="status">Loading analytics...</p>
+        }
+        else if (course is null && quiz is null)
+        {
+            <div class="alert alert-warning" role="alert">Analytics are unavailable or you do not own this content.</div>
+        }
+        else
+        {
+            @if (course is not null)
+            {
+                <section class="tw:mt-6" aria-labelledby="course-analytics-title">
+                    <h2 id="course-analytics-title" class="tw:text-2xl tw:font-bold">Course: @course.CourseTitle</h2>
+                    <dl class="tw:grid tw:gap-3 tw:sm:grid-cols-2 tw:lg:grid-cols-5">
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Enrollments</dt><dd class="tw:text-2xl tw:font-bold">@course.Enrollments</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Completed</dt><dd class="tw:text-2xl tw:font-bold">@course.Completed</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>In progress</dt><dd class="tw:text-2xl tw:font-bold">@course.InProgress</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Completion rate</dt><dd class="tw:text-2xl tw:font-bold">@Percent(course.CompletionRate)</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Final quiz pass rate</dt><dd class="tw:text-2xl tw:font-bold">@Percent(course.FinalQuizPassRate)</dd></div>
+                    </dl>
+                    <div class="table-responsive tw:mt-5">
+                        <table class="table table-hover align-middle">
+                            <caption>Lesson completion among enrolled students</caption>
+                            <thead><tr><th scope="col">Lesson</th><th scope="col">Completed students</th><th scope="col">Enrollments</th><th scope="col">Completion rate</th></tr></thead>
+                            <tbody>@foreach (var lesson in course.Lessons){<tr><th scope="row">@lesson.Order. @lesson.Title</th><td>@lesson.CompletedStudents</td><td>@lesson.Enrollments</td><td>@Percent(lesson.CompletionRate)</td></tr>}</tbody>
+                        </table>
+                    </div>
+                </section>
+            }
+
+            @if (quiz is not null)
+            {
+                <section class="tw:mt-8" aria-labelledby="quiz-analytics-title">
+                    <h2 id="quiz-analytics-title" class="tw:text-2xl tw:font-bold">Quiz: @quiz.QuizTitle</h2>
+                    <p>Score summary is calculated across all completed attempts.</p>
+                    <dl class="tw:grid tw:gap-3 tw:sm:grid-cols-2 tw:lg:grid-cols-4">
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Participants (any attempt)</dt><dd class="tw:text-2xl tw:font-bold">@quiz.Participants</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Unique students (completed)</dt><dd class="tw:text-2xl tw:font-bold">@quiz.UniqueStudents</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Completed attempts</dt><dd class="tw:text-2xl tw:font-bold">@quiz.CompletedAttempts</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>In-progress attempts</dt><dd class="tw:text-2xl tw:font-bold">@quiz.InProgressAttempts</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>PASS attempts</dt><dd class="tw:text-2xl tw:font-bold">@quiz.PassAttempts</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>NOT PASS attempts</dt><dd class="tw:text-2xl tw:font-bold">@quiz.NotPassAttempts</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Pass rate</dt><dd class="tw:text-2xl tw:font-bold">@Percent(quiz.PassRate)</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Average score</dt><dd class="tw:text-2xl tw:font-bold">@Score(quiz.AverageScore, quiz.TotalQuestions)</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Highest score</dt><dd class="tw:text-2xl tw:font-bold">@Score(quiz.HighestScore, quiz.TotalQuestions)</dd></div>
+                        <div class="ss-glass tw:rounded-xl tw:p-4"><dt>Lowest score</dt><dd class="tw:text-2xl tw:font-bold">@Score(quiz.LowestScore, quiz.TotalQuestions)</dd></div>
+                    </dl>
+
+                    <h3 class="tw:mt-7 tw:text-xl tw:font-bold">Question accuracy</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <caption>Correct rate by question, using completed attempts only</caption>
+                            <thead><tr><th scope="col">Question</th><th scope="col">Attempts</th><th scope="col">Correct</th><th scope="col">Incorrect</th><th scope="col">Correct rate</th></tr></thead>
+                            <tbody>@foreach (var question in quiz.Questions){<tr><th scope="row">@question.Order. @question.QuestionText</th><td>@question.Attempts</td><td>@question.Correct</td><td>@question.Incorrect</td><td>@Percent(question.CorrectRate)@if(question.CorrectRate is < 50){<span class="tw:block tw:text-sm tw:font-semibold">Difficult question</span>}</td></tr>}</tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="tw:mt-7 tw:text-xl tw:font-bold">Student results</h3>
+                    @if (quiz.Students.Count == 0){<p>No completed student attempts.</p>}
+                    else
+                    {
+                        <div class="table-responsive"><table class="table table-hover align-middle">
+                            <caption>Latest and best result per student</caption>
+                            <thead><tr><th scope="col">Student</th><th scope="col">Attempts</th><th scope="col">Latest score</th><th scope="col">Best score</th><th scope="col">Latest result</th><th scope="col">Completed</th></tr></thead>
+                            <tbody>@foreach(var student in quiz.Students){<tr><th scope="row">@student.DisplayName</th><td>@student.Attempts</td><td>@student.LatestScore / @quiz.TotalQuestions</td><td>@student.BestScore / @quiz.TotalQuestions</td><td>@(student.LatestResult == SoftSync.Common.Enums.QuizAttemptResult.Pass ? "PASS" : "NOT PASS")</td><td>@student.CompletedAtUtc.ToLocalTime().ToString("g")</td></tr>}</tbody>
+                        </table></div>
+                    }
+                </section>
+            }
+        }
+    </section>
+</main>
+
+@code {
+    [Parameter] public int CourseId { get; set; }
+    [Parameter] public int QuizId { get; set; }
+    private CourseAnalyticsDto? course;
+    private QuizAnalyticsDto? quiz;
+    private bool loading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        var state = await Auth.GetAuthenticationStateAsync();
+        var userId = state.User.GetUserId();
+        var isAdmin = state.User.IsInRole("Admin");
+        course = CourseId > 0 ? await Courses.GetAnalyticsAsync(CourseId, userId, isAdmin) : null;
+        var quizId = QuizId > 0 ? QuizId : course?.FinalQuizId ?? 0;
+        quiz = quizId > 0 ? await Challenges.GetAnalyticsAsync(quizId, userId, isAdmin) : null;
+        loading = false;
+    }
+
+    private static string Percent(decimal? value) => value.HasValue ? $"{value.Value:0.0}%" : "N/A";
+    private static string Score(decimal? value, int total) => value.HasValue ? $"{value.Value:0.0} / {total}" : "N/A";
+    private static string Score(int? value, int total) => value.HasValue ? $"{value.Value} / {total}" : "N/A";
+}

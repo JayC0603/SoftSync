@@ -31,7 +31,9 @@ public enum ChatSender
 
 public enum UserRole
 {
-    Student
+    Student,
+    Teacher,
+    Admin
 }
 
 public enum Gender
@@ -46,6 +48,40 @@ public enum QuestionType
     MultipleChoice,
     Scenario
 }
+
+public enum RoadmapActivityType
+{
+    VideoLesson,
+    LessonScript,
+    LessonSummary,
+    Quiz,
+    Roleplay,
+    Reflection
+}
+
+public enum RoadmapContentOrigin
+{
+    SoftSyncCurated,
+    AiPersonalized
+}
+
+public enum RoleplaySessionStatus
+{
+    InProgress,
+    Completed,
+    Failed
+}
+
+public enum RoleplaySpeaker
+{
+    Persona,
+    Learner
+}
+
+public enum CourseStatus { Draft, Published, Archived }
+public enum ChallengeDifficulty { Beginner, Intermediate, Advanced }
+public enum ChallengeQuestionType { Knowledge, Scenario }
+public enum QuizAttemptResult { NotPass, Pass }
 
 /// <summary>Self-reported current level, used by the AI to tune the roadmap.</summary>
 public enum LearningLevel

@@ -1,0 +1,190 @@
+@page "/game"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.BLL.Services
+@using SoftSync.Common.Dtos
+@inject IChallengeService Challenges
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Mini Game · SoftSync</PageTitle>
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-4xl" aria-labelledby="@(result is not null ? "result-title" : "game-title")" aria-busy="@(loading || submitting)">
+        @if (loading)
+        {
+            <h1 id="game-title" class="tw:text-3xl tw:font-bold">Mini Game</h1>
+            <p role="status">@Tx("Loading quizzes...", "Đang tải bài kiểm tra...")</p>
+        }
+        else if (quiz is null)
+        {
+            <header class="tw:mb-8">
+                <span class="badge bg-primary">Inclusive Skill Challenge</span>
+                <h1 id="game-title" class="tw:mt-3 tw:text-3xl tw:font-bold">Mini Game</h1>
+                <p>@Tx("Practice soft skills through published 10-question challenges.", "Luyện kỹ năng mềm qua các thử thách 10 câu hỏi đã xuất bản.")</p>
+                <a class="btn btn-outline-primary tw:mt-3" href="/game/history">@Tx("Attempt history", "Lịch sử làm bài")</a>
+            </header>
+
+            @if (items.Count == 0)
+            {
+                <div class="alert alert-info" role="status">@Tx("No published challenge is available yet.", "Chưa có thử thách nào được xuất bản.")</div>
+            }
+            <div class="tw:grid tw:gap-5 tw:md:grid-cols-2">
+                @foreach (var item in items)
+                {
+                    <article class="ss-glass tw:rounded-2xl tw:p-6">
+                        <i class="bi bi-controller tw:text-3xl tw:text-indigo-600" aria-hidden="true"></i>
+                        <h2 class="tw:mt-3 tw:text-xl tw:font-bold">@item.Title</h2>
+                        <p>@item.Description</p>
+                        <dl><dt>@Tx("Skill", "Kỹ năng")</dt><dd>@item.SkillName</dd><dt>@Tx("Questions", "Số câu")</dt><dd>@item.QuestionCount / 10</dd></dl>
+                        <button type="button" class="btn btn-primary" @onclick="() => StartAsync(item.Id)">@Tx("Start quiz", "Bắt đầu")</button>
+                    </article>
+                }
+            </div>
+            <AuthorizeView Roles="Teacher,Admin"><a class="btn btn-outline-primary tw:mt-8" href="/teacher/courses"><i class="bi bi-pencil-square" aria-hidden="true"></i> @Tx("Manage courses and questions", "Quản lý khóa học và câu hỏi")</a></AuthorizeView>
+        }
+        else if (result is not null)
+        {
+            <article class="ss-glass tw:rounded-2xl tw:p-8" aria-labelledby="result-title">
+                <span class="badge @(result.Passed ? "bg-success" : "bg-danger")">@(result.Passed ? "PASS" : "NOT PASS")</span>
+                <h1 id="result-title" class="tw:mt-4 tw:text-3xl tw:font-bold">@result.QuizTitle</h1>
+                <p class="tw:text-xl" aria-label="@Tx($"Score {result.CorrectAnswers} out of {result.TotalQuestions}", $"Điểm {result.CorrectAnswers} trên {result.TotalQuestions}")">
+                    @Tx("Score", "Điểm"): <strong>@result.CorrectAnswers / @result.TotalQuestions</strong>
+                </p>
+                <dl><dt>@Tx("Result", "Kết quả")</dt><dd>@(result.Passed ? "PASS" : "NOT PASS")</dd><dt>@Tx("Correct answers", "Câu trả lời đúng")</dt><dd>@result.CorrectAnswers</dd><dt>@Tx("Incorrect answers", "Câu trả lời sai")</dt><dd>@(result.TotalQuestions - result.CorrectAnswers)</dd></dl>
+                <p>@(result.Passed ? Tx("You passed this challenge.", "Bạn đã vượt qua thử thách.") : Tx("You need at least 5 correct answers to pass.", "Bạn cần ít nhất 5 câu đúng để đạt."))</p>
+                <button type="button" class="btn btn-primary" @onclick="BackToList">@Tx("Back to quizzes", "Về danh sách")</button>
+            </article>
+        }
+        else
+        {
+            var question = quiz.Questions[currentIndex];
+            <header class="tw:mb-6">
+                <button type="button" class="btn btn-link tw:px-0" @onclick="BackToList">← @Tx("Quiz list", "Danh sách")</button>
+                <h1 id="game-title" class="tw:text-3xl tw:font-bold">@quiz.Title</h1>
+                <p id="quiz-progress-text">@Tx($"Question {currentIndex + 1} of 10. {(currentIndex + 1) * 10} percent complete.", $"Câu {currentIndex + 1} / 10. Đã hoàn thành {(currentIndex + 1) * 10} phần trăm.")</p>
+                <div class="progress" role="progressbar" aria-labelledby="quiz-progress-text" aria-valuenow="@(currentIndex + 1)" aria-valuemin="1" aria-valuemax="10" aria-valuetext="@((currentIndex + 1) * 10) percent complete">
+                    <div class="progress-bar" style="width: @((currentIndex + 1) * 10)%"></div>
+                </div>
+            </header>
+
+            <article class="ss-glass tw:rounded-2xl tw:p-6" @key="question.Id">
+                @if (!string.IsNullOrWhiteSpace(question.Scenario))
+                {
+                    <p class="alert alert-light"><strong>@Tx("Scenario", "Tình huống"):</strong> @question.Scenario</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(question.ImageUrl))
+                {
+                    <img src="@question.ImageUrl" alt="@question.ImageAltText" class="tw:mb-5 tw:max-h-80 tw:w-full tw:rounded-xl tw:object-cover" />
+                }
+                <fieldset class="tw:mt-5">
+                    <legend @ref="questionHeading" tabindex="-1" class="tw:text-xl tw:font-bold">@question.QuestionText</legend>
+                    <p class="visually-hidden">@Tx("Choose one answer.", "Chọn một đáp án.")</p>
+                    @foreach (var option in question.Options)
+                    {
+                        var optionId = $"quiz-{question.Id}-option-{option.Id}";
+                        <div class="form-check ss-quiz-option tw:mb-3 tw:rounded-xl tw:border tw:border-slate-200 tw:p-4 tw:pl-10">
+                            <input id="@optionId" class="form-check-input" type="radio" name="question-@question.Id"
+                                   checked="@(answers.GetValueOrDefault(question.Id) == option.Id)"
+                                   @onchange="() => SelectAnswer(question.Id, option.Id)" />
+                            <label class="form-check-label tw:block tw:w-full" for="@optionId">@option.Text</label>
+                        </div>
+                    }
+                </fieldset>
+            </article>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger tw:mt-4" role="alert">@errorMessage</div>
+            }
+            <nav class="tw:mt-6 tw:flex tw:items-center tw:justify-between" aria-label="@Tx("Quiz question navigation", "Điều hướng câu hỏi")">
+                <button type="button" class="btn btn-outline-secondary" disabled="@(currentIndex == 0 || submitting)" @onclick="Previous">← @Tx("Previous", "Trước")</button>
+                @if (currentIndex < quiz.Questions.Count - 1)
+                {
+                    <button type="button" class="btn btn-primary" disabled="@submitting" @onclick="Next">@Tx("Next", "Tiếp") →</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" disabled="@(answers.Count != 10 || submitting)" @onclick="SubmitAsync">@(submitting ? Tx("Submitting...", "Đang nộp...") : Tx("Submit", "Nộp bài"))</button>
+                }
+            </nav>
+            <p class="tw:mt-3 tw:text-sm tw:text-slate-700" role="status" aria-live="polite">@(submitting ? Tx("Submitting test...", "Đang nộp bài...") : Tx($"Answered {answers.Count} of 10", $"Đã trả lời {answers.Count} / 10"))</p>
+        }
+    </section>
+</main>
+
+@code {
+    [SupplyParameterFromQuery(Name = "quizId")] private int? RequestedQuizId { get; set; }
+    private IReadOnlyList<StudentChallengeDto> items = [];
+    private StudentQuizDto? quiz;
+    private QuizAttemptResultDto? result;
+    private int attemptId;
+    private readonly Dictionary<int, int> answers = [];
+    private int currentIndex;
+    private bool loading = true;
+    private bool submitting;
+    private bool focusQuestion;
+    private ElementReference questionHeading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Challenges.GetPublishedAsync();
+        if (RequestedQuizId is int quizId) await StartAsync(quizId);
+        loading = false;
+    }
+
+    private async Task StartAsync(int quizId)
+    {
+        var userId = await AuthenticationStateProvider.GetUserIdAsync();
+        var session = await Challenges.StartAttemptAsync(quizId, userId);
+        quiz = session?.Quiz;
+        attemptId = session?.AttemptId ?? 0;
+        result = null;
+        answers.Clear();
+        currentIndex = 0;
+        errorMessage = quiz is null ? Tx("This quiz is unavailable.", "Bài kiểm tra không khả dụng.") : null;
+    }
+
+    private void SelectAnswer(int questionId, int optionId) => answers[questionId] = optionId;
+    private void Previous() { currentIndex = Math.Max(0, currentIndex - 1); focusQuestion = true; }
+    private void Next() { currentIndex = Math.Min((quiz?.Questions.Count ?? 1) - 1, currentIndex + 1); focusQuestion = true; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusQuestion) return;
+        focusQuestion = false;
+        await questionHeading.FocusAsync();
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (quiz is null || submitting || answers.Count != ChallengeRules.RequiredQuestionCount) return;
+        submitting = true;
+        errorMessage = null;
+        try
+        {
+            var userId = await AuthenticationStateProvider.GetUserIdAsync();
+            result = await Challenges.SubmitAsync(attemptId, userId, answers.Select(x => new StudentQuizAnswerDto { QuestionId = x.Key, SelectedOptionId = x.Value }).ToList());
+            if (result is null) errorMessage = Tx("Your submission could not be saved. Please review all answers and try again.", "Không thể lưu bài làm. Vui lòng kiểm tra đủ đáp án và thử lại.");
+            else Navigation.NavigateTo($"/game/result/{result.AttemptId}");
+        }
+        finally
+        {
+            submitting = false;
+        }
+    }
+
+    private void BackToList()
+    {
+        quiz = null;
+        result = null;
+        answers.Clear();
+        currentIndex = 0;
+        attemptId = 0;
+        errorMessage = null;
+    }
+
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+}

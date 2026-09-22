@@ -164,8 +164,9 @@
             await TrySaveHistoryAsync(SoftSync.Common.Enums.ChatSender.Assistant, viReply, enReply);
             await PersistBrowserHistoryAsync();
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "AI assistant failed for user {UserId}; showing the user-facing fallback", UserId);
             var error = new AssistantMessage
             {
                 ViContent = "SYNCY chưa thể kết nối với AI. Vui lòng thử lại sau.",
