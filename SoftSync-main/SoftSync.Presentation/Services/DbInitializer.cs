@@ -108,28 +108,31 @@ public static class DbInitializer
 
         var users = services.GetRequiredService<UserManager<ApplicationUser>>();
         var admin = await users.FindByEmailAsync(email);
-        if (admin is null)
+        if (admin is not null)
         {
-            admin = new ApplicationUser
-            {
-                UserName = email,
-                Email = email,
-                EmailConfirmed = true,
-                FullName = "SoftSync Administrator",
-                Role = UserRole.Admin,
-                CreatedAt = DateTime.UtcNow
-            };
-            var created = await users.CreateAsync(admin, password);
-            if (!created.Succeeded)
-                throw new InvalidOperationException($"Could not create bootstrap Admin: {string.Join(", ", created.Errors.Select(error => error.Code))}");
+            // An existing account may have registered this unconfirmed email first.
+            // Never promote it just because its address matches configuration.
+            if (!await users.IsInRoleAsync(admin, CourseAuthorization.AdminRole))
+                throw new InvalidOperationException("BootstrapAdmin email belongs to an existing non-Admin account. Resolve the account manually before starting the app.");
+            return;
         }
 
-        if (!await users.IsInRoleAsync(admin, CourseAuthorization.AdminRole))
+        admin = new ApplicationUser
         {
-            var assigned = await users.AddToRoleAsync(admin, CourseAuthorization.AdminRole);
-            if (!assigned.Succeeded)
-                throw new InvalidOperationException($"Could not assign bootstrap Admin role: {string.Join(", ", assigned.Errors.Select(error => error.Code))}");
-        }
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FullName = "SoftSync Administrator",
+            Role = UserRole.Admin,
+            CreatedAt = DateTime.UtcNow
+        };
+        var created = await users.CreateAsync(admin, password);
+        if (!created.Succeeded)
+            throw new InvalidOperationException($"Could not create bootstrap Admin: {string.Join(", ", created.Errors.Select(error => error.Code))}");
+
+        var assigned = await users.AddToRoleAsync(admin, CourseAuthorization.AdminRole);
+        if (!assigned.Succeeded)
+            throw new InvalidOperationException($"Could not assign bootstrap Admin role: {string.Join(", ", assigned.Errors.Select(error => error.Code))}");
     }
 
     // Older builds stored the goal as resolved text (e.g. "Cải thiện giao tiếp")

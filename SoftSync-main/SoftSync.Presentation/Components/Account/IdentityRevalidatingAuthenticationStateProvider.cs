@@ -9,7 +9,8 @@ namespace SoftSync.Presentation.Components.Account;
 
 /// <summary>
 /// Server-side AuthenticationStateProvider that revalidates the security stamp
-/// of the logged-in user every 30 minutes. Adapted from the Blazor Web App
+/// of the logged-in user every minute so role revocations take effect promptly.
+/// Adapted from the Blazor Web App
 /// Individual Accounts template.
 /// </summary>
 public sealed class IdentityRevalidatingAuthenticationStateProvider(
@@ -18,7 +19,7 @@ public sealed class IdentityRevalidatingAuthenticationStateProvider(
     IOptions<IdentityOptions> options)
     : RevalidatingServerAuthenticationStateProvider(loggerFactory)
 {
-    protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
+    protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(1);
 
     protected override async Task<bool> ValidateAuthenticationStateAsync(
         AuthenticationState authenticationState, CancellationToken cancellationToken)

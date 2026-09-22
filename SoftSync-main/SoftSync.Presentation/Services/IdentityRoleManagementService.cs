@@ -46,14 +46,21 @@ public sealed class IdentityRoleManagementService(UserManager<ApplicationUser> u
 
         var isTeacher = await users.IsInRoleAsync(target, CourseAuthorization.TeacherRole);
         if (assign)
-            return isTeacher ? IdentityResult.Success : await users.AddToRoleAsync(target, CourseAuthorization.TeacherRole);
+        {
+            if (isTeacher) return IdentityResult.Success;
+            var added = await users.AddToRoleAsync(target, CourseAuthorization.TeacherRole);
+            return added.Succeeded ? await users.UpdateSecurityStampAsync(target) : added;
+        }
 
         if (!isTeacher) return IdentityResult.Success;
         var removed = await users.RemoveFromRoleAsync(target, CourseAuthorization.TeacherRole);
         if (!removed.Succeeded) return removed;
         if (!await users.IsInRoleAsync(target, CourseAuthorization.UserRole))
-            return await users.AddToRoleAsync(target, CourseAuthorization.UserRole);
-        return IdentityResult.Success;
+        {
+            var addedUser = await users.AddToRoleAsync(target, CourseAuthorization.UserRole);
+            if (!addedUser.Succeeded) return addedUser;
+        }
+        return await users.UpdateSecurityStampAsync(target);
     }
 
     private async Task<(int UserId, ApplicationUser Account)?> GetAdminCallerAsync()

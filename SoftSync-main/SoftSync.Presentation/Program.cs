@@ -119,6 +119,10 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy(CourseAuthorization.AdminPolicy, policy =>
         policy.RequireAuthenticatedUser().RequireRole(CourseAuthorization.AdminRole));
 
+// A role change updates the user's security stamp, invalidating old role claims.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+    options.ValidationInterval = TimeSpan.FromMinutes(1));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "SoftSync.Auth";
