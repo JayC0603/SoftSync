@@ -8,13 +8,17 @@ export default async function CoursesPage() {
   let error = "";
 
   try {
-    courses = await prisma.course.findMany({
-      where: { status: "Published" },
-      select: { id: true, title: true, description: true, status: true },
-      orderBy: { createdAtUtc: "desc" },
-    });
+    // The existing ASP.NET/EF database uses quoted PascalCase table and column
+    // names. Read it directly while the full Prisma schema is being mapped.
+    courses = await prisma.$queryRaw<typeof courses>`
+      SELECT "Id" AS id, "Title" AS title, "Description" AS description,
+             "Status"::text AS status
+      FROM "Courses"
+      WHERE "Status" = 1
+      ORDER BY "CreatedAtUtc" DESC
+    `;
   } catch {
-    error = "Chưa thể kết nối database. Hãy cấu hình DATABASE_URL trên Vercel.";
+    error = "Đã kết nối database nhưng chưa đọc được bảng Courses cũ. Kiểm tra log Vercel để map schema EF Core.";
   }
 
   return (
