@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  Student
+  Teacher
+  Admin
+}
+enum Gender {
+  Unspecified
+  Male
+  Female
+}
+enum CourseStatus {
+  Draft
+  Published
+  Archived
+}
+enum ChallengeDifficulty {
+  Beginner
+  Intermediate
+  Advanced
+}
+enum ChallengeQuestionType {
+  Knowledge
+  Scenario
+}
+enum QuizAttemptResult {
+  NotPass
+  Pass
+}
+enum LearningLevel {
+  Unspecified
+  Beginner
+  Intermediate
+  Advanced
+}
+enum StudyTime {
+  Unspecified
+  Morning
+  Afternoon
+  Evening
+  Night
+}
+enum ThemePreference {
+  System
+  Light
+  Dark
+}
+enum ChatSender {
+  User
+  Assistant
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique
+  passwordHash       String
+  phoneNumber        String?   @unique
+  fullName           String    @default("")
+  displayName        String    @default("")
+  age                Int       @default(0)
+  role               UserRole  @default(Student)
+  gender             Gender    @default(Unspecified)
+  goal               String    @default("")
+  avatarUrl          String    @default("")
+  experiencePoints   Int       @default(0)
+  currentLevel       LearningLevel @default(Unspecified)
+  dailyStudyMinutes  Int       @default(0)
+  studyDaysPerWeek   Int       @default(0)
+  preferredStudyTime StudyTime @default(Unspecified)
+  preferredLanguage  String    @default("")
+  theme              ThemePreference @default(Light)
+  reduceMotion       Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  coursesCreated     Course[]  @relation("CourseCreator")
+  coursesEnrolled    CourseEnrollment[]
+  skills             UserSkillSelection[]
+  attempts           QuizAttempt[]
+  progressLogs       ProgressLog[]
+  chatSessions       ChatSession[]
+  chatMessages       ChatMessage[]
+  roadmapItems       RoadmapItem[]
+}
+
+model Skill {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String    @default("")
+  iconName    String    @default("")
+  users       UserSkillSelection[]
+  courses     Course[]
+  quizzes     SkillChallenge[]
+  progress    ProgressLog[]
+}
+
+model UserSkillSelection {
+  userId  Int
+  skillId Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  @@id([userId, skillId])
+}
+
+model Course {
+  id              Int       @id @default(autoincrement())
+  creatorUserId   Int
+  creator         User      @relation("CourseCreator", fields: [creatorUserId], references: [id])
+  title           String
+  description     String    @default("")
+  skillId         Int
+  skill           Skill     @relation(fields: [skillId], references: [id])
+  thumbnailUrl    String    @default("")
+  thumbnailAltText String   @default("")
+  status          CourseStatus @default(Draft)
+  createdAtUtc    DateTime  @default(now())
+  publishedAtUtc  DateTime?
+  lessons         CourseLesson[]
+  quizzes         SkillChallenge[]
+  enrollments     CourseEnrollment[]
+}
+
+model CourseLesson {
+  id                  Int       @id @default(autoincrement())
+  courseId            Int
+  course              Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title               String
+  description         String    @default("")
+  order               Int
+  videoUrl            String    @default("")
+  videoDurationSeconds Int?
+  transcript          String    @default("")
+  captionUrl          String    @default("")
+  createdAtUtc        DateTime  @default(now())
+  progress            CourseLessonProgress[]
+}
+
+model CourseEnrollment {
+  id                 Int       @id @default(autoincrement())
+  courseId           Int
+  userId             Int
+  course             Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrolledAtUtc      DateTime  @default(now())
+  completedAtUtc     DateTime?
+  progressPercentage Int       @default(0)
+  lessonProgress     CourseLessonProgress[]
+  @@unique([courseId, userId])
+}
+
+model CourseLessonProgress {
+  id                  Int       @id @default(autoincrement())
+  enrollmentId        Int
+  lessonId            Int
+  enrollment           CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson              CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  isCompleted         Boolean   @default(false)
+  completedAtUtc      DateTime?
+  lastPositionSeconds Int       @default(0)
+  @@unique([enrollmentId, lessonId])
+}
+
+model SkillChallenge {
+  id          Int       @id @default(autoincrement())
+  teacherId   Int
+  courseId    Int?
+  title       String
+  description String    @default("")
+  skillId     Int
+  difficulty  ChallengeDifficulty @default(Beginner)
+  status      CourseStatus @default(Draft)
+  createdAtUtc DateTime @default(now())
+  publishedAtUtc DateTime?
+  course      Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  skill       Skill @relation(fields: [skillId], references: [id])
+  questions   ChallengeQuestion[]
+  attempts    QuizAttempt[]
+  @@index([teacherId])
+}
+
+model ChallengeQuestion {
+  id           Int       @id @default(autoincrement())
+  quizId       Int
+  questionText String
+  scenario     String    @default("")
+  imageUrl     String    @default("")
+  imageAltText String    @default("")
+  explanation  String    @default("")
+  order        Int       @default(0)
+  type         ChallengeQuestionType @default(Knowledge)
+  quiz         SkillChallenge @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options      ChallengeOption[]
+  answers      QuizAttemptAnswer[]
+}
+
+model ChallengeOption {
+  id         Int       @id @default(autoincrement())
+  questionId Int
+  text       String
+  isCorrect  Boolean   @default(false)
+  order      Int       @default(0)
+  question   ChallengeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedIn QuizAttemptAnswer[]
+}
+
+model QuizAttempt {
+  id              Int       @id @default(autoincrement())
+  quizId          Int
+  userId          Int
+  startedAtUtc    DateTime  @default(now())
+  completedAtUtc  DateTime?
+  correctAnswers  Int       @default(0)
+  totalQuestions  Int       @default(0)
+  scorePercentage Decimal   @default(0)
+  result          QuizAttemptResult @default(NotPass)
+  quiz            SkillChallenge @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers         QuizAttemptAnswer[]
+}
+
+model QuizAttemptAnswer {
+  id               Int       @id @default(autoincrement())
+  attemptId        Int
+  questionId       Int
+  selectedOptionId Int
+  isCorrect        Boolean   @default(false)
+  attempt          QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question         ChallengeQuestion @relation(fields: [questionId], references: [id])
+  selectedOption   ChallengeOption @relation(fields: [selectedOptionId], references: [id])
+}
+
+model ProgressLog {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  skillId        Int
+  percentComplete Int
+  updatedAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill          Skill    @relation(fields: [skillId], references: [id])
+}
+
+model RoadmapItem {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  weekNumber  Int
+  skillId     Int
+  title       String
+  description String   @default("")
+  objective   String   @default("")
+  isCompleted Boolean  @default(false)
+  lastLearningStep String @default("video")
+  quizHistoryJson String @default("[]")
+  roleplayHistoryJson String @default("[]")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, weekNumber])
+}
+
+model ChatSession {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  titleVi   String   @default("Cuộc trò chuyện mới")
+  titleEn   String   @default("New conversation")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  chatSessionId Int?
+  sender        ChatSender
+  content       String
+  createdAt     DateTime @default(now())
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatSession   ChatSession? @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+}
