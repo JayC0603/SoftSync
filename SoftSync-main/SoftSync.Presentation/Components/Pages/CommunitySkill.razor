@@ -1,0 +1,50 @@
+@page "/community/skills/{SkillId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+@inject ISkillService SkillService
+@inject IMentorService MentorService
+
+<PageTitle>@(skill?.Name ?? Tx("Skill community", "Nhóm kỹ năng")) · SoftSync</PageTitle>
+<main class="eco-page skill-community" aria-labelledby="skill-community-title">
+    <a class="eco-back" href="/community"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Community", "Cộng đồng")</a>
+    @if (loading)
+    {
+        <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span></div>
+    }
+    else if (skill is null)
+    {
+        <div class="eco-state eco-state-error"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><h1 id="skill-community-title">@Tx("Skill group not found", "Không tìm thấy nhóm kỹ năng")</h1><a href="/community">@Tx("View available groups", "Xem nhóm khả dụng")</a></div>
+    }
+    else
+    {
+        <header class="skill-community-head"><i class="bi @skill.IconName" aria-hidden="true"></i><div><span>@Tx("SKILL COMMUNITY", "NHÓM KỸ NĂNG")</span><h1 id="skill-community-title">@skill.Name</h1><p>@skill.Description</p></div><a class="eco-primary" href="/roadmap">@Tx("Open roadmap", "Mở lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></header>
+        <div class="skill-community-grid">
+            <section aria-labelledby="group-use-title"><h2 id="group-use-title">@Tx("How to use this group", "Cách sử dụng nhóm này")</h2><ol><li>@Tx("Finish the relevant lesson and Practice.", "Hoàn thành bài học và Practice liên quan.")</li><li>@Tx("Bring one specific situation or question.", "Mang theo một tình huống hoặc câu hỏi cụ thể.")</li><li>@Tx("Protect private information when asking for feedback.", "Bảo vệ thông tin riêng tư khi xin phản hồi.")</li></ol></section>
+            <section aria-labelledby="related-mentors-title">
+                <h2 id="related-mentors-title">@Tx("Related mentors", "Mentor liên quan")</h2>
+                @if (mentors.Count == 0) { <p class="eco-muted">@Tx("No mentor is currently mapped to this skill.", "Hiện chưa có Mentor được gắn với kỹ năng này.")</p> }
+                else { @foreach (var mentor in mentors) { <a class="skill-mentor" href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" width="48" height="48" /><span><strong>@mentor.Name</strong><small>@mentor.Expertise</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }
+            </section>
+        </div>
+    }
+</main>
+
+@code {
+    [Parameter] public int SkillId { get; set; }
+    private SkillDto? skill;
+    private List<MentorDto> mentors = [];
+    private bool loading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        var all = (await SkillService.GetAllSkillsAsync()).ToList();
+        skill = all.FirstOrDefault(x => x.Id == SkillId);
+        if (skill is not null)
+        {
+            var terms = skill.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            mentors = (await MentorService.GetAllAsync()).Where(m => terms.Any(t => m.Expertise.Contains(t, StringComparison.OrdinalIgnoreCase) || m.ShortBio.Contains(t, StringComparison.OrdinalIgnoreCase))).ToList();
+        }
+        loading = false;
+    }
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+}

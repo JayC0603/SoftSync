@@ -17,7 +17,68 @@
 }
 else
 {
-    <main class="dash-home" aria-labelledby="dash-page-title">
+    <main class="focus-home" aria-labelledby="focus-home-title">
+        <header class="focus-home-header">
+            <div>
+                <span class="focus-eyebrow">@T("HÀNH TRÌNH CỦA BẠN", "YOUR JOURNEY")</span>
+                <h1 id="focus-home-title">@T($"Sẵn sàng tiến thêm một bước, {FirstName(user.PublicName)}?", $"Ready to take one more step, {FirstName(user.PublicName)}?")</h1>
+                <p>@T("Tiếp tục hành trình và biến kỹ năng thành phản xạ tự nhiên.", "Continue your journey and turn knowledge into natural skill.")</p>
+            </div>
+            <div class="focus-streak" aria-label="@T("Chuỗi học tập 4 ngày", "4-day learning streak")">
+                <i class="bi bi-fire" aria-hidden="true"></i><strong>4</strong><span>@T("ngày liên tiếp", "day streak")</span>
+            </div>
+        </header>
+
+        <section class="focus-next" aria-labelledby="focus-next-title">
+            <div class="focus-next-copy">
+                <span class="focus-kicker">@T("TIẾP TỤC HÀNH TRÌNH", "CONTINUE YOUR JOURNEY")</span>
+                <small>@T("Chương hiện tại · Giao tiếp hiệu quả", "Current chapter · Effective communication")</small>
+                <h2 id="focus-next-title">@CurrentTitle</h2>
+                <p>@T("Dành một phiên học ngắn để tiếp tục đúng nhịp và mở hoạt động kế tiếp.", "Take one focused session to keep your momentum and unlock the next activity.")</p>
+                <div class="focus-next-actions">
+                    <button type="button" class="focus-primary" @onclick='() => Nav.NavigateTo("/roadmap")'>
+                        @T("Tiếp tục học", "Continue learning") <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="focus-link" @onclick="NavigateToAssessment">@T("Đánh giá lại kỹ năng", "Retake assessment")</button>
+                </div>
+            </div>
+            <div class="focus-listening" aria-hidden="true">
+                <span></span><span></span><span></span><i class="bi bi-ear"></i><span></span><span></span><span></span>
+            </div>
+            <div class="focus-chapter-progress">
+                <div><span>@T("Tiến độ hiện tại", "Current progress")</span><strong>@CurrentPercent%</strong></div>
+                <div class="focus-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@CurrentPercent"><i style="width:@CurrentPercent%"></i></div>
+                <small>@completedItems @T("bài đã hoàn thành", "lessons completed")</small>
+            </div>
+        </section>
+
+        <div class="focus-home-grid">
+            <section class="focus-week" aria-labelledby="focus-week-title">
+                <div class="focus-section-heading"><div><span>@T("NHỊP HỌC", "LEARNING RHYTHM")</span><h2 id="focus-week-title">@T("Tuần này", "This week")</h2></div><button @onclick='() => Nav.NavigateTo("/roadmap")'>@T("Xem lộ trình", "View roadmap") <i class="bi bi-arrow-right"></i></button></div>
+                <ol class="focus-path">
+                    <li class="done"><i class="bi bi-check-lg"></i><div><small>@T("Đã hoàn thành", "Completed")</small><b>Video</b></div></li>
+                    <li class="current"><i class="bi bi-file-text"></i><div><small>@T("Đang học", "Current")</small><b>Script</b></div></li>
+                    <li><i class="bi bi-lightbulb"></i><div><small>@T("Tiếp theo", "Up next")</small><b>Summary</b></div></li>
+                    <li class="locked"><i class="bi bi-ui-checks"></i><div><small>@T("Chưa mở", "Locked")</small><b>Quiz</b></div></li>
+                    <li class="locked"><i class="bi bi-person-workspace"></i><div><small>@T("Chưa mở", "Locked")</small><b>Practice</b></div></li>
+                    <li class="locked"><i class="bi bi-stars"></i><div><small>@T("Chưa mở", "Locked")</small><b>Reflection</b></div></li>
+                </ol>
+            </section>
+
+            <aside class="focus-coach" aria-labelledby="focus-coach-title">
+                <div class="focus-coach-head"><img src="/images/syncy-robot.png" alt="" /><div><span>SYNCY</span><h2 id="focus-coach-title">@T("Bạn đang đi đúng nhịp", "You are on track")</h2></div></div>
+                <p>@T("Hoàn thành hoạt động hiện tại để mở bài tiếp theo. Không cần học quá nhiều trong một lần.", "Complete the current activity to unlock the next one. One focused step is enough.")</p>
+            </aside>
+        </div>
+
+        <section class="focus-insight" aria-labelledby="focus-insight-title">
+            <span class="focus-insight-icon"><i class="bi bi-chat-left-text"></i></span>
+            <div><span>@T("ĐIỂM CẦN CẢI THIỆN", "IMPROVEMENT FOCUS")</span><h2 id="focus-insight-title">@T("Đặt câu hỏi mở", "Ask open questions")</h2><p>@T("Thử mở rộng câu hỏi để khám phá thêm góc nhìn và tạo kết nối sâu hơn.", "Expand your questions to uncover more perspectives and build deeper connection.")</p></div>
+            <button @onclick='() => Nav.NavigateTo("/case-studies")'><i class="bi bi-clock"></i>@T("Luyện 5 phút", "Practice 5 min")</button>
+        </section>
+    </main>
+
+    <main class="dash-home dash-home-legacy" aria-labelledby="dash-page-title">
         <section class="dash-hero dash-hero-v2" aria-describedby="dash-hero-summary">
             <div class="dash-hero-copy">
                 <span class="dash-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i>@T("Không gian học tập của bạn", "Your learning space")</span>

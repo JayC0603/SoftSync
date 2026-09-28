@@ -423,6 +423,26 @@ public class Mentor
     public string ShortBio { get; set; } = string.Empty;
 }
 
+public class MentorSupportRequest
+{
+    [Key]
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public int MentorId { get; set; }
+    [Required, MaxLength(120)]
+    public string Goal { get; set; } = string.Empty;
+    [MaxLength(100)]
+    public string Skill { get; set; } = string.Empty;
+    [Required, MaxLength(2000)]
+    public string Context { get; set; } = string.Empty;
+    [Required, MaxLength(40)]
+    public string PreferredContact { get; set; } = string.Empty;
+    public bool ShareLearningContext { get; set; }
+    [Required, MaxLength(30)]
+    public string Status { get; set; } = "Pending";
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
 public class DataProtectionKey
 {
     [Key]

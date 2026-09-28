@@ -7,6 +7,7 @@ Disallow: /profile-setup
 Disallow: /assessment/
 Disallow: /roadmap/lecture/
 Disallow: /roadmap/game/
+Disallow: /roadmap/practice/
 Disallow: /roadmap/voice-practice/
 Disallow: /Account/
 

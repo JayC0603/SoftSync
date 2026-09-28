@@ -28,17 +28,14 @@
         <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All">
             <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/assistant">
-            <i class="bi bi-robot"></i> <span>@L["nav.assistant"]</span>
-        </NavLink>
         <NavLink class="ss-navpill" href="/roadmap">
-            <i class="bi bi-mortarboard"></i> <span>@L["nav.roadmap"]</span>
+            <i class="bi bi-book"></i> <span>@L["nav.learn"]</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/progress">
             <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/community">
-            <i class="bi bi-people"></i> <span>@L["nav.community"]</span>
+        <NavLink class="ss-navpill" href="/resources">
+            <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/game">
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
@@ -48,7 +45,7 @@
     <!-- Right: actions -->
     <div class="ss-nav-actions tw:flex tw:items-center tw:gap-3">
                 <button type="button" class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle" aria-label="@LanguageSwitchTitle">
-            <span class="ss-lang-flag" aria-hidden="true">@(L.Current == AppLanguage.Vi ? "🇻🇳" : "🇬🇧")</span>
+            <i class="bi bi-globe2" aria-hidden="true"></i>
             <span class="ss-lang-code">@CurrentLanguageCode</span>
             <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
         </button>
@@ -103,17 +100,14 @@
     <NavLink class="ss-mobile-bottom-link" href="@HomeHref" Match="NavLinkMatch.All">
         <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
     </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/assistant">
-        <i class="bi bi-stars"></i><span>@L["nav.assistant"]</span>
-    </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/roadmap">
-        <i class="bi bi-signpost-split"></i><span>@L["nav.roadmap"]</span>
+        <i class="bi bi-book"></i><span>@L["nav.learn"]</span>
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/progress">
         <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
     </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/community">
-        <i class="bi bi-people-fill"></i><span>@L["nav.community"]</span>
+    <NavLink class="ss-mobile-bottom-link" href="/resources">
+        <i class="bi bi-folder"></i><span>@L["nav.resources"]</span>
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/game">
         <i class="bi bi-controller"></i><span>Mini Game</span>
@@ -191,7 +185,6 @@
         border: 1px solid rgba(101, 91, 183, 0.14);
         box-shadow: 0 5px 14px rgba(58, 49, 129, 0.06);
     }
-    .ss-lang-flag { font-size: 1.15rem; line-height: 1; }
     .ss-lang-chevron { margin-left: auto; font-size: 0.72rem !important; }
     .ss-lang-code {
         font-size: 0.78rem;
@@ -345,7 +338,7 @@
             bottom: max(0.65rem, env(safe-area-inset-bottom));
             z-index: 1000;
             display: grid !important;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 0.2rem !important;
             min-height: 64px;
             padding: 0.4rem;

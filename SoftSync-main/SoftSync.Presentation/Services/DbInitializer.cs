@@ -23,7 +23,10 @@ public static class DbInitializer
         var sp = scope.ServiceProvider;
 
         var db = sp.GetRequiredService<SoftSyncDbContext>();
-        await db.Database.MigrateAsync();
+        if (db.Database.IsInMemory())
+            await db.Database.EnsureCreatedAsync();
+        else
+            await db.Database.MigrateAsync();
 
         var roleManager = sp.GetRequiredService<RoleManager<IdentityRole<int>>>();
         foreach (var roleName in CourseAuthorization.Roles)

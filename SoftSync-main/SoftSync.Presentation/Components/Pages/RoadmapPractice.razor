@@ -1,0 +1,149 @@
+@page "/roadmap/practice/{UserId:int}/{ItemId:int}"
+@page "/roadmap/game/{UserId:int}/{ItemId:int}"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Enums
+@inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<PageTitle>@Tx("Applied Practice", "Thực hành ứng dụng") · SoftSync</PageTitle>
+
+<main class="pipeline-practice">
+    <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
+        <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Summary</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Quiz</b></span><span class="active"><i>5</i><b>Practice</b></span><span><i>6</i><b>Reflection</b></span>
+    </nav>
+    @if (loading)
+    {
+        <div class="game-state"><span></span>@Tx("Loading Practice...", "Đang tải Practice...")</div>
+    }
+    else if (!allowed)
+    {
+        <section class="game-state game-blocked"><i class="bi bi-lock-fill"></i><h1>@Tx("Practice is not unlocked", "Practice chưa được mở")</h1><p>@Tx("Pass the Quiz before starting this required step.", "Hãy vượt qua Quiz trước khi bắt đầu bước bắt buộc này.")</p><button @onclick="BackToQuiz">@Tx("Back to Quiz", "Quay lại Quiz")</button></section>
+    }
+    else if (completed)
+    {
+        <section class="game-result">
+            <span class="result-icon"><i class="bi bi-check-lg"></i></span>
+            <small>@Tx("STEP 5 COMPLETE", "HOÀN THÀNH BƯỚC 5")</small>
+            <h1>@Tx("Practice completed", "Đã hoàn thành Practice")</h1>
+            <p>@Tx("You made all three decisions. Reflection is now unlocked.", "Bạn đã hoàn thành cả ba lượt quyết định. Phản tư đã được mở khóa.")</p>
+            <div class="result-score"><strong>@score / 30</strong><span>@ResultLabel</span></div>
+            <button class="primary" @onclick="ContinueToReflection">@Tx("Continue to Reflection", "Tiếp tục Phản tư")<i class="bi bi-arrow-right"></i></button>
+            <button class="secondary" @onclick="Restart">@Tx("Practice again", "Thực hành lại")</button>
+        </section>
+    }
+    else
+    {
+        <div class="game-shell">
+            <header class="game-header">
+                <button class="game-back" @onclick="BackToLesson"><i class="bi bi-arrow-left"></i>@Tx("Lesson", "Bài học")</button>
+                <div><small>@Tx("REQUIRED PIPELINE · STEP 5 OF 6", "PIPELINE BẮT BUỘC · BƯỚC 5/6")</small><h1>@Tx("Applied Practice", "Thực hành ứng dụng")</h1></div>
+                <span>@(current + 1) / @Rounds.Length</span>
+            </header>
+
+            <div class="game-progress" role="progressbar" aria-valuemin="0" aria-valuemax="3" aria-valuenow="@current"><i style="width:@(current * 100 / Rounds.Length)%"></i></div>
+
+            <section class="scenario-card">
+                <div class="scenario-context"><span><i class="bi bi-chat-square-quote"></i>@Tx("SITUATION", "TÌNH HUỐNG")</span><h2>@Tx(Round.En, Round.Vi)</h2><p>@Tx(Round.ContextEn, Round.ContextVi)</p></div>
+                <div class="scenario-options" aria-label="@Tx("Response choices", "Các cách phản hồi")">
+                    @foreach (var option in Round.Options)
+                    {
+                        var captured = option;
+                        <button disabled="@answered" class="@(answered && ReferenceEquals(captured, selected) ? captured.Points == 10 ? "best" : "selected" : null)" @onclick="() => Choose(captured)">
+                            <span>@("ABC"[Array.IndexOf(Round.Options, captured)])</span>
+                            <div><b>@Tx(captured.En, captured.Vi)</b>@if (answered && ReferenceEquals(captured, selected)) { <small>@Tx(captured.FeedbackEn, captured.FeedbackVi)</small> }</div>
+                            @if (answered && ReferenceEquals(captured, selected)) { <i class="bi @(captured.Points == 10 ? "bi-check-circle-fill" : "bi-info-circle-fill")"></i> }
+                        </button>
+                    }
+                </div>
+            </section>
+
+            <footer class="game-actions">
+                <span>@Tx("Choose the response you would use in real life.", "Chọn cách bạn thực sự sẽ phản hồi.")</span>
+                <button class="primary" disabled="@(!answered || saving)" @onclick="Next" aria-busy="@saving">
+                    @if (saving)
+                    {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        @Tx("Saving...", "Đang lưu...")
+                    }
+                    else
+                    {
+                        @(current == Rounds.Length - 1 ? Tx("Complete Practice", "Hoàn thành Practice") : Tx("Next decision", "Lượt tiếp theo"))
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    }
+                </button>
+            </footer>
+            @if (!string.IsNullOrWhiteSpace(error)) { <div class="game-error" role="alert"><i class="bi bi-exclamation-circle"></i>@error</div> }
+        </div>
+    }
+</main>
+
+@code {
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public int ItemId { get; set; }
+
+    private bool loading = true;
+    private bool allowed;
+    private bool completed;
+    private bool answered;
+    private bool saving;
+    private int current;
+    private int score;
+    private string error = string.Empty;
+    private GameOption? selected;
+    private GameRound Round => Rounds[current];
+    private string ResultLabel => score >= 25 ? Tx("Confident response", "Phản hồi vững vàng") : score >= 18 ? Tx("Good progress", "Tiến bộ tốt") : Tx("Keep practicing", "Tiếp tục luyện tập");
+
+    protected override async Task OnInitializedAsync()
+    {
+        var signedInId = await AuthProvider.GetUserIdAsync();
+        if (signedInId <= 0 || signedInId != UserId) { Nav.NavigateTo("/Account/Login", true); return; }
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(signedInId, UserId);
+        var item = roadmap.Items.FirstOrDefault(x => x.Id == ItemId);
+        // Legacy compatibility: IsPracticeCompleted means the quiz has passed and
+        // Practice is unlocked; IsScenarioCompleted is the applied Practice result.
+        allowed = item?.IsPracticeCompleted == true;
+        completed = item?.IsScenarioCompleted == true;
+        loading = false;
+    }
+
+    private void Choose(GameOption option) { if (answered) return; selected = option; score += option.Points; answered = true; }
+    private async Task Next()
+    {
+        if (!answered || saving) return;
+        if (current < Rounds.Length - 1) { current++; answered = false; selected = null; return; }
+        saving = true;
+        var ok = await RoadmapService.MarkPracticeCompleteAsync(ItemId, UserId);
+        saving = false;
+        if (ok) completed = true;
+        else error = Tx("Could not save Practice progress. Please try again.", "Không thể lưu tiến độ Practice. Vui lòng thử lại.");
+    }
+    private void Restart() { current = 0; score = 0; completed = false; answered = false; selected = null; error = string.Empty; }
+    private void BackToQuiz() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=4");
+    private void BackToLesson() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=5");
+    private void ContinueToReflection() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=6");
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+
+    private static readonly GameRound[] Rounds =
+    [
+        new("A teammate interrupts you repeatedly", "Một thành viên liên tục ngắt lời", "You are presenting an idea in a group meeting and Minh interrupts for the third time.", "Bạn đang trình bày ý tưởng trong cuộc họp nhóm và Minh đã ngắt lời lần thứ ba.",
+            [new("Stop interrupting me.", "Đừng ngắt lời tôi nữa.", "Direct, but likely to escalate tension.", "Thẳng thắn nhưng dễ làm căng thẳng tăng lên.", 4), new("Stay silent and give up your turn.", "Im lặng và nhường luôn lượt nói.", "This avoids conflict but your need remains unheard.", "Cách này tránh xung đột nhưng nhu cầu của bạn chưa được thể hiện.", 2), new("Minh, let me finish this point, then I want to hear your view.", "Minh, để mình nói hết ý này, sau đó mình muốn nghe góc nhìn của bạn.", "Clear, respectful and creates space for both people.", "Rõ ràng, tôn trọng và tạo không gian cho cả hai.", 10)]),
+        new("A friend seems upset but says nothing is wrong", "Một người bạn buồn nhưng nói rằng không có chuyện gì", "Their voice is quiet and they avoid eye contact after receiving feedback.", "Bạn ấy nói nhỏ và tránh giao tiếp bằng mắt sau khi nhận phản hồi.",
+            [new("You look quieter than usual. Do you want to talk about what happened?", "Mình thấy bạn im lặng hơn bình thường. Bạn có muốn nói về chuyện vừa xảy ra không?", "An open question acknowledges the signal without forcing them.", "Câu hỏi mở ghi nhận tín hiệu nhưng không gây áp lực.", 10), new("If you say you are fine, then it is fine.", "Bạn nói ổn thì chắc là ổn.", "This ignores important non-verbal signals.", "Cách này bỏ qua tín hiệu phi ngôn ngữ quan trọng.", 2), new("Tell them exactly how they should feel.", "Nói ngay cho bạn ấy biết nên cảm thấy thế nào.", "Advice before listening can make the person withdraw.", "Khuyên trước khi lắng nghe có thể khiến đối phương khép lại.", 4)]),
+        new("A deadline is at risk", "Thời hạn có nguy cơ bị trễ", "Your group has one day left and one task is still unclear.", "Nhóm chỉ còn một ngày và một đầu việc vẫn chưa rõ ràng.",
+            [new("Wait and hope someone handles it.", "Chờ và hy vọng ai đó sẽ xử lý.", "The risk remains invisible and unmanaged.", "Rủi ro vẫn không được làm rõ và kiểm soát.", 2), new("Can we confirm the owner, expected result and check-in time now?", "Chúng ta xác nhận người phụ trách, kết quả cần có và thời điểm kiểm tra ngay nhé?", "This creates shared clarity and a concrete next step.", "Cách này tạo sự rõ ràng và bước tiếp theo cụ thể.", 10), new("Blame the teammate in the group chat.", "Chỉ trích người phụ trách trong nhóm chat.", "Blame damages trust without solving the ambiguity.", "Đổ lỗi làm giảm lòng tin nhưng không giải quyết điểm chưa rõ.", 4)])
+    ];
+
+    private sealed record GameRound(string En, string Vi, string ContextEn, string ContextVi, GameOption[] Options);
+    private sealed record GameOption(string En, string Vi, string FeedbackEn, string FeedbackVi, int Points);
+}
+
+<style>
+    .pipeline-practice{min-height:calc(100vh - 72px);padding:2rem clamp(1rem,4vw,3.5rem) 6rem;background:var(--fj-bg,#f7f7fa);color:var(--fj-text,#17182f)}
+    .game-shell,.game-result,.game-state{width:min(980px,100%);margin:auto}.game-header{display:grid;grid-template-columns:150px 1fr 70px;align-items:center;gap:1rem}.game-header>div{text-align:center}.game-header small,.game-result>small{color:#5146e5;font-size:.72rem;font-weight:800;letter-spacing:.09em}.game-header h1{margin:.25rem 0;font-size:clamp(1.8rem,4vw,2.8rem)}.game-header>span{justify-self:end;font-weight:800}.game-back{min-height:44px;border:0;background:transparent;color:#626a7f;text-align:left}.game-progress{height:8px;margin:1.5rem 0;border-radius:99px;background:#e7e7ee;overflow:hidden}.game-progress i{display:block;height:100%;border-radius:inherit;background:#5146e5;transition:width .25s ease}.scenario-card{overflow:hidden;border:1px solid var(--fj-border,#e3e5ed);border-radius:18px;background:#fff}.scenario-context{padding:2rem;background:#f3f2ff}.scenario-context>span{color:#5146e5;font-size:.72rem;font-weight:800;letter-spacing:.08em}.scenario-context h2{margin:.65rem 0;font-size:clamp(1.35rem,3vw,2rem)}.scenario-context p{margin:0;color:#626a7f;line-height:1.6}.scenario-options{display:grid;gap:.75rem;padding:1.5rem}.scenario-options button{display:grid;grid-template-columns:42px 1fr auto;align-items:start;gap:1rem;min-height:64px;padding:1rem;text-align:left;border:1px solid #e3e5ed;border-radius:12px;background:#fff;color:#17182f}.scenario-options button>span{display:grid;width:38px;height:38px;place-items:center;border-radius:10px;background:#f1f1f5;font-weight:800}.scenario-options button b,.scenario-options button small{display:block}.scenario-options button small{margin-top:.4rem;color:#626a7f;line-height:1.5}.scenario-options button.best{border-color:#16845b;background:#edf8f3}.scenario-options button.selected{border-color:#a96500;background:#fff8e8}.game-actions{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1rem;padding:1rem 0}.game-actions span{color:#626a7f}.pipeline-game .primary,.game-state button{min-height:46px;padding:0 1.2rem;border:0;border-radius:10px;background:#5146e5;color:#fff;font-weight:700}.game-result,.game-state{padding:clamp(2rem,6vw,5rem);text-align:center;border:1px solid var(--fj-border,#e3e5ed);border-radius:18px;background:#fff}.result-icon{display:grid;width:70px;height:70px;margin:0 auto 1rem;place-items:center;border-radius:50%;background:#eaf7f1;color:#16845b;font-size:2rem}.game-result h1{margin:.5rem 0}.game-result p{color:#626a7f}.result-score{display:flex;align-items:center;justify-content:center;gap:1rem;margin:1.5rem}.result-score strong{font-size:1.5rem}.game-result .secondary{display:block;margin:1rem auto 0;border:0;background:transparent;color:#5146e5;font-weight:700}.game-state{display:grid;place-items:center;gap:1rem;min-height:360px}.game-state>i{font-size:2rem;color:#a96500}.game-error{margin:1rem auto;padding:1rem;border-left:4px solid #c93636;border-radius:8px;background:#fff0f0;color:#8d3030}
+    .pipeline-practice .primary{min-height:46px;padding:0 1.2rem;border:0;border-radius:10px;background:#5146e5;color:#fff;font-weight:700}
+    @@media(max-width:640px){.pipeline-practice{padding:1rem .75rem 7rem}.game-header{grid-template-columns:1fr auto}.game-header>div{text-align:left}.game-back{grid-column:1/-1}.scenario-context{padding:1.25rem}.scenario-options{padding:1rem}.scenario-options button{grid-template-columns:38px 1fr}.scenario-options button>i{display:none}.game-actions{align-items:stretch;flex-direction:column}.game-actions .primary{width:100%}.game-result,.game-state{padding:2rem 1rem}}
+</style>

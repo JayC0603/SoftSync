@@ -258,3 +258,9 @@ public class ChatSessionRepository : Repository<ChatSession>, IChatSessionReposi
 
 public interface IMentorRepository : IRepository<Mentor> { }
 public class MentorRepository : Repository<Mentor>, IMentorRepository { public MentorRepository(Data.SoftSyncDbContext context) : base(context) { } }
+
+public interface IMentorSupportRequestRepository : IRepository<MentorSupportRequest> { }
+public class MentorSupportRequestRepository : Repository<MentorSupportRequest>, IMentorSupportRequestRepository
+{
+    public MentorSupportRequestRepository(Data.SoftSyncDbContext context) : base(context) { }
+}

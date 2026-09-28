@@ -1,9 +1,5 @@
 @inherits LayoutComponentBase
 
-<div class="ss-aurora" aria-hidden="true">
-    <span></span><span></span><span></span>
-</div>
-
 <div class="page">
     <a class="ss-skip-link" href="#main-content">Skip to main content</a>
     <NavBar />
@@ -12,10 +8,13 @@
     <div id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">
         @Body
     </div>
+    <AppFooter />
 </div>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+    <button type="button" class="dismiss" aria-label="Dismiss error notification">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
 </div>

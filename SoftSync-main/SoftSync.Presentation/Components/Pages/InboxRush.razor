@@ -12,6 +12,14 @@
 <PageTitle>Inbox Rush · SoftSync</PageTitle>
 
 <main class="inbox-rush">
+    <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
+        <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>Summary</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>Quiz</b></span>
+        <span class="active"><i>5</i><b>Practice</b></span>
+        <span><i>6</i><b>Reflection</b></span>
+    </nav>
     <header class="ir-hero">
         <button @onclick="Back"><i class="bi bi-arrow-left"></i></button>
         <div><small>@Tx("TIME MANAGEMENT PRACTICE", "THỰC HÀNH QUẢN LÝ THỜI GIAN")</small><h1>Inbox Rush</h1><p>@Tx("Prioritize tasks, estimate their duration, and build an eight-slot day.", "Ưu tiên công việc, ước lượng thời lượng và sắp xếp một ngày gồm 8 khung giờ.")</p></div>
@@ -70,7 +78,7 @@
             <article><i class="bi bi-lightning-charge"></i><span>@Tx("Adaptation", "Thích ứng")<b>@AdaptationScore.ToString("0")/100</b></span></article>
             <article><i class="bi bi-calendar-check"></i><span>@Tx("Schedule use", "Sử dụng lịch")<b>@(FilledSlots * 100 / 8)%</b></span></article>
         </section>
-        <div class="ir-result-actions"><button @onclick="Reset">@Tx("Play again", "Chơi lại")</button><button class="primary" @onclick="Back">@Tx("Continue to reflection", "Tiếp tục đến Phản tư")<i class="bi bi-arrow-right"></i></button></div>
+        <div class="ir-result-actions"><button @onclick="Reset">@Tx("Practice again", "Thực hành lại")</button><button class="primary" @onclick="ContinueToReflection">@Tx("Continue to Reflection", "Tiếp tục đến Phản tư")<i class="bi bi-arrow-right"></i></button></div>
     }
 </main>
 
@@ -142,6 +150,7 @@
         saving = false;
     }
     private void Back() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}");
+    private void ContinueToReflection() => Nav.NavigateTo($"/roadmap/lecture/{UserId}/{ItemId}?step=6");
     private sealed class TaskCard(int id, string vi, string en, int u, int i, int d, bool interrupt, int quadrant, int estimate) { public int Id=id; public string Vi=vi; public string En=en; public int U=u; public int I=i; public int D=d; public bool Interrupt=interrupt; public int Quadrant=quadrant; public int Estimate=estimate; public int Position=8; public DateTime? FirstTouchedAt; }
     private static readonly (string Vi,string En,int U,int I,int D,bool Interrupt,int Q)[] Bank =
     [

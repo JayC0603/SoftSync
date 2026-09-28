@@ -124,6 +124,36 @@ html[data-theme="dark"] {
     --ss-shadow-md: 0 18px 50px rgba(2, 6, 23, 0.32);
 }
 
+/* Optional accessibility mode with strong boundaries and AA-friendly colors. */
+html[data-high-contrast="1"] {
+    --ss-canvas: #ffffff;
+    --ss-surface: #ffffff;
+    --ss-surface-soft: #ffffff;
+    --ss-surface-accent: #fff7cc;
+    --ss-text: #000000;
+    --ss-text-muted: #202020;
+    --ss-border: #000000;
+    --ss-primary: #0037ff;
+    --ss-primary-hover: #001d99;
+    --ss-focus-ring: #ffbf00;
+    --glass-bg: #ffffff;
+    --glass-bg-strong: #ffffff;
+    --glass-border: #000000;
+}
+
+html[data-high-contrast="1"] body,
+html[data-high-contrast="1"] :where(.ss-card, .card, .ss-navbar, .assistant-chat-card, .dash-card) {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+}
+
+html[data-high-contrast="1"] :where(a, button, input, select, textarea):focus-visible {
+    outline: 4px solid #ffbf00 !important;
+    outline-offset: 3px;
+}
+
 /* ===== Liquid Glass System ===== */
 .ss-glass {
     position: relative;

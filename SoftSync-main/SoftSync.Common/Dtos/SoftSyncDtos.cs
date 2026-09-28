@@ -269,6 +269,16 @@ public class CourseDto
     public List<ChallengeQuizDto> Quizzes { get; set; } = [];
 }
 
+public sealed class PublicCourseDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
+    public string ThumbnailAltText { get; set; } = string.Empty;
+    public int TotalLessons { get; set; }
+}
+
 public class CourseLessonDto
 {
     public int Id { get; set; }
@@ -523,4 +533,14 @@ public class MentorDto
     public string Expertise { get; set; } = string.Empty;
     public string AvatarUrl { get; set; } = string.Empty;
     public string ShortBio { get; set; } = string.Empty;
+}
+
+public class MentorSupportRequestDto
+{
+    public int MentorId { get; set; }
+    public string Goal { get; set; } = string.Empty;
+    public string Skill { get; set; } = string.Empty;
+    public string Context { get; set; } = string.Empty;
+    public string PreferredContact { get; set; } = string.Empty;
+    public bool ShareLearningContext { get; set; }
 }

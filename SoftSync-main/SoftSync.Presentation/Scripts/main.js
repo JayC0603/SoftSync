@@ -242,3 +242,24 @@ window.ssFontSize = {
     }
 };
 try { window.ssFontSize.init(); } catch { /* ignore */ }
+
+// High-contrast mode is browser-local so it is available before sign-in and
+// does not depend on a profile/database round-trip.
+window.ssContrast = {
+    apply(enabled) {
+        const root = document.documentElement;
+        if (enabled) root.setAttribute('data-high-contrast', '1');
+        else root.removeAttribute('data-high-contrast');
+    },
+    set(enabled) {
+        try { localStorage.setItem('ss-high-contrast', enabled ? '1' : '0'); } catch { /* ignore */ }
+        this.apply(!!enabled);
+    },
+    init() {
+        let enabled = false;
+        try { enabled = localStorage.getItem('ss-high-contrast') === '1'; } catch { /* ignore */ }
+        this.apply(enabled);
+        return enabled;
+    }
+};
+try { window.ssContrast.init(); } catch { /* ignore */ }

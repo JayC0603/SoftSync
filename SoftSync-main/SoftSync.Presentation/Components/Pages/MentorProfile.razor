@@ -1,0 +1,49 @@
+@page "/mentors/{MentorId:int}"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+@inject IMentorService MentorService
+@inject AuthenticationStateProvider AuthProvider
+
+<PageTitle>@(mentor?.Name ?? Tx("Mentor profile", "Hồ sơ Mentor")) · SoftSync</PageTitle>
+<main class="eco-page mentor-profile" aria-labelledby="mentor-title">
+    <a class="eco-back" href="/mentors"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("All mentors", "Tất cả Mentor")</a>
+    @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentor profile...", "Đang tải hồ sơ Mentor...")</p></div> }
+    else if (mentor is null) { <div class="eco-state eco-state-error"><i class="bi bi-person-x" aria-hidden="true"></i><h1 id="mentor-title">@Tx("Mentor not found", "Không tìm thấy Mentor")</h1><p>@Tx("This profile may no longer be available.", "Hồ sơ này có thể không còn khả dụng.")</p><a href="/mentors">@Tx("Return to mentors", "Quay lại danh sách")</a></div> }
+    else {
+        <div class="mentor-profile-grid">
+            <article class="mentor-profile-main">
+                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@Tx("SOFTSYNC MENTOR", "MENTOR SOFTSYNC")</span><h1 id="mentor-title">@mentor.Name</h1><strong>@mentor.Expertise</strong></div></header>
+                <section><h2>@Tx("How this mentor can help", "Mentor này có thể hỗ trợ gì")</h2><p>@mentor.ShortBio</p><p>@Tx("Use a support request to describe the decision, conversation or learning step where you feel stuck. The mentor receives only what you choose to write below.", "Dùng yêu cầu hỗ trợ để mô tả quyết định, cuộc trò chuyện hoặc bước học nơi bạn đang gặp khó. Mentor chỉ nhận nội dung bạn chủ động viết bên dưới.")</p></section>
+                <section><h2>@Tx("A focused support process", "Quy trình hỗ trợ tập trung")</h2><ol><li><span>1</span>@Tx("Describe one concrete learning goal.", "Mô tả một mục tiêu học cụ thể.")</li><li><span>2</span>@Tx("Choose whether to share learning context.", "Chọn có chia sẻ ngữ cảnh học hay không.")</li><li><span>3</span>@Tx("SoftSync records your request for follow-up.", "SoftSync lưu yêu cầu để tiếp tục xử lý.")</li></ol></section>
+            </article>
+            <aside class="mentor-request" aria-labelledby="request-title">
+                @if (submitted) {
+                    <div class="eco-success" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i><h2 id="request-title">@Tx("Request received", "Đã nhận yêu cầu")</h2><p>@Tx("Your request was saved. SoftSync can now follow up through your selected contact method.", "Yêu cầu đã được lưu. SoftSync có thể tiếp tục hỗ trợ qua phương thức bạn đã chọn.")</p><a href="/roadmap">@Tx("Return to learning", "Quay lại học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+                } else {
+                    <h2 id="request-title">@Tx("Request mentor support", "Yêu cầu Mentor hỗ trợ")</h2><p>@Tx("This is a support request, not an instant booking.", "Đây là yêu cầu hỗ trợ, không phải đặt lịch tức thì.")</p>
+                    @if (!signedIn) { <div class="eco-inline-note"><i class="bi bi-lock" aria-hidden="true"></i><span>@Tx("Sign in before sending a private request.", "Đăng nhập trước khi gửi yêu cầu riêng tư.")</span></div><a class="eco-primary" href="/Account/Login">@Tx("Sign in", "Đăng nhập")</a> }
+                    else {
+                        <EditForm Model="request" OnSubmit="Submit">
+                            <div class="eco-field"><label for="mentor-goal">@Tx("Support goal", "Mục tiêu hỗ trợ") <span aria-hidden="true">*</span></label><input id="mentor-goal" @bind="request.Goal" maxlength="120" aria-describedby="goal-help goal-error" /><small id="goal-help">@Tx("Example: prepare for a difficult feedback conversation.", "Ví dụ: chuẩn bị cho cuộc trao đổi phản hồi khó.")</small>@if (showErrors && request.Goal.Trim().Length < 3) { <small id="goal-error" class="field-error" role="alert">@Tx("Enter at least 3 characters.", "Nhập ít nhất 3 ký tự.")</small> }</div>
+                            <div class="eco-field"><label for="mentor-skill">@Tx("Related skill", "Kỹ năng liên quan")</label><input id="mentor-skill" @bind="request.Skill" maxlength="100" /></div>
+                            <div class="eco-field"><label for="mentor-context">@Tx("What are you dealing with?", "Bạn đang gặp tình huống gì?") <span aria-hidden="true">*</span></label><textarea id="mentor-context" @bind="request.Context" maxlength="2000" rows="6" aria-describedby="context-help context-error"></textarea><small id="context-help">@Tx("20–2,000 characters. Do not include information you do not want to share.", "20–2.000 ký tự. Không nhập thông tin bạn không muốn chia sẻ.")</small>@if (showErrors && request.Context.Trim().Length < 20) { <small id="context-error" class="field-error" role="alert">@Tx("Add enough context for the mentor to understand the situation.", "Bổ sung đủ ngữ cảnh để Mentor hiểu tình huống.")</small> }</div>
+                            <div class="eco-field"><label for="mentor-contact">@Tx("Preferred follow-up", "Cách liên hệ mong muốn")</label><select id="mentor-contact" @bind="request.PreferredContact"><option value="In-app">@Tx("In-app", "Trong ứng dụng")</option><option value="Email">Email</option></select></div>
+                            <label class="eco-check"><input type="checkbox" @bind="request.ShareLearningContext" /><span>@Tx("I choose to let the mentor know which skill I am learning. My Reflection text is not shared automatically.", "Tôi đồng ý cho Mentor biết kỹ năng đang học. Nội dung Reflection không được tự động chia sẻ.")</span></label>
+                            @if (!string.IsNullOrEmpty(saveError)) { <div class="eco-form-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>@saveError</div> }
+                            <button class="eco-primary" type="submit" disabled="@saving" aria-busy="@saving">@if(saving){<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>@Tx("Saving...", "Đang lưu...")}else{@Tx("Send support request", "Gửi yêu cầu hỗ trợ")}</button>
+                        </EditForm>
+                    }
+                }
+            </aside>
+        </div>
+    }
+</main>
+
+@code {
+    [Parameter] public int MentorId { get; set; }
+    private MentorDto? mentor; private MentorSupportRequestDto request = new(){ PreferredContact="In-app" }; private bool loading=true,signedIn,saving,submitted,showErrors; private string? saveError; private int userId;
+    protected override async Task OnInitializedAsync(){ mentor=await MentorService.GetByIdAsync(MentorId); userId=await AuthProvider.GetUserIdAsync(); signedIn=userId>0; request.MentorId=MentorId; loading=false; }
+    private async Task Submit(){ showErrors=true; saveError=null; if(request.Goal.Trim().Length<3||request.Context.Trim().Length<20)return; saving=true; try{submitted=await MentorService.SubmitSupportRequestAsync(userId,request); if(!submitted)saveError=Tx("The request could not be saved. Review the form and try again.","Không thể lưu yêu cầu. Hãy kiểm tra biểu mẫu và thử lại.");}catch{saveError=Tx("Connection lost. Your text is still here; please try again.","Mất kết nối. Nội dung vẫn còn; vui lòng thử lại.");}finally{saving=false;} }
+    private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
+}

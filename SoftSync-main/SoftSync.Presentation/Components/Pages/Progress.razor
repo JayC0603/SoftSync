@@ -12,7 +12,63 @@
 @inject IUserService UserService
 @inject NavigationManager Nav
 
-<div class="pg-shell">
+<main class="focus-progress-page" aria-labelledby="focus-progress-title">
+    <header class="focus-progress-head">
+        <div><span>@Tx("LEARNING INSIGHT", "PHÂN TÍCH HỌC TẬP")</span><h1 id="focus-progress-title">@Tx("Your progress", "Tiến độ của bạn")</h1><p>@Tx("See what is improving and where to focus next.", "Xem kỹ năng nào đang tiến bộ và nên tập trung vào đâu tiếp theo.")</p></div>
+        <div class="pg-calendar focus-range">
+            <button type="button" class="pg-calendar-trigger" @onclick="()=>calendarOpen=!calendarOpen" aria-expanded="@calendarOpen"><i class="bi bi-calendar3"></i>@DateRange<i class="bi bi-chevron-down"></i></button>
+            @if(calendarOpen){<section class="pg-calendar-popover"><header><b>@Tx("Learning calendar", "Lịch học")</b><button type="button" @onclick="()=>calendarOpen=false" aria-label="@Tx("Close", "Đóng")"><i class="bi bi-x-lg"></i></button></header><label>@Tx("From", "Từ ngày")<input type="date" @bind="draftStart" /></label><label>@Tx("To", "Đến ngày")<input type="date" @bind="draftEnd" /></label><div class="pg-calendar-summary"><i class="bi bi-check2-circle"></i><span><b>@DraftActivityCount</b>@Tx("completed activities in this period", "hoạt động hoàn thành trong khoảng này")</span></div><footer><button type="button" class="secondary" @onclick="SetCurrentWeek">@Tx("This week", "Tuần này")</button><button type="button" class="apply" @onclick="ApplyDateRange">@Tx("Apply", "Áp dụng")</button></footer></section>}
+        </div>
+    </header>
+
+    <section class="focus-growth" aria-labelledby="skill-growth-title">
+        <div class="focus-growth-main"><div class="focus-section-title"><div><span>@Tx("LAST 8 WEEKS", "8 TUẦN GẦN ĐÂY")</span><h2 id="skill-growth-title">@Tx("Skill growth", "Tăng trưởng kỹ năng")</h2></div><button @onclick='() => Nav.NavigateTo("/assessment/" + UserId)'>@Tx("Review skills", "Xem đánh giá")<i class="bi bi-arrow-right"></i></button></div>
+            <div class="focus-skill-bars">
+                @foreach (var track in Tracks)
+                {
+                    var percent = TrackProgress(track);
+                    <div><span><i class="bi @track.Icon"></i><b>@TrackName(track)</b><strong>@percent%</strong></span><div><i style="width:@percent%"></i></div><small>@TrackSummary(track)</small></div>
+                }
+            </div>
+        </div>
+        <aside class="focus-overall"><span>@Tx("OVERALL GROWTH", "TIẾN ĐỘ TỔNG THỂ")</span><strong>@Overall%</strong><p>@CompletedActivities / @TotalActivities @Tx("learning steps completed", "bước học đã hoàn thành")</p><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Continue learning", "Tiếp tục học")<i class="bi bi-arrow-right"></i></button></aside>
+    </section>
+
+    <section class="focus-journey-table" aria-labelledby="learning-journey-title">
+        <div class="focus-section-title"><div><span>@Tx("PIPELINE STATUS", "TRẠNG THÁI PIPELINE")</span><h2 id="learning-journey-title">@Tx("Learning journey", "Hành trình học tập")</h2></div><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Open roadmap", "Mở lộ trình")<i class="bi bi-arrow-right"></i></button></div>
+        @if (roadmapItems.Count == 0)
+        {
+            <div class="focus-progress-empty"><i class="bi bi-signpost-split"></i><h3>@Tx("Your roadmap is ready to begin", "Lộ trình của bạn đã sẵn sàng")</h3><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Start learning", "Bắt đầu học")</button></div>
+        }
+        else
+        {
+            <div class="focus-journey-list">
+                @foreach (var item in roadmapItems.Take(5))
+                {
+                    <article>
+                        <div class="focus-course"><i class="bi @SkillIcon(item)"></i><span><b>@LocalizedSkillName(item.SkillName)</b><small>@Tx("Week", "Tuần") @item.WeekNumber · @item.Title</small></span></div>
+                        <div class="focus-mini-pipeline" aria-label="@Tx("Lesson pipeline", "Pipeline bài học")">
+                            @foreach (var step in Pipeline)
+                            {
+                                var state = StepState(item, step.Id);
+                                <span class="@state" title="@Tx(step.En, step.Vi)"><i class="bi @(state == "done" ? "bi-check-lg" : state == "current" ? "bi-play-fill" : "bi-lock")"></i><b>@Tx(step.En, step.Vi)</b></span>
+                            }
+                        </div>
+                        <div class="focus-row-progress"><b>@CompletedStepCount(item)/6</b><span><i style="width:@(CompletedStepCount(item)*100/6)%"></i></span></div>
+                        <button aria-label="@Tx("Open lesson", "Mở bài học")" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-chevron-right"></i></button>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <div class="focus-progress-bottom">
+        <section><div class="focus-section-title"><div><span>@Tx("MILESTONES", "CỘT MỐC")</span><h2>@Tx("Recent achievements", "Thành tích gần đây")</h2></div></div><div class="focus-achievements"><div><i class="bi bi-fire"></i><span><b>@ActiveDays @Tx("day streak", "ngày liên tiếp")</b><small>@Tx("Keep your learning rhythm", "Duy trì nhịp học")</small></span></div><div><i class="bi bi-check-circle"></i><span><b>@CompletedActivities @Tx("steps completed", "bước đã hoàn thành")</b><small>@Tx("Across your current roadmap", "Trong lộ trình hiện tại")</small></span></div><div><i class="bi bi-stars"></i><span><b>@(user?.ExperiencePoints ?? 0) XP</b><small>@Tx("Earned from learning", "Tích lũy từ học tập")</small></span></div></div></section>
+        <aside class="focus-next-action"><img src="/images/syncy-robot.png" alt="" /><div><span>@Tx("FOCUS NEXT", "TẬP TRUNG TIẾP THEO")</span><h2>@Tx("Turn insight into Practice", "Biến kiến thức thành Practice")</h2><p>@Tx("Continue the active lesson and complete its required Practice before Reflection.", "Tiếp tục bài đang học và hoàn thành Practice bắt buộc trước Reflection.")</p><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Continue", "Tiếp tục")<i class="bi bi-arrow-right"></i></button></div></aside>
+    </div>
+</main>
+
+<div class="pg-shell pg-shell-legacy">
     <aside class="pg-side">
         <div class="pg-user"><img src="@(user?.AvatarUrl?.Length > 0 ? user.AvatarUrl : "/images/syncy-robot.png")" alt=""/><div><b>@(user?.PublicName ?? "SoftSync Learner")</b><span>@Tx("Level", "Cấp") @(user?.Level ?? 1) · @(user?.ExperiencePoints ?? 0) XP</span></div></div>
         <div class="pg-label">@Tx("LEARNING PROGRESS", "TIẾN ĐỘ HỌC TẬP")</div>
@@ -41,7 +97,7 @@
         <div class="pg-grid">
             <section class="pg-card pg-analysis"><header><h2>@Tx("Skill analysis", "Phân tích kỹ năng")</h2><button type="button" class="pg-link" @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Open roadmap", "Mở lộ trình")</button></header><div class="pg-track-progress">@foreach(var track in Tracks){var percent=TrackProgress(track);<article><i class="bi @track.Icon"></i><div><span><b>@TrackName(track)</b><strong>@percent%</strong></span><p>@TrackSummary(track)</p><div class="track-meter"><i style="width:@percent%"></i></div><small>@EstimatedCompleted(track) / @track.Modules.Count @Tx("activities completed", "hoạt động hoàn thành")</small></div></article>}</div></section>
 
-            <section class="pg-card pg-path"><header><h2>@Tx("Complete roadmap catalog", "Danh mục lộ trình đầy đủ")</h2><button type="button" class="pg-link" @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("View all", "Xem tất cả")</button></header><div class="pg-track-tabs">@foreach(var entry in Tracks.Select((x,i)=>(x,i))){<button class="@(selectedTrack==entry.i?"active":"")" @onclick="()=>selectedTrack=entry.i"><i class="bi @entry.x.Icon"></i><span>@TrackName(entry.x)<small>@entry.x.Modules.Count @Tx("activities", "hoạt động")</small></span></button>}</div><h3>@TrackName(CurrentTrack) <span>@TrackProgress(CurrentTrack)%</span></h3><div class="pg-path-list">@foreach(var entry in CurrentTrack.Modules.Select((x,i)=>(x,i))){var state=ModuleState(CurrentTrack,entry.i);<button class="@state" @onclick="()=>Nav.NavigateTo(entry.x.Route)"><i>@(state=="done"?"✓":(entry.i+1).ToString())</i><b>@ModuleType(entry.x.Type) · @ModuleName(entry.x)</b><span>@(state=="done"?"100%":state=="current"?Tx("Continue","Tiếp tục"):Tx("Not started","Chưa học"))</span><i class="bi bi-chevron-right"></i></button>}</div><footer>▣ Video　▣ @Tx("Theory", "Lý thuyết")　🔗 Quiz　🎮 Game</footer></section>
+            <section class="pg-card pg-path"><header><h2>@Tx("Complete roadmap catalog", "Danh mục lộ trình đầy đủ")</h2><button type="button" class="pg-link" @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("View all", "Xem tất cả")</button></header><div class="pg-track-tabs">@foreach(var entry in Tracks.Select((x,i)=>(x,i))){<button class="@(selectedTrack==entry.i?"active":"")" @onclick="()=>selectedTrack=entry.i"><i class="bi @entry.x.Icon"></i><span>@TrackName(entry.x)<small>@entry.x.Modules.Count @Tx("activities", "hoạt động")</small></span></button>}</div><h3>@TrackName(CurrentTrack) <span>@TrackProgress(CurrentTrack)%</span></h3><div class="pg-path-list">@foreach(var entry in CurrentTrack.Modules.Select((x,i)=>(x,i))){var state=ModuleState(CurrentTrack,entry.i);<button class="@state" @onclick="()=>Nav.NavigateTo(entry.x.Route)"><i>@(state=="done"?"✓":(entry.i+1).ToString())</i><b>@ModuleType(entry.x.Type) · @ModuleName(entry.x)</b><span>@(state=="done"?"100%":state=="current"?Tx("Continue","Tiếp tục"):Tx("Not started","Chưa học"))</span><i class="bi bi-chevron-right"></i></button>}</div><footer><span><i class="bi bi-play-circle"></i>Video</span><span><i class="bi bi-file-text"></i>@Tx("Theory", "Lý thuyết")</span><span><i class="bi bi-ui-checks"></i>Quiz</span><span><i class="bi bi-person-workspace"></i>Practice</span></footer></section>
 
             <section class="pg-card pg-week" id="progress-statistics"><header><h2>@Tx("Current learning statistics", "Thống kê học tập hiện tại")</h2></header><div class="pg-mini"><span><i class="bi bi-check-circle"></i><b>@CompletedActivities</b><small>@Tx("completed activities", "hoạt động đã xong")</small></span><span><i class="bi bi-list-task"></i><b>@TotalActivities</b><small>@Tx("roadmap activities", "hoạt động lộ trình")</small></span><span><i class="bi bi-graph-up"></i><b>@Overall%</b><small>@Tx("overall progress", "tiến độ tổng thể")</small></span><span><i class="bi bi-calendar-check"></i><b>@CompletedInRange</b><small>@Tx("in selected period", "trong lịch đã chọn")</small></span><span><i class="bi bi-stars"></i><b>@(user?.ExperiencePoints ?? 0)</b><small>XP</small></span></div>@if(progressLogs.Count==0){<p class="pg-no-data">@Tx("No progress has been recorded yet. Start a roadmap lesson to see statistics here.", "Chưa có tiến độ được ghi nhận. Hãy bắt đầu một bài trong lộ trình để xem thống kê tại đây.")</p>}else{<div class="skill-progress-grid">@foreach(var item in progressLogs){<article><div><strong>@LocalizedSkillName(item.SkillName)</strong><b>@item.PercentComplete%</b></div><span><i style="width:@item.PercentComplete%"></i></span><small>@Tx("Updated", "Cập nhật") @item.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy")</small></article>}</div>}</section>
 
@@ -62,6 +118,9 @@
  private int DraftActivityCount=>ActivityDates.Count(x=>InRange(x,draftStart,draftEnd));
  private int TrackProgress(LearningTrack track){var matches=roadmapItems.Where(x=>track.Keys.Any(k=>$"{x.SkillName} {x.Title}".Contains(k,StringComparison.OrdinalIgnoreCase))).ToList();var total=matches.Count*6;return total==0?0:matches.Sum(CompletedStepCount)*100/total;}
  private int EstimatedCompleted(LearningTrack track)=>(int)Math.Round(track.Modules.Count*TrackProgress(track)/100d);
+ private static readonly (int Id,string En,string Vi)[] Pipeline=[(1,"Video","Video"),(2,"Script","Script"),(3,"Summary","Tóm tắt"),(4,"Quiz","Quiz"),(5,"Practice","Thực hành"),(6,"Reflection","Phản tư")];
+ private static string SkillIcon(RoadmapItemDto item){var value=$"{item.SkillName} {item.Title}".ToLowerInvariant();return value.Contains("time")||value.Contains("thời gian")?"bi-clock-history":value.Contains("critical")||value.Contains("phản biện")?"bi-lightbulb":"bi-chat-dots";}
+ private static string StepState(RoadmapItemDto item,int step){var done=step switch{1=>item.IsVideoCompleted||item.VideoCompletedAtUtc.HasValue,2=>item.ScriptCompletedAtUtc.HasValue,3=>item.SummaryCompletedAtUtc.HasValue,4=>item.IsPracticeCompleted||item.PracticeCompletedAtUtc.HasValue,5=>item.IsScenarioCompleted||item.ScenarioCompletedAtUtc.HasValue,6=>item.IsReflectionCompleted||item.ReflectionCompletedAtUtc.HasValue,_=>false};if(done)return "done";var accessible=step==1||step==2&&(item.IsVideoCompleted||item.VideoCompletedAtUtc.HasValue)||step==3&&item.ScriptCompletedAtUtc.HasValue||step==4&&item.SummaryCompletedAtUtc.HasValue||step==5&&(item.IsPracticeCompleted||item.PracticeCompletedAtUtc.HasValue)||step==6&&(item.IsScenarioCompleted||item.ScenarioCompletedAtUtc.HasValue);return accessible?"current":"locked";}
  private string ModuleState(LearningTrack track,int index){var completed=EstimatedCompleted(track);return index<completed?"done":index==completed?"current":"locked";}
  private static int CompletedStepCount(RoadmapItemDto item)=>item.CompletedActivityCount;
  private static IEnumerable<DateTime> ActivityTimestamps(RoadmapItemDto item)
@@ -114,7 +173,7 @@
   new("Time management", "Quản lý thời gian", "bi-clock-history", "Plan priorities and build a sustainable study rhythm.", "Lập kế hoạch ưu tiên và xây dựng nhịp học bền vững.", ["time", "thời gian"],
   [
    new("Video", "Time management foundations", "Nền tảng quản lý thời gian", "/roadmap"),
-   new("Game", "Eisenhower Matrix", "Ma trận Eisenhower", "/roadmap"),
+   new("Practice", "Eisenhower Matrix", "Ma trận Eisenhower", "/roadmap"),
    new("Quiz", "Priority challenge", "Thử thách ưu tiên", "/roadmap")
   ]),
   new("Critical thinking", "Tư duy phản biện", "bi-lightbulb", "Analyze information, arguments and decisions more clearly.", "Phân tích thông tin, lập luận và quyết định rõ ràng hơn.", ["critical", "phản biện"],

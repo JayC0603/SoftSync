@@ -24,6 +24,16 @@ RUN dotnet restore SoftSync.Presentation/SoftSync.Presentation.csproj
 
 # Copy the rest of the source and publish.
 COPY . .
+
+# Build the frontend before dotnet publish so the generated Vite/Tailwind
+# assets exist when ASP.NET collects static web assets. Keep this step
+# fail-fast: deploying without app.css leaves the navigation and responsive
+# layout visibly broken.
+RUN cd SoftSync.Presentation \
+    && npm ci \
+    && npm run build \
+    && touch node_modules/.install-stamp
+
 RUN dotnet publish SoftSync.Presentation/SoftSync.Presentation.csproj \
     -c Release -o /app/publish /p:UseAppHost=false
 

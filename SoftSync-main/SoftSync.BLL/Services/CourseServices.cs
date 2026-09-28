@@ -11,6 +11,28 @@ namespace SoftSync.BLL.Services;
 
 public sealed class CourseService(ICourseRepository repository) : ICourseService
 {
+    public async Task<IReadOnlyList<PublicCourseDto>> GetPublicPublishedAsync() =>
+        await PublicCourses()
+            .OrderBy(x => x.Title)
+            .ToListAsync();
+
+    public async Task<PublicCourseDto?> GetPublicPublishedByIdAsync(int id) =>
+        await PublicCourses().FirstOrDefaultAsync(x => x.Id == id);
+
+    private IQueryable<PublicCourseDto> PublicCourses() =>
+        repository.Courses
+            .AsNoTracking()
+            .Where(x => x.Status == CourseStatus.Published)
+            .Select(x => new PublicCourseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                ThumbnailUrl = x.ThumbnailUrl,
+                ThumbnailAltText = x.ThumbnailAltText,
+                TotalLessons = x.Lessons.Count
+            });
+
     public async Task<IReadOnlyList<CourseDto>> GetPublishedAsync(int authenticatedUserId)
     {
         if (authenticatedUserId <= 0) return [];

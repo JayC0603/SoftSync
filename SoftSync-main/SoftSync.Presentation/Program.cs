@@ -32,6 +32,16 @@ builder.Services.AddRazorComponents()
 // SSR / enhanced navigation and render the first frame without flashing.
 builder.Services.AddHttpContextAccessor();
 
+var frontendOrigins = (builder.Configuration["FRONTEND_ORIGINS"] ?? "http://localhost:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins(frontendOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 // UI localization (EN/VI). Seed each circuit from the cookie so SSR and the
 // interactive render always use the same language.
 builder.Services.AddScoped<LocalizationService>(services =>
@@ -42,25 +52,44 @@ builder.Services.AddScoped<LocalizationService>(services =>
 builder.Services.AddScoped<UserProfileState>();
 builder.Services.AddScoped<CourseUploadService>();
 
-// 1. Database Configuration (PostgreSQL).
+// 1. Database Configuration. Demo mode uses an ephemeral in-memory database so
+// reviewers can exercise the product locally without PostgreSQL credentials.
+var demoMode = builder.Configuration.GetValue<bool>("SoftSync:DemoMode");
+
+if (demoMode)
+{
+    // Windows Event Log requires elevated privileges on some machines. Console
+    // logging keeps the zero-setup demo profile usable for normal accounts.
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole();
+}
+
 // Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
 // cannot override the managed database's current internal connection URL.
 // Local/other environments can still use ConnectionStrings:SoftSyncDb.
 // IConfiguration includes environment variables and Development User Secrets,
 // allowing the same DATABASE_URL key to work on Render and on a local machine.
-var databaseUrl = builder.Configuration["DATABASE_URL"];
-var connectionString = !string.IsNullOrWhiteSpace(databaseUrl)
-    ? BuildNpgsqlConnectionString(databaseUrl)
-    : builder.Configuration.GetConnectionString("SoftSyncDb");
-
-if (string.IsNullOrWhiteSpace(connectionString))
+if (demoMode)
 {
-    throw new InvalidOperationException(
-        "PostgreSQL is not configured. Set DATABASE_URL on Render or " +
-        "ConnectionStrings__SoftSyncDb for another environment.");
+    builder.Services.AddDbContext<SoftSyncDbContext>(options =>
+        options.UseInMemoryDatabase("SoftSyncDemo"));
 }
-builder.Services.AddDbContext<SoftSyncDbContext>(options =>
-    options.UseNpgsql(connectionString));
+else
+{
+    var databaseUrl = builder.Configuration["DATABASE_URL"];
+    var connectionString = !string.IsNullOrWhiteSpace(databaseUrl)
+        ? BuildNpgsqlConnectionString(databaseUrl)
+        : builder.Configuration.GetConnectionString("SoftSyncDb");
+
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException(
+            "PostgreSQL is not configured. Set DATABASE_URL on Render or " +
+            "ConnectionStrings__SoftSyncDb for another environment, or enable SoftSync:DemoMode.");
+    }
+    builder.Services.AddDbContext<SoftSyncDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
 
 builder.Services.AddSingleton<EfDataProtectionKeyRepository>();
 builder.Services
@@ -153,6 +182,7 @@ builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 builder.Services.AddScoped<IMentorRepository, MentorRepository>();
+builder.Services.AddScoped<IMentorSupportRequestRepository, MentorSupportRequestRepository>();
 
 // 3. Register AI Services (BLL - Mocked)
 builder.Services.AddScoped<IAiAssessmentService, HuggingFaceAiAssessmentService>();
@@ -211,7 +241,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-else
+else if (!demoMode)
 {
     // In the Render container TLS is handled by the proxy; redirecting inside the
     // container just breaks. Only redirect to HTTPS during local development.
@@ -220,10 +250,28 @@ else
 
 app.UseStaticFiles();
 
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();
+
+// Render uses this lightweight endpoint to check that the web process is
+// accepting requests. Keep it independent from page rendering and user state.
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+    .AllowAnonymous();
+
+var coursesApi = app.MapGroup("/api/courses")
+    .AllowAnonymous();
+
+coursesApi.MapGet("/", async (ICourseService courses) =>
+    Results.Ok(await courses.GetPublicPublishedAsync()));
+
+coursesApi.MapGet("/{id:int}", async (int id, ICourseService courses) =>
+{
+    var course = await courses.GetPublicPublishedByIdAsync(id);
+    return course is null ? Results.NotFound() : Results.Ok(course);
+});
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
@@ -232,7 +280,7 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 // Apply migrations at startup; never provision the known demo account outside Development.
-await DbInitializer.SeedAsync(app.Services, seedDemoAccount: app.Environment.IsDevelopment());
+await DbInitializer.SeedAsync(app.Services, seedDemoAccount: app.Environment.IsDevelopment() || demoMode);
 
 app.Run();
 
@@ -249,5 +297,5 @@ static string BuildNpgsqlConnectionString(string databaseUrl)
     var port = uri.Port > 0 ? uri.Port : 5432;
 
     return $"Host={uri.Host};Port={port};Database={database};Username={username};" +
-           $"Password={password};SSL Mode=Prefer;Trust Server Certificate=true";
+           $"Password={password};SSL Mode=Require;Trust Server Certificate=true";
 }

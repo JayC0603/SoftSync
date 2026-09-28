@@ -1,0 +1,19 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+
+<footer class="eco-footer">
+    <div class="eco-footer-inner">
+        <div class="eco-footer-brand"><strong>SoftSync</strong><span>@Tx("Learn with purpose. Practice with confidence.", "Học có mục tiêu. Thực hành đầy tự tin.")</span></div>
+        <nav aria-label="@Tx("About SoftSync", "Thông tin SoftSync")">
+            <a href="/about">@Tx("About", "Về chúng tôi")</a>
+            <a href="/mentors">@Tx("Mentors", "Mentor")</a>
+            <a href="/community">@Tx("Community", "Cộng đồng")</a>
+            <a href="/resources">@Tx("Resources", "Tài nguyên")</a>
+        </nav>
+        <a class="eco-external" href="https://softsync.id.vn/" target="_blank" rel="noopener noreferrer" aria-label="@Tx("Open SoftSync website in a new tab", "Mở website SoftSync trong tab mới")">
+            <i class="bi bi-globe2" aria-hidden="true"></i><span>@Tx("Official website", "Website chính thức")</span><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+        </a>
+    </div>
+</footer>
+
+@code { private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en; }

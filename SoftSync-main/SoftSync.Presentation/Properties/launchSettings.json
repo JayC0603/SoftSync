@@ -27,6 +27,16 @@
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
       },
+      "demo": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://localhost:5104",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "SoftSync__DemoMode": "true"
+        }
+      },
       "IIS Express": {
         "commandName": "IISExpress",
         "launchBrowser": true,

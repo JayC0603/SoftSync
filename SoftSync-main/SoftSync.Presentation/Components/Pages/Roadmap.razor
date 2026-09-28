@@ -559,7 +559,8 @@
     {
         return SkillKey(item) switch
         {
-            "time" or "communication" or "critical" => $"/roadmap/game/{UserId}/{item.Id}",
+            "time" or "communication" => $"/roadmap/lecture/{UserId}/{item.Id}?step=5",
+            "critical" => $"/roadmap/practice/{UserId}/{item.Id}",
             _ => string.Empty
         };
     }

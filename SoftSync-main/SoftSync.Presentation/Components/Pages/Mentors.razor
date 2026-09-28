@@ -1,0 +1,23 @@
+@page "/mentors"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+@inject IMentorService MentorService
+
+<PageTitle>@Tx("Mentors", "Mentor") · SoftSync</PageTitle>
+<main class="eco-page" aria-labelledby="mentors-title">
+    <header class="eco-page-head eco-page-head-compact"><span>@Tx("LEARNING SUPPORT", "HỖ TRỢ HỌC TẬP")</span><h1 id="mentors-title">@Tx("Find the right person to unblock your next step", "Tìm người phù hợp để tháo gỡ bước tiếp theo")</h1><p>@Tx("Mentors complement your learning journey; they do not replace Practice and Reflection.", "Mentor hỗ trợ hành trình học; họ không thay thế Practice và Reflection.")</p></header>
+    <div class="eco-search" role="search"><i class="bi bi-search" aria-hidden="true"></i><label for="mentor-search">@Tx("Search mentors", "Tìm Mentor")</label><input id="mentor-search" @bind="query" @bind:event="oninput" placeholder="@Tx("Name or expertise", "Tên hoặc chuyên môn")" /><span aria-live="polite">@Filtered.Count() @Tx("results", "kết quả")</span></div>
+    @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentors...", "Đang tải Mentor...")</p></div> }
+    else if (!string.IsNullOrEmpty(error)) { <div class="eco-state eco-state-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><h2>@Tx("Mentors could not be loaded", "Không thể tải Mentor")</h2><p>@error</p><button @onclick="Load">@Tx("Try again", "Thử lại")</button></div> }
+    else if (!Filtered.Any()) { <div class="eco-state"><i class="bi bi-search" aria-hidden="true"></i><h2>@Tx("No matching mentors", "Không có Mentor phù hợp")</h2><p>@Tx("Try a broader name or expertise.", "Hãy thử tên hoặc chuyên môn rộng hơn.")</p><button @onclick="() => query = string.Empty">@Tx("Clear search", "Xóa tìm kiếm")</button></div> }
+    else { <section class="mentor-list" aria-label="@Tx("Mentor directory", "Danh sách Mentor")">@foreach (var mentor in Filtered) { <article class="mentor-row"><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="72" height="72" loading="lazy" /><div><h2>@mentor.Name</h2><strong>@mentor.Expertise</strong><p>@mentor.ShortBio</p></div><a href="/mentors/@mentor.Id">@Tx("View profile", "Xem hồ sơ")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></article> }</section> }
+</main>
+
+@code {
+    private List<MentorDto> mentors = []; private string query = string.Empty; private bool loading = true; private string? error;
+    private IEnumerable<MentorDto> Filtered => mentors.Where(x => string.IsNullOrWhiteSpace(query) || $"{x.Name} {x.Expertise} {x.ShortBio}".Contains(query.Trim(), StringComparison.OrdinalIgnoreCase));
+    protected override Task OnInitializedAsync() => Load();
+    private async Task Load(){ loading=true; error=null; try { mentors=(await MentorService.GetAllAsync()).ToList(); } catch { error=Tx("Check your connection and try again.", "Kiểm tra kết nối và thử lại."); } finally { loading=false; } }
+    private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
+}

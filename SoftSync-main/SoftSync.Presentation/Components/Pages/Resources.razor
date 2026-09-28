@@ -1,0 +1,89 @@
+@page "/resources"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+@inject NavigationManager Nav
+
+<PageTitle>@Tx("Learning resources", "Tài nguyên học tập") · SoftSync</PageTitle>
+
+<main class="resource-page" aria-labelledby="resource-title">
+    <header class="resource-head">
+        <div><span>@Tx("RESOURCE LIBRARY", "THƯ VIỆN TÀI NGUYÊN")</span><h1 id="resource-title">@Tx("Learning resources", "Tài nguyên học tập")</h1><p>@Tx("Find practical tools for every step of your learning journey.", "Tìm công cụ thực tế cho từng bước trong hành trình học tập.")</p></div>
+    </header>
+
+    <div class="resource-search" role="search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <label class="visually-hidden" for="resource-query">@Tx("Search resources", "Tìm tài nguyên")</label>
+        <input id="resource-query" @bind="query" @bind:event="oninput" placeholder="@Tx("Search videos, guides, templates, and exercises…", "Tìm video, hướng dẫn, mẫu và bài tập…")" />
+        <span aria-live="polite">@Filtered.Count() @Tx("resources", "tài nguyên")</span>
+    </div>
+
+    <div class="resource-filters" aria-label="@Tx("Resource filters", "Bộ lọc tài nguyên")">
+        @foreach (var filter in Filters)
+        {
+            <button class="@(activeFilter == filter.Key ? "active" : null)" @onclick="() => activeFilter = filter.Key">@Tx(filter.En, filter.Vi)</button>
+        }
+    </div>
+
+    <div class="resource-layout">
+        <section class="resource-main" aria-labelledby="recommended-title">
+            <h2 id="recommended-title">@Tx("Recommended for you", "Đề xuất cho bạn")</h2>
+            <article class="resource-featured">
+                <div class="resource-visual"><i class="bi bi-ear" aria-hidden="true"></i><i class="bi bi-chat-square-text" aria-hidden="true"></i></div>
+                <div><span>@Tx("GUIDE · 8 MIN", "HƯỚNG DẪN · 8 PHÚT")</span><h3>@Tx("Active Listening Field Guide", "Cẩm nang lắng nghe chủ động")</h3><p>@Tx("Practice listening with intention, understanding others and responding thoughtfully in real conversations.", "Luyện cách lắng nghe có chủ đích, thấu hiểu người khác và phản hồi phù hợp trong hội thoại thực tế.")</p></div>
+                <button class="resource-primary" @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Open resource", "Mở tài nguyên")<i class="bi bi-arrow-right"></i></button>
+            </article>
+
+            <div class="resource-list-head"><h2>@Tx("Browse resources", "Khám phá tài nguyên")</h2><span>@Tx("Skill", "Kỹ năng") · @Tx("Type", "Loại") · @Tx("Duration", "Thời lượng")</span></div>
+            <div class="resource-list">
+                @foreach (var item in Filtered)
+                {
+                    <article>
+                        <i class="bi @item.Icon" aria-hidden="true"></i>
+                        <div><h3>@Tx(item.En, item.Vi)</h3><p>@Tx(item.SkillEn, item.SkillVi) · @Tx(item.TypeEn, item.TypeVi) · @item.Min @Tx("min", "phút")</p></div>
+                        <button class="resource-save @(saved.Contains(item.En) ? "saved" : null)"
+                                aria-label="@(saved.Contains(item.En) ? Tx("Remove from saved", "Bỏ khỏi mục đã lưu") : Tx("Save resource", "Lưu tài nguyên"))"
+                                aria-pressed="@saved.Contains(item.En)"
+                                @onclick="() => ToggleSaved(item.En)">
+                            <i class="bi @(saved.Contains(item.En) ? "bi-bookmark-fill" : "bi-bookmark")" aria-hidden="true"></i>
+                        </button>
+                        <button class="resource-open" @onclick="() => Nav.NavigateTo(item.Route)">@Tx("Open", "Mở")<i class="bi bi-chevron-right"></i></button>
+                    </article>
+                }
+            </div>
+            @if (!Filtered.Any())
+            {
+                <div class="resource-empty"><i class="bi bi-search"></i><h2>@Tx("No matching resources", "Không tìm thấy tài nguyên phù hợp")</h2><p>@Tx("Try another keyword or skill filter.", "Hãy thử từ khóa hoặc bộ lọc kỹ năng khác.")</p><button @onclick="ResetFilters">@Tx("Clear filters", "Xóa bộ lọc")</button></div>
+            }
+        </section>
+
+        <aside class="resource-side">
+            <section><h2>@Tx("Your library", "Thư viện của bạn")</h2><dl><div><dt><i class="bi bi-bookmark"></i>@Tx("Saved this visit", "Đã lưu trong phiên này")</dt><dd>@saved.Count</dd></div><div><dt><i class="bi bi-check-circle"></i>@Tx("Available", "Có sẵn")</dt><dd>@Items.Length</dd></div></dl></section>
+            <section><span>@Tx("CONTINUE WHERE YOU LEFT OFF", "TIẾP TỤC NỘI DUNG ĐANG DỞ")</span><h2>@Tx("Active Listening: Understand to Connect", "Lắng nghe chủ động: Hiểu để kết nối")</h2><p>@Tx("Lesson 3 · 5 of 8", "Bài 3 · 5/8 phần")</p><div class="resource-meter"><i></i></div><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Resume", "Tiếp tục")<i class="bi bi-arrow-right"></i></button></section>
+            <section class="resource-coach"><img src="/images/syncy-robot.png" alt="" /><div><span>SYNCY</span><h2>@Tx("Put learning into action", "Đưa kiến thức vào thực tế")</h2><p>@Tx("Use the listening guide before your next Practice activity.", "Xem cẩm nang lắng nghe trước hoạt động Practice tiếp theo.")</p></div></section>
+            <section><span>@Tx("HUMAN SUPPORT", "HỖ TRỢ TỪ CON NGƯỜI")</span><h2>@Tx("Need help applying a skill?", "Cần hỗ trợ áp dụng kỹ năng?")</h2><p>@Tx("Describe one specific learning block to a SoftSync Mentor.", "Mô tả một điểm đang vướng cụ thể cho Mentor SoftSync.")</p><button @onclick='() => Nav.NavigateTo("/mentors")'>@Tx("Find a Mentor", "Tìm Mentor")<i class="bi bi-arrow-right"></i></button></section>
+        </aside>
+    </div>
+</main>
+
+@code {
+    private string query = string.Empty;
+    private string activeFilter = "all";
+    private readonly HashSet<string> saved = new(StringComparer.Ordinal);
+    private bool Vi => L.Current == AppLanguage.Vi;
+    private string Tx(string en, string vi) => Vi ? vi : en;
+    private IEnumerable<ResourceItem> Filtered => Items.Where(x => (activeFilter == "all" || x.Key == activeFilter) && (string.IsNullOrWhiteSpace(query) || $"{x.En} {x.Vi} {x.SkillEn} {x.SkillVi} {x.TypeEn} {x.TypeVi}".Contains(query.Trim(), StringComparison.OrdinalIgnoreCase)));
+    private void ResetFilters() { query = string.Empty; activeFilter = "all"; }
+    private void ToggleSaved(string key) { if (!saved.Add(key)) saved.Remove(key); }
+    private static readonly (string Key, string En, string Vi)[] Filters = [("all","All resources","Tất cả"),("communication","Communication","Giao tiếp"),("time","Time Management","Quản lý thời gian"),("critical","Critical Thinking","Tư duy phản biện"),("teamwork","Teamwork","Làm việc nhóm")];
+    private static readonly ResourceItem[] Items =
+    [
+        new("communication","I-Statement Conversation Template","Mẫu hội thoại I-Statement","Communication","Giao tiếp","Template","Mẫu",10,"bi-file-earmark-text","/case-studies"),
+        new("time","Eisenhower Matrix Worksheet","Bảng Ma trận Eisenhower","Time Management","Quản lý thời gian","Worksheet","Bài tập",12,"bi-grid-3x3-gap","/roadmap"),
+        new("communication","Giving Constructive Feedback","Phản hồi mang tính xây dựng","Communication","Giao tiếp","Video","Video",7,"bi-play-circle","/roadmap"),
+        new("critical","Critical Thinking Checklist","Checklist tư duy phản biện","Critical Thinking","Tư duy phản biện","Checklist","Danh sách",6,"bi-list-check","/roadmap"),
+        new("teamwork","Team Agreement Canvas","Khung thỏa thuận nhóm","Teamwork","Làm việc nhóm","Template","Mẫu",9,"bi-people","/community")
+    ];
+    private sealed record ResourceItem(string Key,string En,string Vi,string SkillEn,string SkillVi,string TypeEn,string TypeVi,int Min,string Icon,string Route);
+}

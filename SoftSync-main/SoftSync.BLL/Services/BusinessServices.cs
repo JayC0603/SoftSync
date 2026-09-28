@@ -708,11 +708,14 @@ public class RoadmapService : IRoadmapService
         => MarkActivityCompleteAsync(itemId, userId, isVideo: true);
 
     /// <summary>
-    /// Marks the required practice as passed. Kept under the existing method name
-    /// so current games continue to call the same service contract.
+    /// Marks the knowledge check as passed. The existing storage field is kept
+    /// for data compatibility; the required applied Practice is completed separately.
     /// </summary>
     public Task<bool> MarkCompleteAsync(int itemId, int userId)
         => MarkActivityCompleteAsync(itemId, userId, isVideo: false);
+
+    public Task<bool> MarkPracticeCompleteAsync(int itemId, int userId)
+        => MarkScenarioCompleteAsync(itemId, userId);
 
     public async Task<bool> MarkScenarioCompleteAsync(int itemId, int userId)
     {
@@ -813,7 +816,7 @@ public class RoadmapService : IRoadmapService
         item.QuizHistoryJson = JsonSerializer.Serialize(history);
         if (attempt.Passed && !item.PracticeCompletedAtUtc.HasValue)
             item.PracticeCompletedAtUtc = attempt.SubmittedAtUtc;
-        item.LastLearningStep = attempt.Passed ? "scenario" : "quiz";
+        item.LastLearningStep = attempt.Passed ? "practice" : "quiz";
         await _roadmapRepo.SaveChangesAsync();
         return true;
     }
@@ -858,7 +861,7 @@ public class RoadmapService : IRoadmapService
         catch (JsonException) { return []; }
     }
 
-    private static readonly string[] LearningStepOrder = ["video", "script", "summary", "quiz", "scenario", "reflection"];
+    private static readonly string[] LearningStepOrder = ["video", "script", "summary", "quiz", "practice", "reflection"];
 
     private static bool CanOpenStep(RoadmapItem item, string step) => item.IsCompleted || step switch
     {
@@ -868,7 +871,7 @@ public class RoadmapService : IRoadmapService
             || string.Equals(item.LastLearningStep, "script", StringComparison.OrdinalIgnoreCase),
         "quiz" => item.SummaryCompletedAtUtc.HasValue
             || string.Equals(item.LastLearningStep, "summary", StringComparison.OrdinalIgnoreCase),
-        "scenario" => item.PracticeCompletedAtUtc.HasValue,
+        "practice" => item.PracticeCompletedAtUtc.HasValue,
         "reflection" => item.ScenarioCompletedAtUtc.HasValue,
         _ => false
     };
@@ -1079,11 +1082,46 @@ public class CaseStudyService : ICaseStudyService
 public class MentorService : IMentorService
 {
     private readonly IMentorRepository _repo;
-    public MentorService(IMentorRepository repo) => _repo = repo;
+    private readonly IMentorSupportRequestRepository _requests;
+    public MentorService(IMentorRepository repo, IMentorSupportRequestRepository requests)
+    {
+        _repo = repo;
+        _requests = requests;
+    }
     public async Task<IEnumerable<MentorDto>> GetAllAsync()
     {
         var list = await _repo.GetAllAsync();
         return list.Select(m => new MentorDto { Id = m.Id, Name = m.Name, Expertise = m.Expertise, ShortBio = m.ShortBio, AvatarUrl = m.AvatarUrl });
+    }
+
+    public async Task<MentorDto?> GetByIdAsync(int mentorId)
+    {
+        var mentor = mentorId > 0 ? await _repo.GetByIdAsync(mentorId) : null;
+        return mentor is null ? null : new MentorDto
+        {
+            Id = mentor.Id, Name = mentor.Name, Expertise = mentor.Expertise,
+            ShortBio = mentor.ShortBio, AvatarUrl = mentor.AvatarUrl
+        };
+    }
+
+    public async Task<bool> SubmitSupportRequestAsync(int userId, MentorSupportRequestDto request)
+    {
+        var goal = request.Goal?.Trim() ?? string.Empty;
+        var skill = request.Skill?.Trim() ?? string.Empty;
+        var context = request.Context?.Trim() ?? string.Empty;
+        var contact = request.PreferredContact?.Trim() ?? string.Empty;
+        if (userId <= 0 || request.MentorId <= 0 || goal.Length is < 3 or > 120
+            || skill.Length > 100 || context.Length is < 20 or > 2000
+            || contact is not ("Email" or "In-app")) return false;
+        if (await _repo.GetByIdAsync(request.MentorId) is null) return false;
+
+        await _requests.AddAsync(new MentorSupportRequest
+        {
+            UserId = userId, MentorId = request.MentorId, Goal = goal, Skill = skill,
+            Context = context, PreferredContact = contact,
+            ShareLearningContext = request.ShareLearningContext
+        });
+        return await _requests.SaveChangesAsync();
     }
 }
 

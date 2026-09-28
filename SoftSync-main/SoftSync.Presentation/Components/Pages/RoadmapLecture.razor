@@ -216,7 +216,30 @@
                 }
                 else if (currentStep == 5)
                 {
-                    @if (isTimeManagementLessonOne)
+                    @if (UsePracticePipeline)
+                    {
+                        <section class="voice-practice-launch practice-pipeline-launch">
+                            <i class="bi bi-person-workspace"></i>
+                            <small>@Tx("STEP 5 · REQUIRED PRACTICE", "BƯỚC 5 · THỰC HÀNH BẮT BUỘC")</small>
+                            <h2>@Tx("Turn knowledge into a real response", "Biến kiến thức thành phản xạ thực tế")</h2>
+                            <p>@Tx("Complete the applied scenario to use what you learned. Reflection unlocks only after Practice is completed.", "Hoàn thành tình huống ứng dụng để vận dụng nội dung vừa học. Phản tư chỉ mở sau khi hoàn thành Practice.")</p>
+                            <div>
+                                <span><b>3</b>@Tx("Decisions", "Lượt quyết định")</span>
+                                <span><b>10</b>@Tx("Minutes", "Phút")</span>
+                                <span><b>1</b>@Tx("Required step", "Bước bắt buộc")</span>
+                                <span><b><i class="bi bi-lock-fill"></i></b>@Tx("Unlock Reflection", "Mở Phản tư")</span>
+                            </div>
+                            <button class="primary" @onclick="OpenPractice"><i class="bi bi-play-fill"></i>@(item!.IsScenarioCompleted ? Tx("Practice again", "Thực hành lại") : Tx("Start Practice", "Bắt đầu Practice"))</button>
+                        </section>
+                        <div class="actions">
+                            <button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>
+                            @if (item!.IsScenarioCompleted)
+                            {
+                                <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button>
+                            }
+                        </div>
+                    }
+                    else if (isTimeManagementLessonOne)
                     {
                         <section class="voice-practice-launch"><i class="bi bi-inboxes-fill"></i><small>@Tx("PRACTICE · INBOX RUSH", "THỰC HÀNH · INBOX RUSH")</small><h2>@Tx("Plan an eight-slot day", "Lập kế hoạch một ngày 8 khung giờ")</h2><p>@Tx("Prioritize realistic student tasks, estimate their duration, and adapt to urgent interruptions.", "Ưu tiên các công việc sinh viên thực tế, ước lượng thời lượng và thích ứng với việc phát sinh khẩn cấp.")</p><div><span><b>50%</b>@Tx("Priority", "Ưu tiên")</span><span><b>30%</b>@Tx("Estimate", "Ước lượng")</span><span><b>20%</b>@Tx("Adapt", "Thích ứng")</span><span><b>8</b>@Tx("Time slots", "Khung giờ")</span></div><button class="primary" @onclick="OpenInboxRush"><i class="bi bi-calendar2-week"></i>@Tx("Open Inbox Rush", "Mở Inbox Rush")</button></section>
                         <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
@@ -278,7 +301,7 @@
                             <div class="confidence-change"><span>@Tx("Confidence change", "Thay đổi tự tin")</span><b>@reflection.ConfidenceBefore → @reflection.ConfidenceAfter</b><em>@ConfidenceDelta</em></div>
                         </aside>
                     </section>
-                    <div class="actions"><button @onclick="() => OpenStep(5)"><i class="bi bi-arrow-left"></i>@Tx("Back: Practice", "Quay lại: Thực hành")</button><div class="reflection-actions">@if (!item!.IsReflectionCompleted) { <button @onclick="SaveReflectionDraft" disabled="@savingReflection">@Tx("Save draft", "Lưu bản nháp")</button><button class="primary" disabled="@(!ReflectionValid || savingReflection)" @onclick="CompleteReflection">@Tx("Complete week", "Hoàn thành tuần")<i class="bi bi-check-circle"></i></button> } else { <button class="primary" @onclick="Back">@Tx("View Roadmap", "Xem Roadmap")<i class="bi bi-arrow-right"></i></button> }</div></div>
+                    <div class="actions"><button @onclick="() => OpenStep(5)"><i class="bi bi-arrow-left"></i>@Tx("Back: Practice", "Quay lại: Thực hành")</button><div class="reflection-actions">@if (!item!.IsReflectionCompleted) { <button @onclick="SaveReflectionDraft" disabled="@savingReflection">@Tx("Save draft", "Lưu bản nháp")</button><button class="primary" disabled="@(!ReflectionValid || savingReflection)" @onclick="CompleteReflection">@Tx("Complete week", "Hoàn thành tuần")<i class="bi bi-check-circle"></i></button> } else { <a class="mentor-context-link" href="/mentors">@Tx("Ask a Mentor", "Hỏi Mentor")</a><button class="primary" @onclick="Back">@Tx("View Roadmap", "Xem Roadmap")<i class="bi bi-arrow-right"></i></button> }</div></div>
                 }
                 else
                 {
@@ -337,6 +360,11 @@
     private static int WordCount(string value) => value.Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length;
     private bool ReflectionValid => WordCount(reflection.Learning) > 5 && WordCount(reflection.Strength) > 5 && WordCount(reflection.Improvement) > 5 && WordCount(reflection.Commitment) > 5;
     private string ReflectionFeedback => !string.IsNullOrWhiteSpace(reflection.AiFeedback) ? reflection.AiFeedback : LatestRoleplayScore switch { < 5 => Tx("Focus on staying calm, asking a clarifying question, and proposing one concrete next step.", "Hãy tập trung giữ bình tĩnh, đặt câu hỏi làm rõ và đề xuất một bước tiếp theo cụ thể."), < 8.5 => Tx("You are progressing well. Make your I-statements and deadlines more specific.", "Bạn đang tiến bộ tốt. Hãy làm rõ hơn câu I-statement và thời hạn hành động."), _ => Tx("You communicate with empathy and a solution mindset. Keep applying this pattern in real situations.", "Bạn giao tiếp thấu cảm và hướng giải pháp tốt. Hãy tiếp tục áp dụng vào tình huống thực tế.") };
+    // Keep the original skill-specific Practice experiences. The generic
+    // scenario is only a fallback when a lesson has no dedicated activity.
+    private bool UsePracticePipeline => !isTimeManagementLessonOne
+        && communicationLessonNumber != 2
+        && roleplayScenario is null;
     private IEnumerable<(bool User, string Text)> RoleplayTranscript
     {
         get
@@ -376,7 +404,7 @@
             timeManagementLessonNumber = timeManagement.FindIndex(x => x.Id == item.Id) + 1;
             isTimeManagementLessonOne = timeManagementLessonNumber == 1;
             isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2 || timeManagementLessonNumber is 1 or 2;
-            currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "scenario" => 5, "reflection" => 6, _ => 1 };
+            currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "practice" or "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
             if (currentStep == 4 && RequestedStep == 4 && LatestQuiz is not null)
@@ -435,12 +463,13 @@
         if (item.IsVideoCompleted)
             await OpenStep(2);
     }
-    private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; if (step == 4 && quizQuestions.Count == 0) StartQuiz(); if (step == 5 && roleplayScenario is null) StartRoleplay(); var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "scenario", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
+    private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; if (step == 4 && quizQuestions.Count == 0) StartQuiz(); if (step == 5 && roleplayScenario is null) StartRoleplay(); var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "practice", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
     private async Task FinishScript() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "summary")) { item!.ScriptCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "summary"; currentStep = 3; } }
     private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; StartQuiz(); } }
     private void Previous() => currentStep = Math.Max(1, currentStep - 1);
     private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
     private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
+    private void OpenPractice() => Nav.NavigateTo($"/roadmap/practice/{UserId}/{ItemId}");
     private void OpenVoicePractice() => Nav.NavigateTo($"/roadmap/voice-practice/{UserId}/{ItemId}");
     private void OpenInboxRush() => Nav.NavigateTo($"/roadmap/inbox-rush/{UserId}/{ItemId}");
     private bool IsVi => L.Current == AppLanguage.Vi;
@@ -546,7 +575,7 @@
             PointsFor(question, selectedAnswers[question.Id]))).ToList();
         var feedback = await AiEvaluator.EvaluateQuizAsync(LessonTitle, answers, quizScore, IsVi);
         var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed, Feedback = feedback };
-        if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "scenario"; } quizFinished = true; await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId); }
+        if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "practice"; } quizFinished = true; await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId); }
         else saveError = Tx("Could not save quiz result. Please try again.", "Không thể lưu kết quả Quiz. Hãy thử lại.");
     }
 
@@ -603,7 +632,7 @@
         else { reflectionMessage = Tx("Could not complete the week.", "Không thể hoàn thành tuần."); reflectionError = true; }
         savingReflection = false;
     }
-    private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"Reflection","Phản tư","bi bi-stars")];
+    private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-person-workspace"),(6,"Reflection","Phản tư","bi bi-stars")];
     private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public string AiFeedback { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
 }
 

@@ -26,6 +26,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
+    public DbSet<MentorSupportRequest> MentorSupportRequests { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }
@@ -75,6 +76,8 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
         modelBuilder.Entity<QuizAttempt>().Property(x => x.ScorePercentage).HasPrecision(5, 2);
         modelBuilder.Entity<QuizAttemptAnswer>().HasIndex(x => new { x.AttemptId, x.QuestionId }).IsUnique();
         modelBuilder.Entity<QuizAttemptAnswer>().HasOne(x => x.SelectedOption).WithMany().HasForeignKey(x => x.SelectedOptionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.UserId);
+        modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.MentorId);
 
         // Seed Data
         SeedData(modelBuilder);

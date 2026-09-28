@@ -3110,6 +3110,25 @@ namespace SoftSync.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.MentorSupportRequest", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("timestamp without time zone");
+                    b.Property<string>("Context").IsRequired().HasMaxLength(2000).HasColumnType("character varying(2000)");
+                    b.Property<string>("Goal").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)");
+                    b.Property<int>("MentorId").HasColumnType("integer");
+                    b.Property<string>("PreferredContact").IsRequired().HasMaxLength(40).HasColumnType("character varying(40)");
+                    b.Property<bool>("ShareLearningContext").HasColumnType("boolean");
+                    b.Property<string>("Skill").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)");
+                    b.Property<string>("Status").IsRequired().HasMaxLength(30).HasColumnType("character varying(30)");
+                    b.Property<int>("UserId").HasColumnType("integer");
+                    b.HasKey("Id");
+                    b.HasIndex("MentorId");
+                    b.HasIndex("UserId");
+                    b.ToTable("MentorSupportRequests");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.ProgressLog", b =>
                 {
                     b.Property<int>("Id")

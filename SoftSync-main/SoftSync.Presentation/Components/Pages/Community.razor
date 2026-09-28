@@ -1,87 +1,21 @@
 @page "/community"
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+@inject ISkillService SkillService
 
-<div class="community-shell tw:mx-auto">
-    <section class="community-hero ss-card">
-        <div>
-            <span class="community-eyebrow">SOFTSYNC SPACE</span>
-            <h1>👥 @L["community.hub.title"]</h1>
-            <p>@L["community.hub.subtitle"]</p>
-        </div>
-        <div class="community-stats">
-            <div><strong>2,500+</strong><span>@L["community.stats.members"]</span></div>
-            <div><strong>20+</strong><span>@L["community.stats.events"]</span></div>
-            <div><strong>150+</strong><span>@L["community.stats.discussions"]</span></div>
-        </div>
+<PageTitle>@Tx("Learning community", "Cộng đồng học tập") · SoftSync</PageTitle>
+<main class="eco-page community-page" aria-labelledby="community-title">
+    <header class="eco-page-head eco-page-head-compact"><span>@Tx("LEARN TOGETHER", "HỌC CÙNG NHAU")</span><h1 id="community-title">@Tx("A community organised around practice", "Cộng đồng được tổ chức quanh việc thực hành")</h1><p>@Tx("Find a skill group and useful learning channels without losing your place in the roadmap.", "Tìm nhóm kỹ năng và kênh học hữu ích mà không mất vị trí trong lộ trình.")</p></header>
+    <section class="community-feature" aria-labelledby="activity-title"><div><span>@Tx("THIS WEEK", "TUẦN NÀY")</span><h2 id="activity-title">@Tx("Continue your current Practice before joining a group", "Hoàn thành Practice hiện tại trước khi tham gia nhóm")</h2><p>@Tx("Bring one concrete question or situation. Focused context makes peer and mentor support more useful.", "Mang theo một câu hỏi hoặc tình huống cụ thể. Ngữ cảnh tập trung giúp hỗ trợ từ bạn học và Mentor hữu ích hơn.")</p></div><a class="eco-primary" href="/roadmap">@Tx("Continue learning", "Tiếp tục học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></section>
+    <section class="community-section" aria-labelledby="groups-title"><div class="eco-section-title"><div><span>@Tx("SKILL GROUPS", "NHÓM KỸ NĂNG")</span><h2 id="groups-title">@Tx("Start with what you are learning", "Bắt đầu từ kỹ năng bạn đang học")</h2></div></div>
+        @if(loading){<div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading skill groups...", "Đang tải nhóm kỹ năng...")</p></div>}
+        else if(skills.Count==0){<div class="eco-state"><i class="bi bi-people" aria-hidden="true"></i><h3>@Tx("No skill groups are available yet", "Chưa có nhóm kỹ năng khả dụng")</h3><p>@Tx("Complete your skill selection first.", "Hãy hoàn tất lựa chọn kỹ năng trước.")</p></div>}
+        else{<div class="community-groups">@foreach(var skill in skills){<a href="/community/skills/@skill.Id"><i class="bi @skill.IconName" aria-hidden="true"></i><span><strong>@skill.Name</strong><small>@skill.Description</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>}</div>}
     </section>
+    <section class="community-section community-events" aria-labelledby="events-title"><div class="eco-section-title"><div><span>@Tx("WORKSHOPS", "WORKSHOP")</span><h2 id="events-title">@Tx("Upcoming learning events", "Sự kiện học tập sắp tới")</h2></div></div><div class="eco-state eco-state-quiet"><i class="bi bi-calendar2" aria-hidden="true"></i><h3>@Tx("No workshop has been scheduled", "Chưa có workshop được lên lịch")</h3><p>@Tx("We will show verified dates, facilitators and registration status here when they are available.", "Khi có dữ liệu xác thực, lịch, người hướng dẫn và trạng thái đăng ký sẽ xuất hiện tại đây.")</p></div></section>
+    <section class="community-section" aria-labelledby="channels-title"><div class="eco-section-title"><div><span>@Tx("OFFICIAL CHANNEL", "KÊNH CHÍNH THỨC")</span><h2 id="channels-title">@Tx("More from SoftSync", "Thông tin khác từ SoftSync")</h2></div></div><a class="community-channel" href="https://softsync.id.vn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-globe2" aria-hidden="true"></i><span><strong>@Tx("SoftSync website", "Website SoftSync")</strong><small>@Tx("Product information and public learning resources", "Thông tin sản phẩm và tài nguyên học công khai")</small></span><span>@Tx("Open external site", "Mở trang ngoài")<i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></span></a></section>
+    <section class="community-guidelines"><i class="bi bi-shield-check" aria-hidden="true"></i><div><h2>@Tx("Learn respectfully", "Học tập tôn trọng")</h2><p>@Tx("Share situations without exposing another person's private information. Give feedback about observable behaviour, not personal labels.", "Chia sẻ tình huống mà không tiết lộ thông tin riêng tư của người khác. Phản hồi về hành vi có thể quan sát, không gắn nhãn con người.")</p></div></section>
+</main>
 
-    <section class="community-grid">
-        @foreach (var channel in Channels)
-        {
-            <article class="community-card ss-card ss-glass-interactive">
-                <div class="community-icon @channel.ColorClass"><i class="bi @channel.Icon"></i></div>
-                <div class="community-copy">
-                    <h2>@channel.Name</h2>
-                    <p>@L[channel.DescriptionKey]</p>
-                </div>
-                <button type="button" @onclick="() => ShowPending(channel.Name)">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></button>
-            </article>
-        }
-    </section>
-
-    @if (!string.IsNullOrEmpty(notification))
-    {
-        <div class="community-notice" role="status"><i class="bi bi-info-circle-fill"></i> @notification</div>
-    }
-</div>
-
-@code {
-    private string? notification;
-
-    private static readonly Channel[] Channels =
-    [
-        new("Discord", "bi-discord", "discord", "community.discord.desc", "community.action.join"),
-        new("Facebook", "bi-facebook", "facebook", "community.facebook.desc", "community.action.follow"),
-        new("TikTok", "bi-tiktok", "tiktok", "community.tiktok.desc", "community.action.follow"),
-        new("YouTube", "bi-youtube", "youtube", "community.youtube.desc", "community.action.subscribe"),
-        new("Website", "bi-globe2", "website", "community.website.desc", "community.action.visit"),
-        new("Events", "bi-calendar-event-fill", "events", "community.events.desc", "community.action.view")
-    ];
-
-    private void ShowPending(string channel) => notification = string.Format(L["community.linkPending"], channel);
-    private sealed record Channel(string Name, string Icon, string ColorClass, string DescriptionKey, string ActionKey);
-}
-
-<style>
-    .community-shell { max-width: 1080px; padding: 1.25rem 0 3rem; }
-    .community-hero { display: grid; grid-template-columns: 1.35fr 1fr; align-items: center; gap: 2rem; padding: 2rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(237,233,254,.76)); }
-    .community-eyebrow { color: #6366f1; letter-spacing: .15em; font-size: .72rem; font-weight: 900; }
-    .community-hero h1 { margin: .45rem 0 .55rem; color: #111827; font-size: clamp(1.9rem, 4vw, 2.65rem); font-weight: 900; }
-    .community-hero p { color: #64748b; max-width: 600px; margin: 0; line-height: 1.65; font-weight: 600; }
-    .community-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; }
-    .community-stats div { text-align: center; padding: 1rem .5rem; border: 1px solid rgba(99,102,241,.16); border-radius: 18px; background: rgba(255,255,255,.62); }
-    .community-stats strong, .community-stats span { display: block; }
-    .community-stats strong { color: #4f46e5; font-size: 1.2rem; }
-    .community-stats span { color: #64748b; margin-top: .2rem; font-size: .75rem; font-weight: 700; }
-    .community-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-    .community-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: 1.25rem; }
-    .community-icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 16px; font-size: 1.45rem; }
-    .discord { color: #5865f2; background: #eef0ff; } .facebook { color: #1877f2; background: #e8f2ff; }
-    .tiktok { color: #111827; background: #f1f5f9; } .youtube { color: #ff0000; background: #fff0f0; }
-    .website { color: #7c3aed; background: #f3e8ff; } .events { color: #ea580c; background: #fff7ed; }
-    .community-copy h2 { color: #111827; margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 850; }
-    .community-copy p { color: #64748b; margin: 0; font-size: .85rem; }
-    .community-card button { color: #4f46e5; background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.22); border-radius: 999px; padding: .5rem .75rem; font-size: .8rem; font-weight: 800; white-space: nowrap; }
-    .community-card button:hover { color: white; background: linear-gradient(135deg,#6366f1,#8b5cf6); }
-    .community-notice { display: flex; align-items: center; gap: .55rem; margin-top: 1rem; padding: .9rem 1rem; color: #4338ca; background: rgba(238,242,255,.88); border: 1px solid rgba(99,102,241,.25); border-radius: 14px; font-weight: 650; }
-    html[data-theme="dark"] .community-hero { background: linear-gradient(135deg,rgba(45,39,86,.86),rgba(30,27,75,.78)); }
-    html[data-theme="dark"] .community-hero h1, html[data-theme="dark"] .community-copy h2 { color: #f8fafc; }
-    html[data-theme="dark"] .community-hero p, html[data-theme="dark"] .community-copy p { color: #cbd5e1; }
-    html[data-theme="dark"] .community-stats div { background: rgba(67,56,132,.38); border-color: rgba(196,181,253,.25); }
-    html[data-theme="dark"] .community-stats strong { color: #c4b5fd; }
-    html[data-theme="dark"] .community-stats span { color: #cbd5e1; }
-    html[data-theme="dark"] .community-notice { color: #ddd6fe; background: rgba(49,46,129,.72); }
-    @@media (max-width: 800px) { .community-hero { grid-template-columns: 1fr; } .community-grid { grid-template-columns: 1fr; } }
-    @@media (max-width: 480px) { .community-stats { grid-template-columns: 1fr; } .community-card { grid-template-columns: auto 1fr; } .community-card button { grid-column: 1 / -1; width: 100%; } }
-</style>
+@code{private List<SkillDto> skills=[];private bool loading=true;protected override async Task OnInitializedAsync(){try{skills=(await SkillService.GetAllSkillsAsync()).ToList();}finally{loading=false;}}private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;}

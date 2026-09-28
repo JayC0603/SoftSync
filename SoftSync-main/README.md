@@ -1,5 +1,25 @@
 # SoftSync
 
+## Production deployment
+
+The production application is the ASP.NET Core + Blazor Server project in
+`SoftSync.Presentation`. Render builds it with the repository-root
+`render.yaml` and connects it to the managed PostgreSQL database through
+`DATABASE_URL`.
+
+`SoftSync.Next` is an incomplete migration target and is not part of the
+production deployment. Do not configure Vercel as the production frontend or
+give it direct database access until the ASP.NET application exposes a secured
+HTTP API.
+
+For Render, create the service from this repository and keep the Blueprint
+defaults. The required production values are:
+
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `DATABASE_URL` supplied by the `softsync-db` Render database
+
+Render's health check is available at `/health`.
+
 Nền tảng học kỹ năng mềm ứng dụng AI, xây dựng bằng **Blazor Server (.NET 8)** theo kiến trúc 3 lớp. Giao diện dùng **Bootstrap** kết hợp một hệ **liquid glass** (kính mờ) tự dựng, biên dịch qua **Vite + Tailwind CSS v4**.
 
 ## Tính năng

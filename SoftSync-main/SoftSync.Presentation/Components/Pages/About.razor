@@ -1,0 +1,36 @@
+@page "/about"
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+
+<PageTitle>@Tx("About SoftSync", "Về SoftSync")</PageTitle>
+<main class="eco-page eco-editorial" aria-labelledby="about-title">
+    <header class="eco-page-head">
+        <a href="/" class="eco-back"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Home", "Trang chủ")</a>
+        <span>@Tx("ABOUT SOFTSYNC", "VỀ SOFTSYNC")</span>
+        <h1 id="about-title">@Tx("Soft skills become useful when you can apply them.", "Kỹ năng mềm chỉ thực sự hữu ích khi bạn có thể áp dụng.")</h1>
+        <p>@Tx("SoftSync turns broad advice into a clear learning journey: understand a skill, practise it in context, then reflect and improve.", "SoftSync biến những lời khuyên chung chung thành hành trình rõ ràng: hiểu kỹ năng, thực hành trong ngữ cảnh, rồi phản tư và cải thiện.")</p>
+    </header>
+
+    <section class="eco-problem" aria-labelledby="problem-title">
+        <div><span>01</span><h2 id="problem-title">@Tx("The problem we solve", "Vấn đề chúng tôi giải quyết")</h2></div>
+        <p>@Tx("Learners often know what good communication or time management sounds like, but not what to do in a difficult moment. SoftSync connects knowledge to decisions and repeated practice.", "Người học thường biết giao tiếp hay quản lý thời gian tốt là gì, nhưng chưa biết nên làm gì trong khoảnh khắc khó. SoftSync kết nối kiến thức với quyết định và thực hành lặp lại.")</p>
+    </section>
+
+    <section class="eco-method" aria-labelledby="method-title">
+        <div class="eco-section-title"><span>02</span><h2 id="method-title">@Tx("A learning loop with a purpose", "Một vòng học có chủ đích")</h2></div>
+        <ol>
+            <li><i class="bi bi-book" aria-hidden="true"></i><div><strong>@Tx("Learn", "Học")</strong><p>@Tx("Use concise video, script and summary content to build a shared foundation.", "Dùng video, script và tóm tắt ngắn gọn để xây nền tảng chung.")</p></div></li>
+            <li><i class="bi bi-person-workspace" aria-hidden="true"></i><div><strong>@Tx("Practice", "Thực hành")</strong><p>@Tx("Make decisions in realistic situations after passing the knowledge check.", "Ra quyết định trong tình huống thực tế sau khi vượt qua phần kiểm tra kiến thức.")</p></div></li>
+            <li><i class="bi bi-journal-check" aria-hidden="true"></i><div><strong>@Tx("Reflect", "Phản tư")</strong><p>@Tx("Turn feedback into one concrete action for the next real conversation.", "Biến phản hồi thành một hành động cụ thể cho cuộc trò chuyện tiếp theo.")</p></div></li>
+        </ol>
+    </section>
+
+    <section class="eco-commitments" aria-labelledby="commitments-title">
+        <div class="eco-section-title"><span>03</span><h2 id="commitments-title">@Tx("What learners can expect", "Điều người học có thể kỳ vọng")</h2></div>
+        <ul><li>@Tx("A clear next step instead of a wall of statistics.", "Một bước tiếp theo rõ ràng thay vì bức tường thống kê.")</li><li>@Tx("Practice is required, not treated as optional content.", "Practice là bước bắt buộc, không phải nội dung tùy chọn.")</li><li>@Tx("Private reflections stay private unless you choose to share context.", "Phản tư riêng tư được giữ kín trừ khi bạn chủ động chia sẻ ngữ cảnh.")</li></ul>
+    </section>
+
+    <section class="eco-final-action"><div><span>@Tx("READY FOR THE NEXT STEP?", "SẴN SÀNG CHO BƯỚC TIẾP THEO?")</span><h2>@Tx("Continue with your own learning journey.", "Tiếp tục hành trình học của chính bạn.")</h2></div><a class="eco-primary" href="/roadmap">@Tx("Explore your roadmap", "Khám phá lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></section>
+</main>
+
+@code { private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en; }

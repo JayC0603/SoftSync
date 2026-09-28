@@ -56,6 +56,7 @@ public interface IRoadmapService
     Task<RoadmapDto> GetUserRoadmapAsync(int authenticatedUserId, int ownerUserId);
     Task<bool> MarkVideoCompleteAsync(int itemId, int userId);
     Task<bool> MarkCompleteAsync(int itemId, int userId);
+    Task<bool> MarkPracticeCompleteAsync(int itemId, int userId);
     Task<bool> MarkScenarioCompleteAsync(int itemId, int userId);
     Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText);
     Task<bool> SaveReflectionDraftAsync(int itemId, int userId, string reflectionText);
@@ -72,6 +73,8 @@ public interface IProgressService
 
 public interface ICourseService
 {
+    Task<IReadOnlyList<PublicCourseDto>> GetPublicPublishedAsync();
+    Task<PublicCourseDto?> GetPublicPublishedByIdAsync(int id);
     Task<IReadOnlyList<CourseDto>> GetPublishedAsync(int authenticatedUserId);
     Task<IReadOnlyList<CourseDto>> GetManagedAsync(int authenticatedUserId, bool isAdmin);
     Task<CourseDto?> GetForManagementAsync(int id, int authenticatedUserId, bool isAdmin);
@@ -134,6 +137,8 @@ public interface ICaseStudyService
 public interface IMentorService
 {
     Task<IEnumerable<MentorDto>> GetAllAsync();
+    Task<MentorDto?> GetByIdAsync(int mentorId);
+    Task<bool> SubmitSupportRequestAsync(int userId, MentorSupportRequestDto request);
 }
 
 // AI Interfaces (Specific names requested by user)

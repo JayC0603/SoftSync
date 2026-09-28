@@ -78,6 +78,7 @@
             <header class="week-header">
                 <h1>@Tx("Week", "Tuần") @SelectedOrdinal: @WeekTitle(SelectedItem, SelectedOrdinal)</h1>
                 <p>@WeekDescription(SelectedItem)</p>
+                <a class="roadmap-mentor-link" href="/mentors"><i class="bi bi-person-video3" aria-hidden="true"></i>@Tx("Talk through a learning block with a Mentor", "Trao đổi điểm đang vướng với Mentor")</a>
             </header>
             <section class="week-stat">
                 <div><i class="bi bi-bullseye"></i><span>@Tx("Weekly progress", "Tiến độ tuần")<b>@SelectedCompletedSteps / 6</b></span></div>
@@ -216,11 +217,11 @@
         (2,"Lesson script","Kịch bản bài học","Review the synchronized theory.","Ôn lại lý thuyết đồng bộ với video.","bi bi-file-text-fill","09:12"),
         (3,"Summary","Tóm tắt kiến thức","Consolidate the most important ideas.","Củng cố những ý quan trọng nhất.","bi bi-lightbulb-fill","05:00"),
         (4,"Mini Quiz","Bài kiểm tra ngắn","Check your understanding.","Kiểm tra mức độ hiểu bài.","bi bi-ui-checks","5 câu"),
-        (5,"Practice (Role-play)","Thực hành tình huống","Apply the skill with AI.","Áp dụng kỹ năng cùng AI.","bi bi-chat-dots-fill","10:00"),
+        (5,"Applied Practice","Thực hành ứng dụng","Apply the skill through a required interactive scenario.","Áp dụng kỹ năng qua tình huống tương tác bắt buộc.","bi bi-person-workspace","10:00"),
         (6,"Reflection & AI Feedback","Phản tư & AI Feedback","Reflect and receive personalized feedback.","Phản tư và nhận góp ý cá nhân hóa.","bi bi-stars","05:00")
     ];
     private static readonly (int Id, string En, string Vi, string Icon)[] Steps =
-    [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-chat-dots"),(6,"AI Feedback","Phản tư","bi bi-stars")];
+    [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-person-workspace"),(6,"Reflection","Phản tư","bi bi-stars")];
 }
 
 <style>
