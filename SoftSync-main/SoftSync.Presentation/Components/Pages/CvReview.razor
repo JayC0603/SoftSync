@@ -1,0 +1,202 @@
+@page "/cv-review"
+@page "/cv-review/{AnalysisId:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@implements IDisposable
+@using System.Security.Claims
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@inject ICvReviewService Reviews
+@inject AuthenticationStateProvider Authentication
+@inject CvUploadOptions UploadOptions
+@inject ICvAiReadiness AiReadiness
+@inject NavigationManager Navigation
+
+<PageTitle>@Ui.Text("CV Review — SoftSync")</PageTitle>
+<main class="ss-workspace" aria-busy="@busy.ToString().ToLowerInvariant()">
+    <h1>@Ui.Text("CV Review")</h1>
+    <p role="status">@(aiConfigured ? Ui.Text("AI: đã cấu hình (chưa xác minh kết nối provider).") : Ui.Text("AI: chưa cấu hình. Bạn vẫn có thể thử upload và đọc CV; chưa lưu phân tích khi thiếu cấu hình."))</p>
+    <p>@Ui.Text("AI đánh giá chất lượng nội dung CV: độ rõ ràng, bằng chứng kỹ năng, kinh nghiệm/dự án và thông tin còn thiếu; đề xuất cách sửa theo ưu tiên, không chỉ trích xuất văn bản.")</p>
+    <p>@Ui.Text("Không phải điểm ATS hay quyết định tuyển dụng. Không đánh giá thiết kế trực quan từ văn bản trích xuất. Hãy kiểm tra lại nhận xét của AI.")</p>
+    <section class="ss-glass tw:p-6 tw:mb-6" aria-labelledby="cv-upload-heading">
+        <h2 id="cv-upload-heading">@Ui.Text("Tải CV để phân tích")</h2>
+        <label for="cv-job-description">@Ui.Text("Mô tả công việc / yêu cầu tuyển dụng (không bắt buộc)")</label>
+        <textarea id="cv-job-description" class="form-control tw:mb-3" rows="7"
+                  maxlength="8000" disabled="@busy" @bind="jobDescription" @bind:event="oninput"
+                  aria-describedby="cv-job-help"></textarea>
+        <p id="cv-job-help">@Ui.Text("Dán mô tả vị trí và các yêu cầu để AI đối chiếu với CV. Tối đa 8.000 ký tự; không nhập thông tin mật. Mô tả sẽ gửi đến AI và lưu riêng tư cùng kết quả. Để trống để đánh giá CV chung.")</p>
+        <p id="cv-privacy">@(Ui.Current == AppLanguage.Vi ? $"PDF có văn bản hoặc DOCX, tối đa {UploadOptions.MaxBytes / 1024 / 1024} MB. Văn bản CV được gửi đến AI provider và lưu riêng tư cùng kết quả. File gốc không được lưu. Bạn có thể xóa CV và các phân tích." : $"Text PDF or DOCX, up to {UploadOptions.MaxBytes / 1024 / 1024} MB. CV text is sent to AI and stored privately with results. The original file is not stored. You can delete the CV and its reviews.")</p>
+        <label for="cv-file">@Ui.Text("Chọn CV")</label>
+        <InputFile id="cv-file" class="form-control" OnChange="SelectFile" accept=".pdf,.docx" disabled="@busy" aria-describedby="cv-privacy" />
+        @if (file is not null) { <p>@Ui.Text("Selected:") @file.Name</p> }
+        <button type="button" class="btn btn-primary tw:mt-3" disabled="@(busy || file is null || userId <= 0)" @onclick="Analyze">@Ui.Text("Phân tích CV")</button>
+    </section>
+    @if (busy) { <p role="status">@Ui.Text("Đang xử lý, vui lòng chờ…")</p> }
+    @if (!string.IsNullOrEmpty(message)) { <p role="status">@Ui.Text(message)</p> }
+    @if (!string.IsNullOrEmpty(error)) { <p role="alert" class="alert alert-danger">@Ui.Text(error)</p> }
+    <section aria-labelledby="cv-history-heading" class="ss-glass tw:p-6 tw:mb-6">
+        <h2 id="cv-history-heading">@Ui.Text("Phân tích của tôi")</h2>
+        @if (history.Count == 0) { <p>@Ui.Text("Chưa có phân tích nào.")</p> }
+        else
+        {
+            <ul>
+                @foreach (var review in history)
+                {
+                    <li class="tw:mb-3" @key="review.AnalysisId">
+                        <a class="btn btn-outline-primary" href="@($"/cv-review/{review.AnalysisId}")">
+                            @review.FileName — @review.CreatedAtUtc.ToLocalTime().ToString("g", Ui.Culture)
+                        </a>
+                    </li>
+                }
+            </ul>
+            <p>@Ui.Text("Hiển thị tối đa 100 phân tích mới nhất.")</p>
+        }
+    </section>
+    @if (selected is not null)
+    {
+        <article class="ss-glass tw:p-6" aria-labelledby="cv-result-heading">
+            <h2 id="cv-result-heading">@Ui.Text("Result:") @selected.FileName</h2>
+            <p>@Ui.Text("Reviewed at") @selected.CreatedAtUtc.ToLocalTime().ToString("g", Ui.Culture)</p>
+            <p>@Ui.Text("Language of saved AI feedback"): @(selected.Result.Language == "en" ? "English" : "Tiếng Việt")</p>
+            <p>@Ui.Text("Switching language does not translate user content or saved AI results. Review again to generate feedback in the selected language.")</p>
+            <h3>@Ui.Text("Đánh giá tổng quan")</h3><p lang="@selected.Result.Language">@selected.Result.Summary</p>
+            @if (!string.IsNullOrWhiteSpace(selected.Result.JobDescription))
+            {
+                <section aria-labelledby="cv-job-match-heading">
+                    <h3 id="cv-job-match-heading">@Ui.Text("Đối chiếu yêu cầu tuyển dụng")</h3>
+                    <details><summary>@Ui.Text("Mô tả tuyển dụng đã dùng")</summary><p class="tw:whitespace-pre-wrap">@selected.Result.JobDescription</p></details>
+                    <p>@Ui.Text("Đánh giá dựa trên bằng chứng trong CV, không phải quyết định tuyển dụng. “Chưa có bằng chứng” không đồng nghĩa bạn không có kỹ năng.")</p>
+                    @foreach (var match in selected.Result.RequirementMatches)
+                    {
+                        <section class="tw:mb-3">
+                            <h4>@match.Requirement</h4>
+                            <p><strong>@Ui.Text("Mức đáp ứng:")</strong> @MatchLabel(match.Status)</p>
+                            <p><strong>@Ui.Text("Bằng chứng / lý do:")</strong> @match.Evidence</p>
+                            <p><strong>@Ui.Text("Gợi ý cải thiện:")</strong> @match.Recommendation</p>
+                        </section>
+                    }
+                </section>
+            }
+            @foreach (var group in Groups(selected.Result))
+            {
+                <section>
+                    <h3>@Ui.Text(group.Title)</h3>
+                    @if (group.Items.Count == 0) { <p>@Ui.Text("Chưa có đủ thông tin.")</p> }
+                    else { <ul>@foreach (var item in group.Items) { <li>@item</li> }</ul> }
+                </section>
+            }
+            <h3>@Ui.Text("Phân tích từng phần")</h3>
+            @foreach (var section in selected.Result.Sections)
+            {
+                <section><h4>@section.Section</h4><p>@section.Feedback</p>
+                    <ul>@foreach (var suggestion in section.Suggestions) { <li>@suggestion</li> }</ul>
+                </section>
+            }
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="Reanalyze">@Ui.Text("Phân tích lại")</button>
+            <button type="button" class="btn btn-outline-danger tw:ml-3" disabled="@busy" @onclick="() => confirmingDelete = true">@Ui.Text("Xóa CV và tất cả phân tích")</button>
+            @if (confirmingDelete)
+            {
+                <div role="group" aria-label="@Ui.Text("Xác nhận xóa")" class="tw:mt-3">
+                    <p>@(Ui.Current == AppLanguage.Vi ? $"Xóa vĩnh viễn {selected.FileName} và tất cả phân tích?" : $"Permanently delete {selected.FileName} and all its reviews?")</p>
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="Delete">@Ui.Text("Xác nhận xóa")</button>
+                    <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="() => confirmingDelete = false">@Ui.Text("Hủy")</button>
+                </div>
+            }
+        </article>
+    }
+</main>
+
+@code {
+    [Parameter] public int? AnalysisId { get; set; }
+    private readonly CancellationTokenSource lifetime = new();
+    private int userId;
+    private bool busy, confirmingDelete, aiConfigured;
+    private string? error, message;
+    private string jobDescription = "";
+    private IBrowserFile? file;
+    private CvReviewDto? selected;
+    private IReadOnlyList<CvReviewDto> history = [];
+    protected override async Task OnInitializedAsync()
+    {
+        Ui.OnChanged += OnLanguageChanged;
+        var state = await Authentication.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+            int.TryParse(state.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+        await Run(async () => history = await Reviews.HistoryAsync(userId, lifetime.Token));
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AnalysisId is not int id) return;
+        await Run(async () =>
+        {
+            selected = await Reviews.GetAsync(userId, id, lifetime.Token);
+            if (selected is null) error = "Không tìm thấy phân tích thuộc tài khoản của bạn.";
+        });
+    }
+    private void SelectFile(InputFileChangeEventArgs args)
+    {
+        error = message = null; file = null; selected = null; confirmingDelete = false;
+        try
+        {
+            var candidate = args.File;
+            SoftSync.BLL.Services.CvReviewService.ValidateFile(candidate.Name, candidate.ContentType, candidate.Size, UploadOptions.MaxBytes);
+            file = candidate;
+        }
+        catch (Exception) { error = "Chọn một file PDF/DOCX trong giới hạn dung lượng."; }
+    }
+    private Task Analyze() => Run(async () =>
+    {
+        if (file is null) return;
+        await using var stream = file.OpenReadStream(UploadOptions.MaxBytes, lifetime.Token);
+        selected = await Reviews.UploadAsync(userId, stream, file.Name, file.ContentType, file.Size, lifetime.Token, jobDescription, Ui.Code);
+        history = await Reviews.HistoryAsync(userId, lifetime.Token);
+        message = "Phân tích đã được lưu.";
+        Navigation.NavigateTo($"/cv-review/{selected.AnalysisId}");
+    });
+    private Task Reanalyze() => Run(async () =>
+    {
+        if (selected is null) return;
+        selected = await Reviews.ReanalyzeAsync(userId, selected.DocumentId, lifetime.Token, Ui.Code);
+        history = await Reviews.HistoryAsync(userId, lifetime.Token);
+        message = selected is null ? "CV không còn tồn tại." : "Đã lưu phân tích mới; kết quả cũ vẫn được giữ.";
+        if (selected is not null) Navigation.NavigateTo($"/cv-review/{selected.AnalysisId}");
+    });
+    private Task Delete() => Run(async () =>
+    {
+        if (selected is null) return;
+        await Reviews.DeleteAsync(userId, selected.DocumentId, lifetime.Token);
+        selected = null; confirmingDelete = false;
+        history = await Reviews.HistoryAsync(userId, lifetime.Token);
+        message = "Đã xóa CV và các phân tích. Thao tác này không thể hoàn tác.";
+        Navigation.NavigateTo("/cv-review");
+    });
+    private async Task Run(Func<Task> action)
+    {
+        if (busy) return;
+        busy = true; error = message = null; confirmingDelete = false;
+        try
+        {
+            var state = await Authentication.GetAuthenticationStateAsync();
+            if (state.User.Identity?.IsAuthenticated != true ||
+                !int.TryParse(state.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId) || userId <= 0)
+                throw new CvReviewException("Vui lòng đăng nhập lại để truy cập CV.");
+            aiConfigured = await AiReadiness.IsConfiguredAsync(lifetime.Token);
+            await action();
+        }
+        catch (OperationCanceledException) { }
+        catch (CvReviewException ex) { error = ex.Message; }
+        catch (Exception) { error = "Không xử lý được yêu cầu. Vui lòng thử lại sau."; }
+        finally { busy = false; }
+    }
+    private static IEnumerable<(string Title, List<string> Items)> Groups(CvAnalysisResult result) =>
+        [("Điểm mạnh", result.Strengths), ("Cần cải thiện", result.Weaknesses), ("Kỹ năng có bằng chứng", result.SkillsDetected),
+         ("Thông tin thiếu hoặc chưa rõ", result.MissingInformation), ("Cách sửa theo thứ tự ưu tiên", result.Suggestions)];
+    private void OnLanguageChanged() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() { Ui.OnChanged -= OnLanguageChanged; lifetime.Cancel(); lifetime.Dispose(); }
+    private string MatchLabel(string status) => Ui.Text(status switch
+    {
+        "Met" => "Có bằng chứng đáp ứng",
+        "Partial" => "Có bằng chứng một phần",
+        _ => "Chưa có bằng chứng trong CV"
+    });
+}

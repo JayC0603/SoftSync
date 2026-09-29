@@ -61,11 +61,32 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 builder.Services.AddDbContext<SoftSyncDbContext>(options =>
     options.UseNpgsql(connectionString));
+// CV operations own short-lived contexts; Identity's existing scoped context is unchanged.
+builder.Services.AddScoped<IDbContextFactory<SoftSyncDbContext>, CvDbContextFactory>();
+var cvUploadOptions = new CvUploadOptions
+{
+    MaxBytes = Math.Clamp(builder.Configuration.GetValue<long?>("CvReview:MaxUploadBytes") ?? 5 * 1024 * 1024, 1024, 20 * 1024 * 1024)
+};
+builder.Services.AddSingleton(cvUploadOptions);
+builder.Services.AddScoped<ICvTextExtractor, CvTextExtractor>();
+builder.Services.AddScoped<ICvAnalysisService, AiCvAnalysisService>();
+builder.Services.AddScoped<ICvAiReadiness, CvAiReadiness>();
+builder.Services.AddScoped<ICvReviewService>(services => new CvReviewService(
+    services.GetRequiredService<IDbContextFactory<SoftSyncDbContext>>(),
+    services.GetRequiredService<ICvTextExtractor>(), services.GetRequiredService<ICvAnalysisService>(), cvUploadOptions.MaxBytes));
 
 builder.Services.AddSingleton<EfDataProtectionKeyRepository>();
-builder.Services
+var dataProtection = builder.Services
     .AddDataProtection()
     .SetApplicationName("SoftSync");
+// Optional external certificate protects the persisted key ring at rest as well.
+// Mount it outside source control; keep the same certificate across redeployments.
+var protectionCertificatePath = builder.Configuration["DataProtection:CertificatePath"];
+if (!string.IsNullOrWhiteSpace(protectionCertificatePath))
+{
+    dataProtection.ProtectKeysWithCertificate(System.Security.Cryptography.X509Certificates.X509CertificateLoader.LoadPkcs12FromFile(
+        protectionCertificatePath, builder.Configuration["DataProtection:CertificatePassword"]));
+}
 builder.Services.AddOptions<KeyManagementOptions>()
     .Configure<EfDataProtectionKeyRepository>((options, repository) =>
     {
@@ -156,8 +177,14 @@ builder.Services.AddSingleton(_ => AssistantKnowledgeBase.Load(
     Path.Combine(builder.Environment.ContentRootPath, "Assets", "AiKnowledge", "softsync-assistant.vi-en.json")));
 builder.Services.AddScoped<KnowledgeBasedAiAssistantService>();
 builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
+builder.Services.AddScoped<IAiTutorService, AiTutorService>();
 builder.Services.AddSingleton<PdfDocumentKnowledge>();
 builder.Services.AddScoped<HuggingFaceJsonClient>();
+builder.Services.AddScoped<IAiSecretProtector, AiSecretProtector>();
+builder.Services.AddScoped<IAiAdminAccess, IdentityAiAdminAccess>();
+builder.Services.AddScoped<IAiProviderConfigurationResolver, AiProviderConfigurationResolver>();
+builder.Services.AddScoped<IAiProviderConnectionTester, AiProviderConnectionTester>();
+builder.Services.AddScoped<IAiProviderManagementService, AiProviderManagementService>();
 builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
 builder.Services.AddScoped<IAiQuizService, AiQuizService>();
 builder.Services.AddScoped<IRoleplayAiService, HuggingFaceRoleplayAiService>();
@@ -172,6 +199,8 @@ builder.Services.AddScoped<IRoleplayService, RoleplayService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<IAccessibilityService, AccessibilityService>();
+builder.Services.AddScoped<ILearningJourneyService, LearningJourneyService>();
 builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
 builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
@@ -179,11 +208,13 @@ builder.Services.AddScoped<IGameBankService, GameBankService>();
 builder.Services.AddScoped<IdentityRoleManagementService>();
 
 // 5. HttpClient for future AI integration
+// Credentials are per-request headers, never defaults/URL. Reject redirects to other hosts.
+builder.Services.AddHttpClient("AiRuntime", client => client.Timeout = Timeout.InfiniteTimeSpan)
+    .RemoveAllLoggers()
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 builder.Services.AddHttpClient("AiApi", client =>
 {
-    var baseUrl = builder.Configuration["AiApi:BaseUrl"];
-    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(baseUrl) ? "https://router.huggingface.co/" : baseUrl.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiApi:TimeoutSeconds", 45));
+    AiApiConfiguration.Configure(client, builder.Configuration);
 });
 
 var app = builder.Build();

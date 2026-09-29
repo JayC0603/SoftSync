@@ -154,6 +154,70 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.AiProviderConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CvModel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("EncryptedApiKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDefault")
+                        .IsUnique()
+                        .HasFilter("\"IsDefault\" = TRUE");
+
+                    b.ToTable("AiProviderConfigurations", t =>
+                        {
+                            t.HasCheckConstraint("CK_AiProvider_DefaultEnabled", "NOT \"IsDefault\" OR \"IsEnabled\"");
+                        });
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
@@ -171,6 +235,9 @@ namespace SoftSync.DAL.Migrations
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("CaptionEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -213,6 +280,12 @@ namespace SoftSync.DAL.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<bool>("HighContrast")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LargeText")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -240,6 +313,9 @@ namespace SoftSync.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
+
+                    b.Property<int>("PreferredLearningMode")
+                        .HasColumnType("integer");
 
                     b.Property<int>("PreferredStudyTime")
                         .HasColumnType("integer");
@@ -3039,6 +3115,66 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("CourseLessonProgress");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvAnalysis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("CvDocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CvDocumentId", "CreatedAtUtc");
+
+                    b.ToTable("CvAnalysis");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ExtractedText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UploadedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "UploadedAtUtc");
+
+                    b.ToTable("CvDocument");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -3809,6 +3945,28 @@ namespace SoftSync.DAL.Migrations
                     b.Navigation("Lesson");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvAnalysis", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.CvDocument", "Document")
+                        .WithMany("Analyses")
+                        .HasForeignKey("CvDocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvDocument", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.ProgressLog", b =>
                 {
                     b.HasOne("SoftSync.DAL.Entities.Skill", "Skill")
@@ -4015,6 +4173,11 @@ namespace SoftSync.DAL.Migrations
             modelBuilder.Entity("SoftSync.DAL.Entities.CourseEnrollment", b =>
                 {
                     b.Navigation("LessonProgress");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvDocument", b =>
+                {
+                    b.Navigation("Analyses");
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.QuizAttempt", b =>

@@ -8,10 +8,12 @@ using SoftSync.DAL.Repositories;
 
 namespace SoftSync.Presentation.Services;
 
+// Historical type name retained for existing consumers; transport now uses Gemini configuration.
 public sealed class HuggingFaceJsonClient(
     IHttpClientFactory clients,
     IConfiguration configuration,
-    ILogger<HuggingFaceJsonClient> logger)
+    ILogger<HuggingFaceJsonClient> logger,
+    IAiProviderConfigurationResolver? resolver = null)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -19,23 +21,21 @@ public sealed class HuggingFaceJsonClient(
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public async Task<T?> AskAsync<T>(string task, string systemPrompt, object input, CancellationToken cancellationToken = default)
-    {
-        var enabled = configuration.GetValue("AiApi:Enabled", false);
-        var apiKey = configuration["AiApi:ApiKey"];
-        if (!enabled || string.IsNullOrWhiteSpace(apiKey))
-        {
-            logger.LogWarning("AI evaluation {Task} is using fallback. Enabled={Enabled}, ApiKeyConfigured={Configured}", task, enabled, !string.IsNullOrWhiteSpace(apiKey));
-            return default;
-        }
+    public Task<ResolvedAiProviderConfiguration?> ResolveAsync(string? task = null, CancellationToken cancellationToken = default)
+        => resolver is null ? Task.FromResult(EnvironmentAiConfiguration.Resolve(configuration, task)) : resolver.ResolveAsync(task, cancellationToken);
 
+    public async Task<T?> AskAsync<T>(string task, string systemPrompt, object input, CancellationToken cancellationToken = default,
+        ResolvedAiProviderConfiguration? resolved = null)
+    {
         try
         {
-            var model = configuration["AiApi:Model"] ?? "Qwen/Qwen3-4B-Instruct-2507:cheapest";
+            var settings = resolved ?? await ResolveAsync(task, cancellationToken);
+            if (settings is null) return default;
+            var model = settings.Model;
             var request = new
             {
                 model,
-                temperature = 0.15,
+                temperature = task == "assistant" ? 0.25 : 0.15,
                 response_format = new { type = "json_object" },
                 messages = new[]
                 {
@@ -43,24 +43,32 @@ public sealed class HuggingFaceJsonClient(
                     new { role = "user", content = JsonSerializer.Serialize(input, JsonOptions) }
                 }
             };
-            var client = clients.CreateClient("AiApi");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            using var response = await client.PostAsJsonAsync("v1/chat/completions", request, cancellationToken);
+            var client = clients.CreateClient("AiRuntime");
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            deadline.CancelAfter(TimeSpan.FromSeconds(settings.TimeoutSeconds));
+            using var message = new HttpRequestMessage(HttpMethod.Post, new Uri(new Uri(settings.Endpoint), AiApiConfiguration.ChatEndpoint));
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+            message.Content = JsonContent.Create(request);
+            using var response = await client.SendAsync(message, deadline.Token);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError("AI evaluation {Task} failed with HTTP {StatusCode}", task, (int)response.StatusCode);
                 return default;
             }
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var payload = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            await using var stream = await response.Content.ReadAsStreamAsync(deadline.Token);
+            using var payload = await JsonDocument.ParseAsync(stream, cancellationToken: deadline.Token);
             var content = payload.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
-            var result = JsonSerializer.Deserialize<T>(content ?? "", JsonOptions);
+            if (task == "cv-review" && payload.RootElement.GetProperty("choices")[0].TryGetProperty("finish_reason", out var reason)
+                && reason.GetString() is "length" or "content_filter") return default;
+            var result = StructuredAiJson.Parse<T>(content);
             logger.LogInformation("AI evaluation {Task} completed with model {Model}", task, model);
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "AI evaluation {Task} failed; using deterministic fallback", task);
+            if (task == "cv-review" && cancellationToken.IsCancellationRequested)
+                throw new OperationCanceledException(cancellationToken);
+            logger.LogWarning("AI evaluation {Task} failed ({ErrorType}); using feature fallback", task, ex.GetType().Name);
             return default;
         }
     }
@@ -161,5 +169,23 @@ public sealed class HuggingFaceAiAssessmentService(HuggingFaceJsonClient ai, IAs
             Diagnosis = diagnosis ?? new(),
             CreatedAt = DateTime.UtcNow
         };
+    }
+}
+
+internal static class StructuredAiJson
+{
+    public static T? Parse<T>(string? content)
+    {
+        var json = content?.Trim() ?? "";
+        if (json.Length > 512 * 1024) throw new JsonException("Structured response exceeds the allowed size.");
+        if (json.StartsWith("```", StringComparison.Ordinal))
+        {
+            var newline = json.IndexOf('\n');
+            if (newline < 0 || !json.EndsWith("```", StringComparison.Ordinal)) throw new JsonException("Invalid JSON fence.");
+            var language = json[3..newline].Trim();
+            if (language.Length > 0 && !language.Equals("json", StringComparison.OrdinalIgnoreCase)) throw new JsonException("Invalid JSON fence.");
+            json = json[(newline + 1)..^3].Trim();
+        }
+        return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
 }

@@ -27,6 +27,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<AiProviderConfiguration> AiProviderConfigurations { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }
     public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
@@ -40,6 +41,20 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var ai = modelBuilder.Entity<AiProviderConfiguration>();
+        ai.Property(x => x.DisplayName).HasMaxLength(120);
+        ai.Property(x => x.Model).HasMaxLength(200);
+        ai.Property(x => x.CvModel).HasMaxLength(200);
+        ai.Property(x => x.Endpoint).HasMaxLength(500);
+        ai.Property(x => x.Revision).IsConcurrencyToken();
+        ai.HasIndex(x => x.IsDefault).IsUnique().HasFilter("\"IsDefault\" = TRUE");
+        ai.ToTable(t => t.HasCheckConstraint("CK_AiProvider_DefaultEnabled", "NOT \"IsDefault\" OR \"IsEnabled\""));
+        modelBuilder.Entity<CvDocument>().Property(x => x.OriginalFileName).HasMaxLength(255);
+        modelBuilder.Entity<CvDocument>().HasIndex(x => new { x.UserId, x.UploadedAtUtc });
+        modelBuilder.Entity<CvDocument>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvAnalysis>().Property(x => x.Model).HasMaxLength(200);
+        modelBuilder.Entity<CvAnalysis>().HasIndex(x => new { x.CvDocumentId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvAnalysis>().HasOne(x => x.Document).WithMany(x => x.Analyses).HasForeignKey(x => x.CvDocumentId).OnDelete(DeleteBehavior.Cascade);
 
         // Many-to-Many: User <-> Skill (Selections)
         modelBuilder.Entity<UserSkillSelection>()

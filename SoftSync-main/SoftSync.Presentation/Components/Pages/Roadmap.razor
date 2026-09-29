@@ -164,8 +164,8 @@
                                 {
                                     <div class="pr-video-detail">
                                         <nav class="pr-content-tabs">
-                                            <button class="@(contentTab == ContentTab.Video ? "active" : "")" @onclick="() => contentTab = ContentTab.Video">Video</button>
-                                            <button class="@(contentTab == ContentTab.Script ? "active" : "")" @onclick="() => contentTab = ContentTab.Script">Script</button>
+                                            <button class="@(contentTab == ContentTab.Video ? "active" : "")" @onclick="() => contentTab = ContentTab.Video">@Ui.Text("Video")</button>
+                                            <button class="@(contentTab == ContentTab.Script ? "active" : "")" @onclick="() => contentTab = ContentTab.Script">@Ui.Text("Script")</button>
                                             <button class="@(contentTab == ContentTab.Summary ? "active" : "")" @onclick="() => contentTab = ContentTab.Summary">@Tx("Summary", "Tóm tắt")</button>
                                         </nav>
 
@@ -185,7 +185,7 @@
                                                         <header>
                                                             <span><i class="bi bi-file-earmark-text-fill"></i></span>
                                                             <div>
-                                                                <small>VIDEO 1 · SCRIPT</small>
+                                                                <small>@Ui.Text("VIDEO 1 · SCRIPT")</small>
                                                                 <h3>@Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp")</h3>
                                                             </div>
                                                         </header>

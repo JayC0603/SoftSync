@@ -26,7 +26,9 @@ public class UserService : IUserService
             DisplayName = user.DisplayName,
             CurrentLevel = user.CurrentLevel, DailyStudyMinutes = user.DailyStudyMinutes,
             StudyDaysPerWeek = user.StudyDaysPerWeek, PreferredStudyTime = user.PreferredStudyTime,
-            PreferredLanguage = user.PreferredLanguage, Theme = user.Theme, ReduceMotion = user.ReduceMotion
+            PreferredLanguage = user.PreferredLanguage, Theme = user.Theme, ReduceMotion = user.ReduceMotion,
+            PreferredLearningMode = user.PreferredLearningMode, LargeText = user.LargeText,
+            HighContrast = user.HighContrast, CaptionEnabled = user.CaptionEnabled
         };
     }
 
@@ -114,6 +116,10 @@ public class UserService : IUserService
         user.PreferredLanguage = dto.PreferredLanguage?.Trim() ?? string.Empty;
         user.Theme = dto.Theme;
         user.ReduceMotion = dto.ReduceMotion;
+        user.PreferredLearningMode = dto.PreferredLearningMode;
+        user.LargeText = dto.LargeText;
+        user.HighContrast = dto.HighContrast;
+        user.CaptionEnabled = dto.CaptionEnabled;
 
         await _userRepo.SaveChangesAsync();
     }

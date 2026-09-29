@@ -19,5 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SoftSync.BLL\SoftSync.BLL.csproj" />
+    <ProjectReference Include="..\SoftSync.Presentation\SoftSync.Presentation.csproj" />
   </ItemGroup>
 </Project>

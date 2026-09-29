@@ -1120,6 +1120,9 @@ html[data-theme="dark"] body .ss-main-content :is(p,small,.text-muted) { color: 
     }
 }
 
+html.ss-high-contrast { filter: contrast(1.12); }
+html.ss-large-text { font-size: 112.5%; }
+
 html[data-reduce-motion="1"] body .ss-main-content *,
 html[data-reduce-motion="1"] body .ss-main-content *::before,
 html[data-reduce-motion="1"] body .ss-main-content *::after {

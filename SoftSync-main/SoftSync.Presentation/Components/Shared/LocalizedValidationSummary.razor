@@ -1,0 +1,7 @@
+@inherits LocalizedValidationBase
+@if (EditContext!.GetValidationMessages().Any())
+{
+    <div @attributes="AdditionalAttributes">
+        <ul class="validation-errors">@foreach (var error in EditContext.GetValidationMessages()) { <li class="validation-message">@Ui.Text(error)</li> }</ul>
+    </div>
+}

@@ -1,5 +1,6 @@
+@inherits LocalizedComponentBase
 @page "/Error"
-<PageTitle>Something went wrong | SoftSync</PageTitle>
+<PageTitle>@Ui.Text("Something went wrong | SoftSync")</PageTitle>
 
 <main class="guest-error">
     <section class="guest-error-card">
@@ -8,26 +9,26 @@
         </div>
         <div class="guest-error-copy">
             <span class="guest-error-kicker">SoftSync</span>
-            <h1>Let’s get you back on track</h1>
-            <p>We couldn’t open that page right now. You can return home, sign in, or create a free account to start learning.</p>
+            <h1>@Ui.Text("Let’s get you back on track")</h1>
+            <p>@Ui.Text("We couldn’t open that page right now. You can return home, sign in, or create a free account to start learning.")</p>
             <AuthorizeView>
                 <Authorized>
-                    <p>Your account is still signed in and your saved progress is safe. Please return to your dashboard or roadmap.</p>
+                    <p>@Ui.Text("Your account is still signed in and your saved progress is safe. Please return to your dashboard or roadmap.")</p>
                     <div class="guest-error-actions">
                         <a href="/dashboard" data-enhance-nav="false" class="guest-error-primary">
                             <i class="bi bi-house-door"></i> Back to dashboard
                         </a>
-                        <a href="/roadmap" class="guest-error-secondary">Open roadmap</a>
+                        <a href="/roadmap" class="guest-error-secondary">@Ui.Text("Open roadmap")</a>
                     </div>
                 </Authorized>
                 <NotAuthorized>
-                    <p>Please return home, sign in, or create a free account to start learning.</p>
+                    <p>@Ui.Text("Please return home, sign in, or create a free account to start learning.")</p>
                     <div class="guest-error-actions">
                         <a href="/" data-enhance-nav="false" class="guest-error-primary">
                             <i class="bi bi-house-door"></i> Back to home
                         </a>
-                        <a href="/Account/Login" class="guest-error-secondary">Sign in</a>
-                        <a href="/Account/Register" class="guest-error-link">Create account</a>
+                        <a href="/Account/Login" class="guest-error-secondary">@Ui.Text("Sign in")</a>
+                        <a href="/Account/Register" class="guest-error-link">@Ui.Text("Create account")</a>
                     </div>
                 </NotAuthorized>
             </AuthorizeView>

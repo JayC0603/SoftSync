@@ -389,8 +389,8 @@
 
                             <label class="form-label tw:font-medium">@L["settings.language"]</label>
                             <div class="ss-seg tw:mb-4">
-                                <button type="button" class="@(langCode == "vi" ? "active" : "")" @onclick='() => SetLanguage("vi")'>Tiếng Việt</button>
-                                <button type="button" class="@(langCode == "en" ? "active" : "")" @onclick='() => SetLanguage("en")'>English</button>
+                                <button type="button" class="@(L.Code == "vi" ? "active" : "")" @onclick='() => SetLanguage("vi")'>Tiếng Việt</button>
+                                <button type="button" class="@(L.Code == "en" ? "active" : "")" @onclick='() => SetLanguage("en")'>English</button>
                             </div>
 
                             <label class="form-label tw:font-medium">@L["settings.theme"]</label>
@@ -416,6 +416,11 @@
                                 <label class="form-check-label tw:font-medium" for="reduceMotion">@L["settings.reduceMotion"]</label>
                             </div>
                             <p class="text-muted tw:text-sm tw:mb-4">@L["settings.reduceMotion.hint"]</p>
+
+                            <fieldset class="tw:mb-4"><legend class="form-label tw:font-medium">@Tx("Learning mode", "Cách học")</legend><div class="ss-seg"><button type="button" class="@(user.PreferredLearningMode == PreferredLearningMode.Text ? "active" : "")" @onclick="() => user.PreferredLearningMode = PreferredLearningMode.Text">@Tx("Reading", "Đọc")</button><button type="button" class="@(user.PreferredLearningMode == PreferredLearningMode.Visual ? "active" : "")" @onclick="() => user.PreferredLearningMode = PreferredLearningMode.Visual">@Tx("Visual", "Trực quan")</button><button type="button" class="@(user.PreferredLearningMode == PreferredLearningMode.Audio ? "active" : "")" @onclick="() => user.PreferredLearningMode = PreferredLearningMode.Audio">@Tx("Audio", "Âm thanh")</button><button type="button" class="@(user.PreferredLearningMode == PreferredLearningMode.AiGuided ? "active" : "")" @onclick="() => user.PreferredLearningMode = PreferredLearningMode.AiGuided">@Tx("AI guided", "AI hướng dẫn")</button></div></fieldset>
+                            <div class="form-check form-switch tw:mb-2"><input class="form-check-input" type="checkbox" id="largeText" @bind="user.LargeText" /><label class="form-check-label tw:font-medium" for="largeText">@Tx("Large text", "Cỡ chữ lớn")</label></div>
+                            <div class="form-check form-switch tw:mb-2"><input class="form-check-input" type="checkbox" id="highContrast" @bind="user.HighContrast" /><label class="form-check-label tw:font-medium" for="highContrast">@Tx("High contrast", "Tương phản cao")</label></div>
+                            <div class="form-check form-switch tw:mb-4"><input class="form-check-input" type="checkbox" id="captionEnabled" @bind="user.CaptionEnabled" /><label class="form-check-label tw:font-medium" for="captionEnabled">@Tx("Captions when available", "Bật phụ đề khi có")</label></div>
 
                             <button class="ss-btn-primary tw:px-6 tw:py-2" @onclick="SaveAsync" disabled="@saving">
                                 <i class="bi bi-stars tw:me-1"></i> @L["settings.save"]
@@ -673,6 +678,7 @@
             await JS.InvokeVoidAsync("ssTheme.syncFromServer",
                 user.Theme.ToString().ToLower(), user.ReduceMotion);
             fontScale = await JS.InvokeAsync<string>("ssFontSize.init");
+            await JS.InvokeVoidAsync("ssAccessibility.set", user.LargeText, user.HighContrast, user.CaptionEnabled);
             StateHasChanged();
         }
     }
@@ -701,6 +707,7 @@
     {
         fontScale = scale;
         await JS.InvokeVoidAsync("ssFontSize.set", scale);
+        if (user is not null) user.LargeText = scale == "large";
     }
 
     private async Task OnReduceMotionChanged(ChangeEventArgs e)
@@ -718,6 +725,7 @@
         try
         {
             await UserService.UpdateSettingsAsync(userId, user);
+            await JS.InvokeVoidAsync("ssAccessibility.set", user.LargeText, user.HighContrast, user.CaptionEnabled);
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
             UserProfileState.NotifyDisplayNameChanged(user.DisplayName);
             savedMessage = L["settings.saved"];

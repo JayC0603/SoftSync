@@ -27,6 +27,10 @@ public class UserDto
     public string PreferredLanguage { get; set; } = string.Empty;
     public ThemePreference Theme { get; set; } = ThemePreference.Light;
     public bool ReduceMotion { get; set; }
+    public PreferredLearningMode PreferredLearningMode { get; set; } = PreferredLearningMode.Text;
+    public bool LargeText { get; set; }
+    public bool HighContrast { get; set; }
+    public bool CaptionEnabled { get; set; } = true;
 
     // Derived from ExperiencePoints — not stored.
     public int Level => LevelSystem.GetLevel(ExperiencePoints);
@@ -267,6 +271,40 @@ public class CourseDto
     public bool IsCompleted => CompletedAtUtc.HasValue;
     public List<CourseLessonDto> Lessons { get; set; } = [];
     public List<ChallengeQuizDto> Quizzes { get; set; } = [];
+}
+
+public sealed class SkillEvidenceDto
+{
+    public int SourceId { get; set; }
+    public int SkillId { get; set; }
+    public string Skill { get; set; } = string.Empty;
+    public string SourceType { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public sealed class LearningJourneyDto
+{
+    public IReadOnlyList<CourseDto> Courses { get; init; } = [];
+    public IReadOnlyList<SkillEvidenceDto> Evidence { get; init; } = [];
+    public string? RecommendedNextActivity { get; init; }
+}
+
+public sealed class AiTutorLessonRequestDto
+{
+    public string Language { get; set; } = "vi";
+    public string LessonTitle { get; set; } = string.Empty;
+    public string LessonContent { get; set; } = string.Empty;
+    public string LearningObjective { get; set; } = string.Empty;
+    public string LearningLevel { get; set; } = string.Empty;
+    public PreferredLearningMode PreferredLearningMode { get; set; } = PreferredLearningMode.Text;
+}
+
+public sealed class AiTutorResponseDto
+{
+    public string Text { get; init; } = string.Empty;
+    public bool IsFallback { get; init; }
 }
 
 public class CourseLessonDto

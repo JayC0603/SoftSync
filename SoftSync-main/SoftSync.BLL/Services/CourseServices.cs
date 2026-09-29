@@ -42,7 +42,7 @@ public sealed class CourseService(ICourseRepository repository) : ICourseService
 
     public async Task<int?> SaveCourseAsync(CourseDto input, int userId, bool isAdmin)
     {
-        if (userId <= 0 || string.IsNullOrWhiteSpace(input.Title) || input.Title.Trim().Length > 200 || (!string.IsNullOrWhiteSpace(input.ThumbnailUrl) && string.IsNullOrWhiteSpace(input.ThumbnailAltText))) return null;
+        if (userId <= 0 || string.IsNullOrWhiteSpace(input.Title) || input.Title.Trim().Length > 200 || !AccessibilityContentRules.HasMeaningfulAltText(input.ThumbnailUrl, input.ThumbnailAltText)) return null;
         Course entity;
         if (input.Id == 0)
         {
@@ -69,7 +69,7 @@ public sealed class CourseService(ICourseRepository repository) : ICourseService
     public async Task<int?> SaveLessonAsync(CourseLessonDto input, int userId, bool isAdmin)
     {
         var course = await repository.Courses.Include(x => x.Lessons).FirstOrDefaultAsync(x => x.Id == input.CourseId);
-        if (course is null || !CourseAuthorization.CanManageOwnedContent(userId, course.CreatorUserId, isAdmin) || string.IsNullOrWhiteSpace(input.Title)) return null;
+        if (course is null || !CourseAuthorization.CanManageOwnedContent(userId, course.CreatorUserId, isAdmin) || string.IsNullOrWhiteSpace(input.Title) || !AccessibilityContentRules.HasAccessibleVideoText(input.VideoUrl, input.CaptionUrl, input.Transcript)) return null;
         var lesson = input.Id == 0 ? new CourseLesson { CourseId = course.Id } : course.Lessons.FirstOrDefault(x => x.Id == input.Id);
         if (lesson is null) return null;
         if (input.Id == 0) repository.Add(lesson);
@@ -219,7 +219,7 @@ public sealed class ChallengeService(ICourseRepository repository, IAiQuizServic
             QuizId = quizId,
             UserId = authenticatedUserId,
             StartedAtUtc = DateTime.UtcNow,
-            TotalQuestions = ChallengeRules.RequiredQuestionCount
+            TotalQuestions = quiz.Questions.Count
         };
         repository.Add(attempt);
         return await repository.SaveChangesAsync() ? new StudentQuizSessionDto { AttemptId = attempt.Id, Quiz = quiz } : null;
@@ -227,15 +227,16 @@ public sealed class ChallengeService(ICourseRepository repository, IAiQuizServic
 
     public async Task<QuizAttemptResultDto?> SubmitAsync(int attemptId, int authenticatedUserId, IReadOnlyCollection<StudentQuizAnswerDto> answers)
     {
-        if (authenticatedUserId <= 0 || answers.Count != ChallengeRules.RequiredQuestionCount) return null;
+        if (authenticatedUserId <= 0 || answers.Count == 0) return null;
         var selected = answers.GroupBy(x => x.QuestionId).ToDictionary(x => x.Key, x => x.Select(a => a.SelectedOptionId).Distinct().ToList());
-        if (selected.Count != ChallengeRules.RequiredQuestionCount || selected.Any(x => x.Value.Count != 1)) return null;
+        if (selected.Count != answers.Count || selected.Any(x => x.Value.Count != 1)) return null;
 
         var attempt = await repository.QuizAttempts.Include(x => x.Quiz).ThenInclude(x => x.Questions).ThenInclude(x => x.Options)
             .Include(x => x.Answers)
             .FirstOrDefaultAsync(x => x.Id == attemptId && x.UserId == authenticatedUserId);
         if (attempt is null || attempt.CompletedAtUtc is not null || attempt.Answers.Count != 0 || attempt.Quiz.Status != CourseStatus.Published) return null;
         var quiz = attempt.Quiz;
+        if (answers.Count != quiz.Questions.Count) return null;
 
         int score;
         try
@@ -248,9 +249,9 @@ public sealed class ChallengeService(ICourseRepository repository, IAiQuizServic
         }
 
         attempt.CorrectAnswers = score;
-        attempt.TotalQuestions = ChallengeRules.RequiredQuestionCount;
-        attempt.ScorePercentage = score * 100m / ChallengeRules.RequiredQuestionCount;
-        attempt.Result = score >= ChallengeRules.PassingScore ? QuizAttemptResult.Pass : QuizAttemptResult.NotPass;
+        attempt.TotalQuestions = quiz.Questions.Count;
+        attempt.ScorePercentage = Math.Round(score * 100m / attempt.TotalQuestions, 2, MidpointRounding.AwayFromZero);
+        attempt.Result = ChallengeRules.IsPassing(score, attempt.TotalQuestions) ? QuizAttemptResult.Pass : QuizAttemptResult.NotPass;
         attempt.CompletedAtUtc = DateTime.UtcNow;
         attempt.Answers = quiz.Questions.Select(question =>
             {

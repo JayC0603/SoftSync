@@ -14,11 +14,142 @@ namespace SoftSync.Tests;
 
 public sealed class CoreWorkflowTests
 {
+    [Fact]
+    public void Learning_preferences_are_mode_values_and_do_not_encode_disability()
+    {
+        Assert.Contains(PreferredLearningMode.Audio, Enum.GetValues<PreferredLearningMode>());
+        Assert.Contains(PreferredLearningMode.AiGuided, Enum.GetValues<PreferredLearningMode>());
+    }
+
+    [Fact]
+    public void Learning_analytics_calculates_explainable_quiz_average()
+    {
+        Assert.Equal(7.5m, LearningAnalyticsRules.AverageQuizScore([(8, 10), (7, 10)]));
+        Assert.Equal(0m, LearningAnalyticsRules.AverageQuizScore([]));
+    }
+
+    [Fact]
+    public void Analytics_recommendation_is_rule_based_and_owned()
+    {
+        Assert.Equal("Review the related lesson before retrying the quiz.", LearningAnalyticsRules.Recommendation(4, false, false));
+        Assert.True(LearningAnalyticsRules.CanViewStudentAnalytics(3, 3));
+        Assert.False(LearningAnalyticsRules.CanViewStudentAnalytics(3, 4));
+    }
+
+    [Fact]
+    public void Only_approved_knowledge_with_metadata_is_usable()
+    {
+        Assert.True(KnowledgeRules.IsUsable(KnowledgeSourceStatus.Approved, "Lesson content", 1, "Active Listening"));
+        Assert.False(KnowledgeRules.IsUsable(KnowledgeSourceStatus.Draft, "Lesson content", 1, "Active Listening"));
+        Assert.False(KnowledgeRules.IsUsable(KnowledgeSourceStatus.Approved, "", 1, "Active Listening"));
+    }
+
+    [Fact]
+    public void Knowledge_context_is_bounded_and_contains_only_supplied_sources()
+    {
+        var context = KnowledgeRules.BuildContext([("Approved lesson", "Use active listening."), ("Other", "Context")], 30);
+        Assert.Contains("Approved lesson", context);
+        Assert.DoesNotContain("password", context, StringComparison.OrdinalIgnoreCase);
+        Assert.True(context.Length <= 30 + 30);
+    }
+
+    [Fact]
+    public void Interview_evidence_requires_completed_session()
+    {
+        Assert.True(CareerPreparationRules.CanCreateInterviewEvidence(true));
+        Assert.False(CareerPreparationRules.CanCreateInterviewEvidence(false));
+    }
+
+    [Fact]
+    public void Star_coach_identifies_missing_result_without_scoring_hiring_potential()
+    {
+        Assert.Equal("Consider adding: Result.", CareerPreparationRules.StarGap("Situation", "Task", "Action", ""));
+        Assert.True(CareerPreparationRules.CanViewPrivatePortfolio(7, 7));
+        Assert.False(CareerPreparationRules.CanViewPrivatePortfolio(7, 8));
+    }
+
     [Theory]
-    [InlineData(4, false)]
-    [InlineData(5, false)]
+    [InlineData(WorkshopStatus.Published, 2, 3, true)]
+    [InlineData(WorkshopStatus.Draft, 0, 3, false)]
+    [InlineData(WorkshopStatus.Published, 3, 3, false)]
+    public void Workshop_registration_requires_published_capacity(WorkshopStatus status, int participants, int capacity, bool expected)
+    {
+        Assert.Equal(expected, WorkshopRules.CanRegister(status, participants, capacity));
+    }
+
+    [Fact]
+    public void Workshop_evidence_requires_completed_enrollment_and_workshop()
+    {
+        Assert.True(WorkshopRules.CanCreateEvidence(WorkshopStatus.Completed, WorkshopEnrollmentStatus.Completed));
+        Assert.False(WorkshopRules.CanCreateEvidence(WorkshopStatus.Published, WorkshopEnrollmentStatus.Completed));
+        Assert.False(WorkshopRules.CanCreateEvidence(WorkshopStatus.Completed, WorkshopEnrollmentStatus.Registered));
+    }
+
+    [Fact]
+    public void Workshop_management_is_owner_or_admin_only()
+    {
+        Assert.True(WorkshopRules.CanManage(10, 10, false));
+        Assert.True(WorkshopRules.CanManage(20, 10, true));
+        Assert.False(WorkshopRules.CanManage(20, 10, false));
+    }
+
+    [Theory]
+    [InlineData(QuizAttemptResult.NotPass, false, false, "Review the related lesson before retrying the quiz.")]
+    [InlineData(null, true, false, "Continue the next unfinished lesson.")]
+    [InlineData(null, false, true, "Explore an advanced course for the same skill.")]
+    public void Adaptive_learning_uses_deterministic_rules(QuizAttemptResult? result, bool unfinished, bool completed, string expected)
+    {
+        Assert.Equal(expected, AdaptiveLearningRules.NextAction(result, unfinished, completed));
+    }
+
+    [Fact]
+    public async Task Ai_tutor_uses_safe_fallback_when_provider_fails()
+    {
+        var tutor = new AiTutorService(new FailingAssistantStub());
+        var result = await tutor.ExplainLessonAsync(new AiTutorLessonRequestDto { LessonTitle = "Active listening", LessonContent = "Listen and clarify." }, 10);
+        Assert.True(result.IsFallback);
+        Assert.Contains("Active listening", result.Text);
+    }
+
+    [Fact]
+    public void Learning_journey_evidence_is_only_successful_activity()
+    {
+        var passed = new QuizAttemptResultDto { AttemptId = 7, QuizId = 3, QuizTitle = "Teamwork", CorrectAnswers = 8, TotalQuestions = 10, ScorePercentage = 80, Result = QuizAttemptResult.Pass };
+        var failed = new QuizAttemptResultDto { AttemptId = 8, QuizId = 3, QuizTitle = "Teamwork", CorrectAnswers = 4, TotalQuestions = 10, ScorePercentage = 40, Result = QuizAttemptResult.NotPass };
+        Assert.True(passed.Passed);
+        Assert.False(failed.Passed);
+    }
+
+    [Theory]
+    [InlineData("", "", true)]
+    [InlineData("/images/course.jpg", "A course about communication", true)]
+    [InlineData("/images/course.jpg", "", false)]
+    [InlineData("/images/course.jpg", "   ", false)]
+    public void Accessibility_content_requires_alt_text_for_informative_images(string imageUrl, string altText, bool expected)
+    {
+        Assert.Equal(expected, AccessibilityContentRules.HasMeaningfulAltText(imageUrl, altText));
+    }
+
+    [Theory]
+    [InlineData("/video/lesson.mp4", "/video/lesson.vtt", "", true)]
+    [InlineData("/video/lesson.mp4", "", "Transcript text", true)]
+    [InlineData("/video/lesson.mp4", "", "", false)]
+    [InlineData("", "", "", true)]
+    public void Accessibility_content_requires_a_text_alternative_for_video(string videoUrl, string captionUrl, string transcript, bool expected)
+    {
+        Assert.Equal(expected, AccessibilityContentRules.HasAccessibleVideoText(videoUrl, captionUrl, transcript));
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, true)]
+    [InlineData(4, true)]
+    [InlineData(5, true)]
     [InlineData(10, true)]
-    public void Challenge_publish_requires_exactly_ten_valid_questions(int count, bool expected)
+    [InlineData(19, true)]
+    [InlineData(20, true)]
+    [InlineData(30, true)]
+    public void Challenge_publish_requires_nonempty_valid_questions(int count, bool expected)
     {
         var questions = Enumerable.Range(1, count).Select(index => new ChallengeQuestion
         {
@@ -107,7 +238,7 @@ public sealed class CoreWorkflowTests
         var score = ChallengeRules.Grade(questions, selected);
 
         Assert.Equal(correctAnswers, score);
-        Assert.Equal(expectedPassed, score >= ChallengeRules.PassingScore);
+        Assert.Equal(expectedPassed, ChallengeRules.IsPassing(score, questions.Count));
     }
 
     [Fact]
@@ -143,6 +274,71 @@ public sealed class CoreWorkflowTests
         var saved = await data.Context.QuizAttempts.SingleAsync(x => x.Id == session.AttemptId);
         Assert.NotNull(saved.CompletedAtUtc);
         Assert.Equal(60m, saved.ScorePercentage);
+    }
+
+    [Theory]
+    [InlineData(1, 0, QuizAttemptResult.NotPass)]
+    [InlineData(1, 1, QuizAttemptResult.Pass)]
+    [InlineData(19, 9, QuizAttemptResult.NotPass)]
+    [InlineData(19, 10, QuizAttemptResult.Pass)]
+    [InlineData(20, 9, QuizAttemptResult.NotPass)]
+    [InlineData(20, 10, QuizAttemptResult.Pass)]
+    [InlineData(30, 14, QuizAttemptResult.NotPass)]
+    [InlineData(30, 15, QuizAttemptResult.Pass)]
+    public async Task Variable_length_quiz_persists_all_answers_and_reloads_same_result(int total, int correct, QuizAttemptResult expected)
+    {
+        await using var data = await QuizData.CreateAsync(questionCount: total);
+        var session = await data.Service.StartAttemptAsync(QuizData.QuizId, QuizData.StudentId);
+        Assert.NotNull(session);
+        Assert.Equal(total, session.Quiz.Questions.Count);
+        Assert.Equal(total, (await data.Context.QuizAttempts.SingleAsync()).TotalQuestions);
+        var result = await data.Service.SubmitAsync(session.AttemptId, QuizData.StudentId, data.Answers(correct));
+        Assert.NotNull(result);
+        Assert.Equal(total, result.TotalQuestions);
+        Assert.Equal(correct, result.CorrectAnswers);
+        Assert.Equal(expected, result.Result);
+        Assert.Equal(Math.Round(correct * 100m / total, 2, MidpointRounding.AwayFromZero), result.ScorePercentage);
+        data.Context.ChangeTracker.Clear();
+        var reloaded = await data.Service.GetAttemptAsync(session.AttemptId, QuizData.StudentId);
+        Assert.Equal(result.ScorePercentage, reloaded!.ScorePercentage);
+        Assert.Equal(expected, reloaded.Result);
+        var saved = await data.Context.QuizAttemptAnswers.Where(x => x.AttemptId == session.AttemptId).ToListAsync();
+        Assert.Equal(total, saved.Count);
+        Assert.Equal(correct, saved.Count(x => x.IsCorrect));
+        Assert.Single(await data.Service.GetHistoryAsync(QuizData.StudentId));
+        Assert.Null(await data.Service.GetAttemptAsync(session.AttemptId, QuizData.OtherStudentId));
+        var review = await data.Service.GetReviewAsync(session.AttemptId, QuizData.StudentId, false, false);
+        Assert.Equal(total, review!.Answers.Count);
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("duplicate")]
+    [InlineData("extra")]
+    [InlineData("foreign-option")]
+    public async Task Variable_length_quiz_rejects_invalid_submission_without_persisting_answers(string invalid)
+    {
+        await using var data = await QuizData.CreateAsync(questionCount: 19);
+        var session = await data.Service.StartAttemptAsync(QuizData.QuizId, QuizData.StudentId);
+        var answers = data.Answers(10);
+        if(invalid == "missing") answers.RemoveAt(18);
+        if(invalid == "duplicate") answers[18] = answers[0];
+        if(invalid == "extra") answers.Add(new() { QuestionId = 9999, SelectedOptionId = 9999 });
+        if(invalid == "foreign-option") answers[18].SelectedOptionId = answers[0].SelectedOptionId;
+        Assert.Null(await data.Service.SubmitAsync(session!.AttemptId, QuizData.StudentId, answers));
+        Assert.Empty(await data.Context.QuizAttemptAnswers.ToListAsync());
+        Assert.Null((await data.Context.QuizAttempts.SingleAsync()).CompletedAtUtc);
+    }
+
+    [Theory]
+    [InlineData(19)]
+    [InlineData(30)]
+    public async Task Variable_length_draft_can_be_published_only_by_owner(int total)
+    {
+        await using var data = await QuizData.CreateAsync(quizStatus: CourseStatus.Draft, questionCount: total);
+        Assert.False(await data.Service.PublishAsync(QuizData.QuizId, QuizData.OtherTeacherId, false));
+        Assert.True(await data.Service.PublishAsync(QuizData.QuizId, QuizData.TeacherId, false));
+        Assert.Equal(total, (await data.Service.GetPublishedQuizAsync(QuizData.QuizId))!.Questions.Count);
     }
 
     [Theory]
@@ -548,7 +744,7 @@ public sealed class CoreWorkflowTests
             });
     }
 
-    private static List<ChallengeQuestion> CreateChallengeQuestions() => Enumerable.Range(1, 10).Select(questionId => new ChallengeQuestion
+    private static List<ChallengeQuestion> CreateChallengeQuestions(int count = 10) => Enumerable.Range(1, count).Select(questionId => new ChallengeQuestion
     {
         Id = questionId,
         Order = questionId,
@@ -576,7 +772,7 @@ public sealed class CoreWorkflowTests
         public required ChallengeService Service { get; init; }
         public required CourseService CourseService { get; init; }
 
-        public static async Task<QuizData> CreateAsync(IAiQuizService? ai = null, CourseStatus quizStatus = CourseStatus.Published)
+        public static async Task<QuizData> CreateAsync(IAiQuizService? ai = null, CourseStatus quizStatus = CourseStatus.Published, int questionCount = 10)
         {
             var options = new DbContextOptionsBuilder<SoftSyncDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
@@ -591,7 +787,7 @@ public sealed class CoreWorkflowTests
                 SkillId = skill.Id,
                 Skill = skill,
                 Status = quizStatus,
-                Questions = CreateChallengeQuestions()
+                Questions = CreateChallengeQuestions(questionCount)
             };
             var course = new Course { Id = CourseId, CreatorUserId = TeacherId, Title = "Course", SkillId = 1, Skill = skill, Status = CourseStatus.Published };
             course.Lessons = [new CourseLesson { Id = FirstLessonId, CourseId = CourseId, Title = "Lesson 1", Order = 1 }, new CourseLesson { Id = FirstLessonId + 1, CourseId = CourseId, Title = "Lesson 2", Order = 2 }];
@@ -744,5 +940,10 @@ public sealed class CoreWorkflowTests
             var repository = new AssessmentRepositoryStub { Questions = questions, Options = options };
             return new AssessmentData(repository, questions, options);
         }
+    }
+
+    private sealed class FailingAssistantStub : IAiAssistantService
+    {
+        public Task<string> GetReplyAsync(string userMessage, int userId) => throw new InvalidOperationException("provider unavailable");
     }
 }

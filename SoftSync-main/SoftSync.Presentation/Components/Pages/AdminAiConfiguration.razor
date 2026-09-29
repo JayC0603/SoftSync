@@ -1,0 +1,94 @@
+@page "/admin/ai-configuration"
+@inherits LocalizedComponentBase
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@using SoftSync.BLL.Services
+@using SoftSync.Common.Dtos
+@inject IAiProviderManagementService Management
+@implements IDisposable
+
+<PageTitle>@Tx("AI Configuration · SoftSync", "Cấu hình AI · SoftSync")</PageTitle>
+<main class="ss-workspace">
+    <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="ai-config-title" aria-busy="@busy">
+        <header><h1 id="ai-config-title">@Tx("AI Configuration", "Cấu hình AI")</h1>
+            <p>@Tx("Saved database settings take priority over environment settings. Changes apply to the next AI request.", "Cấu hình đã kích hoạt trong database ưu tiên hơn biến môi trường. Thay đổi áp dụng từ yêu cầu AI tiếp theo.")</p>
+            <a href="/admin/users">@Tx("Role management", "Quản lý quyền")</a></header>
+        <div aria-live="polite">@if (message.Length > 0) { <p class="alert alert-info" role="status">@message</p> }</div>
+        <section class="ss-glass tw:rounded-2xl tw:p-6 tw:mt-4" aria-labelledby="provider-form-title">
+            <h2 id="provider-form-title">@(edit.Id == Guid.Empty ? Tx("Add provider", "Thêm provider") : Tx("Edit provider", "Sửa provider"))</h2>
+            <form @onsubmit="Save" @onsubmit:preventDefault="true">
+                <fieldset disabled="@busy">
+                    <legend class="visually-hidden">@Tx("Provider settings", "Thông tin provider")</legend>
+                    <div class="mb-3"><label for="ai-provider" class="form-label">Provider</label>
+                        <select id="ai-provider" class="form-select" @bind="edit.Provider" @bind:after="ProviderChanged">
+                            @foreach (var type in Enum.GetValues<AiProviderType>()) { <option value="@type">@type</option> }
+                        </select></div>
+                    <div class="mb-3"><label for="ai-name" class="form-label">@Tx("Display name", "Tên hiển thị")</label><input id="ai-name" class="form-control" maxlength="120" required @bind="edit.DisplayName" /></div>
+                    <div class="mb-3"><label for="ai-model" class="form-label">Model</label><input id="ai-model" class="form-control" maxlength="200" required @bind="edit.Model" /></div>
+                    <div class="mb-3"><label for="ai-cv-model" class="form-label">@Tx("CV model (optional)", "Model cho CV (tùy chọn)")</label><input id="ai-cv-model" class="form-control" maxlength="200" @bind="edit.CvModel" aria-describedby="cv-model-help" /><small id="cv-model-help">@Tx("Blank uses the main model. Select a lighter model here for CV Review.", "Để trống sẽ dùng model chính. Có thể chọn model nhẹ hơn cho CV Review.")</small></div>
+                    <div class="mb-3"><label for="ai-endpoint" class="form-label">Endpoint</label><input id="ai-endpoint" class="form-control" required maxlength="500" @bind="edit.Endpoint" aria-describedby="endpoint-help" /><small id="endpoint-help">@Tx("Only the official provider base URL is accepted.", "Chỉ chấp nhận base URL chính thức của provider.")</small></div>
+                    <div class="mb-3"><label for="ai-secret" class="form-label">@Tx("New API key", "API key mới")</label><input id="ai-secret" type="password" class="form-control" autocomplete="new-password" maxlength="4096" @bind="edit.NewApiKey" aria-describedby="key-help" /><small id="key-help">@(hasKey ? Tx("•••••••• Key saved. Leave blank to keep it; the original key is never returned.", "•••••••• Đã lưu key. Để trống để giữ nguyên; key gốc không được trả về giao diện.") : Tx("No key saved.", "Chưa có key được lưu."))</small></div>
+                    <div class="form-check mb-3"><input id="ai-enabled" type="checkbox" class="form-check-input" @bind="edit.IsEnabled" /><label for="ai-enabled" class="form-check-label">@Tx("Enabled", "Đã bật")</label></div>
+                    <p>@Tx("Connection tests send a minimal request and may incur provider charges. They do not save the draft.", "Test kết nối gửi yêu cầu tối thiểu và có thể phát sinh phí provider. Test không lưu bản nháp.")</p>
+                    <button type="button" class="btn btn-outline-primary me-2" @onclick="Test">@Tx("Test Connection", "Test kết nối")</button>
+                    <button type="submit" class="btn btn-primary me-2">@Tx("Save Configuration", "Lưu cấu hình")</button>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="New">@Tx("New / clear", "Tạo mới / xóa form")</button>
+                </fieldset>
+            </form>
+        </section>
+        <section class="ss-glass tw:rounded-2xl tw:p-6 tw:mt-6" aria-labelledby="provider-list-title">
+            <h2 id="provider-list-title">@Tx("Configured providers", "Provider đã cấu hình")</h2>
+            <button type="button" class="btn btn-outline-secondary mb-3" disabled="@busy" @onclick="Reload">@Tx("Refresh", "Tải lại")</button>
+            @if (providers.Count == 0) { <p>@Tx("No AI provider configured in the database.", "Chưa có provider AI trong database.")</p> }
+            else { <div class="table-responsive"><table class="table align-middle"><caption>@Tx("Only one enabled provider can be active. Test results are transient and do not disable providers.", "Chỉ một provider đã bật được kích hoạt. Kết quả test là tạm thời và không tự tắt provider.")</caption>
+                <thead><tr><th scope="col">Provider</th><th scope="col">Model</th><th scope="col">@Tx("Status", "Trạng thái")</th><th scope="col">@Tx("Updated", "Cập nhật")</th><th scope="col">@Tx("Actions", "Thao tác")</th></tr></thead><tbody>
+                @foreach (var row in providers) { <tr><th scope="row">@row.DisplayName <small>(@row.Provider)</small></th><td>@row.Model @if(row.CvModel.Length > 0){<small>CV: @row.CvModel</small>}</td>
+                    <td>@(row.IsDefault ? Tx("Active", "Đang dùng") : row.IsEnabled ? Tx("Enabled", "Đã bật") : Tx("Disabled", "Đã tắt")) · @(row.HasApiKey ? Tx("Key saved", "Đã lưu key") : Tx("No key", "Chưa có key"))</td><td>@row.UpdatedAt.ToLocalTime().ToString("g", Ui.Culture)</td>
+                    <td><button type="button" class="btn btn-sm btn-outline-primary me-2" disabled="@busy" @onclick="() => Edit(row)">@Tx("Edit", "Sửa")</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-2" disabled="@busy" @onclick="() => TestRow(row)">@Tx("Test", "Test")</button>
+                    <button type="button" class="btn btn-sm btn-outline-success me-2" disabled="@(busy || !row.IsEnabled || row.IsDefault)" @onclick="() => Activate(row)">@Tx("Set Active", "Kích hoạt")</button>
+                    <button type="button" class="btn btn-sm btn-outline-warning" disabled="@(busy || row.IsDefault)" @onclick="() => Toggle(row)">@(row.IsEnabled ? Tx("Disable", "Tắt") : Tx("Enable", "Bật"))</button></td></tr> }
+                </tbody></table></div> }
+        </section>
+    </section>
+</main>
+
+@code {
+    private string Tx(string en, string vi) => Ui.Current == AppLanguage.Vi ? vi : en;
+    protected override void OnLanguageChanged() { message = ""; base.OnLanguageChanged(); }
+    private readonly CancellationTokenSource lifetime = new();
+    private bool busy, hasKey;
+    private string message = "";
+    private AiProviderEditDto edit = new();
+    private IReadOnlyList<AiProviderDto> providers = [];
+    protected override Task OnInitializedAsync() => Reload();
+    private Task Reload() => Run(async () => providers = await Management.ListAsync(lifetime.Token));
+    private void New() { edit.NewApiKey = null; edit = new(); hasKey = false; }
+    private void ProviderChanged() { edit.NewApiKey = null; edit.Endpoint = AiProviderRules.Endpoint(edit.Provider); }
+    private static AiProviderEditDto Input(AiProviderDto row) => new() { Id = row.Id, Revision = row.Revision, Provider = row.Provider, DisplayName = row.DisplayName, Model = row.Model, CvModel = row.CvModel, Endpoint = row.Endpoint, IsEnabled = row.IsEnabled };
+    private void Edit(AiProviderDto row) { edit.NewApiKey = null; edit = Input(row); hasKey = row.HasApiKey; }
+    private Task Save() => Run(async () => { var saved = await Management.SaveAsync(edit, lifetime.Token); Edit(saved); providers = await Management.ListAsync(lifetime.Token); message = Tx("Saved. Set Active to use a new provider.", "Đã lưu. Kích hoạt để dùng provider mới."); });
+    private Task Test() => Run(async () => message = TestMessage(await Management.TestAsync(edit, lifetime.Token)));
+    private Task TestRow(AiProviderDto row) => Run(async () => message = TestMessage(await Management.TestAsync(Input(row), lifetime.Token)));
+    private Task Activate(AiProviderDto row) => Run(async () => { await Management.SetActiveAsync(row.Id, row.Revision, lifetime.Token); providers = await Management.ListAsync(lifetime.Token); message = Tx("Active provider changed. The next request uses this configuration.", "Đã đổi provider đang dùng. Yêu cầu tiếp theo sẽ dùng cấu hình này."); });
+    private Task Toggle(AiProviderDto row) => Run(async () => { await Management.SetEnabledAsync(row.Id, row.Revision, !row.IsEnabled, lifetime.Token); providers = await Management.ListAsync(lifetime.Token); message = Tx("Provider state updated.", "Đã cập nhật trạng thái provider."); });
+    private string TestMessage(AiConnectionStatus status) => status switch {
+        AiConnectionStatus.Success => Tx("Connection successful.", "Kết nối thành công."),
+        AiConnectionStatus.AuthenticationFailed => Tx("Authentication failed. Check the API key.", "Xác thực thất bại. Kiểm tra API key."),
+        AiConnectionStatus.ModelUnavailable => Tx("Model unavailable or request unsupported by this model.", "Model không khả dụng hoặc không hỗ trợ yêu cầu này."),
+        AiConnectionStatus.RateLimited => Tx("Provider rate limit reached.", "Đã chạm giới hạn provider."),
+        AiConnectionStatus.Timeout => Tx("AI provider timed out.", "Provider AI hết thời gian chờ."),
+        AiConnectionStatus.NotConfigured => Tx("API key missing or cannot be decrypted.", "Thiếu API key hoặc không giải mã được."),
+        _ => Tx("Provider unavailable or returned an invalid response.", "Provider không khả dụng hoặc trả phản hồi không hợp lệ.") };
+    private async Task Run(Func<Task> action)
+    {
+        if (busy) return; busy = true; message = "";
+        try { await action(); }
+        catch (OperationCanceledException) { }
+        catch (UnauthorizedAccessException) { message = Tx("Admin access required.", "Yêu cầu quyền Admin."); }
+        catch (AiConfigurationException ex) { message = Ui.Text(ex.Message); }
+        catch (Exception) { message = Tx("Unable to process configuration. Try again later.", "Không xử lý được cấu hình. Vui lòng thử lại sau."); }
+        finally { busy = false; }
+    }
+    public override void Dispose() { edit.NewApiKey = null; lifetime.Cancel(); lifetime.Dispose(); base.Dispose(); }
+}

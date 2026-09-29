@@ -241,4 +241,20 @@ window.ssFontSize = {
         return scale;
     }
 };
+
+window.ssAccessibility = {
+    apply(largeText, highContrast, captions) {
+        document.documentElement.classList.toggle('ss-large-text', !!largeText);
+        document.documentElement.classList.toggle('ss-high-contrast', !!highContrast);
+        document.documentElement.setAttribute('data-captions', captions ? 'on' : 'off');
+    },
+    set(largeText, highContrast, captions) {
+        try { localStorage.setItem('ss-accessibility', JSON.stringify({ largeText: !!largeText, highContrast: !!highContrast, captions: captions !== false })); } catch { /* ignore */ }
+        this.apply(largeText, highContrast, captions !== false);
+    },
+    init() {
+        try { const p = JSON.parse(localStorage.getItem('ss-accessibility') || '{}'); this.apply(!!p.largeText, !!p.highContrast, p.captions !== false); return p; } catch { this.apply(false, false, true); return {}; }
+    }
+};
 try { window.ssFontSize.init(); } catch { /* ignore */ }
+try { window.ssAccessibility.init(); } catch { /* ignore */ }

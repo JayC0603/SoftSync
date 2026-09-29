@@ -1,35 +1,91 @@
+@inherits LocalizedComponentBase
 @page "/courses"
+@page "/courses/{CourseId:int}"
+@page "/courses/{CourseId:int}/lessons/{LessonId:int}"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
-@using SoftSync.Presentation.Services
 @inject ICourseService CoursesService
 @inject AuthenticationStateProvider Auth
 
-<PageTitle>Courses · SoftSync</PageTitle>
-<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
-<header class="tw:mb-8"><span class="badge bg-primary">Inclusive Learning</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">Courses</h1><p>Video, caption, transcript and persistent learning progress.</p></header>
-@if(loading){<p role="status">Loading courses...</p>}
-@if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@message</div>}
-<div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">@foreach(var course in courses){<article class="ss-glass tw:rounded-2xl tw:p-6" aria-labelledby="course-title-@course.Id">
-@if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText" class="tw:mb-4 tw:h-48 tw:w-full tw:rounded-xl tw:object-cover"/>}
-<h2 id="course-title-@course.Id" class="tw:text-xl tw:font-bold">@course.Title</h2><p>@course.Description</p><div class="progress" role="progressbar" aria-label="Course progress for @course.Title" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="@course.ProgressPercentage percent complete"><div class="progress-bar" style="width:@course.ProgressPercentage%">@course.ProgressPercentage%</div></div>
-<dl class="tw:mt-3"><dt>Lessons completed</dt><dd>@course.CompletedLessons / @course.TotalLessons</dd><dt>Final Quiz</dt><dd>@(course.FinalQuizId is null ? "Not required" : course.FinalQuizResult is null ? "Not Started" : course.FinalQuizResult == QuizAttemptResult.Pass ? "Pass" : "Not Pass")</dd><dt>Course Status</dt><dd>@(course.IsCompleted ? "Completed" : "In Progress")</dd></dl>
-@if(course.IsCompleted){<div class="alert alert-success" role="status"><strong>Course Completed</strong></div>}
-else if(course.FinalQuizResult == QuizAttemptResult.NotPass){<div class="alert alert-warning" role="status">Final quiz not passed yet. You may retry.</div>}
-else if(course.FinalQuizId is not null){<p>Complete all required lessons and pass the final quiz.</p>}
-else {<p>Complete all required lessons to finish this course.</p>}
-<button type="button" class="btn btn-primary tw:my-3" @onclick="()=>Enroll(course.Id)">Enroll / Continue</button>
-<ol>@foreach(var lesson in course.Lessons){<li class="tw:mb-4"><h3 class="tw:text-lg tw:font-semibold">@lesson.Title</h3>@if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video class="tw:w-full" controls preload="metadata" aria-label="Video lesson: @lesson.Title"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="Vietnamese captions" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p class="tw:text-sm tw:text-slate-700">Captions are not available for this video.</p>}}@if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details><summary>Transcript for @lesson.Title</summary><div class="tw:whitespace-pre-wrap">@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p class="tw:text-sm tw:text-slate-700">A transcript is not available for this video.</p>}<button type="button" class="btn btn-sm btn-outline-success tw:mt-2" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? "Lesson completed" : "Mark lesson completed")</button></li>}</ol>
-@if(course.FinalQuizId is int finalQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? "Retry Final Quiz" : "Open Final Quiz")</a>}
-</article>}</div>
-</section></main>
-@code{
-private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
-protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
-private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
-private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
-private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Lesson progress saved.":"Enroll before completing a lesson.";await Reload();}
+<PageTitle>@Ui.Text("Courses · SoftSync")</PageTitle>
+<main class="ss-workspace" aria-busy="@(loading || busy)">
+@if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@Ui.Text(message)</div>}
+@if(loading){<LoadingState Text="@Ui.Text("Loading courses...")" />}
+else if(CourseId is null){
+    <PageHeader HeadingId="courses-title" Title="@Ui.Text("Courses")" Eyebrow="@Tx("YOUR LEARNING LIBRARY", "THƯ VIỆN HỌC TẬP")" Description="@Tx("Build one skill at a time. Choose a course and learn at your own pace.", "Phát triển từng kỹ năng. Chọn khóa học và học theo nhịp của bạn.")" />
+    <label for="course-search" class="form-label">@Tx("Find a course", "Tìm khóa học")</label>
+    <input id="course-search" type="search" class="form-control mb-4" @bind="search" @bind:event="oninput" />
+    @if(!Filtered.Any()){<EmptyState Title="@Tx("No courses to show", "Chưa có khóa học phù hợp")" Description="@Tx("Try another search or check back for new published courses.", "Thử từ khóa khác hoặc quay lại khi có khóa học mới được xuất bản.")" />}
+    <div class="ss-course-grid">@foreach(var course in Filtered){
+        <article class="ss-panel ss-course-card" aria-labelledby="course-title-@course.Id">
+            @if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText" loading="lazy" />}
+            <div><p class="ss-eyebrow">@Tx("SOFT SKILLS", "KỸ NĂNG MỀM")</p><h2 id="course-title-@course.Id">@course.Title</h2></div>
+            <p>@course.Description</p><div class="ss-course-meta"><span><i class="bi bi-journal-text" aria-hidden="true"></i> @course.TotalLessons @Ui.Text("Lessons")</span><span>@(course.IsCompleted ? Ui.Text("Completed") : Ui.Text("In Progress"))</span></div>
+            <div class="progress" role="progressbar" aria-label="@(Ui.Text("Courses") + ": " + course.Title)" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:@course.ProgressPercentage%"></div></div>
+            <small>@course.CompletedLessons / @course.TotalLessons @Ui.Text("Lessons completed") · @course.ProgressPercentage%</small>
+            <a class="btn btn-primary" href="/courses/@course.Id">@Tx("View course", "Xem khóa học") <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </article>
+    }</div>
+}
+else if(Selected is not { } course){
+    <EmptyState Title="@Tx("Course unavailable", "Khóa học không khả dụng")" Description="@Tx("This course is not published or is no longer available.", "Khóa học chưa được xuất bản hoặc không còn khả dụng.")" ActionHref="/courses" ActionLabel="@Ui.Text("Courses")" />
+}
+else {
+    <a href="/courses" class="ss-muted">← @Ui.Text("Courses")</a>
+    <PageHeader HeadingId="courses-title" Title="@course.Title" Description="@(LessonId is null ? course.Description : null)" Eyebrow="@Tx("MY LEARNING", "KHÔNG GIAN HỌC TẬP")" />
+    <div class="ss-learning-layout">
+        <aside class="ss-panel ss-outline">
+            <details open><summary>@Tx("Course content", "Nội dung khóa học") · @course.CompletedLessons/@course.TotalLessons</summary>
+            <ol>@foreach(var item in course.Lessons.OrderBy(x=>x.Order)){
+                <li><a href="/courses/@course.Id/lessons/@item.Id" aria-current="@(LessonId == item.Id ? "page" : null)"><i class="bi @(item.IsCompleted ? "bi-check-circle-fill" : LessonId == item.Id ? "bi-play-circle" : "bi-circle")" aria-hidden="true"></i><span>@item.Title <small class="d-block ss-muted">@(item.IsCompleted ? Ui.Text("Completed") : LessonId == item.Id ? Tx("Current lesson", "Bài đang xem") : Ui.Text("Not Started"))</small></span></a></li>
+            }</ol>
+            @if(course.FinalQuizId is int quizId){<a href="/game?quizId=@quizId"><i class="bi bi-ui-checks" aria-hidden="true"></i>@Ui.Text("Final Quiz")</a>}
+            </details>
+        </aside>
+        <section class="ss-panel">
+        @if(LessonId is null){
+            <h2>@Tx("Your next step", "Bước học tiếp theo")</h2>
+            <p>@course.ProgressPercentage% @Ui.Text("percent complete") · @course.CompletedLessons/@course.TotalLessons @Ui.Text("Lessons completed")</p>
+            <div class="progress" role="progressbar" aria-label="@Ui.Text("Course Status")" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:@course.ProgressPercentage%"></div></div>
+            @if(course.IsCompleted){<p class="alert alert-success mt-3">@Ui.Text("Course Completed")</p>}
+            <div class="ss-action-bar"><button class="btn btn-primary" type="button" disabled="@busy" @onclick="()=>Enroll(course.Id)">@Ui.Text("Enroll / Continue")</button>
+            @if(NextLesson(course) is { } next){<a href="/courses/@course.Id/lessons/@next.Id" class="btn btn-outline-primary">@Tx("Open next lesson", "Mở bài học tiếp theo")</a>}</div>
+            <p class="ss-muted">@Ui.Text(course.FinalQuizId is null ? "Complete all required lessons to finish this course." : "Complete all required lessons and pass the final quiz.")</p>
+            @if(course.FinalQuizResult is not null){<p>@Ui.Text("Final Quiz"): @Ui.Text(course.FinalQuizResult == QuizAttemptResult.Pass ? "Pass" : "Not Pass")</p>}
+        }
+        else if(course.Lessons.FirstOrDefault(x=>x.Id==LessonId) is { } lesson){
+            <h2>@lesson.Title</h2><LessonMedia Lesson="@lesson" />
+            <div class="ss-action-bar"><button type="button" class="btn btn-primary" disabled="@(busy || lesson.IsCompleted)" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? Ui.Text("Lesson completed") : Ui.Text("Mark lesson completed"))</button></div>
+            <nav class="ss-action-bar" aria-label="@Tx("Lesson navigation", "Điều hướng bài học")">
+            @if(Adjacent(course,lesson,-1) is { } prev){<a class="btn btn-outline-secondary" href="/courses/@course.Id/lessons/@prev.Id">← @Ui.Text("Previous")</a>}
+            @if(Adjacent(course,lesson,1) is { } next){<a class="btn btn-outline-primary" href="/courses/@course.Id/lessons/@next.Id">@Ui.Text("Next") →</a>}
+            else if(course.FinalQuizId is int lessonQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@lessonQuizId">@Ui.Text("Open Final Quiz")</a>}
+            </nav>
+        }
+        else {<EmptyState Title="@Tx("Lesson unavailable", "Bài học không khả dụng")" Description="@Tx("Choose a lesson from this course's outline.", "Chọn một bài học trong mục nội dung khóa học.")" />}
+        </section>
+    </div>
+}
+</main>
+@code {
+    [Parameter] public int? CourseId { get; set; }
+    [Parameter] public int? LessonId { get; set; }
+    private int userId;
+    private IReadOnlyList<CourseDto> courses=[];
+    private string? message;
+    private string search="";
+    private bool loading=true,busy;
+    private CourseDto? Selected => courses.FirstOrDefault(x=>x.Id==CourseId);
+    private IEnumerable<CourseDto> Filtered => courses.Where(x=>x.Title.Contains(search,StringComparison.OrdinalIgnoreCase));
+    private string Tx(string en,string vi)=>Ui.Current==AppLanguage.Vi?vi:en;
+    protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=state.User.GetUserId();try{await Reload();}catch(Exception){message=Tx("Courses could not be loaded. Please try again.","Không tải được khóa học. Vui lòng thử lại.");}finally{loading=false;}}
+    private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
+    private Task Enroll(int id)=>Run(async()=>{message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();});
+    private Task Complete(int id)=>Run(async()=>{message=await CoursesService.CompleteLessonAsync(id,userId)?"Lesson progress saved.":"Enroll before completing a lesson.";await Reload();});
+    private async Task Run(Func<Task> action){if(busy)return;busy=true;try{await action();}catch(Exception){message=Tx("We could not save progress. Please try again.","Chưa lưu được tiến độ. Vui lòng thử lại.");}finally{busy=false;}}
+    private static CourseLessonDto? NextLesson(CourseDto c)=>c.Lessons.OrderBy(x=>x.Order).FirstOrDefault(x=>!x.IsCompleted)??c.Lessons.OrderBy(x=>x.Order).FirstOrDefault();
+    private static CourseLessonDto? Adjacent(CourseDto c,CourseLessonDto lesson,int step){var list=c.Lessons.OrderBy(x=>x.Order).ToList();var index=list.FindIndex(x=>x.Id==lesson.Id)+step;return index>=0&&index<list.Count?list[index]:null;}
 }

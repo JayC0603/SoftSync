@@ -99,13 +99,13 @@
             var createResult = await UserManager.CreateAsync(user);
             if (!createResult.Succeeded)
             {
-                message = "Error: " + string.Join(" ", createResult.Errors.Select(e => e.Description));
+                message = "Error: " + string.Join(" ", createResult.Errors.Select(e => Ui.IdentityError(e.Code)));
                 return;
             }
             var roleResult = await UserManager.AddToRoleAsync(user, SoftSync.BLL.Auth.CourseAuthorization.UserRole);
             if (!roleResult.Succeeded)
             {
-                message = "Error: " + string.Join(" ", roleResult.Errors.Select(e => e.Description));
+                message = "Error: " + string.Join(" ", roleResult.Errors.Select(e => Ui.IdentityError(e.Code)));
                 return;
             }
             isNew = true;
@@ -114,7 +114,7 @@
         var addLoginResult = await UserManager.AddLoginAsync(user, externalLoginInfo);
         if (!addLoginResult.Succeeded && isNew)
         {
-            message = "Error: " + string.Join(" ", addLoginResult.Errors.Select(e => e.Description));
+            message = "Error: " + string.Join(" ", addLoginResult.Errors.Select(e => Ui.IdentityError(e.Code)));
             return;
         }
 

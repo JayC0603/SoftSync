@@ -1,3 +1,4 @@
+@inherits LocalizedComponentBase
 @page "/admin/users"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
@@ -5,52 +6,52 @@
 @inject IdentityRoleManagementService RoleManagement
 @inject AuthenticationStateProvider Auth
 
-<PageTitle>Quản lý Teacher · SoftSync</PageTitle>
+<PageTitle>@Ui.Text("Quản lý Teacher · SoftSync")</PageTitle>
 
-<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+<main class="ss-workspace">
     <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="user-management-title" aria-busy="@busy">
         <header class="tw:mb-6">
-            <span class="badge bg-primary">Admin</span>
-            <h1 id="user-management-title" class="tw:mt-2 tw:text-3xl tw:font-bold">Quản lý tài khoản Teacher</h1>
-            <p>Chỉ thay đổi membership của role <code>Teacher</code>. Ownership Course/Quiz hiện tại không bị thay đổi.</p>
+            <span class="badge bg-primary">@Ui.Text("Admin")</span>
+            <h1 id="user-management-title" class="tw:mt-2 tw:text-3xl tw:font-bold">@Ui.Text("Quản lý tài khoản Teacher")</h1>
+            <p>@Ui.Text("Chỉ thay đổi membership của role") <code>@Ui.Text("Teacher")</code>@Ui.Text(". Ownership Course/Quiz hiện tại không bị thay đổi.")</p>
         </header>
 
         <div aria-live="polite" aria-atomic="true">
             @if (!string.IsNullOrWhiteSpace(message))
             {
-                <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@message</div>
+                <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@Ui.Text(message)</div>
             }
         </div>
 
         @if (busy && users.Count == 0)
         {
-            <p role="status">Đang tải danh sách người dùng...</p>
+            <p role="status">@Ui.Text("Đang tải danh sách người dùng...")</p>
         }
         else
         {
             <div class="table-responsive ss-glass tw:rounded-2xl tw:p-4">
                 <table class="table table-hover align-middle">
-                    <caption class="visually-hidden">Danh sách người dùng và quyền Teacher</caption>
-                    <thead><tr><th scope="col">Người dùng</th><th scope="col">Email</th><th scope="col">Roles</th><th scope="col">Thao tác</th></tr></thead>
+                    <caption class="visually-hidden">@Ui.Text("Danh sách người dùng và quyền Teacher")</caption>
+                    <thead><tr><th scope="col">@Ui.Text("Người dùng")</th><th scope="col">@Ui.Text("Email")</th><th scope="col">@Ui.Text("Roles")</th><th scope="col">@Ui.Text("Thao tác")</th></tr></thead>
                     <tbody>
                     @foreach (var user in users)
                     {
                         <tr>
                             <th scope="row">@(string.IsNullOrWhiteSpace(user.DisplayName) ? $"User #{user.Id}" : user.DisplayName)</th>
                             <td>@user.Email</td>
-                            <td><span class="visually-hidden">Roles: </span>@RoleText(user)</td>
+                            <td><span class="visually-hidden">@Ui.Text("Roles:") </span>@RoleText(user)</td>
                             <td>
                                 @if (user.IsAdmin || user.Id == adminUserId)
                                 {
-                                    <span class="text-muted">Được bảo vệ</span>
+                                    <span class="text-muted">@Ui.Text("Được bảo vệ")</span>
                                 }
                                 else if (user.IsTeacher)
                                 {
-                                    <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, false)">Gỡ Teacher</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, false)">@Ui.Text("Gỡ Teacher")</button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, true)">Gán Teacher</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, true)">@Ui.Text("Gán Teacher")</button>
                                 }
                             </td>
                         </tr>
@@ -93,11 +94,11 @@
         error = !result.Succeeded;
         message = result.Succeeded
             ? assign ? "Đã gán role Teacher." : "Đã gỡ role Teacher; tài khoản vẫn giữ role User."
-            : string.Join(" ", result.Errors.Select(x => x.Description));
+            : string.Join(" ", result.Errors.Select(x => Ui.Text(x.Description)));
         users = await RoleManagement.GetUsersAsync();
         busy = false;
     }
 
-    private static string RoleText(ManagedUserRoleDto user) =>
-        string.Join(", ", new[] { user.IsUser ? "User" : null, user.IsTeacher ? "Teacher" : null, user.IsAdmin ? "Admin" : null }.Where(x => x is not null));
+    private string RoleText(ManagedUserRoleDto user) =>
+        string.Join(", ", new[] { user.IsUser ? Ui.Text("User") : null, user.IsTeacher ? Ui.Text("Teacher") : null, user.IsAdmin ? Ui.Text("Admin") : null }.Where(x => x is not null));
 }

@@ -31,17 +31,17 @@
 
 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
     <DataAnnotationsValidator />
-    <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+    <LocalizedValidationSummary class="text-danger tw:mb-3" role="alert" />
 
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["auth.identifier"]</label>
-        <InputText @bind-Value="Input.Identifier" class="form-control form-control-lg" autocomplete="username" placeholder="@L["auth.identifier.placeholder"]" />
-        <ValidationMessage For="() => Input.Identifier" class="text-danger" />
+        <label for="login-identifier" class="form-label tw:font-medium">@L["auth.identifier"]</label>
+        <InputText id="login-identifier" @bind-Value="Input.Identifier" class="form-control form-control-lg" autocomplete="username" placeholder="@L["auth.identifier.placeholder"]" />
+        <LocalizedValidationMessage For="() => Input.Identifier" class="text-danger" />
     </div>
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["auth.password"]</label>
-        <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" />
-        <ValidationMessage For="() => Input.Password" class="text-danger" />
+        <label for="login-password" class="form-label tw:font-medium">@L["auth.password"]</label>
+        <InputText id="login-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" />
+        <LocalizedValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
     <div class="login-options">
         <div class="form-check">

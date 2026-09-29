@@ -30,6 +30,12 @@ public interface IAssessmentService
     Task<IReadOnlyList<AssessmentAttemptDto>> GetHistoryAsync(int authenticatedUserId, int ownerUserId);
 }
 
+public interface IAccessibilityService
+{
+    Task<UserDto?> GetUserPreferenceAsync(int authenticatedUserId);
+    Task<bool> UpdatePreferenceAsync(int authenticatedUserId, UserDto preference);
+}
+
 public class AssessmentQuestionDto // Local DTO for BLL to UI
 {
     public int Id { get; set; }
@@ -81,6 +87,11 @@ public interface ICourseService
     Task<bool> EnrollAsync(int courseId, int authenticatedUserId);
     Task<bool> CompleteLessonAsync(int lessonId, int authenticatedUserId);
     Task<CourseAnalyticsDto?> GetAnalyticsAsync(int courseId, int authenticatedUserId, bool isAdmin);
+}
+
+public interface ILearningJourneyService
+{
+    Task<LearningJourneyDto> GetAsync(int authenticatedUserId);
 }
 
 public interface IChallengeService
@@ -145,6 +156,12 @@ public interface IAiAssessmentService
 public interface IAiAssistantService
 {
     Task<string> GetReplyAsync(string userMessage, int userId);
+}
+
+public interface IAiTutorService
+{
+    Task<AiTutorResponseDto> ExplainLessonAsync(AiTutorLessonRequestDto request, int authenticatedUserId, CancellationToken cancellationToken = default);
+    Task<AiTutorResponseDto> SummarizeLessonAsync(AiTutorLessonRequestDto request, int authenticatedUserId, CancellationToken cancellationToken = default);
 }
 
 public interface IChatHistoryService

@@ -34,12 +34,7 @@
         <NavLink class="ss-navpill" href="/roadmap">
             <i class="bi bi-mortarboard"></i> <span>@L["nav.roadmap"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/progress">
-            <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/community">
-            <i class="bi bi-people"></i> <span>@L["nav.community"]</span>
-        </NavLink>
+        <NavLink class="ss-navpill" href="/courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@Ui.Text("Courses")</span></NavLink>
         <NavLink class="ss-navpill" href="/game">
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
         </NavLink>
@@ -53,20 +48,25 @@
             <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
         </button>
 
-        <AuthorizeView Roles="Admin" Context="adminNavContext">
-            <Authorized><a class="btn btn-sm btn-outline-primary" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Users</span></a></Authorized>
-        </AuthorizeView>
-
+        <details class="ss-role-menu">
+            <summary>@(L.Current==AppLanguage.Vi ? "Khám phá" : "Explore") <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+            <div class="ss-role-links">
+                <NavLink href="/courses">@Ui.Text("Courses")</NavLink>
+                <NavLink href="/roadmap">@L["nav.roadmap"]</NavLink>
+                <NavLink href="/assistant">@L["nav.assistant"]</NavLink>
+                <NavLink href="/progress">@L["nav.progress"]</NavLink>
+                <NavLink href="/community">@L["nav.community"]</NavLink>
+                <NavLink href="/cv-review">@Ui.Text("CV Review")</NavLink>
+                <NavLink href="/game/history">@Ui.Text("Attempt history")</NavLink>
+                <NavLink href="/profile">@(L.Current==AppLanguage.Vi ? "Hồ sơ" : "Profile")</NavLink>
+                @if(profile is not null){<NavLink href="@($"/assessment/{profile.Id}")">@(L.Current==AppLanguage.Vi ? "Đánh giá kỹ năng" : "Assessment")</NavLink>}
+                <NavLink href="/settings">@L["nav.settings"]</NavLink>
+                <AuthorizeView Roles="Teacher,Admin" Context="teacherNavContext"><Authorized><hr /><NavLink href="/teacher">@(L.Current==AppLanguage.Vi ? "Không gian giảng dạy" : "Teacher Studio")</NavLink></Authorized></AuthorizeView>
+                <AuthorizeView Roles="Admin" Context="adminNavContext"><Authorized><hr /><NavLink href="/admin/users">@Ui.Text("Users")</NavLink><NavLink href="/admin/ai-configuration">@Ui.Text("AI Configuration")</NavLink></Authorized></AuthorizeView>
+            </div>
+        </details>
         <AuthorizeView>
             <Authorized>
-                <button type="button" class="ss-icon-btn ss-search-btn" title="@L["nav.search"]" aria-label="@L["nav.search"]">
-                    <i class="bi bi-search"></i>
-                </button>
-                <button type="button" class="ss-icon-btn ss-bell" title="@L["nav.notifications"]" aria-label="@L["nav.notifications"]">
-                    <i class="bi bi-bell"></i>
-                    <span class="ss-bell-badge">3</span>
-                </button>
-
                 <button type="button" class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]" aria-label="@L["nav.settings"]">
                     <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
                         @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
@@ -109,9 +109,7 @@
     <NavLink class="ss-mobile-bottom-link" href="/roadmap">
         <i class="bi bi-signpost-split"></i><span>@L["nav.roadmap"]</span>
     </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/progress">
-        <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
-    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@Ui.Text("Courses")</span></NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/community">
         <i class="bi bi-people-fill"></i><span>@L["nav.community"]</span>
     </NavLink>
@@ -489,8 +487,8 @@
     private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
     private string TargetLanguageName => L.Current == AppLanguage.Vi ? "English" : "Vietnamese";
     private string LanguageSwitchTitle => L.Current == AppLanguage.Vi
-        ? "Switch to English"
-        : "Chuyển sang tiếng Việt";
+        ? "Chuyển sang tiếng Anh"
+        : "Switch to Vietnamese";
 
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
 

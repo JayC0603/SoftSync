@@ -1,0 +1,15 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Dtos
+<div class="ss-lesson-media">
+    @if(!string.IsNullOrWhiteSpace(Lesson.VideoUrl)) {
+        <video @key="Lesson.Id" controls preload="metadata" aria-label="@(Ui.Text("Video lesson:") + " " + Lesson.Title)">
+            <source src="@Lesson.VideoUrl" />
+            @if(!string.IsNullOrWhiteSpace(Lesson.CaptionUrl)){<track kind="captions" src="@Lesson.CaptionUrl" srclang="vi" label="@Ui.Text("Vietnamese captions")" default />}
+        </video>
+        @if(string.IsNullOrWhiteSpace(Lesson.CaptionUrl)){<p class="ss-muted">@Ui.Text("Captions are not available for this video.")</p>}
+    }
+    @if(!string.IsNullOrWhiteSpace(Lesson.Description)){<p>@Lesson.Description</p>}
+    @if(!string.IsNullOrWhiteSpace(Lesson.Transcript)){<details><summary>@Ui.Text("Transcript for") @Lesson.Title</summary><div class="ss-transcript">@Lesson.Transcript</div></details>}
+    else if(!string.IsNullOrWhiteSpace(Lesson.VideoUrl)){<p class="ss-muted">@Ui.Text("A transcript is not available for this video.")</p>}
+</div>
+@code { [Parameter, EditorRequired] public CourseLessonDto Lesson { get; set; } = new(); }

@@ -1,0 +1,168 @@
+/* SoftSync learning/editor surfaces. Loaded after the legacy glass stylesheet. */
+:root {
+  --ss-canvas: #f6f7fb; --ss-surface: #fff; --ss-surface-soft: #f0f2f7;
+  --ss-text: #18233b; --ss-text-muted: #526071; --ss-border: #dbe1eb;
+  --ss-primary: #4338ca; --ss-primary-hover: #3730a3;
+  --ss-success: #166534; --ss-warning: #92400e; --ss-danger: #b91c1c;
+  --ss-radius-md: 12px;
+  --ss-elevation-0: none;
+  --ss-elevation-1: 0 1px 2px #18233b06, 0 4px 12px #18233b08;
+  --ss-elevation-2: 0 2px 4px #18233b08, 0 8px 20px #18233b0f;
+  --ss-elevation-3: 0 3px 6px #18233b0a, 0 12px 28px #18233b12;
+  --ss-elevation-4: 0 4px 8px #18233b0f, 0 18px 40px #18233b1f;
+  --ss-shadow-sm: var(--ss-elevation-1);
+  --ss-motion-fast: 120ms; --ss-motion-normal: 180ms; --ss-motion-slow: 240ms;
+  --ss-ease-standard: cubic-bezier(.2,0,0,1); --ss-ease-enter: cubic-bezier(.16,1,.3,1);
+  --ss-space-1: .5rem; --ss-space-2: 1rem; --ss-space-3: 1.5rem; --ss-space-4: 2rem;
+}
+html[data-theme="dark"] { --ss-canvas: #111827; --ss-surface: #192338; --ss-surface-soft: #243149; --ss-text: #f3f5fa; --ss-text-muted: #b7c4d8; --ss-border: #3c4b63; --ss-primary: #a5b4fc; --ss-primary-hover: #c7d2fe; }
+.ss-workspace { max-width: 1200px; margin: auto; padding: 2.5rem 1.5rem 5rem; color: var(--ss-text); min-width: 0; }
+.ss-workspace h1 { font-size: clamp(1.7rem, 3vw, 2.3rem); letter-spacing: -.035em; line-height: 1.2; }
+.ss-workspace h2 { font-size: 1.3rem; letter-spacing: -.02em; }
+.ss-workspace h3 { font-size: 1.05rem; }
+.ss-workspace p { line-height: 1.65; }
+.ss-workspace :is(.ss-glass,.ss-card), .account-page .account-card {
+  background: var(--ss-surface) !important; color: var(--ss-text); border: 1px solid var(--ss-border) !important;
+  box-shadow: var(--ss-shadow-sm) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+.ss-workspace :is(.ss-glass,.ss-card)::before, .account-page .account-card::before { display: none; }
+.ss-page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; }
+.ss-page-heading p { color: var(--ss-text-muted); max-width: 65ch; margin: .75rem 0 0; }
+.ss-eyebrow { color: var(--ss-primary); text-transform: uppercase; font-size: .75rem; font-weight: 750; letter-spacing: .12em; margin-bottom: .5rem; }
+.ss-panel { background: var(--ss-surface); border: 1px solid var(--ss-border); border-radius: var(--ss-radius-md); padding: 1.5rem; min-width: 0; }
+.ss-workspace .btn { min-height: 42px; border-radius: 8px; font-weight: 600; padding: .6rem 1rem; }
+.ss-workspace .btn-primary { background: #4338ca; border-color: #4338ca; color: white; }
+.ss-workspace .btn-primary:hover { background: #3730a3; border-color: #3730a3; }
+.ss-workspace .btn-outline-primary { color: var(--ss-primary); border-color: var(--ss-primary); }
+.ss-workspace :is(.form-control,.form-select) { background: var(--ss-surface); color: var(--ss-text); border: 1px solid var(--ss-border); border-radius: 8px; min-height: 44px; }
+.ss-workspace textarea.form-control { min-height: 110px; line-height: 1.6; resize: vertical; }
+.ss-workspace .form-label { font-weight: 650; margin-top: 1rem; }
+.ss-workspace .form-text, .ss-muted { color: var(--ss-text-muted); }
+.ss-workspace :is(a,button,input,select,textarea,summary):focus-visible { outline: 3px solid var(--ss-primary); outline-offset: 3px; }
+.ss-workspace .table { --bs-table-bg: var(--ss-surface); --bs-table-color: var(--ss-text); --bs-table-border-color: var(--ss-border); }
+.ss-workspace .table th { font-size: .85rem; }
+.ss-workspace .table :is(td,th) { padding: 1rem .75rem; }
+.ss-empty { text-align: center; padding: 3rem 1.5rem; border: 1px dashed var(--ss-border); border-radius: 12px; }
+.ss-empty > i { font-size: 2rem; color: var(--ss-primary); display: block; margin-bottom: 1rem; }
+.ss-empty p { color: var(--ss-text-muted); max-width: 50ch; margin: .75rem auto 1.5rem; }
+.ss-loading { display: flex; align-items: center; gap: .75rem; padding: 1.5rem 0; color: var(--ss-text-muted); }
+.ss-course-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.5rem; }
+.ss-course-card { display: flex; flex-direction: column; gap: 1rem; }
+.ss-course-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
+.ss-course-card p { color: var(--ss-text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ss-course-card .btn { margin-top: auto; align-self: flex-start; }
+.ss-course-meta { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--ss-text-muted); font-size: .9rem; }
+.ss-learning-layout, .ss-studio-layout { display: grid; grid-template-columns: 270px minmax(0,1fr); gap: 2rem; align-items: start; }
+.ss-outline { position: sticky; top: 100px; }
+.ss-outline ol { list-style: none; padding: 0; margin: 1rem 0; }
+.ss-outline a { display: flex; gap: .65rem; padding: .8rem; color: var(--ss-text); border-radius: 8px; text-decoration: none; }
+.ss-outline a[aria-current="page"] { background: var(--ss-surface-soft); font-weight: 700; border-left: 3px solid var(--ss-primary); }
+.ss-lesson-media video { width: 100%; max-height: 62vh; background: #0f172a; border-radius: 10px; }
+.ss-lesson-media details { margin: 1.25rem 0; border: 1px solid var(--ss-border); border-radius: 8px; padding: 1rem; }
+.ss-lesson-media summary { cursor: pointer; font-weight: 650; }
+.ss-transcript { white-space: pre-wrap; max-width: 72ch; line-height: 1.8; padding-top: 1rem; }
+.ss-action-bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: 1.5rem 0; }
+.ss-studio-list { display: grid; gap: .5rem; max-height: 65vh; overflow-y: auto; padding: 3px; }
+.ss-studio-list button { width: 100%; text-align: left; background: var(--ss-surface); border: 1px solid var(--ss-border); color: var(--ss-text); padding: .8rem; border-radius: 8px; }
+.ss-studio-list button[aria-pressed="true"] { border-color: var(--ss-primary); background: var(--ss-surface-soft); }
+.ss-builder-nav { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--ss-border); padding-bottom: 1rem; }
+.ss-builder-nav button { background: transparent; border: 0; border-radius: 8px; padding: .7rem 1rem; color: var(--ss-text-muted); font-weight: 650; }
+.ss-builder-nav button[aria-pressed="true"] { color: var(--ss-primary); background: var(--ss-surface-soft); }
+.ss-builder-section { margin-bottom: 1.5rem; }
+.ss-builder-section > summary { padding: 1rem; cursor: pointer; font-weight: 700; border-bottom: 1px solid var(--ss-border); }
+.ss-question-option { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: .8rem; align-items: center; padding: .75rem; margin-top: .5rem; border: 1px solid var(--ss-border); border-radius: 8px; }
+.ss-question-option:has(input:checked) { border-color: var(--ss-primary); background: var(--ss-surface-soft); }
+.ss-role-menu { position: relative; }
+.ss-role-menu summary { cursor: pointer; list-style: none; color: var(--ss-text); padding: .5rem; font-weight: 650; }
+.ss-role-links { position: absolute; z-index: 80; right: 0; top: 100%; width: 230px; padding: .75rem; border: 1px solid var(--ss-border); border-radius: 12px; background: var(--ss-surface); box-shadow: var(--ss-shadow-sm); }
+.ss-role-links a { display: block; padding: .65rem; color: var(--ss-text); border-radius: 6px; text-decoration: none; }
+.ss-role-links a.active { background: var(--ss-surface-soft); color: var(--ss-primary); }
+.ss-navbar .ss-navpills { overflow-x: auto; min-width: 0; }
+.account-page .account-card { border-radius: 12px; padding: 2rem; }
+.account-page .account-brand { background: #3730a3; }
+.account-page .account-shell { backdrop-filter: none; box-shadow: var(--ss-shadow-sm); }
+@media(max-width:1050px) { .ss-course-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .ss-learning-layout,.ss-studio-layout { grid-template-columns: 220px minmax(0,1fr); gap: 1.25rem; } }
+@media(max-width:760px) { .ss-workspace { padding: 1.5rem 1rem 6rem; } .ss-page-heading { flex-direction: column; } .ss-course-grid,.ss-learning-layout,.ss-studio-layout { grid-template-columns: 1fr; } .ss-outline { position: static; } .ss-studio-list { max-height: 220px; } .ss-panel { padding: 1rem; } .ss-navbar { flex-wrap: wrap; gap: .5rem; } .ss-navbar .ss-nav-actions { gap: .5rem; } .ss-role-links { right: 0; } }
+@media(prefers-reduced-motion:reduce) { .ss-workspace *, .ss-workspace *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+html[data-reduce-motion="1"] .ss-workspace * { animation: none !important; transition: none !important; }
+html.ss-high-contrast .ss-workspace { --ss-text: #000; --ss-text-muted: #222; --ss-surface: #fff; --ss-border: #000; --ss-primary: #312e81; }
+html.ss-large-text .ss-workspace { font-size: 1.15rem; }
+.ss-navbar { background: var(--ss-surface) !important; border-color: var(--ss-border) !important; backdrop-filter: none !important; }
+.ss-navbar :is(a,button,summary):focus-visible { outline: 3px solid var(--ss-primary); outline-offset: 3px; }
+.ss-navbar .ss-navpill span { display: inline; }
+.account-page :is(.form-control,.form-select) { background: var(--ss-surface); color: var(--ss-text); border-color: var(--ss-border); }
+.account-page :is(a,button,input):focus-visible { outline: 3px solid var(--ss-primary); outline-offset: 3px; }
+.account-page .account-shell { border-radius: 12px; }
+.account-page .account-brand { min-height: 560px; }
+.account-page .account-brand-copy { margin-top: 65px; }
+.account-page .account-brand h1 { font-size: clamp(2rem,3vw,2.8rem); line-height: 1.2; }
+.account-page .account-brand::before, .account-page .account-brand::after { display: none; }
+.dash-home.ss-workspace { max-width: 1200px; padding: 2rem 1.5rem 5rem; }
+.dash-home.ss-workspace .dash-hero-v2 { min-height: 0; margin: 0; padding: 2rem; grid-template-columns: minmax(0,1fr) 260px; gap: 2rem; background: var(--ss-surface); border: 1px solid var(--ss-border); border-radius: 12px; }
+.dash-home.ss-workspace .dash-hero-v2::after { display: none; }
+.dash-home.ss-workspace .dash-hero-v2 h1 { font-size: clamp(1.7rem,3vw,2.3rem); line-height: 1.2; letter-spacing: -.035em; }
+.dash-home.ss-workspace .dash-focus-card { background: var(--ss-surface-soft); border-color: var(--ss-border); box-shadow: none; border-radius: 10px; }
+.dash-home.ss-workspace .dash-syncy-v2 { min-height: 260px; }
+.dash-home.ss-workspace .dash-syncy-v2 img { width: 240px; height: 260px; bottom: 0; }
+.dash-home.ss-workspace .syncy-bubble { display: none; }
+.dash-home.ss-workspace .mentor-bar, .dash-home.ss-workspace .mentor-cards article { background: var(--ss-surface); border-color: var(--ss-border); border-radius: 12px; box-shadow: none; }
+@media(max-width:760px) { .dash-home.ss-workspace { padding: 1rem 1rem 6rem; } .dash-home.ss-workspace .dash-hero-v2 { grid-template-columns: 1fr; padding: 1rem; } .dash-home.ss-workspace .dash-syncy-v2 { display: none; } }
+
+/* Depth is selective: static panels do not lift; only actionable cards do. */
+.ss-workspace .ss-course-card, .ss-workspace .ss-outline { box-shadow: var(--ss-elevation-1); }
+.ss-workspace .ss-course-card { transition: transform var(--ss-motion-normal) var(--ss-ease-standard), box-shadow var(--ss-motion-normal) var(--ss-ease-standard), border-color var(--ss-motion-fast) ease; }
+.ss-workspace .ss-course-card:focus-within { border-color: var(--ss-primary); box-shadow: var(--ss-elevation-2); }
+.ss-workspace .ss-studio-list button { box-shadow: var(--ss-elevation-1); transition: border-color var(--ss-motion-fast) ease, background-color var(--ss-motion-fast) ease, box-shadow var(--ss-motion-normal) ease; }
+.ss-workspace .btn, .account-page .ss-btn-primary { transition: transform var(--ss-motion-fast) var(--ss-ease-standard), box-shadow var(--ss-motion-fast) ease, background-color var(--ss-motion-fast) ease; }
+.ss-workspace .btn-primary:not(:disabled):active, .account-page .ss-btn-primary:not(:disabled):active { transform: translateY(0); box-shadow: var(--ss-elevation-0); }
+.ss-workspace :is(.form-control,.form-select) { transition: border-color var(--ss-motion-fast) ease, box-shadow var(--ss-motion-fast) ease; scroll-margin-bottom: 9rem; }
+.ss-workspace :is(.form-control,.form-select):focus { border-color: var(--ss-primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--ss-primary) 15%,transparent); }
+.ss-navbar .ss-navpill, .ss-role-links a, .ss-builder-nav button { transition: background-color var(--ss-motion-fast) ease, color var(--ss-motion-fast) ease; }
+.ss-navbar .ss-navpill.active { box-shadow: inset 0 -2px var(--ss-primary); }
+.ss-role-links { box-shadow: var(--ss-elevation-3); }
+.ss-role-menu[open] .ss-role-links { animation: ss-menu-enter var(--ss-motion-fast) var(--ss-ease-enter); }
+.ss-workspace .progress-bar, .dash-home.ss-workspace .dash-focus-progress > span { transition: width var(--ss-motion-slow) var(--ss-ease-standard); }
+/* Bootstrap floats legends and form-check radios. Keep this group in normal
+   flow and use a dedicated grid so the first option cannot wrap around its title. */
+.ss-workspace .ss-quiz-question { min-width: 0; margin: 0; padding: 0; border: 0; }
+.ss-workspace .ss-quiz-question-title { float: none; width: 100%; margin: 0 0 1.25rem; padding: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.ss-workspace .ss-quiz-option { display: grid; grid-template-columns: 1.25rem minmax(0,1fr); align-items: start; gap: .75rem; width: 100%; min-height: 56px; margin: 0 0 .75rem; padding: 1rem; border: 1px solid var(--ss-border); border-radius: 12px; background: var(--ss-surface); cursor: pointer; }
+.ss-workspace .ss-quiz-option:last-child { margin-bottom: 0; }
+.ss-workspace .ss-quiz-option > .form-check-input { float: none; position: static; width: 1.125rem; height: 1.125rem; margin: .2rem 0 0; }
+.ss-workspace .ss-quiz-option-text { min-width: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.ss-workspace .ss-quiz-option:has(input:disabled) { cursor: default; }
+.ss-workspace .ss-quiz-option, .ss-workspace .ss-question-option { transition: border-color var(--ss-motion-fast) ease, background-color var(--ss-motion-fast) ease; }
+.ss-workspace .ss-quiz-option:has(input:checked) { border-color: var(--ss-primary) !important; background: var(--ss-surface-soft); box-shadow: inset 3px 0 var(--ss-primary); }
+.ss-workspace .ss-quiz-option:focus-within { outline: 2px solid var(--ss-primary); outline-offset: 2px; }
+.ss-workspace .ss-editor-content { animation: ss-content-enter var(--ss-motion-normal) var(--ss-ease-enter); }
+.ss-workspace .ss-editor-feedback { animation: ss-feedback-enter var(--ss-motion-fast) ease; }
+.ss-workspace .ss-sticky-actions { position: sticky; bottom: 1rem; z-index: 10; background: var(--ss-surface); border: 1px solid var(--ss-border); border-radius: 10px; padding: .75rem; box-shadow: var(--ss-elevation-3); }
+.ss-workspace .ss-save-button { min-width: 110px; }
+.ss-workspace details[open] > .ss-transcript { animation: ss-feedback-enter var(--ss-motion-normal) ease; }
+.dash-home.ss-workspace .dash-focus-card, .dash-home.ss-workspace .week-card { box-shadow: var(--ss-elevation-1); }
+.dash-home.ss-workspace .course-cards button { box-shadow: var(--ss-elevation-1); transition: transform var(--ss-motion-normal) var(--ss-ease-standard), box-shadow var(--ss-motion-normal) ease; }
+.dash-home.ss-workspace .dash-hero-copy { animation: ss-content-enter var(--ss-motion-normal) var(--ss-ease-enter); }
+.dash-home.ss-workspace .week-card { animation: ss-content-enter var(--ss-motion-normal) var(--ss-ease-enter) 40ms backwards; }
+.dash-home.ss-workspace .recommend-section { animation: ss-content-enter var(--ss-motion-normal) var(--ss-ease-enter) 80ms backwards; }
+.dash-home.ss-workspace .mentor-modal { box-shadow: var(--ss-elevation-4); animation: ss-dialog-enter var(--ss-motion-normal) var(--ss-ease-enter); }
+.dash-home.ss-workspace .mentor-modal-backdrop { animation: ss-feedback-enter var(--ss-motion-fast) ease; }
+@media(hover:hover) and (pointer:fine) {
+  .ss-workspace .ss-course-card:hover, .dash-home.ss-workspace .course-cards button:hover { transform: translateY(-2px); box-shadow: var(--ss-elevation-2); border-color: var(--ss-primary); }
+  .ss-workspace .ss-studio-list button:not(:disabled):hover { border-color: var(--ss-primary); box-shadow: var(--ss-elevation-2); }
+  .ss-workspace .btn-primary:not(:disabled):hover, .account-page .ss-btn-primary:not(:disabled):hover { transform: translateY(-1px); box-shadow: var(--ss-elevation-2); }
+  .ss-workspace .ss-quiz-option:hover { border-color: var(--ss-primary) !important; }
+  .ss-workspace .btn-primary:not(:disabled):active, .account-page .ss-btn-primary:not(:disabled):active { transform: translateY(0); box-shadow: var(--ss-elevation-0); }
+}
+@keyframes ss-content-enter { from { opacity: .85; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes ss-feedback-enter { from { opacity: .85; } to { opacity: 1; } }
+@keyframes ss-menu-enter { from { opacity: .85; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes ss-dialog-enter { from { opacity: .85; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
+@media(max-width:760px) { .ss-workspace .ss-sticky-actions { bottom: calc(5.5rem + env(safe-area-inset-bottom)); } }
+/* Suppress movement, including hover transforms, but retain all state styling. */
+@media(prefers-reduced-motion:reduce) {
+  :is(.ss-workspace,.ss-navbar,.account-page) *, :is(.ss-workspace,.ss-navbar,.account-page) *::before, :is(.ss-workspace,.ss-navbar,.account-page) *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .ss-workspace .ss-course-card:hover, .dash-home.ss-workspace .course-cards button:hover, .ss-workspace .btn:hover, .account-page .ss-btn-primary:hover { transform: none !important; }
+}
+html[data-reduce-motion="1"] :is(.ss-workspace,.ss-navbar,.account-page) *, html[data-reduce-motion="1"] :is(.ss-workspace,.ss-navbar,.account-page) *::before, html[data-reduce-motion="1"] :is(.ss-workspace,.ss-navbar,.account-page) *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html[data-reduce-motion="1"] .ss-workspace .ss-course-card:hover, html[data-reduce-motion="1"] .dash-home.ss-workspace .course-cards button:hover, html[data-reduce-motion="1"] .ss-workspace .btn:hover, html[data-reduce-motion="1"] .account-page .ss-btn-primary:hover { transform: none !important; }

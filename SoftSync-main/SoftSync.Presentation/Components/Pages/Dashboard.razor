@@ -8,6 +8,7 @@
 @inject IUserService UserService
 @inject IProgressService ProgressService
 @inject IRoadmapService RoadmapService
+@inject ICourseService CourseService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
@@ -17,17 +18,17 @@
 }
 else
 {
-    <main class="dash-home" aria-labelledby="dash-page-title">
+    <main class="dash-home ss-workspace" aria-labelledby="dash-page-title">
         <section class="dash-hero dash-hero-v2" aria-describedby="dash-hero-summary">
             <div class="dash-hero-copy">
                 <span class="dash-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i>@T("Không gian học tập của bạn", "Your learning space")</span>
-                <h1 id="dash-page-title">@T("Chào buổi sáng", "Good morning"), @FirstName(user.PublicName)!</h1>
+                <h1 id="dash-page-title">@T("Chào bạn", "Welcome"), @FirstName(user.PublicName)!</h1>
                 <p id="dash-hero-summary">@T("Một bước nhỏ hôm nay sẽ tạo nên kỹ năng lớn ngày mai.", "One focused step today builds a stronger skill tomorrow.")</p>
 
                 <div class="dash-focus-card">
                     <div class="dash-focus-heading">
                         <span><i class="bi bi-play-fill" aria-hidden="true"></i>@T("Học tiếp", "Continue learning")</span>
-                        <small><i class="bi bi-clock" aria-hidden="true"></i>15 @T("phút", "min")</small>
+
                     </div>
                     <h2>@CurrentTitle</h2>
                     <p>@CurrentSkill</p>
@@ -36,18 +37,17 @@ else
                     </div>
                     <div class="dash-focus-footer">
                         <strong>@CurrentPercent% @T("hoàn thành", "complete")</strong>
-                        <span>@completedItems @T("bài đã xong", "lessons completed")</span>
+                        <span>@CurrentCompleted @T("mục đã hoàn thành", "items completed")</span>
                     </div>
                 </div>
                 <div class="dash-hero-actions">
-                    <button type="button" class="primary" @onclick='() => Nav.NavigateTo("/roadmap")'>@T("Bắt đầu học", "Start learning")<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                    <button type="button" class="primary" @onclick='() => Nav.NavigateTo(ContinueHref)'>@T("Học tiếp", "Continue learning")<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     <button type="button" class="dash-text-action" @onclick="NavigateToAssessment">@T("Đánh giá lại kỹ năng", "Retake skill assessment")</button>
                 </div>
             </div>
             <div class="dash-syncy dash-syncy-v2">
                 <div class="syncy-bubble"><strong>Syncy</strong><span>@T("Hôm nay chỉ cần tập trung vào một bài thôi nhé!", "Let's focus on just one lesson today!")</span></div>
                 <img src="/images/syncy-robot.png" alt="Syncy AI" />
-                <div class="dash-streak-pill"><i class="bi bi-fire" aria-hidden="true"></i><span><strong>4 @T("ngày", "days")</strong><small>@T("Chuỗi học tập", "Learning streak")</small></span></div>
             </div>
         </section>
 
@@ -64,29 +64,22 @@ else
                 </section>
 
                 <section class="recommend-section">
-                    <h3>@T("Có thể bạn quan tâm", "You may be interested")</h3>
-                    <div class="course-cards">
-                        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-person-video3 blue"></i><span><strong>@T("Thuyết trình tự tin", "Confident presenting")</strong><small>@T("Trình bày ý tưởng rõ ràng, thuyết phục và cuốn hút.", "Present ideas clearly and persuasively.")</small><em><i class="bi bi-clock"></i> 20 @T("phút", "min")</em></span></button>
-                        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-people-fill teal"></i><span><strong>@T("Làm việc nhóm hiệu quả", "Effective teamwork")</strong><small>@T("Hợp tác, chia sẻ và đạt mục tiêu chung.", "Collaborate and achieve shared goals.")</small><em><i class="bi bi-clock"></i> 18 @T("phút", "min")</em></span></button>
-                        <button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-head-side-heart-fill purple"></i><span><strong>@T("Quản lý cảm xúc", "Emotion management")</strong><small>@T("Nhận diện và kiểm soát cảm xúc để phát triển bản thân.", "Recognize and regulate your emotions.")</small><em><i class="bi bi-clock"></i> 16 @T("phút", "min")</em></span></button>
-                    </div>
+                    <h2>@T("Khóa học đang mở", "Available courses")</h2>
+                    @if(publishedCourses.Count==0){<p>@T("Chưa có khóa học được xuất bản.", "No published courses yet.")</p>}
+                    <div class="course-cards">@foreach(var item in publishedCourses.Take(3)){
+                        <button type="button" @onclick='()=>Nav.NavigateTo($"/courses/{item.Id}")'><i class="bi bi-journal-bookmark blue" aria-hidden="true"></i><span><strong>@item.Title</strong><small>@item.TotalLessons @Ui.Text("Lessons") · @item.ProgressPercentage%</small></span></button>
+                    }</div>
                 </section>
             </div>
 
             <section class="week-card">
-                <header><h3>@T("Kết quả tuần này", "This week's results")</h3><button @onclick='() => Nav.NavigateTo("/progress")'>@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right"></i></button></header>
+                <header><h3>@T("Tiến độ học tập", "Learning progress")</h3><button @onclick='() => Nav.NavigateTo("/progress")'>@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right"></i></button></header>
                 <div class="week-stats">
                     <div><i class="bi bi-book-fill purple"></i><span><strong>@completedItems</strong><small>@T("bài học", "lessons")</small></span></div>
                     <div><i class="bi bi-star-fill gold"></i><span><strong>@user.ExperiencePoints</strong><small>XP</small></span></div>
-                    <div><i class="bi bi-fire orange"></i><span><small>@T("Chuỗi", "Streak")</small><strong class="orange-text">4 @T("ngày", "days")</strong></span></div>
+                    <div><i class="bi bi-journal-check orange" aria-hidden="true"></i><span><strong>@publishedCourses.Count(x=>x.IsCompleted)</strong><small>@T("khóa học hoàn thành", "courses completed")</small></span></div>
                 </div>
-                <div class="week-days">
-                    @foreach (var day in WeekDays)
-                    {
-                        <div><small>@day</small><span class="@(day is "T2" or "T3" or "T4" or "T5" ? "done" : "")">@(day is "T2" or "T3" or "T4" or "T5" ? "✓" : "")</span></div>
-                    }
-                    <i class="bi bi-fire"></i>
-                </div>
+
             </section>
         </div>
 
@@ -135,11 +128,15 @@ else
     private MentorDetail? SelectedMentor;
     private bool Vi => L.Current == AppLanguage.Vi;
     private string T(string vi, string en) => Vi ? vi : en;
-    private string[] WeekDays => Vi ? ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] : ["M", "T", "W", "T", "F", "S", "S"];
+    private IReadOnlyList<CourseDto> publishedCourses=[];
+    private CourseDto? ActiveCourse=>publishedCourses.Where(x=>x.ProgressPercentage>0&&!x.IsCompleted).OrderByDescending(x=>x.ProgressPercentage).FirstOrDefault();
+    private CourseLessonDto? NextLesson=>ActiveCourse?.Lessons.OrderBy(x=>x.Order).FirstOrDefault(x=>!x.IsCompleted);
+    private string ContinueHref=>ActiveCourse is { } c ? NextLesson is { } lesson ? $"/courses/{c.Id}/lessons/{lesson.Id}" : $"/courses/{c.Id}" : CurrentItem is not null ? "/roadmap" : "/courses";
+    private int CurrentCompleted=>ActiveCourse?.CompletedLessons??completedItems;
     private RoadmapItemDto? CurrentItem => roadmapItems.FirstOrDefault(x => !x.IsCompleted) ?? roadmapItems.LastOrDefault();
-    private string CurrentTitle => CurrentItem?.Title ?? T("Lắng nghe chủ động", "Active listening");
-    private string CurrentSkill => progress.FirstOrDefault()?.SkillName ?? T("Giao tiếp hiệu quả", "Effective communication");
-    private int CurrentPercent => progress.Count == 0 ? 0 : Math.Clamp(progress.Max(x => x.PercentComplete), 0, 100);
+    private string CurrentTitle => ActiveCourse?.Title ?? CurrentItem?.Title ?? T("Khám phá khóa học", "Explore courses");
+    private string CurrentSkill => NextLesson?.Title ?? (ActiveCourse is null ? T("Tiếp tục lộ trình hoặc chọn khóa học", "Continue your roadmap or choose a course") : T("Hoàn thành bài kiểm tra cuối khóa", "Complete the final quiz"));
+    private int CurrentPercent => ActiveCourse?.ProgressPercentage ?? (roadmapItems.Count==0?0:completedItems*100/roadmapItems.Count);
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,6 +148,7 @@ else
         var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
         roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
         completedItems = roadmapItems.Count(x => x.IsCompleted);
+        publishedCourses=await CourseService.GetPublishedAsync(id);
     }
 
     private void NavigateToAssessment() => Nav.NavigateTo($"/assessment/{user?.Id ?? 0}");

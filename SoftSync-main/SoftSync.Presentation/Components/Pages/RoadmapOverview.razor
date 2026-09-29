@@ -74,7 +74,7 @@
         </aside>
 
         <section class="week-column">
-            <div class="breadcrumb"><span>Roadmap</span><i class="bi bi-chevron-right"></i><span>@SkillName(SkillKey(SelectedItem))</span><i class="bi bi-chevron-right"></i><b>@Tx("Week", "Tuần") @SelectedOrdinal</b></div>
+            <div class="breadcrumb"><span>@Ui.Text("Roadmap")</span><i class="bi bi-chevron-right"></i><span>@SkillName(SkillKey(SelectedItem))</span><i class="bi bi-chevron-right"></i><b>@Tx("Week", "Tuần") @SelectedOrdinal</b></div>
             <header class="week-header">
                 <h1>@Tx("Week", "Tuần") @SelectedOrdinal: @WeekTitle(SelectedItem, SelectedOrdinal)</h1>
                 <p>@WeekDescription(SelectedItem)</p>

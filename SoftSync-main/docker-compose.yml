@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: softsync
       POSTGRES_USER: softsync
-      POSTGRES_PASSWORD: softsync
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or shell}"
     ports:
       - "5432:5432"
     volumes:
@@ -23,8 +23,8 @@ services:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@softsync.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:?Set PGADMIN_DEFAULT_EMAIL in .env or shell}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in .env or shell}"
     ports:
       - "5050:80"
     volumes:
@@ -42,10 +42,16 @@ services:
       PORT: "8080"
 
       # Inside the compose network the DB host is the service name "db".
-      ConnectionStrings__SoftSyncDb: "Host=db;Port=5432;Database=softsync;Username=softsync;Password=softsync"
+      ConnectionStrings__SoftSyncDb: "Host=db;Port=5432;Database=softsync;Username=softsync;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or shell}"
       # Values come from a local .env or the shell; never hard-code credentials here.
       BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
       BootstrapAdmin__Password: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
+      AiApi__ApiKey: "${AiApi__ApiKey:-}"
+      AiApi__Enabled: "${AiApi__Enabled:-true}"
+      AiApi__BaseUrl: "${AiApi__BaseUrl:-https://generativelanguage.googleapis.com/v1beta/openai/}"
+      AiApi__Model: "${AiApi__Model:-gemini-3.8-flash}"
+      AiApi__CvModel: "${AiApi__CvModel:-gemini-3.1-flash-lite}"
+      AiApi__TimeoutSeconds: "${AiApi__TimeoutSeconds:-45}"
 
     ports:
       - "8081:8080"

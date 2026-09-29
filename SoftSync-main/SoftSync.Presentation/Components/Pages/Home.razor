@@ -314,7 +314,7 @@
                     else if (chatView == "about")
                     {
                         <button type="button" @onclick='() => chatView = "how"'>🚀 @L["chatbot.action.how"]</button>
-                        <button type="button" @onclick='() => chatView = "mentor"'>👥 Mentor</button>
+                        <button type="button" @onclick='() => chatView = "mentor"'>@Ui.Text("👥 Mentor")</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/case-studies")'>🎮 @L["chatbot.action.cases"]</button>
                         <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
                     }

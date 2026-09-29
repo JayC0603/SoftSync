@@ -1,0 +1,15 @@
+@inherits LocalizedComponentBase
+@rendermode InteractiveServer
+@if (ErrorNotice)
+{
+    <div id="blazor-error-ui">
+        @Ui.Text("An unhandled error has occurred.")
+        <a href="" class="reload">@Ui.Text("Reload")</a>
+        <button type="button" class="dismiss" aria-label="@Ui.Text("Cancel")">🗙</button>
+    </div>
+}
+else
+{
+    <a class="ss-skip-link" href="#main-content">@Ui.Text("Skip to main content")</a>
+}
+@code { [Parameter] public bool ErrorNotice { get; set; } }

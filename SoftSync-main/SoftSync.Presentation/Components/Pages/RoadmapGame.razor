@@ -9,7 +9,7 @@
 <PageTitle>@Tx("Roadmap quiz", "Quiz Roadmap") · SoftSync</PageTitle>
 
 <main class="empty-quiz">
-    <section><i class="bi bi-ui-checks-grid"></i><span>QUIZ</span><h1>@Tx("Quiz has not been loaded", "Chưa nạp Quiz")</h1><p>@Tx("The old quiz was removed. This route is ready for new weekly questions.", "Quiz cũ đã được xóa. Trang này đang chờ bộ câu hỏi mới theo tuần.")</p><button @onclick="Back">@Tx("Back to week", "Quay lại tuần")</button></section>
+    <section><i class="bi bi-ui-checks-grid"></i><span>@Ui.Text("QUIZ")</span><h1>@Tx("Quiz has not been loaded", "Chưa nạp Quiz")</h1><p>@Tx("The old quiz was removed. This route is ready for new weekly questions.", "Quiz cũ đã được xóa. Trang này đang chờ bộ câu hỏi mới theo tuần.")</p><button @onclick="Back">@Tx("Back to week", "Quay lại tuần")</button></section>
 </main>
 
 @code {

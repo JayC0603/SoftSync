@@ -1,0 +1,16 @@
+@using System.Linq.Expressions
+@typeparam TValue
+@inherits LocalizedValidationBase
+@foreach (var error in EditContext!.GetValidationMessages(field))
+{
+    <div @attributes="AdditionalAttributes" class="validation-message">@Ui.Text(error)</div>
+}
+@code {
+    [Parameter, EditorRequired] public Expression<Func<TValue>> For { get; set; } = default!;
+    private FieldIdentifier field;
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        field = FieldIdentifier.Create(For);
+    }
+}

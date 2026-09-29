@@ -17,9 +17,9 @@ public abstract class LocalizedComponentBase : ComponentBase, IDisposable
         L.OnChanged += OnLanguageChanged;
     }
 
-    private void OnLanguageChanged() => InvokeAsync(StateHasChanged);
+    protected virtual void OnLanguageChanged() => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         L.OnChanged -= OnLanguageChanged;
         GC.SuppressFinalize(this);

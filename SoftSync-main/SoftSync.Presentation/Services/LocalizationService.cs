@@ -30,6 +30,35 @@ public class LocalizationService
 
     /// <summary>Convenience method identical to the indexer.</summary>
     public string T(string key) => Translations.Get(key, Current);
+    public string Text(string? literal) => UiTextCatalog.Get(literal, Current);
+    public System.Globalization.CultureInfo Culture => System.Globalization.CultureInfo.GetCultureInfo(Current == AppLanguage.Vi ? "vi-VN" : "en-US");
+    public string IdentityError(string code) => Current == AppLanguage.En ? code switch
+    {
+        "DuplicateEmail" or "DuplicateUserName" => "An account with these details already exists.",
+        "PasswordTooShort" => "The password is too short.",
+        "PasswordRequiresNonAlphanumeric" => "The password requires a symbol.",
+        "PasswordRequiresDigit" => "The password requires a digit.",
+        "PasswordRequiresLower" => "The password requires a lowercase letter.",
+        "PasswordRequiresUpper" => "The password requires an uppercase letter.",
+        "PasswordRequiresUniqueChars" => "The password needs more distinct characters.",
+        "PasswordMismatch" => "The password is incorrect.",
+        "InvalidToken" => "The verification code is invalid or expired.",
+        "InvalidEmail" => "Invalid email address.",
+        _ => "The account operation could not be completed. Check your information and try again."
+    } : code switch
+    {
+        "DuplicateEmail" or "DuplicateUserName" => "Tài khoản với thông tin này đã tồn tại.",
+        "PasswordTooShort" => "Mật khẩu quá ngắn.",
+        "PasswordRequiresNonAlphanumeric" => "Mật khẩu cần có ký tự đặc biệt.",
+        "PasswordRequiresDigit" => "Mật khẩu cần có chữ số.",
+        "PasswordRequiresLower" => "Mật khẩu cần có chữ thường.",
+        "PasswordRequiresUpper" => "Mật khẩu cần có chữ hoa.",
+        "PasswordRequiresUniqueChars" => "Mật khẩu cần nhiều ký tự khác nhau hơn.",
+        "PasswordMismatch" => "Mật khẩu không đúng.",
+        "InvalidToken" => "Mã xác minh không hợp lệ hoặc đã hết hạn.",
+        "InvalidEmail" => "Email không hợp lệ.",
+        _ => "Không thể hoàn tất thao tác tài khoản. Kiểm tra thông tin và thử lại."
+    };
 
     public void SetLanguage(AppLanguage language)
     {
