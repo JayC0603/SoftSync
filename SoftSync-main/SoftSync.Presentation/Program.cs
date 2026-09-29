@@ -220,6 +220,15 @@ builder.Services.AddHttpClient("AiApi", client =>
     client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiApi:TimeoutSeconds", 45));
 });
 
+// CV/JD matching runs as an internal Python service. Authentication remains in
+// SoftSync; the AI service receives only the files needed for one inference.
+builder.Services.AddHttpClient<RecruitmentAiClient>(client =>
+{
+    var baseUrl = builder.Configuration["RecruitmentAi:BaseUrl"];
+    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(baseUrl) ? "http://127.0.0.1:8001/" : baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("RecruitmentAi:TimeoutSeconds", 600));
+});
+
 var app = builder.Build();
 
 // Behind Render's reverse proxy TLS terminates at the edge, so trust the

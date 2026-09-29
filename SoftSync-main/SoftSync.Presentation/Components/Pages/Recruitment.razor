@@ -1,0 +1,163 @@
+@page "/recruitment"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components.Forms
+@using SoftSync.Presentation.Services
+@inject RecruitmentAiClient RecruitmentAi
+
+<PageTitle>AI Recruitment · SoftSync</PageTitle>
+
+<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="recruitment-title">
+        <header class="tw:mb-8">
+            <span class="badge bg-primary">SoftSync AI</span>
+            <h1 id="recruitment-title" class="tw:mt-3 tw:text-3xl tw:font-bold">AI Recruitment</h1>
+            <p>Match and rank candidate CVs against a job description using your existing SoftSync account.</p>
+        </header>
+
+        <div class="ss-glass tw:rounded-2xl tw:p-6">
+            <div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">
+                <div>
+                    <label class="form-label tw:font-semibold" for="cv-files">Candidate CVs (PDF or TXT)</label>
+                    <InputFile id="cv-files" class="form-control" OnChange="SelectCvs" multiple accept=".pdf,.txt" />
+                    <small class="text-muted">Up to @MaxCvCount files, @MaxFileSizeMb MB each.</small>
+                    @if (cvFiles.Count > 0)
+                    {
+                        <ul class="tw:mt-3">@foreach (var file in cvFiles) { <li>@file.Name</li> }</ul>
+                    }
+                </div>
+                <div>
+                    <label class="form-label tw:font-semibold" for="jd-file">Job description file (optional)</label>
+                    <InputFile id="jd-file" class="form-control" OnChange="SelectJd" accept=".pdf,.txt" />
+                    <label class="form-label tw:mt-4 tw:font-semibold" for="jd-text">Or paste job description</label>
+                    <textarea id="jd-text" class="form-control" rows="7" @bind="jdText" disabled="@(jdFile is not null)"
+                              placeholder="Responsibilities, required skills, experience..."></textarea>
+                    @if (jdFile is not null) { <small class="text-muted">Selected: @jdFile.Name</small> }
+                </div>
+            </div>
+
+            <div class="tw:mt-6 tw:flex tw:flex-wrap tw:items-end tw:gap-4">
+                <div>
+                    <label class="form-label" for="model">AI model</label>
+                    <select id="model" class="form-select" @bind="modelId">
+                        <option value="cross_weighted">Weighted Sum (recommended)</option>
+                        <option value="cross_mlp">MLP</option>
+                        <option value="cross_residual">Residual MLP</option>
+                        <option value="cross_attention">Attention</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" disabled="@running" @onclick="RunMatching">
+                    @(running ? "Analyzing..." : "Match and rank CVs")
+                </button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <div class="alert @(hasError ? "alert-danger" : "alert-info") tw:mt-6" role="status">@message</div>
+        }
+
+        @if (result is not null)
+        {
+            <section class="ss-glass tw:mt-6 tw:rounded-2xl tw:p-6" aria-labelledby="ranking-title">
+                <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
+                    <h2 id="ranking-title" class="tw:text-2xl tw:font-bold">Candidate ranking</h2>
+                    <span class="badge bg-secondary">@result.ModelUsed · @result.ElapsedSeconds.ToString("0.00")s</span>
+                </div>
+                <div class="table-responsive tw:mt-4">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Rank</th><th>CV</th><th>Score</th><th>Confidence</th><th>Decision</th><th>Coverage</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in result.Results)
+                        {
+                            <tr>
+                                <td><strong>#@item.Rank</strong></td>
+                                <td>@item.CvFile</td>
+                                <td><strong>@item.Score.ToString("0.00") / 10</strong></td>
+                                <td>@FormatPercent(item.Confidence)</td>
+                                <td><span class="badge @(item.IsMatch ? "bg-success" : "bg-warning text-dark")">@(item.IsMatch ? "Match" : "Review")</span></td>
+                                <td><small>CV @item.CvCoverage · JD @item.JdCoverage</small></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+    </section>
+</main>
+
+@code {
+    private const int MaxCvCount = 20;
+    private const long MaxFileSize = 10 * 1024 * 1024;
+    private const int MaxFileSizeMb = 10;
+    private IReadOnlyList<IBrowserFile> cvFiles = [];
+    private IBrowserFile? jdFile;
+    private string jdText = string.Empty;
+    private string modelId = "cross_weighted";
+    private bool running;
+    private bool hasError;
+    private string? message;
+    private RecruitmentMatchingData? result;
+
+    private void SelectCvs(InputFileChangeEventArgs args)
+    {
+        cvFiles = args.GetMultipleFiles(MaxCvCount);
+        result = null;
+        message = null;
+    }
+
+    private void SelectJd(InputFileChangeEventArgs args)
+    {
+        jdFile = args.File;
+        jdText = string.Empty;
+        result = null;
+        message = null;
+    }
+
+    private async Task RunMatching()
+    {
+        hasError = false;
+        result = null;
+        if (cvFiles.Count == 0) { Fail("Please select at least one CV."); return; }
+        if (jdFile is null && string.IsNullOrWhiteSpace(jdText)) { Fail("Please upload or paste a job description."); return; }
+
+        running = true;
+        message = "Extracting CV/JD data and running the matching model. This can take a few minutes.";
+        var streams = new List<Stream>();
+        try
+        {
+            var uploads = new List<RecruitmentUpload>();
+            foreach (var file in cvFiles)
+            {
+                var stream = file.OpenReadStream(MaxFileSize);
+                streams.Add(stream);
+                uploads.Add(new(file.Name, ContentType(file), stream));
+            }
+
+            RecruitmentUpload? jdUpload = null;
+            if (jdFile is not null)
+            {
+                var stream = jdFile.OpenReadStream(MaxFileSize);
+                streams.Add(stream);
+                jdUpload = new(jdFile.Name, ContentType(jdFile), stream);
+            }
+
+            result = await RecruitmentAi.MatchAsync(uploads, jdUpload, jdText, modelId);
+            message = $"Completed: {result.Results.Count} CV(s) ranked. Extraction {result.ExtractionSeconds:0.00}s, inference {result.InferenceSeconds:0.00}s.";
+        }
+        catch (Exception ex)
+        {
+            Fail(ex.Message);
+        }
+        finally
+        {
+            foreach (var stream in streams) await stream.DisposeAsync();
+            running = false;
+        }
+    }
+
+    private void Fail(string text) { hasError = true; message = text; }
+    private static string ContentType(IBrowserFile file) => string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType;
+    private static string FormatPercent(double value) => $"{(value <= 1 ? value * 100 : value):0.0}%";
+}
