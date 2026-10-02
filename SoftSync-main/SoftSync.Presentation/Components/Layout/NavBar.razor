@@ -35,6 +35,7 @@
             <i class="bi bi-mortarboard"></i> <span>@L["nav.roadmap"]</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@Ui.Text("Courses")</span></NavLink>
+        <NavLink class="ss-navpill" href="/schedule"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Lịch của tôi" : "My Schedule")</span></NavLink>
         <NavLink class="ss-navpill" href="/game">
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
         </NavLink>
@@ -57,6 +58,7 @@
                 <NavLink href="/progress">@L["nav.progress"]</NavLink>
                 <NavLink href="/community">@L["nav.community"]</NavLink>
                 <NavLink href="/cv-review">@Ui.Text("CV Review")</NavLink>
+                <NavLink href="/schedule">@(L.Current == AppLanguage.Vi ? "Lịch của tôi" : "My Schedule")</NavLink>
                 <NavLink href="/game/history">@Ui.Text("Attempt history")</NavLink>
                 <NavLink href="/profile">@(L.Current==AppLanguage.Vi ? "Hồ sơ" : "Profile")</NavLink>
                 @if(profile is not null){<NavLink href="@($"/assessment/{profile.Id}")">@(L.Current==AppLanguage.Vi ? "Đánh giá kỹ năng" : "Assessment")</NavLink>}
@@ -112,6 +114,9 @@
     <NavLink class="ss-mobile-bottom-link" href="/courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@Ui.Text("Courses")</span></NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/community">
         <i class="bi bi-people-fill"></i><span>@L["nav.community"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/schedule">
+        <i class="bi bi-calendar3" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Lịch" : "Schedule")</span>
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/game">
         <i class="bi bi-controller"></i><span>Mini Game</span>
@@ -343,7 +348,7 @@
             bottom: max(0.65rem, env(safe-area-inset-bottom));
             z-index: 1000;
             display: grid !important;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 0.2rem !important;
             min-height: 64px;
             padding: 0.4rem;

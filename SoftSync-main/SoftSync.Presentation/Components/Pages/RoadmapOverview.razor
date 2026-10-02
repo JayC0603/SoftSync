@@ -257,6 +257,18 @@
     .lesson-action button:hover,.review-activity:hover,.content-panel>footer button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 15px 30px rgba(104,71,235,.3),inset 1px 1px 0 rgba(255,255,255,.42)}
     .lesson-action button:active,.review-activity:active,.content-panel>footer button:active{transform:translateY(0) scale(.97)}
     html[data-theme="dark"] .coursera-roadmap{background:linear-gradient(135deg,rgba(20,18,44,.32),rgba(49,46,129,.16))}html[data-theme="dark"] .week-column{background:rgba(30,27,75,.16)}html[data-theme="dark"] .lesson,html[data-theme="dark"] .weekly-challenge{color:#f8fafc;background:linear-gradient(145deg,rgba(49,46,129,.5),rgba(30,27,75,.38))!important}html[data-theme="dark"] .content-accordions button,html[data-theme="dark"] .content-tools button,html[data-theme="dark"] .content-panel>footer button{color:#f8fafc;background:rgba(49,46,129,.42)}
+    /* Dark roadmap: pair light text with genuinely dark surfaces throughout. */
+    html[data-theme="dark"] .coursera-roadmap{--navy:#f4f5ff;--muted:#b8c2d8;--line:#474c6b;color:#f4f5ff}
+    html[data-theme="dark"] .roadmap-sidebar{background:#15182d;border-color:#474c6b!important}
+    html[data-theme="dark"] .overall-card{background:#222641;border-color:#474c6b}
+    html[data-theme="dark"] .xp-card{background:#222641;border-color:#474c6b}
+    html[data-theme="dark"] .streak{background:#222641;border-color:#474c6b}
+    html[data-theme="dark"] .week-stat{background:#222641;border-color:#474c6b}
+    html[data-theme="dark"] .progress-ring:after{background:#222641}
+    html[data-theme="dark"] .sidebar-heading,html[data-theme="dark"] .breadcrumb{color:#b8c2d8}
+    html[data-theme="dark"] .tree-week.selected{background:#2b3052}
+    html[data-theme="dark"] .tree-week:hover:not(:disabled){background:#303657}
+    html[data-theme="dark"] .lesson.locked{opacity:.88}
     @@media(prefers-reduced-motion:reduce){.overall-card,.xp-card,.streak,.week-stat,.lesson,.weekly-challenge,.content-card,.tree-week,.content-accordions button,.content-panel>footer button,.review-activity,.lesson-action button,.lesson-thumb,.skill-icon{transition:none!important;transform:none!important}}
     @@keyframes spin{to{transform:rotate(360deg)}}
     @@media(max-width:1250px){.coursera-roadmap{grid-template-columns:250px minmax(0,1fr)}.week-column{padding:2rem}}

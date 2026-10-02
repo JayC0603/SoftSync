@@ -11,3 +11,4 @@ if (result.warnings.length) {
     throw new Error('UI stylesheet validation reported warnings.');
 }
 console.log('Learning platform CSS syntax: PASS (not a browser or performance check).');
+await import('./check-roadmap-dark.mjs');

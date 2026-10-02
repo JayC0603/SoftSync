@@ -1,0 +1,204 @@
+@page "/schedule"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using System.Globalization
+@using SoftSync.BLL.Interfaces
+@using SoftSync.BLL.Services
+@using SoftSync.DAL.Entities
+@inject IScheduleService PlannerService
+@inject IJSRuntime JS
+
+<PageTitle>@Text("Lịch của tôi", "My Schedule") — SoftSync</PageTitle>
+<main class="ss-workspace schedule-page" aria-labelledby="schedule-title">
+    <header class="schedule-header">
+        <div>
+            <span class="schedule-eyebrow"><i class="bi bi-calendar3" aria-hidden="true"></i> @Text("KHÔNG GIAN CỦA BẠN", "YOUR SPACE")</span>
+            <h1 id="schedule-title">@Text("Lịch của tôi", "My Schedule")</h1>
+            <p>@Text("Sắp xếp việc học và hoạt động cá nhân theo cách của bạn.", "Plan your learning and personal activities your way.")</p>
+        </div>
+        <button type="button" class="btn btn-primary schedule-add" @onclick="() => OpenCreate(visibleDate)"><i class="bi bi-plus-lg" aria-hidden="true"></i> @Text("Thêm việc", "Add task")</button>
+    </header>
+
+    <section class="schedule-surface" aria-labelledby="schedule-period">
+        <div class="schedule-toolbar">
+            <div class="schedule-navigation">
+                <button type="button" class="btn btn-outline-secondary" @onclick="GoToday">@Text("Hôm nay", "Today")</button>
+                <button type="button" class="schedule-icon-btn" aria-label="@Text("Kỳ trước", "Previous period")" @onclick="() => Move(-1)"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                <button type="button" class="schedule-icon-btn" aria-label="@Text("Kỳ sau", "Next period")" @onclick="() => Move(1)"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                <h2 id="schedule-period">@PeriodLabel</h2>
+            </div>
+            <div class="schedule-view-switch" role="group" aria-label="@Text("Chế độ xem lịch", "Calendar view")">
+                <button type="button" class="@(view == CalendarView.Month ? "selected" : "")" aria-pressed="@(view == CalendarView.Month)" @onclick="() => SwitchView(CalendarView.Month)">@Text("Tháng", "Month")</button>
+                <button type="button" class="@(view == CalendarView.Week ? "selected" : "")" aria-pressed="@(view == CalendarView.Week)" @onclick="() => SwitchView(CalendarView.Week)">@Text("Tuần", "Week")</button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(pageError)) { <p role="alert" class="alert alert-danger">@pageError</p> }
+        @if (loading) { <p role="status">@Text("Đang tải lịch…", "Loading schedule…")</p> }
+        else
+        {
+            @if (tasks.Count == 0)
+            {
+                <div class="schedule-empty" role="status">
+                    <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+                    <h3>@Text("Lịch của bạn đang trống", "Your schedule is clear")</h3>
+                    <p>@Text("Thêm buổi học, bài tập hay công việc để chủ động hơn mỗi ngày.", "Add study sessions, assignments, or personal tasks to organize your days.")</p>
+                    <button type="button" class="btn btn-outline-primary" @onclick="() => OpenCreate(visibleDate)">@Text("Thêm việc đầu tiên", "Add your first task")</button>
+                </div>
+            }
+            <div class="schedule-desktop">
+                @if (view == CalendarView.Month)
+                {
+                    <div class="schedule-month" aria-label="@PeriodLabel">
+                        @foreach (var name in DayNames) { <div class="schedule-day-name">@name</div> }
+                        @foreach (var day in VisibleDays)
+                        {
+                            <section class="schedule-day @(day == today ? "is-today" : "") @(day.Month != visibleDate.Month ? "is-outside" : "")" aria-label="@FullDate(day)" @key="day">
+                                <button type="button" class="schedule-day-number" aria-label="@Text("Thêm việc vào", "Add task on") @FullDate(day)" @onclick="() => OpenCreate(day)">@day.Day @if (day == today) { <span class="visually-hidden">@Text("Hôm nay", "Today")</span> }</button>
+                                <div class="schedule-day-tasks">
+                                    @foreach (var task in ForDay(day)) { <button type="button" class="schedule-task @TaskClass(task)" @key="task.Id" @onclick="() => OpenDetails(task)" aria-label="@TaskLabel(task)"><span class="schedule-task-time">@TimeLabel(task)</span><span class="schedule-task-title">@(task.Status == ScheduleTaskStatus.Completed ? "✓ " : "")@task.Title</span></button> }
+                                </div>
+                            </section>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="schedule-week">
+                        @foreach (var day in VisibleDays)
+                        {
+                            <section class="schedule-week-day @(day == today ? "is-today" : "")" aria-label="@FullDate(day)" @key="day">
+                                <div class="schedule-week-heading"><h3>@ShortDate(day) @if (day == today) { <small>@Text("Hôm nay", "Today")</small> }</h3><button type="button" aria-label="@Text("Thêm việc vào", "Add task on") @FullDate(day)" @onclick="() => OpenCreate(day)"><i class="bi bi-plus-lg" aria-hidden="true"></i></button></div>
+                                @foreach (var task in ForDay(day)) { <button type="button" class="schedule-task @TaskClass(task)" @key="task.Id" @onclick="() => OpenDetails(task)" aria-label="@TaskLabel(task)"><span class="schedule-task-time">@TimeLabel(task)</span><span class="schedule-task-title">@(task.Status == ScheduleTaskStatus.Completed ? "✓ " : "")@task.Title</span></button> }
+                            </section>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="schedule-mobile" aria-label="@Text("Danh sách lịch", "Schedule agenda")">
+                @foreach (var day in VisibleDays.Where(d => view == CalendarView.Week || d.Month == visibleDate.Month))
+                {
+                    <section class="schedule-agenda-day" @key="day">
+                        <div class="schedule-week-heading"><h3>@FullDate(day) @if (day == today) { <small>@Text("Hôm nay", "Today")</small> }</h3><button type="button" aria-label="@Text("Thêm việc vào", "Add task on") @FullDate(day)" @onclick="() => OpenCreate(day)"><i class="bi bi-plus-lg" aria-hidden="true"></i></button></div>
+                        @foreach (var task in ForDay(day)) { <button type="button" class="schedule-task @TaskClass(task)" @key="task.Id" @onclick="() => OpenDetails(task)" aria-label="@TaskLabel(task)"><span class="schedule-task-time">@TimeLabel(task)</span><span class="schedule-task-title">@(task.Status == ScheduleTaskStatus.Completed ? "✓ " : "")@task.Title</span></button> }
+                    </section>
+                }
+            </div>
+        }
+    </section>
+</main>
+
+<dialog class="schedule-dialog" @ref="dialog" @onclose="DialogClosed" aria-labelledby="schedule-dialog-title">
+    @if (dialogMode != DialogMode.None)
+    {
+        <div class="schedule-dialog-header"><h2 id="schedule-dialog-title">@(dialogMode == DialogMode.Create ? Text("Thêm việc", "Add task") : dialogMode == DialogMode.Edit ? Text("Sửa việc", "Edit task") : dialogMode == DialogMode.Delete ? Text("Xóa việc?", "Delete task?") : selected?.Title)</h2><button type="button" class="schedule-icon-btn" aria-label="@Text("Đóng", "Close")" @onclick="CloseDialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+        @if (dialogMode is DialogMode.Create or DialogMode.Edit)
+        {
+            <form @onsubmit="Save" @onsubmit:preventDefault>
+                <div class="schedule-field"><label for="schedule-title-input">@Text("Tên công việc", "Title") <span aria-hidden="true">*</span></label><input id="schedule-title-input" class="form-control" required maxlength="200" @bind="title" /></div>
+                <div class="schedule-field"><label for="schedule-date">@Text("Ngày", "Date") <span aria-hidden="true">*</span></label><input id="schedule-date" class="form-control" type="date" required @bind="formDate" @bind:format="yyyy-MM-dd" /></div>
+                <div class="schedule-field"><label class="schedule-checkbox"><input type="checkbox" @bind="allDay" /> @Text("Cả ngày", "All day")</label></div>
+                @if (!allDay)
+                {
+                    <div class="schedule-times"><div class="schedule-field"><label for="schedule-start">@Text("Bắt đầu", "Start time")</label><input id="schedule-start" class="form-control" type="time" required value="@startText" @onchange="e => startText = e.Value?.ToString() ?? string.Empty" /></div><div class="schedule-field"><label for="schedule-end">@Text("Kết thúc", "End time")</label><input id="schedule-end" class="form-control" type="time" required value="@endText" @onchange="e => endText = e.Value?.ToString() ?? string.Empty" /></div></div>
+                }
+                <div class="schedule-field"><label for="schedule-description">@Text("Mô tả", "Description")</label><textarea id="schedule-description" class="form-control" rows="3" maxlength="2000" @bind="description"></textarea></div>
+                <div class="schedule-field"><label for="schedule-priority">@Text("Ưu tiên", "Priority")</label><select id="schedule-priority" class="form-select" @bind="priority"><option value="Low">@Text("Thấp", "Low")</option><option value="Normal">@Text("Bình thường", "Normal")</option><option value="High">@Text("Cao", "High")</option></select></div>
+                @if (!string.IsNullOrEmpty(formError)) { <p role="alert" class="text-danger" id="schedule-form-error">@formError</p> }
+                <div class="schedule-dialog-actions"><button type="button" class="btn btn-outline-secondary" @onclick="CloseDialog">@Text("Hủy", "Cancel")</button><button type="submit" class="btn btn-primary" disabled="@saving">@Text("Lưu", "Save")</button></div>
+            </form>
+        }
+        else if (selected is not null && dialogMode == DialogMode.Details)
+        {
+            <p class="schedule-detail-date">@FullDate(selected.Date) · @TimeLabel(selected)</p>
+            @if (!string.IsNullOrWhiteSpace(selected.Description)) { <p class="schedule-description">@selected.Description</p> }
+            <p>@Text("Ưu tiên", "Priority"): @PriorityLabel(selected.Priority) · @Text("Trạng thái", "Status"): @(selected.Status == ScheduleTaskStatus.Completed ? Text("Đã xong", "Completed") : Text("Chưa xong", "Pending"))</p>
+            <div class="schedule-dialog-actions"><button type="button" class="btn btn-outline-secondary" disabled="@saving" @onclick="ToggleComplete">@(selected.Status == ScheduleTaskStatus.Completed ? Text("Đánh dấu chưa xong", "Restore to pending") : Text("Hoàn thành", "Mark complete"))</button><button type="button" class="btn btn-outline-primary" @onclick="OpenEdit">@Text("Sửa", "Edit")</button><button type="button" class="btn btn-outline-danger" @onclick="() => dialogMode = DialogMode.Delete">@Text("Xóa", "Delete")</button></div>
+        }
+        else if (selected is not null && dialogMode == DialogMode.Delete)
+        {
+            <p>"@selected.Title" — @Text("Hành động này không thể hoàn tác.", "This action cannot be undone.")</p>
+            <div class="schedule-dialog-actions"><button type="button" class="btn btn-outline-secondary" @onclick="() => dialogMode = DialogMode.Details">@Text("Hủy", "Cancel")</button><button type="button" class="btn btn-danger" disabled="@saving" @onclick="Delete">@Text("Xóa", "Delete")</button></div>
+        }
+    }
+</dialog>
+
+@code {
+    private enum CalendarView { Month, Week }
+    private enum DialogMode { None, Create, Details, Edit, Delete }
+    private CalendarView view = CalendarView.Month;
+    private DialogMode dialogMode;
+    private DateOnly visibleDate = DateOnly.FromDateTime(DateTime.Today);
+    private DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+    private List<ScheduleTaskView> tasks = [];
+    private ElementReference dialog;
+    private bool loading, saving;
+    private string? pageError, formError;
+    private ScheduleTaskView? selected;
+    private string title = "", description = "", startText = "09:00", endText = "10:00";
+    private DateTime formDate = DateTime.Today;
+    private bool allDay;
+    private ScheduleTaskPriority priority = ScheduleTaskPriority.Normal;
+    private CultureInfo Culture => Ui.Culture;
+    private string Text(string vi, string en) => Ui.Current == AppLanguage.Vi ? vi : en;
+    private DateOnly WeekStart(DateOnly day) => day.AddDays(-((int)day.DayOfWeek + 6) % 7);
+    private IEnumerable<DateOnly> VisibleDays { get { var start = view == CalendarView.Month ? WeekStart(new DateOnly(visibleDate.Year, visibleDate.Month, 1)) : WeekStart(visibleDate); var end = view == CalendarView.Month ? WeekStart(new DateOnly(visibleDate.Year, visibleDate.Month, 1).AddMonths(1).AddDays(-1)).AddDays(6) : start.AddDays(6); for (var day = start; day <= end; day = day.AddDays(1)) yield return day; } }
+    private string[] DayNames => Enumerable.Range(0, 7).Select(i => Culture.DateTimeFormat.GetAbbreviatedDayName((DayOfWeek)((i + 1) % 7))).ToArray();
+    private string PeriodLabel => view == CalendarView.Month ? visibleDate.ToDateTime(TimeOnly.MinValue).ToString("MMMM yyyy", Culture) : $"{ShortDate(WeekStart(visibleDate))} – {ShortDate(WeekStart(visibleDate).AddDays(6))}";
+    private string ShortDate(DateOnly date) => date.ToDateTime(TimeOnly.MinValue).ToString("ddd d MMM", Culture);
+    private string FullDate(DateOnly date) => date.ToDateTime(TimeOnly.MinValue).ToString("D", Culture);
+    private IEnumerable<ScheduleTaskView> ForDay(DateOnly day) => tasks.Where(t => t.Date == day);
+    private string TimeLabel(ScheduleTaskView task) => task.IsAllDay ? Text("Cả ngày", "All day") : $"{task.StartTime:HH:mm}–{task.EndTime:HH:mm}";
+    private string PriorityLabel(ScheduleTaskPriority value) => value switch { ScheduleTaskPriority.Low => Text("Thấp", "Low"), ScheduleTaskPriority.High => Text("Cao", "High"), _ => Text("Bình thường", "Normal") };
+    private string TaskClass(ScheduleTaskView task) => $"priority-{task.Priority.ToString().ToLowerInvariant()} {(task.Status == ScheduleTaskStatus.Completed ? "is-complete" : "")}";
+    private string TaskLabel(ScheduleTaskView task) => $"{task.Title}, {FullDate(task.Date)}, {TimeLabel(task)}, {(task.Status == ScheduleTaskStatus.Completed ? Text("Đã xong", "Completed") : Text("Chưa xong", "Pending"))}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        try { var local = await JS.InvokeAsync<string>("ssSchedule.today"); if (DateOnly.TryParseExact(local, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) today = visibleDate = date; }
+        catch (JSException) { /* Server date remains a usable fallback. */ }
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        loading = true; pageError = null; StateHasChanged();
+        try { var days = VisibleDays.ToArray(); tasks = (await PlannerService.GetPeriodAsync(days[0], days[^1])).ToList(); }
+        catch (Exception ex) when (ex is not OperationCanceledException) { pageError = Text("Không thể tải lịch. Vui lòng thử lại.", "Could not load schedule. Please try again."); }
+        finally { loading = false; StateHasChanged(); }
+    }
+
+    private async Task Move(int direction) { visibleDate = view == CalendarView.Month ? visibleDate.AddMonths(direction) : visibleDate.AddDays(7 * direction); await Load(); }
+    private async Task GoToday() { visibleDate = today; await Load(); }
+    private async Task SwitchView(CalendarView next) { view = next; await Load(); }
+    private async Task Show(DialogMode mode) { dialogMode = mode; formError = null; StateHasChanged(); await JS.InvokeVoidAsync("ssSchedule.show", dialog); }
+    private async Task OpenCreate(DateOnly date) { selected = null; title = description = ""; formDate = date.ToDateTime(TimeOnly.MinValue); allDay = false; startText = "09:00"; endText = "10:00"; priority = ScheduleTaskPriority.Normal; await Show(DialogMode.Create); }
+    private async Task OpenDetails(ScheduleTaskView task) { selected = await PlannerService.GetAsync(task.Id); if (selected is not null) await Show(DialogMode.Details); }
+    private void OpenEdit() { if (selected is null) return; title = selected.Title; description = selected.Description ?? ""; formDate = selected.Date.ToDateTime(TimeOnly.MinValue); allDay = selected.IsAllDay; startText = selected.StartTime?.ToString("HH:mm") ?? "09:00"; endText = selected.EndTime?.ToString("HH:mm") ?? "10:00"; priority = selected.Priority; formError = null; dialogMode = DialogMode.Edit; }
+    private async Task CloseDialog() { await JS.InvokeVoidAsync("ssSchedule.close", dialog); dialogMode = DialogMode.None; }
+    private void DialogClosed() => dialogMode = DialogMode.None;
+
+    private async Task Save()
+    {
+        if (saving) return;
+        formError = null;
+        TimeOnly? start = null, end = null;
+        if (!allDay && (!TimeOnly.TryParseExact(startText, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedStart) || !TimeOnly.TryParseExact(endText, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedEnd))) { formError = Text("Nhập giờ bắt đầu và kết thúc hợp lệ.", "Enter valid start and end times."); return; }
+        if (!allDay) { start = TimeOnly.ParseExact(startText, "HH:mm", CultureInfo.InvariantCulture); end = TimeOnly.ParseExact(endText, "HH:mm", CultureInfo.InvariantCulture); }
+        var input = new ScheduleTaskInput(title, description, DateOnly.FromDateTime(formDate), start, end, allDay, priority);
+        try { ScheduleService.Validate(input); }
+        catch (ArgumentException) { formError = Text("Kiểm tra tên, ngày và giờ kết thúc phải sau giờ bắt đầu.", "Check title, date, and that end time is after start time."); return; }
+        saving = true;
+        try
+        {
+            if (dialogMode == DialogMode.Create) await PlannerService.CreateAsync(input);
+            else if (selected is not null && !await PlannerService.UpdateAsync(selected.Id, input)) { formError = Text("Không tìm thấy công việc.", "Task not found."); return; }
+            await CloseDialog(); await Load();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException) { formError = Text("Không thể lưu. Vui lòng thử lại.", "Could not save. Please try again."); }
+        finally { saving = false; }
+    }
+    private async Task ToggleComplete() { if (selected is null || saving) return; saving = true; try { if (await PlannerService.SetCompletedAsync(selected.Id, selected.Status != ScheduleTaskStatus.Completed)) { await CloseDialog(); await Load(); } else pageError = Text("Không tìm thấy công việc.", "Task not found."); } catch (Exception ex) when (ex is not OperationCanceledException) { pageError = Text("Không thể cập nhật. Vui lòng thử lại.", "Could not update task. Please try again."); } finally { saving = false; } }
+    private async Task Delete() { if (selected is null || saving) return; saving = true; try { if (await PlannerService.DeleteAsync(selected.Id)) { await CloseDialog(); await Load(); } else pageError = Text("Không tìm thấy công việc.", "Task not found."); } catch (Exception ex) when (ex is not OperationCanceledException) { pageError = Text("Không thể xóa. Vui lòng thử lại.", "Could not delete task. Please try again."); } finally { saving = false; } }
+}

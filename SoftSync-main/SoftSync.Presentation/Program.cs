@@ -74,6 +74,8 @@ builder.Services.AddScoped<ICvAiReadiness, CvAiReadiness>();
 builder.Services.AddScoped<ICvReviewService>(services => new CvReviewService(
     services.GetRequiredService<IDbContextFactory<SoftSyncDbContext>>(),
     services.GetRequiredService<ICvTextExtractor>(), services.GetRequiredService<ICvAnalysisService>(), cvUploadOptions.MaxBytes));
+builder.Services.AddScoped<ICurrentScheduleUser, CurrentScheduleUser>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 builder.Services.AddSingleton<EfDataProtectionKeyRepository>();
 var dataProtection = builder.Services

@@ -258,3 +258,8 @@ window.ssAccessibility = {
 };
 try { window.ssFontSize.init(); } catch { /* ignore */ }
 try { window.ssAccessibility.init(); } catch { /* ignore */ }
+window.ssSchedule = {
+  today: () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; },
+  show: dialog => { if (dialog && !dialog.open) dialog.showModal(); },
+  close: dialog => { if (dialog?.open) dialog.close(); }
+};

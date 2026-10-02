@@ -1,4 +1,4 @@
-param([switch]$SkipFrontend)
+param([switch]$SkipFrontend, [switch]$SkipBuild, [string]$TestFilter)
 $ErrorActionPreference = 'Stop'
 $cvRepo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $cvSuffix = [Guid]::NewGuid().ToString('N').Substring(0, 12)
@@ -18,7 +18,7 @@ try {
     }
     if (-not $cvReady) { throw 'Temporary PostgreSQL did not become ready.' }
     $cvSdk = @('run','--rm','-v',"${cvRepo}:/src",'-v','softsync-cv-nuget:/root/.nuget/packages','--network',"container:$cvDb",'-w','/src','mcr.microsoft.com/dotnet/sdk:10.0')
-    Invoke-CvDocker ($cvSdk + @('sh','-c','dotnet restore && dotnet build --no-restore'))
+    if (-not $SkipBuild) { Invoke-CvDocker ($cvSdk + @('sh','-c','dotnet restore && dotnet build --no-restore')) }
     Invoke-CvDocker @('run','--rm','-d','--name',$cvApp,'--network',"container:$cvDb",'-v',"${cvRepo}:/src",'-w','/src/SoftSync.Presentation','-e','ASPNETCORE_URLS=http://0.0.0.0:8080','-e','ConnectionStrings__SoftSyncDb=Host=localhost;Database=postgres;Username=postgres','-e','AiApi__ApiKey=','-e','AiApi__Enabled=true','-e','Logging__LogLevel__Microsoft.EntityFrameworkCore=Warning','mcr.microsoft.com/dotnet/aspnet:10.0','dotnet','bin/Debug/net10.0/SoftSync.Presentation.dll')
     $cvReady = $false
     for ($cvTry = 0; $cvTry -lt 30; $cvTry++) {
@@ -27,7 +27,9 @@ try {
         Start-Sleep -Seconds 1
     }
     if (-not $cvReady) { throw 'Acceptance web app did not become ready.' }
-    Invoke-CvDocker @('run','--rm','-v',"${cvRepo}:/src",'-v','softsync-cv-nuget:/root/.nuget/packages','--network',"container:$cvDb",'-e','SOFTSYNC_CV_ACCEPTANCE_DB=Host=localhost;Database=postgres;Username=postgres','-e','SOFTSYNC_CV_ACCEPTANCE_URL=http://localhost:8080','-w','/src','mcr.microsoft.com/dotnet/sdk:10.0','dotnet','test','--no-build')
+    $cvTestArgs = @('run','--rm','-v',"${cvRepo}:/src",'-v','softsync-cv-nuget:/root/.nuget/packages','--network',"container:$cvDb",'-e','SOFTSYNC_CV_ACCEPTANCE_DB=Host=localhost;Database=postgres;Username=postgres','-e','SOFTSYNC_CV_ACCEPTANCE_URL=http://localhost:8080','-w','/src','mcr.microsoft.com/dotnet/sdk:10.0','dotnet','test','--no-build')
+    if (-not [string]::IsNullOrWhiteSpace($TestFilter)) { $cvTestArgs += @('--filter', $TestFilter) }
+    Invoke-CvDocker $cvTestArgs
     Invoke-CvDocker ($cvSdk + @('sh','-c','dotnet tool install dotnet-ef --version 10.0.0 --tool-path /tmp/ef && /tmp/ef/dotnet-ef migrations has-pending-model-changes --project SoftSync.DAL --startup-project SoftSync.Presentation --no-build'))
     if (-not $SkipFrontend) {
         Invoke-CvDocker @('run','--rm','-v',"${cvRepo}:/src",'-v','/src/SoftSync.Presentation/node_modules','-w','/src/SoftSync.Presentation','node:20','sh','-c','npm ci && npm run build && node Scripts/check-ui-css.mjs')
@@ -38,7 +40,7 @@ try {
     $cvGitExit = $LASTEXITCODE
     $ErrorActionPreference = $cvPreviousErrorPolicy
     if ($cvGitExit -ne 0) { throw 'git diff --check failed.' }
-    Write-Host 'CV acceptance PASS; real AI tests are deliberately skipped. Browser E2E is separate.'
+    Write-Host 'Acceptance command PASS; browser E2E and real AI provider checks are separate.'
 }
 finally {
     # Only the two randomly named containers created by this script are stopped.

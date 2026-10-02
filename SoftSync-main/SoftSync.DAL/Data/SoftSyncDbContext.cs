@@ -37,6 +37,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ChallengeOption> ChallengeOptions { get; set; }
     public DbSet<QuizAttempt> QuizAttempts { get; set; }
     public DbSet<QuizAttemptAnswer> QuizAttemptAnswers { get; set; }
+    public DbSet<ScheduleTask> ScheduleTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -90,6 +91,11 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
         modelBuilder.Entity<QuizAttempt>().Property(x => x.ScorePercentage).HasPrecision(5, 2);
         modelBuilder.Entity<QuizAttemptAnswer>().HasIndex(x => new { x.AttemptId, x.QuestionId }).IsUnique();
         modelBuilder.Entity<QuizAttemptAnswer>().HasOne(x => x.SelectedOption).WithMany().HasForeignKey(x => x.SelectedOptionId).OnDelete(DeleteBehavior.Restrict);
+        var schedule = modelBuilder.Entity<ScheduleTask>();
+        schedule.Property(x => x.Title).HasMaxLength(200);
+        schedule.Property(x => x.Description).HasMaxLength(2000);
+        schedule.HasIndex(x => new { x.UserId, x.Date });
+        schedule.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
 
         // Seed Data
         SeedData(modelBuilder);
