@@ -24,7 +24,7 @@
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: var(--text);
-    /* Transparent so the animated .ss-aurora field shows through behind the glass */
+    /* Transparent so the shared animated SoftSync background shows through behind glass */
     background-color: transparent;
 }
 

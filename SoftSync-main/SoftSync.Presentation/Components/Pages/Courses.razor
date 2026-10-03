@@ -15,7 +15,9 @@
 @if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@Ui.Text(message)</div>}
 @if(loading){<LoadingState Text="@Ui.Text("Loading courses...")" />}
 else if(CourseId is null){
-    <PageHeader HeadingId="courses-title" Title="@Ui.Text("Courses")" Eyebrow="@Tx("YOUR LEARNING LIBRARY", "THƯ VIỆN HỌC TẬP")" Description="@Tx("Build one skill at a time. Choose a course and learn at your own pace.", "Phát triển từng kỹ năng. Chọn khóa học và học theo nhịp của bạn.")" />
+    <div class="ss-scene-hero ss-scene-courses">
+        <PageHeader HeadingId="courses-title" Title="@Ui.Text("Courses")" Eyebrow="@Tx("YOUR LEARNING LIBRARY", "THƯ VIỆN HỌC TẬP")" Description="@Tx("Build one skill at a time. Choose a course and learn at your own pace.", "Phát triển từng kỹ năng. Chọn khóa học và học theo nhịp của bạn.")" />
+    </div>
     <label for="course-search" class="form-label">@Tx("Find a course", "Tìm khóa học")</label>
     <input id="course-search" type="search" class="form-control mb-4" @bind="search" @bind:event="oninput" />
     @if(!Filtered.Any()){<EmptyState Title="@Tx("No courses to show", "Chưa có khóa học phù hợp")" Description="@Tx("Try another search or check back for new published courses.", "Thử từ khóa khác hoặc quay lại khi có khóa học mới được xuất bản.")" />}

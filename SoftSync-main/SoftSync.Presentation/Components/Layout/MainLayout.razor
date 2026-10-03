@@ -1,8 +1,8 @@
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
 
-<div class="ss-aurora" aria-hidden="true">
-    <span></span><span></span><span></span>
-</div>
+<AnimatedSoftSyncBackground Intensity="@BackgroundIntensity" />
 
 <div class="page">
     <SoftSync.Presentation.Components.Shared.LocalizedChrome />
@@ -15,3 +15,20 @@
 </div>
 
 <SoftSync.Presentation.Components.Shared.LocalizedChrome ErrorNotice="true" />
+
+@code {
+    private string BackgroundIntensity
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
+            return string.IsNullOrEmpty(path) ? "Hero" : path.Equals("dashboard", StringComparison.OrdinalIgnoreCase) ? "Ambient" : "Quiet";
+        }
+    }
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

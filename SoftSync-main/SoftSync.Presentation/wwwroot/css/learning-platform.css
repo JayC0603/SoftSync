@@ -99,15 +99,23 @@ html.ss-large-text .ss-workspace { font-size: 1.15rem; }
 .account-page .account-brand h1 { font-size: clamp(2rem,3vw,2.8rem); line-height: 1.2; }
 .account-page .account-brand::before, .account-page .account-brand::after { display: none; }
 .dash-home.ss-workspace { max-width: 1200px; padding: 2rem 1.5rem 5rem; }
-.dash-home.ss-workspace .dash-hero-v2 { min-height: 0; margin: 0; padding: 2rem; grid-template-columns: minmax(0,1fr) 260px; gap: 2rem; background: var(--ss-surface); border: 1px solid var(--ss-border); border-radius: 12px; }
+.dash-home.ss-workspace .dash-hero-v2 { min-height: 460px; margin: 0; padding: clamp(1.5rem,4vw,3rem); grid-template-columns: minmax(0,1fr); gap: 2rem; background: linear-gradient(90deg,rgba(255,255,255,.86),rgba(255,255,255,.68) 38%,rgba(255,255,255,.08) 75%),url('/images/backgrounds/softsync-dashboard.webp') 54% center / cover no-repeat; border: 1px solid rgba(255,255,255,.55); border-radius: 24px; }
+.dash-home.ss-workspace .dash-hero-copy { max-width: 640px; }
 .dash-home.ss-workspace .dash-hero-v2::after { display: none; }
 .dash-home.ss-workspace .dash-hero-v2 h1 { font-size: clamp(1.7rem,3vw,2.3rem); line-height: 1.2; letter-spacing: -.035em; }
-.dash-home.ss-workspace .dash-focus-card { background: var(--ss-surface-soft); border-color: var(--ss-border); box-shadow: none; border-radius: 10px; }
+.dash-home.ss-workspace .dash-focus-card { background: rgba(255,255,255,.76); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-color: rgba(255,255,255,.7); box-shadow: var(--ss-elevation-1); border-radius: 16px; }
 .dash-home.ss-workspace .dash-syncy-v2 { min-height: 260px; }
 .dash-home.ss-workspace .dash-syncy-v2 img { width: 240px; height: 260px; bottom: 0; }
 .dash-home.ss-workspace .syncy-bubble { display: none; }
-.dash-home.ss-workspace .mentor-bar, .dash-home.ss-workspace .mentor-cards article { background: var(--ss-surface); border-color: var(--ss-border); border-radius: 12px; box-shadow: none; }
-@media(max-width:760px) { .dash-home.ss-workspace { padding: 1rem 1rem 6rem; } .dash-home.ss-workspace .dash-hero-v2 { grid-template-columns: 1fr; padding: 1rem; } .dash-home.ss-workspace .dash-syncy-v2 { display: none; } }
+.dash-home.ss-workspace .mentor-bar, .dash-home.ss-workspace .mentor-cards article,
+body .dash-home.ss-workspace .quick-links, body .dash-home.ss-workspace .week-card,
+body .dash-home.ss-workspace .recommend-section { background: rgba(255,255,255,.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-color: rgba(255,255,255,.65); border-radius: 16px; }
+.dash-home.ss-workspace .recommend-section { padding: 1.25rem; }
+.dash-home.ss-workspace .quick-section > h3 { display: inline-block; padding: .4rem .75rem; border-radius: 10px; background: rgba(255,255,255,.85); }
+html[data-theme="dark"] .dash-home.ss-workspace .dash-hero-v2 { background: linear-gradient(90deg,rgba(17,19,41,.93),rgba(17,19,41,.75) 38%,rgba(17,19,41,.18) 80%),url('/images/backgrounds/softsync-dashboard.webp') 54% center / cover no-repeat; }
+html[data-theme="dark"] body .dash-home.ss-workspace :is(.dash-focus-card,.quick-links,.week-card,.recommend-section,.mentor-bar,.mentor-cards article),
+html[data-theme="dark"] .dash-home.ss-workspace .quick-section > h3 { background: rgba(23,25,49,.85) !important; border-color: rgba(185,177,239,.25); }
+@media(max-width:760px) { .dash-home.ss-workspace { padding: 1rem 1rem 6rem; } .dash-home.ss-workspace .dash-hero-v2 { grid-template-columns: 1fr; padding: 210px 1rem 1.5rem; background: linear-gradient(0deg,rgba(248,247,255,.97) 0%,rgba(248,247,255,.94) 55%,rgba(248,247,255,.3) 80%,transparent),url('/images/backgrounds/softsync-dashboard.webp') 66% top / auto 235px no-repeat; background-color:rgba(248,247,255,.86); } html[data-theme="dark"] .dash-home.ss-workspace .dash-hero-v2 { background: linear-gradient(0deg,rgba(23,25,49,.97),rgba(23,25,49,.94) 55%,rgba(23,25,49,.3) 80%,transparent),url('/images/backgrounds/softsync-dashboard.webp') 66% top / auto 235px no-repeat; background-color:rgba(23,25,49,.86); } .dash-home.ss-workspace .dash-syncy-v2 { display: none; } }
 
 /* Depth is selective: static panels do not lift; only actionable cards do. */
 .ss-workspace .ss-course-card, .ss-workspace .ss-outline { box-shadow: var(--ss-elevation-1); }

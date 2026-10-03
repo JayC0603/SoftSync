@@ -3,6 +3,8 @@
    clash with it (buttons, headings, borders). */
 @import "tailwindcss/theme.css" layer(theme) prefix(tw);
 @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
+@import "./softsync-background.css";
+@import "./scene-pages.css";
 
 /* Scan Razor + JS so class usage there is picked up by the JIT. */
 @source "../Components/**/*.razor";
@@ -232,28 +234,6 @@ html[data-theme="dark"] :where(.ss-card, .ss-navbar, .assistant-chat-card, .dash
     66%      { transform: translate(-5%, 3%) scale(0.95); }
 }
 
-/* Full-page cosmic background image behind the glass. The galaxy photo is the
-   top layer; a purple→pink gradient sits underneath as a fallback so the page
-   still looks cosmic if the image is missing (e.g. before it's committed). */
-.ss-aurora {
-    position: fixed;
-    inset: 0;
-    z-index: -10;
-    overflow: hidden;
-    pointer-events: none;
-    background-image:
-        linear-gradient(rgba(248,247,255,.72), rgba(248,247,255,.78)),
-        url('/images/background-softsync.png'),
-        linear-gradient(135deg, #eef2ff 0%, #f5f3ff 48%, #fdf4ff 100%);
-    background-color: #f7f6fc;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-/* The animated blobs are replaced by the image now. */
-.ss-aurora span { display: none; }
-
 .ss-gradient-text {
     background: var(--gradient);
     background-clip: text;
@@ -262,8 +242,7 @@ html[data-theme="dark"] :where(.ss-card, .ss-navbar, .assistant-chat-card, .dash
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .ss-glass::after,
-    .ss-aurora span { animation: none; }
+    .ss-glass::after { animation: none; }
     .ss-glass::after { opacity: 0; }
     .ss-glass, .ss-glass:hover { transition: none; }
 }
@@ -282,16 +261,6 @@ html[data-theme="dark"] {
     color-scheme: dark;
 }
 html[data-theme="dark"] body { color: #ede9fe; }
-/* Deep navy-purple canvas with a slightly brighter aurora so the page reads as a
-   rich dark surface (like the reference) rather than washed-out grey. */
-/* Dark theme keeps the same galaxy image but darkens it with an overlay so the
-   glass cards stay readable and the mood matches the dark UI. */
-html[data-theme="dark"] .ss-aurora {
-    background-image:
-        linear-gradient(rgba(10, 9, 24, 0.62), rgba(10, 9, 24, 0.72)),
-        url('/images/background-softsync.png'),
-        linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6b21a8 100%);
-}
 html[data-theme="dark"] .text-muted { color: #9ca3af !important; }
 html[data-theme="dark"] .ss-card,
 html[data-theme="dark"] .card { color: #e5e7eb; }
@@ -334,7 +303,6 @@ html[data-theme="dark"] .input-group .form-control::placeholder {
 
 /* Accessibility: user opted to reduce motion in Settings (mirrors the media query). */
 html[data-reduce-motion="1"] .ss-glass::after,
-html[data-reduce-motion="1"] .ss-aurora span,
 html[data-reduce-motion="1"] .wiz-mascot,
 html[data-reduce-motion="1"] .ss-welcome-mascot { animation: none !important; }
 html[data-reduce-motion="1"] * { scroll-behavior: auto !important; }

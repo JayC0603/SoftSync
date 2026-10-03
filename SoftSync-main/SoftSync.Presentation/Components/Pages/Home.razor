@@ -389,21 +389,6 @@
         min-height: calc(100vh - 72px);
         overflow: hidden;
     }
-    .ss-landing::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -8;
-        background:
-            radial-gradient(circle at 74% 12%, rgba(236, 72, 153, 0.22), transparent 30rem),
-            radial-gradient(circle at 52% 18%, rgba(139, 92, 246, 0.2), transparent 34rem),
-            linear-gradient(180deg, rgba(3, 7, 18, 0.28), rgba(3, 7, 18, 0.9)),
-            url('/images/background-softsync.png');
-        background-size: auto, auto, auto, cover;
-        background-position: center;
-        pointer-events: none;
-    }
-
     html[data-theme="light"] .ss-navbar {
         background: rgba(245, 241, 255, 0.78) !important;
         border-bottom-color: rgba(124, 58, 237, 0.14) !important;
@@ -441,16 +426,6 @@
         --ss-home-border: rgba(124, 58, 237, 0.16);
         --ss-home-shadow: rgba(99, 102, 241, 0.16);
     }
-    html[data-theme="light"] .ss-landing::before {
-        background:
-            radial-gradient(circle at 18% 10%, rgba(96, 165, 250, 0.34), transparent 31rem),
-            radial-gradient(circle at 80% 8%, rgba(236, 72, 153, 0.22), transparent 28rem),
-            radial-gradient(circle at 62% 42%, rgba(167, 139, 250, 0.26), transparent 34rem),
-            linear-gradient(135deg, rgba(248, 250, 252, 0.88), rgba(237, 233, 254, 0.76) 44%, rgba(255, 228, 245, 0.68)),
-            url('/images/background-softsync.png');
-        background-size: auto, auto, auto, auto, cover;
-        background-position: center;
-    }
     html[data-theme="light"] .ss-eyebrow {
         background: rgba(255, 255, 255, 0.6);
     }
@@ -465,6 +440,16 @@
         min-height: min(760px, calc(100vh - 120px));
     }
     .ss-hero-copy { max-width: 520px; }
+    .ss-hero-copy > * { opacity: 0; animation: ss-home-hero-enter 650ms cubic-bezier(.2,.7,.25,1) both; }
+    .ss-hero-copy > :nth-child(2) { animation-delay: 80ms; }
+    .ss-hero-copy > :nth-child(3) { animation-delay: 140ms; }
+    .ss-hero-copy > :nth-child(4) { animation-delay: 200ms; }
+    .ss-orbit-stage { animation: ss-home-hero-enter 700ms 120ms cubic-bezier(.2,.7,.25,1) both; }
+    @@keyframes ss-home-hero-enter { from { opacity: 0; transform: translate3d(0, 12px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+    @@media (prefers-reduced-motion: reduce) {
+        .ss-hero-copy > *, .ss-orbit-stage { opacity: 1; animation: none; transform: none; }
+    }
+    html[data-reduce-motion="1"] .ss-hero-copy > *, html[data-reduce-motion="1"] .ss-orbit-stage { opacity: 1; animation: none; transform: none; }
     .ss-eyebrow {
         display: inline-flex;
         padding: 0.45rem 0.85rem;
@@ -554,10 +539,7 @@
         width: min(38vw, 500px);
         aspect-ratio: 1.65;
         border-radius: 50%;
-        background:
-            radial-gradient(ellipse at center, rgba(255, 236, 202, 0.92), rgba(236, 72, 153, 0.32) 22%, rgba(79, 70, 229, 0.18) 48%, transparent 70%),
-            url('/images/background-softsync.png');
-        background-size: 160%;
+        background: radial-gradient(ellipse at center, rgba(255, 236, 202, 0.92), rgba(236, 72, 153, 0.32) 22%, rgba(79, 70, 229, 0.18) 48%, transparent 70%);
         filter: saturate(1.4);
         transform: rotate(-10deg);
         opacity: 0.9;
