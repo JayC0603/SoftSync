@@ -1,4 +1,5 @@
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IWebHostEnvironment HostEnvironment
 <!DOCTYPE html>
 <html lang="@ServerLanguage" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
 
@@ -40,12 +41,12 @@
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="dist/app.css" />
+    <link rel="stylesheet" href="@VersionedAsset("dist/app.css")" />
     <link rel="stylesheet" href="css/liquid-glass.css" />
     <link rel="stylesheet" href="css/focus-journey.css" />
     <link rel="stylesheet" href="css/ecosystem.css" />
-    <link rel="stylesheet" href="css/design-system.css" />
-    <script src="js/design-system.js"></script>
+    <link rel="stylesheet" href="@VersionedAsset("css/design-system.css")" />
+    <script src="@VersionedAsset("js/design-system.js")"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
     <script>
@@ -96,6 +97,14 @@
 </html>
 
 @code {
+    private string VersionedAsset(string path)
+    {
+        var asset = HostEnvironment.WebRootFileProvider.GetFileInfo(path);
+        if (!asset.Exists) return path;
+        using var stream = asset.CreateReadStream();
+        var version = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream))[..16];
+        return $"{path}?v={version}";
+    }
     // Read the resolved theme the browser last persisted to the ss-theme cookie
     // and paint it straight onto <html> during SSR / enhanced navigation. This is
     // what stops the theme from flashing to light and reverting between pages.

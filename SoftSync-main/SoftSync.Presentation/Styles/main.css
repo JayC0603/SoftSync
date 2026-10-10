@@ -1375,7 +1375,7 @@ html[data-theme="dark"] body {
     backdrop-filter: blur(16px) saturate(145%);
 }
 
-.ss-workspace-topbar > div:first-child { display: grid; gap: 0.08rem; }
+.ss-workspace-title { display: grid; gap: 0.08rem; }
 .ss-workspace-topbar strong { font-size: 0.98rem; letter-spacing: -0.01em; }
 .ss-workspace-kicker {
     color: #9a93ff;
@@ -1543,7 +1543,6 @@ html[data-theme="dark"] body :where(input, textarea, select) {
 @media (max-width: 760px) {
     .ss-workspace { margin-left: 0; }
     .ss-workspace-topbar { min-height: 58px; padding: 0.55rem 1rem; }
-    .ss-workspace-topbar > div:first-child { display: none; }
     .ss-workspace-topbar { justify-content: flex-end; }
     body .ss-navbar {
         position: sticky;
