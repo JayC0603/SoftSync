@@ -5,10 +5,23 @@
     <NavBar />
     <WelcomeToast />
 
-    <div id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">
-        @Body
+    <div class="ss-workspace">
+        <header class="ss-workspace-topbar">
+            <div>
+                <span class="ss-workspace-kicker">SoftSync</span>
+                <strong>Không gian học tập</strong>
+            </div>
+            <div class="ss-connection-state" role="status">
+                <span aria-hidden="true"></span>
+                <span>Đang hoạt động</span>
+            </div>
+        </header>
+
+        <main id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">
+            @Body
+        </main>
+        <AppFooter />
     </div>
-    <AppFooter />
 </div>
 
 <div id="blazor-error-ui">

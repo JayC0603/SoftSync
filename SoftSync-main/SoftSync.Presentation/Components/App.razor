@@ -11,8 +11,8 @@
         /* Critical first-paint canvas. This is intentionally inline and appears
            before external styles so refresh never exposes the purple fallback
            while Blazor/CSS is still loading. */
-        html, body { min-height: 100%; margin: 0; background: #f7f6fc; }
-        html[data-theme="dark"], html[data-theme="dark"] body { background: #100d24; }
+        html, body { min-height: 100%; margin: 0; background: #050917; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background: #050917; }
     </style>
     <script>
         // Migrate the old localStorage-only preference before the first paint.
@@ -59,7 +59,7 @@
             }
             function apply() {
                 try {
-                    var pref = localStorage.getItem('ss-theme') || 'light';
+                    var pref = localStorage.getItem('ss-theme') || 'dark';
                     var rm = localStorage.getItem('ss-reduce-motion') === '1';
                     var resolved = (pref === 'light' || pref === 'dark') ? pref
                         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -97,7 +97,7 @@
     // and paint it straight onto <html> during SSR / enhanced navigation. This is
     // what stops the theme from flashing to light and reverting between pages.
     private string ServerTheme =>
-        HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "light" ? "light" : "dark";
 
     private string BrowserThemeColor => ServerTheme == "dark" ? "#100d24" : "#f7f6fc";
 

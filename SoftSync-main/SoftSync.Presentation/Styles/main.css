@@ -1313,3 +1313,237 @@ html[data-theme="dark"] body :is(.dash-home .quick-links,.pr-page .pr-main-card,
     body .assistant-hero > img { display: none; }
     body .assistant-chat-card { min-height: 52dvh; max-height: 62dvh; }
 }
+
+/* ===== Quiz Studio-inspired application shell =====
+   A dark, space-themed workspace with a persistent desktop rail. The existing
+   Blazor navigation and page components remain intact; only the app chrome and
+   shared surfaces are restyled here. */
+html[data-theme="dark"] {
+    --glass-bg: rgba(14, 18, 33, 0.72);
+    --glass-bg-strong: rgba(17, 22, 38, 0.88);
+    --glass-border: rgba(126, 146, 255, 0.22);
+    --glass-highlight: rgba(255, 255, 255, 0.09);
+    --ss-canvas: #050917;
+    --ss-surface: #111626;
+    --ss-surface-soft: #171d31;
+    --ss-surface-accent: rgba(103, 98, 255, 0.16);
+    --ss-text: #f8fbff;
+    --ss-text-muted: #aab5d4;
+    --ss-border: rgba(126, 146, 255, 0.22);
+    --ss-primary: #9a93ff;
+    --ss-primary-hover: #b4afff;
+    --ss-shadow-sm: 0 10px 28px rgba(0, 0, 0, 0.2);
+    --ss-shadow-md: 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] body {
+    color: var(--ss-text);
+    background:
+        radial-gradient(circle at 72% 0%, rgba(74, 65, 180, 0.17), transparent 30rem),
+        radial-gradient(circle at 95% 74%, rgba(34, 80, 160, 0.12), transparent 34rem),
+        #050917;
+}
+
+.page {
+    min-height: 100dvh;
+    background: transparent;
+}
+
+.ss-workspace {
+    min-width: 0;
+    min-height: 100dvh;
+    margin-left: 286px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.ss-workspace-topbar {
+    position: sticky;
+    z-index: 45;
+    top: 0;
+    min-height: 72px;
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--ss-text);
+    background: rgba(8, 13, 27, 0.78);
+    border-bottom: 1px solid rgba(148, 168, 255, 0.13);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    backdrop-filter: blur(16px) saturate(145%);
+}
+
+.ss-workspace-topbar > div:first-child { display: grid; gap: 0.08rem; }
+.ss-workspace-topbar strong { font-size: 0.98rem; letter-spacing: -0.01em; }
+.ss-workspace-kicker {
+    color: #9a93ff;
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.ss-connection-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #aab5d4;
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+.ss-connection-state > span:first-child {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12), 0 0 18px rgba(16, 185, 129, 0.45);
+}
+
+.ss-main-content.container {
+    width: min(1220px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 3vw, 2.75rem) clamp(1rem, 3.5vw, 3rem) 5rem !important;
+}
+
+/* Turn the current top navigation component into the desktop sidebar. */
+body .ss-navbar {
+    position: fixed;
+    z-index: 60;
+    inset: 0 auto 0 0;
+    width: 286px;
+    min-height: 100dvh;
+    padding: 1.35rem 1rem !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 1.65rem;
+    color: #f8fbff;
+    background:
+        linear-gradient(180deg, rgba(4, 8, 20, 0.24), rgba(4, 8, 20, 0.78)),
+        url('../images/space-bg.jpg') center / cover no-repeat;
+    border: 0;
+    border-right: 1px solid rgba(148, 168, 255, 0.16);
+    box-shadow: inset -1px 0 0 rgba(129, 145, 255, 0.07), 18px 0 50px rgba(0, 0, 0, 0.12);
+    overflow-y: auto;
+}
+
+body .ss-navbar .ss-brand {
+    padding: 0.15rem 0.55rem 1.1rem;
+    color: #fff;
+    border-bottom: 1px solid rgba(148, 168, 255, 0.16);
+}
+body .ss-navbar .ss-brand-logo { width: 42px; height: 42px; border-radius: 13px; }
+body .ss-navbar .ss-gradient-text {
+    color: #fff;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+}
+body .ss-navbar .ss-navpills {
+    width: 100%;
+    display: grid !important;
+    gap: 0.35rem !important;
+}
+body .ss-navbar .ss-navpill {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7rem 0.85rem;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    color: #aab5d4;
+    border: 1px solid transparent;
+    border-radius: 12px;
+}
+body .ss-navbar .ss-navpill i { width: 22px; text-align: center; color: #c2c8df; }
+body .ss-navbar .ss-navpill:hover {
+    color: #fff;
+    background: rgba(61, 72, 117, 0.24);
+}
+body .ss-navbar .ss-navpill.active {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(124, 104, 255, 0.3), rgba(124, 104, 255, 0.2));
+    border-color: rgba(154, 151, 255, 0.48);
+    box-shadow: 0 10px 24px rgba(92, 80, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+body .ss-navbar .ss-navpill.active i { color: #fff; }
+body .ss-navbar .ss-nav-actions {
+    width: 100%;
+    margin-top: auto;
+    padding-top: 1rem;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem !important;
+    border-top: 1px solid rgba(148, 168, 255, 0.16);
+}
+body .ss-navbar .ss-icon-btn {
+    width: 100%;
+    color: #c1c8dc;
+    background: rgba(9, 14, 29, 0.52);
+    border: 1px solid rgba(143, 162, 255, 0.2);
+}
+body .ss-navbar .ss-icon-btn:hover { color: #fff; background: rgba(61, 72, 117, 0.35); }
+body .ss-navbar .ss-lang-btn { grid-column: 1 / -1; width: 100%; }
+body .ss-navbar .ss-userchip {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 0.55rem;
+    color: #f8fbff;
+    border-radius: 12px;
+    background: rgba(9, 14, 29, 0.52);
+    border: 1px solid rgba(143, 162, 255, 0.2);
+}
+body .ss-navbar .ss-userchip:hover { background: rgba(61, 72, 117, 0.35); }
+body .ss-navbar .ss-userchip-sub,
+body .ss-navbar .ss-user-chevron { color: #9a93ff; }
+body .ss-navbar .ss-auth-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+body .ss-navbar .ss-login-link { color: #dbe2f5; background: rgba(9, 14, 29, 0.62); }
+
+/* Shared page surfaces follow the reference app's restrained glass cards. */
+html[data-theme="dark"] body :where(.ss-card, .card, .dash-card, .assistant-chat-card) {
+    color: var(--ss-text);
+    background: linear-gradient(180deg, rgba(19, 24, 42, 0.76), rgba(14, 18, 33, 0.72));
+    border-color: rgba(132, 151, 255, 0.23);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+html[data-theme="dark"] body :where(input, textarea, select) {
+    color: #f8fbff;
+    background: rgba(17, 22, 38, 0.76);
+    border-color: rgba(126, 146, 255, 0.24);
+}
+
+@media (max-width: 760px) {
+    .ss-workspace { margin-left: 0; }
+    .ss-workspace-topbar { min-height: 58px; padding: 0.55rem 1rem; }
+    .ss-workspace-topbar > div:first-child { display: none; }
+    .ss-workspace-topbar { justify-content: flex-end; }
+    body .ss-navbar {
+        position: sticky;
+        inset: auto;
+        width: 100%;
+        min-height: 58px;
+        overflow: visible;
+        flex-direction: row;
+        background: rgba(8, 13, 27, 0.92);
+        border-right: 0;
+        border-bottom: 1px solid rgba(148, 168, 255, 0.16);
+    }
+    body .ss-navbar .ss-brand { padding: 0; border: 0; }
+    body .ss-navbar .ss-nav-actions {
+        width: auto;
+        margin-top: 0;
+        padding-top: 0;
+        display: flex !important;
+        border: 0;
+    }
+    body .ss-navbar .ss-lang-btn { width: auto; }
+    body .ss-navbar .ss-userchip { width: auto; padding: 2px; border: 0; background: transparent; }
+    body .ss-navbar .ss-auth-actions { display: inline-flex; }
+    .ss-mobile-bottom-nav {
+        color: #f8fbff;
+        background: rgba(11, 16, 31, 0.94) !important;
+        border-color: rgba(139, 92, 246, 0.3) !important;
+    }
+}

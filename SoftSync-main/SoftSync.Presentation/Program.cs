@@ -123,6 +123,9 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
     {
         options.ClientId = googleClientId;
         options.ClientSecret = googleClientSecret;
+        // Keep the callback explicit so local, Docker and production Google
+        // Cloud registrations all use the same predictable endpoint.
+        options.CallbackPath = "/signin-google";
     });
 }
 authBuilder.AddIdentityCookies();

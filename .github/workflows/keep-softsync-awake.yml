@@ -1,0 +1,29 @@
+name: Keep SoftSync awake
+
+on:
+  schedule:
+    # GitHub Actions uses UTC. Run every 10 minutes, all day.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-softsync-awake
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping SoftSync health endpoint
+        shell: bash
+        run: |
+          curl --fail --silent --show-error \
+            --retry 2 \
+            --retry-delay 5 \
+            --max-time 90 \
+            --user-agent "SoftSync-Keepalive/1.0" \
+            "https://softsync.id.vn/health"

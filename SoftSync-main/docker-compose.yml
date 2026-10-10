@@ -46,6 +46,10 @@ services:
       # Values come from a local .env or the shell; never hard-code credentials here.
       BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
       BootstrapAdmin__Password: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
+      # Google OAuth web credentials. Configure the callback in Google Cloud as
+      # http://localhost:8081/signin-google for this local Compose stack.
+      Authentication__Google__ClientId: "${GOOGLE_CLIENT_ID:-}"
+      Authentication__Google__ClientSecret: "${GOOGLE_CLIENT_SECRET:-}"
 
     ports:
       - "8081:8080"

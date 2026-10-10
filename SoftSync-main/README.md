@@ -164,3 +164,41 @@ Toàn bộ hiệu ứng tôn trọng `prefers-reduced-motion`.
 ## Tích hợp AI thật
 
 Ba interface AI (`IAiAssessmentService`, `IAiAssistantService`, `IAiRoadmapService`) đang dùng bản giả lập. Xem hướng dẫn thay thế bằng service thật trong [API_INTEGRATION_NOTES.md](API_INTEGRATION_NOTES.md).
+
+## Đăng nhập bằng Google thật
+
+Ứng dụng dùng ASP.NET Core Identity và Google OAuth. Tạo một OAuth client loại
+**Web application** trong Google Cloud Console, sau đó thêm đúng callback:
+
+- Chạy trực tiếp: `https://localhost:7212/signin-google`
+- Chạy Docker Compose: `http://localhost:8081/signin-google`
+- Production SoftSync: `https://softsync.id.vn/signin-google`
+
+Callback phải khớp tuyệt đối cả protocol, hostname, port và path. Không commit
+Google Client Secret vào repository.
+
+Chạy trực tiếp bằng .NET User Secrets:
+
+```powershell
+dotnet user-secrets set "Authentication:Google:ClientId" "YOUR_CLIENT_ID" --project SoftSync.Presentation
+dotnet user-secrets set "Authentication:Google:ClientSecret" "YOUR_CLIENT_SECRET" --project SoftSync.Presentation
+dotnet run --project SoftSync.Presentation
+```
+
+Chạy bằng Docker Compose: sao chép `.env.example` thành `.env`, điền hai giá trị
+Google rồi chạy `docker compose up --build`. Khi cả hai giá trị hợp lệ, nút
+"Đăng nhập bằng Google" tự động xuất hiện trên trang đăng nhập và đăng ký.
+
+Trên dịch vụ production (Render), cấu hình hai environment variables:
+
+```text
+Authentication__Google__ClientId=YOUR_CLIENT_ID
+Authentication__Google__ClientSecret=YOUR_CLIENT_SECRET
+```
+
+Trong Google Cloud Console, cấu hình OAuth client như sau:
+
+```text
+Authorized JavaScript origin: https://softsync.id.vn
+Authorized redirect URI:      https://softsync.id.vn/signin-google
+```

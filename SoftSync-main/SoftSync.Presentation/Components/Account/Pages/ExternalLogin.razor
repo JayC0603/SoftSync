@@ -73,6 +73,7 @@
     {
         var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
         var name = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? email ?? "";
+        var avatarUrl = externalLoginInfo.Principal.FindFirstValue("urn:google:picture") ?? "";
 
         if (string.IsNullOrEmpty(email))
         {
@@ -88,6 +89,7 @@
             user = new ApplicationUser
             {
                 FullName = name,
+                AvatarUrl = avatarUrl,
                 CreatedAt = DateTime.UtcNow,
                 Role = SoftSync.Common.Enums.UserRole.Student,
                 EmailConfirmed = true
