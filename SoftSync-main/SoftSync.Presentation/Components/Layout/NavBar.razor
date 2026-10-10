@@ -1,18 +1,10 @@
 @rendermode InteractiveServer
 @implements IDisposable
-@using SoftSync.BLL.Interfaces
-@using SoftSync.Common.Dtos
-@using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
 @inject LocalizationService L
-@inject IJSRuntime JS
-@inject NavigationManager Nav
-@inject IServiceScopeFactory ScopeFactory
 @inject AuthenticationStateProvider AuthProvider
-@inject UserProfileState UserProfileState
 
-@* Top navigation. Interactive so the language toggle (@onclick + JS interop)
-   works — the surrounding MainLayout renders as static SSR. *@
+@* Sidebar navigation shares localization with HeaderActions. MainLayout remains static SSR. *@
 
 <nav class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center">
     <!-- Brand -->
@@ -41,53 +33,8 @@
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY" title="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
-        <AuthorizeView Roles="Teacher,Admin"><Authorized><NavLink class="ss-navpill" href="/teacher" aria-label="Teacher Studio" title="Teacher Studio"><i class="bi bi-person-video3"></i><span>Teacher Studio</span></NavLink></Authorized></AuthorizeView>
     </div>
 
-    <!-- Right: actions -->
-    <div class="ss-nav-actions tw:flex tw:items-center tw:gap-3">
-                <button type="button" class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle" aria-label="@LanguageSwitchTitle">
-            <i class="bi bi-globe2" aria-hidden="true"></i>
-            <span class="ss-lang-code">@CurrentLanguageCode</span>
-            <i class="bi bi-chevron-down ss-lang-chevron" aria-hidden="true"></i>
-        </button>
-
-        <AuthorizeView Roles="Admin" Context="adminNavContext">
-            <Authorized><a class="btn btn-sm btn-outline-primary" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Users</span></a></Authorized>
-        </AuthorizeView>
-
-        <AuthorizeView>
-            <Authorized>
-                <button type="button" class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]" aria-label="@L["nav.settings"]">
-                    <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
-                        @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
-                        {
-                            <img src="@profile.AvatarUrl" alt="avatar" class="ss-avatar-img" />
-                        }
-                        else
-                        {
-                            <img src="@Mascot.ImageFor(profile?.Gender ?? Gender.Unspecified)"
-                                 alt="avatar"
-                                 class="ss-avatar-img"
-                                 onerror="this.style.display='none';this.parentElement.querySelector('.ss-avatar-fallback').style.display='flex'" />
-                            <i class="bi bi-person-fill ss-avatar-fallback"></i>
-                        }
-                    </div>
-                    <div class="tw:flex tw:flex-col tw:leading-tight">
-                        <span class="tw:font-semibold tw:text-sm">@(profile?.PublicName ?? context.User.Identity?.Name)</span>
-                        <span class="ss-userchip-sub">@L["nav.level"] @(profile?.Level ?? 1)</span>
-                    </div>
-                    <i class="bi bi-chevron-down ss-user-chevron" aria-hidden="true"></i>
-                </button>
-            </Authorized>
-            <NotAuthorized>
-                <div class="ss-auth-actions">
-                    <a href="Account/Login" class="ss-login-link">@L["nav.login"]</a>
-                    <a href="Account/Register" class="ss-register-link">@L["auth.register"]</a>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
 </nav>
 
 <nav class="ss-mobile-bottom-nav" aria-label="Mobile navigation">
@@ -443,91 +390,13 @@
 </style>
 
 @code {
-    private UserDto? profile;
-    private string HomeHref => profile is null ? "/" : "/dashboard";
-
-    protected override void OnInitialized()
+    private bool authenticated;
+    private string HomeHref => authenticated ? "/dashboard" : "/";
+    protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
+    protected override async Task OnInitializedAsync()
     {
-        L.OnChanged += StateHasChangedSafe;
-        UserProfileState.AvatarChanged += OnAvatarChanged;
-        UserProfileState.DisplayNameChanged += OnDisplayNameChanged;
-        Nav.LocationChanged += OnLocationChanged;
+        authenticated = (await AuthProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true;
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Load the user's profile (avatar + level) in its own DI scope so we
-            // don't share the page's scoped DbContext (avoids a concurrent-query
-            // crash when a page also queries the DB during its own init).
-            await LoadProfileAsync();
-        }
-    }
-
-    private async Task ToggleLanguage()
-    {
-        var next = L.Current == AppLanguage.En ? AppLanguage.Vi : AppLanguage.En;
-        var nextCode = next == AppLanguage.Vi ? "vi" : "en";
-        await JS.InvokeVoidAsync("ssLang.set", nextCode);
-        L.SetLanguage(next);
-    }
-
-    private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
-    private string TargetLanguageName => L.Current == AppLanguage.Vi ? "English" : "Vietnamese";
-    private string LanguageSwitchTitle => L.Current == AppLanguage.Vi
-        ? "Switch to English"
-        : "Chuyển sang tiếng Việt";
-
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
-
-    private void OnAvatarChanged(string avatarUrl)
-    {
-        if (profile is not null)
-        {
-            profile.AvatarUrl = avatarUrl;
-            _ = InvokeAsync(StateHasChanged);
-        }
-        else
-        {
-            _ = LoadProfileAsync();
-        }
-    }
-
-    private void OnDisplayNameChanged(string displayName)
-    {
-        if (profile is not null)
-        {
-            profile.DisplayName = displayName;
-            _ = InvokeAsync(StateHasChanged);
-        }
-        else
-        {
-            _ = LoadProfileAsync();
-        }
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        _ = LoadProfileAsync();
-    }
-
-    private async Task LoadProfileAsync()
-    {
-        var userId = await AuthProvider.GetUserIdAsync();
-        if (userId <= 0) return;
-
-        await using var scope = ScopeFactory.CreateAsyncScope();
-        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        profile = await userService.GetUserByIdAsync(userId);
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        L.OnChanged -= StateHasChangedSafe;
-        UserProfileState.AvatarChanged -= OnAvatarChanged;
-        UserProfileState.DisplayNameChanged -= OnDisplayNameChanged;
-        Nav.LocationChanged -= OnLocationChanged;
-    }
+    public void Dispose() => L.OnChanged -= StateHasChangedSafe;
 }
