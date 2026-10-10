@@ -2,8 +2,8 @@ name: Keep SoftSync awake
 
 on:
   schedule:
-    # GitHub Actions uses UTC. Run every 10 minutes, all day.
-    - cron: "*/10 * * * *"
+    # UTC: every 10 minutes, offset from the busy start of the hour.
+    - cron: "3,13,23,33,43,53 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -16,14 +16,29 @@ concurrency:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 6
     steps:
       - name: Ping SoftSync health endpoint
         shell: bash
         run: |
-          curl --fail --silent --show-error \
-            --retry 2 \
-            --retry-delay 5 \
-            --max-time 90 \
-            --user-agent "SoftSync-Keepalive/1.0" \
-            "https://softsync.id.vn/health"
+          set -euo pipefail
+          response_file=$(mktemp)
+          trap 'rm -f "$response_file"' EXIT
+          # A sleeping Render instance can return a loading page before the app is ready.
+          for attempt in 1 2 3 4; do
+            echo "Health request ${attempt}/4 at $(date -u +%FT%TZ)"
+            if curl --fail --silent --show-error --location \
+              --connect-timeout 15 --max-time 60 \
+              --header "Cache-Control: no-cache" \
+              --user-agent "SoftSync-Keepalive/1.1" \
+              --output "$response_file" \
+              "https://softsync.id.vn/health?keepalive=$(date +%s)"; then
+              if python3 -c 'import json, sys; payload = json.load(open(sys.argv[1])); sys.exit(0 if payload.get("status") == "ok" else 1)' "$response_file"; then
+                echo "SoftSync health check passed."
+                exit 0
+              fi
+            fi
+            if [ "$attempt" -lt 4 ]; then sleep 15; fi
+          done
+          echo "::error::SoftSync did not return a healthy JSON response. Check Render logs."
+          exit 1
