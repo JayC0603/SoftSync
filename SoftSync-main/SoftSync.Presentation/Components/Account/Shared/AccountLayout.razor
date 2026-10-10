@@ -20,6 +20,11 @@
                 <span class="account-eyebrow">@L["auth.brand.eyebrow"]</span>
                 <h1>@L["auth.brand.title"]<br /><span>@L["auth.brand.titleAccent"]</span></h1>
                 <p>@L["auth.brand.description"]</p>
+                <div class="account-benefits" aria-hidden="true">
+                    <span><i class="bi bi-stars"></i></span>
+                    <span><i class="bi bi-signpost-split"></i></span>
+                    <span><i class="bi bi-graph-up-arrow"></i></span>
+                </div>
             </div>
 
             <div class="account-brand-orbit" aria-hidden="true">
@@ -42,39 +47,61 @@
 
 <style>
     .account-page {
-        min-height: 100vh;
+        min-height: 100dvh;
         display: grid;
         place-items: center;
-        padding: 32px;
+        padding: clamp(20px, 4vw, 52px);
         position: relative;
+        overflow: hidden;
+        color: #f8fbff;
+        background:
+            radial-gradient(circle at 15% 12%, rgba(109, 91, 255, .22), transparent 28rem),
+            radial-gradient(circle at 88% 82%, rgba(37, 99, 235, .16), transparent 32rem),
+            #050917;
+    }
+
+    .account-page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: .32;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(255,255,255,.72) .7px, transparent .7px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(to bottom, #000, transparent 78%);
     }
 
     .account-shell {
-        width: min(1040px, 100%);
+        width: min(1120px, 100%);
+        min-height: min(720px, calc(100dvh - 64px));
         display: grid;
-        grid-template-columns: minmax(0, 1.05fr) minmax(400px, .95fr);
+        grid-template-columns: minmax(0, 1.08fr) minmax(410px, .92fr);
         overflow: hidden;
-        border: 1px solid rgba(99, 102, 241, .16);
-        border-radius: 28px;
-        background: rgba(255, 255, 255, .72);
-        box-shadow: 0 28px 80px rgba(67, 56, 202, .14);
-        backdrop-filter: blur(18px);
+        position: relative;
+        z-index: 1;
+        border: 1px solid rgba(139, 151, 255, .2);
+        border-radius: 30px;
+        background: rgba(8, 13, 27, .74);
+        box-shadow: 0 35px 100px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.05);
+        backdrop-filter: blur(24px) saturate(145%);
     }
 
     .account-brand {
-        min-height: 650px;
-        padding: 42px 48px;
+        min-height: 680px;
+        padding: 44px 50px;
         position: relative;
         overflow: hidden;
         color: #fff;
-        background: linear-gradient(145deg, #316ff6 0%, #6848ed 48%, #a84eea 100%);
+        background:
+            linear-gradient(180deg, rgba(6, 10, 24, .08), rgba(6, 10, 24, .56)),
+            url('/images/space-bg.jpg') center / cover no-repeat;
     }
 
     .account-brand::before,
     .account-brand::after {
         content: "";
         position: absolute;
-        border: 1px solid rgba(255, 255, 255, .22);
+        border: 1px solid rgba(173, 184, 255, .22);
         border-radius: 50%;
     }
 
@@ -93,45 +120,51 @@
         z-index: 2;
     }
 
-    .account-logo img { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; }
-    .account-logo-mobile { display: none; color: #5b55e7; margin-bottom: 24px; }
-    .account-brand-copy { position: relative; z-index: 2; margin-top: 100px; max-width: 440px; }
+    .account-logo img { width: 44px; height: 44px; border-radius: 13px; object-fit: cover; box-shadow: 0 8px 22px rgba(77,66,220,.28); }
+    .account-logo-mobile { display: none; color: #fff; margin-bottom: 28px; }
+    .account-brand-copy { position: relative; z-index: 2; margin-top: clamp(88px, 12vh, 132px); max-width: 460px; }
 
     .account-eyebrow {
         display: inline-block;
         padding: 7px 12px;
-        border: 1px solid rgba(255, 255, 255, .36);
+        border: 1px solid rgba(173, 184, 255, .3);
         border-radius: 999px;
         font-size: .72rem;
         font-weight: 700;
         letter-spacing: .08em;
-        background: rgba(255, 255, 255, .1);
+        color: #d9dcff;
+        background: rgba(98, 82, 220, .16);
+        backdrop-filter: blur(10px);
     }
 
-    .account-brand h1 { margin: 22px 0 18px; font-size: clamp(2.4rem, 4vw, 3.7rem); line-height: 1.04; font-weight: 800; letter-spacing: -.04em; }
-    .account-brand h1 span { color: #d9e7ff; }
-    .account-brand p { max-width: 320px; margin: 0; color: rgba(255, 255, 255, .82); font-size: 1.05rem; line-height: 1.7; }
+    .account-brand h1 { margin: 24px 0 18px; max-width: 9ch; font-size: clamp(2.7rem, 4.4vw, 4.25rem); line-height: .98; font-weight: 850; letter-spacing: -.055em; }
+    .account-brand h1 span { color: #aca8ff; }
+    .account-brand p { max-width: 390px; margin: 0; color: #b7c0db; font-size: 1rem; line-height: 1.72; }
 
-    .account-brand-orbit { position: absolute; right: 18px; bottom: 18px; width: 126px; height: 126px; border: 1px solid rgba(255,255,255,.34); border-radius: 50%; display: grid; place-items: center; }
-    .account-brand-mascot { width: 104px; height: 104px; display: grid; place-items: center; overflow: visible; background: transparent; }
-    .account-brand-mascot img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 18px rgba(30,24,100,.28)); }
+    .account-benefits { display: flex; gap: 10px; margin-top: 30px; }
+    .account-benefits span { width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid rgba(154,151,255,.28); border-radius: 14px; color: #d9dcff; background: rgba(21,25,48,.56); backdrop-filter: blur(10px); }
+    .account-benefits i { font-size: 1.05rem; }
 
-    .account-form-panel { padding: 48px 52px 32px; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,.84); }
+    .account-brand-orbit { position: absolute; right: 30px; bottom: 28px; width: 154px; height: 154px; border: 1px solid rgba(154,151,255,.3); border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 60px rgba(98,82,220,.15); }
+    .account-brand-mascot { width: 132px; height: 132px; display: grid; place-items: center; overflow: visible; background: transparent; }
+    .account-brand-mascot img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 25px rgba(0,0,0,.35)); }
+
+    .account-form-panel { padding: 50px clamp(32px, 4vw, 58px) 34px; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(180deg, rgba(17,22,38,.94), rgba(11,16,31,.96)); border-left: 1px solid rgba(139,151,255,.15); }
     .account-card { padding: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
-    .account-home-link { align-self: center; margin-top: 24px; color: #70778a; text-decoration: none; font-size: .88rem; }
-    .account-home-link:hover { color: #5b55e7; }
+    .account-home-link { align-self: center; margin-top: 26px; color: #8f9ab8; text-decoration: none; font-size: .86rem; }
+    .account-home-link:hover { color: #b4afff; }
 
     @@media (max-width: 820px) {
         .account-page { padding: 20px; align-items: start; }
-        .account-shell { display: block; max-width: 500px; border-radius: 22px; }
+        .account-shell { display: block; max-width: 520px; min-height: calc(100dvh - 40px); border-radius: 24px; }
         .account-brand { display: none; }
-        .account-form-panel { min-height: calc(100vh - 40px); padding: 32px 28px 24px; }
+        .account-form-panel { min-height: calc(100dvh - 40px); padding: 32px 30px 24px; border-left: 0; }
         .account-logo-mobile { display: inline-flex; align-self: center; }
     }
 
     @@media (max-width: 420px) {
         .account-page { padding: 0; }
-        .account-shell { min-height: 100vh; border: 0; border-radius: 0; }
-        .account-form-panel { min-height: 100vh; padding: 26px 20px; }
+        .account-shell { min-height: 100dvh; border: 0; border-radius: 0; }
+        .account-form-panel { min-height: 100dvh; padding: 26px 20px; }
     }
 </style>

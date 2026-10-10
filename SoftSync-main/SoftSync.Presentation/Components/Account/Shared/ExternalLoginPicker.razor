@@ -12,7 +12,7 @@
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
         @foreach (var provider in externalLogins)
         {
-            <button type="submit" class="btn btn-outline-secondary tw:w-full tw:py-2 tw:flex tw:items-center tw:justify-center tw:gap-2"
+            <button type="submit" class="external-google tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2"
                     name="provider" value="@provider.Name" title="@provider.DisplayName">
                 <i class="bi bi-google"></i> @L["auth.googleSignIn"]
             </button>
@@ -21,8 +21,11 @@
 }
 
 <style>
-    .external-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 16px; color: #9297a6; font-size: .8rem; }
-    .external-divider::before, .external-divider::after { content: ""; height: 1px; flex: 1; background: #e4e6ef; }
+    .external-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 16px; color: #7783a2; font-size: .76rem; }
+    .external-divider::before, .external-divider::after { content: ""; height: 1px; flex: 1; background: rgba(143,162,255,.16); }
+    .external-google { min-height: 50px; padding: 11px 16px; border: 1px solid rgba(143,162,255,.24); border-radius: 12px; color: #e8ecf7; background: rgba(17,22,38,.72); font-weight: 700; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+    .external-google:hover { border-color: rgba(154,147,255,.58); color: #fff; background: rgba(61,72,117,.3); transform: translateY(-1px); }
+    .external-google i { color: #fff; }
 </style>
 
 @code {
