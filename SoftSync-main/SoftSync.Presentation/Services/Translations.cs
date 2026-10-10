@@ -585,6 +585,12 @@ public static class Translations
         ["auth.reset.success"] = ("Your password has been reset. Please sign in.", "Mật khẩu đã được đặt lại. Vui lòng đăng nhập."),
 
         // ===== Auth: external (Google) =====
+        ["auth.googleCancelled"] = ("Google sign-in was cancelled or could not be completed. Please try again.", "Đăng nhập Google đã bị hủy hoặc chưa hoàn tất. Vui lòng thử lại."),
+        ["auth.googleLink.title"] = ("Confirm your existing account", "Xác nhận tài khoản hiện có"),
+        ["auth.googleLink.help"] = ("This email already has a SoftSync account. Enter its password to link Google. Next time you can continue with Google directly.", "Email này đã có tài khoản SoftSync. Nhập mật khẩu của tài khoản để liên kết Google. Lần sau bạn có thể đăng nhập trực tiếp bằng Google."),
+        ["auth.googleLink.submit"] = ("Confirm and link Google", "Xác nhận và liên kết Google"),
+        ["auth.googleLink.unavailable"] = ("Sign in using your existing method to access this account. Automatic linking is unavailable.", "Vui lòng đăng nhập bằng phương thức hiện có để truy cập tài khoản. Không thể tự động liên kết."),
+        ["auth.googleUnverified"] = ("Google did not verify this email. Please use another account.", "Google chưa xác minh email này. Vui lòng dùng tài khoản khác."),
         ["auth.googleSignIn"] = ("Continue with Google", "Tiếp tục với Google"),
         ["auth.googleNotConfigured"] = ("Google sign-in is not configured yet.", "Đăng nhập Google chưa được cấu hình."),
         ["auth.external.title"] = ("Signing in...", "Đang đăng nhập..."),

@@ -1,204 +1,405 @@
-# SoftSync
+<div align="center">
 
-## Production deployment
+<img src="SoftSync.Presentation/wwwroot/images/logo.png" alt="SoftSync" width="112" />
 
-The production application is the ASP.NET Core + Blazor Server project in
-`SoftSync.Presentation`. Render builds it with the repository-root
-`render.yaml` and connects it to the managed PostgreSQL database through
-`DATABASE_URL`.
+# ✦ SoftSync
 
-`SoftSync.Next` is an incomplete migration target and is not part of the
-production deployment. Do not configure Vercel as the production frontend or
-give it direct database access until the ASP.NET application exposes a secured
-HTTP API.
+### Học kỹ năng mềm cùng AI — phát triển hôm nay, dẫn lối ngày mai.
 
-For Render, create the service from this repository and keep the Blueprint
-defaults. The required production values are:
+Nền tảng học tập kỹ năng mềm cá nhân hóa, kết hợp đánh giá năng lực, lộ trình học,
+trợ lý AI, thực hành tình huống và bộ công cụ nghề nghiệp trong một trải nghiệm thống nhất.
 
-- `ASPNETCORE_ENVIRONMENT=Production`
-- `DATABASE_URL` supplied by the `softsync-db` Render database
+[![Live](https://img.shields.io/badge/🌐_LIVE-softsync.id.vn-6d5dfc?style=for-the-badge)](https://softsync.id.vn/)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-Render's health check is available at `/health`.
+[![Keepalive](https://img.shields.io/github/actions/workflow/status/JayC0603/SoftSync/keep-softsync-awake.yml?label=Keepalive&logo=githubactions)](https://github.com/JayC0603/SoftSync/actions/workflows/keep-softsync-awake.yml)
+[![License](https://img.shields.io/badge/license-private-lightgrey)](#-license)
 
-Nền tảng học kỹ năng mềm ứng dụng AI, xây dựng bằng **Blazor Server (.NET 8)** theo kiến trúc 3 lớp. Giao diện dùng **Bootstrap** kết hợp một hệ **liquid glass** (kính mờ) tự dựng, biên dịch qua **Vite + Tailwind CSS v4**.
+**[Trải nghiệm SoftSync](https://softsync.id.vn/)** ·
+**[Báo lỗi](https://github.com/JayC0603/SoftSync/issues)** ·
+**[Tài liệu AI](API_INTEGRATION_NOTES.md)**
 
-## Tính năng
+</div>
 
-- Đánh giá kỹ năng mềm bằng AI (assessment)
-- Lộ trình học cá nhân hóa (roadmap)
-- Trợ lý AI hỏi đáp (chat assistant)
-- Theo dõi tiến độ, case study, kết nối mentor
-- Giao diện liquid glass: kính mờ, ánh sáng bám con trỏ, nền aurora động
+---
 
-> Các service AI hiện dùng bản giả lập (`Fake*Service`). Xem [API_INTEGRATION_NOTES.md](API_INTEGRATION_NOTES.md) để tích hợp AI thật.
+## 🌌 Giới thiệu
 
-## Kiến trúc
+SoftSync giúp người học nhận diện điểm mạnh, cải thiện kỹ năng mềm và theo dõi sự
+tiến bộ qua từng hoạt động. Giao diện sử dụng phong cách **dark space + liquid
+glass**, tối ưu cho cả desktop lẫn thiết bị di động.
 
-| Project                   | Vai trò                                                             |
-| ------------------------- | -------------------------------------------------------------------- |
-| `SoftSync.Common`       | DTOs, Enums dùng chung                                              |
-| `SoftSync.DAL`          | Data Access Layer — EF Core,`DbContext`, Repositories, Migrations |
-| `SoftSync.BLL`          | Business Logic Layer — Services + Interfaces (gồm interface AI)    |
-| `SoftSync.Presentation` | Blazor Server UI + toolchain front-end (Vite/Tailwind)               |
+> [!IMPORTANT]
+> Ứng dụng production hiện tại là `SoftSync.Presentation` sử dụng ASP.NET Core
+> Blazor Server. `SoftSync.Next` là frontend Next.js đang được phát triển/migration
+> và chưa thay thế toàn bộ hệ thống Blazor.
 
-## Yêu cầu môi trường
+## ✨ Tính năng nổi bật
 
-- **.NET SDK 10.0** (dự án target `net10.0`)
-- **Node.js 18+** và **npm** (để biên dịch CSS/JS front-end)
-- **SQL Server** (LocalDB / Express / full / named instance) — sửa connection string cho khớp instance của bạn
+| Mô-đun | Khả năng |
+| --- | --- |
+| 🧠 **Đánh giá kỹ năng** | Bài đánh giá, phân tích năng lực và đề xuất hướng cải thiện |
+| 🗺️ **Lộ trình cá nhân hóa** | Lộ trình theo mục tiêu, bài học, quiz và lưu vị trí học |
+| 🤖 **Trợ lý AI** | Hỏi đáp dựa trên kho kiến thức SoftSync và tài liệu PDF |
+| 🎭 **Roleplay** | Thực hành giao tiếp qua tình huống và nhận phản hồi AI |
+| 📈 **Theo dõi tiến độ** | Điểm, level, streak, lịch sử bài làm và biểu đồ tiến bộ |
+| 🎮 **Mini game** | Game giao tiếp, tư duy phản biện và quản lý thời gian |
+| 👥 **Mentor & Community** | Kết nối mentor, case study và cộng đồng học tập |
+| 📄 **CV Intelligence** | Lưu trữ, matching CV–JD, ranking, comparison và tìm kiếm CV |
+| 🔐 **Identity** | Đăng ký, đăng nhập, OTP, phân quyền và Google OAuth 2.0 |
+| 🌐 **Song ngữ** | Tiếng Việt/English, light/dark mode và accessibility |
 
-## Cài đặt & chạy
+## 🖼️ Trải nghiệm giao diện
 
-### 1. Cấu hình database
+- Dashboard kiểu space studio với sidebar desktop và bottom navigation trên mobile.
+- Liquid glass, aurora background và hiệu ứng tương tác theo con trỏ.
+- Responsive cho điện thoại, tablet và desktop.
+- Hỗ trợ `prefers-reduced-motion`, keyboard focus và high-contrast mode.
 
-Connection string nằm ở [SoftSync.Presentation/appsettings.json](SoftSync.Presentation/appsettings.json):
+## 🧱 Kiến trúc hệ thống
 
-```json
-"ConnectionStrings": {
-  "SoftSyncDb": "Server=localhost\\JAYC;Database=SoftSyncDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-}
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    SoftSync.Presentation                    │
+│       Blazor Server · Identity · Vite · Tailwind · UI      │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│                         SoftSync.BLL                        │
+│          Business services · Authorization · AI layer      │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│                         SoftSync.DAL                        │
+│         EF Core · Repositories · Migrations · Identity     │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│                         PostgreSQL                          │
+└─────────────────────────────────────────────────────────────┘
+
+SoftSync.Common ── DTOs · Enums · Scoring · Shared rules
+SoftSync.Next   ── Next.js migration + CV dashboard/proxy
+SoftSync.Tests  ── Unit tests cho các workflow cốt lõi
 ```
 
-Sửa `Server=` cho khớp SQL Server của bạn:
+| Project | Vai trò |
+| --- | --- |
+| `SoftSync.Presentation` | Web app production, Blazor Server và authentication |
+| `SoftSync.BLL` | Business logic, authorization và AI services |
+| `SoftSync.DAL` | EF Core, PostgreSQL, repositories và migrations |
+| `SoftSync.Common` | DTO, enum, scoring và quy tắc dùng chung |
+| `SoftSync.Tests` | Unit tests |
+| `SoftSync.Next` | Next.js frontend và CV dashboard đang phát triển |
 
-- Instance mặc định: `Server=localhost`
-- Named instance (ví dụ máy này): `Server=localhost\\JAYC`
-- SQL LocalDB: `Server=(localdb)\\MSSQLLocalDB`
+## 🛠️ Công nghệ
 
-Xem tên instance đang có bằng: `sc query state= all | findstr MSSQL` (PowerShell). Instance `MSSQL$JAYC` tương ứng chuỗi `localhost\JAYC`.
+| Nhóm | Công nghệ |
+| --- | --- |
+| Backend | ASP.NET Core 10, Blazor Server, C# |
+| Authentication | ASP.NET Core Identity, Cookie Auth, Google OAuth 2.0 |
+| Database | PostgreSQL 16, Entity Framework Core, Npgsql |
+| Frontend | Razor Components, Bootstrap, Tailwind CSS 4, Vite 6 |
+| AI | Hugging Face-compatible APIs, knowledge base, PDF extraction |
+| CV workspace | Next.js 15, React 19, TypeScript |
+| Infrastructure | Docker, Docker Compose, GitHub Actions |
+| Testing | xUnit / .NET Test SDK |
 
-### 2. Áp migration để tạo database
+## 🚀 Chạy nhanh với Docker
+
+### Yêu cầu
+
+- Docker Desktop hoặc Docker Engine + Compose.
+- Git.
+
+### Khởi động
 
 ```bash
-# Cài công cụ EF nếu chưa có
-dotnet tool install --global dotnet-ef
-
-# Từ thư mục gốc solution, tạo DB từ migration Initial sẵn có
-dotnet ef database update --project SoftSync.DAL --startup-project SoftSync.Presentation
+git clone https://github.com/JayC0603/SoftSync.git
+cd SoftSync/SoftSync-main
+cp .env.example .env
+docker compose up --build
 ```
 
-Nếu `dotnet` không nằm trong PATH, `dotnet-ef` sẽ báo "cannot find dotnet". Thêm tạm vào PATH trước khi chạy:
+| Dịch vụ | URL |
+| --- | --- |
+| SoftSync | <http://localhost:8081> |
+| pgAdmin | <http://localhost:5050> |
+| PostgreSQL | `localhost:5432` |
 
-```powershell
-$env:Path = "C:\Program Files\dotnet;$env:Path"
-dotnet ef database update --project SoftSync.DAL --startup-project SoftSync.Presentation
+Tài khoản pgAdmin mặc định dành cho local development:
+
+```text
+Email:    admin@softsync.com
+Password: admin
 ```
 
-### 3. Chạy ứng dụng
+> [!WARNING]
+> Không sử dụng mật khẩu development mặc định trên production.
+
+## 💻 Chạy trực tiếp bằng .NET
+
+### Yêu cầu môi trường
+
+- .NET SDK 10.0.
+- Node.js 20+ và npm.
+- PostgreSQL 16+.
+
+### Cài đặt
 
 ```bash
+git clone https://github.com/JayC0603/SoftSync.git
+cd SoftSync/SoftSync-main
+
+dotnet restore SoftSync.sln
+npm install --prefix SoftSync.Presentation
+dotnet ef database update --project SoftSync.DAL --startup-project SoftSync.Presentation
 dotnet run --project SoftSync.Presentation
 ```
 
-Bước `dotnet run`/`dotnet build` **tự động** chạy `npm install` + `npm run build` (cấu hình trong [.csproj](SoftSync.Presentation/SoftSync.Presentation.csproj)) để sinh `wwwroot/dist/app.css` và `app.js`. Nếu không có Node, build .NET vẫn chạy nhưng bỏ qua phần front-end (sẽ có cảnh báo).
+Ứng dụng local:
 
-Mặc định app chạy tại:
+- <https://localhost:7212>
+- <http://localhost:5104>
 
-- https://localhost:7212
-- http://localhost:5104
-
-## Toolchain front-end (Vite + Tailwind)
-
-Nguồn nằm trong `SoftSync.Presentation/`:
-
-| Đường dẫn       | Nội dung                                                                    |
-| ------------------- | ---------------------------------------------------------------------------- |
-| `Styles/main.css` | Tailwind v4 (tắt preflight để không đụng Bootstrap) + hệ liquid glass |
-| `Scripts/main.js` | Entry bundle, xử lý ánh sáng bám con trỏ (`.ss-glass-interactive`)   |
-| `vite.config.js`  | Cấu hình Vite → xuất`wwwroot/dist/`                                    |
-| `package.json`    | Dependencies + scripts                                                       |
-
-Lệnh npm (chạy trong `SoftSync.Presentation/`):
+Trong lúc phát triển UI, chạy hai terminal:
 
 ```bash
-npm install       # cài dependencies
-npm run build     # build 1 lần ra wwwroot/dist
-npm run dev       # watch, rebuild khi sửa CSS/JS
-```
-
-Khi phát triển giao diện, chạy song song để có hot-reload:
-
-```bash
-# Terminal 1 — watch front-end
-cd SoftSync.Presentation && npm run dev
+# Terminal 1 — build/watch Tailwind + Vite
+npm run dev --prefix SoftSync.Presentation
 
 # Terminal 2 — Blazor hot reload
 dotnet watch --project SoftSync.Presentation
 ```
 
-### Quy ước `tw:` prefix (quan trọng)
+## ⚙️ Biến môi trường
 
-Dự án chạy **hybrid Bootstrap + Tailwind**: Bootstrap CSS vẫn được nạp cho các component (button, badge, alert, progress, spinner, form) và màu sắc, còn layout (grid/flex/spacing/typography) dùng Tailwind.
+Sao chép `.env.example` thành `.env` khi chạy Docker. Production nên dùng secret
+manager của nền tảng hosting.
 
-Vì Bootstrap và Tailwind trùng tên nhiều utility (`p-4`, `gap-3`, `mb-3`...) nhưng **khác giá trị**, Tailwind được cấu hình bật **prefix `tw:`** (trong [Styles/main.css](SoftSync.Presentation/Styles/main.css)). Mọi utility Tailwind phải viết kèm tiền tố:
+| Biến | Bắt buộc | Mô tả |
+| --- | :---: | --- |
+| `DATABASE_URL` | ✅ Production | PostgreSQL URI do hosting cung cấp |
+| `ConnectionStrings__SoftSyncDb` | ✅ Local/khác | Connection string PostgreSQL chuẩn Npgsql |
+| `Authentication__Google__ClientId` | Google OAuth | OAuth Web Client ID |
+| `Authentication__Google__ClientSecret` | Google OAuth | OAuth Client Secret — không commit |
+| `BootstrapAdmin__Email` | Không | Email admin khởi tạo |
+| `BootstrapAdmin__Password` | Không | Mật khẩu admin khởi tạo |
+| `AiApi__ApiKey` | AI thật | API key của AI provider |
+| `RecruitmentAi__BaseUrl` | CV AI | URL của dịch vụ FastAPI CV/JD |
+| `FRONTEND_ORIGINS` | Tách frontend | Danh sách CORS origins, phân tách bằng dấu phẩy |
 
-```razor
-<!-- Tailwind: LUÔN có tiền tố tw: -->
-<div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6 tw:p-6 tw:flex tw:items-center">
+## 🔐 Google OAuth 2.0
 
-<!-- Bootstrap: giữ nguyên, KHÔNG prefix -->
-<button class="btn btn-primary">...</button>
-<span class="badge bg-success">...</span>
-<i class="bi bi-check-circle-fill text-success"></i>
+Nút **Tiếp tục với Google** luôn xuất hiện trên trang đăng nhập và đăng ký.
+Khi thiếu cấu hình, nút bị vô hiệu hóa và hiển thị thông báo thay vì biến mất.
+Tài khoản Google mới được tạo không cần mật khẩu và chuyển đến thiết lập hồ sơ;
+tài khoản đã liên kết chuyển đến dashboard hoặc trang nội bộ được yêu cầu.
+Nếu email trùng tài khoản dùng mật khẩu, người dùng phải xác nhận mật khẩu trước
+khi liên kết Google. Email chưa được Google xác minh không được dùng để tạo tài khoản.
+Luồng này không bỏ qua khóa tài khoản hoặc xác thực hai bước.
+
+Tạo OAuth Client loại **Web application** trong Google Cloud Console.
+
+| Môi trường | Authorized redirect URI |
+| --- | --- |
+| Local .NET | `https://localhost:7212/signin-google` |
+| Docker Compose | `http://localhost:8081/signin-google` |
+| Production | `https://softsync.id.vn/signin-google` |
+
+Production origin:
+
+```text
+https://softsync.id.vn
 ```
 
-Khi viết markup mới:
-
-- **Layout/spacing/typography** → dùng Tailwind có prefix: `tw:flex`, `tw:grid`, `tw:p-6`, `tw:mb-4`, `tw:text-xl`, `tw:font-bold`, `tw:md:grid-cols-2`...
-- **Component + màu** → giữ Bootstrap không prefix: `btn`, `btn-primary`, `badge`, `bg-*`, `text-muted`, `progress`, `form-control`...
-- **Icon** → luôn giữ `bi bi-*` (Bootstrap Icons, dependency riêng).
-
-Lưu ý thang đo khác nhau: Bootstrap `p-4` = 1.5rem, còn Tailwind `tw:p-4` = 1rem. Khi chuyển từ Bootstrap sang Tailwind cần đổi bậc (`p-4` → `tw:p-6`, `p-5` → `tw:p-12`).
-
-## Hệ liquid glass
-
-Các class dùng lại được (định nghĩa trong `Styles/main.css`):
-
-- `.ss-glass` — bề mặt kính mờ: frost blur, specular highlight, sheen chéo trôi
-- `.ss-glass-interactive` — thêm vệt sáng bám theo con trỏ chuột
-- `.ss-aurora` — nền màu blur trôi (đặt sẵn trong `MainLayout.razor`)
-- `.ss-card` đã được nâng cấp sẵn thành kính, nên mọi card kế thừa tự động
-
-Toàn bộ hiệu ứng tôn trọng `prefers-reduced-motion`.
-
-## Tích hợp AI thật
-
-Ba interface AI (`IAiAssessmentService`, `IAiAssistantService`, `IAiRoadmapService`) đang dùng bản giả lập. Xem hướng dẫn thay thế bằng service thật trong [API_INTEGRATION_NOTES.md](API_INTEGRATION_NOTES.md).
-
-## Đăng nhập bằng Google thật
-
-Ứng dụng dùng ASP.NET Core Identity và Google OAuth. Tạo một OAuth client loại
-**Web application** trong Google Cloud Console, sau đó thêm đúng callback:
-
-- Chạy trực tiếp: `https://localhost:7212/signin-google`
-- Chạy Docker Compose: `http://localhost:8081/signin-google`
-- Production SoftSync: `https://softsync.id.vn/signin-google`
-
-Callback phải khớp tuyệt đối cả protocol, hostname, port và path. Không commit
-Google Client Secret vào repository.
-
-Chạy trực tiếp bằng .NET User Secrets:
+Local bằng User Secrets:
 
 ```powershell
 dotnet user-secrets set "Authentication:Google:ClientId" "YOUR_CLIENT_ID" --project SoftSync.Presentation
 dotnet user-secrets set "Authentication:Google:ClientSecret" "YOUR_CLIENT_SECRET" --project SoftSync.Presentation
-dotnet run --project SoftSync.Presentation
 ```
 
-Chạy bằng Docker Compose: sao chép `.env.example` thành `.env`, điền hai giá trị
-Google rồi chạy `docker compose up --build`. Khi cả hai giá trị hợp lệ, nút
-"Đăng nhập bằng Google" tự động xuất hiện trên trang đăng nhập và đăng ký.
+> [!CAUTION]
+> Không ghi Client Secret vào `appsettings.json`, Dockerfile, source code hoặc
+> commit Git. Nếu secret từng bị công khai, hãy rotate ngay trong Google Cloud.
 
-Trên dịch vụ production (Render), cấu hình hai environment variables:
+## 🤖 Tích hợp AI
+
+Các AI service tuân theo interface ở `SoftSync.BLL`, giúp thay đổi provider mà
+không ảnh hưởng UI. Xem [API_INTEGRATION_NOTES.md](API_INTEGRATION_NOTES.md) để
+cấu hình assessment, assistant, roadmap, quiz và roleplay AI.
+
+Kho kiến thức mặc định:
 
 ```text
-Authentication__Google__ClientId=YOUR_CLIENT_ID
-Authentication__Google__ClientSecret=YOUR_CLIENT_SECRET
+SoftSync.Presentation/Assets/AiKnowledge/
 ```
 
-Trong Google Cloud Console, cấu hình OAuth client như sau:
+## 📄 CV Dashboard / Next.js
+
+`SoftSync.Next` chứa workspace CV tại route `/cv`:
+
+- CV Storage.
+- CV–JD Matching.
+- CV Ranking.
+- CV Comparison.
+- Hybrid/Web CV Search.
+- API proxy `/api/cv/*` để giữ URL backend ở phía server.
+
+```bash
+cd SoftSync.Next
+cp .env.example .env.local
+npm install
+npm run dev
+```
 
 ```text
-Authorized JavaScript origin: https://softsync.id.vn
-Authorized redirect URI:      https://softsync.id.vn/signin-google
+CV_API_URL=https://your-cv-api-service.example.com
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-oauth-client-id
 ```
+
+## 🎨 Quy ước giao diện
+
+Dự án kết hợp Bootstrap và Tailwind CSS. Tailwind dùng prefix `tw:` để tránh
+xung đột utility class:
+
+```razor
+<!-- Tailwind: luôn có prefix tw: -->
+<div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6">
+
+<!-- Bootstrap: không dùng prefix -->
+<button class="btn btn-primary">Tiếp tục</button>
+<i class="bi bi-check-circle-fill"></i>
+```
+
+| Class | Công dụng |
+| --- | --- |
+| `.ss-glass` | Bề mặt kính mờ |
+| `.ss-glass-interactive` | Ánh sáng tương tác theo con trỏ |
+| `.ss-card` | Card dùng chung |
+| `.ss-aurora` | Nền aurora động |
+
+## 🧪 Build và kiểm thử
+
+```bash
+# Build toàn solution
+dotnet build SoftSync.sln
+
+# Chạy unit tests
+dotnet test SoftSync.Tests/SoftSync.Tests.csproj
+
+# Build Next.js production
+npm run build --prefix SoftSync.Next
+```
+
+Trạng thái kiểm tra gần nhất: **54 tests passed** ✅
+
+## 🐳 Triển khai production
+
+Ứng dụng production được đóng gói bằng:
+
+```text
+SoftSync.Presentation/Dockerfile
+```
+
+Container production cần các biến cơ bản:
+
+```text
+ASPNETCORE_ENVIRONMENT=Production
+DATABASE_URL=postgresql://...
+Authentication__Google__ClientId=...
+Authentication__Google__ClientSecret=...
+```
+
+Health check:
+
+```text
+GET /health → {"status":"ok"}
+```
+
+GitHub Actions workflow `.github/workflows/keep-softsync-awake.yml` gọi health
+endpoint mỗi 10 phút và hỗ trợ chạy thủ công bằng `workflow_dispatch`.
+
+## 🧯 Troubleshooting
+
+<details>
+<summary><strong>Không thấy nút “Đăng nhập bằng Google”</strong></summary>
+
+Kiểm tra cả `Authentication__Google__ClientId` và
+`Authentication__Google__ClientSecret` đã tồn tại trong môi trường chạy, sau đó
+redeploy. Provider chỉ được đăng ký khi có đủ hai giá trị. Khi thiếu cấu hình,
+nút Google vẫn hiển thị nhưng bị vô hiệu hóa kèm thông báo.
+
+</details>
+
+<details>
+<summary><strong>Google báo redirect_uri_mismatch</strong></summary>
+
+Callback trong Google Cloud phải khớp tuyệt đối protocol, hostname, port và path.
+Production sử dụng `https://softsync.id.vn/signin-google`.
+
+</details>
+
+<details>
+<summary><strong>Không kết nối được PostgreSQL</strong></summary>
+
+Kiểm tra `DATABASE_URL` hoặc `ConnectionStrings__SoftSyncDb`, trạng thái database,
+SSL và network access. Container runtime bao gồm thư viện GSSAPI cần cho Npgsql.
+
+</details>
+
+<details>
+<summary><strong>CSS mới chưa xuất hiện</strong></summary>
+
+Chạy `npm install` và `npm run build` trong `SoftSync.Presentation`, sau đó build
+lại .NET/Docker image. Bundle được xuất vào `wwwroot/dist`.
+
+</details>
+
+## 🤝 Đóng góp
+
+1. Fork repository.
+2. Tạo branch: `git checkout -b feature/ten-tinh-nang`.
+3. Commit: `git commit -m "Add: mô tả thay đổi"`.
+4. Push branch và tạo Pull Request.
+5. Đảm bảo build/test thành công trước khi gửi.
+
+## 🔒 Bảo mật
+
+- Không commit `.env`, API key, OAuth secret hoặc database password.
+- Dùng User Secrets khi phát triển local.
+- Dùng secret manager/environment variables trên production.
+- Rotate ngay credential nếu nghi ngờ bị lộ.
+- Báo cáo vấn đề bảo mật qua kênh riêng thay vì public issue.
+
+## 📂 Cấu trúc thư mục
+
+```text
+SoftSync-main/
+├── SoftSync.Common/        # Shared DTOs, enums và rules
+├── SoftSync.DAL/           # EF Core, entities, repositories, migrations
+├── SoftSync.BLL/           # Business logic, auth và AI services
+├── SoftSync.Presentation/  # Blazor Server production app
+├── SoftSync.Next/          # Next.js + CV workspace
+├── SoftSync.Tests/         # Automated tests
+├── docker-compose.yml      # Local stack
+└── SoftSync.sln            # .NET solution
+```
+
+## 📜 License
+
+Repository hiện được phát triển cho dự án SoftSync và chưa công bố giấy phép mã
+nguồn mở. Mọi quyền được bảo lưu cho đến khi có tệp `LICENSE` chính thức.
+
+---
+
+<div align="center">
+
+### Built with 💜 by the SoftSync team
+
+**[⬆ Về đầu trang](#-softsync)**
+
+</div>

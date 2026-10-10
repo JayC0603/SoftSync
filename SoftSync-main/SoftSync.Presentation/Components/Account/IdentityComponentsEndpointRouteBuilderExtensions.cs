@@ -22,12 +22,20 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
 
         var group = endpoints.MapGroup("/Account");
 
-        group.MapPost("/PerformExternalLogin", (
+        group.MapPost("/PerformExternalLogin", async (
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider,
-            [FromForm] string returnUrl) =>
+            [FromForm] string? returnUrl) =>
         {
+            var schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+            if (!schemes.Any(scheme => scheme.Name == provider))
+                return (IResult)TypedResults.BadRequest("External provider is unavailable.");
+
+            // Accept local paths only; OAuth state carries this destination back.
+            if (string.IsNullOrWhiteSpace(returnUrl) || !returnUrl.StartsWith('/')
+                || returnUrl.StartsWith("//") || returnUrl.Contains('\\'))
+                returnUrl = "/dashboard";
             IEnumerable<KeyValuePair<string, StringValues>> query =
             [
                 new("ReturnUrl", returnUrl),
@@ -40,7 +48,7 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
                 QueryString.Create(query));
 
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return TypedResults.Challenge(properties, [provider]);
+            return (IResult)TypedResults.Challenge(properties, [provider]);
         });
 
         group.MapPost("/Logout", async (

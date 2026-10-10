@@ -1352,7 +1352,7 @@ html[data-theme="dark"] body {
 .ss-workspace {
     min-width: 0;
     min-height: 100dvh;
-    margin-left: 286px;
+    margin-left: 248px;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -1369,8 +1369,8 @@ html[data-theme="dark"] body {
     justify-content: space-between;
     gap: 1rem;
     color: var(--ss-text);
-    background: rgba(8, 13, 27, 0.78);
-    border-bottom: 1px solid rgba(148, 168, 255, 0.13);
+    background: var(--ss-surface);
+    border-bottom: 1px solid var(--ss-border);
     -webkit-backdrop-filter: blur(16px) saturate(145%);
     backdrop-filter: blur(16px) saturate(145%);
 }
@@ -1388,7 +1388,7 @@ html[data-theme="dark"] body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: #aab5d4;
+    color: var(--ss-text-muted);
     font-size: 0.78rem;
     font-weight: 650;
 }
@@ -1412,7 +1412,7 @@ body .ss-navbar {
     position: fixed;
     z-index: 60;
     inset: 0 auto 0 0;
-    width: 286px;
+    width: 248px;
     min-height: 100dvh;
     padding: 1.35rem 1rem !important;
     display: flex;
@@ -1499,6 +1499,32 @@ body .ss-navbar .ss-userchip-sub,
 body .ss-navbar .ss-user-chevron { color: #9a93ff; }
 body .ss-navbar .ss-auth-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
 body .ss-navbar .ss-login-link { color: #dbe2f5; background: rgba(9, 14, 29, 0.62); }
+
+html[data-theme="light"] body .ss-navbar {
+    background: #faf9ff !important;
+    color: var(--ss-text);
+    border-right-color: #e8e5f3;
+    box-shadow: none;
+}
+html[data-theme="light"] body .ss-navbar .ss-gradient-text {
+    color: #25223d;
+    -webkit-text-fill-color: currentColor;
+}
+html[data-theme="light"] body .ss-navbar .ss-navpill { color: #64647b; }
+html[data-theme="light"] body .ss-navbar .ss-navpill i { color: #85819e; }
+html[data-theme="light"] body .ss-navbar .ss-navpill.active {
+    color: #5b45db;
+    background: #eeeaff;
+    border-color: transparent;
+    box-shadow: none;
+}
+html[data-theme="light"] body .ss-navbar .ss-navpill.active i { color: #5b45db; }
+html[data-theme="light"] body .ss-navbar .ss-navpill:hover { color: #5b45db; background: #f0edfa; }
+html[data-theme="light"] body .ss-navbar :is(.ss-icon-btn, .ss-userchip, .ss-login-link) {
+    color: #514b6e;
+    background: #fff;
+    border-color: #e4dfef;
+}
 
 /* Shared page surfaces follow the reference app's restrained glass cards. */
 html[data-theme="dark"] body :where(.ss-card, .card, .dash-card, .assistant-chat-card) {

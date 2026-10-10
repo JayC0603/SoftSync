@@ -15,6 +15,7 @@ using SoftSync.Presentation.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authentication;
 
 // Postgres maps DateTime to `timestamptz`. Some entities store non-UTC DateTime
 // (e.g. CreatedAt); this switch keeps the pre-6.0 behavior so those writes don't
@@ -115,9 +116,15 @@ var authBuilder = builder.Services.AddAuthentication(options =>
 
 // Only register Google when configured — AddGoogle throws at startup on empty keys.
 var googleSection = builder.Configuration.GetSection("Authentication:Google");
-var googleClientId = googleSection["ClientId"];
-var googleClientSecret = googleSection["ClientSecret"];
-if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+var googleClientId = !string.IsNullOrWhiteSpace(googleSection["ClientId"])
+    ? googleSection["ClientId"]
+    : builder.Configuration["GOOGLE_CLIENT_ID"];
+var googleClientSecret = !string.IsNullOrWhiteSpace(googleSection["ClientSecret"])
+    ? googleSection["ClientSecret"]
+    : builder.Configuration["GOOGLE_CLIENT_SECRET"];
+var googleAuthConfigured = !string.IsNullOrWhiteSpace(googleClientId)
+    && !string.IsNullOrWhiteSpace(googleClientSecret);
+if (googleAuthConfigured)
 {
     authBuilder.AddGoogle(options =>
     {
@@ -126,6 +133,15 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         // Keep the callback explicit so local, Docker and production Google
         // Cloud registrations all use the same predictable endpoint.
         options.CallbackPath = "/signin-google";
+        options.ClaimActions.MapJsonKey("urn:google:picture", "picture");
+        options.ClaimActions.MapJsonKey("urn:google:email_verified", "verified_email");
+        options.Events.OnRemoteFailure = context =>
+        {
+            // Cancellation and provider failures should return to a usable login page.
+            context.HandleResponse();
+            context.Response.Redirect("/Account/Login?googleError=1");
+            return Task.CompletedTask;
+        };
     });
 }
 authBuilder.AddIdentityCookies();
@@ -270,7 +286,11 @@ app.UseAntiforgery();
 
 // Render uses this lightweight endpoint to check that the web process is
 // accepting requests. Keep it independent from page rendering and user state.
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+app.MapGet("/health", () => Results.Ok(new
+    {
+        status = "ok",
+        authentication = new { google = googleAuthConfigured ? "configured" : "not_configured" }
+    }))
     .AllowAnonymous();
 
 var coursesApi = app.MapGroup("/api/courses")

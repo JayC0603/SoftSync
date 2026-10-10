@@ -1,6 +1,8 @@
 @page "/Account/ExternalLogin"
 @layout AccountLayout
 @using System.Security.Claims
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using SoftSync.DAL.Entities
 @inject SignInManager<ApplicationUser> SignInManager
@@ -14,14 +16,36 @@
 <PageTitle>@L["auth.external.title"]</PageTitle>
 
 <StatusMessage Message="@message" />
+@if (needsLinkConfirmation)
+{
+    <h2>@L["auth.googleLink.title"]</h2>
+    <p>@L["auth.googleLink.help"]</p>
+    <EditForm Model="Input" method="post" OnValidSubmit="ConfirmLinkAsync" FormName="google-link">
+        <DataAnnotationsValidator />
+        <label for="link-password" class="form-label">@L["auth.password"]</label>
+        <InputText id="link-password" type="password" @bind-Value="Input.Password" class="form-control tw:mb-3" autocomplete="current-password" />
+        <ValidationMessage For="() => Input.Password" />
+        <button type="submit" class="ss-btn-primary tw:w-full tw:py-3">@L["auth.googleLink.submit"]</button>
+    </EditForm>
+    <a href="Account/Login" class="tw:block tw:mt-3">@L["auth.login.title"]</a>
+}
+else if (message is null)
+{
 <div class="tw:text-center tw:py-4">
     <div class="spinner-border text-primary" role="status"></div>
     <p class="tw:mt-3">@L["auth.external.processing"]</p>
 </div>
+}
+else
+{
+    <a href="Account/Login">@L["auth.login.title"]</a>
+}
 
 @code {
     private string? message;
     private ExternalLoginInfo externalLoginInfo = default!;
+    private bool needsLinkConfirmation;
+    [SupplyParameterFromForm] private LinkInput Input { get; set; } = default!;
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
     [SupplyParameterFromQuery] private string? RemoteError { get; set; }
@@ -29,6 +53,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Input ??= new();
         if (RemoteError is not null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login",
@@ -48,19 +73,23 @@
             externalLoginInfo.LoginProvider,
             externalLoginInfo.ProviderKey,
             isPersistent: true,
-            bypassTwoFactor: true);
+            bypassTwoFactor: false);
 
         if (result.Succeeded)
         {
             Logger.LogInformation("{Name} logged in with {Provider}.",
                 externalLoginInfo.Principal.Identity?.Name, externalLoginInfo.LoginProvider);
             WelcomeCookie.Set(HttpContext, externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name));
-            RedirectManager.RedirectTo(ReturnUrl ?? "");
+            RedirectManager.RedirectTo(Destination);
         }
         else if (result.IsLockedOut)
         {
             RedirectManager.RedirectToWithStatus("Account/Login",
                 $"Error: {L["auth.error.lockedOut"]}", HttpContext);
+        }
+        else if (result.IsNotAllowed || result.RequiresTwoFactor)
+        {
+            message = "Error: " + L["auth.googleLink.unavailable"];
         }
         else
         {
@@ -81,8 +110,23 @@
                 $"Error: {L["auth.error.externalNoEmail"]}", HttpContext);
         }
 
+        if (!string.Equals(externalLoginInfo.Principal.FindFirstValue("urn:google:email_verified"), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            message = "Error: " + L["auth.googleUnverified"];
+            return;
+        }
+
         // Link to an existing local account with the same email, or create one.
         var user = await UserManager.FindByEmailAsync(email!);
+        if (user is not null)
+        {
+            // Matching email alone does not prove ownership of a local account.
+            if (!await UserManager.HasPasswordAsync(user))
+                message = "Error: " + L["auth.googleLink.unavailable"];
+            else
+                needsLinkConfirmation = true;
+            return;
+        }
         var isNew = false;
         if (user is null)
         {
@@ -107,6 +151,7 @@
             var roleResult = await UserManager.AddToRoleAsync(user, SoftSync.BLL.Auth.CourseAuthorization.UserRole);
             if (!roleResult.Succeeded)
             {
+                await UserManager.DeleteAsync(user);
                 message = "Error: " + string.Join(" ", roleResult.Errors.Select(e => e.Description));
                 return;
             }
@@ -114,18 +159,58 @@
         }
 
         var addLoginResult = await UserManager.AddLoginAsync(user, externalLoginInfo);
-        if (!addLoginResult.Succeeded && isNew)
+        if (!addLoginResult.Succeeded)
         {
+            if (isNew) await UserManager.DeleteAsync(user);
             message = "Error: " + string.Join(" ", addLoginResult.Errors.Select(e => e.Description));
             return;
         }
 
         await SignInManager.SignInAsync(user, isPersistent: true);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         Logger.LogInformation("New account provisioned via {Provider}.", externalLoginInfo.LoginProvider);
         WelcomeCookie.Set(HttpContext, user.FullName, isFirstLogin: isNew);
 
         // New users complete their profile; returning users go to their dashboard.
-        var destination = string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" ? "dashboard" : ReturnUrl;
-        RedirectManager.RedirectTo(isNew ? "profile-setup" : destination);
+        RedirectManager.RedirectTo(isNew ? "profile-setup" : Destination);
+    }
+
+    private string Destination => !string.IsNullOrWhiteSpace(ReturnUrl)
+        && ReturnUrl.StartsWith('/') && !ReturnUrl.StartsWith("//")
+        && !ReturnUrl.Contains('\\') && ReturnUrl != "/" ? ReturnUrl : "dashboard";
+
+    private async Task ConfirmLinkAsync()
+    {
+        // Re-read the signed external cookie on POST; never trust a form email/provider key.
+        var info = await SignInManager.GetExternalLoginInfoAsync();
+        var email = info?.Principal.FindFirstValue(ClaimTypes.Email);
+        var user = email is null ? null : await UserManager.FindByEmailAsync(email);
+        if (info is null || user is null || !needsLinkConfirmation)
+        {
+            message = "Error: " + L["auth.error.externalNoInfo"];
+            return;
+        }
+        var check = await SignInManager.CheckPasswordSignInAsync(user, Input.Password, lockoutOnFailure: true);
+        if (!check.Succeeded || await UserManager.GetTwoFactorEnabledAsync(user))
+        {
+            message = check.IsLockedOut ? L["auth.error.lockedOut"] : L["auth.error.invalidLogin"];
+            return;
+        }
+        var linked = await UserManager.AddLoginAsync(user, info);
+        if (!linked.Succeeded)
+        {
+            message = "Error: " + string.Join(" ", linked.Errors.Select(e => e.Description));
+            return;
+        }
+        await SignInManager.SignInAsync(user, isPersistent: true);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        WelcomeCookie.Set(HttpContext, user.FullName);
+        RedirectManager.RedirectTo(Destination);
+    }
+
+    private sealed class LinkInput
+    {
+        [Required]
+        public string Password { get; set; } = "";
     }
 }

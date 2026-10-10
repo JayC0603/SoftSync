@@ -29,6 +29,12 @@
 }
 
 <StatusMessage Message="@errorMessage" />
+@if (GoogleError == 1)
+{
+    <div class="alert alert-warning" role="alert">@L["auth.googleCancelled"]</div>
+}
+
+<ExternalLoginPicker />
 
 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
     <DataAnnotationsValidator />
@@ -62,7 +68,6 @@
 </EditForm>
 
 <a class="login-otp" href="Account/LoginWithOtp"><i class="bi bi-chat-dots"></i>@L["auth.loginWithOtp"]</a>
-<ExternalLoginPicker />
 
 <div class="login-register">
     @L["auth.noAccount"] <a href="Account/Register">@L["auth.register"]</a>
@@ -101,6 +106,7 @@
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     [SupplyParameterFromQuery] private int Suspended { get; set; }
     [SupplyParameterFromQuery] private int Deleted { get; set; }
+    [SupplyParameterFromQuery] private int GoogleError { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
