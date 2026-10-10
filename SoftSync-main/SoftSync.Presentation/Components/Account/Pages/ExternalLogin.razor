@@ -16,7 +16,13 @@
 <PageTitle>@L["auth.external.title"]</PageTitle>
 
 <StatusMessage Message="@message" />
-@if (needsLinkConfirmation)
+@if (needsRegistration)
+{
+    <div class="alert alert-info" role="status">@L["auth.googleNeedsRegistration"]</div>
+    <a href="Account/Register" class="ss-btn-primary tw:block tw:text-center tw:py-3">@L["auth.register"]</a>
+    <a href="Account/Login" class="tw:block tw:mt-3">@L["auth.login.title"]</a>
+}
+else if (needsLinkConfirmation)
 {
     <h2>@L["auth.googleLink.title"]</h2>
     <p>@L["auth.googleLink.help"]</p>
@@ -45,6 +51,7 @@ else
     private string? message;
     private ExternalLoginInfo externalLoginInfo = default!;
     private bool needsLinkConfirmation;
+    private bool needsRegistration;
     [SupplyParameterFromForm] private LinkInput Input { get; set; } = default!;
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
@@ -125,6 +132,13 @@ else
                 message = "Error: " + L["auth.googleLink.unavailable"];
             else
                 needsLinkConfirmation = true;
+            return;
+        }
+        if (externalLoginInfo.AuthenticationProperties is null
+            || !externalLoginInfo.AuthenticationProperties.Items.TryGetValue("SoftSync.AuthIntent", out var intent)
+            || intent != "register")
+        {
+            needsRegistration = true;
             return;
         }
         var isNew = false;

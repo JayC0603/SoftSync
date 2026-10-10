@@ -9,6 +9,7 @@
     <form class="external-login-form" action="Account/PerformExternalLogin" method="post">
         <AntiforgeryToken />
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        <input type="hidden" name="intent" value="@(IsRegistration ? "register" : "login")" />
         @foreach (var provider in externalLogins)
         {
             <button type="submit" class="external-google tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2"
@@ -43,6 +44,7 @@ else
 
 @code {
     private AuthenticationScheme[] externalLogins = [];
+    [Parameter] public bool IsRegistration { get; set; }
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     [Inject] private LocalizationService L { get; set; } = default!;

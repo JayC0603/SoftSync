@@ -134,7 +134,7 @@ if (googleAuthConfigured)
         // Cloud registrations all use the same predictable endpoint.
         options.CallbackPath = "/signin-google";
         options.ClaimActions.MapJsonKey("urn:google:picture", "picture");
-        options.ClaimActions.MapJsonKey("urn:google:email_verified", "verified_email");
+        options.ClaimActions.MapJsonKey("urn:google:email_verified", "email_verified");
         options.Events.OnRemoteFailure = context =>
         {
             // Cancellation and provider failures should return to a usable login page.

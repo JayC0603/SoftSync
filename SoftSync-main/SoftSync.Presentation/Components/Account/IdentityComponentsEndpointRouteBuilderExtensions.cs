@@ -26,7 +26,8 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider,
-            [FromForm] string? returnUrl) =>
+            [FromForm] string? returnUrl,
+            [FromForm] string? intent) =>
         {
             var schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
             if (!schemes.Any(scheme => scheme.Name == provider))
@@ -48,6 +49,8 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
                 QueryString.Create(query));
 
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            // Carry the chosen flow in protected OAuth state, not callback query parameters.
+            properties.Items["SoftSync.AuthIntent"] = intent == "register" ? "register" : "login";
             return (IResult)TypedResults.Challenge(properties, [provider]);
         });
 

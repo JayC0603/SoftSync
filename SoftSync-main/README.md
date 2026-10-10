@@ -195,7 +195,8 @@ manager của nền tảng hosting.
 
 Nút **Tiếp tục với Google** luôn xuất hiện trên trang đăng nhập và đăng ký.
 Khi thiếu cấu hình, nút bị vô hiệu hóa và hiển thị thông báo thay vì biến mất.
-Tài khoản Google mới được tạo không cần mật khẩu và chuyển đến thiết lập hồ sơ;
+Đăng nhập Google khi chưa có tài khoản sẽ hiển thị hướng dẫn và nút đăng ký.
+Tài khoản Google mới chỉ được tạo từ luồng đăng ký, không cần mật khẩu và chuyển đến thiết lập hồ sơ;
 tài khoản đã liên kết chuyển đến dashboard hoặc trang nội bộ được yêu cầu.
 Nếu email trùng tài khoản dùng mật khẩu, người dùng phải xác nhận mật khẩu trước
 khi liên kết Google. Email chưa được Google xác minh không được dùng để tạo tài khoản.
