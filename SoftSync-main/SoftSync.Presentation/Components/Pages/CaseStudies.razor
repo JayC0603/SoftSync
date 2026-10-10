@@ -1,4 +1,5 @@
 @page "/case-studies"
+@layout PublicLayout
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
@@ -21,7 +22,7 @@
             <div class="case-card-head"><div class="case-head-icon"><i class="bi bi-people-fill"></i></div><strong>@L["caseStudies.label"] <span>@caseStudy.Title</span></strong><i class="bi bi-chat-dots-fill case-chat-art"></i></div>
             <div class="case-body">
                 <aside class="scenario-art"><div><i class="bi bi-person"></i><b>×</b></div></aside>
-                <main>
+                <section>
                     <h2>@caseStudy.Scenario</h2><i class="title-line"></i>
                     <h3>@L["caseStudies.howRespond"]</h3>
                     <div class="case-options">
@@ -38,7 +39,7 @@
                     {
                         <div class="case-feedback @(isCorrect ? "good" : "learn")"><i class="bi @(isCorrect ? "bi-check-circle-fill" : "bi-lightbulb-fill")"></i><div><strong>@(isCorrect ? L["caseStudies.correctTitle"] : L["caseStudies.incorrectTitle"])</strong><p>@feedback</p></div><button @onclick="LoadNext">@L["caseStudies.tryAnother"] →</button></div>
                     }
-                </main>
+                </section>
             </div>
         </section>
         <div class="case-note"><i class="bi bi-lightbulb-fill"></i><span>@L["caseStudies.noWrongAnswer"]</span> ✨</div>

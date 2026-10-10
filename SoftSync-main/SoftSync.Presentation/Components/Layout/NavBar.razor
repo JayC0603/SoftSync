@@ -25,21 +25,23 @@
 
     <!-- Center: nav pills -->
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
-        <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All">
+        <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All" aria-label="@L["nav.home"]" title="@L["nav.home"]">
             <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/roadmap">
+        <NavLink class="ss-navpill" href="/roadmap" aria-label="@L["nav.learn"]" title="@L["nav.learn"]">
             <i class="bi bi-book"></i> <span>@L["nav.learn"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/progress">
+        <NavLink class="ss-navpill" href="/progress" aria-label="@L["nav.progress"]" title="@L["nav.progress"]">
             <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/resources">
+        <NavLink class="ss-navpill" href="/resources" aria-label="@L["nav.resources"]" title="@L["nav.resources"]">
             <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/game">
+        <NavLink class="ss-navpill" href="/game" aria-label="Mini Game" title="Mini Game">
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
         </NavLink>
+        <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY" title="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
+        <AuthorizeView Roles="Teacher,Admin"><Authorized><NavLink class="ss-navpill" href="/teacher" aria-label="Teacher Studio" title="Teacher Studio"><i class="bi bi-person-video3"></i><span>Teacher Studio</span></NavLink></Authorized></AuthorizeView>
     </div>
 
     <!-- Right: actions -->
@@ -56,14 +58,6 @@
 
         <AuthorizeView>
             <Authorized>
-                <button type="button" class="ss-icon-btn ss-search-btn" title="@L["nav.search"]" aria-label="@L["nav.search"]">
-                    <i class="bi bi-search"></i>
-                </button>
-                <button type="button" class="ss-icon-btn ss-bell" title="@L["nav.notifications"]" aria-label="@L["nav.notifications"]">
-                    <i class="bi bi-bell"></i>
-                    <span class="ss-bell-badge">3</span>
-                </button>
-
                 <button type="button" class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]" aria-label="@L["nav.settings"]">
                     <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
                         @if (!string.IsNullOrEmpty(profile?.AvatarUrl))

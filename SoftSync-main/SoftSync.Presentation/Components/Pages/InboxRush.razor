@@ -11,7 +11,7 @@
 
 <PageTitle>Inbox Rush · SoftSync</PageTitle>
 
-<main class="inbox-rush">
+<section class="inbox-rush">
     <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
         <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span>
         <span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span>
@@ -80,7 +80,7 @@
         </section>
         <div class="ir-result-actions"><button @onclick="Reset">@Tx("Practice again", "Thực hành lại")</button><button class="primary" @onclick="ContinueToReflection">@Tx("Continue to Reflection", "Tiếp tục đến Phản tư")<i class="bi bi-arrow-right"></i></button></div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

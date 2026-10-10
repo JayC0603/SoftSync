@@ -7,7 +7,7 @@
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>Quiz Review · SoftSync</PageTitle>
-<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
     <section class="tw:mx-auto tw:max-w-4xl" aria-labelledby="review-title" aria-busy="@loading">
         @if (loading)
         {
@@ -45,7 +45,7 @@
             </ol>
         }
     </section>
-</main>
+</section>
 
 @code {
     [Parameter] public int AttemptId { get; set; }

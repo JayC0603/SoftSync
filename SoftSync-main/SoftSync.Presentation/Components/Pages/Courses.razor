@@ -9,7 +9,7 @@
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>Courses · SoftSync</PageTitle>
-<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
+<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
 <header class="tw:mb-8"><span class="badge bg-primary">Inclusive Learning</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">Courses</h1><p>Video, caption, transcript and persistent learning progress.</p></header>
 @if(loading){<p role="status">Loading courses...</p>}
 @if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@message</div>}
@@ -25,7 +25,7 @@ else {<p>Complete all required lessons to finish this course.</p>}
 <ol>@foreach(var lesson in course.Lessons){<li class="tw:mb-4"><h3 class="tw:text-lg tw:font-semibold">@lesson.Title</h3>@if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video class="tw:w-full" controls preload="metadata" aria-label="Video lesson: @lesson.Title"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="Vietnamese captions" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p class="tw:text-sm tw:text-slate-700">Captions are not available for this video.</p>}}@if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details><summary>Transcript for @lesson.Title</summary><div class="tw:whitespace-pre-wrap">@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p class="tw:text-sm tw:text-slate-700">A transcript is not available for this video.</p>}<button type="button" class="btn btn-sm btn-outline-success tw:mt-2" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? "Lesson completed" : "Mark lesson completed")</button></li>}</ol>
 @if(course.FinalQuizId is int finalQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? "Retry Final Quiz" : "Open Final Quiz")</a>}
 </article>}</div>
-</section></main>
+</section></section>
 @code{
 private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
 protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}

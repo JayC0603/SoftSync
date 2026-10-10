@@ -1,0 +1,38 @@
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@inject IJSRuntime JS
+
+<header class="ss-public-header">
+    <a class="ss-public-brand" href="/" aria-label="SoftSync"><img src="/images/logo.png" alt="" width="36" height="36" /><strong>SoftSync</strong></a>
+    <nav class="ss-public-links" aria-label="@Tx("Main navigation", "Điều hướng chính")">
+        <NavLink href="/" Match="NavLinkMatch.All">@L["nav.home"]</NavLink>
+        <NavLink href="/about">@Tx("About", "Giới thiệu")</NavLink>
+        <NavLink href="/mentors">Mentor</NavLink>
+        <NavLink href="/community">@Tx("Community", "Cộng đồng")</NavLink>
+    </nav>
+    <div class="ss-public-actions">
+        <button type="button" class="ss-shell-control ss-public-language" @onclick="ToggleLanguage" aria-label="@Tx("Switch to Vietnamese", "Chuyển sang tiếng Anh")">@(L.Current == AppLanguage.Vi ? "VI" : "EN")</button>
+        <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
+        <AuthorizeView>
+            <Authorized><a class="ss-btn-primary" href="/dashboard">@Tx("My learning", "Vào học tập")</a></Authorized>
+            <NotAuthorized><a class="ss-public-login" href="/Account/Login">@L["auth.login.title"]</a><a class="ss-btn-primary" href="/Account/Register">@L["auth.register"]</a></NotAuthorized>
+        </AuthorizeView>
+    </div>
+    <details class="ss-public-mobile">
+        <summary aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></summary>
+        <nav aria-label="@Tx("Mobile navigation", "Điều hướng điện thoại")">
+            <a href="/">@L["nav.home"]</a><a href="/about">@Tx("About", "Giới thiệu")</a><a href="/mentors">Mentor</a><a href="/community">@Tx("Community", "Cộng đồng")</a><a href="/assistant">SYNCY</a>
+            <button type="button" class="ss-public-language-menu" @onclick="ToggleLanguage">@Tx("Tiếng Việt", "English")</button>
+        </nav>
+    </details>
+</header>
+
+@code {
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+    private async Task ToggleLanguage()
+    {
+        var next = L.Current == AppLanguage.Vi ? AppLanguage.En : AppLanguage.Vi;
+        await JS.InvokeVoidAsync("ssLang.set", next == AppLanguage.Vi ? "vi" : "en");
+        L.SetLanguage(next);
+    }
+}

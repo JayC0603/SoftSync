@@ -28,32 +28,32 @@
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
 
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["profile.fullName"]</label>
-        <InputText @bind-Value="Input.FullName" class="form-control form-control-lg" placeholder="@L["profile.fullName.placeholder"]" />
+        <label for="register-fullname" class="form-label tw:font-medium">@L["profile.fullName"]</label>
+        <InputText id="register-fullname" @bind-Value="Input.FullName" class="form-control form-control-lg" placeholder="@L["profile.fullName.placeholder"]" />
         <ValidationMessage For="() => Input.FullName" class="text-danger" />
     </div>
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["auth.email"]</label>
-        <InputText @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" />
+        <label for="register-email" class="form-label tw:font-medium">@L["auth.email"]</label>
+        <InputText id="register-email" @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" />
         <ValidationMessage For="() => Input.Email" class="text-danger" />
     </div>
     <div class="tw:mb-3">
-        <label class="form-label tw:font-medium">@L["auth.password"]</label>
+        <label for="register-password" class="form-label tw:font-medium">@L["auth.password"]</label>
         <div class="input-group">
-            <InputText type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="Show or hide password"
-                    onclick="const input=this.previousElementSibling; const show=input.type==='password'; input.type=show?'text':'password'; this.querySelector('i').className=show?'bi bi-eye-slash':'bi bi-eye';">
+            <InputText id="register-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
+            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-password" aria-pressed="false"
+                    onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
         </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
     <div class="tw:mb-4">
-        <label class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
+        <label for="register-confirmpassword" class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
         <div class="input-group">
-            <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="Show or hide password"
-                    onclick="const input=this.previousElementSibling; const show=input.type==='password'; input.type=show?'text':'password'; this.querySelector('i').className=show?'bi bi-eye-slash':'bi bi-eye';">
+            <InputText id="register-confirmpassword" type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
+            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
+                    onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
         </div>

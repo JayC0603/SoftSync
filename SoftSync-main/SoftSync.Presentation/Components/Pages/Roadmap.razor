@@ -16,7 +16,7 @@
 
 <PageTitle>@Tx("Your Roadmap", "Lộ trình của bạn") · SoftSync</PageTitle>
 
-<main class="pr-page">
+<section class="pr-page">
     @if (loading)
     {
         <div class="pr-loading"><span></span>@Tx("Personalizing your roadmap...", "Đang cá nhân hóa lộ trình của bạn...")</div>
@@ -312,7 +312,7 @@
             </div>
         </div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

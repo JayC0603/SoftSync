@@ -11,7 +11,7 @@
 
 <PageTitle>@Tx("Applied Practice", "Thực hành ứng dụng") · SoftSync</PageTitle>
 
-<main class="pipeline-practice">
+<section class="pipeline-practice">
     <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
         <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Summary</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Quiz</b></span><span class="active"><i>5</i><b>Practice</b></span><span><i>6</i><b>Reflection</b></span>
     </nav>
@@ -79,7 +79,7 @@
             @if (!string.IsNullOrWhiteSpace(error)) { <div class="game-error" role="alert"><i class="bi bi-exclamation-circle"></i>@error</div> }
         </div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

@@ -22,6 +22,7 @@
 @inject ILogger<Settings> Logger
 
 <div class="ss-settings-shell tw:mx-auto">
+    <UiPageHeader Title="@L["nav.settings"]" Description="@L["redesign.settings.description"]" />
     @if (loadFailed)
     {
         <div class="ss-card tw:p-8 tw:text-center">

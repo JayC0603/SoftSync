@@ -1,6 +1,7 @@
 @page "/teacher"
 @page "/teacher/courses"
 @rendermode InteractiveServer
+@inherits LocalizedComponentBase
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.TeacherPolicy)]
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
@@ -12,8 +13,8 @@
 @inject CourseUploadService Uploads
 
 <PageTitle>Teacher Studio · SoftSync</PageTitle>
-<main class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-8"><div class="tw:mx-auto tw:max-w-6xl">
-<header class="tw:mb-6"><span class="badge bg-primary">Teacher Studio</span><h1 class="tw:mt-2 tw:text-3xl tw:font-bold">Courses & Inclusive Skill Challenge</h1></header>
+<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-8"><div class="tw:mx-auto tw:max-w-6xl">
+<UiPageHeader Eyebrow="Teacher Studio" Title="@L["staff.courses"]" Description="@L["staff.courses.description"]" />
 @if (!string.IsNullOrWhiteSpace(message)) { <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@message</div> }
 <div class="tw:grid tw:gap-6 tw:lg:grid-cols-3">
 <aside class="ss-glass tw:rounded-2xl tw:p-5" aria-labelledby="managed-courses-title"><h2 id="managed-courses-title" class="tw:text-xl tw:font-bold">My Courses</h2><button type="button" class="btn btn-primary tw:my-3" @onclick="NewCourse"><i class="bi bi-plus-lg" aria-hidden="true"></i> Create Course</button>
@@ -63,7 +64,7 @@ else {
 </fieldset><ol class="tw:mt-3">@foreach(var q in quiz.Questions){<li>@q.Order. @q.QuestionText</li>}</ol>
 }
 }
-</section></div></div></main>
+</section></div></div></section>
 
 @code {
 private int userId; private bool isAdmin; private IReadOnlyList<CourseDto> courses=[]; private CourseDto course=new(); private CourseLessonDto lesson=new(); private ChallengeQuizDto quiz=new(); private ChallengeQuestionEditorDto question=NewQuestion(); private string? message; private bool error; private string aiLearningContext=""; private string aiStatus=""; private bool aiBusy; private bool aiError; private bool aiDraftNeedsConfirmation;

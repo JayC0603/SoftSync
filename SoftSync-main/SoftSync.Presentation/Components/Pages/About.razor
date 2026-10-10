@@ -1,9 +1,10 @@
 @page "/about"
+@layout PublicLayout
 @inherits LocalizedComponentBase
 @using SoftSync.Common.Enums
 
 <PageTitle>@Tx("About SoftSync", "Về SoftSync")</PageTitle>
-<main class="eco-page eco-editorial" aria-labelledby="about-title">
+<section class="eco-page eco-editorial" aria-labelledby="about-title">
     <header class="eco-page-head">
         <a href="/" class="eco-back"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Home", "Trang chủ")</a>
         <span>@Tx("ABOUT SOFTSYNC", "VỀ SOFTSYNC")</span>
@@ -31,6 +32,6 @@
     </section>
 
     <section class="eco-final-action"><div><span>@Tx("READY FOR THE NEXT STEP?", "SẴN SÀNG CHO BƯỚC TIẾP THEO?")</span><h2>@Tx("Continue with your own learning journey.", "Tiếp tục hành trình học của chính bạn.")</h2></div><a class="eco-primary" href="/roadmap">@Tx("Explore your roadmap", "Khám phá lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></section>
-</main>
+</section>
 
 @code { private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en; }

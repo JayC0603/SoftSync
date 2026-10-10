@@ -11,7 +11,7 @@
 @implements IAsyncDisposable
 
 <PageTitle>@Tx("Voice Practice", "Luyện giọng nói") · SoftSync</PageTitle>
-<main class="vp-page">
+<section class="vp-page">
     <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
         <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Summary</b></span><span class="done"><i class="bi bi-check-lg"></i><b>Quiz</b></span><span class="active"><i>5</i><b>Practice</b></span><span><i>6</i><b>Reflection</b></span>
     </nav>
@@ -28,7 +28,7 @@
     </section>
 
     @if(scores is not null){<section class="vp-results"><header><div class="vp-total"><b>@scores.Total.ToString("0.0")</b><span>/10</span></div><div><small>@Tx("ANALYSIS RESULT", "KẾT QUẢ PHÂN TÍCH")</small><h2>@scores.Label</h2><p>@scores.Note</p></div></header><div class="vp-score-grid">@foreach(var row in scores.Rows){<article><div><i class="bi @row.Icon"></i><b>@row.Name</b><strong>@(row.Score.HasValue ? row.Score.Value.ToString("0.0") : "—")/@row.Max</strong></div><p>@row.Feedback</p></article>}</div><div class="vp-tech"><b><i class="bi bi-activity"></i> @Tx("Signal metrics", "Chỉ số tín hiệu")</b><span>@result!.Duration.ToString("0.0")s</span><span>F0 SD @result.PitchSd.ToString("0.0") Hz</span><span>RMS variation @result.RmsVariation.ToString("0.00")</span><span>@Tx("Longest silence", "Im lặng dài nhất") @result.LongestSilence.ToString("0.0")s</span></div>@if(scores.NeedsReview){<div class="vp-warning"><i class="bi bi-exclamation-triangle"></i><div><b>@Tx("AI/teacher articulation review recommended", "Cần AI/giáo viên review độ rõ chữ")</b><span>@Tx("STT confidence is below 0.8 or WA is below 85%; no fixed deduction is applied to avoid unfair scoring.", "STT không có confidence ≥ 0,8 hoặc WA dưới 85%; hệ thống không trừ điểm cứng để tránh chấm oan.")</span></div></div>}<div class="vp-disclaimer"><i class="bi bi-info-circle"></i>@Tx("Instant scoring uses browser STT and local signal analysis. Production audio should be reprocessed server-side with Whisper/FPT and Praat.", "Điểm tức thời dùng STT trình duyệt và phân tích tín hiệu cục bộ. Bản production nên xử lý lại audio bằng Whisper/FPT và Praat phía server.")</div><button class="vp-complete" disabled="@saving" @onclick="SaveAndContinue">@(saving ? Tx("Saving...", "Đang lưu...") : Tx("Save result and continue", "Lưu kết quả và tiếp tục"))</button>@if(!string.IsNullOrWhiteSpace(saveMessage)){<p class="vp-save">@saveMessage</p>}</section>}
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

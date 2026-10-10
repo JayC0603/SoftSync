@@ -20,3 +20,6 @@
 # OS
 Thumbs.db
 .DS_Store
+
+# Local browser QA dependencies and screenshots
+.ui-qa/

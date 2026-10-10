@@ -17,10 +17,7 @@
 
     @if (questions == null || !storageRestored)
     {
-        <div class="tw:text-center tw:py-12">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="tw:mt-4">@L["assessment.preparing"]</p>
-        </div>
+        <UiState Loading="true" Title="@L["assessment.preparing"]" />
     }
     else if (questions.Count == 0)
     {

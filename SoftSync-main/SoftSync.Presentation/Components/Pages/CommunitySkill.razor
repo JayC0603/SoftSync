@@ -1,4 +1,5 @@
 @page "/community/skills/{SkillId:int}"
+@layout PublicLayout
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @using SoftSync.Common.Enums
@@ -6,7 +7,7 @@
 @inject IMentorService MentorService
 
 <PageTitle>@(skill?.Name ?? Tx("Skill community", "Nhóm kỹ năng")) · SoftSync</PageTitle>
-<main class="eco-page skill-community" aria-labelledby="skill-community-title">
+<section class="eco-page skill-community" aria-labelledby="skill-community-title">
     <a class="eco-back" href="/community"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Community", "Cộng đồng")</a>
     @if (loading)
     {
@@ -28,7 +29,7 @@
             </section>
         </div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int SkillId { get; set; }

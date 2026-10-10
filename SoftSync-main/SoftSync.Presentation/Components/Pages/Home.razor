@@ -1,4 +1,5 @@
 @page "/"
+@layout PublicLayout
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @inject NavigationManager Nav
@@ -28,59 +29,49 @@
 </HeadContent>
 
 <section class="ss-landing">
-    <div class="ss-hero-grid">
-        <div class="ss-hero-copy">
-            <div class="ss-eyebrow">@L["home.tagline"]</div>
-            <h1>
-                @L["home.heroTitlePrefix"]<span>@L["home.heroTitleHighlight"].</span>
-            </h1>
-            <p>@L["home.heroDesc"]</p>
-
+    <div class="ss-product-hero">
+        <div class="ss-product-copy">
+            <span class="ss-eyebrow">@L["redesign.hero.label"]</span>
+            <h1>@L["redesign.hero.title"]</h1>
+            <h2>@L["redesign.hero.support"]</h2>
+            <p>@L["redesign.hero.description"]</p>
             <div class="ss-hero-actions">
                 <AuthorizeView>
-                    <Authorized>
-                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("/profile-setup")'>
-                            @L["home.startJourney"] <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </Authorized>
-                    <NotAuthorized>
-                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("Account/Register")'>
-                            @L["home.startJourney"] <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </NotAuthorized>
+                    <Authorized><a class="ss-btn-primary" href="/dashboard">@L["redesign.hero.start"] <i class="bi bi-arrow-right" aria-hidden="true"></i></a></Authorized>
+                    <NotAuthorized><a class="ss-btn-primary" href="/Account/Register">@L["redesign.hero.start"] <i class="bi bi-arrow-right" aria-hidden="true"></i></a></NotAuthorized>
                 </AuthorizeView>
-                <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/assistant")'>
-                    <i class="bi bi-play-circle-fill"></i> @L["home.learnMore"]
-                </button>
+                <a class="ss-secondary-cta" href="/about">@L["redesign.hero.explore"]</a>
             </div>
         </div>
-
-        <div class="ss-orbit-stage" aria-hidden="true">
-            <div class="ss-orbit ss-orbit-one"></div>
-            <div class="ss-orbit ss-orbit-two"></div>
-            <div class="ss-galaxy-core"></div>
-            <div class="ss-planet ss-planet-a"></div>
-            <div class="ss-planet ss-planet-b"></div>
-            <div class="ss-ai-orb">
-                <img src="/images/syncy-robot.png" alt="" />
-            </div>
-            <div class="ss-feature-chip ss-chip-practice ss-glass ss-glass-interactive">
-                <i class="bi bi-controller"></i>
-                <div><strong>@L["home.orbit.practice.title"]</strong><span>@L["home.orbit.practice.desc"]</span></div>
-                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
-            </div>
-            <div class="ss-feature-chip ss-chip-assess ss-glass ss-glass-interactive">
-                <i class="bi bi-graph-up-arrow"></i>
-                <div><strong>@L["home.orbit.assess.title"]</strong><span>@L["home.orbit.assess.desc"]</span></div>
-                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
-            </div>
-            <div class="ss-feature-chip ss-chip-grow ss-glass ss-glass-interactive">
-                <i class="bi bi-person-fill"></i>
-                <div><strong>@L["home.orbit.grow.title"]</strong><span>@L["home.orbit.grow.desc"]</span></div>
-                <span class="ss-chip-arrow"><i class="bi bi-arrow-right"></i></span>
+        <div class="ss-product-preview" aria-label="@L["redesign.preview.label"]">
+            <header><span class="ss-preview-dot"></span><strong>SoftSync · @L["layout.workspace"]</strong></header>
+            <div class="ss-preview-body">
+                <div class="ss-preview-mascot"><img src="/images/syncy-robot.png" alt="SYNCY" width="180" height="180" /></div>
+                <span class="ss-preview-badge">@L["redesign.preview.label"]</span>
+                <h3>@L["redesign.preview.title"]</h3>
+                <p>@L["redesign.preview.description"]</p>
+                <div class="ss-preview-steps"><span><i class="bi bi-clipboard-check"></i>@L["redesign.step.assess"]</span><span><i class="bi bi-map"></i>@L["redesign.step.learn"]</span><span><i class="bi bi-chat-heart"></i>@L["redesign.step.practice"]</span></div>
             </div>
         </div>
     </div>
+
+    <section class="ss-product-section" aria-labelledby="product-intro">
+        <div class="ss-section-heading"><span>@L["redesign.intro.label"]</span><h2 id="product-intro">@L["redesign.intro.title"]</h2><p>@L["redesign.intro.description"]</p></div>
+        <div class="ss-experience-grid">
+            <a href="/Account/Register"><i class="bi bi-clipboard-check"></i><h3>@L["redesign.step.assess"]</h3><p>@L["redesign.assess.description"]</p></a>
+            <a href="/roadmap"><i class="bi bi-map"></i><h3>@L["redesign.step.learn"]</h3><p>@L["redesign.learn.description"]</p></a>
+            <a href="/case-studies"><i class="bi bi-chat-heart"></i><h3>@L["redesign.step.practice"]</h3><p>@L["redesign.practice.description"]</p></a>
+            <a href="/progress"><i class="bi bi-graph-up-arrow"></i><h3>@L["redesign.step.reflect"]</h3><p>@L["redesign.reflect.description"]</p></a>
+        </div>
+    </section>
+    <section class="ss-product-section ss-learning-method" aria-labelledby="learning-method">
+        <div class="ss-section-heading"><span>@L["redesign.method.label"]</span><h2 id="learning-method">@L["redesign.method.title"]</h2></div>
+        <ol><li><b>01</b><strong>@L["redesign.step.assess"]</strong></li><li><b>02</b><strong>@L["redesign.step.learn"]</strong></li><li><b>03</b><strong>@L["redesign.step.practice"]</strong></li><li><b>04</b><strong>@L["redesign.step.reflect"]</strong></li></ol>
+    </section>
+    <section class="ss-ai-example" aria-labelledby="ai-example-title">
+        <div><span class="ss-eyebrow">@L["redesign.preview.label"]</span><h2 id="ai-example-title">@L["redesign.ai.title"]</h2><p>@L["redesign.ai.description"]</p><a class="ss-btn-primary" href="/assistant">@L["redesign.ai.action"] <i class="bi bi-arrow-right"></i></a></div>
+        <div class="ss-example-conversation"><p class="ss-example-user">@L["redesign.ai.user"]</p><p class="ss-example-assistant"><strong>SYNCY</strong>@L["redesign.ai.reply"]</p><small>@L["redesign.ai.disclaimer"]</small></div>
+    </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
         <div class="ss-panel-head ss-glass">
@@ -253,12 +244,7 @@
         }
     </section>
 
-    <section class="ss-landing-stats">
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><strong>7+</strong><span>@L["home.stat.coreSkills"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-pie-chart-fill"></i><strong>AI</strong><span>@L["home.stat.assessment"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-headset"></i><strong>24/7</strong><span>@L["home.stat.support"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-star-fill"></i><strong>10K+</strong><span>@L["home.stat.learners"]</span></div>
-    </section>
+    <section class="ss-final-cta"><div><span>SOFTSYNC</span><h2>@L["redesign.final.title"]</h2><p>@L["redesign.hero.description"]</p></div><a class="ss-btn-primary" href="/Account/Register">@L["auth.register"] <i class="bi bi-arrow-right"></i></a></section>
 
     <aside class="ss-chat-widget @(chatbotOpen ? "open" : "") @((mentorDetailsOpen || advisorDetailsOpen || xuanDetailsOpen) ? "hidden-by-modal" : "")" aria-label="SoftSync assistant preview">
         @if (chatbotOpen)
@@ -269,7 +255,7 @@
                         <img src="/images/syncy-robot.png" alt="" />
                     </div>
                     <div>
-                        <strong>SYNCY AI</strong>
+                        <strong>@L["redesign.guide"]</strong>
                         <span>@L["chatbot.tagline"]</span>
                     </div>
                     <button type="button" class="ss-chat-close" title="Thu về hình tròn" @onclick="() => chatbotOpen = false">
@@ -331,15 +317,7 @@
                     }
                 </div>
 
-                <div class="ss-chat-composer">
-                    <button type="button" class="ss-chat-attach" title="Đính kèm tệp" aria-label="Đính kèm tệp">
-                        <i class="bi bi-paperclip"></i>
-                    </button>
-                    <input type="text" placeholder='@L["assistant.inputPlaceholder"]' aria-label='@L["assistant.inputPlaceholder"]' />
-                    <button type="button" class="ss-chat-send" title="Gửi tin nhắn" aria-label="Gửi tin nhắn" @onclick='() => Nav.NavigateTo("/assistant")'>
-                        <i class="bi bi-send-fill"></i>
-                    </button>
-                </div>
+                <div class="ss-chat-composer"><a class="ss-btn-primary" href="/assistant">@L["redesign.ai.action"]</a></div>
             </div>
         }
         else

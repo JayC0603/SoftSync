@@ -1,4 +1,5 @@
 @page "/mentors/{MentorId:int}"
+@layout PublicLayout
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @using SoftSync.Common.Enums
@@ -6,7 +7,7 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <PageTitle>@(mentor?.Name ?? Tx("Mentor profile", "Hồ sơ Mentor")) · SoftSync</PageTitle>
-<main class="eco-page mentor-profile" aria-labelledby="mentor-title">
+<section class="eco-page mentor-profile" aria-labelledby="mentor-title">
     <a class="eco-back" href="/mentors"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("All mentors", "Tất cả Mentor")</a>
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentor profile...", "Đang tải hồ sơ Mentor...")</p></div> }
     else if (mentor is null) { <div class="eco-state eco-state-error"><i class="bi bi-person-x" aria-hidden="true"></i><h1 id="mentor-title">@Tx("Mentor not found", "Không tìm thấy Mentor")</h1><p>@Tx("This profile may no longer be available.", "Hồ sơ này có thể không còn khả dụng.")</p><a href="/mentors">@Tx("Return to mentors", "Quay lại danh sách")</a></div> }
@@ -38,7 +39,7 @@
             </aside>
         </div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int MentorId { get; set; }

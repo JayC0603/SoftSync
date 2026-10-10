@@ -15,7 +15,7 @@
 
 <PageTitle>@LessonTitle · SoftSync</PageTitle>
 
-<main class="lesson-page">
+<section class="lesson-page">
     @if (loading)
     {
         <div class="state"><span></span>@Tx("Loading lesson...", "Đang tải bài học...")</div>
@@ -311,7 +311,7 @@
             </section>
         </div>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

@@ -14,7 +14,7 @@
 
 <PageTitle>@Tx("Roadmap", "Lộ trình") · SoftSync</PageTitle>
 
-<main class="coursera-roadmap">
+<section class="coursera-roadmap">
     @if (loading)
     {
         <div class="loading"><span></span>@Tx("Loading roadmap...", "Đang tải lộ trình...")</div>
@@ -112,7 +112,7 @@
         </section>
 
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }

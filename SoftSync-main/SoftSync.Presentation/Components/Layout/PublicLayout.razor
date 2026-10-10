@@ -1,0 +1,10 @@
+@inherits LayoutComponentBase
+
+<div class="ss-public-site">
+    <a class="ss-skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+    <PublicNavigation />
+    <main id="main-content" tabindex="-1" class="ss-public-content">
+        @Body
+    </main>
+    <AppFooter />
+</div>

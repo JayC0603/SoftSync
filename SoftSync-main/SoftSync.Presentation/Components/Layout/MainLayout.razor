@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject LocalizationService L
 
 <div class="page">
     <a class="ss-skip-link" href="#main-content">Skip to main content</a>
@@ -7,14 +8,17 @@
 
     <div class="ss-workspace">
         <header class="ss-workspace-topbar">
-            <div>
-                <span class="ss-workspace-kicker">SoftSync</span>
-                <strong>Không gian học tập</strong>
-            </div>
+            <button type="button" class="ss-shell-control ss-sidebar-toggle" onclick="window.ssDesign.toggleSidebar(this)" aria-label="@L["layout.toggleSidebar"]" aria-expanded="true">
+                <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
+            </button>
+            <WorkspaceTitle />
             <div class="ss-connection-state" role="status">
                 <span aria-hidden="true"></span>
-                <span>Đang hoạt động</span>
+                <span>@L["layout.workspaceReady"]</span>
             </div>
+            <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]">
+                <i class="bi bi-circle-half" aria-hidden="true"></i>
+            </button>
         </header>
 
         <main id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">

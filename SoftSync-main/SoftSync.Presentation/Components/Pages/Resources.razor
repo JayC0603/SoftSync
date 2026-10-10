@@ -7,7 +7,7 @@
 
 <PageTitle>@Tx("Learning resources", "Tài nguyên học tập") · SoftSync</PageTitle>
 
-<main class="resource-page" aria-labelledby="resource-title">
+<section class="resource-page" aria-labelledby="resource-title">
     <header class="resource-head">
         <div><span>@Tx("RESOURCE LIBRARY", "THƯ VIỆN TÀI NGUYÊN")</span><h1 id="resource-title">@Tx("Learning resources", "Tài nguyên học tập")</h1><p>@Tx("Find practical tools for every step of your learning journey.", "Tìm công cụ thực tế cho từng bước trong hành trình học tập.")</p></div>
     </header>
@@ -60,12 +60,12 @@
 
         <aside class="resource-side">
             <section><h2>@Tx("Your library", "Thư viện của bạn")</h2><dl><div><dt><i class="bi bi-bookmark"></i>@Tx("Saved this visit", "Đã lưu trong phiên này")</dt><dd>@saved.Count</dd></div><div><dt><i class="bi bi-check-circle"></i>@Tx("Available", "Có sẵn")</dt><dd>@Items.Length</dd></div></dl></section>
-            <section><span>@Tx("CONTINUE WHERE YOU LEFT OFF", "TIẾP TỤC NỘI DUNG ĐANG DỞ")</span><h2>@Tx("Active Listening: Understand to Connect", "Lắng nghe chủ động: Hiểu để kết nối")</h2><p>@Tx("Lesson 3 · 5 of 8", "Bài 3 · 5/8 phần")</p><div class="resource-meter"><i></i></div><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Resume", "Tiếp tục")<i class="bi bi-arrow-right"></i></button></section>
+            <section><span>@Tx("CONTINUE YOUR JOURNEY", "TIẾP TỤC HÀNH TRÌNH")</span><h2>@Tx("Your learning roadmap", "Lộ trình học của bạn")</h2><p>@Tx("Open your roadmap to find the next activity and your recorded progress.", "Mở lộ trình để xem hoạt động tiếp theo và tiến độ được ghi nhận.")</p><button @onclick='() => Nav.NavigateTo("/roadmap")'>@Tx("Open roadmap", "Mở lộ trình")<i class="bi bi-arrow-right"></i></button></section>
             <section class="resource-coach"><img src="/images/syncy-robot.png" alt="" /><div><span>SYNCY</span><h2>@Tx("Put learning into action", "Đưa kiến thức vào thực tế")</h2><p>@Tx("Use the listening guide before your next Practice activity.", "Xem cẩm nang lắng nghe trước hoạt động Practice tiếp theo.")</p></div></section>
             <section><span>@Tx("HUMAN SUPPORT", "HỖ TRỢ TỪ CON NGƯỜI")</span><h2>@Tx("Need help applying a skill?", "Cần hỗ trợ áp dụng kỹ năng?")</h2><p>@Tx("Describe one specific learning block to a SoftSync Mentor.", "Mô tả một điểm đang vướng cụ thể cho Mentor SoftSync.")</p><button @onclick='() => Nav.NavigateTo("/mentors")'>@Tx("Find a Mentor", "Tìm Mentor")<i class="bi bi-arrow-right"></i></button></section>
         </aside>
     </div>
-</main>
+</section>
 
 @code {
     private string query = string.Empty;

@@ -13,6 +13,7 @@
            while Blazor/CSS is still loading. */
         html, body { min-height: 100%; margin: 0; background: #050917; }
         html[data-theme="dark"], html[data-theme="dark"] body { background: #050917; }
+        html[data-theme="light"], html[data-theme="light"] body { background: #f7f8fa; }
     </style>
     <script>
         // Migrate the old localStorage-only preference before the first paint.
@@ -37,12 +38,14 @@
         })();
     </script>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="dist/app.css" />
     <link rel="stylesheet" href="css/liquid-glass.css" />
     <link rel="stylesheet" href="css/focus-journey.css" />
     <link rel="stylesheet" href="css/ecosystem.css" />
+    <link rel="stylesheet" href="css/design-system.css" />
+    <script src="js/design-system.js"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
     <script>
@@ -59,7 +62,7 @@
             }
             function apply() {
                 try {
-                    var pref = localStorage.getItem('ss-theme') || 'dark';
+                    var pref = localStorage.getItem('ss-theme') || 'light';
                     var rm = localStorage.getItem('ss-reduce-motion') === '1';
                     var resolved = (pref === 'light' || pref === 'dark') ? pref
                         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -97,7 +100,7 @@
     // and paint it straight onto <html> during SSR / enhanced navigation. This is
     // what stops the theme from flashing to light and reverting between pages.
     private string ServerTheme =>
-        HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "light" ? "light" : "dark";
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
 
     private string BrowserThemeColor => ServerTheme == "dark" ? "#100d24" : "#f7f6fc";
 

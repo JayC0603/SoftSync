@@ -1,0 +1,27 @@
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<div class="ss-workspace-title"><span class="ss-workspace-kicker">SoftSync</span><strong>@Title</strong></div>
+
+@code {
+    private string Title => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Split('/')[0].ToLowerInvariant() switch
+    {
+        "dashboard" => L["layout.workspace"],
+        "roadmap" or "roadmap-legacy" => L["nav.learn"],
+        "progress" => L["nav.progress"],
+        "resources" => L["nav.resources"],
+        "profile" => L["nav.profile"],
+        "settings" => L["nav.settings"],
+        "assistant" => "SYNCY",
+        "teacher" => "Teacher Studio",
+        "admin" => L.Current == AppLanguage.Vi ? "Quản lý tài khoản" : "Account management",
+        "game" => "Mini Game",
+        "assessment" or "assessment-result" or "assessment-complete" => L.Current == AppLanguage.Vi ? "Đánh giá kỹ năng" : "Skill assessment",
+        _ => L["layout.workspace"]
+    };
+    protected override void OnInitialized() { base.OnInitialized(); Navigation.LocationChanged += OnLocationChanged; }
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs args) => _ = InvokeAsync(StateHasChanged);
+    public new void Dispose() { Navigation.LocationChanged -= OnLocationChanged; base.Dispose(); }
+}

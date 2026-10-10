@@ -31,7 +31,7 @@
         <div class="side-mascot"><img src="/images/syncy-robot.png" alt="SYNCY" /><p>@L["assistant.sideQuote"] ✨</p></div>
     </aside>
 
-    <main class="assistant-shell">
+    <section class="assistant-shell">
         <section class="assistant-hero">
             <div><span>✦</span><p>@L["assistant.heroHi"]</p><h1><b>SoftSync</b> AI Assistant</h1><small>@L["assistant.subtitle"]</small></div>
             <img src="/images/syncy-robot.png" alt="SYNCY AI" />
@@ -63,9 +63,9 @@
 
     <div class="assistant-input">
         <input type="text" placeholder="@L["assistant.inputPlaceholder"]"
+               aria-label="@L["assistant.inputPlaceholder"]"
                @bind="userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" />
-        <i class="bi bi-paperclip"></i>
-        <button @onclick="SendMessage" disabled="@(string.IsNullOrWhiteSpace(userInput))">
+        <button @onclick="SendMessage" aria-label="@L["redesign.ai.send"]" disabled="@(string.IsNullOrWhiteSpace(userInput))">
             <i class="bi bi-send-fill"></i>
         </button>
     </div>
@@ -76,7 +76,7 @@
             <button @onclick='() => SetPrompt("advice")'><i class="bi bi-lightbulb"></i><span><b>@L["assistant.prompt.advice"]</b><small>@L["assistant.prompt.adviceSub"]</small></span></button>
             <button @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-graph-up-arrow"></i><span><b>@L["assistant.prompt.progress"]</b><small>@L["assistant.prompt.progressSub"]</small></span></button>
         </section>
-    </main>
+    </section>
 </div>
 
 @code {
