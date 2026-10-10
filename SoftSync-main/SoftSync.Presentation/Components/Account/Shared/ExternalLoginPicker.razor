@@ -15,17 +15,21 @@
             <button type="submit" class="external-google tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2"
                     name="provider" value="@provider.Name" title="@provider.DisplayName">
                 <span class="google-mark" aria-hidden="true">G</span>
-                <span>@L["auth.googleSignIn"]</span>
+                <span>@GoogleButtonLabel</span>
             </button>
         }
     </form>
+    @if (IsRegistration)
+    {
+        <p class="external-help">@L["auth.googleSignUp.help"]</p>
+    }
     <div class="external-divider"><span>@L["auth.or"]</span></div>
 }
 else
 {
     <button type="button" class="external-google tw:w-full" disabled aria-describedby="google-unavailable">
         <span class="google-mark" aria-hidden="true">G</span>
-        <span>@L["auth.googleSignIn"]</span>
+        <span>@GoogleButtonLabel</span>
     </button>
     <p id="google-unavailable" class="external-help" role="status">@L["auth.googleNotConfigured"]</p>
     <div class="external-divider"><span>@L["auth.or"]</span></div>
@@ -45,6 +49,7 @@ else
 @code {
     private AuthenticationScheme[] externalLogins = [];
     [Parameter] public bool IsRegistration { get; set; }
+    private string GoogleButtonLabel => L[IsRegistration ? "auth.googleSignUp" : "auth.googleSignIn"];
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     [Inject] private LocalizationService L { get; set; } = default!;
