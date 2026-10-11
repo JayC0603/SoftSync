@@ -1,4 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
+
+export function BrandLogo() {
+    return <Image src="/images/logo.png" alt="" width={36} height={36} className="project-logo" />;
+}
+
 export function Icon({ name }: {
     name: string;
 }) {
@@ -6,5 +12,5 @@ export function Icon({ name }: {
     return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name] || paths.grid}/></svg>;
 }
 export function SiteNav() {
-    return <header className="nav"><Link href="/" className="brand" aria-label="SoftSync — Trang chủ"><span className="brand-mark"><Icon name="spark"/></span>SoftSync</Link><nav className="desktop-links" aria-label="Điều hướng chính"><Link href="/#features">Khám phá</Link><Link href="/courses">Lộ trình học</Link><Link href="/cv">CV thông minh</Link></nav><div className="nav-actions"><Link href="/cv" className="login-link">Đăng nhập CV</Link><Link href="/#start" className="primary">Bắt đầu →</Link></div><details className="mobile-menu"><summary aria-label="Mở menu điều hướng">☰</summary><nav aria-label="Điều hướng trên điện thoại"><Link href="/#features">Khám phá</Link><Link href="/courses">Lộ trình & khóa học</Link><Link href="/cv">CV thông minh / Đăng nhập</Link><Link href="/#start">Bắt đầu</Link></nav></details></header>;
+    return <header className="nav"><Link href="/" className="brand" aria-label="SoftSync — Trang chủ"><span className="brand-mark"><BrandLogo /></span>SoftSync</Link><nav className="desktop-links" aria-label="Điều hướng chính"><Link href="/#features">Khám phá</Link><Link href="/courses">Lộ trình học</Link><Link href="/cv">CV thông minh</Link></nav><div className="nav-actions"><Link href="/cv" className="login-link">Đăng nhập CV</Link><Link href="/#start" className="primary">Bắt đầu →</Link></div><details className="mobile-menu"><summary aria-label="Mở menu điều hướng">☰</summary><nav aria-label="Điều hướng trên điện thoại"><Link href="/#features">Khám phá</Link><Link href="/courses">Lộ trình & khóa học</Link><Link href="/cv">CV thông minh / Đăng nhập</Link><Link href="/#start">Bắt đầu</Link></nav></details></header>;
 }

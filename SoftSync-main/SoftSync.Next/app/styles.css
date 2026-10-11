@@ -82,6 +82,27 @@ html {
   height: 32px
 }
 
+.marketing .project-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.marketing .preview-sidebar .project-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.marketing .footer .project-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+
 .marketing .desktop-links {
   display: flex;
   gap: 30px;
