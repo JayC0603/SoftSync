@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function CourseNotFound() { return <main className="marketing"><div className="shell"><section className="page-heading"><p className="eyebrow">SOFTSYNC LEARNING</p><h1>Không tìm thấy khóa học</h1><p className="intro">Khóa học này không tồn tại hoặc chưa được xuất bản.</p><Link className="primary" href="/courses">Quay lại danh sách khóa học</Link></section></div></main>; }

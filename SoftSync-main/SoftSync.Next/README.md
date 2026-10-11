@@ -51,3 +51,20 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-oauth-client-id
 
 `CV_API_URL` must point to the FastAPI backend root without `/api/v1`. The
 FastAPI backend must be able to reach its AI service and document storage.
+
+## Homepage and course navigation
+
+The homepage uses a responsive purple design with a product preview, an
+asymmetric feature grid, mobile navigation, and links to the existing learning
+and CV areas. The dashboard shown in the hero is explicitly labeled as sample
+data; it does not represent the signed-in user's progress.
+
+`/courses` reads published courses from the ASP.NET API. `/courses/[id]` reads
+the public course details and provides a link to the original ASP.NET `/courses`
+area for enrollment, lessons, and progress. Learning authentication stays in
+that application; CV authentication stays in `/cv`. API requests have a 10-second
+timeout, and course pages provide unavailable, empty, and not-found states.
+
+The existing CV dashboard and API proxy remain the entry points for CV storage,
+matching, ranking, comparison, and searching. These operations require a working
+CV backend and its AI/document services.
