@@ -154,15 +154,31 @@ body .password-toggle { background: var(--ss-surface-soft); border-color: var(--
 body .account-logo { color: var(--ss-text); }
 body .account-eyebrow { color: var(--ss-primary); border-color: var(--ss-border); background: var(--ss-surface-accent); }
 body .account-benefits span { background: var(--ss-surface); color: var(--ss-primary); border-color: var(--ss-border); box-shadow: none; }
+/* Keep desktop navigation compact; reveal only the hovered item's label. */
 @media (min-width: 761px) {
-    html[data-sidebar="collapsed"] { --ss-sidebar-width: 76px; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-brand { padding-inline: 8px; }
-    html[data-sidebar="collapsed"] .ss-navbar :is(.ss-brand > span, .ss-navpill > span, .ss-userchip > div:nth-child(2), .ss-user-chevron, .ss-lang-code, .ss-lang-chevron) { display: none; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-navpill { justify-content: center; padding-inline: 8px; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-nav-actions { grid-template-columns: 1fr; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-auth-actions { grid-template-columns: 1fr; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-auth-actions a { font-size: .6rem; padding: 6px 2px; }
-    html[data-sidebar="collapsed"] body .ss-navbar .ss-userchip { justify-content: center; }
+    :root, html[data-theme="light"], html[data-theme="dark"] { --ss-sidebar-width: 76px; }
+    html body .ss-navbar { overflow: visible; transition: none; }
+    body .ss-workspace { transition: none; }
+    html body .ss-navbar .ss-brand { padding-inline: 8px; }
+    .ss-navbar .ss-brand > span { display: none; }
+    html body .ss-navbar .ss-navpill { position: relative; justify-content: center; padding-inline: 8px; transition: background-color .18s, color .18s; }
+    html body .ss-navbar .ss-navpill > span {
+        position: absolute;
+        left: calc(100% + 16px);
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 8px 12px;
+        border: 1px solid var(--ss-border);
+        border-radius: 8px;
+        background: var(--ss-surface);
+        color: var(--ss-text);
+        box-shadow: var(--ss-shadow-md);
+        white-space: nowrap;
+        pointer-events: none;
+        visibility: hidden;
+        z-index: 1;
+    }
+    html body .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span { visibility: visible; }
 }
 @media (max-width: 1000px) {
     body .ss-hero-grid { grid-template-columns: 1fr; min-height: auto; }

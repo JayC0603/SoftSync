@@ -1,11 +1,5 @@
 (() => {
     const root = document.documentElement;
-    function syncSidebar() {
-        document.querySelectorAll('.ss-sidebar-toggle').forEach(button => {
-            button.setAttribute('aria-expanded', String(root.dataset.sidebar !== 'collapsed'));
-        });
-    }
-    try { root.dataset.sidebar = localStorage.getItem('ss-sidebar') || 'expanded'; } catch {}
     window.ssDesign = {
         togglePassword(button) {
             const input = document.getElementById(button.getAttribute('aria-controls'));
@@ -16,11 +10,6 @@
             const icon = button.querySelector('i');
             if (icon) icon.className = visible ? 'bi bi-eye-slash' : 'bi bi-eye';
         },
-        toggleSidebar() {
-            root.dataset.sidebar = root.dataset.sidebar === 'collapsed' ? 'expanded' : 'collapsed';
-            try { localStorage.setItem('ss-sidebar', root.dataset.sidebar); } catch {}
-            syncSidebar();
-        },
         toggleTheme() {
             const theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
             root.dataset.theme = theme;
@@ -30,8 +19,6 @@
             } catch {}
         }
     };
-    document.addEventListener('DOMContentLoaded', syncSidebar);
-    document.addEventListener('enhancedload', syncSidebar);
     // Header disclosures use native keyboard behavior. Keep only one open and
     // dismiss on selection, outside click or Escape without replacing auth state.
     document.addEventListener('toggle', event => {
