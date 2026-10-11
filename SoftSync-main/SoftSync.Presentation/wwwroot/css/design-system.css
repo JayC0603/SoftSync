@@ -71,7 +71,13 @@ body h1, body h2, body h3, body h4 { letter-spacing: -.025em; }
 body .ss-main-content h1 { font-size: clamp(1.65rem, 3vw, 2.3rem); line-height: 1.25; }
 body .ss-main-content h2 { font-size: clamp(1.2rem, 2vw, 1.65rem); }
 body .ss-main-content :is(h1, h2, h3, h4) { color: var(--ss-text); }
-body .ss-main-content.container { width: min(1440px, 100%); padding: 32px clamp(20px, 3vw, 40px) 56px !important; }
+html body .ss-workspace > .ss-main-content.container {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin-inline: 0;
+    padding: 24px !important;
+}
 body .ss-workspace { margin-left: var(--ss-sidebar-width); }
 body .ss-workspace-topbar { background: var(--ss-surface) !important; border-color: var(--ss-border); backdrop-filter: none; }
 body .ss-workspace-kicker { color: var(--ss-text-muted); font-size: .6rem; }
@@ -100,7 +106,13 @@ body :is(.ss-card, .dash-card, .card, .assistant-chat-card)::before { display: n
 body :is(.focus-growth-main, .focus-overall, .focus-journey-table, .focus-progress-bottom > section, .focus-next-action, .ss-settings-sidebar, .ss-settings-content, .lesson-steps, .lesson-content, .assessment-card, .result-card, .ss-hero, .ss-flat-card, .ss-feature-chip, .ss-main-mentor-card) {
     background: var(--ss-surface) !important; color: var(--ss-text) !important; border-color: var(--ss-border) !important; border-radius: 12px !important; box-shadow: var(--ss-shadow-sm) !important;
 }
-body :is(.ss-settings-shell, .focus-home, .focus-progress-page, .eco-page) { width: 100%; max-width: 1240px; margin-inline: auto; }
+/* Fill the app workspace while keeping text, chat bubbles and forms readable. */
+html body .ss-main-content :is(.ss-settings-shell, .focus-home, .focus-progress-page, .eco-page, .assistant-layout, .case-workspace, .resource-page, .dash-home, .game-workspace, .lesson-shell) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin-inline: 0;
+}
 body .ss-main-content:has(> .coursera-roadmap), body .ss-main-content:has(> .lesson-page) { padding: 0 !important; }
 html body .coursera-roadmap .lesson { background: var(--ss-surface) !important; color: var(--ss-text) !important; border-color: var(--ss-border) !important; border-radius: 10px !important; box-shadow: none !important; }
 html body .coursera-roadmap .lesson.active { border-color: var(--ss-primary) !important; background: var(--ss-surface-accent) !important; }
@@ -192,7 +204,7 @@ body .account-benefits span { background: var(--ss-surface); color: var(--ss-pri
     html body .ss-navbar { width: 100%; min-height: 60px; padding: 12px 16px !important; flex-direction: row; }
     body .ss-sidebar-toggle { display: none; }
     body .ss-workspace-topbar .ss-connection-state { display: none; }
-    body .ss-main-content.container { padding: 24px 16px 96px !important; }
+    html body .ss-workspace > .ss-main-content.container { padding: 24px 16px 96px !important; }
     body .account-page { padding: 16px; }
     body .account-form-panel { padding: 28px 24px; }
     body .ss-hero-grid { gap: 24px; }
