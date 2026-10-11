@@ -33,6 +33,7 @@
             <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
+        <NavLink class="ss-navpill" href="/cv" aria-label="CV thông minh"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
     </div>
 
 </nav>
@@ -53,6 +54,7 @@
     <NavLink class="ss-mobile-bottom-link" href="/game">
         <i class="bi bi-controller"></i><span>Mini Game</span>
     </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/cv"><i class="bi bi-file-earmark-person"></i><span>CV</span></NavLink>
 </nav>
 
 <style>
@@ -279,7 +281,7 @@
             bottom: max(0.65rem, env(safe-area-inset-bottom));
             z-index: 1000;
             display: grid !important;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 0.2rem !important;
             min-height: 64px;
             padding: 0.4rem;

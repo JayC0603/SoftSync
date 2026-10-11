@@ -7,7 +7,7 @@
 
 .content-header {
   height: 80px;
-  background: white;
+  background: var(--cv-surface);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -33,7 +33,7 @@
   padding: 0 22px;
   border: 1.5px solid var(--border-color);
   border-radius: 12px;
-  background: white;
+  background: var(--cv-surface);
   color: var(--text-dark);
   font-size: 15px;
   font-weight: 900;
@@ -55,7 +55,7 @@
   background: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.25);
+  box-shadow: 0 10px 15px -3px rgba(81, 70, 216, 0.25);
 }
 
 @media (max-width: 680px) {

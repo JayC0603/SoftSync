@@ -52,6 +52,8 @@ builder.Services.AddScoped<LocalizationService>(services =>
 });
 builder.Services.AddScoped<UserProfileState>();
 builder.Services.AddScoped<CourseUploadService>();
+builder.Services.Configure<CvIntegrationOptions>(builder.Configuration.GetSection("CvIntegration"));
+builder.Services.AddHttpClient<CvIntegrationService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
 // 1. Database Configuration. Demo mode uses an ephemeral in-memory database so
 // reviewers can exercise the product locally without PostgreSQL credentials.
@@ -139,7 +141,9 @@ if (googleAuthConfigured)
         {
             // Cancellation and provider failures should return to a usable login page.
             context.HandleResponse();
-            context.Response.Redirect("/Account/Login?googleError=1");
+            var savedReturnUrl = context.Properties is { } properties && properties.Items.TryGetValue("SoftSync.ReturnUrl", out var target) ? target : null;
+            var returnTo = LocalReturnUrl.Normalize(savedReturnUrl);
+            context.Response.Redirect("/Account/Login?googleError=1&ReturnUrl=" + Uri.EscapeDataString(returnTo));
             return Task.CompletedTask;
         };
     });
@@ -283,6 +287,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();
+app.MapCvIntegrationEndpoints();
 
 // Render uses this lightweight endpoint to check that the web process is
 // accepting requests. Keep it independent from page rendering and user state.

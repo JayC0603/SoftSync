@@ -1,0 +1,79 @@
+.cv-connect { min-height:100dvh; padding:32px; display:flex; flex-direction:column; gap:16px; align-items:center; justify-content:center; background:#f5f3ff; color:#241950; font-family:'Segoe UI',sans-serif; text-align:center; }
+.cv-connect img { border-radius:16px; }.cv-connect h1 { font-size:25px; }.cv-connect p { font-size:14px; color:#6b6389; }.cv-connect a { color:#6734f6; font-size:13px; }.cv-connect button { border:0; padding:12px 22px; border-radius:10px; background:#6734f6; color:white; cursor:pointer; }
+.softsync-cv-module { --primary-color:#6734f6; --primary-hover:#4b23c9; --primary-light:#f0ebff; }
+.softsync-cv-module .sidebar-brand { text-decoration:none; color:inherit; margin-bottom:16px; }.softsync-cv-module .sidebar-brand img { border-radius:10px; flex-shrink:0; }.softsync-cv-module .sidebar-brand small { font-size:11px; display:block; color:var(--text-gray); }
+.softsync-cv-module .cv-platform-link { display:flex; gap:10px; align-items:center; padding:10px; font-size:12px; text-decoration:none; color:var(--text-gray); margin-bottom:16px; border-radius:8px; }.softsync-cv-module .cv-platform-link:hover { background:var(--primary-light); color:var(--primary-color); }.softsync-cv-module .sidebar-collapsed .cv-platform-link { justify-content:center; padding:10px 0; }
+.softsync-cv-module .sidebar { flex-shrink:0; }.softsync-cv-module .menu-button.active { box-shadow:0 6px 12px -4px #6734f655; }
+.softsync-cv-module .main-content { min-width:0; }
+@media(max-width:700px) {
+  .softsync-cv-module .sidebar { width:62px; padding:20px 8px; }
+  .softsync-cv-module .sidebar-brand { justify-content:center; padding:0; }
+  .softsync-cv-module .sidebar-brand > div, .softsync-cv-module .menu-button-label, .softsync-cv-module .sidebar-toggle, .softsync-cv-module .cv-platform-link span:nth-child(2), .softsync-cv-module .user-profile { display:none; }
+  .softsync-cv-module .menu-button, .softsync-cv-module .cv-platform-link { justify-content:center; padding:12px 0; }
+  .softsync-cv-module .content-header { padding:0 18px; }.softsync-cv-module .content-header h1 { font-size:19px; }
+}
+
+/* Match the SoftSync semantic palette; live values are supplied by the host. */
+:root {
+  --ss-canvas: #f8fafd;
+  --ss-surface: #ffffff;
+  --ss-surface-soft: #f1f3f6;
+  --ss-surface-accent: #f1eeff;
+  --ss-text: #172033;
+  --ss-text-muted: #64748b;
+  --ss-border: #e5e9f2;
+  --ss-primary: #5146d8;
+  --ss-primary-hover: #4338b8;
+  --ss-success: #16a34a;
+  --ss-danger: #ef4444;
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --ss-canvas: #0b1024;
+  --ss-surface: #141a31;
+  --ss-surface-soft: #25262f;
+  --ss-surface-accent: #302947;
+  --ss-text: #f0f0f5;
+  --ss-text-muted: #a4a5b3;
+  --ss-border: #30313c;
+  --ss-primary: #a398ff;
+  --ss-primary-hover: #b9b0ff;
+}
+.softsync-cv-module {
+  --primary-color: var(--ss-primary);
+  --primary-hover: var(--ss-primary-hover);
+  --primary-light: var(--ss-surface-accent);
+  --text-dark: var(--ss-text);
+  --text-gray: var(--ss-text-muted);
+  --bg-gray: var(--ss-canvas);
+  --border-color: var(--ss-border);
+  --success-color: var(--ss-success);
+  --danger-color: var(--ss-danger);
+  --cv-surface: var(--ss-surface);
+  --cv-surface-soft: var(--ss-surface-soft);
+  --cv-action: #5146d8;
+  --cv-action-hover: #4338b8;
+  color: var(--ss-text);
+  font-family: 'Segoe UI', sans-serif;
+}
+.cv-connect { background: var(--ss-canvas); color: var(--ss-text); }
+.cv-connect p { color: var(--ss-text-muted); }
+.cv-connect a { color: var(--ss-primary); }
+.cv-connect button { background: #5146d8; }
+.softsync-cv-module .menu-button.active { background: var(--cv-action); box-shadow: none; }
+.softsync-cv-module .upload-icon { color: var(--ss-primary); }
+html[data-reduce-motion='1'] .softsync-cv-module *, html[data-reduce-motion='1'] .softsync-cv-module *::before { transition: none !important; animation: none !important; }
+
+.softsync-cv-module .header-search-button.active,
+.softsync-cv-module .web-profile-action.primary,
+.softsync-cv-module .ranking-progress-fill,
+.softsync-cv-module .ranking-detail-rank,
+.softsync-cv-module .ranking-detail-meter > div,
+.softsync-cv-module .ranking-detail-tabs button.active,
+.softsync-cv-module .search-file-drop .upload-icon-circle,
+.softsync-cv-module .search-primary-btn,
+.softsync-cv-module .logo-icon,
+.softsync-cv-module .menu-button.active,
+.softsync-cv-module .saved-cv-toggle,
+.softsync-cv-module .save-btn { background: var(--cv-action); color: white; }
+.softsync-cv-module :is(.header-search-button.active, .web-profile-action.primary, .search-primary-btn, .saved-cv-toggle, .save-btn):hover:not(:disabled) { background: var(--cv-action-hover); color: white; }

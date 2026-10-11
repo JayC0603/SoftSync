@@ -11,7 +11,7 @@ import type { MatchingResult } from '../types/matching';
 import type { SavedDocument } from '../types/document';
 import type { SearchCvResult } from '../types/search';
 import { confirmSave, renameSavedCv, deleteSavedCv } from '../services/api';
-import Sidebar from './dashboard/Sidebar';
+import Sidebar, { MENU_LABEL } from './dashboard/Sidebar';
 import Toast from './dashboard/Toast';
 import CvStorageSection from './dashboard/sections/CvStorageSection';
 import CvJdMatchingSection from './dashboard/sections/CvJdMatchingSection';
@@ -342,7 +342,7 @@ export default function Dashboard() {
 
       <main className="main-content">
         <header className={`content-header ${activeMenu === 'CV Searching' ? 'content-header-searching' : ''}`}>
-          <h1>{activeMenu}</h1>
+          <h1>{MENU_LABEL[activeMenu]}</h1>
         </header>
         <Toast message={notification} />
         <div className="content-body">

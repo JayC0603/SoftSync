@@ -23,12 +23,18 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   }
 
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
-  const upstream = await fetch(target, {
-    method: request.method,
-    headers,
-    body: hasBody ? await request.arrayBuffer() : undefined,
-    cache: "no-store",
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(target, {
+      method: request.method,
+      headers,
+      body: hasBody ? await request.arrayBuffer() : undefined,
+      cache: "no-store",
+      signal: AbortSignal.timeout(600000),
+    });
+  } catch {
+    return Response.json({ detail: "Không thể kết nối dịch vụ CV. Vui lòng thử lại." }, { status: 503 });
+  }
 
   const responseHeaders = new Headers();
   for (const name of FORWARDED_RESPONSE_HEADERS) {

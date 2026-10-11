@@ -4,6 +4,26 @@
 @* Static layout for Account pages. No JS interop or language toggle so it is
    safe under static SSR (where auth cookies can be written). *@
 
+@inject NavigationManager Navigation
+
+@if (new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/').Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+{
+    <HeadContent><link rel="stylesheet" href="css/neo-login.css" /></HeadContent>
+    <main class="neo-login">
+        <div class="neo-decoration neo-decoration-one" aria-hidden="true"></div>
+        <div class="neo-decoration neo-decoration-two" aria-hidden="true"></div>
+        <div class="neo-decoration neo-decoration-three" aria-hidden="true"></div>
+        <a href="/" class="neo-home" aria-label="@L["auth.backHome"]"><i class="bi bi-arrow-left" aria-hidden="true"></i> @L["auth.backHome"]</a>
+        <button type="button" class="neo-theme" onclick="window.ssDesign.toggleTheme()" aria-label="Đổi giao diện sáng / tối"><i class="bi bi-moon-fill neo-moon" aria-hidden="true"></i><i class="bi bi-sun-fill neo-sun" aria-hidden="true"></i></button>
+        <section class="neo-content" aria-label="SoftSync">
+            <a href="/" class="neo-logo" aria-label="SoftSync — Trang chủ"><img src="/images/logo.png" width="112" height="112" alt="Logo nhóm SoftSync" /></a>
+            <div class="neo-form-content">@Body</div>
+            <p class="neo-tagline">LEARN · BUILD · GROW TOGETHER</p>
+        </section>
+    </main>
+}
+else
+{
 <div class="ss-aurora" aria-hidden="true">
     <span></span><span></span><span></span>
 </div>
@@ -44,6 +64,8 @@
         </section>
     </div>
 </main>
+
+}
 
 <style>
     .account-page {

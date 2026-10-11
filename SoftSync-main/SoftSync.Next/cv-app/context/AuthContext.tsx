@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { setCvAccessToken } from '../services/session';
 
 const API_BASE_URL = '/api/cv';
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
@@ -59,7 +60,7 @@ interface ForgotPasswordResponse {
   message: string;
 }
 
-interface StoredAuth {
+export interface StoredAuth {
   accessToken: string;
   refreshToken: string;
   user: AuthUser;
@@ -72,6 +73,8 @@ interface AuthUser {
 }
 
 interface AuthContextType {
+  integrated: boolean;
+  hostOrigin: string;
   isAuthenticated: boolean;
   user: AuthUser | null;
   accessToken: string | null;
@@ -229,8 +232,21 @@ export function loadGoogleIdentityScript(): Promise<void> {
   });
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [auth, setAuth] = useState<StoredAuth | null>(() => readStoredAuth());
+export function AuthProvider({ children, initialAuth, integrated = false, hostOrigin = '' }: {
+  children: ReactNode; initialAuth?: StoredAuth; integrated?: boolean; hostOrigin?: string;
+}) {
+  const [auth, setAuth] = useState<StoredAuth | null>(() => {
+    const session = integrated ? initialAuth ?? null : readStoredAuth();
+    setCvAccessToken(session?.accessToken ?? null);
+    return session;
+  });
+  useEffect(() => {
+    if (!integrated || !initialAuth) return;
+    setCvAccessToken(initialAuth.accessToken);
+    setAuth(initialAuth);
+  }, [initialAuth, integrated]);
+  useEffect(() => { setCvAccessToken(auth?.accessToken ?? null); }, [auth?.accessToken]);
+  useEffect(() => () => setCvAccessToken(null), []);
 
   useEffect(() => {
     const accessToken = auth?.accessToken;
@@ -243,7 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuth((currentAuth) => {
           if (!currentAuth) return null;
           const refreshedAuth = { ...currentAuth, user };
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(refreshedAuth));
+          if (!integrated) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(refreshedAuth));
           return refreshedAuth;
         });
       })
@@ -263,7 +279,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
     };
 
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+    if (!integrated) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+    setCvAccessToken(nextAuth.accessToken);
     setAuth(nextAuth);
   };
 
@@ -331,7 +348,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     const currentAuth = auth;
 
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    if (!integrated) localStorage.removeItem(AUTH_STORAGE_KEY);
+    setCvAccessToken(null);
     setAuth(null);
 
     if (!currentAuth?.accessToken) return;
@@ -350,6 +368,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider 
       value={{ 
+        integrated,
+        hostOrigin,
         isAuthenticated: !!auth, 
         user: auth?.user ?? null,
         accessToken: auth?.accessToken ?? null,

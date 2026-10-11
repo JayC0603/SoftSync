@@ -46,6 +46,7 @@
                     <a href="/profile"><i class="bi bi-person" aria-hidden="true"></i>@L["nav.profile"]</a>
                     <a href="/roadmap"><i class="bi bi-book" aria-hidden="true"></i>@L["nav.learn"]</a>
                     <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i>@L["nav.settings"]</a>
+                    <a href="/cv"><i class="bi bi-file-earmark-person" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</a>
                     <AuthorizeView Roles="Teacher,Admin" Context="staffContext"><Authorized><a href="/teacher"><i class="bi bi-person-video3" aria-hidden="true"></i>Teacher Studio</a></Authorized></AuthorizeView>
                     <AuthorizeView Roles="Admin" Context="adminContext"><Authorized><a href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i>@L["layout.manageUsers"]</a></Authorized></AuthorizeView>
                     <form action="/Account/Logout" method="post"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="Account/Login" /><button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>@L["nav.logout"]</button></form>

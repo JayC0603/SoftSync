@@ -189,9 +189,7 @@ else
         RedirectManager.RedirectTo(isNew ? "profile-setup" : Destination);
     }
 
-    private string Destination => !string.IsNullOrWhiteSpace(ReturnUrl)
-        && ReturnUrl.StartsWith('/') && !ReturnUrl.StartsWith("//")
-        && !ReturnUrl.Contains('\\') && ReturnUrl != "/" ? ReturnUrl : "dashboard";
+    private string Destination => SoftSync.BLL.Auth.LocalReturnUrl.Normalize(ReturnUrl);
 
     private async Task ConfirmLinkAsync()
     {

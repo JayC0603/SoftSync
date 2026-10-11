@@ -34,8 +34,6 @@
     <div class="alert alert-warning" role="alert">@L["auth.googleCancelled"]</div>
 }
 
-<ExternalLoginPicker />
-
 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
     <DataAnnotationsValidator />
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
@@ -67,6 +65,8 @@
 
     <button type="submit" class="ss-btn-primary login-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.login.submit"]</span><i class="bi bi-arrow-right"></i></button>
 </EditForm>
+
+<div class="neo-social"><ExternalLoginPicker /></div>
 
 <a class="login-otp" href="Account/LoginWithOtp"><i class="bi bi-chat-dots"></i>@L["auth.loginWithOtp"]</a>
 
@@ -135,7 +135,7 @@
         {
             Logger.LogInformation("User logged in.");
             WelcomeCookie.Set(HttpContext, user.FullName);
-            RedirectManager.RedirectTo(string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" ? "dashboard" : ReturnUrl);
+            RedirectManager.RedirectTo(SoftSync.BLL.Auth.LocalReturnUrl.Normalize(ReturnUrl));
         }
         else if (result.IsLockedOut)
         {

@@ -50,6 +50,10 @@ services:
       # http://localhost:8081/signin-google for this local Compose stack.
       Authentication__Google__ClientId: "${GOOGLE_CLIENT_ID:-}"
       Authentication__Google__ClientSecret: "${GOOGLE_CLIENT_SECRET:-}"
+      CvIntegration__FrontendUrl: "${CV_FRONTEND_URL:-}"
+      CvIntegration__ApiBaseUrl: "${CV_API_URL:-}"
+      CvIntegration__SharedSecret: "${SOFTSYNC_SHARED_SECRET:-}"
+      CvIntegration__Issuer: "${SOFTSYNC_ISSUER:-softsync}"
 
     ports:
       - "8081:8080"

@@ -1,3 +1,5 @@
+import { cvFetch } from '../session';
+export { cvFetch } from '../session';
 export const API_BASE_URL = '/api/cv';
 export const DEFAULT_USD_VND_RATE = 26236.346503;
 
@@ -27,7 +29,7 @@ export interface ExchangeRateResponse {
 
 export const fetchCvContent = async (documentId: number): Promise<{ ok: boolean; text: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/matching/search-cvs/${documentId}/content`);
+    const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/search-cvs/${documentId}/content`);
     const result: CvContentResponse = await response.json();
     if (!response.ok || result.status !== 'success' || !result.data) {
       return { ok: false, text: '' };
@@ -40,7 +42,7 @@ export const fetchCvContent = async (documentId: number): Promise<{ ok: boolean;
 
 export const fetchCvStructured = async (documentId: number): Promise<{ ok: boolean; text: string; structured: Record<string, unknown> }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/matching/search-cvs/${documentId}/structured`);
+    const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/search-cvs/${documentId}/structured`);
     const result: CvStructuredResponse = await response.json();
     if (!response.ok || result.status !== 'success' || !result.data) {
       return { ok: false, text: '', structured: {} };
@@ -57,7 +59,7 @@ export const fetchCvStructured = async (documentId: number): Promise<{ ok: boole
 
 export const fetchUsdVndRate = async (): Promise<number> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/exchange-rate/usd-vnd`);
+    const response = await cvFetch(`${API_BASE_URL}/api/v1/exchange-rate/usd-vnd`);
     const result: ExchangeRateResponse = await response.json();
     const rate = result.data?.rate;
     if (!response.ok || result.status !== 'success' || typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {

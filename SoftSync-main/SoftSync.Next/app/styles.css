@@ -1,11 +1,11 @@
 
 
 :root {
-  --ss-ink: #191440;
-  --ss-muted: #686582;
-  --ss-accent: #6734f6;
-  --ss-border: #eae7f5;
-  --ss-bg: #fcfbff
+  --ss-ink: #172033;
+  --ss-muted: #64748b;
+  --ss-accent: #5146d8;
+  --ss-border: #e5e9f2;
+  --ss-bg: #f8fafd
 }
 
 * {
@@ -137,7 +137,7 @@ html {
   background: var(--ss-accent);
   color: white;
   border: 1px solid transparent;
-  box-shadow: 0 8px 22px #6734f61a
+  box-shadow: 0 8px 22px #5146d81a
 }
 
 .marketing .secondary {
@@ -149,7 +149,7 @@ html {
 
 .marketing .primary:hover,.marketing .secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px #6734f628
+  box-shadow: 0 10px 25px #5146d828
 }
 
 .marketing .nav .primary {

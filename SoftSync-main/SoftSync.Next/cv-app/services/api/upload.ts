@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './client';
+import { API_BASE_URL, cvFetch } from './client';
 import type { SavedDocument } from '../../types/document';
 
 export interface PreviewUploadResult {
@@ -13,7 +13,7 @@ export interface PreviewUploadResult {
 export const uploadPreview = async (file: File): Promise<PreviewUploadResult> => {
   const formData = new FormData();
   formData.append('file', file);
-  const response = await fetch(`${API_BASE_URL}/api/v1/upload/preview`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/preview`, {
     method: 'POST',
     body: formData,
   });
@@ -27,7 +27,7 @@ export interface ConfirmSaveResult {
 }
 
 export const confirmSave = async (filename: string, category: string): Promise<ConfirmSaveResult> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/upload/confirm-save`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/confirm-save`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export interface ListSavedCvsResponse {
 }
 
 export const listSavedCvs = async (): Promise<ListSavedCvsResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/upload/cvs`);
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/cvs`);
   const result = await response.json();
   return { ...result, ok: response.ok };
 };
@@ -59,7 +59,7 @@ export interface RenameSavedCvResponse {
 }
 
 export const renameSavedCv = async (id: number, filename: string): Promise<RenameSavedCvResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/upload/cvs/${id}/rename`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/cvs/${id}/rename`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export interface DeleteSavedCvResponse {
 }
 
 export const deleteSavedCv = async (id: number): Promise<DeleteSavedCvResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/upload/cvs/${id}`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/cvs/${id}`, {
     method: 'DELETE',
   });
   const result = await response.json();

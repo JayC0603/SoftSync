@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './client';
+import { API_BASE_URL, cvFetch } from './client';
 
 export interface CareerVietProfile {
   id: string;
@@ -73,7 +73,7 @@ export const searchCareerVietProfiles = async (
   const query = input.query?.trim();
   if (query) params.set('query', query);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles?${params.toString()}`);
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles?${params.toString()}`);
   const result: CareerVietSearchResponse = await response.json();
   return { ok: response.ok, result };
 };
@@ -97,7 +97,7 @@ export const searchCareerVietProfilesByJd = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles/search-jd`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles/search-jd`, {
     method: 'POST',
     body: formData,
   });
@@ -137,7 +137,7 @@ export const searchCareerVietProfilesWithMatching = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles/search-match`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/careerviet/profiles/search-match`, {
     method: 'POST',
     body: formData,
   });
@@ -155,7 +155,7 @@ export const getCareerVietProfile = async (
   if (salary) params.set('salary', salary);
 
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(
+  const response = await cvFetch(
     `${API_BASE_URL}/api/v1/web-search/careerviet/profiles/${encodeURIComponent(profileId)}${suffix}`,
   );
   const result: CareerVietProfileResponse = await response.json();
@@ -182,7 +182,7 @@ export const searchVietnamWorksProfiles = async (
   const query = input.query?.trim();
   if (query) params.set('query', query);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles?${params.toString()}`);
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles?${params.toString()}`);
   const result: VietnamWorksSearchResponse = await response.json();
   return { ok: response.ok, result };
 };
@@ -201,7 +201,7 @@ export const searchVietnamWorksProfilesByJd = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles/search-jd`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles/search-jd`, {
     method: 'POST',
     body: formData,
   });
@@ -230,7 +230,7 @@ export const searchVietnamWorksProfilesWithMatching = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles/search-match`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles/search-match`, {
     method: 'POST',
     body: formData,
   });
@@ -246,7 +246,7 @@ export const getVietnamWorksProfile = async (
   if (profileUrl) params.set('profile_url', profileUrl);
 
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(
+  const response = await cvFetch(
     `${API_BASE_URL}/api/v1/web-search/vietnamworks/profiles/${encodeURIComponent(profileId)}${suffix}`,
   );
   const result: VietnamWorksProfileResponse = await response.json();
@@ -272,7 +272,7 @@ export const searchAcademicProfiles = async (
   const query = input.query?.trim();
   if (query) params.set('query', query);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles?${params.toString()}`);
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles?${params.toString()}`);
   const result: AcademicSearchResponse = await response.json();
   return { ok: response.ok, result };
 };
@@ -291,7 +291,7 @@ export const searchAcademicProfilesByJd = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles/search-jd`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles/search-jd`, {
     method: 'POST',
     body: formData,
   });
@@ -320,7 +320,7 @@ export const searchAcademicProfilesWithMatching = async (
     formData.append('jd_text', input.jdText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles/search-match`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/web-search/academic/profiles/search-match`, {
     method: 'POST',
     body: formData,
   });
@@ -336,7 +336,7 @@ export const getAcademicProfile = async (
   if (profileUrl) params.set('profile_url', profileUrl);
 
   const suffix = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(
+  const response = await cvFetch(
     `${API_BASE_URL}/api/v1/web-search/academic/profiles/${encodeURIComponent(profileId)}${suffix}`,
   );
   const result: AcademicProfileResponse = await response.json();

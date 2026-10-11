@@ -1,10 +1,10 @@
-import { API_BASE_URL } from './client';
+import { API_BASE_URL, cvFetch } from './client';
 import type { MatchingApiResponse } from '../../types/matching';
 import type { ModelsApiResponse } from '../../types/model';
 import type { SearchApiResponse, ReindexApiResponse, JdAnalysisSummary } from '../../types/search';
 
 export const fetchModels = async (): Promise<{ ok: boolean; result: ModelsApiResponse }> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/models`);
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/models`);
   if (!response.ok) return { ok: false, result: {} };
   const result: ModelsApiResponse = await response.json();
   return { ok: true, result };
@@ -36,7 +36,7 @@ export const runMatching = async (
   if (input.modelId) {
     formData.append('model_id', input.modelId);
   }
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/cv-jd`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/cv-jd`, {
     method: 'POST',
     body: formData,
   });
@@ -54,7 +54,7 @@ export const reindexAllCvs = async (
   const formData = new FormData();
   if (input.modelId) formData.append('model_id', input.modelId);
   formData.append('force', 'false');
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/search-cvs/reindex-all`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/search-cvs/reindex-all`, {
     method: 'POST',
     body: formData,
   });
@@ -89,7 +89,7 @@ export const searchCvs = async (
   formData.append('rerank', input.rerank ? 'true' : 'false');
   formData.append('rerank_top_n', String(input.rerankTopN));
   if (input.modelId) formData.append('model_id', input.modelId);
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/search-cvs/from-jd`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/search-cvs/from-jd`, {
     method: 'POST',
     body: formData,
   });
@@ -118,7 +118,7 @@ export const analyzeJd = async (
   } else if (input.jdFile) {
     formData.append('jd_file', input.jdFile, input.jdFile.name);
   }
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/jd-analysis`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/jd-analysis`, {
     method: 'POST',
     body: formData,
   });
@@ -147,7 +147,7 @@ export const getCvHeatmap = async (
   if (input.cvText) formData.append('cv_text', input.cvText);
   if (input.cvFilename) formData.append('cv_filename', input.cvFilename);
   if (input.modelId) formData.append('model_id', input.modelId);
-  const response = await fetch(`${API_BASE_URL}/api/v1/matching/cv-detail/heatmap`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/matching/cv-detail/heatmap`, {
     method: 'POST',
     body: formData,
   });

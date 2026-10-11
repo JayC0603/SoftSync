@@ -12,7 +12,7 @@
   align-items: center;
   gap: 18px;
   padding: 12px 18px;
-  background: #fff;
+  background: var(--cv-surface);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
@@ -197,7 +197,7 @@
   padding: 8px 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #fff;
+  background: var(--cv-surface);
   transition: border-color 0.15s;
 }
 
@@ -511,7 +511,7 @@
   gap: 4px;
   padding: 10px 22px;
   border-bottom: 1px solid var(--border-color);
-  background: #fff;
+  background: var(--cv-surface);
 }
 
 .ranking-detail-tabs button {
@@ -570,12 +570,12 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: var(--cv-surface-soft);
 }
 
 .ranking-detail-body > iframe {
   border: none;
-  background: #fff;
+  background: var(--cv-surface);
 }
 
 .ranking-detail-section {

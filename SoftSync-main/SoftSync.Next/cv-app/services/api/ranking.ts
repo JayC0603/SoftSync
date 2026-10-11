@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './client';
+import { API_BASE_URL, cvFetch } from './client';
 import type { RankingApiResponse } from '../../types/ranking';
 
 export interface RunRankingInput {
@@ -29,7 +29,7 @@ export const runRanking = async (
     fd.append('model_id', input.modelId);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/ranking/rank`, {
+  const response = await cvFetch(`${API_BASE_URL}/api/v1/ranking/rank`, {
     method: 'POST',
     body: fd,
   });

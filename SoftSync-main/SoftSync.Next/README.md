@@ -38,15 +38,18 @@ corresponding project.
 
 ## Complete CV dashboard
 
-The `/cv` route contains CV Storage, CV-JD Matching, CV Ranking, CV
-Comparison, and CV Searching. Browser requests are sent to the same-origin
-`/api/cv/*` proxy, so the FastAPI service URL remains server-side.
+The `/cv` route opens CV Storage, CV-JD Matching, CV Ranking, CV Comparison,
+and CV Searching inside the authenticated SoftSync workspace. Direct visits
+redirect to the canonical SoftSync `/cv` page. Users sign in with their SoftSync
+account once. Browser requests use the same-origin `/api/cv/*` proxy, so the
+FastAPI service URL remains server-side. See [CV integration](../docs/CV_INTEGRATION.md)
+for the server connection, backend migration, and deployment settings.
 
 Set these variables in Vercel:
 
 ```text
 CV_API_URL=https://your-cv-api-service.example.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-oauth-client-id
+SOFTSYNC_APP_URL=https://softsync.id.vn
 ```
 
 `CV_API_URL` must point to the FastAPI backend root without `/api/v1`. The
@@ -62,7 +65,7 @@ data; it does not represent the signed-in user's progress.
 `/courses` reads published courses from the ASP.NET API. `/courses/[id]` reads
 the public course details and provides a link to the original ASP.NET `/courses`
 area for enrollment, lessons, and progress. Learning authentication stays in
-that application; CV authentication stays in `/cv`. API requests have a 10-second
+that application and also opens the integrated CV workspace. API requests have a 10-second
 timeout, and course pages provide unavailable, empty, and not-found states.
 
 The existing CV dashboard and API proxy remain the entry points for CV storage,

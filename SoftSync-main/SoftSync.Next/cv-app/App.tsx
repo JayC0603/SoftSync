@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import type { StoredAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
@@ -8,12 +9,13 @@ import ForgotPassword from './components/ForgotPassword';
 type AuthView = 'login' | 'signup' | 'forgot-password';
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, integrated } = useAuth();
   const [authView, setAuthView] = useState<AuthView>('login');
 
   if (isAuthenticated) {
     return <Dashboard />;
   }
+  if (integrated) return <p role="status">Đang kết nối tài khoản SoftSync…</p>;
 
   if (authView === 'signup') {
     return <Signup onSwitchToLogin={() => setAuthView('login')} />;
@@ -31,9 +33,9 @@ function AppContent() {
   );
 }
 
-function App() {
+function App({ initialAuth, integrated, hostOrigin }: { initialAuth?: StoredAuth; integrated?: boolean; hostOrigin?: string }) {
   return (
-    <AuthProvider>
+    <AuthProvider initialAuth={initialAuth} integrated={integrated} hostOrigin={hostOrigin}>
       <AppContent />
     </AuthProvider>
   );

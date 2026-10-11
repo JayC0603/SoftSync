@@ -1,0 +1,57 @@
+@page "/cv"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@implements IAsyncDisposable
+@inject Microsoft.Extensions.Options.IOptions<CvIntegrationOptions> Options
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>CV thông minh · SoftSync</PageTitle>
+<section class="ss-cv-workspace" aria-labelledby="cv-title">
+    <header class="ss-cv-heading"><div><span>SOFTSYNC CAREER</span><h1 id="cv-title">CV thông minh</h1><p>Lưu trữ, so khớp, xếp hạng, so sánh và tìm kiếm CV trong không gian SoftSync.</p></div><a href="/roadmap">← Quay lại học tập</a></header>
+    @if (Options.Value.Configured)
+    {
+        <div class="ss-cv-frame-container">
+            <p id="cv-connection-status" class="ss-cv-connection" role="status">Đang kết nối tài khoản SoftSync…</p>
+            <iframe id="softsync-cv-frame" src="@FrameUrl" title="Các công cụ CV của SoftSync"
+                allow="clipboard-write" referrerpolicy="no-referrer"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-top-navigation-by-user-activation"></iframe>
+        </div>
+    }
+    else
+    {
+        <div class="ss-card ss-cv-unavailable"><h2>Dịch vụ CV chưa được kết nối</h2><p>Khu vực CV dùng tài khoản SoftSync của bạn. Dịch vụ đang chờ được cấu hình.</p><a href="/recruitment" class="ss-btn-primary">Mở công cụ so khớp hiện có</a></div>
+    }
+</section>
+
+<style>
+    .ss-cv-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:24px; }
+    .ss-cv-heading span { color:var(--ss-primary); font-size:.7rem; letter-spacing:.15em; font-weight:700; }
+    .ss-cv-heading h1 { margin:8px 0; font-size:clamp(1.8rem,4vw,2.4rem); }
+    .ss-cv-heading p { color:var(--ss-text-muted); margin:0; font-size:.9rem; }
+    .ss-cv-heading a { white-space:nowrap; color:var(--ss-primary); font-size:.85rem; text-decoration:none; }
+    .ss-cv-frame-container { position:relative; min-height:760px; border:1px solid var(--ss-border); border-radius:18px; overflow:hidden; background:var(--ss-surface); }
+    .ss-cv-frame-container iframe { width:100%; height:max(760px,calc(100dvh - 180px)); border:0; display:block; }
+    .ss-cv-connection { margin:0; padding:15px 20px; color:var(--ss-text-muted); font-size:.85rem; }
+    .ss-cv-connection[hidden] { display:none; }
+    .ss-cv-unavailable { padding:28px; }
+    @@media(max-width:600px) { .ss-cv-heading { align-items:flex-start; flex-direction:column; } .ss-cv-frame-container { border-radius:12px; } }
+</style>
+
+@code {
+    private IJSObjectReference? module;
+    private string FrameUrl => new Uri(Options.Value.FrontendOrigin!, "/cv").ToString()
+        + "?integrated=1&host=" + Uri.EscapeDataString(new Uri(Navigation.Uri).GetLeftPart(UriPartial.Authority));
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || !Options.Value.Configured) return;
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/cv-integration.js");
+        await module.InvokeVoidAsync("mount", "softsync-cv-frame", Options.Value.FrontendOrigin!.GetLeftPart(UriPartial.Authority));
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (module is null) return;
+        try { await module.InvokeVoidAsync("unmount", "softsync-cv-frame"); await module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

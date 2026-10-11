@@ -34,9 +34,7 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
                 return (IResult)TypedResults.BadRequest("External provider is unavailable.");
 
             // Accept local paths only; OAuth state carries this destination back.
-            if (string.IsNullOrWhiteSpace(returnUrl) || !returnUrl.StartsWith('/')
-                || returnUrl.StartsWith("//") || returnUrl.Contains('\\'))
-                returnUrl = "/dashboard";
+            returnUrl = SoftSync.BLL.Auth.LocalReturnUrl.Normalize(returnUrl);
             IEnumerable<KeyValuePair<string, StringValues>> query =
             [
                 new("ReturnUrl", returnUrl),
@@ -51,6 +49,7 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             // Carry the chosen flow in protected OAuth state, not callback query parameters.
             properties.Items["SoftSync.AuthIntent"] = intent == "register" ? "register" : "login";
+            properties.Items["SoftSync.ReturnUrl"] = returnUrl;
             return (IResult)TypedResults.Challenge(properties, [provider]);
         });
 

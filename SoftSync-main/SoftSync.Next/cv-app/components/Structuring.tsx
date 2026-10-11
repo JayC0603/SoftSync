@@ -1,3 +1,4 @@
+import { cvFetch } from '../services/session';
 import { useState, useEffect } from 'react';
 import './Structuring.css';
 
@@ -75,7 +76,7 @@ export default function Structuring({ sharedCvData, sharedJdData, onDataUpdate, 
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/upload/preview`, {
+      const response = await cvFetch(`${API_BASE_URL}/api/v1/upload/preview`, {
         method: 'POST',
         body: formData,
       });
@@ -120,7 +121,7 @@ export default function Structuring({ sharedCvData, sharedJdData, onDataUpdate, 
     formData.append('extract_raw_text', 'true');
 
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await cvFetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         body: formData,
       });

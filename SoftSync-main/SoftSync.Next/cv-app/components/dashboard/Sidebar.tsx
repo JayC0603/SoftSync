@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import Image from 'next/image';
+import { useAuth } from '../../context/AuthContext';
 import type { MenuType } from '../../types/dashboard';
 
 interface SidebarProps {
@@ -44,6 +46,10 @@ const MENU_ICON: Record<MenuType, ReactNode> = {
     </svg>
   ),
 };
+export const MENU_LABEL: Record<MenuType, string> = {
+  'CV Storage': 'Kho CV', 'CV-JD Matching': 'So khớp CV – JD',
+  'CV Ranking': 'Xếp hạng CV', 'CV Comparison': 'So sánh CV', 'CV Searching': 'Tìm kiếm CV',
+};
 
 const IconChevron = ({ direction }: { direction: 'left' | 'right' }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -64,6 +70,7 @@ export default function Sidebar({
   userName, userEmail, onLogout,
   collapsed, onToggleCollapse,
 }: SidebarProps) {
+  const { integrated, hostOrigin } = useAuth();
   const initials = (userName || userEmail || '?')
     .split(/\s+/)
     .map((p) => p[0])
@@ -84,10 +91,11 @@ export default function Sidebar({
         <IconChevron direction={collapsed ? 'right' : 'left'} />
       </button>
 
-      <div className="sidebar-brand">
-        <div className="logo-icon">JD</div>
-        {!collapsed && <h2>Recruitment</h2>}
-      </div>
+      <a className="sidebar-brand" href={integrated ? `${hostOrigin}/dashboard` : '/'} target={integrated ? '_top' : undefined} aria-label="Về SoftSync">
+        <Image src="/images/logo.png" width={40} height={40} alt="" />
+        {!collapsed && <div><h2>SoftSync</h2><small>CV thông minh</small></div>}
+      </a>
+      <a className="cv-platform-link" href={integrated ? `${hostOrigin}/roadmap` : '/courses'} target={integrated ? '_top' : undefined} aria-label="Quay lại học tập"><span aria-hidden="true">←</span>{!collapsed && <span>Quay lại học tập</span>}</a>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
@@ -95,11 +103,12 @@ export default function Sidebar({
             key={item}
             className={`menu-button ${activeMenu === item ? 'active' : ''}`}
             onClick={() => onChangeMenu(item)}
-            title={collapsed ? item : undefined}
-            aria-label={item}
+            title={collapsed ? MENU_LABEL[item] : undefined}
+            aria-label={MENU_LABEL[item]}
+            aria-current={activeMenu === item ? 'page' : undefined}
           >
             <span className="menu-button-icon">{MENU_ICON[item]}</span>
-            {!collapsed && <span className="menu-button-label">{item}</span>}
+            {!collapsed && <span className="menu-button-label">{MENU_LABEL[item]}</span>}
           </button>
         ))}
       </nav>
@@ -110,14 +119,14 @@ export default function Sidebar({
             <div className="user-avatar" title={`${userName ?? ''}\n${userEmail ?? ''}`.trim()}>
               {initials}
             </div>
-            <button
+            {!integrated && <button
               className="logout-button logout-button-collapsed"
               onClick={onLogout}
               title="Log out"
               aria-label="Log out"
             >
               <IconLogout />
-            </button>
+            </button>}
           </>
         ) : (
           <>
@@ -125,7 +134,7 @@ export default function Sidebar({
               <span className="user-name">{userName}</span>
               <span className="user-email">{userEmail}</span>
             </div>
-            <button className="logout-button" onClick={onLogout}>Log Out</button>
+            {!integrated && <button className="logout-button" onClick={onLogout}>Đăng xuất</button>}
           </>
         )}
       </div>
