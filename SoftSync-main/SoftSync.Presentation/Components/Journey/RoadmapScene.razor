@@ -1,0 +1,117 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+<svg class="journey-map-scene" viewBox="@($"0 0 420 {MapPoint.F(Height)}")" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs>
+        <linearGradient id="@(id)-sky" x2="0" y2="1"><stop stop-color="#131746"/><stop offset=".5" stop-color="#252261"/><stop offset="1" stop-color="#0e1733"/></linearGradient>
+        <linearGradient id="@(id)-mountain" x2="1" y2="1"><stop stop-color="var(--journey-accent)" stop-opacity=".45"/><stop offset="1" stop-color="#161839"/></linearGradient>
+        <linearGradient id="@(id)-land" x2="0" y2="1"><stop stop-color="#59508f"/><stop offset=".4" stop-color="#363568"/><stop offset="1" stop-color="#182742"/></linearGradient>
+        <linearGradient id="@(id)-road" x2="0" y2="1"><stop stop-color="#f4c467"/><stop offset=".35" stop-color="var(--journey-accent)"/><stop offset="1" stop-color="var(--journey-secondary)"/></linearGradient>
+        <radialGradient id="@(id)-mist"><stop stop-color="var(--journey-accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--journey-accent)" stop-opacity="0"/></radialGradient>
+        <radialGradient id="@(id)-summit"><stop stop-color="#f4c467" stop-opacity=".6"/><stop offset="1" stop-color="#f4c467" stop-opacity="0"/></radialGradient>
+        <filter id="@(id)-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+        <g id="@(id)-tree"><path d="M-2 0H3V-56H-2Z" fill="#33365b"/><path d="M0-77L-15-49H-8L-24-28H-14L-29-7Q0 1 29-7L15-28H24L8-49H15Z" fill="#193947"/><path d="M0-77L-15-49H-8L-24-28H-14L-29-7 0-13Z" fill="#285562"/><path d="M0-77L15-49H8L24-28H14L29-7 0-13Z" fill="#171f46"/></g>
+        <g id="@(id)-crystal"><path d="M0-23L9-12 6 3-5 6-11-10Z" fill="var(--journey-accent)"/><path d="M0-23L0 1-5 6-11-10Z" fill="var(--journey-light)" opacity=".65"/></g>
+    </defs>
+    <rect width="420" height="@Height" rx="18" fill="@($"url(#{id}-sky)")"/>
+    <image href="images/journey/valley.jpg" width="420" height="@Height" preserveAspectRatio="xMidYMid slice" opacity=".78" style="@SceneryStyle"/>
+    <ellipse cx="220" cy="150" rx="250" ry="190" fill="@($"url(#{id}-mist)")"/>
+    <g opacity=".15">
+        <path d="M0 185L43 86 63 126 108 49 147 119 180 86 236 161 288 58 322 120 365 78 420 154V350H0Z" fill="#171b4e"/>
+        <path d="M0 231L66 160 108 49 123 96 143 125 153 165 209 230 278 147 288 58 317 119 347 190 420 144V350H0Z" fill="@($"url(#{id}-mountain)")"/>
+        <path d="M108 49L91 113 108 95 123 96ZM288 58L272 110 288 96 305 102Z" fill="#aba0ff"/>
+    </g>
+    @for (var i = 0; i < 32; i++)
+    {
+        <circle cx="@((i * 71 + 23) % 412)" cy="@((i * 47 + 11) % Height)" r="@(i % 5 == 0 ? 1.8 : .9)" fill="var(--journey-light)" opacity="@(i % 3 == 0 ? .75 : .3)"/>
+    }
+    <path d="@($"M0 {Height * .48}Q70 {Height * .35} 180 {Height * .52}T420 {Height * .4}V{Height}H0Z")" fill="#151e3c" opacity=".15"/>
+    @if (ThemeKey == "time")
+    {
+        <g transform="@($"translate(330 {MapPoint.F(Height * .35)})")">
+            <path d="M-20 85V-38H20V85Z" fill="#33395c" stroke="#857eaa"/>
+            <path d="M-30-37L0-74 30-37Z" fill="#695988"/>
+            <circle cy="-12" r="17" fill="#182338" stroke="#f4c467" stroke-width="2"/>
+            <path d="M0-24V-12L8-7" fill="none" stroke="#ffe2a6" stroke-width="2"/>
+            <path d="M-6 85V61Q0 51 6 61V85" fill="#f4c467" opacity=".5"/>
+            <path d="M-9 23H-3V36H-9ZM3 23H9V36H3Z" fill="#e9c777" opacity=".6"/>
+        </g>
+    }
+    else if (ThemeKey == "critical")
+    {
+        <g transform="@($"translate(325 {MapPoint.F(Height * .42)})")" fill="none" stroke="var(--journey-secondary)">
+            <path d="M-50 20L0-8 50 20 0 48Z" fill="#172e48" stroke-width="2"/>
+            <path d="M-32 21L0 4 31 21 0 38-19 27 0 16 12 22 0 28" stroke="var(--journey-light)" stroke-width="3"/>
+            <path d="M-13-35V-55Q0-77 13-55V-35M-6-31H6M-4-26H4" stroke="var(--journey-light)" stroke-width="3"/>
+            <path d="M0-80V-88M-26-66L-34-70M26-66L34-70" stroke-width="2"/>
+        </g>
+    }
+    else if (ThemeKey == "teamwork")
+    {
+        <g transform="@($"translate(325 {MapPoint.F(Height * .43)})")">
+            <path d="M-45 25Q0-12 45 25" fill="none" stroke="var(--journey-light)" stroke-width="8"/>
+            <path d="M-35 22V48M-15 7V34M15 7V34M35 22V48" stroke="#5c8091" stroke-width="3"/>
+            <circle cx="-27" cy="-18" r="7" fill="var(--journey-accent)"/><circle cx="27" cy="-18" r="7" fill="var(--journey-secondary)"/>
+            <path d="M-39 2Q-27-17-15 2M15 2Q27-17 39 2" fill="none" stroke="var(--journey-light)" stroke-width="6"/>
+        </g>
+    }
+    @for (var index = Checkpoints.Count - 1; index >= 0; index--)
+    {
+        var point = RoadmapGeometry.Point(index, Checkpoints.Count);
+        <g transform="@($"translate({MapPoint.F(point.X)} {MapPoint.F(point.Y + 20)})")">
+            <ellipse cx="4" cy="12" rx="78" ry="25" fill="#080e25" opacity=".5"/>
+            <path d="M-74-7Q-45-37 9-28Q65-26 79-4L65 23 35 37-12 33-52 22Z" fill="#171c3d"/>
+            <path d="M-74-7Q-45-37 9-28Q65-26 79-4Q59 13 3 18Q-50 13-74-7Z" fill="@($"url(#{id}-land)")"/>
+            <path d="M-65-10Q-15-35 56-14" fill="none" stroke="#ada0ff" stroke-opacity=".25" stroke-width="2"/>
+            <path d="M-44 17L-34 44-20 26M26 22L32 48 41 23" fill="#252b51"/>
+            <use href="@($"#{id}-tree")" transform="translate(-54 -10) scale(.52)"/>
+            <use href="@($"#{id}-tree")" transform="translate(52 -16) scale(.38)"/>
+            <use href="@($"#{id}-crystal")" transform="translate(-27 -4) scale(.65)"/>
+            <ellipse cx="35" cy="-9" rx="8" ry="4" fill="#528281"/><ellipse cx="-60" cy="3" rx="10" ry="5" fill="#374e63"/>
+        </g>
+    }
+    @for (var index = 0; index < Checkpoints.Count - 1; index++)
+    {
+        var from = RoadmapGeometry.Point(index, Checkpoints.Count);
+        var to = RoadmapGeometry.Point(index + 1, Checkpoints.Count);
+        var segment = RoadmapGeometry.Segment(from, to);
+        var completed = Checkpoints[index].State == JourneyState.Completed;
+        <path d="@segment" fill="none" stroke="#0c102d" stroke-width="25" opacity=".75"/>
+        <path d="@segment" fill="none" stroke="#65608c" stroke-width="17"/>
+        <path d="@segment" fill="none" stroke="#8883b1" stroke-width="1" stroke-dasharray="4 10"/>
+        @if (completed)
+        {
+            <path d="@segment" fill="none" stroke="var(--journey-secondary)" stroke-width="10" filter="@($"url(#{id}-glow)")"/>
+            <path d="@segment" fill="none" stroke="@($"url(#{id}-road)")" stroke-width="3"/>
+            <path d="@segment" fill="none" stroke="#d6ffff" stroke-opacity=".65" stroke-width="1"/>
+        }
+    }
+    <ellipse cx="230" cy="70" rx="83" ry="72" fill="@($"url(#{id}-summit)")"/>
+    <g transform="translate(230 61)">
+        <ellipse cx="0" cy="22" rx="33" ry="8" fill="#f4c467" opacity=".2"/>
+        <path d="M-17-24H17V-6Q16 12 0 14Q-16 12-17-6Z" fill="#f4c467" stroke="#fff1bb" stroke-width="2"/>
+        <path d="M-17-18H-28Q-31-2-15 3M17-18H28Q31-2 15 3" fill="none" stroke="#ffc96c" stroke-width="4"/>
+        <path d="M0 14V26M-14 28H14" stroke="#ffdc8c" stroke-width="5"/>
+        <path d="M0-16L3-9 10-8 5-3 6 4 0 1-6 4-5-3-10-8-3-9Z" fill="#fff2c1"/>
+        <path d="M50 25V-24L74-18 50-7" fill="var(--journey-light)" stroke="var(--journey-light)" stroke-width="2"/>
+    </g>
+    <g opacity=".9">
+        <use href="@($"#{id}-tree")" transform="@($"translate(20 {MapPoint.F(Height - 9)}) scale(1.3)")"/>
+        <use href="@($"#{id}-tree")" transform="@($"translate(390 {MapPoint.F(Height - 20)}) scale(1.7)")"/>
+        <use href="@($"#{id}-tree")" transform="@($"translate(410 {MapPoint.F(Height * .6)}) scale(1.1)")"/>
+    </g>
+    <ellipse cx="260" cy="@(Height - 25)" rx="230" ry="70" fill="@($"url(#{id}-mist)")" opacity=".6"/>
+</svg>
+
+@code {
+    [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
+    [Parameter] public string ThemeKey { get; set; } = "communication";
+    private readonly string id = "map-" + Guid.NewGuid().ToString("N");
+    private double Height => RoadmapGeometry.Height(Checkpoints.Count);
+    private string SceneryStyle => ThemeKey switch
+    {
+        "critical" => "filter:hue-rotate(-25deg)",
+        "teamwork" => "filter:hue-rotate(-65deg)",
+        "time" => "filter:hue-rotate(12deg)",
+        _ => ""
+    };
+}

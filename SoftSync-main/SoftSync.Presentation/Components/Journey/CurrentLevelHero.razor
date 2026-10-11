@@ -1,0 +1,44 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+<article class="journey-hero journey-card @(Theme.Key == "communication" ? "journey-hero-conversation" : "journey-hero-symbolic")" style="@Theme.Css">
+    @if (Theme.Key == "communication")
+    {
+        <img class="journey-hero-art" src="images/journey/conversation.jpg" alt="" width="1536" height="1024" fetchpriority="high" />
+    }
+    else
+    {
+        <div class="journey-symbolic-art" aria-hidden="true">
+            <svg viewBox="0 0 500 500"><defs><linearGradient id="journey-orbit" x2="1" y2="1"><stop stop-color="var(--journey-accent)"/><stop offset="1" stop-color="var(--journey-secondary)"/></linearGradient></defs><circle cx="250" cy="260" r="155" fill="#151a3d" stroke="url(#journey-orbit)" stroke-width="2"/><ellipse cx="250" cy="260" rx="210" ry="74" fill="none" stroke="var(--journey-light)" opacity=".3" transform="rotate(-30 250 260)"/><ellipse cx="250" cy="260" rx="190" ry="88" fill="none" stroke="var(--journey-secondary)" opacity=".4" transform="rotate(35 250 260)"/><path d="M100 420L250 350 410 420 250 480Z" fill="#34316d"/><path d="M100 420L250 480 410 420V439L250 498 100 439Z" fill="#1a1e46"/><circle cx="113" cy="149" r="10" fill="var(--journey-secondary)"/><circle cx="420" cy="265" r="7" fill="var(--journey-light)"/><circle cx="275" cy="70" r="5" fill="var(--journey-accent)"/></svg>
+            <i class="bi @Theme.Icon"></i>
+        </div>
+    }
+    <img class="journey-syncy" src="images/syncy-robot.png" alt="" width="140" height="140" />
+    <div class="journey-hero-copy">
+        <span class="journey-eyebrow">@Category · @(Vietnamese ? "CHƯƠNG" : "CHAPTER") @Ordinal</span>
+        <p class="journey-level">Level @Ordinal.ToString("00")</p>
+        <h1>@Category</h1>
+        <h2>@Title</h2>
+        <p class="journey-description">@Description</p>
+        <div class="journey-progress-label"><span>@(Vietnamese ? "Tiến trình" : "Learning progress")</span><b>@Completed / @Total</b></div>
+        <progress class="journey-progress" value="@Completed" max="@Math.Max(1, Total)" aria-label="@(Vietnamese ? "Tiến độ bài học" : "Lesson progress")">@Completed / @Total</progress>
+        <div class="journey-hero-meta"><i class="bi bi-journal-check" aria-hidden="true"></i><span>@(Vietnamese ? "Tiến độ được lưu theo từng hoạt động" : "Your progress is saved for each activity")</span></div>
+        @if (Locked)
+        {
+            <p class="journey-unlock"><i class="bi bi-lock" aria-hidden="true"></i>@(Vietnamese ? "Hoàn thành cấp độ hiện tại để mở khóa bài này." : "Complete the current level to unlock this lesson.")</p>
+        }
+        <button class="journey-primary" disabled="@Locked" @onclick="OnContinue">@(Locked ? Vietnamese ? "Chưa mở khóa" : "Locked" : Completed == Total ? Vietnamese ? "Xem lại bài học" : "Review lesson" : Vietnamese ? "Tiếp tục học" : "Continue learning") <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+    </div>
+</article>
+
+@code {
+    [Parameter] public SkillTheme Theme { get; set; } = SkillTheme.For("communication");
+    [Parameter] public string Category { get; set; } = "";
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "";
+    [Parameter] public int Ordinal { get; set; }
+    [Parameter] public int Completed { get; set; }
+    [Parameter] public int Total { get; set; }
+    [Parameter] public bool Locked { get; set; }
+    [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public EventCallback OnContinue { get; set; }
+}
