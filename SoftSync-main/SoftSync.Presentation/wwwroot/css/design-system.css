@@ -89,6 +89,30 @@ body .ss-connection-state { margin-left: auto; color: var(--ss-text-muted); font
 body .ss-connection-state > span:first-child { display: none; }
 .ss-shell-control { display: inline-grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border: 1px solid var(--ss-border); border-radius: 8px; background: var(--ss-surface); color: var(--ss-text); }
 .ss-shell-control:hover { background: var(--ss-surface-soft); }
+/* Native modal top layer keeps mentor details outside ancestor clipping/stacking. */
+html body dialog:is(.mentor-modal-backdrop, .ss-mentor-modal-backdrop) {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) !important;
+    box-sizing: border-box;
+    overflow: auto;
+    overscroll-behavior: contain;
+    align-items: center;
+}
+html body dialog:is(.mentor-modal-backdrop, .ss-mentor-modal-backdrop):not([open]) { display: none; }
+html body dialog > :is(.mentor-modal, .ss-mentor-modal) {
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    min-height: 0;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
+}
 html body .ss-navbar { width: var(--ss-sidebar-width); padding: 20px 12px !important; gap: 24px; color: var(--ss-text) !important; background: var(--ss-surface) !important; border-right: 1px solid var(--ss-border); box-shadow: none !important; }
 html body .ss-navbar .ss-brand { padding: 0 10px 20px; border-color: var(--ss-border); }
 html body .ss-navbar .ss-gradient-text { background: none !important; color: var(--ss-text) !important; -webkit-text-fill-color: currentColor !important; font-size: 1.1rem; }

@@ -152,7 +152,7 @@
 
         @if (xuanDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => xuanDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => xuanDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="xuan-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => xuanDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -177,12 +177,12 @@
                         <p>@L["mentor.advisor.xuan.bio"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
 
         @if (advisorDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => advisorDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => advisorDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="advisor-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => advisorDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -209,12 +209,12 @@
                         <p>@L["mentor.advisor.bio2"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
 
         @if (mentorDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => mentorDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => mentorDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="mentor-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => mentorDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -240,7 +240,7 @@
                         <p>@L["mentor.main.bio3"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
     </section>
 

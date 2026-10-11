@@ -43,6 +43,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         let dialog = null;
         let returnFocus = null;
+        let savedBodyOverflow = null;
         const focusable = node => [...node.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex="0"]')].filter(item => item.getClientRects().length);
         const observeDialog = () => {
             const next = document.querySelector('.ss-mentor-modal[aria-modal="true"], .mentor-modal[aria-modal="true"]');
@@ -50,14 +51,26 @@
             if (next) {
                 returnFocus = document.activeElement;
                 dialog = next;
+                const overlay = dialog.closest('dialog');
+                if (overlay && !overlay.open) overlay.showModal();
+                if (savedBodyOverflow === null) savedBodyOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
                 (focusable(dialog)[0] || dialog).focus();
             } else {
                 dialog = null;
+                if (savedBodyOverflow !== null) document.body.style.overflow = savedBodyOverflow;
+                savedBodyOverflow = null;
                 if (returnFocus?.isConnected) returnFocus.focus();
                 returnFocus = null;
             }
         };
         new MutationObserver(observeDialog).observe(document.body, { childList: true, subtree: true });
+        observeDialog();
+        document.addEventListener('cancel', event => {
+            if (!event.target.matches?.('dialog.mentor-modal-backdrop, dialog.ss-mentor-modal-backdrop')) return;
+            event.preventDefault();
+            event.target.querySelector('.mentor-modal-close, .ss-mentor-modal-close')?.click();
+        }, true);
         document.addEventListener('keydown', event => {
             if (!dialog) return;
             if (event.key === 'Escape') {

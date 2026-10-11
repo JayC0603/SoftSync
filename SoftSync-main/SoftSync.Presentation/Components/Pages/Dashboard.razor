@@ -80,7 +80,7 @@ else
 
         @if (SelectedMentor is { } mentor)
         {
-            <div class="mentor-modal-backdrop" role="presentation" @onclick="CloseMentor">
+            <dialog class="mentor-modal-backdrop" role="presentation" @onclick="CloseMentor">
                 <section class="mentor-modal" role="dialog" aria-modal="true" aria-labelledby="mentor-modal-title" @onclick:stopPropagation="true">
                     <button class="mentor-modal-close" @onclick="CloseMentor" aria-label="@T("Đóng", "Close")"><i class="bi bi-x-lg"></i></button>
                     <header><img src="@mentor.Image" alt="@mentor.Name" /><div><span>@T(mentor.RoleVi, mentor.RoleEn)</span><h2 id="mentor-modal-title">@mentor.Name</h2><p>@T(mentor.PositionVi, mentor.PositionEn)</p></div></header>
@@ -92,7 +92,7 @@ else
                     </div>
                     <div class="mentor-biography"><h3>@T("Giới thiệu", "About")</h3><p>@T(mentor.BioVi, mentor.BioEn)</p></div>
                 </section>
-            </div>
+            </dialog>
         }
 
     </div>
