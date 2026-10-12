@@ -113,6 +113,33 @@ html[data-theme="dark"] body:has(.dashboard-reference) .ss-navbar .ss-navpill.ac
 html[data-theme="dark"] body .dashboard-reference .ss-next-lessons>a:hover{background:#302947}
 html[data-theme="dark"] body .dashboard-reference .ss-lesson-index{box-shadow:0 0 0 5px #252840}
 html[data-theme="dark"] body .dashboard-reference .ss-workspace-shortcuts a:hover{background:#302947}
-@media(min-width:1200px){html body:has(.dashboard-reference){--ss-sidebar-width:170px}html body .dashboard-reference{padding-inline:28px}}
+@media(min-width:1200px){html body:has(.dashboard-reference){--ss-sidebar-width:240px}html body .dashboard-reference{padding-inline:28px}}
 @media(max-width:1100px){html body .dashboard-reference .focus-next-copy{padding:26px}html body .dashboard-reference .ss-overview-grid article{padding:16px}html body .dashboard-reference .ss-learning-companion img{width:230px;height:250px}}
 @media(max-width:760px){html body:has(.dashboard-reference) .ss-workspace>.ss-main-content.container{padding:12px 0 88px!important}html body:has(.dashboard-reference) .ss-workspace-topbar{padding-inline:16px}html body:has(.dashboard-reference) .ss-navbar .ss-brand{flex-direction:row;padding:0;justify-content:flex-start}html body .dashboard-reference .focus-next-copy{padding:24px}html body .dashboard-reference .ss-learning-companion{min-height:180px;padding:0}html body .dashboard-reference .ss-learning-companion img{width:210px;height:200px}html body .dashboard-reference .ss-overview-grid article{padding:12px}html body .dashboard-reference .ss-overview-grid strong{font-size:24px}html body .dashboard-reference .ss-next-lessons:has(>a:nth-child(2))::before{left:30px}html body .dashboard-reference .focus-chapter-progress{gap:10px;padding:12px}html body .dashboard-reference .dashboard-orbit{inset:20% 24%}html body .dashboard-reference .dashboard-spark-one{left:22%}}
+/* Compact icon rail: width and labels must use the same desktop mode. */
+@media(min-width:761px) and (max-width:1199px){
+  html body:has(.dashboard-reference){--ss-sidebar-width:84px}
+  html body:has(.dashboard-reference) .ss-navbar{width:84px;padding:24px 12px!important;overflow:visible;gap:24px}
+  html body:has(.dashboard-reference) .ss-workspace{margin-left:84px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-brand{padding:0 0 16px;gap:0}
+  html body:has(.dashboard-reference) .ss-navbar .ss-brand>span{display:none}
+  html body:has(.dashboard-reference) .ss-navbar .ss-brand-logo{width:40px;height:40px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpills{width:100%;gap:8px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill{position:relative;justify-content:center;width:100%;min-height:48px!important;padding:12px!important;gap:0;border-radius:14px!important}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill>i{font-size:21px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill>span,
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill:is(:hover,:focus-visible)>span{display:block;position:absolute;left:calc(100% + 14px);top:50%;transform:translateY(-50%);width:max-content;padding:8px 12px;border:1px solid var(--ss-border);border-radius:10px;background:var(--ss-surface);color:var(--ss-text);box-shadow:var(--ss-shadow-md);white-space:nowrap;pointer-events:none;visibility:hidden;opacity:0;z-index:100}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill:is(:hover,:focus-visible)>span{visibility:visible;opacity:1}
+}
+/* Keep desktop navigation labels visible and aligned with the workspace. */
+@media(min-width:1200px){
+  html body:has(.dashboard-reference) .ss-navbar{width:var(--ss-sidebar-width);overflow-y:auto;gap:20px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-brand{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 12px 20px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-brand>span{display:inline}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpills{width:100%;gap:8px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:48px!important;padding:12px!important;gap:12px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill>i{flex:0 0 24px;text-align:center;font-size:21px}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill>span,
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill:is(:hover,:focus-visible)>span{position:static;display:inline;visibility:visible;opacity:1;transform:none;width:auto;min-width:0;max-width:none;margin:0;padding:0;border:0;background:transparent;box-shadow:none;color:inherit;font-size:16px;pointer-events:auto}
+  html body:has(.dashboard-reference) .ss-navbar .ss-navpill>span::before{display:none}
+}
