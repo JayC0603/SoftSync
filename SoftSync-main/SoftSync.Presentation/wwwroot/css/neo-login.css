@@ -154,3 +154,37 @@ html body .neo-login .login-submit, html body .neo-login .login-submit:hover {
 }
 .neo-login.auth-container { display: grid; padding: 82px 24px 35px; align-items: center; justify-content: normal; }
 @media (max-width: 480px) { .neo-login.auth-container { padding: 86px 26px 30px; } }
+
+/* Compact login; higher specificity than shared account theme rules. */
+html body .neo-login.neo-login-compact { box-sizing:border-box; min-height:100dvh; padding:64px 24px 20px; }
+html body .neo-login.neo-login-compact .neo-content { width:min(440px,100%); }
+html body .neo-login.neo-login-compact .neo-logo { width:72px; height:72px; margin-bottom:14px; border-radius:22px; }
+html body .neo-login.neo-login-compact .neo-logo img { width:54px; height:54px; border-radius:16px; }
+html body .neo-login.neo-login-compact .login-heading { margin-bottom:18px; }
+html body .neo-login.neo-login-compact .login-kicker { margin-bottom:6px; font-size:10px; }
+html body .neo-login.neo-login-compact .login-heading h2 { margin-bottom:4px; font-size:30px; line-height:1.2; }
+html body .neo-login.neo-login-compact .login-heading p { margin:0; font-size:14px; }
+html body .neo-login.neo-login-compact .login-field { margin-bottom:12px!important; }
+html body .neo-login.neo-login-compact .login-field label { margin-bottom:6px; font-size:14px; }
+html body .neo-login.neo-login-compact .login-input-wrap .form-control { min-height:48px; padding-block:10px; font-size:16px; border-radius:16px!important; }
+html body .neo-login.neo-login-compact .login-options { margin:4px 0 14px; }
+html body .neo-login.neo-login-compact .login-options,
+html body .neo-login.neo-login-compact .login-options a { font-size:14px; }
+html body .neo-login.neo-login-compact .login-submit { min-height:48px; padding-block:10px!important; font-size:18px!important; }
+html body .neo-login.neo-login-compact .login-submit>i { width:32px; height:32px; font-size:21px; }
+html body .neo-login.neo-login-compact .neo-social { gap:10px; margin-top:14px; }
+html body .neo-login.neo-login-compact .external-google { min-height:44px; padding-block:8px; }
+html body .neo-login.neo-login-compact .external-help { margin-top:6px; }
+html body .neo-login.neo-login-compact .login-register { margin-top:14px; font-size:14px; }
+html body .neo-login.neo-login-compact .neo-tagline { margin:12px 0 0; }
+html body .neo-login.neo-login-compact .alert { margin-bottom:12px; padding:10px 14px; font-size:14px; }
+html body .neo-login.neo-login-compact .neo-theme { width:44px; height:44px; }
+@media(min-width:761px) and (max-height:700px) {
+ html body .neo-login.neo-login-compact { padding-top:20px; }
+ html body .neo-login.neo-login-compact .neo-logo { width:56px; height:56px; margin-bottom:8px; }
+ html body .neo-login.neo-login-compact .neo-logo img { width:42px; height:42px; }
+ html body .neo-login.neo-login-compact .login-heading { margin-bottom:12px; }
+}
+@media(max-width:600px) {
+ html body .neo-login.neo-login-compact { padding:76px 20px 24px; }
+}
