@@ -30,7 +30,8 @@ else
     <span></span><span></span><span></span>
 </div>
 
-<main class="account-page">
+<HeadContent><link rel="stylesheet" href="css/account-modern.css?v=2" /></HeadContent>
+<main class="account-page account-modern">
     <div class="account-shell">
         <section class="account-brand" aria-label="SoftSync">
             <a href="/" class="account-logo">
@@ -43,13 +44,13 @@ else
                 <h1>@L["auth.brand.title"]<br /><span>@L["auth.brand.titleAccent"]</span></h1>
                 <p>@L["auth.brand.description"]</p>
                 <div class="account-benefits" aria-hidden="true">
-                    <span><i class="bi bi-stars"></i></span>
-                    <span><i class="bi bi-signpost-split"></i></span>
-                    <span><i class="bi bi-graph-up-arrow"></i></span>
+                    <span><i class="bi bi-stars"></i> @(L.Current == AppLanguage.Vi ? "Học theo cách của bạn" : "Learn your way")</span>
+                    <span><i class="bi bi-signpost-split"></i> @(L.Current == AppLanguage.Vi ? "Lộ trình phù hợp" : "A path for you")</span>
+                    <span><i class="bi bi-graph-up-arrow"></i> @(L.Current == AppLanguage.Vi ? "Tiến bộ mỗi ngày" : "Grow every day")</span>
                 </div>
             </div>
 
-            <div class="account-brand-orbit" aria-hidden="true">
+            <div class="account-brand-orbit" aria-hidden="true"><span class="account-art-star">✦</span><span class="account-art-star account-art-star-small">✧</span>
                 <div class="account-brand-mascot"><img src="images/syncy-robot.png" alt="" /></div>
             </div>
         </section>

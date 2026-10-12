@@ -18,16 +18,11 @@
 }
 else
 {
-    <div class="focus-home ss-learning-dashboard" aria-labelledby="focus-home-title">
+    <div class="focus-home ss-learning-dashboard dashboard-reference" aria-labelledby="focus-home-title">
         <header class="focus-home-header">
-            <div><span class="focus-eyebrow">@T("HÀNH TRÌNH CỦA BẠN", "YOUR JOURNEY")</span><h1 id="focus-home-title">@T($"Chào mừng trở lại, {FirstName(user.PublicName)}!", $"Welcome back, {FirstName(user.PublicName)}!")</h1><p>@T("Tiếp tục hành trình rèn luyện và phát triển kỹ năng của bạn.", "Continue your journey of practice and skill development.")</p></div>
+            <div><h1 id="focus-home-title">@T($"Chào mừng trở lại, {FirstName(user.PublicName)}!", $"Welcome back, {FirstName(user.PublicName)}!") <span aria-hidden="true">👋</span></h1><p>@T("Mỗi bước nhỏ hôm nay là một tiến bộ ngày mai.", "Every small step today is progress for tomorrow.")</p></div>
             <a class="ss-secondary-cta" href="/profile"><i class="bi bi-person" aria-hidden="true"></i>@T("Hồ sơ của tôi", "My profile")</a>
         </header>
-        <section class="ss-overview-grid" aria-label="@T("Tổng quan học tập", "Learning overview")">
-            <article><span>@T("Bài đã hoàn thành", "Completed lessons")</span><strong>@completedItems<small> / @roadmapItems.Count</small></strong><i class="bi bi-check2-circle" aria-hidden="true"></i></article>
-            <article><span>@T("Hoạt động đã hoàn thành", "Completed activities")</span><strong>@roadmapItems.Sum(x => x.CompletedActivityCount)</strong><i class="bi bi-list-check" aria-hidden="true"></i></article>
-            <article><span>@T("Điểm kinh nghiệm", "Experience points")</span><strong>@user.ExperiencePoints<small> XP</small></strong><i class="bi bi-stars" aria-hidden="true"></i></article>
-        </section>
         @if (CurrentItem is null)
         {
             <UiState Title="@T("Bắt đầu từ điểm xuất phát của bạn", "Start from where you are")" Description="@T("Hoàn thành bài đánh giá để xem lộ trình học phù hợp.", "Complete an assessment to find your learning roadmap.")" Icon="bi-signpost-split" ActionHref="@($"/assessment/{user.Id}")" ActionText="@T("Bắt đầu đánh giá", "Start assessment")" />
@@ -35,14 +30,19 @@ else
         else
         {
             <section class="focus-next" aria-labelledby="focus-next-title">
-                <div class="focus-next-copy"><span class="focus-kicker">@T("TIẾP TỤC HỌC TẬP", "CONTINUE LEARNING")</span><small>@CurrentItem.SkillName · @T("Tuần", "Week") @CurrentItem.WeekNumber</small><h2 id="focus-next-title">@CurrentTitle</h2><p>@CurrentItem.Objective</p><div class="focus-next-actions"><a class="ss-btn-primary" href="@($"/roadmap/lecture/{user.Id}/{CurrentItem.Id}")">@T("Mở bài học", "Open lesson")<i class="bi bi-arrow-right"></i></a><button type="button" class="focus-link" @onclick="NavigateToAssessment">@T("Đánh giá lại kỹ năng", "Retake assessment")</button></div></div>
-                <div class="ss-learning-companion"><img src="/images/syncy-robot.png" alt="SYNCY" width="160" height="160" /><p>@T("Tập trung vào một bước nhỏ. Tiến bộ được xây dựng từ thực hành.", "Focus on one small step. Progress comes from practice.")</p></div>
+                <div class="focus-next-copy"><span class="focus-kicker">@T("TIẾP TỤC HỌC TẬP", "CONTINUE LEARNING")</span><small>@T("Tuần", "Week") @CurrentItem.WeekNumber · @CurrentItem.SkillName</small><h2 id="focus-next-title">@CurrentTitle</h2><p>@CurrentItem.Objective</p><div class="focus-next-actions"><a class="ss-btn-primary" href="@($"/roadmap/lecture/{user.Id}/{CurrentItem.Id}")">@T("Tiếp tục bài học", "Continue lesson")<i class="bi bi-arrow-right"></i></a><button type="button" class="focus-link" @onclick="NavigateToAssessment">@T("Đánh giá lại kỹ năng", "Retake assessment")</button></div></div>
+                <div class="ss-learning-companion"><span class="dashboard-orbit" aria-hidden="true"></span><span class="dashboard-spark dashboard-spark-one" aria-hidden="true">✦</span><span class="dashboard-spark dashboard-spark-two" aria-hidden="true">✦</span><img src="/images/syncy-robot.png" alt="SYNCY" width="300" height="300" /><p>@T("Cùng nhau học tốt hơn mỗi ngày! ♡", "Learning better together, every day! ♡")</p></div>
                 <div class="focus-chapter-progress"><div><span>@T("Tiến độ bài học", "Lesson progress")</span><strong>@CurrentPercent%</strong></div><div class="focus-progress" role="progressbar" aria-label="@T("Tiến độ bài học", "Lesson progress")" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@CurrentPercent"><i style="width:@CurrentPercent%"></i></div><small>@CurrentItem.CompletedActivityCount / @CurrentItem.TotalActivityCount @T("hoạt động hoàn thành", "activities completed")</small></div>
             </section>
         }
+        <section class="ss-overview-grid" aria-label="@T("Tổng quan học tập", "Learning overview")">
+            <article><span>@T("Bài học hoàn thành", "Completed lessons")</span><strong>@completedItems<small> / @roadmapItems.Count</small></strong><i class="bi bi-book-fill" aria-hidden="true"></i></article>
+            <article><span>@T("Hoạt động hoàn thành", "Completed activities")</span><strong>@roadmapItems.Sum(x => x.CompletedActivityCount)</strong><i class="bi bi-bullseye" aria-hidden="true"></i></article>
+            <article><span>@T("Điểm kinh nghiệm", "Experience points")</span><strong>@user.ExperiencePoints<small> XP</small></strong><i class="bi bi-star-fill" aria-hidden="true"></i></article>
+        </section>
         <div class="focus-home-grid">
             <section class="focus-week">
-                <div class="focus-section-heading"><div><span>@T("BƯỚC TIẾP THEO", "NEXT STEPS")</span><h2>@T("Lộ trình của bạn", "Your roadmap")</h2></div><a href="/roadmap">@T("Xem tất cả", "View all") <i class="bi bi-arrow-right"></i></a></div>
+                <div class="focus-section-heading"><div><h2>@T("Lộ trình của bạn", "Your roadmap")</h2></div><a href="/roadmap">@T("Xem tất cả", "View all") <i class="bi bi-arrow-right"></i></a></div>
                 @if (roadmapItems.Count == 0)
                 {
                     <p class="ss-muted">@T("Chưa có bài học. Hãy bắt đầu với bài đánh giá.", "No lessons yet. Start with an assessment.")</p>
@@ -50,17 +50,17 @@ else
                 else
                 {
                     <div class="ss-next-lessons">
-                        @foreach (var item in roadmapItems.Where(x => !x.IsCompleted).Take(3))
+                        @foreach (var item in roadmapItems.Where(x => !x.IsCompleted).Take(2))
                         {
-                            <a href="@($"/roadmap/lecture/{user.Id}/{item.Id}")"><span class="ss-lesson-index">@item.WeekNumber</span><div><strong>@item.Title</strong><small>@item.SkillName · @item.CompletedActivityCount/@item.TotalActivityCount @T("hoạt động", "activities")</small></div><i class="bi bi-arrow-right"></i></a>
+                            <a href="@($"/roadmap/lecture/{user.Id}/{item.Id}")"><span class="ss-lesson-index">@item.WeekNumber</span><div><strong>@item.Title</strong><small>@item.SkillName · @item.CompletedActivityCount/@item.TotalActivityCount @T("hoạt động", "activities")</small></div><span class="dashboard-lesson-status @(item.Id == CurrentItem?.Id ? "is-current" : "")"><i aria-hidden="true"></i>@(item.Id == CurrentItem?.Id ? T("Đang học", "Learning") : T("Bước tiếp theo", "Up next"))</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                         }
                         @if (roadmapItems.All(x => x.IsCompleted)) { <p class="ss-muted">@T("Bạn đã hoàn thành các bài trong lộ trình hiện tại. Xem lại tiến độ hoặc đánh giá lại kỹ năng.", "You have completed your current roadmap. Review progress or reassess your skills.")</p> }
                     </div>
                 }
             </section>
-            <aside class="focus-coach"><div class="focus-coach-head"><img src="/images/syncy-robot.png" alt="" width="48" height="48" /><div><span>SYNCY</span><h2>@T("Đồng hành cùng bạn", "Here to help you")</h2></div></div><p>@T("Có điều gì chưa rõ? Đặt câu hỏi để tìm hướng học và thực hành phù hợp.", "Need clarity? Ask a question to find your next learning or practice step.")</p><a class="ss-secondary-cta" href="/assistant">@T("Mở trợ lý", "Open assistant")<i class="bi bi-chat-dots"></i></a></aside>
+            <aside class="focus-coach"><img class="dashboard-coach-art" src="/images/syncy-robot.png" alt="" width="150" height="150" /><div class="dashboard-coach-copy"><h2>@T("Luôn có người đồng hành", "Always here for you")</h2><p>@T("Cùng tìm bước học phù hợp với bạn.", "Find the right next step together.")</p><a class="dashboard-coach-prompt" href="/assistant"><i class="bi bi-chat" aria-hidden="true"></i>@T("Hôm nay tôi nên học gì?", "What should I learn today?")</a></div><a class="ss-btn-primary" href="/assistant"><i class="bi bi-chat" aria-hidden="true"></i>@T("Trò chuyện với SYNCY", "Chat with SYNCY") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></aside>
         </div>
-        <section class="ss-workspace-shortcuts" aria-label="@T("Khám phá học tập", "Explore learning")"><a href="/progress"><i class="bi bi-graph-up-arrow"></i>@T("Xem tiến độ", "View progress")</a><a href="/case-studies"><i class="bi bi-chat-heart"></i>@T("Khám phá tình huống", "Explore scenarios")</a><a href="/game"><i class="bi bi-ui-checks"></i>@T("Kiểm tra kiến thức", "Test your knowledge")</a><a href="/resources"><i class="bi bi-folder"></i>@T("Tài nguyên học", "Learning resources")</a></section>
+        <section class="ss-workspace-shortcuts" aria-label="@T("Khám phá học tập", "Explore learning")"><a href="/progress"><i class="bi bi-bar-chart-fill"></i>@T("Tiến độ", "Progress")</a><a href="/case-studies"><i class="bi bi-bullseye"></i>@T("Thực hành", "Practice")</a><a href="/game"><i class="bi bi-clipboard-check"></i>@T("Kiểm tra", "Quiz")</a><a href="/resources"><i class="bi bi-folder"></i>@T("Tài nguyên", "Resources")</a></section>
         <section class="mentor-bar">
             <header><div><h3><i class="bi bi-stars"></i> @T("Đội ngũ cố vấn đồng hành", "Mentors accompanying you")</h3><p>@T("Những chuyên gia giàu kinh nghiệm luôn sẵn sàng hỗ trợ hành trình phát triển của bạn.", "Experienced experts are ready to support your development journey.")</p></div></header>
             <div class="mentor-items mentor-cards">

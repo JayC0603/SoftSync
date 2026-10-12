@@ -15,12 +15,18 @@
 
 <PageTitle>@L["auth.external.title"]</PageTitle>
 
+<div class="external-account-content">
 <StatusMessage Message="@message" />
 @if (needsRegistration)
 {
-    <div class="alert alert-info" role="status">@L["auth.googleNeedsRegistration"]</div>
-    <a href="Account/Register" class="ss-btn-primary tw:block tw:text-center tw:py-3">@L["auth.register"]</a>
-    <a href="Account/Login" class="tw:block tw:mt-3">@L["auth.login.title"]</a>
+    <div class="external-account-symbol" aria-hidden="true"><i class="bi bi-person-plus"></i><span>✦</span></div>
+    <span class="external-account-eyebrow">@T("BƯỚC ĐẦU TIÊN CỦA BẠN", "YOUR FIRST STEP")</span>
+    <h1>@T("Một khởi đầu mới,", "A fresh start,")<br /><span>@T("nhiều cơ hội hơn.", "more possibilities.")</span></h1>
+    <p class="external-account-intro">@T("Tạo tài khoản để bắt đầu hành trình học tập của riêng bạn, cùng SYNCY.", "Create an account to start your own learning journey with SYNCY.")</p>
+    <div class="external-account-notice" role="status"><i class="bi bi-info-circle" aria-hidden="true"></i><p>@L["auth.googleNeedsRegistration"]</p></div>
+    <a href="Account/Register" class="external-account-primary">@L["auth.register"]<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    <p class="external-account-signin">@T("Đã có tài khoản?", "Already have an account?") <a href="Account/Login">@L["auth.login.title"]</a></p>
+    <div class="external-account-reassurance"><i class="bi bi-shield-check" aria-hidden="true"></i>@T("Không gian học tập dành riêng cho bạn", "Your personal space to learn and grow")</div>
 }
 else if (needsLinkConfirmation)
 {
@@ -47,7 +53,10 @@ else
     <a href="Account/Login">@L["auth.login.title"]</a>
 }
 
+</div>
+
 @code {
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
     private string? message;
     private ExternalLoginInfo externalLoginInfo = default!;
     private bool needsLinkConfirmation;

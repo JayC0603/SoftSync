@@ -1,0 +1,56 @@
+﻿/* Account callback and recovery screens. Login/register keep their own layout. */
+html body .account-modern{min-height:100dvh;padding:32px;color:#18143e;background:radial-gradient(ellipse at 12% 12%,#e5dfff 0,transparent 45%),radial-gradient(ellipse at 90% 85%,#dfeaff 0,transparent 45%),#f3f5fc}
+html body .account-modern::before{opacity:.18;background-image:radial-gradient(#9892c4 .7px,transparent .7px)}
+html body .account-modern .account-shell{width:min(1120px,100%);min-height:650px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid #ffffff;border-radius:30px;background:#fff;box-shadow:0 24px 80px #45457515;backdrop-filter:none}
+html body .account-modern .account-brand{min-height:650px;padding:34px 40px;color:#fff;background:radial-gradient(ellipse at 80% 80%,#7854e5 0,transparent 65%),linear-gradient(150deg,#15142f,#302458 62%,#5944b7)}
+html body .account-modern .account-brand::before{width:440px;height:440px;right:-245px;top:-210px;border-color:#d6caff22}
+html body .account-modern .account-brand::after{width:450px;height:450px;left:-220px;bottom:-280px;border-color:#d6caff22}
+html body .account-modern .account-logo{font-size:24px;gap:12px}
+html body .account-modern .account-logo img{width:42px;height:42px;border-radius:13px}
+html body .account-modern .account-brand-copy{margin-top:56px;max-width:440px}
+html body .account-modern .account-eyebrow{padding:0;border:0;background:transparent;color:#cec3ff;font-size:10px;letter-spacing:.15em;backdrop-filter:none}
+html body .account-modern .account-brand h1{max-width:none;margin:18px 0 16px;font-size:clamp(32px,3vw,44px);line-height:1.15;font-weight:750;letter-spacing:-.045em;color:#fff}
+html body .account-modern .account-brand h1 span{color:#c8b7ff}
+html body .account-modern .account-brand p{max-width:390px;color:#ded6f1;font-size:14px;line-height:1.75}
+html body .account-modern .account-benefits{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;max-width:360px}
+html body .account-modern .account-benefits span{display:inline-flex;align-items:center;gap:7px;width:auto;height:auto;padding:8px 10px;border:1px solid #d6caff25;border-radius:10px;background:#ffffff09;color:#e5ddff;font-size:11px}
+html body .account-modern .account-benefits i{color:#cbbbff;font-size:14px}
+html body .account-modern .account-brand-orbit{width:240px;height:150px;right:22px;bottom:42px;border-color:#d6caff40;transform:rotate(-15deg);box-shadow:0 0 60px #ab8aff25}
+html body .account-modern .account-brand-mascot{width:215px;height:215px;transform:rotate(15deg) translateY(-10px)}
+html body .account-modern .account-brand-mascot img{filter:drop-shadow(0 12px 20px #15102d44)}
+html body .account-modern .account-art-star{position:absolute;left:-5px;top:5px;color:#d8caff;font-size:32px;line-height:1}
+html body .account-modern .account-art-star-small{left:auto;right:-4px;top:auto;bottom:0;font-size:24px}
+html body .account-modern .account-form-panel{padding:44px 48px 30px;background:#fff;border:0;justify-content:center}
+html body .account-modern .account-card{color:#18143e}
+html body .account-modern .account-home-link{display:inline-flex;align-items:center;margin-top:30px;color:#77809a;font-size:12px;text-decoration:none}
+html body .account-modern .account-home-link:hover{color:#7044df}
+html body .account-modern .external-account-symbol{position:relative;display:grid;place-items:center;width:60px;height:60px;margin-bottom:26px;border:1px solid #e8dfff;border-radius:19px;color:#7549e5;background:linear-gradient(135deg,#f9f6ff,#eee6ff);font-size:28px}
+html body .account-modern .external-account-symbol span{position:absolute;right:-7px;top:-8px;color:#a783ef;font-size:23px}
+html body .account-modern .external-account-eyebrow{color:#8b7bab;font-size:10px;font-weight:700;letter-spacing:.14em}
+html body .account-modern .external-account-content h1{margin:12px 0 14px;color:#18143e;font-size:clamp(27px,2.5vw,35px);font-weight:750;line-height:1.2;letter-spacing:-.035em}
+html body .account-modern .external-account-content h1 span{color:#7549df}
+html body .account-modern .external-account-intro{margin:0 0 22px;color:#7b7e96;font-size:14px;line-height:1.7}
+html body .account-modern .external-account-notice{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin-bottom:20px;border:1px solid #e7e0fa;border-radius:13px;color:#67617f;background:#f8f6fd;font-size:12px;line-height:1.65}
+html body .account-modern .external-account-notice i{color:#9676cf;font-size:16px;margin-top:2px;flex-shrink:0}
+html body .account-modern .external-account-notice p{margin:0}
+html body .account-modern .external-account-primary{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;border:1px solid #885dec;border-radius:12px;color:#fff;background:linear-gradient(110deg,#8c60ec,#6843d5);box-shadow:0 8px 16px #7549df22;text-decoration:none;font-size:14px;font-weight:700;transition:box-shadow .18s,background .18s}
+html body .account-modern .external-account-primary:hover{background:linear-gradient(110deg,#8053df,#5935c4);box-shadow:0 10px 22px #7549df33}
+html body .account-modern .external-account-signin{text-align:center;margin:18px 0 24px;color:#8b8da0;font-size:12px}
+html body .account-modern .external-account-signin a{margin-left:4px;color:#7549df;font-weight:700;text-decoration:none}
+html body .account-modern .external-account-signin a:hover{text-decoration:underline}
+html body .account-modern .external-account-reassurance{display:flex;align-items:center;justify-content:center;gap:7px;padding-top:20px;border-top:1px solid #f0edf6;color:#9394a8;font-size:11px}
+html body .account-modern .external-account-reassurance i{color:#9990b5;font-size:14px}
+html body .account-modern .external-account-content>h2{font-size:26px;margin-bottom:12px;color:#18143e}
+html body .account-modern .external-account-content>.tw\:text-center{color:#79748f}
+html[data-theme="dark"] body .account-modern{background:radial-gradient(ellipse at 12% 12%,#28213e,transparent 55%),#111526;color:#f2eeff}
+html[data-theme="dark"] body .account-modern .account-shell{border-color:#38304c;background:#1c1d30;box-shadow:0 24px 80px #0003}
+html[data-theme="dark"] body .account-modern .account-form-panel{background:#1c1d30}
+html[data-theme="dark"] body .account-modern :is(.account-card,.external-account-content h1,.external-account-content>h2){color:#f2eeff}
+html[data-theme="dark"] body .account-modern .external-account-content h1 span{color:#b299ff}
+html[data-theme="dark"] body .account-modern .external-account-notice{background:#282339;border-color:#3d3454;color:#c4bdd9}
+html[data-theme="dark"] body .account-modern .external-account-intro{color:#aaa5be}
+html[data-theme="dark"] body .account-modern .external-account-symbol{background:#302743;border-color:#463760;color:#b299ff}
+html[data-theme="dark"] body .account-modern .external-account-reassurance{border-color:#353044}
+@media(max-width:900px){html body .account-modern .account-brand{padding:30px}html body .account-modern .account-form-panel{padding:36px 30px}html body .account-modern .account-brand h1{font-size:34px}}
+@media(max-width:820px){html body .account-modern{padding:24px 16px}html body .account-modern .account-shell{display:block;max-width:520px;min-height:auto;border-radius:24px}html body .account-modern .account-brand{display:none}html body .account-modern .account-form-panel{min-height:calc(100dvh - 50px);padding:32px 28px}html body .account-modern .account-logo-mobile{display:inline-flex;align-self:flex-start;color:#18143e;margin-bottom:34px;font-size:20px}html body .account-modern .external-account-symbol{margin-bottom:20px}html[data-theme="dark"] body .account-modern .account-logo-mobile{color:#f2eeff}}
+@media(max-width:420px){html body .account-modern{padding:12px}html body .account-modern .account-form-panel{min-height:calc(100dvh - 26px);padding:28px 22px}html body .account-modern .external-account-content h1{font-size:28px}}
