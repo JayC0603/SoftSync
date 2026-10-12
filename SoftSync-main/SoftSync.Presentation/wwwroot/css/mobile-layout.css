@@ -161,3 +161,52 @@ html[data-mobile-view='true'] body .ss-mentor-carousel > article { scroll-snap-a
  html body .ss-main-mentor-grid.ss-mentor-carousel .ss-main-mentor-portrait { width:100%; max-width:180px; margin:0 auto 16px; }
  html body .ss-mentor-carousel:focus-visible { outline:3px solid var(--ss-primary); outline-offset:4px; }
 }
+
+/* Compact mobile rhythm: content-sized cards, readable copy, grouped footer. */
+.eco-footer-socials { display:flex; align-items:center; gap:10px; }
+@media(max-width:900px) {
+ html body .dashboard-reference .focus-home-header h1 { font-size:26px; line-height:1.25; letter-spacing:-.03em; }
+ html body .dashboard-reference .focus-home-header p { margin:8px 0 0; font-size:14px; }
+ html body .dashboard-reference .focus-next-copy { padding:20px 18px!important; }
+ html body .dashboard-reference .focus-next h2 { font-size:22px; line-height:1.35; }
+ html body .dashboard-reference .focus-next-copy>small { font-size:14px; }
+ html body .dashboard-reference .focus-next-copy>p { margin-bottom:14px; font-size:14px; line-height:1.6; }
+ html body .dashboard-reference .focus-next-actions { gap:8px; }
+ html body .dashboard-reference .ss-overview-grid { gap:8px; margin:14px 0; }
+ html body .dashboard-reference .ss-overview-grid article { padding:12px 14px; grid-template-columns:40px minmax(0,1fr); gap:2px 12px; }
+ html body .dashboard-reference .ss-overview-grid article>i { width:40px; height:40px; font-size:21px; border-radius:12px; }
+ html body .dashboard-reference .ss-overview-grid article>span { font-size:13px; }
+ html body .dashboard-reference .ss-overview-grid article>strong { font-size:22px; }
+ html body .dashboard-reference .focus-home-grid { gap:12px; }
+ html body .dashboard-reference .focus-week { padding:18px 16px; }
+ html body .dashboard-reference .focus-section-heading h2 { font-size:20px; margin:0; }
+ html body .dashboard-reference .ss-next-lessons strong { font-size:14px; line-height:1.45; }
+ html body .dashboard-reference .ss-next-lessons small { font-size:12px; line-height:1.5; }
+ html body .dashboard-reference .mentor-bar { padding:16px 12px; margin-top:20px; border-radius:20px; }
+ html body .dashboard-reference .mentor-bar>header { margin-bottom:8px; }
+ html body .dashboard-reference .mentor-bar>header h3 { font-size:19px; line-height:1.4; }
+ html body .dashboard-reference .mentor-bar>header p { font-size:13px; line-height:1.6; margin:6px 0 0; }
+ html body .ss-mentor-carousel-tools { margin:8px 0; font-size:12px; }
+ html body .dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel { grid-auto-columns:min(300px,90%); padding-bottom:10px; }
+ html body .dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel>article { height:auto; min-height:0; padding:18px 16px; border-radius:18px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-photo { width:88px; height:88px; margin:0 auto 12px; flex:0 0 auto; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-photo img { width:88px; height:88px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info { height:auto; min-height:0; flex:0 0 auto; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>em { padding:5px 8px; font-size:11px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info h4 { margin:10px 0 4px; font-size:18px; line-height:1.35; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>strong { min-height:0; font-size:13px; line-height:1.45; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>p { flex:none; margin:10px 0; font-size:14px; line-height:1.5; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-tags { margin:2px 0 12px; gap:6px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-tags span { font-size:11px; padding:5px 7px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>button { min-height:44px; padding:10px 12px; font-size:14px; }
+ html body .ss-workspace > .eco-footer { padding-bottom:0; }
+ html body .ss-public-site > .eco-footer { padding-bottom:0; }
+ html body .eco-footer-inner { display:flex; flex-direction:column; align-items:stretch; gap:14px; padding:20px 16px; }
+ html body .eco-footer-brand strong { font-size:16px; }
+ html body .eco-footer-brand span { font-size:13px; line-height:1.5; }
+ html body .eco-footer nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; order:initial; }
+ html body .eco-footer nav a { min-height:36px; display:flex; align-items:center; font-size:13px; }
+ html body .eco-footer-socials { display:flex; gap:10px; }
+ html body .eco-footer .eco-footer-socials a { display:grid; place-items:center; width:44px; height:44px; min-height:44px; margin:0; padding:0; line-height:1; border:1px solid var(--ss-border); border-radius:12px; font-size:20px; }
+ html body .page .ss-workspace { padding-bottom:calc(80px + env(safe-area-inset-bottom,0px)); }
+}
