@@ -1,5 +1,7 @@
 /* Phone layout loads after page themes so desktop navigation cannot leak into it. */
 .ss-mobile-brand { display:none; }
+html body .ss-header-language > .ss-header-control.ss-header-language-trigger { width:44px; min-width:44px; min-height:44px; padding:0; gap:0; }
+html body .ss-header-language-trigger .ss-language-flag { display:block; width:28px; height:20px; object-fit:cover; border-radius:4px; }
 html[data-mobile-view='true'] body .ss-mobile-brand { display:flex; align-items:center; gap:8px; min-width:0; flex:1; color:var(--ss-text); text-decoration:none; font-size:18px; font-weight:750; }
 html[data-mobile-view='true'] body .ss-mobile-brand img { width:36px; height:36px; border-radius:10px; flex-shrink:0; }
 html[data-mobile-view='true'] body .ss-header-actions { width:auto; flex:0 1 auto; gap:2px; }

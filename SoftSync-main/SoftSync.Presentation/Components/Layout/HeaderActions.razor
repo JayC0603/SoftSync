@@ -12,8 +12,8 @@
 
 <div class="ss-header-actions">
     <details class="ss-header-language ss-header-menu">
-        <summary class="ss-header-control" aria-label="@L["layout.languageMenu"]">
-            <span class="ss-language-flag" aria-hidden="true">@(L.Current == AppLanguage.Vi ? "🇻🇳" : "🇬🇧")</span><span>@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")</span><i class="bi bi-chevron-down ss-header-chevron" aria-hidden="true"></i>
+        <summary class="ss-header-control ss-header-language-trigger" aria-label="@L["layout.languageMenu"]" title="@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")">
+            <img class="ss-language-flag" src="@(L.Current == AppLanguage.Vi ? "/images/flags/vi.svg" : "/images/flags/en.svg")" width="28" height="20" alt="" aria-hidden="true" />
         </summary>
         <div class="ss-header-dropdown">
             <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguageAsync(AppLanguage.Vi)">@L["layout.language.vi"]</button>
@@ -90,7 +90,6 @@
         L.SetLanguage(next);
     }
 
-    private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
 
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
 
