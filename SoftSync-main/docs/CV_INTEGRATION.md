@@ -90,3 +90,23 @@ also discovers the new identity table in deployments that use that mechanism.
   layout, rejected message origin, denied CSRF-less session creation, account
   logout and return to learning. AI responses can be mocked for this check;
   actual extraction/matching still requires the deployed AI and storage services.
+
+## Existing Vite CV frontend
+
+The original `Capstone Project/fe/my-react-app` frontend also supports the
+SoftSync iframe session bridge. Configure `VITE_SOFTSYNC_APP_URL` to the exact
+public SoftSync origin and `VITE_API_BASE_URL` to the CV API origin before
+building it. Set ASP.NET `CvIntegration__FrontendUrl` to that frontend's origin;
+the hosting service must serve the SPA for `/cv` requests.
+
+With this configuration, direct visits redirect to the authenticated SoftSync
+`/cv` page. Embedded requests with `integrated=1` only accept session messages
+from the configured parent origin. The frame never uses its stored standalone
+account, never shows its separate login/signup form, and attaches the in-memory
+access token only to CV API requests. Missing or mismatched integration
+configuration displays a connection error instead of another login form.
+
+Deploy the updated CV frontend and configure both servers' matching shared
+secret before testing. A successful frontend build alone does not verify a
+production account exchange. Do not attempt to solve the extra login by merely
+hiding the login page or automatically trusting an email/query parameter.
