@@ -16,6 +16,10 @@ services:
           property: connectionString
       - key: FRONTEND_ORIGINS
         sync: false
+      - key: BootstrapAdmin__Email
+        sync: false
+      - key: BootstrapAdmin__Password
+        sync: false
 
 databases:
   - name: softsync-db
