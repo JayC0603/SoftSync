@@ -1,5 +1,24 @@
 (() => {
     const root = document.documentElement;
+    let footer = null;
+    const measureFooter = () => {
+        if (!footer?.isConnected) return;
+        const layout = footer.parentElement;
+        layout.style.setProperty('--ss-footer-height', `${Math.ceil(footer.getBoundingClientRect().height)}px`);
+    };
+    const footerObserver = new ResizeObserver(measureFooter);
+    const connectFooter = () => {
+        const next = document.querySelector('.ss-workspace > .eco-footer, .ss-public-site > .eco-footer');
+        if (next === footer) return;
+        footerObserver.disconnect();
+        footer = next;
+        if (footer) { footerObserver.observe(footer); measureFooter(); }
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+        connectFooter();
+        new MutationObserver(connectFooter).observe(document.body, { childList: true, subtree: true });
+    });
+    document.addEventListener('enhancedload', connectFooter);
     window.ssDesign = {
         togglePassword(button) {
             const input = document.getElementById(button.getAttribute('aria-controls'));
