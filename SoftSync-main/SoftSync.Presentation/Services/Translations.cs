@@ -295,11 +295,11 @@ public static class Translations
         ["roadmap.backToRoadmap"] = ("Back to Roadmap", "Quay lại Roadmap"),
 
         // ===== Assessment Completed =====
-        ["assessmentComplete.title"] = ("You have completed the assessment", "Bạn đã hoàn thành assessment"),
-        ["assessmentComplete.subtitle"] = ("Your learning path is ready. You can go straight to your personalized roadmap.", "Lộ trình học của bạn đã sẵn sàng. Bạn có thể đi thẳng tới roadmap cá nhân hóa."),
-        ["assessmentComplete.noteTitle"] = ("No need to retake it", "Không cần làm lại"),
-        ["assessmentComplete.noteBody"] = ("We already saved your latest assessment results and will use them to tailor your roadmap.", "Chúng tôi đã lưu kết quả assessment gần nhất của bạn và sẽ dùng nó để cá nhân hóa roadmap."),
-        ["assessmentComplete.cta"] = ("Go to Roadmap", "Đi tới Roadmap"),
+        ["assessmentComplete.title"] = ("You have completed the assessment!", "Bạn đã hoàn thành đánh giá!"),
+        ["assessmentComplete.subtitle"] = ("Your personalized learning path is ready.", "Lộ trình học cá nhân hóa của bạn đã sẵn sàng."),
+        ["assessmentComplete.noteTitle"] = ("Your results have been saved", "Kết quả của bạn đã được lưu"),
+        ["assessmentComplete.noteBody"] = ("You can continue learning right away without retaking the assessment.", "Bạn có thể tiếp tục học ngay mà không cần làm lại đánh giá."),
+        ["assessmentComplete.cta"] = ("Explore my learning path", "Khám phá lộ trình của tôi"),
 
         // ===== Assessment Result =====
         ["result.title.prefix"] = ("Your", "Hồ sơ"),

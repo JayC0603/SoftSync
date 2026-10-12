@@ -21,8 +21,6 @@
 
 <StatusMessage Message="@errorMessage" />
 
-<ExternalLoginPicker IsRegistration="true" />
-
 <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
     <DataAnnotationsValidator />
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
@@ -62,6 +60,8 @@
 
     <button type="submit" class="ss-btn-primary register-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.register.submit"]</span><i class="bi bi-arrow-right"></i></button>
 </EditForm>
+
+<div class="neo-social"><ExternalLoginPicker IsRegistration="true" /></div>
 
 <div class="register-login tw:text-center tw:mt-4 tw:text-sm">
     @L["auth.haveAccount"] <a href="Account/Login">@L["auth.login.title"]</a>

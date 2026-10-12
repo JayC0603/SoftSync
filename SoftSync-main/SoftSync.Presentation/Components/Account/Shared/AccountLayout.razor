@@ -6,7 +6,9 @@
 
 @inject NavigationManager Navigation
 
-@if (new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/').Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+@if (new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/') is var accountPath &&
+    (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) ||
+     accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
     <HeadContent><link rel="stylesheet" href="css/neo-login.css" /></HeadContent>
     <main class="neo-login">

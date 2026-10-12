@@ -26,6 +26,18 @@
     <div class="external-divider"><span>@L["auth.or"]</span></div>
 }
 
+else
+{
+    <div class="external-login-form">
+        <button type="button" class="external-google" disabled aria-describedby="google-unavailable">
+            <span class="google-mark" aria-hidden="true">G</span>
+            <span>@GoogleButtonLabel</span>
+        </button>
+        <p id="google-unavailable" class="external-help">@L["auth.googleNotConfigured"]</p>
+    </div>
+    <div class="external-divider"><span>@L["auth.or"]</span></div>
+}
+
 <style>
     .external-login-form { margin: 0; }
     .external-help { margin: 10px 0 0; color: #9ba7c5; font-size: .82rem; text-align: center; }

@@ -5,26 +5,29 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 
-<div class="max-800 mx-auto">
-    <StepIndicator CurrentStep="4" />
+<div class="assessment-completed">
+    <StepIndicator CurrentStep="5" IsComplete="true" />
 
-    <div class="ss-card ss-glass-interactive tw:p-12 tw:text-center completed-shell">
-        <div class="tw:mb-4">
+    <section class="ss-card completed-shell" aria-labelledby="completed-title">
+        <div class="completed-icon-wrap" aria-hidden="true">
             <i class="bi bi-patch-check-fill completed-icon"></i>
         </div>
 
-        <h2 class="tw:font-bold tw:mb-3">@L["assessmentComplete.title"]</h2>
-        <p class="text-muted tw:mb-5">@L["assessmentComplete.subtitle"]</p>
+        <h1 id="completed-title">@L["assessmentComplete.title"]</h1>
+        <p class="completed-subtitle">@L["assessmentComplete.subtitle"]</p>
 
-        <div class="completed-note tw:mx-auto tw:mb-8">
-            <strong>@L["assessmentComplete.noteTitle"]</strong>
-            <div>@L["assessmentComplete.noteBody"]</div>
+        <div class="completed-note">
+            <i class="bi bi-shield-check" aria-hidden="true"></i>
+            <div>
+                <strong>@L["assessmentComplete.noteTitle"]</strong>
+                <p>@L["assessmentComplete.noteBody"]</p>
+            </div>
         </div>
 
-        <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="GoToRoadmap">
-            @L["assessmentComplete.cta"] <i class="bi bi-calendar-check tw:ms-2"></i>
+        <button class="ss-btn-primary completed-cta" @onclick="GoToRoadmap">
+            @L["assessmentComplete.cta"] <i class="bi bi-arrow-right" aria-hidden="true"></i>
         </button>
-    </div>
+    </section>
 </div>
 
 @code {
@@ -39,21 +42,69 @@
 }
 
 <style>
-    .max-800 { max-width: 800px; }
-    .completed-shell {
-        background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(248,250,252,0.94));
+    .assessment-completed { width: 100%; max-width: 920px; margin: 16px auto 32px; }
+    .assessment-completed .step-indicator { margin-bottom: 32px; }
+    .assessment-completed .completed-shell {
+        padding: 48px;
+        text-align: center;
+        background: var(--ss-surface);
+        border: 1px solid var(--ss-border);
         border-radius: 24px;
+        box-shadow: var(--ss-shadow-md);
     }
-    .completed-icon {
-        font-size: 4rem;
-        color: var(--primary);
-        filter: drop-shadow(0 8px 24px rgba(99,102,241,0.25));
+    .completed-icon-wrap {
+        display: grid;
+        place-items: center;
+        width: 112px;
+        height: 112px;
+        margin: 0 auto 28px;
+        border-radius: 50%;
+        background: var(--ss-surface-accent);
     }
-    .completed-note {
-        max-width: 420px;
-        padding: 1rem 1.25rem;
+    .completed-icon { font-size: 76px; line-height: 1; color: var(--ss-primary); }
+    body .assessment-completed #completed-title {
+        margin: 0 0 16px;
+        font-size: clamp(28px, 3vw, 36px);
+        font-weight: 700;
+        line-height: 1.25;
+    }
+    .completed-subtitle { max-width: 620px; margin: 0 auto 28px; font-size: 18px; line-height: 1.6; color: var(--ss-text-muted); }
+    .assessment-completed .completed-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        max-width: 520px;
+        margin: 0 auto 32px;
+        padding: 24px;
         border-radius: 18px;
-        background: rgba(99, 102, 241, 0.08);
-        color: var(--text);
+        background: var(--ss-surface-accent);
+        color: var(--ss-text);
+        text-align: left;
+        font-size: 17px;
+        line-height: 1.6;
+    }
+    .completed-note > i { font-size: 24px; color: var(--ss-primary); }
+    .completed-note strong { display: block; margin-bottom: 6px; }
+    .completed-note p { margin: 0; }
+    body .assessment-completed .completed-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 56px;
+        padding: 14px 32px;
+        border-radius: 14px;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+    .completed-cta:focus-visible { outline: 3px solid var(--ss-primary); outline-offset: 4px; }
+    @@media (max-width: 600px) {
+        .assessment-completed { margin-top: 0; }
+        .assessment-completed .completed-shell { padding: 32px 20px; }
+        .completed-subtitle { font-size: 17px; }
+        .assessment-completed .completed-note { padding: 20px; font-size: 16px; gap: 12px; }
+        body .assessment-completed .completed-cta { width: 100%; padding-inline: 16px; }
+        .assessment-completed .step-connector { width: 24px; }
     }
 </style>
