@@ -119,8 +119,9 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
 
         // 5. Mentors
         modelBuilder.Entity<Mentor>().HasData(
-            new Mentor { Id = 1, Name = "Dr. Katherine", Expertise = "Leadership & Soft Skills", ShortBio = "15 years of experience in corporate training.", AvatarUrl = "https://i.pravatar.cc/150?u=katherine" },
-            new Mentor { Id = 2, Name = "John Smith", Expertise = "Problem Solving", ShortBio = "Former Google engineer, expert in algorithms and thinking.", AvatarUrl = "https://i.pravatar.cc/150?u=john" }
+            new Mentor { Id = 1, Name = "Th.S. Nguyễn Hoàng Vân Anh", Expertise = "Tâm lý và phát triển cá nhân", ShortBio = "Cố vấn chuyên môn của SoftSync, đồng hành cùng người học xây dựng sự tự tin, hiểu bản thân và phát triển thói quen học tập bền vững.", AvatarUrl = "/images/mentor-nguyen-hoang-van-anh.png" },
+            new Mentor { Id = 2, Name = "Th.S. Nguyễn Thuỵ Tố Trâm", Expertise = "Kỹ năng mềm và phát triển cộng đồng", ShortBio = "Cố vấn chính của SoftSync, định hướng chuyên môn và hỗ trợ người học ứng dụng kỹ năng giao tiếp, làm việc nhóm vào các tình huống thực tế.", AvatarUrl = "/images/mentor-nguyen-thuy-to-tram.png" },
+            new Mentor { Id = 3, Name = "Th.S. Nguyễn Xuân", Expertise = "Giáo dục và công nghệ", ShortBio = "Cố vấn chuyên môn của SoftSync, phát triển phương pháp học tập thực tiễn và ứng dụng công nghệ vào trải nghiệm học kỹ năng mềm.", AvatarUrl = "/images/mentor-nguyen-xuan.png" }
         );
     }
 }

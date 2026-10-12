@@ -3095,37 +3095,80 @@ namespace SoftSync.DAL.Migrations
                         new
                         {
                             Id = 1,
-                            AvatarUrl = "https://i.pravatar.cc/150?u=katherine",
-                            Expertise = "Leadership & Soft Skills",
-                            Name = "Dr. Katherine",
-                            ShortBio = "15 years of experience in corporate training."
+                            AvatarUrl = "/images/mentor-nguyen-hoang-van-anh.png",
+                            Expertise = "Tâm lý và phát triển cá nhân",
+                            Name = "Th.S. Nguyễn Hoàng Vân Anh",
+                            ShortBio = "Cố vấn chuyên môn của SoftSync, đồng hành cùng người học xây dựng sự tự tin, hiểu bản thân và phát triển thói quen học tập bền vững."
                         },
                         new
                         {
                             Id = 2,
-                            AvatarUrl = "https://i.pravatar.cc/150?u=john",
-                            Expertise = "Problem Solving",
-                            Name = "John Smith",
-                            ShortBio = "Former Google engineer, expert in algorithms and thinking."
+                            AvatarUrl = "/images/mentor-nguyen-thuy-to-tram.png",
+                            Expertise = "Kỹ năng mềm và phát triển cộng đồng",
+                            Name = "Th.S. Nguyễn Thuỵ Tố Trâm",
+                            ShortBio = "Cố vấn chính của SoftSync, định hướng chuyên môn và hỗ trợ người học ứng dụng kỹ năng giao tiếp, làm việc nhóm vào các tình huống thực tế."
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AvatarUrl = "/images/mentor-nguyen-xuan.png",
+                            Expertise = "Giáo dục và công nghệ",
+                            Name = "Th.S. Nguyễn Xuân",
+                            ShortBio = "Cố vấn chuyên môn của SoftSync, phát triển phương pháp học tập thực tiễn và ứng dụng công nghệ vào trải nghiệm học kỹ năng mềm."
                         });
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.MentorSupportRequest", b =>
                 {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("timestamp without time zone");
-                    b.Property<string>("Context").IsRequired().HasMaxLength(2000).HasColumnType("character varying(2000)");
-                    b.Property<string>("Goal").IsRequired().HasMaxLength(120).HasColumnType("character varying(120)");
-                    b.Property<int>("MentorId").HasColumnType("integer");
-                    b.Property<string>("PreferredContact").IsRequired().HasMaxLength(40).HasColumnType("character varying(40)");
-                    b.Property<bool>("ShareLearningContext").HasColumnType("boolean");
-                    b.Property<string>("Skill").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)");
-                    b.Property<string>("Status").IsRequired().HasMaxLength(30).HasColumnType("character varying(30)");
-                    b.Property<int>("UserId").HasColumnType("integer");
+
+                    b.Property<string>("Context")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Goal")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int>("MentorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PreferredContact")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<bool>("ShareLearningContext")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Skill")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
                     b.HasIndex("MentorId");
+
                     b.HasIndex("UserId");
+
                     b.ToTable("MentorSupportRequests");
                 });
 
