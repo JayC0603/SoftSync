@@ -8,6 +8,7 @@
 @inject IUserService UserService
 @inject IProgressService ProgressService
 @inject IRoadmapService RoadmapService
+@inject IAssessmentService AssessmentService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
 
@@ -117,7 +118,14 @@ else
         await base.OnInitializedAsync();
         var id = await AuthProvider.GetUserIdAsync();
         user = await UserService.GetUserByIdAsync(id);
-        if (user is null || user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal)) { Nav.NavigateTo("/profile-setup", true); return; }
+        if (user is null) { Nav.NavigateTo("/Account/Login", true); return; }
+        if (user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal))
+        {
+            // Returning learners may have results predating the current profile fields.
+            // Keep their dashboard accessible instead of replaying onboarding.
+            var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(id, id)).Any();
+            if (!hasCompletedAssessment) { Nav.NavigateTo("/profile-setup", true); return; }
+        }
         progress = (await ProgressService.GetUserProgressAsync(id)).ToList();
         var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
         roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
