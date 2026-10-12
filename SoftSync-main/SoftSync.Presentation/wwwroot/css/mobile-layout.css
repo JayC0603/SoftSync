@@ -1,5 +1,11 @@
 /* Phone layout loads after page themes so desktop navigation cannot leak into it. */
 .ss-mobile-brand { display:none; }
+html[data-mobile-view='true'] body .ss-mobile-brand { display:flex; align-items:center; gap:8px; min-width:0; flex:1; color:var(--ss-text); text-decoration:none; font-size:18px; font-weight:750; }
+html[data-mobile-view='true'] body .ss-mobile-brand img { width:36px; height:36px; border-radius:10px; flex-shrink:0; }
+html[data-mobile-view='true'] body .ss-header-actions { width:auto; flex:0 1 auto; gap:2px; }
+html[data-mobile-view='true'] body .ss-header-language > summary { min-width:0; padding:4px; font-size:12px; gap:4px; }
+html[data-mobile-view='true'] body .ss-header-actions > .ss-shell-control { width:36px; height:40px; }
+html[data-mobile-view='true'] body .ss-header-fullscreen { display:none; }
 .ss-mobile-more > summary { list-style:none; cursor:pointer; }
 .ss-mobile-more > summary::-webkit-details-marker { display:none; }
 .ss-mobile-more:not([open]) > :not(summary) { display:none; }
@@ -12,6 +18,12 @@ html body .ss-mobile-menu-panel > a { min-height:52px; }
 html body .ss-mobile-menu-panel > a > i { font-size:22px; color:var(--ss-primary); }
 html[data-mobile-view='true'] body .ss-mobile-bottom-nav { grid-template-columns:repeat(5,minmax(0,1fr)); }
 html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto; width:min(456px,calc(100vw - 24px)); transform:translateX(-50%); }
+/* The compact desktop preview must also stack the dashboard's actual grids. */
+html[data-mobile-view='true'] body .dashboard-reference .focus-home-grid,
+html[data-mobile-view='true'] body .dashboard-reference .mentor-items.mentor-cards { display:grid; grid-template-columns:minmax(0,1fr) !important; gap:16px; }
+html[data-mobile-view='true'] body .dashboard-reference :is(.focus-week,.focus-coach,.mentor-items.mentor-cards > article) { width:100%; min-width:0; max-width:100%; }
+html[data-mobile-view='true'] body .dashboard-reference .focus-coach { grid-template-columns:72px minmax(0,1fr) !important; padding:18px; }
+html[data-mobile-view='true'] body .dashboard-reference .dashboard-coach-art { width:72px; height:88px; }
 @media (max-width: 900px) {
   html body .page { display:block; width:100%; min-width:0; }
   html body .page > .ss-navbar { display:none !important; }
@@ -23,8 +35,8 @@ html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto;
     border-bottom:1px solid var(--ss-border);
   }
   html body .ss-workspace-left { display:none; }
-  html body .ss-mobile-brand { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ss-text); font-size:16px; font-weight:750; flex:1; min-width:0; }
-  html body .ss-mobile-brand img { border-radius:10px; }
+  html body .ss-mobile-brand { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ss-text); font-size:18px; font-weight:750; flex:1; min-width:0; }
+  html body .ss-mobile-brand img { width:36px; height:36px; border-radius:10px; flex-shrink:0; }
   html body .ss-workspace-kicker { display:none; }
   html body .ss-workspace-title strong { font-size:14px; }
   html body .ss-header-actions { flex:0 1 auto; gap:2px; margin-left:auto; }
@@ -78,6 +90,26 @@ html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto;
   html body .dashboard-reference .ss-overview-grid article > strong { grid-column:2; grid-row:2; font-size:24px; }
   html body .dashboard-reference .focus-progress-bottom,
   html body .dashboard-reference .mentor-cards { grid-template-columns:1fr; }
+  html body .dashboard-reference .focus-home-grid,
+  html body .dashboard-reference .mentor-items.mentor-cards { display:grid; grid-template-columns:minmax(0,1fr) !important; gap:16px; }
+  html body .dashboard-reference :is(.focus-week,.focus-coach,.mentor-items.mentor-cards > article) { width:100%; min-width:0; max-width:100%; padding:20px; }
+  html body .dashboard-reference .focus-section-heading { flex-wrap:wrap; align-items:flex-start; gap:10px; }
+  html body .dashboard-reference .focus-section-heading > div { min-width:0; flex:1 1 160px; }
+  html body .dashboard-reference .focus-section-heading > a { flex:0 0 auto; font-size:13px; }
+  html body .dashboard-reference .ss-next-lessons > a { display:flex; align-items:center; min-width:0; gap:10px; padding:12px; }
+  html body .dashboard-reference .ss-next-lessons > a > div { min-width:0; flex:1; }
+  html body .dashboard-reference .ss-next-lessons :is(strong,small) { white-space:normal; overflow-wrap:break-word; word-break:normal; }
+  html body .dashboard-reference .dashboard-lesson-status { display:none; }
+  html body .dashboard-reference .focus-coach { display:grid; grid-template-columns:72px minmax(0,1fr) !important; gap:12px; }
+  html body .dashboard-reference .dashboard-coach-art { width:72px; height:88px; object-fit:contain; }
+  html body .dashboard-reference .dashboard-coach-copy { min-width:0; }
+  html body .dashboard-reference .focus-coach h2 { font-size:20px; }
+  html body .dashboard-reference .focus-coach p { font-size:14px; }
+  html body .dashboard-reference .mentor-items.mentor-cards > article { display:flex; flex-direction:column; align-items:stretch; }
+  html body .dashboard-reference .mentor-info { min-width:0; width:100%; }
+  html body .dashboard-reference .mentor-info :is(h4,strong,p,em) { white-space:normal; word-break:normal; overflow-wrap:break-word; }
+  html body .dashboard-reference .mentor-tags { display:flex; flex-wrap:wrap; gap:8px; }
+  html body .dashboard-reference .ss-workspace-shortcuts a { min-width:0; gap:8px; padding:12px; font-size:13px; white-space:normal; }
   html body .dashboard-reference .ss-workspace-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
   html body .ss-cv-heading { flex-direction:column; align-items:flex-start; gap:12px; }
   html body .ss-cv-heading h1 { font-size:28px; }
@@ -108,4 +140,22 @@ html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto;
   html body .ss-main-content .table-responsive { width:100%; overflow-x:auto; }
   html body .ss-main-content :is(.lesson-page,.lesson-content,.assistant-chat-card,.ss-card) { min-width:0; }
   html body .ss-main-content .tw\:lg\:grid-cols-3 { grid-template-columns:minmax(0,1fr); }
+}
+
+/* Mentor cards stay readable in a swipeable row with a visible next card. */
+.ss-mentor-carousel-tools { display:none; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools { display:flex; align-items:center; gap:8px; margin:12px 0; color:var(--ss-text-muted); font-size:13px; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools span { flex:1; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools button { width:44px; height:44px; border:1px solid var(--ss-border); border-radius:12px; background:var(--ss-surface); color:var(--ss-primary); }
+html[data-mobile-view='true'] body :is(.dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel,.ss-main-mentor-grid.ss-mentor-carousel) { display:grid; grid-template-columns:none!important; grid-auto-flow:column; grid-auto-columns:min(320px,88%); align-items:stretch; gap:16px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding:0; padding:8px 0 16px; }
+html[data-mobile-view='true'] body .ss-mentor-carousel > article { scroll-snap-align:start; min-width:0; width:100%; }
+@media(max-width:900px) {
+ html body .ss-mentor-carousel-tools { display:flex; align-items:center; gap:8px; margin:12px 0; color:var(--ss-text-muted); font-size:13px; }
+ html body .ss-mentor-carousel-tools span { flex:1; }
+ html body .ss-mentor-carousel-tools button { width:44px; height:44px; border:1px solid var(--ss-border); border-radius:12px; background:var(--ss-surface); color:var(--ss-primary); }
+ html body :is(.dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel,.ss-main-mentor-grid.ss-mentor-carousel) { display:grid; grid-template-columns:none!important; grid-auto-flow:column; grid-auto-columns:min(320px,88%); align-items:stretch; gap:16px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding:0; padding:8px 0 16px; scrollbar-width:thin; scrollbar-color:var(--ss-primary) transparent; }
+ html body .ss-mentor-carousel > article { scroll-snap-align:start; min-width:0; width:100%; }
+ html body .ss-main-mentor-grid.ss-mentor-carousel > article { display:flex; flex-direction:column; padding:20px; }
+ html body .ss-main-mentor-grid.ss-mentor-carousel .ss-main-mentor-portrait { width:100%; max-width:180px; margin:0 auto 16px; }
+ html body .ss-mentor-carousel:focus-visible { outline:3px solid var(--ss-primary); outline-offset:4px; }
 }

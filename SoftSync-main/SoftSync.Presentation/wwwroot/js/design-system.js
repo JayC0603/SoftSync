@@ -3,6 +3,13 @@
     const syncMobileButtons = () => document.querySelectorAll('.ss-header-mobile').forEach(button =>
         button.setAttribute('aria-pressed', String(root.dataset.mobileView === 'true')));
     window.ssDesign = {
+        scrollMentors(button, direction) {
+            const track = button.closest('section')?.querySelector('.ss-mentor-carousel');
+            if (!track) return;
+            track.dataset.autoPaused = 'true';
+            const step = (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + 16;
+            track.scrollBy({ left: direction * step, behavior: root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        },
         toggleMobileView() {
             const enabled = root.dataset.mobileView !== 'true';
             root.dataset.mobileView = String(enabled);
@@ -36,6 +43,31 @@
     try { root.dataset.mobileView = localStorage.getItem('ss-mobile-view') === 'true' ? 'true' : 'false'; } catch {}
     document.addEventListener('DOMContentLoaded', syncMobileButtons);
     document.addEventListener('enhancedload', syncMobileButtons);
+    const mentorTracks = new Set();
+    const observeMentors = () => document.querySelectorAll('.ss-mentor-carousel').forEach(track => {
+        if (mentorTracks.has(track)) return;
+        mentorTracks.add(track);
+        for (const event of ['pointerdown', 'wheel', 'keydown', 'focusin'])
+            track.addEventListener(event, () => { track.dataset.autoPaused = 'true'; }, { passive: true });
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        observeMentors();
+        new MutationObserver(observeMentors).observe(document.body, { childList: true, subtree: true });
+    });
+    document.addEventListener('enhancedload', observeMentors);
+    setInterval(() => {
+        if (document.hidden || root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (innerWidth > 900 && root.dataset.mobileView !== 'true') return;
+        for (const track of mentorTracks) {
+            if (!track.isConnected) { mentorTracks.delete(track); continue; }
+            const rect = track.getBoundingClientRect();
+            if (rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight || track.dataset.autoPaused === 'true' || track.matches(':hover')) continue;
+            const max = track.scrollWidth - track.clientWidth;
+            if (max <= 1) continue;
+            const step = (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + 16;
+            track.scrollTo({ left: track.scrollLeft >= max - 2 ? 0 : Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
+        }
+    }, 5500);
     document.addEventListener('fullscreenchange', () => document.querySelectorAll('.ss-header-fullscreen i').forEach(icon => {
         icon.className = document.fullscreenElement ? 'bi bi-fullscreen-exit' : 'bi bi-fullscreen';
     }));

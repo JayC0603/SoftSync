@@ -81,7 +81,8 @@
             </div>
         </div>
 
-        <div class="ss-main-mentor-grid">
+        <div class="ss-mentor-carousel-tools"><span>@(L.Current == AppLanguage.Vi ? "Vuốt để xem thêm cố vấn" : "Swipe to meet more mentors")</span><button type="button" onclick="window.ssDesign.scrollMentors(this,-1)" aria-label="@(L.Current == AppLanguage.Vi ? "Cố vấn trước" : "Previous mentor")"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" onclick="window.ssDesign.scrollMentors(this,1)" aria-label="@(L.Current == AppLanguage.Vi ? "Cố vấn tiếp theo" : "Next mentor")"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
+        <div class="ss-main-mentor-grid ss-mentor-carousel" tabindex="0" aria-label="@(L.Current == AppLanguage.Vi ? "Danh sách cố vấn, vuốt để xem thêm" : "Mentors, swipe to see more")">
             <article class="ss-main-mentor ss-advisor-card ss-glass ss-glass-interactive">
                 <div class="ss-main-mentor-portrait">
                     <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
