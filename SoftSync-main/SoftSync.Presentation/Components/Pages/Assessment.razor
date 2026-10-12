@@ -9,7 +9,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject IJSRuntime JS
 
-<div class="max-800 tw:mx-auto">
+<div class="max-800 tw:mx-auto assessment-page">
     @if (storageRestored && questions is not null && questions.Count > 0)
     {
         <StepIndicator CurrentStep="@(currentQuestionIndex + 1)" TotalSteps="@questions.Count" />
@@ -60,10 +60,11 @@
             <div class="tw:grid tw:gap-4">
                 @foreach (var opt in q.Options)
                 {
-                    <button class="btn btn-outline-primary tw:text-start tw:p-6 tw:text-xl @(selectedOptionId == opt.Id ? "active" : "")"
+                    <button @key="opt.Id" type="button" class="btn btn-outline-primary assessment-option tw:text-start tw:p-6 tw:text-xl @(selectedOptionId == opt.Id ? "active" : "")"
                             aria-pressed="@(selectedOptionId == opt.Id)"
                             @onclick="() => SelectOptionAsync(opt.Id)">
-                        @OptionLabel(opt)
+                        <i class="bi @(selectedOptionId == opt.Id ? "bi-check-circle-fill" : "bi-circle")" aria-hidden="true"></i>
+                        <span>@OptionLabel(opt)</span>
                     </button>
                 }
             </div>
@@ -134,7 +135,7 @@
             return;
         }
 
-        var draft = await JS.InvokeAsync<AssessmentDraft?>("ssAssessment.get", UserId);
+        var draft = await ReadDraftAsync();
         if (!TryRestoreDraft(draft))
             await PersistDraftAsync();
 
@@ -149,7 +150,7 @@
         await LoadQuestionsAsync();
         if (questions is { Count: > 0 })
         {
-            var draft = await JS.InvokeAsync<AssessmentDraft?>("ssAssessment.get", UserId);
+            var draft = await ReadDraftAsync();
             if (!TryRestoreDraft(draft))
                 await PersistDraftAsync();
         }
@@ -217,6 +218,12 @@
         return true;
     }
 
+    private async Task<AssessmentDraft?> ReadDraftAsync()
+    {
+        try { return await JS.InvokeAsync<AssessmentDraft?>("ssAssessment.get", UserId); }
+        catch (JSException) { return null; }
+    }
+
     private async Task PersistDraftAsync()
     {
         if (questions is null || questions.Count == 0)
@@ -229,7 +236,9 @@
             OptionIds = questions.ToDictionary(q => q.Id, q => q.Options.Select(o => o.Id).ToList()),
             Answers = new Dictionary<int, int>(answers)
         };
-        await JS.InvokeVoidAsync("ssAssessment.set", UserId, draft);
+        // Browser draft storage is optional: failures must not break answering.
+        try { await JS.InvokeVoidAsync("ssAssessment.set", UserId, draft); }
+        catch (JSException) { }
     }
 
     private static void Shuffle<T>(IList<T> items, Random rng)
@@ -288,6 +297,9 @@
 
     private async Task SelectOptionAsync(int id)
     {
+        if (questions is null || currentQuestionIndex >= questions.Count ||
+            !questions[currentQuestionIndex].Options.Any(option => option.Id == id))
+            return;
         selectedOptionId = id;
         SaveCurrentAnswer();
         await PersistDraftAsync();
@@ -320,6 +332,8 @@
 
     private async Task NextQuestion()
     {
+        if (questions is null || currentQuestionIndex >= questions.Count || selectedOptionId == 0)
+            return;
         SaveCurrentAnswer();
         
         if (currentQuestionIndex < questions!.Count - 1)
@@ -335,7 +349,8 @@
                 .Select(answer => new UserAnswerDto { QuestionId = answer.Key, OptionId = answer.Value })
                 .ToList();
             await AssessmentService.SubmitAssessmentAsync(UserId, submittedAnswers);
-            await JS.InvokeVoidAsync("ssAssessment.clear", UserId);
+            try { await JS.InvokeVoidAsync("ssAssessment.clear", UserId); }
+            catch (JSException) { }
             Nav.NavigateTo($"/assessment-result/{UserId}");
         }
     }

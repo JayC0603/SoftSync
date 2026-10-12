@@ -1,4 +1,18 @@
 /* SoftSync's lavender and blue theme, shared with the sculpted login screen. */
+html body .assessment-page .assessment-option {
+    display:flex; align-items:flex-start; gap:14px; width:100%;
+    padding:18px 20px !important; border:2px solid var(--ss-border) !important;
+    border-radius:16px !important; text-align:left; cursor:pointer;
+}
+html body .assessment-page .assessment-option > i { flex:0 0 auto; color:var(--ss-text-muted); font-size:20px; }
+html body .assessment-page .assessment-option.active {
+    background:var(--ss-surface-accent) !important;
+    border-color:var(--ss-primary) !important; color:var(--ss-text) !important;
+    box-shadow:0 0 0 1px var(--ss-primary) !important;
+}
+html body .assessment-page .assessment-option.active > i { color:var(--ss-primary); }
+html body .assessment-page .assessment-option:hover { border-color:var(--ss-primary) !important; }
+html body .assessment-page .assessment-option:focus-visible { outline:3px solid var(--ss-primary); outline-offset:3px; }
 html body .eco-footer .eco-footer-icon { display:inline-flex; align-items:center; justify-content:center; width:44px; min-height:44px; border-radius:12px; font-size:20px; }
 html body .eco-footer .eco-footer-icon:hover { background:var(--ss-surface-accent); }
 html body .eco-footer .eco-footer-icon:focus-visible { outline:2px solid var(--ss-primary); outline-offset:2px; }
