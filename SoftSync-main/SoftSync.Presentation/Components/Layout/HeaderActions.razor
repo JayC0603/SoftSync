@@ -37,12 +37,12 @@
                         }
                     </span>
                     <span class="ss-header-user-info"><strong title="@(profile?.PublicName ?? context.User.Identity?.Name)">@(profile?.PublicName ?? context.User.Identity?.Name)</strong>
-                        @if (profile is not null) { <small>@L["nav.level"] @profile.Level</small> }
+                        @if (context.User.IsInRole("Admin")) { <small>Admin</small> } else if (profile is not null) { <small>@L["nav.level"] @profile.Level</small> }
                     </span>
                     <i class="bi bi-chevron-down ss-header-chevron" aria-hidden="true"></i>
                 </summary>
                 <div class="ss-header-dropdown ss-header-profile-dropdown">
-                    <div class="ss-header-menu-identity"><strong>@(profile?.PublicName ?? context.User.Identity?.Name)</strong>@if (profile is not null) { <small>@L["nav.level"] @profile.Level</small> }</div>
+                    <div class="ss-header-menu-identity"><strong>@(profile?.PublicName ?? context.User.Identity?.Name)</strong>@if (context.User.IsInRole("Admin")) { <small>Admin</small> } else if (profile is not null) { <small>@L["nav.level"] @profile.Level</small> }</div>
                     <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i>@L["nav.settings"]</a>
                     <a href="/cv"><i class="bi bi-file-earmark-person" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</a>
                     <AuthorizeView Roles="Teacher,Admin" Context="staffContext"><Authorized><a href="/teacher"><i class="bi bi-person-video3" aria-hidden="true"></i>Teacher Studio</a></Authorized></AuthorizeView>

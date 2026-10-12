@@ -194,6 +194,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if ((await AuthProvider.GetAuthenticationStateAsync()).User.IsInRole("Admin"))
+        {
+            Nav.NavigateTo("/admin/users", true);
+            return;
+        }
         userId = await AuthProvider.GetUserIdAsync();
         var existing = await UserService.GetUserByIdAsync(userId);
         if (existing is not null)

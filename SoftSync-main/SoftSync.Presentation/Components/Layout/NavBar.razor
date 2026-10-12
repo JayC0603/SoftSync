@@ -17,6 +17,13 @@
 
     <!-- Center: nav pills -->
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
+        @if (isAdmin)
+        {
+            <NavLink class="ss-navpill" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+            <NavLink class="ss-navpill" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></NavLink>
+        }
+        else
+        {
         <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All" aria-label="@L["nav.home"]">
             <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
         </NavLink>
@@ -34,11 +41,19 @@
         </NavLink>
         <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
         <NavLink class="ss-navpill" href="/cv" aria-label="CV thông minh"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
+        }
     </div>
 
 </nav>
 
 <nav class="ss-mobile-bottom-nav" aria-label="Mobile navigation">
+    @if (isAdmin)
+    {
+        <NavLink class="ss-mobile-bottom-link" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+        <NavLink class="ss-mobile-bottom-link" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></NavLink>
+    }
+    else
+    {
     <NavLink class="ss-mobile-bottom-link" href="@HomeHref" Match="NavLinkMatch.All">
         <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
     </NavLink>
@@ -55,6 +70,7 @@
         <i class="bi bi-controller"></i><span>Mini Game</span>
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/cv"><i class="bi bi-file-earmark-person"></i><span>CV</span></NavLink>
+    }
 </nav>
 
 <style>
@@ -393,11 +409,14 @@
 
 @code {
     private bool authenticated;
-    private string HomeHref => authenticated ? "/dashboard" : "/";
+    private bool isAdmin;
+    private string HomeHref => isAdmin ? "/admin/users" : authenticated ? "/dashboard" : "/";
     protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
     protected override async Task OnInitializedAsync()
     {
-        authenticated = (await AuthProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true;
+        var principal = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        authenticated = principal.Identity?.IsAuthenticated == true;
+        isAdmin = principal.IsInRole("Admin");
     }
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
     public void Dispose() => L.OnChanged -= StateHasChangedSafe;
