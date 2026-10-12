@@ -289,6 +289,13 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/dev/mobile", () => Results.File(
+        Path.Combine(app.Environment.ContentRootPath, "Assets", "Dev", "mobile-preview.html"),
+        "text/html; charset=utf-8"));
+}
+
 // Render uses this lightweight endpoint to check that the web process is
 // accepting requests. Keep it independent from page rendering and user state.
 app.MapGet("/health", () => Results.Ok(new

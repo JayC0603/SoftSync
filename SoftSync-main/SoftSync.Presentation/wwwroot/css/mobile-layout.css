@@ -1,5 +1,18 @@
 /* Phone layout loads after page themes so desktop navigation cannot leak into it. */
-@media (max-width: 760px) {
+.ss-mobile-brand { display:none; }
+.ss-mobile-more > summary { list-style:none; cursor:pointer; }
+.ss-mobile-more > summary::-webkit-details-marker { display:none; }
+.ss-mobile-more:not([open]) > :not(summary) { display:none; }
+.ss-mobile-more[open] > summary { background:var(--ss-surface-accent); color:var(--ss-primary); }
+html body .ss-mobile-menu-backdrop { position:fixed; inset:0; width:100%; height:100dvh; border:0; padding:0; background:rgb(10 15 35 / 42%); z-index:1001; }
+html body .ss-mobile-menu-panel { position:fixed; top:auto; bottom:calc(88px + env(safe-area-inset-bottom,0px)); left:12px; right:12px; width:auto; min-width:0; max-width:480px; max-height:65dvh; overflow-y:auto; z-index:1002; border-radius:24px; padding:16px; }
+html body .ss-mobile-menu-panel > header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 4px 12px; border-bottom:1px solid var(--ss-border); }
+html body .ss-mobile-menu-panel > header button { width:44px; padding:10px; }
+html body .ss-mobile-menu-panel > a { min-height:52px; }
+html body .ss-mobile-menu-panel > a > i { font-size:22px; color:var(--ss-primary); }
+html[data-mobile-view='true'] body .ss-mobile-bottom-nav { grid-template-columns:repeat(5,minmax(0,1fr)); }
+html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto; width:min(456px,calc(100vw - 24px)); transform:translateX(-50%); }
+@media (max-width: 900px) {
   html body .page { display:block; width:100%; min-width:0; }
   html body .page > .ss-navbar { display:none !important; }
   html body .page .ss-workspace { width:100%; min-width:0; margin:0 !important; }
@@ -9,7 +22,9 @@
     min-height:64px; padding:10px 16px; background:var(--ss-surface);
     border-bottom:1px solid var(--ss-border);
   }
-  html body .ss-workspace-left { min-width:0; flex:1 1 100px; }
+  html body .ss-workspace-left { display:none; }
+  html body .ss-mobile-brand { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ss-text); font-size:16px; font-weight:750; flex:1; min-width:0; }
+  html body .ss-mobile-brand img { border-radius:10px; }
   html body .ss-workspace-kicker { display:none; }
   html body .ss-workspace-title strong { font-size:14px; }
   html body .ss-header-actions { flex:0 1 auto; gap:2px; margin-left:auto; }
@@ -27,7 +42,7 @@
   html body .page .ss-mobile-bottom-nav {
     position:fixed; left:12px; right:12px; bottom:calc(8px + env(safe-area-inset-bottom, 0px));
     width:auto; transform:none; z-index:1000; display:grid !important;
-    grid-template-columns:repeat(6,minmax(0,1fr)); gap:2px !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)); gap:2px !important;
     min-height:64px; padding:6px; border:1px solid var(--ss-border); border-radius:20px;
     background:var(--ss-surface); box-shadow:0 8px 28px rgb(25 24 65 / 14%);
   }
@@ -38,13 +53,14 @@
     color:var(--ss-text-muted); text-decoration:none; line-height:1.2;
   }
   html body .ss-mobile-bottom-link i { font-size:21px; }
-  html body .ss-mobile-bottom-link span { font-size:10px; max-width:100%; white-space:normal; text-align:center; overflow-wrap:anywhere; }
+  html body .ss-mobile-bottom-link span { font-size:11px; max-width:100%; white-space:normal; text-align:center; overflow-wrap:anywhere; }
   html body .ss-mobile-bottom-link.active { background:var(--ss-surface-accent); color:var(--ss-primary); }
   html body .ss-mobile-bottom-link::after { display:none; }
   html body .page .ss-main-content h1 { font-size:28px; line-height:1.25; overflow-wrap:anywhere; }
   html body .page .ss-main-content h2 { font-size:22px; line-height:1.3; }
   html body .page .dashboard-reference { width:100%; padding:0 !important; }
   html body .dashboard-reference .focus-home-header { display:block; margin-bottom:20px; }
+  html body .dashboard-reference .focus-home-header > div { width:100%; max-width:none; }
   html body .dashboard-reference .focus-home-header h1 { font-size:28px; line-height:1.25; }
   html body .dashboard-reference .focus-home-header p { font-size:15px; line-height:1.6; }
   html body .dashboard-reference .focus-next { grid-template-columns:minmax(0,1fr); border-radius:20px; }
@@ -56,7 +72,10 @@
   html body .dashboard-reference .focus-next-actions > * { width:100%; min-height:44px; text-align:center; }
   html body .dashboard-reference .focus-chapter-progress { grid-template-columns:1fr; gap:10px; margin:0 16px 16px; padding:14px; }
   html body .dashboard-reference .ss-overview-grid { grid-template-columns:1fr; gap:10px; margin:16px 0; }
-  html body .dashboard-reference .ss-overview-grid article { padding:16px; }
+  html body .dashboard-reference .ss-overview-grid article { display:grid; grid-template-columns:48px minmax(0,1fr); grid-template-rows:auto auto; column-gap:14px; row-gap:4px; padding:16px; }
+  html body .dashboard-reference .ss-overview-grid article > i { grid-column:1; grid-row:1 / 3; width:48px; height:48px; align-self:center; }
+  html body .dashboard-reference .ss-overview-grid article > span { grid-column:2; grid-row:1; font-size:14px; }
+  html body .dashboard-reference .ss-overview-grid article > strong { grid-column:2; grid-row:2; font-size:24px; }
   html body .dashboard-reference .focus-progress-bottom,
   html body .dashboard-reference .mentor-cards { grid-template-columns:1fr; }
   html body .dashboard-reference .ss-workspace-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -85,4 +104,8 @@
   html body .ss-product-preview { width:100%; min-width:0; transform:none; }
   html body .ss-experience-grid, html body .ss-feature-grid { grid-template-columns:1fr; }
   html body .ss-main-content img, html body .ss-landing img { max-width:100%; }
+  html body .ss-main-content :is(input,select,textarea) { max-width:100%; font-size:16px; }
+  html body .ss-main-content .table-responsive { width:100%; overflow-x:auto; }
+  html body .ss-main-content :is(.lesson-page,.lesson-content,.assistant-chat-card,.ss-card) { min-width:0; }
+  html body .ss-main-content .tw\:lg\:grid-cols-3 { grid-template-columns:minmax(0,1fr); }
 }

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SoftSync · Mobile Dev</title>
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; font:14px/1.5 system-ui,sans-serif; background:#edf0f8; color:#172142; }
+    header { padding:18px 24px; background:white; border-bottom:1px solid #dce1ee; }
+    h1 { font-size:20px; margin:0 0 4px; }
+    p { margin:0; color:#66718e; }
+    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin-top:16px; }
+    label { display:grid; gap:5px; font-weight:600; }
+    select,button,a { font:inherit; }
+    select,button { min-height:42px; padding:8px 12px; border:1px solid #d7ddec; background:white; border-radius:10px; color:inherit; }
+    button { cursor:pointer; }
+    button:hover { background:#f0edff; }
+    a { color:#5742ce; }
+    main { padding:24px; }
+    .stage { display:flex; flex-direction:column; align-items:center; gap:12px; min-width:max-content; }
+    .phone { border:8px solid #172142; border-radius:36px; overflow:hidden; background:white; box-shadow:0 20px 60px #17214226; }
+    iframe { display:block; width:390px; height:844px; border:0; background:white; }
+    output { color:#596582; }
+    .hint { text-align:center; max-width:600px; margin:14px auto 0; }
+    button:focus-visible,select:focus-visible,a:focus-visible { outline:3px solid #9b88ff; outline-offset:3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SoftSync · Giả lập màn hình điện thoại</h1>
+    <p>Khung bên dưới dùng kích thước viewport riêng để kiểm tra giao diện mobile.</p>
+    <div class="controls">
+      <label>Thiết bị<select id="device">
+        <option value="360,800">Android nhỏ · 360 × 800</option>
+        <option value="390,844" selected>Điện thoại · 390 × 844</option>
+        <option value="430,932">Điện thoại lớn · 430 × 932</option>
+        <option value="768,1024">Tablet · 768 × 1024</option>
+      </select></label>
+      <label>Trang<select id="route">
+        <option value="/dashboard">Dashboard</option><option value="/cv">CV thông minh</option>
+        <option value="/roadmap">Học tập</option><option value="/progress">Tiến độ</option>
+        <option value="/resources">Tài nguyên</option><option value="/game">Mini Game</option>
+        <option value="/assistant">SYNCY</option><option value="/admin/users">Quản lý phân quyền</option>
+        <option value="/">Trang chủ</option><option value="/Account/Login">Đăng nhập</option>
+        <option value="/Account/Register">Đăng ký</option>
+      </select></label>
+      <button id="rotate" type="button" aria-pressed="false">Xoay ngang / dọc</button>
+      <button id="reload" type="button">Tải lại</button>
+      <a id="open" href="/dashboard" target="_blank" rel="noopener">Mở trang riêng ↗</a>
+    </div>
+  </header>
+  <main>
+    <div class="stage">
+      <output id="size" aria-live="polite">390 × 844 px · Dọc</output>
+      <div class="phone"><iframe id="screen" src="/dashboard" title="Màn hình điện thoại SoftSync"></iframe></div>
+    </div>
+    <p class="hint">Đăng nhập trực tiếp trong khung. Tài khoản, ngôn ngữ và sáng/tối dùng chung với bản dev. Đây là giả lập bố cục; bàn phím và phần cứng điện thoại cần kiểm tra trên thiết bị thật.</p>
+  </main>
+  <script>
+    const device=document.getElementById('device'), route=document.getElementById('route');
+    const screen=document.getElementById('screen'), rotate=document.getElementById('rotate');
+    let landscape=false;
+    function resize() {
+      let [width,height]=device.value.split(',').map(Number);
+      if(landscape) [width,height]=[height,width];
+      screen.style.width=width+'px'; screen.style.height=height+'px';
+      document.getElementById('size').textContent=`${width} × ${height} px · ${landscape?'Ngang':'Dọc'}`;
+      rotate.setAttribute('aria-pressed',String(landscape));
+    }
+    device.addEventListener('change',resize);
+    rotate.addEventListener('click',()=>{landscape=!landscape;resize();});
+    route.addEventListener('change',()=>{screen.src=route.value;document.getElementById('open').href=route.value;});
+    document.getElementById('reload').addEventListener('click',()=>screen.contentWindow.location.reload());
+    screen.addEventListener('load',()=>{
+      try {
+        const current=screen.contentWindow.location.pathname;
+        document.getElementById('open').href=current;
+        if([...route.options].some(option=>option.value===current)) route.value=current;
+      } catch {}
+    });
+    resize();
+  </script>
+</body>
+</html>
