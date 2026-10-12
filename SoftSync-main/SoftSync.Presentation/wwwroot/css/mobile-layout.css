@@ -1,0 +1,88 @@
+/* Phone layout loads after page themes so desktop navigation cannot leak into it. */
+@media (max-width: 760px) {
+  html body .page { display:block; width:100%; min-width:0; }
+  html body .page > .ss-navbar { display:none !important; }
+  html body .page .ss-workspace { width:100%; min-width:0; margin:0 !important; }
+  html body .page .ss-workspace-topbar {
+    position:sticky; top:0; z-index:950; display:flex; flex-wrap:wrap;
+    align-items:center; justify-content:space-between; gap:8px;
+    min-height:64px; padding:10px 16px; background:var(--ss-surface);
+    border-bottom:1px solid var(--ss-border);
+  }
+  html body .ss-workspace-left { min-width:0; flex:1 1 100px; }
+  html body .ss-workspace-kicker { display:none; }
+  html body .ss-workspace-title strong { font-size:14px; }
+  html body .ss-header-actions { flex:0 1 auto; gap:2px; margin-left:auto; }
+  html body .ss-header-language > summary { min-width:0; padding:4px; font-size:12px; gap:4px; }
+  html body .ss-header-actions > .ss-shell-control { width:36px; height:40px; }
+  html body .ss-header-fullscreen, html body .ss-header-mobile { display:none; }
+  html body .ss-header-user { width:40px; height:40px; min-height:40px; padding:3px; }
+  html body .ss-header-user-info, html body .ss-header-user > .ss-header-chevron { display:none; }
+  html body .ss-header-menu-identity { display:block; }
+  html body .ss-header-dropdown { max-width:calc(100vw - 32px); }
+  html body .page .ss-workspace > .ss-main-content.container {
+    width:100%; max-width:100%; min-width:0; padding:20px 16px 24px !important;
+  }
+  html body .page .ss-workspace { padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
+  html body .page .ss-mobile-bottom-nav {
+    position:fixed; left:12px; right:12px; bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+    width:auto; transform:none; z-index:1000; display:grid !important;
+    grid-template-columns:repeat(6,minmax(0,1fr)); gap:2px !important;
+    min-height:64px; padding:6px; border:1px solid var(--ss-border); border-radius:20px;
+    background:var(--ss-surface); box-shadow:0 8px 28px rgb(25 24 65 / 14%);
+  }
+  html body .ss-mobile-bottom-nav:has(a[href='/admin/users']) { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html body .ss-mobile-bottom-link {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-width:0; min-height:48px; padding:5px 1px; gap:4px; border-radius:13px;
+    color:var(--ss-text-muted); text-decoration:none; line-height:1.2;
+  }
+  html body .ss-mobile-bottom-link i { font-size:21px; }
+  html body .ss-mobile-bottom-link span { font-size:10px; max-width:100%; white-space:normal; text-align:center; overflow-wrap:anywhere; }
+  html body .ss-mobile-bottom-link.active { background:var(--ss-surface-accent); color:var(--ss-primary); }
+  html body .ss-mobile-bottom-link::after { display:none; }
+  html body .page .ss-main-content h1 { font-size:28px; line-height:1.25; overflow-wrap:anywhere; }
+  html body .page .ss-main-content h2 { font-size:22px; line-height:1.3; }
+  html body .page .dashboard-reference { width:100%; padding:0 !important; }
+  html body .dashboard-reference .focus-home-header { display:block; margin-bottom:20px; }
+  html body .dashboard-reference .focus-home-header h1 { font-size:28px; line-height:1.25; }
+  html body .dashboard-reference .focus-home-header p { font-size:15px; line-height:1.6; }
+  html body .dashboard-reference .focus-next { grid-template-columns:minmax(0,1fr); border-radius:20px; }
+  html body .dashboard-reference .focus-next-copy { padding:22px 20px !important; }
+  html body .dashboard-reference .focus-next h2 { font-size:24px; line-height:1.3; }
+  html body .dashboard-reference .focus-next-copy > p { font-size:15px; }
+  html body .dashboard-reference .ss-learning-companion { display:none; }
+  html body .dashboard-reference .focus-next-actions { display:grid; gap:12px; }
+  html body .dashboard-reference .focus-next-actions > * { width:100%; min-height:44px; text-align:center; }
+  html body .dashboard-reference .focus-chapter-progress { grid-template-columns:1fr; gap:10px; margin:0 16px 16px; padding:14px; }
+  html body .dashboard-reference .ss-overview-grid { grid-template-columns:1fr; gap:10px; margin:16px 0; }
+  html body .dashboard-reference .ss-overview-grid article { padding:16px; }
+  html body .dashboard-reference .focus-progress-bottom,
+  html body .dashboard-reference .mentor-cards { grid-template-columns:1fr; }
+  html body .dashboard-reference .ss-workspace-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html body .ss-cv-heading { flex-direction:column; align-items:flex-start; gap:12px; }
+  html body .ss-cv-heading h1 { font-size:28px; }
+  html body .ss-cv-heading p { font-size:14px; line-height:1.6; }
+  html body .ss-cv-frame-container { min-height:480px; border-radius:14px; }
+  html body .ss-cv-frame-container iframe { width:100%; height:max(480px,calc(100dvh - 180px)); }
+  html body .ss-public-header { padding:12px 16px; gap:10px; min-height:64px; }
+  html body .ss-public-brand { gap:8px; min-width:0; }
+  html body .ss-public-brand img { width:32px; height:32px; }
+  html body .ss-public-brand strong { font-size:19px; }
+  html body .ss-public-actions { gap:6px; margin-left:auto; }
+  html body .ss-public-actions .ss-btn-primary { font-size:12px !important; min-height:40px; padding:8px 10px !important; white-space:normal; text-align:center; }
+  html body .ss-public-actions .ss-public-login { display:none; }
+  html body .ss-public-mobile summary { width:40px; height:40px; }
+  html body .ss-landing { padding-inline:16px; }
+  html body .ss-product-hero { grid-template-columns:minmax(0,1fr); gap:24px; padding:28px 0; }
+  html body .ss-product-copy { min-width:0; }
+  html body .ss-product-copy h1 { font-size:32px; line-height:1.2; margin:16px 0; }
+  html body .ss-product-copy h2 { font-size:18px; line-height:1.5; }
+  html body .ss-product-copy > p { font-size:15px; line-height:1.65; }
+  html body .ss-product-copy .ss-eyebrow { font-size:10px; white-space:normal; }
+  html body .ss-hero-actions { display:grid; grid-template-columns:1fr; gap:10px; }
+  html body .ss-hero-actions > a { width:100%; min-width:0; min-height:48px; padding:12px 16px !important; font-size:15px !important; white-space:normal; text-align:center; }
+  html body .ss-product-preview { width:100%; min-width:0; transform:none; }
+  html body .ss-experience-grid, html body .ss-feature-grid { grid-template-columns:1fr; }
+  html body .ss-main-content img, html body .ss-landing img { max-width:100%; }
+}
