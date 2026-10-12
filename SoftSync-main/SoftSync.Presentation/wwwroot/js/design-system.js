@@ -1,6 +1,20 @@
 (() => {
     const root = document.documentElement;
+    const syncMobileButtons = () => document.querySelectorAll('.ss-header-mobile').forEach(button =>
+        button.setAttribute('aria-pressed', String(root.dataset.mobileView === 'true')));
     window.ssDesign = {
+        toggleMobileView() {
+            const enabled = root.dataset.mobileView !== 'true';
+            root.dataset.mobileView = String(enabled);
+            try { localStorage.setItem('ss-mobile-view', String(enabled)); } catch {}
+            syncMobileButtons();
+        },
+        async toggleFullscreen() {
+            try {
+                if (document.fullscreenElement) await document.exitFullscreen();
+                else await root.requestFullscreen();
+            } catch { /* Fullscreen may be unavailable in embedded browsers. */ }
+        },
         togglePassword(button) {
             const input = document.getElementById(button.getAttribute('aria-controls'));
             if (!input) return;
@@ -19,6 +33,12 @@
             } catch {}
         }
     };
+    try { root.dataset.mobileView = localStorage.getItem('ss-mobile-view') === 'true' ? 'true' : 'false'; } catch {}
+    document.addEventListener('DOMContentLoaded', syncMobileButtons);
+    document.addEventListener('enhancedload', syncMobileButtons);
+    document.addEventListener('fullscreenchange', () => document.querySelectorAll('.ss-header-fullscreen i').forEach(icon => {
+        icon.className = document.fullscreenElement ? 'bi bi-fullscreen-exit' : 'bi bi-fullscreen';
+    }));
     // Header disclosures use native keyboard behavior. Keep only one open and
     // dismiss on selection, outside click or Escape without replacing auth state.
     document.addEventListener('toggle', event => {

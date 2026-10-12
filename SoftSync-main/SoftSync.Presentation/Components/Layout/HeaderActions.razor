@@ -13,14 +13,16 @@
 <div class="ss-header-actions">
     <details class="ss-header-language ss-header-menu">
         <summary class="ss-header-control" aria-label="@L["layout.languageMenu"]">
-            <i class="bi bi-globe2" aria-hidden="true"></i><span>@CurrentLanguageCode</span><i class="bi bi-chevron-down ss-header-chevron" aria-hidden="true"></i>
+            <span class="ss-language-flag" aria-hidden="true">@(L.Current == AppLanguage.Vi ? "🇻🇳" : "🇬🇧")</span><span>@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")</span><i class="bi bi-chevron-down ss-header-chevron" aria-hidden="true"></i>
         </summary>
         <div class="ss-header-dropdown">
             <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguageAsync(AppLanguage.Vi)">@L["layout.language.vi"]</button>
             <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguageAsync(AppLanguage.En)">@L["layout.language.en"]</button>
         </div>
     </details>
-    <button type="button" class="ss-shell-control ss-header-theme" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
+    <button type="button" class="ss-shell-control ss-header-theme" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-moon-fill ss-theme-moon" aria-hidden="true"></i><i class="bi bi-sun-fill ss-theme-sun" aria-hidden="true"></i></button>
+    <button type="button" class="ss-shell-control ss-header-mobile" onclick="window.ssDesign.toggleMobileView()" aria-pressed="false" aria-label="@(L.Current == AppLanguage.Vi ? "Chuyển giao diện mobile" : "Toggle mobile layout")" title="@(L.Current == AppLanguage.Vi ? "Chuyển giao diện mobile" : "Toggle mobile layout")"><i class="bi bi-phone" aria-hidden="true"></i></button>
+    <button type="button" class="ss-shell-control ss-header-fullscreen" onclick="window.ssDesign.toggleFullscreen()" aria-label="@(L.Current == AppLanguage.Vi ? "Toàn màn hình" : "Fullscreen")"><i class="bi bi-fullscreen" aria-hidden="true"></i></button>
     <AuthorizeView>
         <Authorized>
             <details class="ss-header-profile ss-header-menu">
