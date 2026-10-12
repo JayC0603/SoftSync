@@ -1,4 +1,27 @@
 /* SoftSync's lavender and blue theme, shared with the sculpted login screen. */
+/* Keep shared footers at the viewport bottom on short pages, after long content. */
+html body :is(.ss-workspace, .ss-public-site) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+html body .ss-workspace > .ss-main-content,
+html body .ss-public-site > .ss-public-content {
+    flex: 1 0 auto;
+    min-width: 0;
+}
+html body :is(.ss-workspace, .ss-public-site) > .eco-footer {
+    position: static;
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: auto;
+}
+@media (max-width: 760px) {
+    html body .ss-workspace > .eco-footer {
+        padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+    }
+}
 html body .neo-login .register-heading { text-align: center; margin-bottom: 30px; }
 html body .neo-login .register-heading h2 { color: var(--neo-ink); font-size: clamp(34px, 4vw, 44px); font-weight: 800; }
 html body .neo-login .register-heading p { color: var(--neo-muted); font-size: 16px; }
