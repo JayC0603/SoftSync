@@ -10,7 +10,7 @@
     (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) ||
      accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
-    <HeadContent><link rel="stylesheet" href="css/neo-login.css" /></HeadContent>
+    <HeadContent><link rel="stylesheet" href="css/neo-login.css?v=3" /></HeadContent>
     <main class="neo-login @(accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) ? "neo-login-compact" : "")">
         <div class="neo-decoration neo-decoration-one" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-two" aria-hidden="true"></div>

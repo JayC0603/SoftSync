@@ -81,7 +81,16 @@
 .neo-login .submit-button, .neo-login .login-submit { position: relative; width: 100%; min-height: 60px; padding: 16px 56px; display: flex; align-items: center; justify-content: center; border: 1px solid #bcb3ff; border-radius: 999px; color: white; background: linear-gradient(115deg, #9b8bff 0%, #7468f5 22%, #5146d8 72%, #4338b8 100%); box-shadow: 0 14px 25px #5146d84d, inset 2px 2px 5px #ffffff82, inset -3px -3px 7px #4338b8b0; font: inherit; font-size: 19px; font-weight: 750; cursor: pointer; transition: transform .18s, box-shadow .18s; }
 .neo-login .submit-button:hover:not(:disabled), .neo-login .login-submit:hover { transform: translateY(-2px); box-shadow: 0 18px 28px #5146d85e, inset 2px 2px 5px #ffffff82; }
 .neo-login .neo-submit-arrow, .neo-login .login-submit > i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #ffffff18; font-size: 24px; }
-.neo-login .login-submit:hover > i { transform: translateY(-50%) translateX(4px); }
+/* Center independently of transforms used by hover/pressed button styles. */
+html body .neo-login .login-submit > i,
+html body .neo-login .login-submit:is(:hover, :active, :focus-visible) > i {
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
+  transform: none;
+  line-height: 1;
+  pointer-events: none;
+}
 .neo-login .auth-divider, .neo-login .external-divider { display: flex; align-items: center; gap: 15px; margin: 9px 0 0; color: var(--neo-muted); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
 .neo-login .auth-divider::before, .neo-login .auth-divider::after, .neo-login .external-divider::before, .neo-login .external-divider::after { content: ''; flex: 1; height: 1px; background: var(--neo-line); }
 .neo-login .auth-divider span { position: static; padding: 0; background: transparent; }
