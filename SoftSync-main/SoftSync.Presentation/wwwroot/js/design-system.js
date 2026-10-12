@@ -1,7 +1,5 @@
 (() => {
     const root = document.documentElement;
-    const syncMobileButtons = () => document.querySelectorAll('.ss-header-mobile').forEach(button =>
-        button.setAttribute('aria-pressed', String(root.dataset.mobileView === 'true')));
     window.ssDesign = {
         scrollMentors(button, direction) {
             const track = button.closest('section')?.querySelector('.ss-mentor-carousel');
@@ -9,12 +7,6 @@
             track.dataset.autoPaused = 'true';
             const step = (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + 16;
             track.scrollBy({ left: direction * step, behavior: root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-        },
-        toggleMobileView() {
-            const enabled = root.dataset.mobileView !== 'true';
-            root.dataset.mobileView = String(enabled);
-            try { localStorage.setItem('ss-mobile-view', String(enabled)); } catch {}
-            syncMobileButtons();
         },
         async toggleFullscreen() {
             try {
@@ -40,9 +32,9 @@
             } catch {}
         }
     };
-    try { root.dataset.mobileView = localStorage.getItem('ss-mobile-view') === 'true' ? 'true' : 'false'; } catch {}
-    document.addEventListener('DOMContentLoaded', syncMobileButtons);
-    document.addEventListener('enhancedload', syncMobileButtons);
+    // Clear the retired forced-mobile preference so desktop returns to its natural layout.
+    delete root.dataset.mobileView;
+    try { localStorage.removeItem('ss-mobile-view'); } catch {}
     const mentorTracks = new Set();
     const observeMentors = () => document.querySelectorAll('.ss-mentor-carousel').forEach(track => {
         if (mentorTracks.has(track)) return;
@@ -57,7 +49,7 @@
     document.addEventListener('enhancedload', observeMentors);
     setInterval(() => {
         if (document.hidden || root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (innerWidth > 900 && root.dataset.mobileView !== 'true') return;
+        if (innerWidth > 900) return;
         for (const track of mentorTracks) {
             if (!track.isConnected) { mentorTracks.delete(track); continue; }
             const rect = track.getBoundingClientRect();

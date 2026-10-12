@@ -16,12 +16,11 @@
             <img class="ss-language-flag" src="@(L.Current == AppLanguage.Vi ? "/images/flags/vi.svg" : "/images/flags/en.svg")" width="28" height="20" alt="" aria-hidden="true" />
         </summary>
         <div class="ss-header-dropdown">
-            <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguageAsync(AppLanguage.Vi)">@L["layout.language.vi"]</button>
-            <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguageAsync(AppLanguage.En)">@L["layout.language.en"]</button>
+            <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguageAsync(AppLanguage.Vi)"><img src="/images/flags/vi.svg" width="28" height="20" alt="" />@L["layout.language.vi"]</button>
+            <button type="button" disabled="@(!interactiveReady)" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguageAsync(AppLanguage.En)"><img src="/images/flags/en.svg" width="28" height="20" alt="" />@L["layout.language.en"]</button>
         </div>
     </details>
     <button type="button" class="ss-shell-control ss-header-theme" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-moon-fill ss-theme-moon" aria-hidden="true"></i><i class="bi bi-sun-fill ss-theme-sun" aria-hidden="true"></i></button>
-    <button type="button" class="ss-shell-control ss-header-mobile" onclick="window.ssDesign.toggleMobileView()" aria-pressed="false" aria-label="@(L.Current == AppLanguage.Vi ? "Chuyển giao diện mobile" : "Toggle mobile layout")" title="@(L.Current == AppLanguage.Vi ? "Chuyển giao diện mobile" : "Toggle mobile layout")"><i class="bi bi-phone" aria-hidden="true"></i></button>
     <button type="button" class="ss-shell-control ss-header-fullscreen" onclick="window.ssDesign.toggleFullscreen()" aria-label="@(L.Current == AppLanguage.Vi ? "Toàn màn hình" : "Fullscreen")"><i class="bi bi-fullscreen" aria-hidden="true"></i></button>
     <AuthorizeView>
         <Authorized>
