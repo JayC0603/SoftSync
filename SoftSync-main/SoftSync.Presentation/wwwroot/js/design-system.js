@@ -3,19 +3,34 @@
     let sidebarExpanded = false;
     const syncSidebar = () => {
         const expanded = sidebarExpanded;
-        root.dataset.sidebar = expanded ? 'expanded' : 'collapsed';
+        const state = expanded ? 'expanded' : 'collapsed';
+        if (document.documentElement.dataset.sidebar !== state)
+            document.documentElement.dataset.sidebar = state;
         document.querySelectorAll('[data-sidebar-toggle]').forEach(button =>
             button.setAttribute('aria-expanded', String(expanded)));
     };
-    // Apply before the first paint; new tabs start with the icon rail.
-    try { sidebarExpanded = sessionStorage.getItem('ss-sidebar-expanded') === '1'; } catch {}
-    root.dataset.sidebar = sidebarExpanded ? 'expanded' : 'collapsed';
+    // Keep the user's explicit choice across page loads and browser sessions.
+    // Migrate the old tab-only preference without overriding a saved choice.
+    const sidebarKey = 'ss-sidebar-expanded';
+    try {
+        const saved = localStorage.getItem(sidebarKey);
+        sidebarExpanded = (saved ?? sessionStorage.getItem(sidebarKey)) === '1';
+        if (saved === null) localStorage.setItem(sidebarKey, sidebarExpanded ? '1' : '0');
+    } catch {
+        try { sidebarExpanded = sessionStorage.getItem(sidebarKey) === '1'; } catch {}
+    }
+    syncSidebar();
+    // Enhanced navigation can patch attributes on <html> with server defaults.
+    // Only the toggle changes the preference; DOM updates must restore it.
+    new MutationObserver(syncSidebar).observe(document.documentElement, {
+        attributes: true, attributeFilter: ['data-sidebar']
+    });
     window.ssDesign = {
         toggleSidebar() {
-            const expanded = root.dataset.sidebar !== 'expanded';
-            sidebarExpanded = expanded;
-            root.dataset.sidebar = expanded ? 'expanded' : 'collapsed';
-            try { sessionStorage.setItem('ss-sidebar-expanded', expanded ? '1' : '0'); } catch {}
+            sidebarExpanded = !sidebarExpanded;
+            const value = sidebarExpanded ? '1' : '0';
+            try { localStorage.setItem(sidebarKey, value); } catch {}
+            try { sessionStorage.setItem(sidebarKey, value); } catch {}
             syncSidebar();
         },
         scrollMentors(button, direction) {
@@ -66,6 +81,7 @@
     });
     document.addEventListener('enhancedload', observeMentors);
     document.addEventListener('enhancedload', syncSidebar);
+    window.addEventListener('pageshow', syncSidebar);
     setInterval(() => {
         if (document.hidden || root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (innerWidth > 900) return;
