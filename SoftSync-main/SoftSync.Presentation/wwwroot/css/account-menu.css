@@ -1,0 +1,73 @@
+/* Account disclosure shares the header's outside-click and Escape handling. */
+.ss-public-actions .ss-header-profile {
+    position: relative;
+}
+
+@media (max-width: 760px) {
+    .ss-public-account > span,
+    .ss-public-account > .bi-chevron-down {
+        display: none;
+    }
+}
+
+html body .ss-header-profile-dropdown {
+    width: 300px;
+    max-width: calc(100vw - 32px);
+    padding: 12px;
+    gap: 4px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--ss-surface) 94%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 48px rgb(0 0 0 / 18%);
+}
+
+html body .ss-header-profile-dropdown > a,
+html body .ss-header-profile-dropdown form button {
+    min-height: 52px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.ss-header-profile-dropdown .ss-account-caret {
+    margin-left: auto;
+    color: var(--ss-text-muted);
+    font-size: .8rem;
+}
+
+html body .ss-account-signin {
+    padding: 8px 4px 18px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--ss-border);
+}
+
+html body .ss-account-signin a {
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 999px;
+    background: var(--ss-text);
+    color: var(--ss-surface);
+    font-weight: 650;
+}
+
+html body .ss-account-signin a:hover {
+    background: var(--ss-text);
+    color: var(--ss-surface);
+    text-decoration: underline;
+}
+
+html body .ss-header-profile-dropdown .ss-header-menu-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--ss-border);
+    overflow-wrap: anywhere;
+}
+
+html body .ss-header-profile-dropdown :is(a, button):focus-visible {
+    outline: 2px solid var(--ss-primary);
+    outline-offset: 2px;
+}
