@@ -1,6 +1,23 @@
 (() => {
     const root = document.documentElement;
+    let sidebarExpanded = false;
+    const syncSidebar = () => {
+        const expanded = sidebarExpanded;
+        root.dataset.sidebar = expanded ? 'expanded' : 'collapsed';
+        document.querySelectorAll('[data-sidebar-toggle]').forEach(button =>
+            button.setAttribute('aria-expanded', String(expanded)));
+    };
+    // Apply before the first paint; new tabs start with the icon rail.
+    try { sidebarExpanded = sessionStorage.getItem('ss-sidebar-expanded') === '1'; } catch {}
+    root.dataset.sidebar = sidebarExpanded ? 'expanded' : 'collapsed';
     window.ssDesign = {
+        toggleSidebar() {
+            const expanded = root.dataset.sidebar !== 'expanded';
+            sidebarExpanded = expanded;
+            root.dataset.sidebar = expanded ? 'expanded' : 'collapsed';
+            try { sessionStorage.setItem('ss-sidebar-expanded', expanded ? '1' : '0'); } catch {}
+            syncSidebar();
+        },
         scrollMentors(button, direction) {
             const track = button.closest('section')?.querySelector('.ss-mentor-carousel');
             if (!track) return;
@@ -43,10 +60,12 @@
             track.addEventListener(event, () => { track.dataset.autoPaused = 'true'; }, { passive: true });
     });
     document.addEventListener('DOMContentLoaded', () => {
+        syncSidebar();
         observeMentors();
         new MutationObserver(observeMentors).observe(document.body, { childList: true, subtree: true });
     });
     document.addEventListener('enhancedload', observeMentors);
+    document.addEventListener('enhancedload', syncSidebar);
     setInterval(() => {
         if (document.hidden || root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (innerWidth > 900) return;
