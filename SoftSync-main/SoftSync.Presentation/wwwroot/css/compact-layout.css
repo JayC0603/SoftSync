@@ -103,8 +103,12 @@ html body .ss-public-content .about-landing h2 { font-size: clamp(24px, 2.5vw, 3
 html body .ss-public-content .about-landing p { font-size: 14px !important; }
 html body .neo-login :is(p, .form-control, .login-options, .login-register, .register-login, .form-label) { font-size: 14px; }
 html body .eco-footer-inner, html body .eco-footer a, html body .eco-footer-brand span { font-size: 13px; }
+html body .eco-footer-inner { padding-block: 8px; gap: 16px; }
+html body .eco-footer-brand strong { font-size: 16px; line-height: 1.25; }
+html body .eco-footer-brand span { margin-top: 2px; line-height: 1.35; }
 
 @media (max-width: 900px) {
+    html body .eco-footer-inner { gap: 8px; }
     html body .page .ss-sidebar-toggle { display: none; }
     html body .page .ss-workspace-topbar { height: 56px; min-height: 56px; max-height: none; padding: 6px 12px; }
     html body .ss-header-actions { gap: 2px; }
