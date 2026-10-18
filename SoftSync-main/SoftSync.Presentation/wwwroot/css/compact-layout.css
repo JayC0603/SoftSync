@@ -9,6 +9,13 @@ html body :is(.ss-main-content, .ss-public-content) h2 { font-size: 22px !import
 html body :is(.ss-main-content, .ss-public-content) h3 { font-size: 18px !important; }
 html body :is(.ss-main-content, .ss-public-content) h4 { font-size: 16px !important; }
 html body .ss-main-content :is(.form-label, small, .text-muted) { font-size: 12px; }
+/* Resource controls and metadata use the same type scale as the workspace. */
+html body .ss-main-content .resource-page { font-family: inherit; font-size: 14px; line-height: 1.55; }
+html body .resource-page :is(h1, h2, h3, button, input) { font-family: inherit; }
+html body .resource-page :is(button, input, dt, dd) { font-size: 14px; line-height: 1.55; }
+html body .resource-page :is(h1, h2) { font-weight: 700; letter-spacing: -.025em; }
+html body .resource-page h3 { font-weight: 600; letter-spacing: -.015em; }
+html body .resource-page :is(.resource-head > div > span, .resource-featured > div > span, .resource-side section > span, .resource-search > span, .resource-list-head > span) { font-size: 12px; }
 html body :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta, .focus-link, .about-button) { font-size: 14px !important; }
 html body .page :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta) { min-height: 38px; }
 
