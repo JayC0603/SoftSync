@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./styles.css";
+import "../../SoftSync.Presentation/wwwroot/css/glass-buttons.css";
 
 export const metadata: Metadata = {
   title: "SoftSync",
