@@ -1,0 +1,95 @@
+/* Shared density settings, loaded after the page and mobile themes. */
+html { font-size: 14px; }
+html body { font-size: 14px; line-height: 1.55; }
+html body .page { --ss-sidebar-width: 200px; }
+html body :is(.ss-main-content, .ss-public-content) :is(p, li, label, td, th, .form-control, .form-select) { font-size: 14px !important; }
+html body :is(.ss-main-content, .ss-public-content) h1 { font-size: clamp(24px, 2.3vw, 28px) !important; }
+html body :is(.ss-main-content, .ss-public-content) h2 { font-size: 22px !important; }
+html body :is(.ss-main-content, .ss-public-content) h3 { font-size: 18px !important; }
+html body :is(.ss-main-content, .ss-public-content) h4 { font-size: 16px !important; }
+html body .ss-main-content :is(.form-label, small, .text-muted) { font-size: 12px; }
+html body :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta, .focus-link, .about-button) { font-size: 14px !important; }
+html body .page :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta) { min-height: 38px; }
+
+/* Keep sidebar width and workspace offset in sync, including the dashboard. */
+@media (min-width: 761px) {
+    html body .page > .ss-navbar { width: var(--ss-sidebar-width); padding: 16px 10px !important; gap: 16px; }
+    html body .page .ss-workspace { margin-left: var(--ss-sidebar-width); }
+    html body .page > .ss-navbar .ss-brand { padding: 0 8px 14px; gap: 8px; }
+    html body .page > .ss-navbar .ss-brand-logo { width: 32px; height: 32px; }
+    html body .page > .ss-navbar .ss-brand > span { font-size: 18px; }
+    html body .page > .ss-navbar .ss-navpills { gap: 4px; }
+    html body .page > .ss-navbar .ss-navpill { min-height: 40px !important; padding: 8px 10px !important; gap: 10px; border-radius: 10px !important; font-size: 14px !important; }
+    html body .page > .ss-navbar .ss-navpill > span { font-size: 14px !important; }
+    html body .page > .ss-navbar .ss-navpill > i { font-size: 18px; flex-basis: 20px; }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+    html body .page { --ss-sidebar-width: 64px; }
+    html body .page > .ss-navbar .ss-brand { padding: 0 0 12px; }
+    html body .page > .ss-navbar .ss-navpill { justify-content: center; padding: 8px !important; gap: 0; }
+}
+
+html body .page .ss-workspace-topbar { height: 52px; min-height: 52px; max-height: 52px; padding: 0 24px; gap: 8px; }
+html body .ss-header-actions { gap: 8px; }
+html body .ss-header-control { min-height: 36px; padding: 4px 8px; gap: 7px; font-size: 13px; }
+html body .ss-header-actions > .ss-shell-control { width: 34px; height: 34px; font-size: 18px; }
+html body .ss-header-language > .ss-header-control.ss-header-language-trigger { width: 36px; min-width: 36px; min-height: 36px; }
+html body .ss-language-flag { width: 24px; height: 17px; }
+html body .page .ss-header-avatar { width: 30px; height: 30px; }
+html body .page .ss-header-avatar img { width: 28px; height: 28px; }
+html body .ss-header-user-info strong, html body .ss-workspace-topbar strong { font-size: 13px; }
+html body .ss-header-user-info small, html body .ss-workspace-kicker { font-size: 11px; }
+html body .ss-header-dropdown :is(a, button) { font-size: 13px; }
+html body .ss-notification-trigger { width: 36px; height: 36px; }
+html body .ss-header-profile-dropdown > a, html body .ss-header-profile-dropdown form button { min-height: 44px; padding: 10px 12px; }
+
+/* Scale the dashboard's fixed-pixel illustration, labels and card spacing too. */
+html body .dashboard-reference { padding: 4px 12px 24px; }
+html body .dashboard-reference .focus-home-header { margin-bottom: 16px; }
+html body .dashboard-reference .focus-home-header h1 { font-size: 28px !important; }
+html body .dashboard-reference .focus-next-copy { padding: 20px 24px; }
+html body .dashboard-reference .focus-kicker { font-size: 11px; }
+html body .dashboard-reference .focus-next-copy > small { font-size: 14px; }
+html body .dashboard-reference .focus-next h2 { font-size: 24px !important; }
+html body .dashboard-reference .ss-btn-primary { min-height: 38px; padding: 9px 18px; }
+html body .dashboard-reference .focus-next-actions { gap: 16px; }
+html body .dashboard-reference .ss-learning-companion img { width: 210px; height: 200px; }
+html body .dashboard-reference .ss-learning-companion p { max-width: 105px; font-size: 15px !important; }
+html body .dashboard-reference .focus-chapter-progress { margin: 0 20px 12px; padding: 10px 14px; gap: 14px; }
+html body .dashboard-reference .focus-progress { height: 10px; }
+html body .dashboard-reference .ss-overview-grid article { grid-template-columns: 44px 1fr; column-gap: 14px; padding: 14px 18px; }
+html body .dashboard-reference .ss-overview-grid article > i { width: 44px; height: 44px; font-size: 23px; border-radius: 13px; }
+html body .dashboard-reference .ss-overview-grid article > span { font-size: 13px; }
+html body .dashboard-reference .ss-overview-grid strong { font-size: 25px; }
+html body .dashboard-reference .ss-overview-grid small { font-size: 13px; }
+html body .dashboard-reference .ss-next-lessons strong { font-size: 14px; }
+html body .dashboard-reference .ss-workspace-shortcuts a { font-size: 13px; padding: 12px 16px; }
+
+/* Public and account pages share the same smaller body type. */
+html body .ss-public-header { min-height: 64px; padding-block: 10px; }
+html body .ss-public-links { font-size: 14px; }
+html body .ss-public-content .about-hero h1 { font-size: clamp(34px, 4.5vw, 56px) !important; }
+html body .ss-public-content .about-hero-copy > p { font-size: 16px !important; }
+html body .ss-public-content .about-landing h2 { font-size: clamp(24px, 2.5vw, 32px) !important; }
+html body .ss-public-content .about-landing p { font-size: 14px !important; }
+html body .neo-login :is(p, .form-control, .login-options, .login-register, .register-login, .form-label) { font-size: 14px; }
+html body .eco-footer-inner, html body .eco-footer a, html body .eco-footer-brand span { font-size: 13px; }
+
+@media (max-width: 760px) {
+    html body .page .ss-workspace-topbar { height: 56px; min-height: 56px; max-height: none; padding: 6px 12px; }
+    html body .ss-header-actions { gap: 2px; }
+    html body .ss-header-control, html body .ss-notification-trigger { min-height: 44px; }
+    html body .ss-header-actions > .ss-shell-control { height: 44px; }
+    html body .ss-header-language > .ss-header-control.ss-header-language-trigger { min-height: 44px; }
+    html body .ss-header-user { width: 36px; height: 44px; padding: 3px; }
+    html body .ss-mobile-brand { font-size: 16px; gap: 6px; }
+    html body .ss-mobile-brand img { width: 28px; height: 28px; }
+    html body .ss-notification-dropdown { top: 60px; }
+    html body .dashboard-reference .focus-home-header h1 { font-size: 24px !important; }
+    html body .dashboard-reference .focus-next-copy { padding: 18px; }
+    html body .dashboard-reference .focus-next h2 { font-size: 21px !important; }
+    html body .page :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta) { min-height: 44px; }
+    /* Mobile browsers retain their normal input focus behavior. */
+    html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(input, textarea, select).form-control,
+    html body :is(.ss-main-content, .ss-public-content) .form-select { font-size: 16px !important; }
+}
