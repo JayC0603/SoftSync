@@ -1,0 +1,63 @@
+@page "/notifications"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Services
+@inject NotificationInbox Inbox
+@inject ILogger<Notifications> Logger
+
+<PageTitle>@T("Thông báo", "Notifications") · SoftSync</PageTitle>
+<section class="ss-announcements-page" aria-busy="@busy">
+    <UiPageHeader Title="@T("Thông báo", "Notifications")" Description="@T("Các cập nhật từ quản trị viên SoftSync.", "Updates from the SoftSync administrators.")" />
+    @if (error) { <div class="alert alert-danger" role="alert">@T("Không tải được thông báo. Vui lòng thử lại.", "Could not load notifications. Please retry.") <button type="button" class="btn btn-outline-primary" @onclick="LoadAsync" disabled="@busy">@T("Thử lại", "Retry")</button></div> }
+    <div class="ss-notification-toolbar">
+        <span aria-live="polite">@data.Unread @T("chưa đọc", "unread")</span>
+        <button type="button" class="btn btn-outline-primary" disabled="@(busy || data.Unread == 0)" @onclick="() => ReadAsync(null)">@T("Đánh dấu tất cả đã đọc", "Mark all as read")</button>
+        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="LoadAsync">@T("Làm mới", "Refresh")</button>
+    </div>
+    @if (busy && data.Total == 0) { <p role="status">@T("Đang tải…", "Loading…")</p> }
+    else if (!error && data.Items.Count == 0) { <p>@T("Bạn chưa có thông báo nào.", "No notifications yet.")</p> }
+    @foreach (var item in data.Items)
+    {
+        <article class="ss-announcement-card @(!item.IsRead ? "is-unread" : "")">
+            <small>@T("Quản trị viên SoftSync", "SoftSync administrator") · @item.PublishedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm") · UTC+7</small>
+            <h2>@item.Title</h2><p class="ss-notification-body">@item.Body</p>
+            @if (!item.IsRead) { <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => ReadAsync(item.Id)">@T("Đánh dấu đã đọc", "Mark as read")</button> }
+            else { <small><i class="bi bi-check2-all" aria-hidden="true"></i> @T("Đã đọc", "Read")</small> }
+        </article>
+    }
+    @if (data.Total > PageSize)
+    {
+        <nav class="ss-notification-toolbar" aria-label="@T("Phân trang thông báo", "Notification pages")">
+            <button type="button" class="btn btn-outline-primary" disabled="@(busy || page <= 1)" @onclick="() => ChangePageAsync(-1)">@T("Trước", "Previous")</button>
+            <span>@(page) / @((data.Total + PageSize - 1) / PageSize)</span>
+            <button type="button" class="btn btn-outline-primary" disabled="@(busy || page * PageSize >= data.Total)" @onclick="() => ChangePageAsync(1)">@T("Sau", "Next")</button>
+        </nav>
+    }
+</section>
+
+@code {
+    private const int PageSize = 20;
+    private int page = 1;
+    private bool busy, error;
+    private NotificationPage data = new([], 0, 0);
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    protected override Task OnInitializedAsync() => LoadAsync();
+    private async Task LoadAsync()
+    {
+        if (busy) return;
+        busy = true;
+        try { data = await Inbox.GetAsync(page, PageSize); error = false; }
+        catch (Exception ex) { Logger.LogWarning(ex, "Could not load inbox"); error = true; }
+        finally { busy = false; }
+    }
+    private async Task ReadAsync(int? id)
+    {
+        if (busy) return;
+        busy = true;
+        try { await Inbox.MarkReadAsync(id); data = await Inbox.GetAsync(page, PageSize); error = false; }
+        catch (Exception ex) { Logger.LogWarning(ex, "Could not mark notifications read"); error = true; }
+        finally { busy = false; }
+    }
+    private async Task ChangePageAsync(int delta) { page += delta; await LoadAsync(); }
+}

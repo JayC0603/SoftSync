@@ -1,0 +1,116 @@
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@using SoftSync.BLL.Services
+@inject NotificationInbox Inbox
+@inject NotificationChanges Changes
+@inject AuthenticationStateProvider Auth
+@inject LocalizationService L
+@inject NavigationManager Nav
+@inject ILogger<NotificationBell> Logger
+
+<details class="ss-header-menu ss-notification-menu">
+    <summary class="ss-header-control ss-notification-trigger" aria-label="@(T("Thông báo", "Notifications") + (unread > 0 ? $" ({unread})" : ""))">
+        <i class="bi bi-bell" aria-hidden="true"></i>
+        @if (unread > 0) { <span class="ss-notification-count" aria-hidden="true">@(unread > 99 ? "99+" : unread.ToString())</span> }
+    </summary>
+    <div class="ss-header-dropdown ss-notification-dropdown">
+        <header><strong>@T("Thông báo", "Notifications")</strong><a href="/notifications">@T("Xem tất cả", "View all")</a></header>
+        <div class="ss-notification-list" aria-live="polite">
+            @if (failed) { <p role="status">@T("Chưa tải được thông báo.", "Could not load notifications.")</p><button type="button" @onclick="RefreshAsync">@T("Thử lại", "Retry")</button> }
+            else if (!loaded) { <p>@T("Đang tải…", "Loading…")</p> }
+            else if (items.Count == 0) { <p>@T("Bạn chưa có thông báo nào.", "No notifications yet.")</p> }
+            else
+            {
+                @foreach (var item in items)
+                {
+                    <button type="button" class="ss-notification-entry @(!item.IsRead ? "is-unread" : "")" @onclick="() => OpenAsync(item.Id)">
+                        <strong>@item.Title</strong><span>@item.Body</span>
+                        <small>@item.PublishedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm") · UTC+7 @(!item.IsRead ? " · " + T("Chưa đọc", "Unread") : "")</small>
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</details>
+
+@code {
+    private readonly CancellationTokenSource stop = new();
+    private readonly SemaphoreSlim refreshGate = new(1, 1);
+    private Task? polling;
+    private int userId, unread;
+    private bool loaded, failed, disposed;
+    private IReadOnlyList<NotificationItem> items = [];
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        userId = await Auth.GetUserIdAsync();
+        if (userId <= 0) return;
+        Changes.Changed += OnChanged;
+        L.OnChanged += OnLanguageChanged;
+        await RefreshAsync();
+        polling = PollAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (disposed) return;
+        try
+        {
+            await refreshGate.WaitAsync(stop.Token);
+            try
+            {
+                var result = await Inbox.GetAsync(pageSize: 5, token: stop.Token);
+                if (disposed) return;
+                items = result.Items;
+                unread = result.Unread;
+                failed = false;
+                loaded = true;
+                StateHasChanged();
+            }
+            finally { refreshGate.Release(); }
+        }
+        catch (OperationCanceledException) when (stop.IsCancellationRequested) { }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Could not refresh notifications");
+            if (!disposed) { failed = true; StateHasChanged(); }
+        }
+    }
+
+    private void OnChanged(int? changedUserId)
+    {
+        if (changedUserId is null || changedUserId == userId) _ = ScheduleRefreshAsync();
+    }
+    private void OnLanguageChanged() => _ = ScheduleRefreshAsync();
+
+    private async Task ScheduleRefreshAsync()
+    {
+        try { if (!disposed) await InvokeAsync(RefreshAsync); }
+        catch (Exception) when (disposed) { }
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        try { while (await timer.WaitForNextTickAsync(stop.Token)) await ScheduleRefreshAsync(); }
+        catch (OperationCanceledException) when (stop.IsCancellationRequested) { }
+    }
+
+    private async Task OpenAsync(int id)
+    {
+        try { await Inbox.MarkReadAsync(id); Nav.NavigateTo("/notifications"); }
+        catch (Exception ex) { Logger.LogWarning(ex, "Could not open notification"); failed = true; }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        Changes.Changed -= OnChanged;
+        L.OnChanged -= OnLanguageChanged;
+        await stop.CancelAsync();
+        if (polling is not null) await polling;
+        stop.Dispose();
+    }
+}

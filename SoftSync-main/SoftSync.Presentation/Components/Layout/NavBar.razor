@@ -20,6 +20,7 @@
         @if (isAdmin)
         {
             <NavLink class="ss-navpill" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/notifications"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
             <NavLink class="ss-navpill" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></NavLink>
         }
         else
@@ -50,6 +51,7 @@
     @if (isAdmin)
     {
         <NavLink class="ss-mobile-bottom-link" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+        <NavLink class="ss-mobile-bottom-link" href="/admin/notifications"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
         <NavLink class="ss-mobile-bottom-link" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></NavLink>
     }
     else

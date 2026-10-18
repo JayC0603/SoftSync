@@ -37,10 +37,22 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<ChallengeOption> ChallengeOptions { get; set; }
     public DbSet<QuizAttempt> QuizAttempts { get; set; }
     public DbSet<QuizAttemptAnswer> QuizAttemptAnswers { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<UserNotification> UserNotifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Announcement>().HasIndex(x => new { x.PublishedAtUtc, x.Id });
+        modelBuilder.Entity<Announcement>().HasOne(x => x.Sender).WithMany()
+            .HasForeignKey(x => x.SenderUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<UserNotification>().HasKey(x => new { x.UserId, x.AnnouncementId });
+        modelBuilder.Entity<UserNotification>().HasIndex(x => new { x.UserId, x.ReadAtUtc });
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.Announcement).WithMany(x => x.Recipients)
+            .HasForeignKey(x => x.AnnouncementId).OnDelete(DeleteBehavior.Cascade);
 
         // Many-to-Many: User <-> Skill (Selections)
         modelBuilder.Entity<UserSkillSelection>()

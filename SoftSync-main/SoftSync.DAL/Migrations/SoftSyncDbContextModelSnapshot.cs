@@ -154,6 +154,39 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.Announcement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTime>("PublishedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("SenderUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderUserId");
+
+                    b.HasIndex("PublishedAtUtc", "Id");
+
+                    b.ToTable("Announcements");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
@@ -3581,6 +3614,26 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("SkillChallenges");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.UserNotification", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AnnouncementId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ReadAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("UserId", "AnnouncementId");
+
+                    b.HasIndex("AnnouncementId");
+
+                    b.HasIndex("UserId", "ReadAtUtc");
+
+                    b.ToTable("UserNotifications");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.UserSkillSelection", b =>
                 {
                     b.Property<int>("UserId")
@@ -3688,6 +3741,17 @@ namespace SoftSync.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.Announcement", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.AssessmentOption", b =>
@@ -4002,6 +4066,25 @@ namespace SoftSync.DAL.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.UserNotification", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.Announcement", "Announcement")
+                        .WithMany("Recipients")
+                        .HasForeignKey("AnnouncementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Announcement");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.UserSkillSelection", b =>
                 {
                     b.HasOne("SoftSync.DAL.Entities.Skill", "Skill")
@@ -4028,6 +4111,11 @@ namespace SoftSync.DAL.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.Announcement", b =>
+                {
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.ApplicationUser", b =>

@@ -11,6 +11,7 @@
 @inject UserProfileState UserProfileState
 
 <div class="ss-header-actions">
+    <AuthorizeView><Authorized><NotificationBell /></Authorized></AuthorizeView>
     <details class="ss-header-language ss-header-menu">
         <summary class="ss-header-control ss-header-language-trigger" aria-label="@L["layout.languageMenu"]" title="@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")">
             <img class="ss-language-flag" src="@(L.Current == AppLanguage.Vi ? "/images/flags/vi.svg" : "/images/flags/en.svg")" width="28" height="20" alt="" aria-hidden="true" />

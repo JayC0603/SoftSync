@@ -21,7 +21,6 @@ else
     <div class="focus-home ss-learning-dashboard dashboard-reference" aria-labelledby="focus-home-title">
         <header class="focus-home-header">
             <div><h1 id="focus-home-title">@T($"Chào mừng trở lại, {FirstName(user.PublicName)}!", $"Welcome back, {FirstName(user.PublicName)}!") <span aria-hidden="true">👋</span></h1><p>@T("Mỗi bước nhỏ hôm nay là một tiến bộ ngày mai.", "Every small step today is progress for tomorrow.")</p></div>
-            <a class="ss-secondary-cta" href="/profile"><i class="bi bi-person" aria-hidden="true"></i>@T("Hồ sơ của tôi", "My profile")</a>
         </header>
         @if (CurrentItem is null)
         {

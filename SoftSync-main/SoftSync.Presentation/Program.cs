@@ -51,6 +51,9 @@ builder.Services.AddScoped<LocalizationService>(services =>
     return new LocalizationService(LocalizationService.Parse(request?.Cookies["ss-lang"]));
 });
 builder.Services.AddScoped<UserProfileState>();
+builder.Services.AddSingleton<NotificationChanges>();
+builder.Services.AddScoped<AnnouncementService>();
+builder.Services.AddScoped<NotificationInbox>();
 builder.Services.AddScoped<CourseUploadService>();
 builder.Services.Configure<CvIntegrationOptions>(builder.Configuration.GetSection("CvIntegration"));
 builder.Services.AddHttpClient<CvIntegrationService>(client => client.Timeout = TimeSpan.FromSeconds(20));

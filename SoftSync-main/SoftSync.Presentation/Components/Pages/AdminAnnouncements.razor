@@ -1,0 +1,81 @@
+@page "/admin/notifications"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@inherits LocalizedComponentBase
+@using System.ComponentModel.DataAnnotations
+@using SoftSync.BLL.Services
+@inject NotificationInbox Inbox
+@inject ILogger<AdminAnnouncements> Logger
+
+<PageTitle>@T("Gửi thông báo", "Send announcements") · SoftSync</PageTitle>
+<section class="ss-announcements-page">
+    <UiPageHeader Title="@T("Gửi thông báo", "Send announcements")" Description="@T("Gửi thông báo đến toàn bộ tài khoản hiện có trên SoftSync.", "Send an announcement to every existing SoftSync account.")" />
+    @if (status.Length > 0) { <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@status</div> }
+    <div class="ss-announcement-compose">
+        <EditForm Model="input" OnValidSubmit="SendAsync" FormName="announcement">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <label for="announcement-title">@T("Tiêu đề", "Title")</label>
+            <InputText id="announcement-title" class="form-control" @bind-Value="input.Title" maxlength="160" disabled="@(busy || !ready)" />
+            <label for="announcement-body">@T("Nội dung", "Message")</label>
+            <InputTextArea id="announcement-body" class="form-control" @bind-Value="input.Body" rows="6" maxlength="4000" disabled="@(busy || !ready)" />
+            <p class="text-muted">@T("Thông báo sẽ xuất hiện trong chuông thông báo của người nhận.", "Recipients will see this message in their notification bell.")</p>
+            <button class="btn btn-primary" type="submit" disabled="@(busy || !ready)"><i class="bi bi-send" aria-hidden="true"></i> @(busy ? T("Đang gửi…", "Sending…") : T("Gửi cho tất cả", "Send to everyone"))</button>
+        </EditForm>
+    </div>
+    <h2>@T("Thông báo đã gửi", "Sent announcements")</h2>
+    @if (loading) { <p role="status">@T("Đang tải…", "Loading…")</p> }
+    else if (history.Count == 0) { <p>@T("Chưa có thông báo đã gửi.", "No announcements sent yet.")</p> }
+    @foreach (var item in history)
+    {
+        <article class="ss-announcement-card">
+            <h3>@item.Title</h3><p class="ss-notification-body">@item.Body</p>
+            <small>@item.PublishedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm") · UTC+7 · @item.Recipients @T("người nhận", "recipients")</small>
+        </article>
+    }
+</section>
+
+@code {
+    private sealed class AnnouncementInput
+    {
+        [Required, StringLength(160)] public string Title { get; set; } = string.Empty;
+        [Required, StringLength(4000)] public string Body { get; set; } = string.Empty;
+    }
+    private AnnouncementInput input = new();
+    private bool busy, error, ready, loading = true;
+    private string status = string.Empty;
+    private IReadOnlyList<PublishedAnnouncement> history = [];
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender) { ready = true; StateHasChanged(); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { history = await Inbox.GetPublishedAsync(); }
+        catch (Exception ex) { Logger.LogWarning(ex, "Could not load announcements"); error = true; status = T("Không tải được thông báo. Vui lòng tải lại trang.", "Could not load announcements. Please reload."); }
+        finally { loading = false; }
+    }
+
+    private async Task SendAsync()
+    {
+        if (busy) return;
+        busy = true;
+        try
+        {
+            var published = await Inbox.PublishAsync(input.Title, input.Body);
+            // Update locally after the committed send, so a history refresh failure
+            // cannot misleadingly invite the admin to send the same message again.
+            history = new[] { published }.Concat(history).Take(50).ToList();
+            input = new();
+            error = false;
+            status = T($"Đã gửi thông báo đến {published.Recipients} tài khoản.", $"Announcement sent to {published.Recipients} accounts.");
+        }
+        catch (UnauthorizedAccessException) { error = true; status = T("Bạn không có quyền gửi thông báo.", "You do not have permission to send announcements."); }
+        catch (ArgumentException) { error = true; status = T("Nhập tiêu đề tối đa 160 ký tự và nội dung tối đa 4000 ký tự.", "Enter a title up to 160 characters and a message up to 4000 characters."); }
+        catch (Exception ex) { Logger.LogError(ex, "Announcement could not be sent"); error = true; status = T("Gửi chưa thành công. Vui lòng thử lại.", "The announcement could not be sent. Please retry."); }
+        finally { busy = false; }
+    }
+}

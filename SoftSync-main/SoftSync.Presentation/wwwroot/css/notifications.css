@@ -1,0 +1,24 @@
+.ss-notification-trigger { position: relative; width: 44px; height: 44px; justify-content: center; }
+.ss-notification-count { position: absolute; top: -2px; right: -3px; min-width: 19px; height: 19px; padding: 0 4px; border-radius: 999px; display: grid; place-items: center; background: #c32d47; color: #fff; font: 700 11px/1 system-ui; border: 2px solid var(--ss-surface); }
+html body .ss-notification-dropdown { width: 370px; min-width: 0; max-width: calc(100vw - 24px); padding: 12px; }
+.ss-notification-dropdown > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 8px 12px; border-bottom: 1px solid var(--ss-border); }
+html body .ss-notification-dropdown > header a { width: auto; padding: 4px; color: var(--ss-primary); font-size: 14px; }
+.ss-notification-list { max-height: min(460px, 65vh); overflow-y: auto; overscroll-behavior: contain; }
+.ss-notification-list > p { padding: 18px 8px; margin: 0; color: var(--ss-text-muted); }
+html body .ss-notification-dropdown .ss-notification-entry { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-top: 6px; padding: 14px 12px; text-align: left; overflow-wrap: anywhere; }
+.ss-notification-entry strong { font-size: 15px; }
+.ss-notification-entry > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; white-space: pre-wrap; }
+.ss-notification-entry small, .ss-announcement-card small { color: var(--ss-text-muted); font-size: 12px; }
+html body .ss-notification-entry.is-unread { background: var(--ss-surface-accent); border-left: 3px solid var(--ss-primary); }
+.ss-announcements-page { max-width: 900px; margin: 0 auto; }
+.ss-announcement-compose, .ss-announcement-card { padding: 24px; margin: 20px 0; border: 1px solid var(--ss-border); border-radius: 20px; background: var(--ss-surface); color: var(--ss-text); }
+.ss-announcement-compose label { display: block; font-weight: 600; margin: 16px 0 8px; }
+.ss-announcement-compose p { margin-top: 12px; }
+.ss-announcement-card.is-unread { border-left: 4px solid var(--ss-primary); }
+.ss-notification-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ss-notification-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+@media (max-width: 760px) {
+    html body .ss-notification-dropdown { position: fixed; top: 72px; left: 12px; right: 12px; width: auto; max-width: none; }
+    .ss-announcement-compose, .ss-announcement-card { padding: 18px; }
+    html body .ss-header-actions { gap: 6px; }
+}
