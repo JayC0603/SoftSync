@@ -33,9 +33,9 @@
     {
         <section class="pr-empty">
             <i class="bi bi-stars"></i>
-            <h1>@Tx("Your roadmap is being prepared", "Lộ trình của bạn đang được chuẩn bị")</h1>
-            <p>@Tx("Complete the skills assessment so SoftSync can build a plan for you.", "Hãy hoàn thành bài đánh giá để SoftSync xây dựng kế hoạch phù hợp cho bạn.")</p>
-            <button @onclick='() => Nav.NavigateTo($"/assessment/{UserId}")'>@Tx("Take assessment", "Làm bài đánh giá")</button>
+            <h1>@Tx("No published lessons for your current skills", "Chưa có bài học được phát hành cho kỹ năng hiện tại")</h1>
+            <p>@Tx("Communication and Time Management lessons are available. Choose either skill in Settings. Critical Thinking assessments remain available while its lessons are being prepared.", "Hiện có bài học Giao tiếp và Quản lý thời gian. Bạn có thể chọn hai kỹ năng này trong Cài đặt. Bài đánh giá Tư duy phản biện vẫn dùng được trong khi nội dung học đang được chuẩn bị.")</p>
+            <button @onclick='() => Nav.NavigateTo("/settings")'>@Tx("Choose learning skills", "Chọn kỹ năng học")</button>
         </section>
     }
     else
@@ -288,7 +288,7 @@
                             }
                         </div>
                         <p><b>@ActivityDays</b> @Tx("learning days", "ngày đã học") · @Tx("Streak", "Chuỗi") <strong>@StreakDays @Tx("days", "ngày")</strong></p>
-                        <small class="pr-data-note">@Tx("Estimated from completed roadmap weeks.", "Tạm tính từ các tuần đã hoàn thành.")</small>
+                        <small class="pr-data-note">@Tx("Based on saved learning activity (UTC).", "Dựa trên hoạt động học đã lưu (UTC).")</small>
                     </section>
 
                     <section class="pr-side-card pr-progress-card">
@@ -355,8 +355,11 @@
     private int OverallPercent => roadmap.ProgressPercent;
     private int CompletedActivities => items.Sum(x => x.CompletedActivityCount);
     private int TotalActivities => items.Sum(x => x.TotalActivityCount);
-    private int ActivityDays => Math.Min(CompletedCount, 7);
-    private int StreakDays => Math.Min(CompletedCount, 7);
+    private DateOnly ActivityToday => DateOnly.FromDateTime(DateTime.UtcNow);
+    private DateOnly WeekStart => ActivityToday.AddDays(-(((int)ActivityToday.DayOfWeek + 6) % 7));
+    private HashSet<DateOnly> SavedActivityDays => SoftSync.Common.LearningActivity.Days(items);
+    private int ActivityDays => SavedActivityDays.Count(day => day >= WeekStart && day <= ActivityToday);
+    private int StreakDays => SoftSync.Common.LearningActivity.Streak(SavedActivityDays, ActivityToday);
     private string CurrentSkillName => items.Count == 0 ? Tx("Soft skills", "Kỹ năng mềm") : SkillDisplayName(items[ActiveIndex]);
     private string SelectedSkillName => SkillDisplayName(SelectedItem);
     private int CurrentSkillPercent => AssessmentPercent(items[ActiveIndex]);
@@ -582,9 +585,9 @@
 
     private string DayClass(int day)
     {
-        var today = ((int)DateTime.Today.DayOfWeek + 6) % 7;
-        if (day < Math.Min(ActivityDays, today + 1)) return "done";
-        return day == today ? "current" : string.Empty;
+        var date = WeekStart.AddDays(day);
+        if (SavedActivityDays.Contains(date)) return "done";
+        return date == ActivityToday ? "current" : string.Empty;
     }
 
     private string DayLabel(int day) => L.Current == AppLanguage.Vi

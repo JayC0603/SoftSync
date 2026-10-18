@@ -19,6 +19,7 @@
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
         @if (isAdmin)
         {
+            <NavLink class="ss-navpill" href="/admin/mentor-requests"><i class="bi bi-person-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Yêu cầu Mentor" : "Mentor requests")</span></NavLink>
             <NavLink class="ss-navpill" href="/admin/users" aria-label="@L["layout.manageUsers"]"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
             <NavLink class="ss-navpill" href="/admin/notifications" aria-label="@L["nav.notifications"]"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
             <NavLink class="ss-navpill" href="/teacher" aria-label="@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></NavLink>

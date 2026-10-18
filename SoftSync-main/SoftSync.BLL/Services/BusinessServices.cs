@@ -480,6 +480,21 @@ public class RoadmapService : IRoadmapService
             // Catalog rows may remain in storage after content review. In normal
             // mode only return the lessons selected by the personalization flow.
             var personalizedCatalog = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
+            var nextWeek = items.Count == 0 ? 1 : items.Max(x => x.WeekNumber) + 1;
+            var added = false;
+            foreach (var lesson in personalizedCatalog.Items)
+            {
+                if (items.Any(x => string.Equals(x.Title, lesson.Title, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+                lesson.WeekNumber = nextWeek++;
+                await _roadmapRepo.AddAsync(CreateRoadmapItem(userId, lesson, assessmentResults, learner?.CurrentLevel ?? LearningLevel.Unspecified));
+                added = true;
+            }
+            if (added)
+            {
+                await _roadmapRepo.SaveChangesAsync();
+                items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
+            }
             var allowedTitles = personalizedCatalog.Items
                 .Select(x => x.Title)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -686,16 +701,17 @@ public class RoadmapService : IRoadmapService
             .OrderBy(r => r.Score)  // weakest skill first
             .Select(r => r.Skill.Name)
             .ToList();
-        if (byScore.Count > 0) return byScore;
-
-        // 2. Fall back to the skills the user selected (active only).
+        // Explicit selections define the current plan; assessment scores order
+        // those skills instead of permanently overriding a later selection.
         var allSkills = (await _skillRepo.GetAllAsync()).ToList();
         var selectedIds = await _assessmentRepo.GetSelectedSkillIdsAsync(userId);
         var selected = allSkills
             .Where(s => selectedIds.Contains(s.Id) && QuizSeedData.ActiveSkillIds.Contains(s.Id))
             .Select(s => s.Name)
             .ToList();
-        if (selected.Count > 0) return selected;
+        if (selected.Count > 0) return selected.OrderBy(name =>
+            byScore.IndexOf(name) is var index && index >= 0 ? index : int.MaxValue).ToList();
+        if (byScore.Count > 0) return byScore;
 
         // 3. Last resort: every active skill.
         return allSkills

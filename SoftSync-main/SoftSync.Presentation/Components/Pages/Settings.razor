@@ -129,13 +129,13 @@
                             </div>
                             <div class="ss-stat">
                                 <div class="ss-stat-icon ss-stat-icon--streak"><i class="bi bi-fire"></i></div>
-                                <div class="ss-stat-num">@dayStreak</div>
-                                <div class="ss-stat-label">@L["settings.hero.streak"]</div>
+                                <div class="ss-stat-num">@trackedSkillCount</div>
+                                <div class="ss-stat-label">@Tx("Skills in progress", "Kỹ năng có tiến độ")</div>
                             </div>
                             <div class="ss-stat">
                                 <div class="ss-stat-icon ss-stat-icon--badge"><i class="bi bi-award-fill"></i></div>
-                                <div class="ss-stat-num">@badgeCount</div>
-                                <div class="ss-stat-label">@L["settings.hero.badges"]</div>
+                                <div class="ss-stat-num">@assessedSkillCount</div>
+                                <div class="ss-stat-label">@Tx("Skills assessed", "Kỹ năng đã đánh giá")</div>
                             </div>
                         </div>
                     </div>
@@ -351,36 +351,9 @@
 
                     case Tab.Notifications:
                         <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title tw:mb-1">@L["settings.tab.notifications"]</h4>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.notifications.hint"]</p>
-                            <div class="ss-notif-row">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.notif.study"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.notif.study.hint"]</div>
-                                </div>
-                                <div class="form-check form-switch tw:m-0">
-                                    <input class="form-check-input" type="checkbox" @bind="notifStudy" />
-                                </div>
-                            </div>
-                            <div class="ss-notif-row">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.notif.progress"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.notif.progress.hint"]</div>
-                                </div>
-                                <div class="form-check form-switch tw:m-0">
-                                    <input class="form-check-input" type="checkbox" @bind="notifProgress" />
-                                </div>
-                            </div>
-                            <div class="ss-notif-row">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.notif.community"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.notif.community.hint"]</div>
-                                </div>
-                                <div class="form-check form-switch tw:m-0">
-                                    <input class="form-check-input" type="checkbox" @bind="notifCommunity" />
-                                </div>
-                            </div>
-                            <p class="text-muted tw:text-xs tw:mt-3"><i class="bi bi-info-circle tw:me-1"></i>@L["settings.notif.preview"]</p>
+                            <h4 class="ss-panel-title">@L["settings.tab.notifications"]</h4>
+                            <p>@Tx("Announcements from SoftSync are available in your notification inbox. Automatic study reminders and community subscriptions are not available yet.", "Thông báo từ SoftSync được lưu trong hộp thông báo. Nhắc học tự động và đăng ký thông báo cộng đồng hiện chưa khả dụng.")</p>
+                            <a class="ss-btn-primary" href="/notifications">@Tx("Open notifications", "Mở thông báo")</a>
                         </div>
                         break;
 
@@ -433,27 +406,9 @@
 
                     case Tab.Privacy:
                         <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title tw:mb-1">@L["settings.tab.privacy"]</h4>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.privacy.hint"]</p>
-                            <div class="ss-notif-row">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.privacy.profile"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.privacy.profile.hint"]</div>
-                                </div>
-                                <div class="form-check form-switch tw:m-0">
-                                    <input class="form-check-input" type="checkbox" @bind="publicProfile" />
-                                </div>
-                            </div>
-                            <div class="ss-notif-row">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.privacy.leaderboard"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.privacy.leaderboard.hint"]</div>
-                                </div>
-                                <div class="form-check form-switch tw:m-0">
-                                    <input class="form-check-input" type="checkbox" @bind="showOnLeaderboard" />
-                                </div>
-                            </div>
-                            <p class="text-muted tw:text-xs tw:mt-3"><i class="bi bi-info-circle tw:me-1"></i>@L["settings.notif.preview"]</p>
+                            <h4 class="ss-panel-title">@L["settings.tab.privacy"]</h4>
+                            <p>@Tx("Your account profile and learning records are accessible through your signed-in account. Public learner profiles and a public leaderboard are not available.", "Hồ sơ tài khoản và kết quả học được truy cập qua tài khoản đăng nhập. Hiện chưa có hồ sơ học viên công khai hoặc bảng xếp hạng công khai.")</p>
+                            <p>@Tx("When requesting mentor support, share only the context you choose to submit. Your Reflection text is not attached automatically.", "Khi yêu cầu Mentor hỗ trợ, chỉ gửi ngữ cảnh bạn muốn chia sẻ. Nội dung phản tư không được tự động đính kèm.")</p>
                         </div>
                         break;
 
@@ -570,15 +525,8 @@
     private readonly List<int> selectedSkillIds = new();
 
     // Hero stats
-    private int dayStreak;
-    private int badgeCount;
-
-    // Notification / privacy toggles — UI-only for now (no persisted preference model yet).
-    private bool notifStudy = true;
-    private bool notifProgress = true;
-    private bool notifCommunity;
-    private bool publicProfile = true;
-    private bool showOnLeaderboard = true;
+    private int trackedSkillCount;
+    private int assessedSkillCount;
 
     // Linked account rows for the mockup grid.
     private record LinkedProvider(string Scheme, string Name, string Icon, string Bg, string Fg, bool Available, bool Connected);
@@ -639,10 +587,9 @@
 
         // Hero stats — pull real data where we have it.
         var results = await AssessmentService.GetLatestResultsAsync(userId, userId);
-        badgeCount = results.Count();
+        assessedSkillCount = results.Select(x => x.SkillId).Distinct().Count();
         var progress = await ProgressService.GetUserProgressAsync(userId);
-        // No streak schema yet — approximate with number of tracked skills so the tile isn't hollow.
-        dayStreak = progress.Count();
+        trackedSkillCount = progress.Count();
 
         // Which external logins are currently linked to this user, and which are configured on the server.
         var appUser = await UserManagerSvc.FindByIdAsync(userId.ToString());
@@ -738,6 +685,11 @@
             UserProfileState.NotifyDisplayNameChanged(user.DisplayName);
             savedMessage = L["settings.saved"];
             toastSeq++; // bump so the toast remounts and replays its animation
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Settings could not be saved for user {UserId}", userId);
+            savedMessage = Tx("Could not save all settings. Please retry.", "Chưa lưu được đầy đủ cài đặt. Vui lòng thử lại.");
         }
         finally
         {

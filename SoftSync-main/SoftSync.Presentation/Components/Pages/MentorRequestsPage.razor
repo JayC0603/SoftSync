@@ -1,0 +1,92 @@
+@page "/mentor-requests"
+@page "/admin/mentor-requests"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Services
+@using SoftSync.Presentation.Services
+@inject MentorRequests Requests
+@inject NavigationManager Navigation
+@inject ILogger<MentorRequestsPage> Logger
+
+<PageTitle>@T("Yêu cầu Mentor", "Mentor requests") · SoftSync</PageTitle>
+<section class="ss-announcements-page" aria-busy="@busy">
+    <UiPageHeader Title="@T("Yêu cầu Mentor", "Mentor requests")" Description="@T("Theo dõi trạng thái. Phản hồi được gửi riêng vào hộp thông báo của người học.", "Track request status. Replies are delivered privately to the learner's notification inbox.")" />
+    <div class="ss-notification-toolbar">
+        <a href="/mentors">@T("Danh sách Mentor", "Find a mentor")</a>
+        <a href="/notifications">@T("Xem phản hồi", "View replies")</a>
+        <button class="btn btn-outline-primary" disabled="@busy" @onclick="LoadAsync">@T("Làm mới", "Refresh")</button>
+    </div>
+    @if (error.Length > 0) { <div class="alert alert-danger" role="alert">@error</div> }
+    @if (busy && items.Count == 0) { <p role="status">@T("Đang tải…", "Loading…")</p> }
+    else if (items.Count == 0 && error.Length == 0) { <p>@T("Chưa có yêu cầu hỗ trợ.", "No support requests yet.")</p> }
+    @foreach (var request in items)
+    {
+        <article class="ss-announcement-card" @key="request.Id">
+            <small>#@request.Id · @request.CreatedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm") UTC+7 · @StatusName(request.Status)</small>
+            <h2>@request.Goal</h2><p>@request.MentorName</p>
+            @if (request.Skill.Length > 0) { <p>@request.Skill</p> }
+            <p class="ss-notification-body">@request.Context</p>
+            @if (Manage)
+            {
+                <p>@T("Liên hệ mong muốn", "Preferred contact"): @request.PreferredContact @request.Email</p>
+                @if (request.Status is not ("Resolved" or "Declined"))
+                {
+                    <label for="reply-@request.Id">@T("Phản hồi riêng cho người học", "Private reply to learner")</label>
+                    <textarea id="reply-@request.Id" class="form-control" rows="4" maxlength="3000" @bind="replies[request.Id]" @bind:event="oninput" disabled="@busy"></textarea>
+                    <label for="status-@request.Id">@T("Trạng thái", "Status")</label>
+                    <select id="status-@request.Id" class="form-select" @bind="statuses[request.Id]" disabled="@busy">
+                        <option value="InProgress">@StatusName("InProgress")</option>
+                        <option value="Resolved">@StatusName("Resolved")</option>
+                        <option value="Declined">@StatusName("Declined")</option>
+                    </select>
+                    <button class="btn btn-primary" disabled="@(busy || replies[request.Id].Trim().Length < 3)" @onclick="() => RespondAsync(request.Id)">@T("Lưu và gửi phản hồi", "Save and send reply")</button>
+                }
+            }
+        </article>
+    }
+    @if (items.Count == 100) { <p>@T("Đang hiển thị 100 yêu cầu gần nhất.", "Showing the latest 100 requests.")</p> }
+</section>
+
+@code {
+    private string T(string vi, string en) => L.Code == "vi" ? vi : en;
+    private bool Manage => new Uri(Navigation.Uri).AbsolutePath.StartsWith("/admin/", StringComparison.Ordinal);
+    private IReadOnlyList<MentorRequestView> items = [];
+    private readonly Dictionary<int, string> replies = [];
+    private readonly Dictionary<int, string> statuses = [];
+    private bool busy;
+    private string error = "";
+    protected override Task OnParametersSetAsync() => LoadAsync();
+    private string StatusName(string status) => status switch
+    {
+        "Pending" => T("Chờ tiếp nhận", "Pending"), "InProgress" => T("Đang hỗ trợ", "In progress"),
+        "Resolved" => T("Đã giải quyết", "Resolved"), "Declined" => T("Không thể tiếp nhận", "Declined"), _ => status
+    };
+    private async Task LoadAsync()
+    {
+        if (busy) return;
+        busy = true; error = "";
+        try
+        {
+            items = await Requests.ListAsync(Manage);
+            foreach (var request in items) { replies.TryAdd(request.Id, ""); statuses.TryAdd(request.Id, "InProgress"); }
+        }
+        catch (Exception ex) { Logger.LogWarning(ex, "Mentor requests could not be loaded"); error = T("Không thể tải yêu cầu hoặc bạn không có quyền truy cập.", "Unable to load requests or access denied."); }
+        finally { busy = false; }
+    }
+    private async Task RespondAsync(int id)
+    {
+        if (busy) return;
+        busy = true; error = "";
+        var saved = false;
+        try
+        {
+            saved = await Requests.RespondAsync(id, statuses[id], replies[id]);
+            if (saved) replies[id] = "";
+            else error = T("Yêu cầu đã đóng hoặc không còn tồn tại. Hãy làm mới.", "Request closed or unavailable. Refresh to check its status.");
+        }
+        catch (Exception ex) { Logger.LogWarning(ex, "Mentor reply failed"); error = T("Chưa gửi được phản hồi. Nội dung vẫn được giữ lại.", "Could not send reply. Your text is kept."); }
+        finally { busy = false; }
+        if (saved) await LoadAsync();
+    }
+}

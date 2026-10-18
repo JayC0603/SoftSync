@@ -262,7 +262,15 @@
                             </div>
                             @if (roleplayResult is null)
                             {
-                                <div class="chat-compose"><textarea @bind="roleplayInput" maxlength="1000" placeholder="@Tx("Write a calm, empathetic response...", "Nhập phản hồi bình tĩnh, thấu cảm...")"></textarea><button disabled="@(string.IsNullOrWhiteSpace(roleplayInput) || sendingRoleplay)" @onclick="SendRoleplay">@Tx("Send", "Gửi")<i class="bi bi-send"></i></button></div>
+                                @if (roleplayUserMessages.Count == 3 || roleplayUserMessages.Count > roleplayAiMessages.Count)
+                                {
+                                    <button class="primary" disabled="@sendingRoleplay" @onclick="SendRoleplay">@Tx("Retry pending response / save", "Thử lại phản hồi / lưu kết quả")</button>
+                                }
+                                else
+                                {
+                                    <div class="chat-compose"><textarea @bind="roleplayInput" disabled="@sendingRoleplay" maxlength="1000" placeholder="@Tx("Write a calm, empathetic response...", "Nhập phản hồi bình tĩnh, thấu cảm...")"></textarea><button disabled="@(string.IsNullOrWhiteSpace(roleplayInput) || sendingRoleplay)" @onclick="SendRoleplay">@Tx("Send", "Gửi")<i class="bi bi-send"></i></button></div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error" role="alert">@saveError</div> }
                             }
                             else
                             {
@@ -348,6 +356,7 @@
     private string roleplayInput = string.Empty;
     private bool sendingRoleplay;
     private RoadmapRoleplayAttemptDto? roleplayResult;
+    private RoadmapRoleplayAttemptDto? pendingRoleplayResult;
     private ReflectionForm reflection = new();
     private bool savingReflection;
     private bool reflectionError;
@@ -424,6 +433,20 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender && item is not null)
+        {
+            var roleplayDraft = await JS.InvokeAsync<RoleplayDraft?>("ssRoadmapRoleplay.get", UserId, ItemId);
+            var scenario = CommunicationRoleplayEngine.Scenarios.FirstOrDefault(x => x.Id == roleplayDraft?.ScenarioId);
+            if (scenario is not null && roleplayDraft is not null && roleplayDraft.HistoryCount == item.RoleplayHistory.Count && roleplayDraft.Messages.Count <= 3
+                && roleplayDraft.Replies.Count <= 2 && roleplayDraft.Replies.Count <= roleplayDraft.Messages.Count
+                && roleplayDraft.Messages.All(x => !string.IsNullOrWhiteSpace(x) && x.Length <= 1000))
+            {
+                roleplayScenario = scenario;
+                roleplayUserMessages.Clear(); roleplayUserMessages.AddRange(roleplayDraft.Messages);
+                roleplayAiMessages.Clear(); roleplayAiMessages.AddRange(roleplayDraft.Replies);
+                StateHasChanged();
+            }
+        }
         if (!firstRender || item is null || currentStep != 4 || quizFinished)
             return;
 
@@ -590,23 +613,42 @@
         var used = item?.RoleplayHistory.Select(x => x.ScenarioId).ToHashSet() ?? [];
         var choices = CommunicationRoleplayEngine.Scenarios.Where(x => !used.Contains(x.Id)).ToList();
         if (choices.Count == 0) choices = CommunicationRoleplayEngine.Scenarios.ToList();
-        roleplayScenario = choices[Random.Shared.Next(choices.Count)]; roleplayUserMessages.Clear(); roleplayAiMessages.Clear(); roleplayInput = string.Empty; roleplayResult = null;
+        roleplayScenario = choices[Random.Shared.Next(choices.Count)]; roleplayUserMessages.Clear(); roleplayAiMessages.Clear(); roleplayInput = string.Empty; roleplayResult = null; pendingRoleplayResult = null;
     }
+    private sealed class RoleplayDraft
+    {
+        public int ScenarioId { get; set; }
+        public List<string> Messages { get; set; } = [];
+        public List<string> Replies { get; set; } = [];
+        public int HistoryCount { get; set; }
+    }
+    private Task PersistRoleplayDraft() => JS.InvokeVoidAsync("ssRoadmapRoleplay.set", UserId, ItemId,
+        new RoleplayDraft { ScenarioId = roleplayScenario!.Id, Messages = roleplayUserMessages, Replies = roleplayAiMessages, HistoryCount = item!.RoleplayHistory.Count }).AsTask();
     private async Task SendRoleplay()
     {
-        var value = roleplayInput.Trim(); if (value.Length == 0 || roleplayScenario is null || roleplayResult is not null) return;
-        sendingRoleplay = true; roleplayUserMessages.Add(value); roleplayInput = string.Empty;
+        if (sendingRoleplay || roleplayScenario is null || roleplayResult is not null) return;
+        var pending = roleplayUserMessages.Count == 3 || roleplayUserMessages.Count > roleplayAiMessages.Count;
+        var value = roleplayInput.Trim();
+        if (!pending && (value.Length == 0 || value.Length > 1000)) return;
+        sendingRoleplay = true; saveError = null;
         try
         {
+            if (!pending) { roleplayUserMessages.Add(value); roleplayInput = string.Empty; }
+            await PersistRoleplayDraft();
             if (roleplayUserMessages.Count < 3)
+            {
                 roleplayAiMessages.Add(await AiEvaluator.ContinueRoleplayAsync(roleplayScenario, roleplayUserMessages, roleplayAiMessages, IsVi));
+                await PersistRoleplayDraft();
+            }
             else
             {
-                var result = await AiEvaluator.GradeRoleplayAsync(roleplayScenario, [.. roleplayUserMessages], [.. roleplayAiMessages], IsVi);
-                if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, result)) { roleplayResult = result; item!.RoleplayHistory.Add(result); item.IsScenarioCompleted = true; item.ScenarioCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "reflection"; }
+                var result = pendingRoleplayResult ??= await AiEvaluator.GradeRoleplayAsync(roleplayScenario, [.. roleplayUserMessages], [.. roleplayAiMessages], IsVi);
+                await PersistRoleplayDraft();
+                if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, result)) { roleplayResult = result; item!.RoleplayHistory.Add(result); item.IsScenarioCompleted = true; item.ScenarioCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "reflection"; await JS.InvokeVoidAsync("ssRoadmapRoleplay.clear", UserId, ItemId); }
                 else saveError = Tx("Could not save role-play history.", "Không thể lưu lịch sử thực hành.");
             }
         }
+        catch (Exception) { saveError = Tx("Your conversation is kept. Retry the pending response or save.", "Hội thoại được giữ lại. Hãy thử lại phản hồi hoặc lưu kết quả."); }
         finally { sendingRoleplay = false; }
     }
     private void LoadReflection()

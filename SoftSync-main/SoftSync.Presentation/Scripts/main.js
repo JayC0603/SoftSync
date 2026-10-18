@@ -158,6 +158,13 @@ window.ssRoadmapQuiz = {
 };
 
 // Submit a plain HTML form by id (used to POST the logout form after the
+// Separate key space for unfinished conversations; no tokens are stored here.
+window.ssRoadmapRoleplay = {
+    ...window.ssRoadmapQuiz,
+    key(userId, itemId) { return `ss-roadmap-roleplay-${userId}-${itemId}`; }
+};
+
+// Submit a plain HTML form by id (used to POST the logout form after the
 // "Leave your learning journey?" modal is confirmed).
 window.ssSubmitForm = function (id) {
     const f = document.getElementById(id);

@@ -76,15 +76,18 @@ public class FakeAiRoadmapService : IAiRoadmapService
         // trong 3 kỹ năng active, sắp xếp theo điểm yếu → mạnh).
         foreach (var skill in weakSkills)
         {
+            // Only publish lessons with video, theory, quiz and practice content.
+            // Assessment support alone does not make a skill's curriculum ready.
+            if (!skill.Equals("Communication", StringComparison.OrdinalIgnoreCase)
+                && !skill.Equals("Time Management", StringComparison.OrdinalIgnoreCase))
+                continue;
             var vi = ToVietnameseSkillName(skill);
             if (skill.Equals("Communication", StringComparison.OrdinalIgnoreCase))
             {
                 items.AddRange(new[]
                 {
                     new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 1 - Nền tảng giao tiếp", Description = "Hiểu mô hình giao tiếp hai chiều, các thành phần cơ bản và nguyên tắc giao tiếp hiệu quả." },
-                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 2 - Lắng nghe chủ động", Description = "Phân biệt nghe và lắng nghe; rèn sự tập trung, thấu cảm, xác nhận và đặt câu hỏi làm rõ." },
-                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 3 - Phản hồi xây dựng", Description = "Phản hồi tôn trọng, kiểm soát cảm xúc, tập trung vào vấn đề và đề xuất giải pháp phù hợp." },
-                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 4 - Giao tiếp nâng cao", Description = "Tổng hợp kỹ năng giao tiếp và vận dụng trong các tình huống học tập, làm việc thực tế." }
+                    new RoadmapItemDto { WeekNumber = week++, Title = "Tuần 2 - Lắng nghe chủ động", Description = "Phân biệt nghe và lắng nghe; rèn sự tập trung, thấu cảm, xác nhận và đặt câu hỏi làm rõ." }
                 });
                 continue;
             }

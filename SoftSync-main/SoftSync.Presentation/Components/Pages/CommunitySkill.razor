@@ -8,10 +8,15 @@
 
 <PageTitle>@(skill?.Name ?? Tx("Skill community", "Nhóm kỹ năng")) · SoftSync</PageTitle>
 <section class="eco-page skill-community" aria-labelledby="skill-community-title">
+    <p class="eco-inline-note">@Tx("This page lists learning guidance and mentors. Group membership, posts and comments are not available here. Send a private mentor request if you need feedback.", "Trang này cung cấp hướng dẫn học và danh sách Mentor. Hiện chưa có tham gia nhóm, bài đăng hoặc bình luận. Nếu cần phản hồi, hãy gửi yêu cầu hỗ trợ riêng cho Mentor.")</p>
     <a class="eco-back" href="/community"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Community", "Cộng đồng")</a>
     @if (loading)
     {
         <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span></div>
+    }
+    else if (loadError)
+    {
+        <div class="eco-state eco-state-error" role="alert"><h1 id="skill-community-title">@Tx("Could not load the skill guide", "Không tải được hướng dẫn kỹ năng")</h1><button @onclick="LoadAsync">@Tx("Retry", "Thử lại")</button></div>
     }
     else if (skill is null)
     {
@@ -36,8 +41,15 @@
     private SkillDto? skill;
     private List<MentorDto> mentors = [];
     private bool loading = true;
-    protected override async Task OnInitializedAsync()
+    private bool loadError;
+    protected override Task OnParametersSetAsync() => LoadAsync();
+    private async Task LoadAsync()
     {
+        loading = true;
+        loadError = false;
+        mentors = [];
+        try
+        {
         var all = (await SkillService.GetAllSkillsAsync()).ToList();
         skill = all.FirstOrDefault(x => x.Id == SkillId);
         if (skill is not null)
@@ -45,7 +57,9 @@
             var terms = skill.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             mentors = (await MentorService.GetAllAsync()).Where(m => terms.Any(t => m.Expertise.Contains(t, StringComparison.OrdinalIgnoreCase) || m.ShortBio.Contains(t, StringComparison.OrdinalIgnoreCase))).ToList();
         }
-        loading = false;
+        }
+        catch { loadError = true; }
+        finally { loading = false; }
     }
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
 }

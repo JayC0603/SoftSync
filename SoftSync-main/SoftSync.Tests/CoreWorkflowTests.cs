@@ -493,6 +493,7 @@ public sealed class CoreWorkflowTests
     public async Task Roadmap_generation_prioritizes_the_weakest_assessed_skill()
     {
         var assessments = AssessmentData.Create(1).Repository;
+        assessments.SelectedSkillIds = [];
         assessments.Results.AddRange([
             new AssessmentResult { UserId = 1, SkillId = 1, Skill = new Skill { Id = 1, Name = "Communication" }, Score = 25, CreatedAt = DateTime.UtcNow },
             new AssessmentResult { UserId = 1, SkillId = 3, Skill = new Skill { Id = 3, Name = "Time Management" }, Score = 12, CreatedAt = DateTime.UtcNow }
@@ -708,9 +709,10 @@ public sealed class CoreWorkflowTests
         public required List<AssessmentQuestion> Questions { get; init; }
         public required List<AssessmentOption> Options { get; init; }
         public List<AssessmentResult> Results { get; } = [];
+        public List<int> SelectedSkillIds { get; set; } = [1];
         public Task<IEnumerable<AssessmentQuestion>> GetQuestionsBySkillIdsAsync(List<int> skillIds) =>
             Task.FromResult<IEnumerable<AssessmentQuestion>>(Questions.Where(q => skillIds.Contains(q.SkillId)).ToList());
-        public Task<List<int>> GetSelectedSkillIdsAsync(int userId) => Task.FromResult(new List<int> { 1 });
+        public Task<List<int>> GetSelectedSkillIdsAsync(int userId) => Task.FromResult(SelectedSkillIds);
         public Task<IEnumerable<AssessmentOption>> GetAnsweredOptionsAsync(List<int> optionIds) =>
             Task.FromResult<IEnumerable<AssessmentOption>>(Options.Where(o => optionIds.Contains(o.Id)).ToList());
         public Task SaveResultAsync(AssessmentResult result) { Results.Add(result); return Task.CompletedTask; }

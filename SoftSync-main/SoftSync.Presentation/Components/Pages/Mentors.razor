@@ -7,6 +7,7 @@
 
 <PageTitle>@Tx("Mentors", "Mentor") · SoftSync</PageTitle>
 <section class="eco-page" aria-labelledby="mentors-title">
+    <AuthorizeView><Authorized><a class="eco-back" href="/mentor-requests">@Tx("My support requests", "Yêu cầu hỗ trợ của tôi")</a></Authorized></AuthorizeView>
     <header class="eco-page-head eco-page-head-compact"><span>@Tx("LEARNING SUPPORT", "HỖ TRỢ HỌC TẬP")</span><h1 id="mentors-title">@Tx("Find the right person to unblock your next step", "Tìm người phù hợp để tháo gỡ bước tiếp theo")</h1><p>@Tx("Mentors complement your learning journey; they do not replace Practice and Reflection.", "Mentor hỗ trợ hành trình học; họ không thay thế Practice và Reflection.")</p></header>
     <div class="eco-search" role="search"><i class="bi bi-search" aria-hidden="true"></i><label for="mentor-search">@Tx("Search mentors", "Tìm Mentor")</label><input id="mentor-search" @bind="query" @bind:event="oninput" placeholder="@Tx("Name or expertise", "Tên hoặc chuyên môn")" /><span aria-live="polite">@Filtered.Count() @Tx("results", "kết quả")</span></div>
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentors...", "Đang tải Mentor...")</p></div> }

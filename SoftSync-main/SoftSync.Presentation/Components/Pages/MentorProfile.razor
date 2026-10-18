@@ -8,6 +8,7 @@
 
 <PageTitle>@(mentor?.Name ?? Tx("Mentor profile", "Hồ sơ Mentor")) · SoftSync</PageTitle>
 <section class="eco-page mentor-profile" aria-labelledby="mentor-title">
+    <AuthorizeView><Authorized><a class="eco-back" href="/mentor-requests">@Tx("Track my support requests", "Theo dõi yêu cầu hỗ trợ của tôi")</a></Authorized></AuthorizeView>
     <a class="eco-back" href="/mentors"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("All mentors", "Tất cả Mentor")</a>
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentor profile...", "Đang tải hồ sơ Mentor...")</p></div> }
     else if (mentor is null) { <div class="eco-state eco-state-error"><i class="bi bi-person-x" aria-hidden="true"></i><h1 id="mentor-title">@Tx("Mentor not found", "Không tìm thấy Mentor")</h1><p>@Tx("This profile may no longer be available.", "Hồ sơ này có thể không còn khả dụng.")</p><a href="/mentors">@Tx("Return to mentors", "Quay lại danh sách")</a></div> }
@@ -22,7 +23,7 @@
                 @if (submitted) {
                     <div class="eco-success" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i><h2 id="request-title">@Tx("Request received", "Đã nhận yêu cầu")</h2><p>@Tx("Your request was saved. SoftSync can now follow up through your selected contact method.", "Yêu cầu đã được lưu. SoftSync có thể tiếp tục hỗ trợ qua phương thức bạn đã chọn.")</p><a href="/roadmap">@Tx("Return to learning", "Quay lại học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
                 } else {
-                    <h2 id="request-title">@Tx("Request mentor support", "Yêu cầu Mentor hỗ trợ")</h2><p>@Tx("This is a support request, not an instant booking.", "Đây là yêu cầu hỗ trợ, không phải đặt lịch tức thì.")</p>
+                    <h2 id="request-title">@Tx("Request mentor support", "Yêu cầu Mentor hỗ trợ")</h2><p>@Tx("SoftSync administrators coordinate these requests. Track status under My support requests; replies arrive in your notification inbox. Email is a contact preference, not an automatic email delivery.", "Quản trị viên SoftSync điều phối các yêu cầu này. Theo dõi trạng thái tại Yêu cầu hỗ trợ của tôi; phản hồi được gửi vào hộp thông báo. Email là phương thức liên hệ mong muốn, không phải gửi email tự động.")</p>
                     @if (!signedIn) { <div class="eco-inline-note"><i class="bi bi-lock" aria-hidden="true"></i><span>@Tx("Sign in before sending a private request.", "Đăng nhập trước khi gửi yêu cầu riêng tư.")</span></div><a class="eco-primary" href="/Account/Login">@Tx("Sign in", "Đăng nhập")</a> }
                     else {
                         <EditForm Model="request" OnSubmit="Submit">
