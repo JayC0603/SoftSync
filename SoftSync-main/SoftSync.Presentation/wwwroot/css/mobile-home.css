@@ -224,22 +224,30 @@
  html body .page .ss-main-content .mobile-home .mh-roadmap li a { padding-block:8px; }
  html body .page .ss-main-content .mobile-home .mh-mentor-track {
     display:grid; grid-template-columns:none; grid-auto-flow:column;
-    grid-auto-columns:min(360px,86%); gap:16px; min-width:0; max-width:100%;
+    grid-auto-columns:min(340px,92%); gap:10px; min-width:0; max-width:100%;
     overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory;
-    padding:8px 0 16px; scrollbar-width:thin; cursor:grab;
+    padding:6px 0 8px; scrollbar-width:thin; cursor:grab;
  }
  html body .page .ss-main-content .mobile-home .mh-mentor-track article {
-    display:flex; flex-direction:column; align-items:flex-start; gap:12px;
-    min-width:0; margin:0; padding:16px; border:1px solid var(--mh-border);
+    display:grid; grid-template-columns:64px minmax(0,1fr); align-items:start; gap:10px;
+    min-width:0; margin:0; padding:12px; border:1px solid var(--mh-border);
     border-radius:16px; scroll-snap-align:start; background:var(--mh-surface);
  }
- html body .page .ss-main-content .mobile-home .mh-mentor-track article > img { width:96px; height:104px; object-fit:contain; }
- html body .page .ss-main-content .mobile-home .mh-mentor-track article > div { flex:1; }
- html body .page .ss-main-content .mobile-home .mh-mentor-track h3 { font-size:18px !important; line-height:1.4; }
- html body .page .ss-main-content .mobile-home .mh-mentor-track article p { font-size:15px !important; line-height:1.5; }
- html body .page .ss-main-content .mobile-home .mh-mentor-track small { font-size:14px !important; line-height:1.6; -webkit-line-clamp:3; }
- html body .page .ss-main-content .mobile-home .mh-mentor-detail { min-height:44px; padding:10px 14px; font-size:15px; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-track article > img { width:64px; height:72px; object-fit:contain; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-track article > div { min-width:0; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-track h3 { font-size:16px !important; line-height:1.35; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-track article p { font-size:13px !important; line-height:1.4; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-track small { font-size:12px !important; line-height:1.45; -webkit-line-clamp:2; }
+ html body .page .ss-main-content .mobile-home .mh-mentor-detail { grid-column:1/-1; justify-self:start; min-height:36px; padding:6px 10px; font-size:13px; }
  html body .page .ss-main-content .mobile-home .mh-mentor-track.is-dragging { cursor:grabbing; user-select:none; scroll-snap-type:none; }
  html body .page .ss-main-content .mobile-home .mh-mentors .mh-section-heading { align-items:flex-start; flex-wrap:wrap; }
 }
 @media (max-width:900px) { html body .page .ss-main-content .mobile-home .mh-mentors { min-width:0; overflow:hidden; } }
+
+@media (max-width:900px) {
+ html body .page .ss-main-content .mobile-home .mh-mentors { padding:12px; }
+ html body .page .ss-main-content .mobile-home .mh-mentors .ss-mentor-carousel-tools { margin:4px 0; gap:6px; font-size:11px; }
+ html body .page .ss-main-content .mobile-home .mh-mentors .ss-mentor-carousel-tools button { width:32px; height:32px; min-height:32px; border-radius:9px; }
+ html body .page .ss-main-content .mobile-home .mh-mentors .mh-section-heading h2 { font-size:16px !important; }
+ html body .page .ss-main-content .mobile-home .mh-mentors .mh-section-heading > a { font-size:12px; }
+}
