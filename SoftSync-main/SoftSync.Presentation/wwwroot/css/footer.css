@@ -1,0 +1,65 @@
+/* Keep the footer navigation and Facebook link on one row at every width. */
+html body .eco-footer .ss-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(8px, 3vw, 32px);
+    width: min(1280px, 100%);
+    margin-inline: auto;
+    padding: 16px 24px;
+    box-sizing: border-box;
+}
+html body .eco-footer .ss-footer-logo {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+html body .eco-footer .ss-footer-logo img {
+    display: block;
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+html body .eco-footer nav.ss-footer-links {
+    display: flex;
+    flex: 1;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 4vw, 48px);
+    order: initial;
+}
+html body .eco-footer nav.ss-footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    white-space: nowrap;
+    font-size: 15px;
+    line-height: 1.4;
+}
+html body .eco-footer .ss-footer-facebook {
+    display: inline-flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: #1877f2;
+    font-size: 28px;
+    border-radius: 50%;
+}
+html body .eco-footer .ss-footer-facebook:hover {
+    background: var(--ss-surface-accent, #edf4ff);
+}
+html body .eco-footer .ss-footer-row a:focus-visible {
+    outline: 2px solid var(--ss-primary, #5146e5);
+    outline-offset: 3px;
+}
+@media (max-width: 480px) {
+    html body .eco-footer .ss-footer-row { gap: 6px; padding: 8px 6px; }
+    html body .eco-footer .ss-footer-logo img { width: 30px; height: 30px; border-radius: 8px; }
+    html body .eco-footer nav.ss-footer-links { gap: 10px; }
+    html body .eco-footer nav.ss-footer-links a { font-size: clamp(10px, 3vw, 13px); }
+    html body .eco-footer .ss-footer-facebook { flex-basis: 32px; width: 32px; font-size: 24px; }
+}
