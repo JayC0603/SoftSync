@@ -1,6 +1,9 @@
 @inherits LocalizedComponentBase
 @using SoftSync.Common.Dtos
 @using SoftSync.Presentation.Components.Journey
+@using SoftSync.BLL.Interfaces
+@inject IMentorService MentorService
+@inject ILogger<MobileHome> Logger
 
 <div class="mobile-home">
     <section class="mh-search" aria-label="@T("Tìm kiếm học tập", "Learning search")">
@@ -18,11 +21,11 @@
         }
     </section>
 
-    <header class="mh-welcome"><h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1><p>@T("Hôm nay là một ngày tuyệt vời để học thêm điều mới!", "Today is a great day to learn something new!")</p></header>
+    <header class="mh-welcome"><div><h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1><p>@T("Hôm nay là một ngày tuyệt vời để học thêm điều mới!", "Today is a great day to learn something new!")</p></div><img src="/images/home/welcome.webp" class="mh-welcome-art" alt="" width="110" height="72" /></header>
 
     <section class="mh-hero" aria-labelledby="mh-hero-title">
         <div class="mh-hero-copy"><span class="mh-badge"><i class="bi bi-play-circle-fill" aria-hidden="true"></i>@(AllDone ? T("Lộ trình hoàn thành", "Roadmap complete") : T("Tiếp tục học tập", "Continue learning"))</span><h2 id="mh-hero-title">@(Current?.Title ?? T("Bắt đầu hành trình của bạn", "Start your journey"))</h2><p>@(Current?.Objective ?? T("Khám phá thế mạnh của bạn và nhận lộ trình học phù hợp.", "Discover your strengths and get a personal learning roadmap."))</p></div>
-        <div class="mh-hero-art" aria-hidden="true"><span>✦</span><img src="/images/syncy-robot.png" alt="" width="180" height="180" fetchpriority="high" /></div>
+        <div class="mh-hero-art" aria-hidden="true"><img src="/images/home/syncy-study.webp" alt="" width="220" height="180" fetchpriority="high" /></div>
         @if (Current is not null)
         {
             <div class="mh-progress"><div><span>@Current.CompletedActivityCount/@Current.TotalActivityCount @T("hoạt động", "activities")</span><strong>@Percent%</strong></div><progress value="@Percent" max="100" aria-label="@T("Tiến độ bài học", "Lesson progress")">@Percent%</progress></div>
@@ -45,23 +48,52 @@
                 <li class="@(IsLocked(item) ? "is-locked" : "is-current")"><a href="@(IsLocked(item) ? "/roadmap" : LessonUrl(item))"><span class="mh-node">@item.WeekNumber</span><span><strong>@item.Title</strong><small>@item.CompletedActivityCount/@item.TotalActivityCount @T("hoạt động", "activities")</small><em>@(IsLocked(item) ? T("Chưa mở khóa", "Locked") : T("Đang học", "Learning"))</em></span><i class="bi @(IsLocked(item) ? "bi-lock" : "bi-chevron-right")" aria-hidden="true"></i></a></li>
             }</ol>
         }
-        <div class="mh-mountain" aria-hidden="true"><i class="bi bi-flag-fill"></i></div>
+        <img class="mh-mountain" src="/images/home/roadmap.webp" alt="" width="170" height="125" loading="lazy" />
     </section>
 
-    <a href="/assistant" class="mh-syncy"><img src="/images/syncy-robot.png" alt="" width="90" height="100" loading="lazy" /><span><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong><small>@T("Trợ lý AI của bạn", "Your AI companion")</small><p>@T("Đặt câu hỏi, nhận gợi ý lộ trình và giải đáp về kỹ năng.", "Ask questions, get roadmap suggestions and explore your skills.")</p></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+    <a href="/assistant" class="mh-syncy"><img src="/images/home/syncy-assistant.webp" alt="" width="90" height="100" loading="lazy" /><span><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong><small>@T("Trợ lý AI của bạn", "Your AI companion")</small><p>@T("Đặt câu hỏi, nhờ gợi ý lộ trình hoặc giải đáp thắc mắc về kỹ năng, nghề nghiệp nhé!", "Ask questions, get roadmap suggestions or explore skills and career advice!")</p></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
 
     <section class="mh-quick mh-surface"><h2>@T("Truy cập nhanh", "Quick access")</h2><div>
         <a href="/progress"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><strong>@T("Tiến độ", "Progress")</strong><span>@T("Xem quá trình học tập", "Your learning journey")</span></a>
-        <a href="/resources"><i class="bi bi-folder-fill" aria-hidden="true"></i><strong>@T("Tài nguyên", "Resources")</strong><span>@T("Tài liệu và mẫu CV", "Guides and CV templates")</span></a>
-        <a href="@($"/assessment/{User.Id}")"><i class="bi bi-clipboard-check-fill" aria-hidden="true"></i><strong>@T("Kiểm tra", "Assessment")</strong><span>@T("Đánh giá kỹ năng", "Assess your skills")</span></a>
+        <a href="/resources"><i class="bi bi-folder-fill" aria-hidden="true"></i><strong>@T("Tài nguyên", "Resources")</strong><span>@T("Tài liệu, mẫu CV, biểu mẫu...", "Guides, CV templates, forms...")</span></a>
+        <a href="@($"/assessment/{User.Id}")"><i class="bi bi-clipboard-check-fill" aria-hidden="true"></i><strong>@T("Kiểm tra", "Assessment")</strong><span>@T("Bài kiểm tra kỹ năng", "Skills assessment")</span></a>
         <a href="/community"><i class="bi bi-people-fill" aria-hidden="true"></i><strong>@T("Cộng đồng", "Community")</strong><span>@T("Kết nối và thảo luận", "Connect and discuss")</span></a>
     </div></section>
+
+    <section class="mh-mentors mh-surface" aria-labelledby="mh-mentors-title">
+        <header class="mh-section-heading"><h2 id="mh-mentors-title">@T("Đội ngũ cố vấn đồng hành", "Your mentor team")</h2><a href="/mentors">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        @if (mentorLoading) { <div class="mh-mentor-loading" role="status"><span class="ss-skeleton"></span>@T("Đang tải cố vấn…", "Loading mentors…")</div> }
+        else if (mentorFailed) { <p role="status">@T("Chưa thể tải cố vấn.", "Mentors could not be loaded.") <button type="button" class="mh-retry" @onclick="LoadMentorsAsync">@T("Thử lại", "Try again")</button></p> }
+        else if (mentor is not null)
+        {
+            <article><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="72" height="72" loading="lazy" /><div><h3>@mentor.Name</h3><p>@L.Ui(mentor.Expertise)</p><small>@L.Ui(mentor.ShortBio)</small></div><a class="mh-mentor-detail" href="/mentors/@mentor.Id">@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></article>
+        }
+        else { <p>@T("Chưa có cố vấn khả dụng.", "No mentors are available yet.")</p> }
+    </section>
+
+    <section class="mh-motivation mh-surface" aria-labelledby="mh-motivation-title"><h2 id="mh-motivation-title">@T("Tiến bộ mỗi ngày", "A little progress every day")</h2><blockquote><i class="bi bi-quote" aria-hidden="true"></i><div><p>@T("“Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.”", "“Every small step today builds a better version of you tomorrow.”")</p><cite>— SYNCY</cite></div></blockquote><img src="/images/home/syncy-growth.webp" alt="" width="170" height="100" loading="lazy" /></section>
 </div>
 
 @code {
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
+    private MentorDto? mentor;
+    private bool mentorLoading = true;
+    private bool mentorFailed;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadMentorsAsync();
+    }
+    private async Task LoadMentorsAsync()
+    {
+        mentorLoading = true;
+        mentorFailed = false;
+        try { mentor = (await MentorService.GetAllAsync()).FirstOrDefault(); }
+        catch (Exception ex) { Logger.LogWarning(ex, "Could not load dashboard mentor preview"); mentorFailed = true; }
+        finally { mentorLoading = false; }
+    }
     private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
     private string Name => User.PublicName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? User.PublicName;
     private RoadmapItemDto? Current => Items.FirstOrDefault(x => !x.IsCompleted) ?? Items.LastOrDefault();
