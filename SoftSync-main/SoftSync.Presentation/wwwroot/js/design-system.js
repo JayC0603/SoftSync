@@ -36,9 +36,17 @@
         scrollMentors(button, direction) {
             const track = button.closest('section')?.querySelector('.ss-mentor-carousel');
             if (!track) return;
-            track.dataset.autoPaused = 'true';
-            const step = (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + 16;
+            track.dataset.resumeAt = String(Date.now() + 8000);
+            const step = mentorStep(track);
             track.scrollBy({ left: direction * step, behavior: root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        },
+        toggleMentorRotation(button) {
+            const track = button.closest('section')?.querySelector('.ss-mentor-carousel');
+            if (!track) return;
+            const paused = track.dataset.rotationPaused !== 'true';
+            track.dataset.rotationPaused = String(paused);
+            button.setAttribute('aria-pressed', String(paused));
+            button.textContent = paused ? button.dataset.resumeLabel : button.dataset.pauseLabel;
         },
         async toggleFullscreen() {
             try {
@@ -67,12 +75,54 @@
     // Clear the retired forced-mobile preference so desktop returns to its natural layout.
     delete root.dataset.mobileView;
     try { localStorage.removeItem('ss-mobile-view'); } catch {}
+    const reducedMotion = () => root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mentorStep = track => (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + (parseFloat(getComputedStyle(track).columnGap) || 0);
     const mentorTracks = new Set();
     const observeMentors = () => document.querySelectorAll('.ss-mentor-carousel').forEach(track => {
         if (mentorTracks.has(track)) return;
         mentorTracks.add(track);
-        for (const event of ['pointerdown', 'wheel', 'keydown', 'focusin'])
-            track.addEventListener(event, () => { track.dataset.autoPaused = 'true'; }, { passive: true });
+        const postpone = () => { track.dataset.resumeAt = String(Date.now() + 8000); };
+        for (const event of ['pointerdown', 'wheel', 'keydown', 'focusin', 'pointerleave', 'focusout'])
+            track.addEventListener(event, postpone, { passive: true });
+        let drag = null;
+        let suppressClick = false;
+        track.addEventListener('pointerdown', event => {
+            if (event.pointerType !== 'mouse' || event.button !== 0 || event.target.closest('button, a, input')) return;
+            drag = { id: event.pointerId, x: event.clientX, scroll: track.scrollLeft, moved: false };
+            suppressClick = false;
+        });
+        track.addEventListener('pointermove', event => {
+            if (!drag || event.pointerId !== drag.id) return;
+            const distance = event.clientX - drag.x;
+            if (!drag.moved && Math.abs(distance) < 6) return;
+            drag.moved = true;
+            track.setPointerCapture(event.pointerId);
+            track.classList.add('is-dragging');
+            track.scrollLeft = drag.scroll - distance;
+            event.preventDefault();
+            postpone();
+        });
+        const finishDrag = event => {
+            if (!drag || drag.id !== event.pointerId) return;
+            suppressClick = drag.moved;
+            drag = null;
+            track.classList.remove('is-dragging');
+            if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
+            postpone();
+            setTimeout(() => { suppressClick = false; }, 0);
+        };
+        for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) track.addEventListener(event, finishDrag);
+        track.addEventListener('pointerleave', event => { if (drag && !drag.moved) finishDrag(event); });
+        track.addEventListener('dragstart', event => event.preventDefault());
+        track.addEventListener('click', event => {
+            if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
+        }, true);
+        track.addEventListener('keydown', event => {
+            if (event.target !== track || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+            event.preventDefault();
+            const step = mentorStep(track);
+            track.scrollBy({ left: event.key === 'ArrowRight' ? step : -step, behavior: reducedMotion() ? 'instant' : 'smooth' });
+        });
     });
     document.addEventListener('DOMContentLoaded', () => {
         syncSidebar();
@@ -84,14 +134,15 @@
     window.addEventListener('pageshow', syncSidebar);
     setInterval(() => {
         if (document.hidden || root.dataset.reduceMotion === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (innerWidth > 900) return;
+
         for (const track of mentorTracks) {
             if (!track.isConnected) { mentorTracks.delete(track); continue; }
+            if (innerWidth > 900 && !track.matches('.ss-home-mentor-carousel')) continue;
             const rect = track.getBoundingClientRect();
-            if (rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight || track.dataset.autoPaused === 'true' || track.matches(':hover')) continue;
+            if (rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight || Number(track.dataset.resumeAt || 0) > Date.now() || track.dataset.rotationPaused === 'true' || track.matches(':hover, :focus-within') || document.querySelector('dialog[open]')) continue;
             const max = track.scrollWidth - track.clientWidth;
             if (max <= 1) continue;
-            const step = (track.firstElementChild?.getBoundingClientRect().width || track.clientWidth) + 16;
+            const step = mentorStep(track);
             track.scrollTo({ left: track.scrollLeft >= max - 2 ? 0 : Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
         }
     }, 5500);
