@@ -1,4 +1,5 @@
 /* Keep the footer navigation and Facebook link on one row at every width. */
+.eco-footer :is(.ss-footer-wordmark, .ss-footer-youtube, .ss-footer-website) { display: none; }
 html body .eco-footer .ss-footer-row {
     display: flex;
     align-items: center;

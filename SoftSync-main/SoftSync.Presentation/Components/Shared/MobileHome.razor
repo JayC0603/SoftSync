@@ -174,24 +174,46 @@
         else { <p class="mh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors are available yet.")</p> }
     </section>
 
+        @{ var achievements = Achievements; }
         <section class="mh-achievements mh-surface" aria-labelledby="mh-achievements-title">
             <header class="mh-section-heading"><h2 id="mh-achievements-title"><i class="bi bi-trophy-fill" aria-hidden="true"></i>@T("Thành tích gần đây", "Recent achievements")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-            <div class="mh-achievement-grid">
-                @if (Achievements.Count == 0)
+            <div id="mh-achievement-list" class="mh-achievement-grid">
+                @if (achievements.Count == 0)
                 {
                     <p class="mh-empty mh-achievement-empty"><i class="bi bi-trophy" aria-hidden="true"></i>@T("Hoàn thành bài học đầu tiên để ghi lại thành tích của bạn.", "Complete your first lesson to record your achievements.")</p>
                 }
-                @foreach (var achievement in Achievements)
+                @foreach (var achievement in achievements.Take(achievementsExpanded ? achievements.Count : AchievementPreviewCount))
                 {
-                    <a href="@achievement.Url"><i class="bi @achievement.Icon" aria-hidden="true"></i><span><strong>@achievement.Title</strong><small>@achievement.Detail</small><time datetime="@achievement.At.ToString("O")">@achievement.At.ToString("dd/MM/yyyy")</time></span></a>
+                    <a class="mh-achievement-card" href="@achievement.Url">
+                        <span class="mh-achievement-symbol" aria-hidden="true"><i class="bi @achievement.Icon"></i><span>✦</span><span>✦</span></span>
+                        <div class="mh-achievement-copy">
+                            <strong>@achievement.Title</strong>
+                            <p>@achievement.Detail</p>
+                            <div class="mh-achievement-meta">
+                                @if (achievement.Result is { } result) { <span><i class="bi bi-file-earmark-text" aria-hidden="true"></i>@result</span> }
+                                <time datetime="@achievement.At.ToString("O")"><i class="bi bi-calendar4-week" aria-hidden="true"></i>@achievement.At.ToString("dd/MM/yyyy")</time>
+                            </div>
+                        </div>
+                        <span class="mh-achievement-status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>@T("Hoàn thành", "Completed")</span>
+                        <i class="bi bi-chevron-right mh-achievement-arrow" aria-hidden="true"></i>
+                        <span class="mh-achievement-celebration"><span aria-hidden="true">🎉</span>@(achievement.Result is null ? T("Tuyệt vời! Bạn đã hoàn thành bài học và tiến thêm một bước trên hành trình.", "Great work! You've completed a lesson and taken another step forward.") : T("Tuyệt vời! Bạn đã vượt qua bài kiểm tra và củng cố kiến thức.", "Great work! You've passed the test and strengthened your knowledge."))</span>
+                    </a>
                 }
             </div>
+            @if (achievements.Count > AchievementPreviewCount)
+            {
+                <button type="button" class="mh-achievement-toggle" aria-controls="mh-achievement-list" aria-expanded="@achievementsExpanded.ToString().ToLowerInvariant()" @onclick="ToggleAchievements">
+                    @(achievementsExpanded ? T("Thu gọn", "Show less") : T($"Xem thêm ({achievements.Count - AchievementPreviewCount})", $"Show more ({achievements.Count - AchievementPreviewCount})"))
+                    <i class="bi @(achievementsExpanded ? "bi-chevron-up" : "bi-chevron-down")" aria-hidden="true"></i>
+                </button>
+            }
         </section>
 
     <section class="mh-motivation mh-surface" aria-labelledby="mh-motivation-title">
         <h2 id="mh-motivation-title" class="mh-sr-only">@T("Tiến bộ mỗi ngày", "A little progress every day")</h2>
         <blockquote><i class="bi bi-quote" aria-hidden="true"></i><div><p>@T("“Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.”", "“Every small step today builds a better version of you tomorrow.”")</p><cite>— SYNCY</cite></div></blockquote>
         <img src="@Asset("quote-landscape")" alt="" width="300" height="75" loading="lazy" />
+        <img class="mh-motivation-trail" src="@Asset("roadmap-mountain")" alt="" width="360" height="265" loading="lazy" />
     </section>
 </div>
 
@@ -199,6 +221,9 @@
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
+    private const int AchievementPreviewCount = 3;
+    private bool achievementsExpanded;
+    private void ToggleAchievements() => achievementsExpanded = !achievementsExpanded;
     private string searchScope = "all";
     private List<MentorDto> mentors = [];
     private bool mentorLoading = true;
@@ -254,8 +279,8 @@
         DateTime? completedAt = new DateTime?[] { item.VideoCompletedAtUtc, item.ScriptCompletedAtUtc, item.SummaryCompletedAtUtc, item.PracticeCompletedAtUtc, item.ScenarioCompletedAtUtc, item.ReflectionCompletedAtUtc }.Max();
         if (item.IsCompleted && completedAt.HasValue)
             entries.Add(new("bi-clipboard-check-fill", T("Hoàn thành bài học", "Lesson completed"), L.Ui(item.Title), completedAt.Value, LessonUrl(item)));
-        entries.AddRange(item.QuizHistory.Where(x => x.Passed && x.SubmittedAtUtc != default).Select(x => new HomeAchievement("bi-shield-check", T("Vượt qua kiểm tra", "Knowledge check passed"), $"{L.Ui(item.Title)} · {x.Score}/{x.TotalQuestions}", x.SubmittedAtUtc, LessonUrl(item))));
+        entries.AddRange(item.QuizHistory.Where(x => x.Passed && x.SubmittedAtUtc != default).Select(x => new HomeAchievement("bi-shield-check", T("Vượt qua kiểm tra", "Knowledge check passed"), L.Ui(item.Title), x.SubmittedAtUtc, LessonUrl(item), $"{x.Score}/{x.TotalQuestions}")));
         return entries;
-    }).OrderByDescending(x => x.At).Take(3).ToList();
-    private sealed record HomeAchievement(string Icon, string Title, string Detail, DateTime At, string Url);
+    }).OrderByDescending(x => x.At).ToList();
+    private sealed record HomeAchievement(string Icon, string Title, string Detail, DateTime At, string Url, string? Result = null);
 }

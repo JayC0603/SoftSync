@@ -130,19 +130,6 @@ html[data-theme='dark'] .mh-v3 .mh-stats a:nth-child(3) > i { color: #ffc86c; }
 .mh-v3 .mh-mentor-track.is-dragging { cursor: grabbing; user-select: none; scroll-snap-type: none; scroll-behavior: auto; }
 .mh-v3 .mh-retry { min-height: 44px; padding: 6px 12px; border: 1px solid var(--mh-border); border-radius: 9px; color: var(--mh-accent); background: var(--mh-soft); }
 .mh-v3 .mh-achievements .mh-section-heading h2 > i { color: #d68a09; }
-.mh-v3 .mh-achievement-grid { display: grid; grid-template-columns: none; gap: 8px; grid-auto-flow: column; grid-auto-columns: min(230px,44%); overflow-x: auto; scrollbar-width: thin; }
-.mh-v3 .mh-achievement-grid a { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--mh-border); border-radius: 13px; }
-.mh-v3 .mh-achievement-grid a > i { display: grid; place-items: center; width: 40px; height: 44px; flex-shrink: 0; border-radius: 12px; background: var(--mh-soft); color: var(--mh-accent); font-size: 24px; }
-.mh-v3 .mh-achievement-grid :is(strong, small, time) { display: block; }
-.mh-v3 .mh-achievement-grid strong { font-size: 13px; }
-.mh-v3 .mh-achievement-grid small { margin-top: 4px; color: var(--mh-muted); font-size: 12px; }
-.mh-v3 .mh-achievement-grid time { margin-top: 6px; color: var(--mh-muted); font-size: 11px; }
-.mh-v3 .mh-motivation { display: flex; align-items: center; gap: 20px; }
-.mh-v3 .mh-motivation blockquote { display: flex; align-items: flex-start; flex: 1; gap: 12px; }
-.mh-v3 .mh-motivation blockquote > i { color: var(--mh-accent); font-size: 32px; line-height: 1; }
-.mh-v3 .mh-motivation p { color: var(--mh-muted); }
-.mh-v3 .mh-motivation cite { display: block; margin-top: 8px; color: var(--mh-ink); font-size: 13px; font-weight: 700; font-style: normal; }
-.mh-v3 .mh-motivation > img { width: 220px; height: auto; flex-shrink: 0; border-radius: 12px; }
 html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visible; }
 .mh-v3 .mh-search-filter { position: relative; flex: 0 0 48px; }
 .mh-v3 .mh-search-filter summary { display: grid; place-items: center; width: 48px; height: 50px; border: 1px solid var(--mh-border); border-radius: 14px; background: var(--mh-surface); color: var(--mh-muted); font-size: 22px; list-style: none; cursor: pointer; }
@@ -152,9 +139,6 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
 .mh-v3 .mh-filter-panel select { width: 100%; min-height: 44px; padding: 6px; background: var(--mh-surface); color: var(--mh-ink); border: 1px solid var(--mh-border); border-radius: 8px; font-size: 16px; }
 .mh-v3 .mh-stats a:nth-child(4) > i { color: #de7026; background: color-mix(in srgb,#f4a51c 9%,var(--mh-surface)); }
 .mh-v3 .mh-recommendation-grid:has(>a:only-child) { grid-auto-columns: 100%; }
-.mh-v3 .mh-achievement-grid:has(.mh-achievement-empty) { grid-auto-columns: 100%; }
-.mh-v3 .mh-achievement-empty { display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px; border: 1px solid var(--mh-border); border-radius: 12px; }
-.mh-v3 .mh-achievement-empty > i { font-size: 28px; color: #d68a09; }
 .mh-v3 .mh-roadmap { position: relative; isolation: isolate; }
 .mh-v3 .mh-roadmap::before { content: ''; position: absolute; z-index: -1; inset: 40px 0 0; border-radius: 16px; background: url('../images/home-v3/roadmap-landscape.webp') right center / auto 100% no-repeat; opacity: .12; }
 .mh-v3 .mh-single-skill { display: flex; align-items: center; gap: 12px; padding: 8px 0; color: var(--mh-ink); }
@@ -247,17 +231,6 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .mh-mentor-track article > div { padding-right: 7px; }
     .mh-v3 .ss-mentor-carousel-tools { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     .mh-v3 .ss-mentor-carousel-tools:focus-within { position: static; width: auto; height: auto; margin: 0 0 6px; clip-path: none; white-space: normal; }
-    .mh-v3 .mh-achievement-grid { grid-auto-columns: max(150px,44%); }
-    .mh-v3 .mh-achievement-grid a { padding: 8px; gap: 6px; }
-    .mh-v3 .mh-achievement-grid a > i { width: 32px; height: 40px; font-size: 22px; }
-    .mh-v3 .mh-achievement-grid strong,.mh-v3 .mh-achievement-grid small { font-size: 10px; }
-    html body .page .ss-main-content .mh-v3 .mh-achievement-empty { font-size: 11px !important; padding: 8px; }
-    .mh-v3 .mh-motivation { position: relative; isolation: isolate; min-height: 86px; padding: 12px; overflow: hidden; }
-    .mh-v3 .mh-motivation blockquote { gap: 8px; max-width: 68%; }
-    .mh-v3 .mh-motivation blockquote > i { font-size: 27px; }
-    html body .page .ss-main-content .mh-v3 .mh-motivation p { font-size: 11px !important; line-height: 1.45; }
-    .mh-v3 .mh-motivation cite { margin-top: 5px; font-size: 11px; }
-    .mh-v3 .mh-motivation > img { position: absolute; z-index: -1; right: 0; bottom: 0; width: 48%; height: 100%; object-fit: cover; object-position: right; border-radius: 0; mask-image: linear-gradient(to right,transparent,#000 35%); }
     html body .page:has(.mh-v3) { overflow-x: visible; }
     html body .page:has(.mh-v3) .ss-workspace { padding: 0 0 calc(92px + env(safe-area-inset-bottom, 0px)); }
     html body .page:has(.mh-v3) .ss-sidebar-toggle { display: none; }
@@ -273,11 +246,6 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     html body .page:has(.mh-v3) .ss-mobile-bottom-link i { font-size: 23px; }
     html body .page:has(.mh-v3) .ss-mobile-bottom-link span { font-size: 12px; }
     html body .page:has(.mh-v3) .ss-mobile-bottom-link.active { background: transparent; color: var(--mh-accent); }
-    html body .page:has(.mh-v3) .eco-footer { width: calc(100% - 32px); margin: 0 16px; padding: 0; border: 0; background: transparent; }
-    html body .page:has(.mh-v3) .ss-footer-row { padding: 4px 0 12px; }
-    html body .page:has(.mh-v3) .ss-footer-links { min-width: 0; width: auto; gap: 8px; }
-    html body .page:has(.mh-v3) .ss-footer-links a { font-size: 11px; }
-    html body .page:has(.mh-v3) :is(.ss-footer-logo, .ss-footer-facebook) { display: inline-flex; align-items: center; justify-content: center; flex-basis: 44px; min-width: 44px; min-height: 44px; }
 }
 @media (max-width:374px) {
     html body .page:has(.mh-v3) .ss-workspace-topbar { width: calc(100% - 16px); margin-inline: 8px; padding-inline: 6px; gap: 2px; }
@@ -296,4 +264,90 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
 }
 @media (prefers-reduced-motion: reduce) {
     .mh-v3 * { scroll-behavior: auto !important; }
+}
+
+/* Homepage ending: achievement detail, scenic quotation and branded footer. */
+.mh-v3 .mh-achievement-grid { display: grid; gap: 14px; }
+.mh-v3 .mh-achievement-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 44px; margin-top: 14px; padding: 10px 16px; border: 1px solid var(--mh-border); border-radius: 12px; background: var(--mh-soft); color: var(--mh-accent); font: inherit; font-weight: 600; cursor: pointer; }
+.mh-v3 .mh-achievement-toggle:hover { border-color: var(--mh-accent); }
+.mh-v3 .mh-achievement-card { display: grid; grid-template-columns: 100px minmax(0,1fr) auto; align-items: center; gap: 18px 22px; padding: 24px; border: 1px solid var(--mh-border); border-radius: 24px; background: var(--mh-surface); }
+.mh-v3 .mh-achievement-symbol { position: relative; grid-row: 1 / 3; display: grid; place-items: center; width: 100px; height: 116px; border-radius: 24px; background: var(--mh-soft); color: var(--mh-accent); }
+.mh-v3 .mh-achievement-symbol > i { font-size: 62px; line-height: 1; }
+.mh-v3 .mh-achievement-symbol > span { position: absolute; color: #ffbf36; font-size: 24px; right: 10px; top: 6px; }
+.mh-v3 .mh-achievement-symbol > span:last-child { top: auto; right: auto; bottom: 8px; left: 10px; }
+.mh-v3 .mh-achievement-copy { grid-column: 2; grid-row: 1 / 3; }
+.mh-v3 .mh-achievement-copy > strong { display: block; font-size: clamp(18px,2.1vw,26px); line-height: 1.35; color: var(--mh-ink); }
+html body .page .ss-main-content .mh-v3 .mh-achievement-copy > p { margin-top: 10px; color: var(--mh-muted); font-size: clamp(14px,1.7vw,21px) !important; line-height: 1.5; }
+.mh-v3 .mh-achievement-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 16px; color: var(--mh-muted); font-size: 17px; }
+.mh-v3 .mh-achievement-meta :is(span,time) { display: inline-flex; align-items: center; gap: 10px; }
+.mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 18px; border-left: 1px solid var(--mh-border); }
+.mh-v3 .mh-achievement-meta i { font-size: 22px; }
+.mh-v3 .mh-achievement-status { display: inline-flex; align-items: center; gap: 8px; align-self: start; padding: 8px 14px; border-radius: 99px; color: var(--mh-success); background: color-mix(in srgb,var(--mh-success) 10%,var(--mh-surface)); font-size: 15px; white-space: nowrap; }
+.mh-v3 .mh-achievement-status i { font-size: 23px; }
+.mh-v3 .mh-achievement-arrow { grid-column: 3; justify-self: end; color: var(--mh-accent); font-size: 24px; }
+.mh-v3 .mh-achievement-celebration { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: 20px; background: var(--mh-soft); color: var(--mh-muted); font-size: clamp(14px,1.6vw,19px); line-height: 1.6; }
+.mh-v3 .mh-achievement-celebration > span { font-size: 38px; flex-shrink: 0; }
+.mh-v3 .mh-achievement-empty { display: flex; align-items: center; gap: 14px; margin: 0; padding: 22px; border: 1px solid var(--mh-border); border-radius: 20px; color: var(--mh-muted); }
+.mh-v3 .mh-achievement-empty > i { color: #f3a723; font-size: 32px; }
+.mh-v3 .mh-motivation { position: relative; isolation: isolate; overflow: hidden; min-height: 270px; display: flex; align-items: center; padding: 36px 30px; border-radius: 26px; background: linear-gradient(115deg,var(--mh-surface) 25%,var(--mh-soft)); }
+.mh-v3 .mh-motivation blockquote { position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 18px; width: 61%; }
+.mh-v3 .mh-motivation blockquote > i { color: var(--mh-accent); font-size: 64px; line-height: 1; }
+html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink); font-size: clamp(18px,2.2vw,29px) !important; line-height: 1.5; }
+.mh-v3 .mh-motivation cite { display: block; margin-top: 22px; color: var(--mh-ink); font-size: 21px; font-style: normal; font-weight: 750; }
+.mh-v3 .mh-motivation > img { position: absolute; z-index: 0; right: 0; bottom: 0; width: 65%; height: 100%; object-fit: cover; object-position: right; opacity: .75; mask-image: linear-gradient(to right,transparent,#000 65%); }
+.mh-v3 .mh-motivation > .mh-motivation-trail { width: 48%; height: 90%; object-fit: contain; object-position: right bottom; opacity: 1; mask-image: linear-gradient(to right,transparent,#000 30%); }
+html body .page:has(.mh-v3) .eco-footer { width: calc(100% - 64px); max-width: 1056px; margin: 12px 32px 32px; padding: 14px 22px; border: 1px solid var(--mh-border); border-radius: 26px; background: var(--mh-surface); }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-row { width: 100%; padding: 0; gap: 12px; display: flex; align-items: center; }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-logo img { width: 54px; height: 54px; }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-wordmark { display: inline; color: var(--mh-ink); font-size: 25px; letter-spacing: -.04em; }
+html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links { flex: 1; gap: 20px; margin-left: 8px; padding-left: 20px; border-left: 1px solid var(--mh-border); }
+html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links a { color: var(--mh-muted); font-size: 15px; text-decoration: none; }
+html body .page:has(.mh-v3) .eco-footer :is(.ss-footer-facebook,.ss-footer-youtube,.ss-footer-website) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 46px; width: 46px; height: 46px; border-radius: 50%; background: var(--mh-soft); font-size: 28px; color: var(--mh-accent); text-decoration: none; }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-youtube { color: #ff0808; }
+@media (max-width: 900px) {
+    html body .page:has(.mh-v3) .eco-footer { width: calc(100% - 32px); margin: 24px 16px 20px; padding: 18px 12px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-row { flex-wrap: wrap; justify-content: center; gap: 10px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-logo img { width: 40px; height: 40px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-wordmark { font-size: 21px; }
+    html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links { flex: 1 1 auto; padding-left: 10px; margin-left: 0; gap: 10px; }
+    html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links a { font-size: 12px; }
+    .mh-v3 .mh-achievement-card { grid-template-columns: 64px minmax(0,1fr) auto; padding: 16px; gap: 14px 12px; border-radius: 20px; }
+    .mh-v3 .mh-achievement-symbol { width: 64px; height: 82px; border-radius: 18px; }
+    .mh-v3 .mh-achievement-symbol > i { font-size: 44px; }
+    .mh-v3 .mh-achievement-symbol > span { font-size: 18px; right: 3px; }
+    .mh-v3 .mh-achievement-status { padding: 6px 9px; font-size: 12px; }
+    .mh-v3 .mh-achievement-meta { font-size: 13px; gap: 10px; margin-top: 12px; }
+    .mh-v3 .mh-achievement-meta i { font-size: 17px; }
+    .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 10px; }
+    .mh-v3 .mh-achievement-celebration { padding: 14px; gap: 12px; font-size: 14px; }
+    .mh-v3 .mh-achievement-celebration > span { font-size: 30px; }
+    .mh-v3 .mh-motivation { min-height: 215px; padding: 24px 18px; }
+    .mh-v3 .mh-motivation blockquote { width: 72%; gap: 10px; }
+    .mh-v3 .mh-motivation blockquote > i { font-size: 42px; }
+    .mh-v3 .mh-motivation cite { font-size: 16px; margin-top: 16px; }
+}
+@media (max-width: 540px) {
+    .mh-v3 .mh-achievement-card { grid-template-columns: 60px minmax(0,1fr) 16px; padding: 12px; gap: 12px 10px; }
+    .mh-v3 .mh-achievement-copy { grid-row: 1 / 3; }
+    .mh-v3 .mh-achievement-copy > strong { font-size: 17px; }
+    .mh-v3 .mh-achievement-status { grid-column: 2; grid-row: 3; justify-self: start; }
+    .mh-v3 .mh-achievement-arrow { grid-row: 1 / 3; font-size: 20px; }
+    .mh-v3 .mh-achievement-meta { gap: 8px; }
+    .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 8px; }
+    .mh-v3 .mh-motivation blockquote { width: 88%; }
+    .mh-v3 .mh-motivation > img { opacity: .45; }
+    .mh-v3 .mh-motivation > .mh-motivation-trail { opacity: .65; width: 58%; height: 65%; }
+    html body .page:has(.mh-v3) .eco-footer { padding: 16px 10px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-row { flex-wrap: nowrap; gap: 4px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-logo { gap: 5px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-logo img { width: 28px; height: 28px; }
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-wordmark { font-size: 15px; }
+    html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links { padding-left: 7px; gap: 7px; }
+    html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links a { font-size: 10px; }
+    html body .page:has(.mh-v3) .eco-footer :is(.ss-footer-facebook,.ss-footer-youtube,.ss-footer-website) { flex-basis: 26px; width: 26px; height: 30px; font-size: 20px; }
+}
+@media (max-width: 374px) {
+    html body .page:has(.mh-v3) .eco-footer .ss-footer-row { flex-wrap: wrap; }
+    html body .page:has(.mh-v3) .eco-footer nav.ss-footer-links { flex-basis: calc(100% - 110px); }
 }
