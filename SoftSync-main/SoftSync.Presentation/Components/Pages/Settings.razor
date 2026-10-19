@@ -150,15 +150,18 @@
                 @switch (tab)
                 {
                     case Tab.Account:
-                        <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
-                            <div class="tw:flex tw:items-center tw:justify-between tw:mb-5 tw:flex-wrap tw:gap-3">
-                                <h4 class="ss-panel-title">@L["settings.profile.info"]</h4>
-                                <a class="ss-ghost-btn" href="Account/ChangePassword">
-                                    <i class="bi bi-lock"></i> @L["settings.password.title"]
+                        <section class="ss-card ss-card--flat ss-account-panel" aria-labelledby="ss-account-title">
+                            <header class="ss-account-heading">
+                                <div class="ss-account-heading-copy">
+                                    <span class="ss-account-heading-icon" aria-hidden="true"><i class="bi bi-person-vcard"></i></span>
+                                    <div><h2 id="ss-account-title">@L["settings.profile.info"]</h2><p>@Tx("Your personal details and sign-in preferences, in one place.", "Quản lý thông tin cá nhân và tài khoản đăng nhập của bạn.")</p></div>
+                                </div>
+                                <a class="ss-account-password" href="/Account/ChangePassword">
+                                    <i class="bi bi-lock" aria-hidden="true"></i> @L["settings.password.title"]
                                 </a>
-                            </div>
+                            </header>
 
-                            <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-4">
+                            <div class="ss-account-fields">
                                 <div class="ss-field">
                                     <i class="bi bi-person ss-field-icon"></i>
                                     <div class="ss-field-body">
@@ -176,8 +179,14 @@
                                 <div class="ss-field">
                                     <i class="bi bi-calendar ss-field-icon"></i>
                                     <div class="ss-field-body">
-                                        <label for="age" class="ss-field-label">@L["profile.age"]</label>
-                                        <input id="age" type="number" min="0" max="120" class="ss-field-input" @bind="user.Age" />
+                                        <label for="age" class="ss-field-label">@L["wizard.about.ageGroup"]</label>
+                                        <select id="age" class="ss-field-input" value="@ProfileAgeGroups.ForAge(user.Age)" @onchange="OnAgeGroupChanged">
+                                            <option value="" disabled>—</option>
+                                            @foreach (var group in ProfileAgeGroups.Options)
+                                            {
+                                                <option value="@group.Key">@L[group.LabelKey]</option>
+                                            }
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="ss-field">
@@ -191,15 +200,15 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="ss-field">
-                                    <i class="bi bi-envelope ss-field-icon"></i>
+                                <div class="ss-field ss-field-readonly">
+                                    <i class="bi bi-envelope ss-field-icon" aria-hidden="true"></i>
                                     <div class="ss-field-body">
                                         <label for="email" class="ss-field-label">@L["auth.email"]</label>
                                         <input id="email" class="ss-field-input" value="@email" disabled />
                                     </div>
                                 </div>
-                                <div class="ss-field">
-                                    <i class="bi bi-telephone ss-field-icon"></i>
+                                <div class="ss-field ss-field-readonly">
+                                    <i class="bi bi-telephone ss-field-icon" aria-hidden="true"></i>
                                     <div class="ss-field-body">
                                         <label for="phone" class="ss-field-label">@L["auth.phone"]</label>
                                         <input id="phone" class="ss-field-input" value="@phone" disabled placeholder="—" />
@@ -207,12 +216,13 @@
                                 </div>
                             </div>
 
-                            <h5 class="ss-section-heading tw:mt-6 tw:mb-3">@L["settings.linkedAccounts"]</h5>
+                            <section class="ss-account-connections" aria-labelledby="ss-connections-title">
+                            <div class="ss-account-section-heading"><div><h3 id="ss-connections-title">@L["settings.linkedAccounts"]</h3><p>@Tx("Choose how you sign in to SoftSync.", "Các phương thức đăng nhập vào SoftSync.")</p></div><span class="ss-account-section-icon" aria-hidden="true"><i class="bi bi-link-45deg"></i></span></div>
                             <div class="ss-linked-grid">
                                 @foreach (var p in linkedProviders)
                                 {
-                                    <div class="ss-linked">
-                                        <div class="ss-linked-icon" style="background:@p.Bg;color:@p.Fg"><i class="bi @p.Icon"></i></div>
+                                    <div class="ss-linked @(p.Connected ? "ss-linked-connected" : "")">
+                                        <div class="ss-linked-icon" style="background:@p.Bg;color:@p.Fg"><i class="bi @p.Icon" aria-hidden="true"></i></div>
                                         <div class="ss-linked-body">
                                             <div class="ss-linked-name">@p.Name</div>
                                             <div class="ss-linked-state @(p.Connected ? "connected" : "")">
@@ -221,7 +231,7 @@
                                         </div>
                                         @if (p.Connected)
                                         {
-                                            <span class="ss-linked-check" title="@L["settings.linked.connected"]"><i class="bi bi-check-circle-fill"></i></span>
+                                            <span class="ss-linked-check" title="@L["settings.linked.connected"]"><i class="bi bi-check-circle-fill" aria-hidden="true"></i></span>
                                         }
                                         else if (p.Available)
                                         {
@@ -235,23 +245,24 @@
                                         }
                                         else
                                         {
-                                            <button class="ss-linked-btn" type="button" disabled title="@L["auth.googleNotConfigured"]">
-                                                @L["settings.linked.connect"]
+                                            <button class="ss-linked-btn" type="button" disabled title="@Tx("This sign-in provider is not available yet.", "Phương thức đăng nhập này hiện chưa khả dụng.")">
+                                                @Tx("Unavailable", "Chưa khả dụng")
                                             </button>
                                         }
                                     </div>
                                 }
                             </div>
+                            </section>
 
-                            <div class="tw:flex tw:items-center tw:justify-between tw:mt-6 tw:flex-wrap tw:gap-3">
-                                <div class="text-muted tw:text-sm tw:flex tw:items-center tw:gap-2">
-                                    <i class="bi bi-shield-lock"></i> @L["settings.secureNote"]
+                            <footer class="ss-account-actions">
+                                <div class="ss-account-security">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i><span>@L["settings.secureNote"]</span>
                                 </div>
-                                <button class="ss-btn-primary tw:px-6 tw:py-2" @onclick="SaveAsync" disabled="@saving">
-                                    <i class="bi bi-stars tw:me-1"></i> @L["settings.save"]
+                                <button type="button" class="ss-account-save" @onclick="SaveAsync" disabled="@saving">
+                                    <i class="bi @(saving ? "bi-hourglass-split" : "bi-check2")" aria-hidden="true"></i> @(saving ? Tx("Saving…", "Đang lưu…") : L["settings.save"])
                                 </button>
-                            </div>
-                        </div>
+                            </footer>
+                        </section>
 
                         <div class="ss-card ss-card--flat ss-danger-zone tw:p-6">
                             <h5 class="tw:font-bold tw:mb-1 text-danger">@L["settings.danger"]</h5>
@@ -651,6 +662,12 @@
     private void ToggleSkill(int id)
     {
         if (!selectedSkillIds.Remove(id)) selectedSkillIds.Add(id);
+    }
+
+    private void OnAgeGroupChanged(ChangeEventArgs e)
+    {
+        if (user is not null && e.Value is string group)
+            user.Age = ProfileAgeGroups.Select(group, user.Age);
     }
 
     private async Task SelectTabAsync(Tab next)
