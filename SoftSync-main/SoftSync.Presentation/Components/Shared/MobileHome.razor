@@ -2,7 +2,7 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Presentation.Components.Journey
 @using SoftSync.BLL.Interfaces
-@inject IMentorService MentorService
+@inject IServiceScopeFactory ScopeFactory
 @inject ILogger<MobileHome> Logger
 
 <div class="mobile-home">
@@ -64,9 +64,12 @@
         <header class="mh-section-heading"><h2 id="mh-mentors-title">@T("Đội ngũ cố vấn đồng hành", "Your mentor team")</h2><a href="/mentors">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
         @if (mentorLoading) { <div class="mh-mentor-loading" role="status"><span class="ss-skeleton"></span>@T("Đang tải cố vấn…", "Loading mentors…")</div> }
         else if (mentorFailed) { <p role="status">@T("Chưa thể tải cố vấn.", "Mentors could not be loaded.") <button type="button" class="mh-retry" @onclick="LoadMentorsAsync">@T("Thử lại", "Try again")</button></p> }
-        else if (mentor is not null)
+        else if (mentors.Count > 0)
         {
+            @foreach (var mentor in mentors)
+            {
             <article><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="72" height="72" loading="lazy" /><div><h3>@mentor.Name</h3><p>@L.Ui(mentor.Expertise)</p><small>@L.Ui(mentor.ShortBio)</small></div><a class="mh-mentor-detail" href="/mentors/@mentor.Id">@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></article>
+            }
         }
         else { <p>@T("Chưa có cố vấn khả dụng.", "No mentors are available yet.")</p> }
     </section>
@@ -78,7 +81,7 @@
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
-    private MentorDto? mentor;
+    private List<MentorDto> mentors = [];
     private bool mentorLoading = true;
     private bool mentorFailed;
     protected override async Task OnInitializedAsync()
@@ -88,12 +91,21 @@
     }
     private async Task LoadMentorsAsync()
     {
+        if (mentorRequestRunning) return;
+        mentorRequestRunning = true;
         mentorLoading = true;
         mentorFailed = false;
-        try { mentor = (await MentorService.GetAllAsync()).FirstOrDefault(); }
+        try
+        {
+            // Keep this query separate from other components sharing the circuit's DbContext.
+            await using var scope = ScopeFactory.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<IMentorService>();
+            mentors = (await service.GetAllAsync()).OrderBy(x => x.Id).Take(3).ToList();
+        }
         catch (Exception ex) { Logger.LogWarning(ex, "Could not load dashboard mentor preview"); mentorFailed = true; }
-        finally { mentorLoading = false; }
+        finally { mentorLoading = false; mentorRequestRunning = false; }
     }
+    private bool mentorRequestRunning;
     private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
     private string Name => User.PublicName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? User.PublicName;
     private RoadmapItemDto? Current => Items.FirstOrDefault(x => !x.IsCompleted) ?? Items.LastOrDefault();
