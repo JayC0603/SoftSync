@@ -1,4 +1,32 @@
 /* Phone layout loads after page themes so desktop navigation cannot leak into it. */
+/* Translucent glass only when backdrop blur is supported; otherwise keep the
+   existing solid surface for readable navigation. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html body .page .ss-mobile-bottom-nav {
+    background: rgb(255 255 255 / 72%) !important;
+    border-color: rgb(255 255 255 / 80%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    box-shadow: 0 8px 28px rgb(35 64 110 / 12%), inset 0 1px 0 rgb(255 255 255 / 65%) !important;
+  }
+  html[data-theme='dark'] body .page .ss-mobile-bottom-nav {
+    background: rgb(22 31 50 / 78%) !important;
+    border-color: rgb(190 210 255 / 18%) !important;
+    box-shadow: 0 8px 28px rgb(0 0 0 / 24%), inset 0 1px 0 rgb(255 255 255 / 8%) !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html body .page .ss-mobile-bottom-nav {
+    background: var(--ss-surface, #fff) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+/* Preserve its fixed anchor; never lift navigation into the keyboard's typing area. */
+html[data-soft-keyboard] body .page .ss-mobile-bottom-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
 .ss-mobile-brand { display:none; }
 html body .ss-header-language > .ss-header-control.ss-header-language-trigger { width:44px; min-width:44px; min-height:44px; padding:0; gap:0; }
 html body .ss-header-language-trigger .ss-language-flag { display:block; width:28px; height:20px; object-fit:cover; border-radius:4px; }

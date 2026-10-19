@@ -1,6 +1,7 @@
 // Bundle entry — imports the stylesheet so Vite emits dist/main.css,
 // and wires the cursor-reactive liquid-glass highlight.
 import '../Styles/main.css';
+import './mobile-keyboard.js';
 
 // Liquid Glass — cursor-reactive specular highlight.
 // Elements with `.ss-glass-interactive` get their `--mx`/`--my` custom
