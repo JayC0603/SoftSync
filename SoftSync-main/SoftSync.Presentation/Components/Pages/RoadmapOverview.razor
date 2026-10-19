@@ -119,8 +119,8 @@
                     else if (SelectedState == JourneyState.Locked) { <p class="lv-empty">@Tx("Complete the current level to unlock these activities.", "Hoàn thành cấp độ hiện tại để mở khóa các hoạt động này.")</p> }
                     else { <p class="lv-empty">@Tx("You have completed the activities in this level.", "Bạn đã hoàn thành các hoạt động trong cấp độ này.")</p> }
                 </section>
-                <section aria-labelledby="lv-journey-title"><header class="lv-section-heading"><h2 id="lv-journey-title">@Tx("Your journey", "Hành trình của bạn")</h2><a href="/roadmap/adventure">@Tx("View map", "Xem bản đồ") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-                    <MobileLearnMap Checkpoints="Checkpoints" Vietnamese="Vietnamese" OnSelect="SelectCheckpoint" />
+                <section aria-labelledby="lv-journey-title"><header class="lv-section-heading"><h2 id="lv-journey-title">@Tx("Your journey", "Hành trình của bạn")</h2></header>
+                    <MobileLearnMap Checkpoints="Checkpoints" Items="SelectedItems" Vietnamese="Vietnamese" OnSelect="SelectMobileCheckpoint" />
                 </section>
                 <section id="lv-activities" aria-labelledby="lv-activities-title"><header class="lv-section-heading"><h2 id="lv-activities-title">@Tx("Activities in this level", "Bài học trong cấp độ này")</h2><strong>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount</strong></header><p class="lv-section-description">@Tx("Complete each activity to unlock the next step.", "Hoàn thành từng hoạt động để mở khóa bước tiếp theo.")</p>
                     <div class="lv-activity-list">
@@ -181,8 +181,12 @@
             if (id <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
             UserId = id; // Route parameters never determine whose progress is read.
             var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
-            items = roadmap.Items.Where(x => !string.IsNullOrWhiteSpace(x.SkillName)).OrderBy(x => SkillRank(SkillKey(x))).ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-            selected = items.Count == 0 ? null : items[ActiveIndex];
+            // Keep the service's personalized priority and persisted progress together.
+            items = roadmap.Items.Where(x => !string.IsNullOrWhiteSpace(x.SkillName)).OrderBy(x => x.PriorityOrder).ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+            selected = items.FirstOrDefault(x => x.Id == roadmap.NextRecommendedItemId)
+                ?? (items.Count == 0 ? null : items[ActiveIndex]);
+            if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))
+                SelectSkill(RequestedSkill);
         }
         catch (Exception ex)
         {
@@ -210,6 +214,16 @@
         if (item is null || StateOf(item) == JourneyState.Locked) return;
         selected = item;
         if (checkpoint.Boss) OpenSelectedStep(checkpoint.Step);
+    }
+
+    private void SelectMobileCheckpoint(JourneyCheckpoint checkpoint)
+    {
+        var item = items.FirstOrDefault(x => x.Id == checkpoint.ItemId);
+        if (item is null || StateOf(item) == JourneyState.Locked) return;
+        var step = checkpoint.Boss ? checkpoint.Step : JourneyProgress.ResumeStep(item);
+        if (!JourneyProgress.CanOpen(item, step)) return;
+        selected = item;
+        OpenSelectedStep(step);
     }
 
     private IReadOnlyList<JourneyCheckpoint> Checkpoints

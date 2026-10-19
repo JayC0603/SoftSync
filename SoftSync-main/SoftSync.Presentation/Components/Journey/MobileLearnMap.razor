@@ -25,6 +25,7 @@
             {
                 var checkpoint = Checkpoints[i];
                 var point = Point(i);
+                var item = Items.FirstOrDefault(x => x.Id == checkpoint.ItemId);
                 <button type="button" @key="checkpoint" class="lv-map-stop is-@checkpoint.State.ToString().ToLowerInvariant() @(checkpoint.Boss ? "is-boss" : null)"
                         style="@($"left:{F(point.X / 360 * 100)}%;top:{F(point.Y / Height * 100)}%")"
                         disabled="@(checkpoint.State == JourneyState.Locked)"
@@ -37,7 +38,12 @@
                     </span>
                     <span class="lv-map-label">
                         @if (!checkpoint.Boss) { <i class="bi bi-clock lv-map-motif" aria-hidden="true"></i> }
-                        <span><strong>@if (checkpoint.Boss) { <em>BOSS:</em><text> </text> }@checkpoint.Title</strong><small>@StateLabel(checkpoint.State)</small></span>
+                        <span><strong>@if (checkpoint.Boss) { <em>BOSS:</em><text> </text> }@checkpoint.Title</strong><small>@StateLabel(checkpoint.State)</small>
+                            @if (!checkpoint.Boss && item is not null)
+                            {
+                                <small class="lv-map-progress">@item.CompletedActivityCount/@item.TotalActivityCount @(Vietnamese ? "hoạt động" : "activities") · @item.ProgressPercent%</small>
+                            }
+                        </span>
                     </span>
                 </button>
             }
@@ -48,9 +54,10 @@
 
 @code {
     [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
+    [Parameter] public IReadOnlyList<SoftSync.Common.Dtos.RoadmapItemDto> Items { get; set; } = [];
     [Parameter] public bool Vietnamese { get; set; }
     [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
-    private int Height => Checkpoints.Count > 3 ? Checkpoints.Count * 84 : Checkpoints.Count == 3 ? 216 : 195;
+    private int Height => Checkpoints.Count > 3 ? Checkpoints.Count * 100 : Checkpoints.Count == 3 ? 260 : 225;
     private static string F(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
     private (double X, double Y) Point(int index)
     {
