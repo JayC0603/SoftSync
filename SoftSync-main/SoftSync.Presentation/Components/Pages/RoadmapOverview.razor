@@ -41,7 +41,7 @@
             @foreach (var group in SkillGroups)
             {
                 var key = group.Key;
-                <button class="@(key == SelectedKey ? "is-active" : null)" aria-pressed="@(key == SelectedKey)" @onclick="() => SelectSkill(key)"><i class="bi @SkillTheme.For(key).Icon" aria-hidden="true"></i>@CategoryName(group.First())<small>@group.Count(x => x.IsCompleted)/@group.Count()</small></button>
+                <button class="@(key == SelectedKey ? "is-active" : null)" aria-pressed="@(key == SelectedKey ? "true" : "false")" @onclick="() => SelectSkill(key)"><i class="bi @SkillTheme.For(key).Icon" aria-hidden="true"></i>@CategoryName(group.First())<small>@group.Count(x => x.IsCompleted)/@group.Count()</small></button>
             }
         </nav>
         <div class="journey-grid">
@@ -60,6 +60,7 @@
 
 @code {
     [Parameter] public int UserId { get; set; }
+    [SupplyParameterFromQuery(Name = "skill")] public string? RequestedSkill { get; set; }
     private List<RoadmapItemDto> items = [];
     private RoadmapItemDto? selected;
     private bool loading = true;
@@ -78,6 +79,11 @@
     private JourneyState StateOf(RoadmapItemDto item) => JourneyProgress.State(item, items.IndexOf(item), ActiveIndex, RoadmapReviewMode.Enabled);
 
     protected override Task OnInitializedAsync() => LoadRoadmap();
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))
+            SelectSkill(RequestedSkill);
+    }
     private async Task LoadRoadmap()
     {
         loading = true;

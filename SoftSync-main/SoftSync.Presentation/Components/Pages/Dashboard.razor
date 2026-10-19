@@ -6,7 +6,6 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Presentation.Services
 @inject IUserService UserService
-@inject IProgressService ProgressService
 @inject IRoadmapService RoadmapService
 @inject IAssessmentService AssessmentService
 @inject AuthenticationStateProvider AuthProvider
@@ -24,101 +23,13 @@ else if (user is null)
 else
 {
     <MobileHome User="user" Items="roadmapItems" />
-    <div class="focus-home ss-learning-dashboard dashboard-reference" aria-labelledby="focus-home-title">
-        <header class="focus-home-header">
-            <div><h1 id="focus-home-title">@T($"Chào mừng trở lại, {FirstName(user.PublicName)}!", $"Welcome back, {FirstName(user.PublicName)}!") <span aria-hidden="true">👋</span></h1><p>@T("Mỗi bước nhỏ hôm nay là một tiến bộ ngày mai.", "Every small step today is progress for tomorrow.")</p></div>
-        </header>
-        @if (CurrentItem is null)
-        {
-            <UiState Title="@T("Bắt đầu từ điểm xuất phát của bạn", "Start from where you are")" Description="@T("Hoàn thành bài đánh giá để xem lộ trình học phù hợp.", "Complete an assessment to find your learning roadmap.")" Icon="bi-signpost-split" ActionHref="@($"/assessment/{user.Id}")" ActionText="@T("Bắt đầu đánh giá", "Start assessment")" />
-        }
-        else
-        {
-            <section class="focus-next" aria-labelledby="focus-next-title">
-                <div class="focus-next-copy"><span class="focus-kicker">@T("TIẾP TỤC HỌC TẬP", "CONTINUE LEARNING")</span><small>@T("Tuần", "Week") @CurrentItem.WeekNumber · @CurrentItem.SkillName</small><h2 id="focus-next-title">@CurrentTitle</h2><p>@CurrentItem.Objective</p><div class="focus-next-actions"><a class="ss-btn-primary" href="@($"/roadmap/lecture/{user.Id}/{CurrentItem.Id}")">@T("Tiếp tục bài học", "Continue lesson")<i class="bi bi-arrow-right"></i></a><button type="button" class="focus-link" @onclick="NavigateToAssessment">@T("Đánh giá lại kỹ năng", "Retake assessment")</button></div></div>
-                <div class="ss-learning-companion"><span class="dashboard-orbit" aria-hidden="true"></span><span class="dashboard-spark dashboard-spark-one" aria-hidden="true">✦</span><span class="dashboard-spark dashboard-spark-two" aria-hidden="true">✦</span><img src="/images/syncy-robot.png" alt="SYNCY" width="300" height="300" /><p>@T("Cùng nhau học tốt hơn mỗi ngày! ♡", "Learning better together, every day! ♡")</p></div>
-                <div class="focus-chapter-progress"><div><span>@T("Tiến độ bài học", "Lesson progress")</span><strong>@CurrentPercent%</strong></div><div class="focus-progress" role="progressbar" aria-label="@T("Tiến độ bài học", "Lesson progress")" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@CurrentPercent"><i style="width:@CurrentPercent%"></i></div><small>@CurrentItem.CompletedActivityCount / @CurrentItem.TotalActivityCount @T("hoạt động hoàn thành", "activities completed")</small></div>
-            </section>
-        }
-        <section class="ss-overview-grid" aria-label="@T("Tổng quan học tập", "Learning overview")">
-            <article><span>@T("Bài học hoàn thành", "Completed lessons")</span><strong>@completedItems<small> / @roadmapItems.Count</small></strong><i class="bi bi-book-fill" aria-hidden="true"></i></article>
-            <article><span>@T("Hoạt động hoàn thành", "Completed activities")</span><strong>@roadmapItems.Sum(x => x.CompletedActivityCount)</strong><i class="bi bi-bullseye" aria-hidden="true"></i></article>
-            <article><span>@T("Điểm kinh nghiệm", "Experience points")</span><strong>@user.ExperiencePoints<small> XP</small></strong><i class="bi bi-star-fill" aria-hidden="true"></i></article>
-        </section>
-        <div class="focus-home-grid">
-            <section class="focus-week">
-                <div class="focus-section-heading"><div><h2>@T("Lộ trình của bạn", "Your roadmap")</h2></div><a href="/roadmap">@T("Xem tất cả", "View all") <i class="bi bi-arrow-right"></i></a></div>
-                @if (roadmapItems.Count == 0)
-                {
-                    <p class="ss-muted">@T("Chưa có bài học. Hãy bắt đầu với bài đánh giá.", "No lessons yet. Start with an assessment.")</p>
-                }
-                else
-                {
-                    <div class="ss-next-lessons">
-                        @foreach (var item in roadmapItems.Where(x => !x.IsCompleted).Take(2))
-                        {
-                            <a href="@($"/roadmap/lecture/{user.Id}/{item.Id}")"><span class="ss-lesson-index">@item.WeekNumber</span><div><strong>@item.Title</strong><small>@item.SkillName · @item.CompletedActivityCount/@item.TotalActivityCount @T("hoạt động", "activities")</small></div><span class="dashboard-lesson-status @(item.Id == CurrentItem?.Id ? "is-current" : "")"><i aria-hidden="true"></i>@(item.Id == CurrentItem?.Id ? T("Đang học", "Learning") : T("Bước tiếp theo", "Up next"))</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-                        }
-                        @if (roadmapItems.All(x => x.IsCompleted)) { <p class="ss-muted">@T("Bạn đã hoàn thành các bài trong lộ trình hiện tại. Xem lại tiến độ hoặc đánh giá lại kỹ năng.", "You have completed your current roadmap. Review progress or reassess your skills.")</p> }
-                    </div>
-                }
-            </section>
-            <aside class="focus-coach"><img class="dashboard-coach-art" src="/images/syncy-robot.png" alt="" width="150" height="150" /><div class="dashboard-coach-copy"><h2>@T("Luôn có người đồng hành", "Always here for you")</h2><p>@T("Cùng tìm bước học phù hợp với bạn.", "Find the right next step together.")</p><a class="dashboard-coach-prompt" href="/assistant"><i class="bi bi-chat" aria-hidden="true"></i>@T("Hôm nay tôi nên học gì?", "What should I learn today?")</a></div><a class="ss-btn-primary" href="/assistant"><i class="bi bi-chat" aria-hidden="true"></i>@T("Trò chuyện với SYNCY", "Chat with SYNCY") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></aside>
-        </div>
-        <section class="ss-workspace-shortcuts" aria-label="@T("Khám phá học tập", "Explore learning")"><a href="/progress"><i class="bi bi-bar-chart-fill"></i>@T("Tiến độ", "Progress")</a><a href="/case-studies"><i class="bi bi-bullseye"></i>@T("Thực hành", "Practice")</a><a href="/game"><i class="bi bi-clipboard-check"></i>@T("Kiểm tra", "Quiz")</a><a href="/resources"><i class="bi bi-folder"></i>@T("Tài nguyên", "Resources")</a></section>
-        <section class="mentor-bar">
-            <header><div><h3><i class="bi bi-stars"></i> @T("Đội ngũ cố vấn đồng hành", "Mentors accompanying you")</h3><p>@T("Những chuyên gia giàu kinh nghiệm luôn sẵn sàng hỗ trợ hành trình phát triển của bạn.", "Experienced experts are ready to support your development journey.")</p></div></header>
-            <div class="ss-mentor-carousel-tools"><span>@T("Vuốt để xem thêm cố vấn", "Swipe to meet more mentors")</span><button type="button" onclick="window.ssDesign.scrollMentors(this,-1)" aria-label="@T("Cố vấn trước", "Previous mentor")"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" onclick="window.ssDesign.scrollMentors(this,1)" aria-label="@T("Cố vấn tiếp theo", "Next mentor")"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
-            <div class="mentor-items mentor-cards ss-mentor-carousel" tabindex="0" aria-label="@T("Danh sách cố vấn, vuốt để xem thêm", "Mentors, swipe to see more")">
-                <article>
-                    <div class="mentor-photo"><span></span><img src="/images/mentor-nguyen-hoang-van-anh.png" alt="Nguyễn Hoàng Vân Anh" /></div>
-                    <div class="mentor-info"><em><i class="bi bi-stars"></i> @T("Cố vấn chuyên môn", "Professional advisor")</em><h4>Th.S. Nguyễn Hoàng Vân Anh</h4><strong>@T("Chuyên gia tâm lý và phát triển cá nhân", "Psychology and personal development expert")</strong><p>@T("Đồng hành cùng người học xây dựng tư duy tích cực và phát triển năng lực cá nhân bền vững.", "Helping learners build positive thinking and sustainable personal capabilities.")</p><div class="mentor-tags"><span><i class="bi bi-person-heart"></i> @T("Tâm lý", "Psychology")</span><span><i class="bi bi-compass-fill"></i> @T("Phát triển", "Development")</span></div><button @onclick='() => OpenMentor("van-anh")'>@T("Xem chi tiết", "View details") <i class="bi bi-arrow-right"></i></button></div>
-                </article>
-                <article>
-                    <div class="mentor-photo"><span></span><img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Nguyễn Thuỵ Tố Trâm" /></div>
-                    <div class="mentor-info"><em><i class="bi bi-gem"></i> @T("Cố vấn chính", "Lead mentor")</em><h4>Th.S. Nguyễn Thuỵ Tố Trâm</h4><strong>@T("Chuyên gia kỹ năng mềm và cộng đồng", "Soft skills and community expert")</strong><p>@T("Truyền cảm hứng và hỗ trợ người học ứng dụng kỹ năng mềm vào học tập, công việc và cuộc sống.", "Inspiring learners to apply soft skills in study, work and life.")</p><div class="mentor-tags"><span><i class="bi bi-chat-dots-fill"></i> @T("Kỹ năng mềm", "Soft skills")</span><span><i class="bi bi-heart-fill"></i> @T("Cộng đồng", "Community")</span></div><button @onclick='() => OpenMentor("to-tram")'>@T("Xem chi tiết", "View details") <i class="bi bi-arrow-right"></i></button></div>
-                </article>
-                <article>
-                    <div class="mentor-photo"><span></span><img src="/images/mentor-nguyen-xuan.png" alt="Nguyễn Xuân" /></div>
-                    <div class="mentor-info"><em><i class="bi bi-stars"></i> @T("Cố vấn chuyên môn", "Professional advisor")</em><h4>Th.S. Nguyễn Xuân</h4><strong>@T("Chuyên gia giáo dục và công nghệ", "Education and technology expert")</strong><p>@T("Kết nối kinh nghiệm giáo dục với công nghệ để tạo ra trải nghiệm học tập thực tế và hiệu quả.", "Connecting education and technology for practical, effective learning.")</p><div class="mentor-tags"><span><i class="bi bi-award-fill"></i> @T("Kinh nghiệm", "Experience")</span><span><i class="bi bi-cpu-fill"></i> EdTech</span></div><button @onclick='() => OpenMentor("xuan")'>@T("Xem chi tiết", "View details") <i class="bi bi-arrow-right"></i></button></div>
-                </article>
-            </div>
-        </section>
-
-        @if (SelectedMentor is { } mentor)
-        {
-            <dialog class="mentor-modal-backdrop" role="presentation" @onclick="CloseMentor">
-                <section class="mentor-modal" role="dialog" aria-modal="true" aria-labelledby="mentor-modal-title" @onclick:stopPropagation="true">
-                    <button class="mentor-modal-close" @onclick="CloseMentor" aria-label="@T("Đóng", "Close")"><i class="bi bi-x-lg"></i></button>
-                    <header><img src="@mentor.Image" alt="@mentor.Name" /><div><span>@T(mentor.RoleVi, mentor.RoleEn)</span><h2 id="mentor-modal-title">@mentor.Name</h2><p>@T(mentor.PositionVi, mentor.PositionEn)</p></div></header>
-                    <div class="mentor-highlights">
-                        @foreach (var highlight in mentor.Highlights)
-                        {
-                            <div><i class="bi bi-stars"></i><span>@T(highlight.Vi, highlight.En)</span></div>
-                        }
-                    </div>
-                    <div class="mentor-biography"><h3>@T("Giới thiệu", "About")</h3><p>@T(mentor.BioVi, mentor.BioEn)</p></div>
-                </section>
-            </dialog>
-        }
-
-    </div>
 }
 
 @code {
     private UserDto? user;
     private bool loadFailed;
-    private List<ProgressDto> progress = [];
     private List<RoadmapItemDto> roadmapItems = [];
-    private int completedItems;
-    private MentorDetail? SelectedMentor;
-    private bool Vi => L.Current == AppLanguage.Vi;
-    private string T(string vi, string en) => Vi ? vi : en;
-    private string[] WeekDays => Vi ? ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] : ["M", "T", "W", "T", "F", "S", "S"];
-    private RoadmapItemDto? CurrentItem => roadmapItems.FirstOrDefault(x => !x.IsCompleted) ?? roadmapItems.LastOrDefault();
-    private string CurrentTitle => CurrentItem?.Title ?? T("Chưa có bài học", "No lesson yet");
-    private string CurrentSkill => progress.FirstOrDefault()?.SkillName ?? T("Giao tiếp hiệu quả", "Effective communication");
-    private int CurrentPercent => Math.Clamp(CurrentItem?.ProgressPercent ?? 0, 0, 100);
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,127 +59,10 @@ else
             var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(id, id)).Any();
             if (!hasCompletedAssessment) { Nav.NavigateTo("/profile-setup", true); return; }
         }
-        progress = (await ProgressService.GetUserProgressAsync(id)).ToList();
+
         var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
         roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-        completedItems = roadmapItems.Count(x => x.IsCompleted);
+
     }
 
-    private void NavigateToAssessment() => Nav.NavigateTo($"/assessment/{user?.Id ?? 0}");
-    private void OpenMentor(string id) => SelectedMentor = Mentors.First(x => x.Id == id);
-    private void CloseMentor() => SelectedMentor = null;
-    private static string FirstName(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? value;
-
-    private static readonly MentorDetail[] Mentors =
-    [
-        new("van-anh", "Th.S. Nguyễn Hoàng Vân Anh", "/images/mentor-nguyen-hoang-van-anh.png", "Cố vấn chuyên môn", "Professional advisor", "Chuyên gia tâm lý và phát triển cá nhân", "Psychology and personal development expert",
-            "Thạc sĩ Nguyễn Hoàng Vân Anh có kinh nghiệm trong lĩnh vực tâm lý, giáo dục và phát triển cá nhân. Cô đồng hành cùng người học xây dựng sự tự tin, hiểu bản thân và hình thành những thói quen phát triển bền vững.",
-            "Nguyen Hoang Van Anh holds a master's degree and has experience in psychology, education and personal development. She helps learners build confidence, understand themselves and develop sustainable growth habits.",
-            [("Kiến thức chuyên sâu về tâm lý học ứng dụng", "Expertise in applied psychology"), ("Kinh nghiệm tư vấn và đồng hành cùng người trẻ", "Experience advising and mentoring young people"), ("Định hướng phát triển cá nhân phù hợp với từng người học", "Personalized development guidance")]),
-        new("to-tram", "Th.S. Nguyễn Thuỵ Tố Trâm", "/images/mentor-nguyen-thuy-to-tram.png", "Cố vấn chính", "Lead mentor", "Chuyên gia kỹ năng mềm và phát triển cộng đồng", "Soft skills and community development expert",
-            "Thạc sĩ Nguyễn Thuỵ Tố Trâm là người định hướng chuyên môn cho SoftSync. Cô có nhiều năm hoạt động trong đào tạo kỹ năng mềm, xây dựng cộng đồng và hỗ trợ người học ứng dụng kiến thức vào những tình huống thực tế.",
-            "Nguyen Thuy To Tram holds a master's degree and leads SoftSync's academic direction. She has extensive experience in soft-skills education, community building and helping learners apply knowledge to real situations.",
-            [("Đào tạo kỹ năng giao tiếp và làm việc nhóm", "Communication and teamwork training"), ("Xây dựng môi trường học tập tích cực và hòa nhập", "Building positive and inclusive learning environments"), ("Kết nối kiến thức với trải nghiệm thực tế", "Connecting knowledge with real-world experience")]),
-        new("xuan", "Th.S. Nguyễn Xuân", "/images/mentor-nguyen-xuan.png", "Cố vấn chuyên môn", "Professional advisor", "Chuyên gia giáo dục và công nghệ", "Education and technology expert",
-            "Thạc sĩ Nguyễn Xuân có kinh nghiệm trong giáo dục, quản lý và ứng dụng công nghệ vào đào tạo. Thầy góp phần phát triển phương pháp học tập thực tiễn, giúp người học tiếp cận kỹ năng mềm một cách trực quan và hiệu quả.",
-            "Nguyen Xuan holds a master's degree and has experience in education, management and educational technology. He develops practical learning approaches that make soft skills visual, accessible and effective.",
-            [("Kinh nghiệm trong quản lý và đào tạo", "Experience in management and education"), ("Ứng dụng công nghệ trong thiết kế trải nghiệm học tập", "Applying technology to learning experience design"), ("Phát triển nội dung EdTech gắn với nhu cầu thực tế", "Developing EdTech content for real learner needs")])
-    ];
-
-    private sealed record MentorDetail(string Id, string Name, string Image, string RoleVi, string RoleEn, string PositionVi, string PositionEn, string BioVi, string BioEn, (string Vi, string En)[] Highlights);
 }
-
-<style>
-    .ss-main-content:has(> .dash-home){width:100%;max-width:none;padding:0!important;background:#fbfcff}
-    .dash-loading{min-height:70vh;display:grid;place-items:center;align-content:center;gap:1rem;color:#626a85;font-weight:700}.dash-loading span{width:44px;height:44px;border:4px solid #e7e5ff;border-top-color:#6848ef;border-radius:50%;animation:spin .8s linear infinite}@@keyframes spin{to{transform:rotate(360deg)}}
-    .dash-home{--ink:#0c1740;--muted:#5e698b;width:100%;max-width:1500px;margin:auto;padding:0 1.7rem 2rem;color:var(--ink)}button{cursor:pointer}
-    .dash-hero{position:relative;min-height:278px;margin:0 -1.7rem;padding:2.7rem 2.2rem 1.8rem;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;background:radial-gradient(circle at 75% 55%,rgba(168,185,255,.26),transparent 28%),linear-gradient(105deg,#fff 5%,#fbf8ff 46%,#eef6ff)}.dash-hero:after{content:"";position:absolute;right:-45px;top:-210px;width:480px;height:480px;border:2px solid rgba(255,255,255,.8);border-radius:50%}.dash-hero-copy{position:relative;z-index:2}.dash-hero h1{margin:0;font-size:2.65rem;font-weight:900;letter-spacing:-.045em}.dash-hero h1 span{font-size:2rem}.dash-hero-copy>p{margin:.8rem 0 1.45rem;color:#344161;font-size:1.12rem}.dash-hero-actions{display:flex;gap:.8rem}.dash-hero-actions button{min-height:54px;padding:.8rem 1.45rem;border:1px solid #cfd3e8;border-radius:13px;color:#1d2c5d;background:rgba(255,255,255,.75);font-weight:800}.dash-hero-actions i{margin-right:.55rem;color:#563be8;font-size:1.2rem}.dash-hero-actions .primary{border-color:transparent;color:#fff;background:linear-gradient(100deg,#5938ed,#7435ee);box-shadow:0 12px 28px rgba(86,56,232,.25)}.dash-hero-actions .primary i{color:#fff}.dash-syncy{position:relative;z-index:2;display:flex;justify-content:center;align-items:flex-end}.dash-syncy img{position:absolute;right:12%;bottom:-65px;width:310px;height:300px;object-fit:contain}.syncy-bubble{position:absolute;z-index:2;left:5%;bottom:62px;width:190px;padding:1rem 1.1rem;border-radius:22px;color:#24356d;background:#fff;box-shadow:0 15px 35px rgba(82,73,150,.11);font-size:.78rem}.syncy-bubble:after{content:"";position:absolute;right:-17px;top:32px;border-width:10px 0 10px 18px;border-style:solid;border-color:transparent transparent transparent #fff}.syncy-bubble strong,.syncy-bubble span{display:block}.syncy-bubble strong{margin:.1rem 0;color:#6540e8;font-size:1.1rem}.syncy-bubble span{line-height:1.45}
-    .dash-eyebrow{width:max-content;margin-bottom:.7rem;padding:.4rem .7rem;display:inline-flex;align-items:center;gap:.4rem;border:1px solid rgba(99,72,239,.18);border-radius:999px;color:#5938d9;background:rgba(255,255,255,.62);font-size:.76rem;font-weight:850;letter-spacing:.03em;text-transform:uppercase}.dash-learning-snapshot{max-width:610px;margin:0 0 1.15rem;display:grid;grid-template-columns:minmax(0,1.45fr) repeat(2,minmax(110px,1fr));gap:.55rem}.dash-learning-snapshot>div{min-width:0;min-height:62px;padding:.65rem .75rem;display:flex;align-items:center;gap:.6rem;border:1px solid rgba(111,91,219,.15);border-radius:15px;background:rgba(255,255,255,.7);box-shadow:0 8px 24px rgba(74,62,145,.06)}.dash-learning-snapshot i{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:11px;color:#fff;background:linear-gradient(135deg,#6947e8,#8b5cf6)}.dash-learning-snapshot span,.dash-learning-snapshot small,.dash-learning-snapshot strong{display:block;min-width:0}.dash-learning-snapshot small{color:#68738f;font-size:.67rem;font-weight:700}.dash-learning-snapshot strong{overflow:hidden;color:#19264f;font-size:.78rem;text-overflow:ellipsis;white-space:nowrap}
-    .journey-card{position:relative;z-index:3;min-height:190px;margin-top:-1rem;padding:1.15rem 1.5rem;display:grid;grid-template-columns:245px minmax(0,1fr) 210px;align-items:center;gap:1.25rem;border:1px solid #e3e5f2;border-radius:23px;background:rgba(255,255,255,.96);box-shadow:0 16px 40px rgba(61,56,127,.12)}.journey-art{position:relative;height:150px;display:grid;place-items:center;border-radius:18px;color:#fff;background:linear-gradient(140deg,#6875ee,#b6b9ff);font-size:4rem;overflow:hidden}.journey-art:before,.journey-art:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;background:#f0d4c3}.journey-art:before{left:20px;bottom:-45px}.journey-art:after{right:20px;bottom:-45px;background:#c7dbef}.journey-art>i{z-index:1}.journey-art span{position:absolute;right:28px;top:20px;width:48px;height:35px;display:grid;place-items:center;border-radius:18px;background:#fff;color:#7650e9;font-size:1.2rem}.journey-copy small{color:#603dee;font-weight:800}.journey-copy h2{margin:.45rem 0;font-size:1.9rem}.journey-copy p{margin:0 0 .75rem;color:#354264}.journey-copy p i{color:#6552e8}.journey-progress{display:inline-block;width:70%;height:10px;border-radius:99px;background:#e8e9f1;overflow:hidden}.journey-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6438ed,#8246ee)}.journey-copy>b{margin-left:.65rem;color:#5637eb}.journey-action{display:grid;justify-items:end;gap:1.4rem}.journey-action>span{color:#5f6987;font-size:.8rem}.journey-action button{width:100%;min-height:58px;border:0;border-radius:14px;color:#fff;background:linear-gradient(100deg,#6931ec,#7b35ed);font-size:1.05rem;font-weight:800}.journey-action button i{float:right;margin-top:.25rem}
-    .dash-content{margin-top:1.1rem;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,1fr);gap:1.1rem}.dash-content h3,.mentor-bar h3{margin:0 0 .65rem;font-size:1rem}.dash-left{min-width:0}.quick-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem}.quick-links button{min-width:0;min-height:70px;padding:.65rem;display:flex;align-items:center;gap:.65rem;border:1px solid #e0e3ef;border-radius:14px;color:var(--ink);background:#fff}.quick-links button>i{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:11px;color:#fff;font-size:1.2rem}.purple{background:#7544e9}.blue{background:#3579e5}.teal{background:#20aaa5}.quick-links strong{min-width:0;flex:1;text-align:left;font-size:.75rem}.quick-links b{color:#66728e;font-size:1.25rem}.recommend-section{margin-top:1rem}.course-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}.course-cards button{min-width:0;min-height:115px;padding:.75rem;display:flex;align-items:flex-start;gap:.65rem;border:1px solid #e0e3ef;border-radius:14px;color:var(--ink);background:#fff;text-align:left}.course-cards button>i{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:11px;color:#fff;font-size:1.2rem}.course-cards span,.course-cards strong,.course-cards small,.course-cards em{display:block}.course-cards strong{font-size:.7rem}.course-cards small{margin:.25rem 0;color:var(--muted);font-size:.58rem;line-height:1.35}.course-cards em{color:#64708d;font-size:.57rem;font-style:normal}
-    .week-card{padding:1.15rem 1.35rem;border:1px solid #dfe3ef;border-radius:18px;background:#fff;box-shadow:0 9px 25px rgba(61,56,127,.05)}.week-card header,.mentor-bar header{display:flex;align-items:center;justify-content:space-between}.week-card header button,.mentor-bar header button{border:0;color:#1462dc;background:transparent;font-size:.7rem}.week-stats{margin:1rem 0;padding-bottom:1rem;display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #e4e7f0}.week-stats>div{display:flex;align-items:center;gap:.65rem;padding:0 .7rem;border-right:1px solid #e5e7f0}.week-stats>div:first-child{padding-left:0}.week-stats>div:last-child{border:0}.week-stats>div>i{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:12px;color:#fff;font-size:1.15rem}.week-stats .gold{background:#fbb53e}.week-stats .orange{background:#ff7c3d}.week-stats span,.week-stats strong,.week-stats small{display:block}.week-stats strong{font-size:1.05rem}.week-stats small{color:#5e6987;font-size:.62rem}.orange-text{color:#f26922}.week-days{display:grid;grid-template-columns:repeat(7,1fr) 52px;align-items:end;gap:.3rem}.week-days div{display:grid;justify-items:center;gap:.55rem}.week-days div small{font-size:.58rem}.week-days div span{width:22px;height:22px;display:grid;place-items:center;border:1.5px dashed #7890b6;border-radius:50%;color:#fff;font-size:.6rem}.week-days div span.done{border-style:solid;border-color:#6941eb;background:#6941eb}.week-days>i{width:48px;height:48px;display:grid;place-items:center;border:1px solid #e1e4ee;border-radius:50%;color:#f68b22;font-size:1.4rem}
-    .mentor-bar{margin-top:1.1rem}.mentor-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #dfe3ef;border-radius:17px;background:#fff;box-shadow:0 9px 25px rgba(61,56,127,.05)}.mentor-items article{min-width:0;padding:.7rem 1rem;display:flex;align-items:center;gap:.65rem;border-right:1px solid #e7e9f1}.mentor-items article:last-child{border:0}.mentor-items img{width:48px;height:48px;flex:0 0 48px;border-radius:50%;object-fit:cover;background:#f2efff}.mentor-items span,.mentor-items strong,.mentor-items small{display:block;min-width:0}.mentor-items strong{overflow:hidden;font-size:.7rem;text-overflow:ellipsis;white-space:nowrap}.mentor-items small{margin-top:.2rem;color:var(--muted);font-size:.6rem}
-    /* Readable dashboard typography */
-    .dash-content h3,.mentor-bar h3{font-size:1.28rem}.quick-links strong{font-size:.92rem}.course-cards strong{font-size:.9rem}.course-cards small{font-size:.78rem;line-height:1.5}.course-cards em{font-size:.72rem}.week-card header button,.mentor-bar header button{font-size:.85rem}.week-stats strong{font-size:1.35rem}.week-stats small{font-size:.78rem}.week-days div small{font-size:.72rem}.journey-copy small{font-size:1rem}.journey-copy p{font-size:1rem}.journey-action>span{font-size:.9rem}
-    /* Same mentor presentation used on the public home page */
-    .mentor-bar{margin-top:1.8rem;padding:1.35rem;border:1px solid rgba(124,92,252,.18);border-radius:24px;background:linear-gradient(135deg,rgba(245,243,255,.92),rgba(238,242,255,.88));box-shadow:0 18px 50px rgba(76,59,150,.1)}.mentor-bar header{margin-bottom:1.2rem}.mentor-bar header h3{margin:0;color:#25205d;font-size:1.35rem}.mentor-bar header h3 i{margin-right:.45rem;color:#7956ee}.mentor-bar header p{margin:.35rem 0 0;color:#68738f;font-size:.92rem}.mentor-items.mentor-cards{gap:1rem;border:0;background:transparent;box-shadow:none}.mentor-cards article{min-width:0;padding:1.25rem;display:flex;flex-direction:column;gap:0;border:1px solid rgba(124,92,252,.15)!important;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(245,243,255,.9));box-shadow:0 14px 34px rgba(76,59,150,.09);text-align:center}.mentor-photo{position:relative;width:140px;height:140px;margin:0 auto .8rem}.mentor-photo>span{position:absolute;inset:-7px;border:2px solid rgba(124,92,252,.24);border-radius:50%;transform:rotate(-12deg) scaleY(.74);box-shadow:0 0 32px rgba(139,92,246,.2)}.mentor-cards .mentor-photo img{position:relative;width:140px;height:140px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 18px 24px rgba(76,29,149,.18))}.mentor-info{width:100%;display:flex;flex:1;flex-direction:column;align-items:center}.mentor-info>em{display:inline-flex;align-items:center;gap:.4rem;padding:.42rem .72rem;border:1px solid rgba(124,92,252,.15);border-radius:999px;color:#6847e8;background:rgba(124,92,252,.08);font-size:.76rem;font-style:normal;font-weight:850}.mentor-info h4{margin:.65rem 0 .25rem;color:#17143d;font-size:1.25rem;font-weight:900}.mentor-info>strong{min-height:2.7em;color:#6d4cf5;font-size:.86rem;line-height:1.4;white-space:normal}.mentor-info>p{flex:1;margin:.65rem 0;color:#64748b;font-size:.84rem;line-height:1.6}.mentor-tags{display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .7rem}.mentor-tags span{padding:.42rem .58rem;border:1px solid rgba(124,92,252,.14);border-radius:12px;color:#5b42db;background:rgba(255,255,255,.72);font-size:.72rem;font-weight:750}.mentor-info>button{width:100%;padding:.7rem .9rem;border:0;border-radius:14px;color:#fff;background:linear-gradient(135deg,#6d4cf5,#8b5cf6);font-size:.86rem;font-weight:800}.mentor-info>button i{margin-left:.35rem}
-    .mentor-modal-backdrop{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:1rem;background:rgba(15,23,42,.62);backdrop-filter:blur(9px)}.mentor-modal{position:relative;width:min(850px,100%);max-height:88vh;overflow-y:auto;padding:2rem;border:1px solid rgba(124,92,252,.2);border-radius:28px;background:rgba(255,255,255,.98);box-shadow:0 30px 90px rgba(15,23,42,.28)}.mentor-modal-close{position:absolute;top:1rem;right:1rem;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(124,92,252,.18);border-radius:50%;color:#5b42db;background:#fff}.mentor-modal header{padding-right:3rem;display:grid;grid-template-columns:145px 1fr;align-items:center;gap:1.4rem}.mentor-modal header img{width:145px;height:145px;border-radius:50%;object-fit:cover;box-shadow:0 18px 38px rgba(76,29,149,.2)}.mentor-modal header span{color:#6d4cf5;font-size:.9rem;font-weight:850}.mentor-modal header h2{margin:.3rem 0;color:#17143d;font-size:2rem;font-weight:900}.mentor-modal header p{margin:0;color:#64748b;font-size:1rem}.mentor-highlights{margin:1.5rem 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.mentor-highlights>div{padding:.85rem;display:flex;align-items:flex-start;gap:.6rem;border:1px solid rgba(124,92,252,.14);border-radius:14px;color:#475569;background:rgba(245,243,255,.72);font-size:.9rem;line-height:1.5}.mentor-highlights i{margin-top:.15rem;color:#8b5cf6}.mentor-biography{padding-top:1rem;border-top:1px solid rgba(124,92,252,.16)}.mentor-biography h3{margin:0 0 .55rem;color:#25205d;font-size:1.2rem}.mentor-biography p{margin:0;color:#64748b;font-size:.95rem;line-height:1.75}
-    html[data-theme="dark"] .ss-main-content:has(> .dash-home){background:#111329}html[data-theme="dark"] .dash-home{--ink:#f5f4ff;--muted:#b5bbd0}html[data-theme="dark"] .dash-hero{background:linear-gradient(105deg,#18152f,#201b45 55%,#172341)}html[data-theme="dark"] .dash-hero-copy>p{color:#cbd2e8}html[data-theme="dark"] .dash-eyebrow{color:#d8d1ff;background:rgba(90,70,170,.22);border-color:rgba(171,155,255,.28)}html[data-theme="dark"] .dash-learning-snapshot>div{background:rgba(31,29,66,.74);border-color:rgba(160,144,255,.22)}html[data-theme="dark"] .dash-learning-snapshot small{color:#aeb8d3}html[data-theme="dark"] .dash-learning-snapshot strong{color:#f8fafc}html[data-theme="dark"] :is(.journey-card,.quick-links button,.course-cards button,.week-card,.mentor-items){border-color:rgba(160,144,255,.2);background:rgba(29,26,59,.94)}html[data-theme="dark"] .mentor-bar{background:linear-gradient(135deg,rgba(35,30,72,.96),rgba(28,27,65,.94))}html[data-theme="dark"] .mentor-bar header h3,html[data-theme="dark"] .mentor-info h4{color:#f8fafc}html[data-theme="dark"] .mentor-bar header p,html[data-theme="dark"] .mentor-info>p{color:#cbd5e1}html[data-theme="dark"] .mentor-cards article{background:linear-gradient(145deg,rgba(42,35,86,.96),rgba(30,27,75,.9))}html[data-theme="dark"] .mentor-tags span{color:#ddd6fe;background:rgba(76,61,139,.45)}html[data-theme="dark"] .mentor-modal{background:rgba(30,27,75,.98)}html[data-theme="dark"] .mentor-modal header h2,html[data-theme="dark"] .mentor-biography h3{color:#f8fafc}html[data-theme="dark"] .mentor-modal header p,html[data-theme="dark"] .mentor-biography p,html[data-theme="dark"] .mentor-highlights>div{color:#cbd5e1}html[data-theme="dark"] .mentor-highlights>div{background:rgba(76,61,139,.32)}
-    @@media(max-width:1000px){.dash-hero{grid-template-columns:1.15fr .85fr}.dash-syncy img{right:-5%;width:260px}.syncy-bubble{display:none}.journey-card{grid-template-columns:180px 1fr 170px}.dash-content{grid-template-columns:1fr}.quick-links{grid-template-columns:repeat(4,1fr)}.week-card{grid-row:2}.mentor-items{grid-template-columns:1fr 1fr}}
-    @@media(max-width:700px){.dash-home{padding:0 .75rem 6rem}.dash-hero{min-height:590px;margin:0 -.75rem;padding:1.4rem 1rem;grid-template-columns:1fr}.dash-hero h1{font-size:2rem}.dash-learning-snapshot{grid-template-columns:1fr 1fr}.dash-learning-snapshot>div:first-child{grid-column:1/-1}.dash-hero-actions{display:grid;grid-template-columns:1fr}.dash-syncy img{right:50%;bottom:-75px;width:240px;transform:translateX(50%)}.journey-card{margin-top:-.5rem;padding:1rem;grid-template-columns:1fr}.journey-art{display:none}.journey-action{justify-items:stretch;gap:.65rem}.journey-action>span{text-align:right}.quick-links{grid-template-columns:1fr 1fr}.course-cards{grid-template-columns:1fr}.week-stats{grid-template-columns:1fr;gap:.65rem}.week-stats>div{border:0;padding:0}.week-days{grid-template-columns:repeat(7,1fr)}.week-days>i{display:none}.mentor-items{grid-template-columns:1fr}.mentor-items article{border:0;border-bottom:1px solid #e7e9f1}.journey-copy h2{font-size:1.45rem}.mentor-modal{padding:1.25rem}.mentor-modal header{grid-template-columns:1fr;padding-right:2.5rem;text-align:center}.mentor-modal header img{width:120px;height:120px;margin:auto}.mentor-modal header h2{font-size:1.5rem}.mentor-highlights{grid-template-columns:1fr}}
-
-    /* Dashboard v2 — one clear learning decision, calmer surfaces, less card noise. */
-    .dash-hero-v2 {
-        min-height: 520px;
-        margin: 0 -1.7rem;
-        padding: clamp(2.5rem, 5vw, 4.75rem) clamp(2rem, 6vw, 6.5rem);
-        grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
-        align-items: center;
-        gap: clamp(2rem, 5vw, 5rem);
-        background:
-            radial-gradient(circle at 76% 42%, rgba(129, 140, 248, .18), transparent 28rem),
-            linear-gradient(115deg, #ffffff 0%, #f8f8ff 58%, #eef2ff 100%);
-        border-bottom: 1px solid #e5e7f2;
-    }
-    .dash-hero-v2::after { right: -8rem; top: -18rem; width: 44rem; height: 44rem; border-color: rgba(99, 102, 241, .08); }
-    .dash-hero-v2 .dash-hero-copy { max-width: 720px; }
-    .dash-hero-v2 .dash-eyebrow { margin-bottom: 1.2rem; border: 0; color: #4f46e5; background: #eef2ff; letter-spacing: .08em; }
-    .dash-hero-v2 h1 { max-width: 680px; font-size: clamp(2.5rem, 4.7vw, 4.9rem); line-height: .98; letter-spacing: -.065em; }
-    .dash-hero-v2 .dash-hero-copy > p { max-width: 560px; margin: 1.2rem 0 1.8rem; color: #53617d; font-size: 1.05rem; line-height: 1.65; }
-    .dash-focus-card { max-width: 640px; padding: 1.25rem 1.35rem; border: 1px solid #e1e5f0; border-radius: 20px; background: rgba(255,255,255,.88); box-shadow: 0 18px 50px rgba(38, 45, 85, .08); }
-    .dash-focus-heading,.dash-focus-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-    .dash-focus-heading > span { display: inline-flex; align-items: center; gap: .35rem; color: #4f46e5; font-size: .75rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
-    .dash-focus-heading > span i { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; color: #fff; background: #4f46e5; }
-    .dash-focus-heading small { display: inline-flex; align-items: center; gap: .35rem; color: #64748b; font-size: .78rem; font-weight: 700; }
-    .dash-focus-card h2 { margin: 1rem 0 .25rem; color: #111936; font-size: clamp(1.25rem, 2vw, 1.65rem); letter-spacing: -.025em; }
-    .dash-focus-card > p { margin: 0 0 1rem; color: #64748b; font-size: .9rem; }
-    .dash-focus-progress { height: 8px; overflow: hidden; border-radius: 999px; background: #e8eaf2; }
-    .dash-focus-progress > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#4f46e5,#7c3aed); }
-    .dash-focus-footer { margin-top: .65rem; color: #64748b; font-size: .76rem; }
-    .dash-focus-footer strong { color: #3730a3; font-size: .78rem; }
-    .dash-hero-v2 .dash-hero-actions { margin-top: 1rem; align-items: center; }
-    .dash-hero-v2 .dash-hero-actions button { min-height: 50px; }
-    .dash-hero-v2 .dash-hero-actions .primary { min-width: 190px; display: inline-flex; align-items: center; justify-content: center; gap: .65rem; background: #4f46e5; box-shadow: 0 12px 26px rgba(79,70,229,.22); }
-    .dash-hero-v2 .dash-hero-actions .primary i { margin: 0; font-size: 1rem; }
-    .dash-hero-v2 .dash-text-action { min-height: 44px; padding-inline: .8rem; border-color: transparent; color: #475569; background: transparent; box-shadow: none; }
-    .dash-hero-v2 .dash-text-action:hover { color: #4338ca; background: #eef2ff; }
-    .dash-syncy-v2 { min-height: 390px; align-self: stretch; }
-    .dash-syncy-v2 img { right: 50%; bottom: -2.7rem; width: min(360px, 90%); height: 390px; transform: translateX(50%); }
-    .dash-syncy-v2 .syncy-bubble { left: auto; right: -1rem; bottom: auto; top: 1rem; width: 210px; padding: 1rem 1.15rem; border: 1px solid #e6e7f3; border-radius: 18px; font-size: .8rem; line-height: 1.5; }
-    .dash-syncy-v2 .syncy-bubble::after { left: 2rem; right: auto; top: auto; bottom: -14px; border-width: 14px 12px 0; border-color: #fff transparent transparent; }
-    .dash-syncy-v2 .syncy-bubble strong { margin: 0 0 .25rem; }
-    .dash-streak-pill { position: absolute; z-index: 3; left: 0; bottom: 2rem; display: flex; align-items: center; gap: .65rem; padding: .7rem .9rem; border: 1px solid #e7e8f2; border-radius: 16px; color: #1e293b; background: rgba(255,255,255,.9); box-shadow: 0 14px 34px rgba(52,58,105,.1); }
-    .dash-streak-pill > i { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; color: #ea580c; background: #fff1e8; }
-    .dash-streak-pill span,.dash-streak-pill strong,.dash-streak-pill small { display: block; }
-    .dash-streak-pill strong { font-size: .85rem; }
-    .dash-streak-pill small { color: #64748b; font-size: .67rem; }
-    .dash-content { margin-top: 2.25rem; }
-
-    html[data-theme="dark"] .dash-hero-v2 { background: radial-gradient(circle at 76% 42%,rgba(99,102,241,.2),transparent 28rem),linear-gradient(115deg,#111329,#17172f 58%,#171f39); border-color: rgba(148,163,184,.15); }
-    html[data-theme="dark"] .dash-focus-card,html[data-theme="dark"] .dash-streak-pill,html[data-theme="dark"] .dash-syncy-v2 .syncy-bubble { color:#f8fafc; background:rgba(24,24,50,.9); border-color:rgba(148,163,184,.18); }
-    html[data-theme="dark"] .dash-focus-card h2 { color:#f8fafc; }
-    html[data-theme="dark"] .dash-focus-card>p,html[data-theme="dark"] .dash-focus-heading small,html[data-theme="dark"] .dash-focus-footer,html[data-theme="dark"] .dash-streak-pill small { color:#aeb8d3; }
-    html[data-theme="dark"] .dash-focus-progress { background:#30334b; }
-    html[data-theme="dark"] .dash-syncy-v2 .syncy-bubble::after { border-top-color:#181832; }
-
-    @@media(max-width:1000px) {
-        .dash-hero-v2 { min-height: 500px; grid-template-columns: minmax(0,1.25fr) minmax(280px,.75fr); padding-inline: 2.25rem; gap: 1rem; }
-        .dash-syncy-v2 img { width: 300px; }
-        .dash-syncy-v2 .syncy-bubble { right: 0; width: 180px; }
-        .dash-streak-pill { left: -.5rem; }
-    }
-    @@media(max-width:700px) {
-        .dash-hero-v2 { min-height: auto; margin: 0 -.75rem; padding: 2rem 1rem 1.5rem; grid-template-columns: 1fr; gap: 1.25rem; }
-        .dash-hero-v2 h1 { max-width: 12ch; font-size: clamp(2.35rem,12vw,3.4rem); }
-        .dash-hero-v2 .dash-hero-copy>p { margin: .9rem 0 1.35rem; font-size: 1rem; }
-        .dash-focus-card { padding: 1rem; border-radius: 17px; }
-        .dash-focus-footer { align-items: flex-start; flex-direction: column; gap: .15rem; }
-        .dash-hero-v2 .dash-hero-actions { display: grid; grid-template-columns: 1fr; }
-        .dash-hero-v2 .dash-hero-actions .primary,.dash-hero-v2 .dash-text-action { width: 100%; }
-        .dash-syncy-v2 { min-height: 245px; }
-        .dash-syncy-v2 img { right: 0; bottom: -2.5rem; width: 235px; height: 260px; transform: none; }
-        .dash-syncy-v2 .syncy-bubble { left: 0; right: auto; top: 1.5rem; width: min(190px,52vw); }
-        .dash-streak-pill { left: .25rem; bottom: .2rem; }
-        .dash-content { margin-top: 1.4rem; }
-    }
-</style>
