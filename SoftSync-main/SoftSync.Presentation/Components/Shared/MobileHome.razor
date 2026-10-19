@@ -16,7 +16,11 @@
                 <button type="button" @onclick="() => query = string.Empty" aria-label="@T("Xóa tìm kiếm", "Clear search")"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             }
         </div>
-        @if (!string.IsNullOrWhiteSpace(query))
+        <details class="mh-search-filter">
+            <summary aria-label="@T("Lọc bài học", "Filter lessons")"><i class="bi bi-sliders" aria-hidden="true"></i></summary>
+            <div class="mh-filter-panel"><label for="mh-search-scope">@T("Hiển thị bài học", "Show lessons")</label><select id="mh-search-scope" @bind="searchScope"><option value="all">@T("Tất cả", "All lessons")</option><option value="available">@T("Có thể học", "Available")</option><option value="completed">@T("Đã hoàn thành", "Completed")</option></select></div>
+        </details>
+        @if (!string.IsNullOrWhiteSpace(query) || searchScope != "all")
         {
             <div id="mh-results" class="mh-results" aria-live="polite">
                 <p>@T("Trong bài học và lộ trình của bạn", "In your lessons and roadmap")</p>
@@ -24,7 +28,7 @@
                 {
                     <a href="@(IsLocked(item) ? "/roadmap" : LessonUrl(item))"><i class="bi @(IsLocked(item) ? "bi-lock" : "bi-journal-text")" aria-hidden="true"></i><span><strong>@L.Ui(item.Title)</strong><small>@L.Ui(item.SkillName) · @(IsLocked(item) ? T("Chưa mở khóa", "Locked") : T("Bài học", "Lesson"))</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                 }
-                @if (T("Tài nguyên", "Resources").Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                @if (searchScope == "all" && !string.IsNullOrWhiteSpace(query) && T("Tài nguyên", "Resources").Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase))
                 {
                     <a href="/resources"><i class="bi bi-folder" aria-hidden="true"></i><span><strong>@T("Tài nguyên học tập", "Learning resources")</strong><small>@T("Mở thư viện tài nguyên", "Open the resource library")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                 }
@@ -65,6 +69,7 @@
         <a href="/progress"><i class="bi bi-book-fill" aria-hidden="true"></i><span><strong>@Items.Count(x => x.IsCompleted)</strong><small>@T("Bài học hoàn thành", "Lessons completed")</small></span></a>
         <a href="/progress"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><strong>@Items.Sum(x => x.CompletedActivityCount)</strong><small>@T("Hoạt động hoàn thành", "Activities completed")</small></span></a>
         <a href="/progress"><i class="bi bi-star-fill" aria-hidden="true"></i><span><strong>@User.ExperiencePoints.ToString("N0")</strong><small>@T("XP tích lũy", "Total XP")</small></span></a>
+        <a href="/profile"><i class="bi bi-award-fill" aria-hidden="true"></i><span><strong>@User.Level</strong><small>@T("Cấp độ hiện tại", "Current level")</small></span></a>
     </section>
 
     <section class="mh-roadmap mh-surface" aria-labelledby="mh-roadmap-title">
@@ -155,18 +160,19 @@
         else { <p class="mh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors are available yet.")</p> }
     </section>
 
-    @if (Achievements.Count > 0)
-    {
         <section class="mh-achievements mh-surface" aria-labelledby="mh-achievements-title">
             <header class="mh-section-heading"><h2 id="mh-achievements-title"><i class="bi bi-trophy-fill" aria-hidden="true"></i>@T("Thành tích gần đây", "Recent achievements")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
             <div class="mh-achievement-grid">
+                @if (Achievements.Count == 0)
+                {
+                    <p class="mh-empty mh-achievement-empty"><i class="bi bi-trophy" aria-hidden="true"></i>@T("Hoàn thành bài học đầu tiên để ghi lại thành tích của bạn.", "Complete your first lesson to record your achievements.")</p>
+                }
                 @foreach (var achievement in Achievements)
                 {
                     <a href="@achievement.Url"><i class="bi @achievement.Icon" aria-hidden="true"></i><span><strong>@achievement.Title</strong><small>@achievement.Detail</small><time datetime="@achievement.At.ToString("O")">@achievement.At.ToString("dd/MM/yyyy")</time></span></a>
                 }
             </div>
         </section>
-    }
 
     <section class="mh-motivation mh-surface" aria-labelledby="mh-motivation-title">
         <h2 id="mh-motivation-title" class="mh-sr-only">@T("Tiến bộ mỗi ngày", "A little progress every day")</h2>
@@ -179,6 +185,7 @@
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
+    private string searchScope = "all";
     private List<MentorDto> mentors = [];
     private bool mentorLoading = true;
     private bool mentorFailed;
@@ -224,7 +231,7 @@
     private static int SkillRank(string key) => key switch { "communication" => 0, "time" => 1, "critical" => 2, "teamwork" => 3, _ => 4 };
     private RoadmapItemDto GroupTarget(List<RoadmapItemDto> group) => group.FirstOrDefault(x => !x.IsCompleted) ?? group[^1];
     private string LessonUrl(RoadmapItemDto item) => $"/roadmap/lecture/{User.Id}/{item.Id}?step={JourneyProgress.ResumeStep(item)}";
-    private IEnumerable<RoadmapItemDto> SearchResults => orderedItems.Where(x => $"{L.Ui(x.Title)} {L.Ui(x.SkillName)}".Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase)).Take(8);
+    private IEnumerable<RoadmapItemDto> SearchResults => orderedItems.Where(x => (searchScope == "all" || searchScope == "completed" && x.IsCompleted || searchScope == "available" && !IsLocked(x)) && $"{L.Ui(x.Title)} {L.Ui(x.SkillName)}".Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase)).Take(8);
     private List<RoadmapItemDto> Recommendations => orderedItems.Where(x => !x.IsCompleted && !IsLocked(x)).Take(2).ToList();
     private static string? Thumbnail(RoadmapItemDto item) => SkillTheme.KeyFor(item) switch { "time" => Asset("time-management"), "teamwork" => Asset("teamwork"), _ => null };
     private List<HomeAchievement> Achievements => orderedItems.SelectMany(item =>

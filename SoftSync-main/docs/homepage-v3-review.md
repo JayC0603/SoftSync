@@ -1,5 +1,8 @@
 # SoftSync Homepage v3 — báo cáo triển khai
 
+> Các lựa chọn bố cục trong báo cáo này đã được thay thế bởi
+> [bản chỉnh theo ảnh tham chiếu](homepage-reference-review.md).
+
 Trang `/dashboard` dùng một giao diện thống nhất trên điện thoại, tablet và
 desktop. Giữ kiến trúc Blazor Interactive Server, session đăng nhập, dịch vụ dữ
 liệu và điều hướng hiện tại. Không thêm dependency runtime, không sửa database,

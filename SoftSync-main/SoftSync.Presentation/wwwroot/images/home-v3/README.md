@@ -20,8 +20,8 @@ at the same quality. The 13 deliverable images total approximately 140 KiB.
 | time-management.webp | 144 × 77 | Matching time management recommendation |
 | teamwork.webp | 134 × 77 | Matching teamwork recommendation |
 | roadmap-mountain.webp | 360 × 265, alpha | Available; omitted to keep timeline clear |
-| roadmap-landscape.webp | 313 × 120 | Available; omitted to keep timeline clear |
-| study-planner.webp | 318 × 120 | Available; not stretched over the hero |
+| roadmap-landscape.webp | 313 × 120 | Faint decoration behind the skill timeline |
+| study-planner.webp | 318 × 120 | Small, faded background behind the hero mascot |
 
 The small banner/thumbnail sources are not suitable for full-page backgrounds.
 Lesson recommendations without a matching supplied thumbnail use the existing

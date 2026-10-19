@@ -87,7 +87,7 @@
         let drag = null;
         let suppressClick = false;
         track.addEventListener('pointerdown', event => {
-            if (event.pointerType !== 'mouse' || event.button !== 0 || event.target.closest('button, a, input')) return;
+            if (event.pointerType !== 'mouse' || event.button !== 0 || event.target.closest('button, input, select')) return;
             drag = { id: event.pointerId, x: event.clientX, scroll: track.scrollLeft, moved: false };
             suppressClick = false;
         });
