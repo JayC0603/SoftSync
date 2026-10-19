@@ -4,7 +4,7 @@
  html body .page:has(.mobile-home) { --mh-surface:var(--ss-surface); --mh-ink:var(--ss-text); --mh-muted:var(--ss-text-muted); --mh-accent:var(--ss-primary); --mh-lavender:color-mix(in srgb,var(--ss-primary) 10%,var(--ss-surface)); --mh-border:var(--ss-border); }
  html[data-theme='light'] body .page:has(.mobile-home) { --mh-surface:#fff; --mh-ink:#101747; --mh-muted:#627098; --mh-accent:#6354e8; --mh-lavender:#efedff; --mh-border:#e4e8fa; }
  html body .page:has(.mobile-home) .ss-workspace > .ss-main-content.container { width:100%; max-width:100%; background:transparent; padding:0 !important; }
- html body .page:has(.mobile-home) .ss-workspace { background:var(--ss-canvas); padding:39px clamp(14px,6.5vw,28px) calc(52px + env(safe-area-inset-bottom,0px)); }
+ html body .page:has(.mobile-home) .ss-workspace { background:var(--ss-canvas); padding:39px 0 calc(52px + env(safe-area-inset-bottom,0px)); }
  html[data-theme='light'] body .page:has(.mobile-home) .ss-workspace { background:radial-gradient(ellipse at 45% 20%,#f0efff66,transparent 70%),#f5f7ff; }
  html body .mobile-home { display:grid; gap:7px; min-width:0; color:var(--mh-ink); }
  html body .mobile-home + .dashboard-reference { display:none !important; }
@@ -118,7 +118,7 @@
  html body .ss-main-content .mh-motivation p { font-size:10px !important; color:var(--mh-muted); }
  .mh-motivation cite { display:block; font-size:9px; color:var(--mh-muted); font-style:normal; margin-top:3px; }
  .mh-motivation > img { position:absolute; right:0; bottom:0; width:44%; height:100%; object-fit:contain; object-position:right bottom; }
- html body .page:has(.mobile-home) .ss-workspace-topbar { position:fixed; top:0; left:clamp(14px,6.5vw,28px); right:clamp(14px,6.5vw,28px); width:auto; flex-wrap:nowrap; height:34px; min-height:34px; max-height:34px; padding:3px 7px; border:1px solid var(--mh-surface); border-radius:11px; background:var(--mh-surface) !important; gap:4px; box-shadow:0 3px 15px #6354e807; }
+ html body .page:has(.mobile-home) .ss-workspace-topbar { position:fixed; top:0; left:0; right:0; width:auto; flex-wrap:nowrap; height:34px; min-height:34px; max-height:34px; padding:3px 7px; border:1px solid var(--mh-surface); border-radius:0; background:var(--mh-surface) !important; gap:4px; box-shadow:0 3px 15px #6354e807; }
  html body .page:has(.mobile-home) .ss-mobile-brand { gap:6px; font-size:16px; font-weight:800; }
  html body .page:has(.mobile-home) .ss-mobile-brand img { width:26px; height:26px; border-radius:7px; }
  html body .page:has(.mobile-home) .ss-header-actions { gap:4px; flex-shrink:0; }
@@ -204,8 +204,8 @@
  html body .page:has(.mobile-home) .ss-mobile-brand { font-size:14px; }
 }
 @media (min-width: 600px) and (max-width: 900px) {
- html body .page:has(.mobile-home) .ss-workspace { padding-inline:32px; }
- html body .mobile-home { max-width:560px; margin-inline:auto; gap:12px; }
+ html body .page:has(.mobile-home) .ss-workspace { padding-inline:0; }
+ html body .mobile-home { max-width:none; margin-inline:0; gap:12px; }
  .mh-hero { min-height:215px; padding:16px; }
  html body .ss-main-content .mobile-home .mh-hero h2 { font-size:24px !important; }
  .mh-hero-art { width:43%; }
