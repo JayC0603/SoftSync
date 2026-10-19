@@ -2,9 +2,9 @@
 
 <svg class="journey-map-scene" viewBox="@($"0 0 420 {MapPoint.F(Height)}")" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
-        <linearGradient id="@(id)-sky" x2="0" y2="1"><stop stop-color="#131746"/><stop offset=".5" stop-color="#252261"/><stop offset="1" stop-color="#0e1733"/></linearGradient>
+        <linearGradient id="@(id)-sky" x2="0" y2="1"><stop stop-color="var(--journey-sky-top, #131746)"/><stop offset=".5" stop-color="var(--journey-sky-middle, #252261)"/><stop offset="1" stop-color="var(--journey-sky-bottom, #0e1733)"/></linearGradient>
         <linearGradient id="@(id)-mountain" x2="1" y2="1"><stop stop-color="var(--journey-accent)" stop-opacity=".45"/><stop offset="1" stop-color="#161839"/></linearGradient>
-        <linearGradient id="@(id)-land" x2="0" y2="1"><stop stop-color="#59508f"/><stop offset=".4" stop-color="#363568"/><stop offset="1" stop-color="#182742"/></linearGradient>
+        <linearGradient id="@(id)-land" x2="0" y2="1"><stop stop-color="var(--journey-land-top, #59508f)"/><stop offset=".4" stop-color="var(--journey-land-middle, #363568)"/><stop offset="1" stop-color="var(--journey-land-bottom, #182742)"/></linearGradient>
         <linearGradient id="@(id)-road" x2="0" y2="1"><stop stop-color="#f4c467"/><stop offset=".35" stop-color="var(--journey-accent)"/><stop offset="1" stop-color="var(--journey-secondary)"/></linearGradient>
         <radialGradient id="@(id)-mist"><stop stop-color="var(--journey-accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--journey-accent)" stop-opacity="0"/></radialGradient>
         <radialGradient id="@(id)-summit"><stop stop-color="#f4c467" stop-opacity=".6"/><stop offset="1" stop-color="#f4c467" stop-opacity="0"/></radialGradient>
@@ -59,7 +59,7 @@
         var point = RoadmapGeometry.Point(index, Checkpoints.Count);
         <g transform="@($"translate({MapPoint.F(point.X)} {MapPoint.F(point.Y + 20)})")">
             <ellipse cx="4" cy="12" rx="78" ry="25" fill="#080e25" opacity=".5"/>
-            <path d="M-74-7Q-45-37 9-28Q65-26 79-4L65 23 35 37-12 33-52 22Z" fill="#171c3d"/>
+            <path d="M-74-7Q-45-37 9-28Q65-26 79-4L65 23 35 37-12 33-52 22Z" fill="var(--journey-island-side, #171c3d)"/>
             <path d="M-74-7Q-45-37 9-28Q65-26 79-4Q59 13 3 18Q-50 13-74-7Z" fill="@($"url(#{id}-land)")"/>
             <path d="M-65-10Q-15-35 56-14" fill="none" stroke="#ada0ff" stroke-opacity=".25" stroke-width="2"/>
             <path d="M-44 17L-34 44-20 26M26 22L32 48 41 23" fill="#252b51"/>
@@ -75,8 +75,8 @@
         var to = RoadmapGeometry.Point(index + 1, Checkpoints.Count);
         var segment = RoadmapGeometry.Segment(from, to);
         var completed = Checkpoints[index].State == JourneyState.Completed;
-        <path d="@segment" fill="none" stroke="#0c102d" stroke-width="25" opacity=".75"/>
-        <path d="@segment" fill="none" stroke="#65608c" stroke-width="17"/>
+        <path d="@segment" fill="none" stroke="var(--journey-road-shadow, #0c102d)" stroke-width="25" opacity=".75"/>
+        <path d="@segment" fill="none" stroke="var(--journey-road-base, #65608c)" stroke-width="17"/>
         <path d="@segment" fill="none" stroke="#8883b1" stroke-width="1" stroke-dasharray="4 10"/>
         @if (completed)
         {
