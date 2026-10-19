@@ -97,7 +97,7 @@
                     <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</div>
                 </div>
             </div>
-            <button class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo(profileComplete ? "/settings" : "/profile-setup")'>
+            <button type="button" class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo("/settings")'>
                 <i class="bi bi-pencil tw:me-2"></i> @L["profile.edit"]
             </button>
 

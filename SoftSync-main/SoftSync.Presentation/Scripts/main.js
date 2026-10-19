@@ -219,10 +219,22 @@ window.ssTheme = {
     // Seed the client from the server-stored preference (DB) the first time a
     // browser is used — but never override a choice the user already made here.
     syncFromServer(pref, reduceMotion) {
+        let saved = false;
         try {
-            if (localStorage.getItem('ss-theme')) return;
+            saved = !!localStorage.getItem('ss-theme');
         } catch { /* ignore */ }
-        this.set(pref || 'light', !!reduceMotion);
+        if (!saved) this.set(pref || 'light', !!reduceMotion);
+        return this.get();
+    },
+    get() {
+        let preference = document.documentElement.dataset.theme || 'light';
+        let reduceMotion = document.documentElement.dataset.reduceMotion === '1';
+        try {
+            preference = localStorage.getItem('ss-theme') || preference;
+            const storedMotion = localStorage.getItem('ss-reduce-motion');
+            if (storedMotion !== null) reduceMotion = storedMotion === '1';
+        } catch { /* ignore */ }
+        return { preference, reduceMotion };
     }
 };
 
@@ -270,3 +282,10 @@ window.ssContrast = {
     }
 };
 try { window.ssContrast.init(); } catch { /* ignore */ }
+
+// Enhanced navigation patches <html> with server-rendered defaults. Restore
+// browser accessibility choices after that patch, just as we do for the theme.
+document.addEventListener('enhancedload', () => {
+    window.ssFontSize.init();
+    window.ssContrast.init();
+});

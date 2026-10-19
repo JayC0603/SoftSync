@@ -94,14 +94,17 @@ public class UserService : IUserService
 
     public async Task UpdateSettingsAsync(int userId, UserDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.FullName) || dto.FullName.Trim().Length > 100
+            || (dto.DisplayName?.Length ?? 0) > 60 || dto.Age is < 0 or > 120)
+            throw new ArgumentException("Invalid account profile settings.", nameof(dto));
         var user = await _userRepo.GetByIdAsync(userId);
-        if (user == null) return;
+        if (user == null) throw new InvalidOperationException("User account was not found.");
 
         // Account / display
-        if (!string.IsNullOrWhiteSpace(dto.FullName)) user.FullName = dto.FullName;
+        user.FullName = dto.FullName.Trim();
         user.DisplayName = dto.DisplayName?.Trim() ?? string.Empty;
         user.Gender = dto.Gender;
-        if (dto.Age > 0) user.Age = dto.Age;
+        user.Age = dto.Age;
 
         // Learning personalization
         user.Goal = dto.Goal;

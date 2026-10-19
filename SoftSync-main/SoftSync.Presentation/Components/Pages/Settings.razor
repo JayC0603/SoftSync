@@ -38,6 +38,7 @@
     }
     else
     {
+        <fieldset disabled="@(!interactiveReady)" class="tw:m-0 tw:min-w-0 tw:border-0 tw:p-0">
         <div class="ss-settings-grid">
             <!-- Sidebar -->
             <aside class="ss-side">
@@ -50,28 +51,28 @@
                     <p class="ss-side-sub">@L["settings.side.sub"]</p>
 
                     <nav class="ss-settings-nav">
-                        <button class="@(tab == Tab.Account ? "active" : "")" @onclick="() => tab = Tab.Account">
+                        <button class="@(tab == Tab.Account ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Account)">
                             <i class="bi bi-person-circle"></i>
                             <span>@L["settings.tab.account"]</span>
                             <i class="bi bi-chevron-right ss-nav-caret"></i>
                         </button>
-                        <button class="@(tab == Tab.Learning ? "active" : "")" @onclick="() => tab = Tab.Learning">
+                        <button class="@(tab == Tab.Learning ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Learning)">
                             <i class="bi bi-mortarboard"></i>
                             <span>@L["settings.tab.learning"]</span>
                         </button>
-                        <button class="@(tab == Tab.Notifications ? "active" : "")" @onclick="() => tab = Tab.Notifications">
+                        <button class="@(tab == Tab.Notifications ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Notifications)">
                             <i class="bi bi-bell"></i>
                             <span>@L["settings.tab.notifications"]</span>
                         </button>
-                        <button class="@(tab == Tab.Appearance ? "active" : "")" @onclick="() => tab = Tab.Appearance">
+                        <button class="@(tab == Tab.Appearance ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Appearance)">
                             <i class="bi bi-palette"></i>
                             <span>@L["settings.tab.appearance"]</span>
                         </button>
-                        <button class="@(tab == Tab.Privacy ? "active" : "")" @onclick="() => tab = Tab.Privacy">
+                        <button class="@(tab == Tab.Privacy ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Privacy)">
                             <i class="bi bi-shield-check"></i>
                             <span>@L["settings.tab.privacy"]</span>
                         </button>
-                        <button class="@(tab == Tab.Danger ? "active" : "")" @onclick="() => tab = Tab.Danger">
+                        <button class="@(tab == Tab.Danger ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Danger)">
                             <i class="bi bi-credit-card"></i>
                             <span>@L["settings.tab.billing"]</span>
                         </button>
@@ -82,9 +83,9 @@
                 <div class="ss-premium">
                     <div class="ss-premium-crown">@Crown("ss-crown-corner")</div>
                     <h5 class="ss-premium-title">@L["settings.premium.title"]</h5>
-                    <p class="ss-premium-sub">@L["settings.premium.sub"]</p>
-                    <button class="ss-btn-primary tw:w-full tw:py-2" type="button">
-                        @Crown("tw:me-1") @L["settings.premium.cta"]
+                    <p class="ss-premium-sub">@Tx("Premium subscriptions are not available yet. You can keep using the current features.", "Gói Premium hiện chưa được mở. Bạn vẫn có thể sử dụng các tính năng hiện có.")</p>
+                    <button class="ss-btn-primary tw:w-full tw:py-2" type="button" disabled>
+                        @Crown("tw:me-1") @Tx("Not available yet", "Chưa khả dụng")
                     </button>
                 </div>
             </aside>
@@ -162,14 +163,32 @@
                                     <i class="bi bi-person ss-field-icon"></i>
                                     <div class="ss-field-body">
                                         <label for="fullName" class="ss-field-label">@L["profile.fullName"]</label>
-                                        <input id="fullName" class="ss-field-input" @bind="user.FullName" />
+                                        <input id="fullName" class="ss-field-input" maxlength="100" required @bind="user.FullName" @bind:event="oninput" />
                                     </div>
                                 </div>
                                 <div class="ss-field">
                                     <i class="bi bi-pencil ss-field-icon"></i>
                                     <div class="ss-field-body">
                                         <label for="displayName" class="ss-field-label">@L["settings.displayName"]</label>
-                                        <input id="displayName" class="ss-field-input" @bind="user.DisplayName" placeholder="@user.FullName" />
+                                        <input id="displayName" class="ss-field-input" maxlength="60" @bind="user.DisplayName" @bind:event="oninput" placeholder="@user.FullName" />
+                                    </div>
+                                </div>
+                                <div class="ss-field">
+                                    <i class="bi bi-calendar ss-field-icon"></i>
+                                    <div class="ss-field-body">
+                                        <label for="age" class="ss-field-label">@L["profile.age"]</label>
+                                        <input id="age" type="number" min="0" max="120" class="ss-field-input" @bind="user.Age" />
+                                    </div>
+                                </div>
+                                <div class="ss-field">
+                                    <i class="bi bi-person ss-field-icon"></i>
+                                    <div class="ss-field-body">
+                                        <label for="gender" class="ss-field-label">@Tx("Gender", "Giới tính")</label>
+                                        <select id="gender" class="ss-field-input" @bind="user.Gender">
+                                            <option value="@Gender.Unspecified">@L["wizard.gender.other"]</option>
+                                            <option value="@Gender.Male">@L["wizard.gender.male"]</option>
+                                            <option value="@Gender.Female">@L["wizard.gender.female"]</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="ss-field">
@@ -312,8 +331,8 @@
 
                             <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-4 tw:mb-4">
                                 <div>
-                                    <label class="form-label tw:font-medium">@L["settings.dailyMinutes"]</label>
-                                    <select class="form-control" @bind="user.DailyStudyMinutes">
+                                    <label for="dailyMinutes" class="form-label tw:font-medium">@L["settings.dailyMinutes"]</label>
+                                    <select id="dailyMinutes" class="form-control" @bind="user.DailyStudyMinutes">
                                         <option value="0">—</option>
                                         <option value="15">15 @L["settings.minutes"]</option>
                                         <option value="30">30 @L["settings.minutes"]</option>
@@ -323,8 +342,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="form-label tw:font-medium">@L["settings.daysPerWeek"]</label>
-                                    <select class="form-control" @bind="user.StudyDaysPerWeek">
+                                    <label for="studyDays" class="form-label tw:font-medium">@L["settings.daysPerWeek"]</label>
+                                    <select id="studyDays" class="form-control" @bind="user.StudyDaysPerWeek">
                                         @for (var d = 0; d <= 7; d++)
                                         {
                                             <option value="@d">@(d == 0 ? "—" : d.ToString())</option>
@@ -415,15 +434,15 @@
                     case Tab.Danger:
                         <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
                             <h4 class="ss-panel-title tw:mb-1">@L["settings.tab.billing"]</h4>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.billing.hint"]</p>
+                            <p class="text-muted tw:text-sm tw:mb-4">@Tx("Payments and paid subscriptions are not available yet.", "Thanh toán và đăng ký gói trả phí hiện chưa được mở.")</p>
 
                             <div class="ss-billing-plan">
                                 <div>
                                     <div class="tw:font-semibold">@L["settings.billing.currentPlan"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.billing.freePlan"]</div>
+                                    <div class="text-muted tw:text-sm">@Tx("You are using the free plan.", "Bạn đang sử dụng gói miễn phí.")</div>
                                 </div>
-                                <button class="ss-btn-primary tw:px-4 tw:py-2" type="button">
-                                    @Crown("tw:me-1") @L["settings.premium.cta"]
+                                <button class="ss-btn-primary tw:px-4 tw:py-2" type="button" disabled>
+                                    @Crown("tw:me-1") @Tx("Not available yet", "Chưa khả dụng")
                                 </button>
                             </div>
                         </div>
@@ -432,6 +451,7 @@
                 }
             </div>
         </div>
+        </fieldset>
     }
 </div>
 
@@ -439,8 +459,8 @@
    toastSeq changes (i.e. each save). Ends invisible with pointer-events:none. *@
 @if (!string.IsNullOrEmpty(savedMessage))
 {
-    <div class="ss-toast" @key="toastSeq" role="status" aria-live="polite">
-        <i class="bi bi-check-circle-fill"></i>
+    <div class="ss-toast @(saveFailed ? "text-danger" : "")" @key="toastSeq" role="@(saveFailed ? "alert" : "status")" aria-live="polite">
+        <i class="bi @(saveFailed ? "bi-exclamation-circle-fill" : "bi-check-circle-fill")"></i>
         <span>@savedMessage</span>
     </div>
 }
@@ -519,7 +539,7 @@
     private int userId;
     private string? email;
     private string? phone;
-    private string langCode = "en";
+    private string langCode => L.Code;
 
     private IEnumerable<SkillDto>? skills;
     private readonly List<int> selectedSkillIds = new();
@@ -543,6 +563,8 @@
     };
 
     private bool saving;
+    private bool interactiveReady;
+    private bool saveFailed;
     private string? savedMessage;
     private int toastSeq; // bumped each save so the toast remounts and replays its animation
     private string? avatarError;
@@ -576,7 +598,7 @@
         if (user is null)
         {
             Logger.LogWarning("Settings could not load user profile for authenticated user {UserId}", userId);
-            Nav.NavigateTo("/profile-setup");
+            loadFailed = true;
             return;
         }
 
@@ -615,7 +637,6 @@
             linkedProviders = [];
         }
 
-        langCode = L.Code;
         if (user is not null && string.IsNullOrEmpty(user.PreferredLanguage))
             user.PreferredLanguage = langCode;
     }
@@ -626,10 +647,14 @@
         // saved to the user's account. Won't override a choice made on this device.
         if (firstRender && user is not null)
         {
-            await JS.InvokeVoidAsync("ssTheme.syncFromServer",
+            var theme = await JS.InvokeAsync<ThemeState>("ssTheme.syncFromServer",
                 user.Theme.ToString().ToLower(), user.ReduceMotion);
+            if (Enum.TryParse<ThemePreference>(theme.Preference, true, out var preference))
+                user.Theme = preference;
+            user.ReduceMotion = theme.ReduceMotion;
             fontScale = await JS.InvokeAsync<string>("ssFontSize.init");
             highContrast = await JS.InvokeAsync<bool>("ssContrast.init");
+            interactiveReady = true;
             StateHasChanged();
         }
     }
@@ -639,9 +664,20 @@
         if (!selectedSkillIds.Remove(id)) selectedSkillIds.Add(id);
     }
 
+    private async Task SelectTabAsync(Tab next)
+    {
+        tab = next;
+        if (next != Tab.Appearance || user is null) return;
+        var theme = await JS.InvokeAsync<ThemeState>("ssTheme.get");
+        if (Enum.TryParse<ThemePreference>(theme.Preference, true, out var preference))
+            user.Theme = preference;
+        user.ReduceMotion = theme.ReduceMotion;
+        fontScale = await JS.InvokeAsync<string>("ssFontSize.init");
+        highContrast = await JS.InvokeAsync<bool>("ssContrast.init");
+    }
+
     private async Task SetLanguage(string code)
     {
-        langCode = code;
         if (user is not null) user.PreferredLanguage = code;
         await JS.InvokeVoidAsync("ssLang.set", code);
         L.SetLanguage(LocalizationService.Parse(code));
@@ -663,6 +699,9 @@
     private async Task OnReduceMotionChanged(ChangeEventArgs e)
     {
         if (user is null) return;
+        var theme = await JS.InvokeAsync<ThemeState>("ssTheme.get");
+        if (Enum.TryParse<ThemePreference>(theme.Preference, true, out var preference))
+            user.Theme = preference;
         user.ReduceMotion = e.Value is bool b && b;
         await JS.InvokeVoidAsync("ssTheme.set", user.Theme.ToString().ToLower(), user.ReduceMotion);
     }
@@ -675,19 +714,38 @@
 
     private async Task SaveAsync()
     {
-        if (user is null) return;
+        if (user is null || saving) return;
         saving = true;
+        saveFailed = false;
         savedMessage = null;
         try
         {
+            if (string.IsNullOrWhiteSpace(user.FullName) || user.FullName.Trim().Length > 100
+                || user.DisplayName.Length > 60 || user.Age is < 0 or > 120)
+            {
+                saveFailed = true;
+                savedMessage = Tx("Enter a full name (up to 100 characters), a display name of up to 60 characters, and an age from 0 to 120.",
+                    "Hãy nhập họ tên (tối đa 100 ký tự), tên hiển thị tối đa 60 ký tự và tuổi từ 0 đến 120.");
+                toastSeq++;
+                return;
+            }
+            var theme = await JS.InvokeAsync<ThemeState>("ssTheme.get");
+            if (Enum.TryParse<ThemePreference>(theme.Preference, true, out var preference))
+                user.Theme = preference;
+            user.ReduceMotion = theme.ReduceMotion;
+            user.PreferredLanguage = L.Code;
+            user.FullName = user.FullName.Trim();
+            user.DisplayName = user.DisplayName.Trim();
             await UserService.UpdateSettingsAsync(userId, user);
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
-            UserProfileState.NotifyDisplayNameChanged(user.DisplayName);
+            UserProfileState.NotifyDisplayNameChanged(user.PublicName);
             savedMessage = L["settings.saved"];
             toastSeq++; // bump so the toast remounts and replays its animation
         }
         catch (Exception ex)
         {
+            saveFailed = true;
+            toastSeq++;
             Logger.LogError(ex, "Settings could not be saved for user {UserId}", userId);
             savedMessage = Tx("Could not save all settings. Please retry.", "Chưa lưu được đầy đủ cài đặt. Vui lòng thử lại.");
         }
@@ -695,6 +753,12 @@
         {
             saving = false;
         }
+    }
+
+    private sealed class ThemeState
+    {
+        public string Preference { get; set; } = "light";
+        public bool ReduceMotion { get; set; }
     }
 
     private void CancelDelete()
