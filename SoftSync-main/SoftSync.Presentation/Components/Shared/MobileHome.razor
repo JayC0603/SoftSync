@@ -76,7 +76,21 @@
         <header class="mh-section-heading"><h2 id="mh-roadmap-title"><i class="bi bi-book" aria-hidden="true"></i>@T("Hành trình phát triển kỹ năng", "Your skill journey")</h2><a href="/roadmap">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
         @if (SkillGroups.Count == 0)
         {
-            <p class="mh-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p>
+            <p class="mh-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.") <a href="@ContinueUrl">@T("Khám phá kỹ năng", "Explore your skills") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></p>
+        }
+        else if (SkillGroups.Count == 1)
+        {
+            var group = SkillGroups[0];
+            var completed = group.Sum(x => x.CompletedActivityCount);
+            var total = group.Sum(x => x.TotalActivityCount);
+            var progress = total > 0 ? (int)Math.Round(100d * completed / total) : 0;
+            var done = group.All(x => x.IsCompleted);
+            var locked = IsLocked(GroupTarget(group));
+            <a class="mh-single-skill" href="@($"/roadmap?skill={Uri.EscapeDataString(SkillTheme.KeyFor(group[0]))}")">
+                <i class="bi @SkillTheme.For(SkillTheme.KeyFor(group[0])).Icon" aria-hidden="true"></i>
+                <span><strong>@L.Ui(group[0].SkillName)</strong><small>@(done ? T("Hoàn thành", "Completed") : locked ? T("Chưa mở khóa", "Locked") : T("Đang học", "Learning")) · @completed/@total @T("hoạt động", "activities")</small><progress value="@progress" max="100" aria-label="@T("Tiến độ kỹ năng", "Skill progress")">@progress%</progress></span>
+                <strong>@progress%</strong><i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </a>
         }
         else
         {
