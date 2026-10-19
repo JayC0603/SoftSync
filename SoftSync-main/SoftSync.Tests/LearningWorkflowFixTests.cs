@@ -16,6 +16,31 @@ namespace SoftSync.Tests;
 public sealed class LearningWorkflowFixTests
 {
     [Fact]
+    public async Task Recommended_roadmap_item_matches_save_permissions_and_reload()
+    {
+        await using var db = await DatabaseAsync();
+        var users = new UserService(new UserRepository(db));
+        var timeSkill = await db.Skills.SingleAsync(x => x.Name == "Time Management");
+        await users.AddSkillSelectionsAsync(100, [1, timeSkill.Id]);
+        var service = new RoadmapService(new RoadmapRepository(db), new FakeAiRoadmapService(),
+            new UserRepository(db), new AssessmentRepository(db), new SkillRepository(db));
+        await service.GetUserRoadmapAsync(100, 100);
+        // Imported week numbers can interleave skills; access uses curriculum skill order.
+        foreach (var row in await db.RoadmapItems.Where(x => x.UserId == 100).ToListAsync())
+            if (row.Title.Contains("giao tiếp", StringComparison.OrdinalIgnoreCase)) row.WeekNumber += 10;
+        await db.SaveChangesAsync();
+        var plan = await service.GetUserRoadmapAsync(100, 100);
+        var recommended = plan.Items.Single(x => x.Id == plan.NextRecommendedItemId);
+        Assert.Equal("Giao tiếp", recommended.SkillName);
+        Assert.True(await service.MarkVideoCompleteAsync(recommended.Id, 100));
+        var reloaded = await service.GetUserRoadmapAsync(100, 100);
+        var saved = reloaded.Items.Single(x => x.Id == recommended.Id);
+        Assert.Equal(1, saved.CompletedActivityCount);
+        Assert.True(saved.IsVideoCompleted);
+        Assert.Equal(SoftSync.Common.Enums.RoadmapActivityType.LessonScript, reloaded.NextRecommendedActivity);
+    }
+
+    [Fact]
     public async Task Curriculum_only_publishes_supported_lessons()
     {
         var plan = await new FakeAiRoadmapService().GenerateRoadmapAsync(100,

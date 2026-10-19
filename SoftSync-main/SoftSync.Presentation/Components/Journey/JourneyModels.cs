@@ -30,6 +30,24 @@ public sealed record SkillTheme(string Key, string Accent, string Light, string 
 
 public static class JourneyProgress
 {
+    public static IReadOnlyList<JourneyCheckpoint> LevelCheckpoints(
+        IReadOnlyList<RoadmapItemDto> items, string skillKey,
+        Func<RoadmapItemDto, int, string> title, bool review = false)
+    {
+        var active = ActiveIndex(items);
+        var result = new List<JourneyCheckpoint>();
+        for (var i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
+            if (SkillTheme.KeyFor(item) != skillKey) continue;
+            var ordinal = result.Count + 1;
+            result.Add(new(item.Id, ResumeStep(item), title(item, ordinal), ordinal,
+                State(item, i, active, review)));
+        }
+        // Reflection is an activity inside a real level, not another level.
+        return result;
+    }
+
     public static int ActiveIndex(IReadOnlyList<RoadmapItemDto> items)
     {
         for (var i = 0; i < items.Count; i++) if (!items[i].IsCompleted) return i;

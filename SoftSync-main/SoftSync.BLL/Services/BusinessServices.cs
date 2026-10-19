@@ -524,6 +524,11 @@ public class RoadmapService : IRoadmapService
                 .ToList();
         }
 
+        // Match CanAccessRoadmapItemAsync: a recommendation must be an item
+        // that the same service will actually allow the learner to open/save.
+        items = items.OrderBy(x => RoadmapSkillRank(ResolveRoadmapSkillName(x.Title)))
+            .ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+
         var itemDtos = items.Select((i, index) => new RoadmapItemDto
             {
                 Id = i.Id,

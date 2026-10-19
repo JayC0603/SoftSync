@@ -120,7 +120,7 @@
                     else { <p class="lv-empty">@Tx("You have completed the activities in this level.", "Bạn đã hoàn thành các hoạt động trong cấp độ này.")</p> }
                 </section>
                 <section aria-labelledby="lv-journey-title"><header class="lv-section-heading"><h2 id="lv-journey-title">@Tx("Your journey", "Hành trình của bạn")</h2></header>
-                    <MobileLearnMap Checkpoints="Checkpoints" Items="SelectedItems" Vietnamese="Vietnamese" OnSelect="SelectMobileCheckpoint" />
+                    <MobileLearnMap Checkpoints="MobileCheckpoints" Items="SelectedItems" Vietnamese="Vietnamese" OnSelect="SelectMobileCheckpoint" />
                 </section>
                 <section id="lv-activities" aria-labelledby="lv-activities-title"><header class="lv-section-heading"><h2 id="lv-activities-title">@Tx("Activities in this level", "Bài học trong cấp độ này")</h2><strong>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount</strong></header><p class="lv-section-description">@Tx("Complete each activity to unlock the next step.", "Hoàn thành từng hoạt động để mở khóa bước tiếp theo.")</p>
                     <div class="lv-activity-list">
@@ -225,6 +225,9 @@
         selected = item;
         OpenSelectedStep(step);
     }
+
+    private IReadOnlyList<JourneyCheckpoint> MobileCheckpoints =>
+        JourneyProgress.LevelCheckpoints(items, SelectedKey, WeekTitle, RoadmapReviewMode.Enabled);
 
     private IReadOnlyList<JourneyCheckpoint> Checkpoints
     {

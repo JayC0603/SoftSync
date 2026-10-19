@@ -7,6 +7,27 @@ namespace SoftSync.Tests;
 public sealed class JourneyProgressTests
 {
     [Fact]
+    public void MobileMapUsesOnlyPersistedLevelsAndSavedActivityState()
+    {
+        RoadmapItemDto[] items = [
+            new() { Id = 31, SkillName = "Communication", Title = "Saved first", IsCompleted = true },
+            new() { Id = 62, SkillName = "Communication", Title = "Saved second", IsVideoCompleted = true,
+                ScriptCompletedAtUtc = DateTime.UtcNow, LastLearningStep = "summary" },
+            new() { Id = 94, SkillName = "Time Management", Title = "Actual time lesson" }
+        ];
+        var points = JourneyProgress.LevelCheckpoints(items, "communication", (item, _) => item.Title);
+        Assert.Equal(new[] { 31, 62 }, points.Select(x => x.ItemId));
+        Assert.Equal(new[] { "Saved first", "Saved second" }, points.Select(x => x.Title));
+        Assert.Equal(JourneyState.Completed, points[0].State);
+        Assert.Equal(JourneyState.Current, points[1].State);
+        Assert.Equal(3, points[1].Step);
+        Assert.DoesNotContain(points, x => x.Boss);
+        var future = Assert.Single(JourneyProgress.LevelCheckpoints(items, "time", (item, _) => item.Title));
+        Assert.Equal(JourneyState.Locked, future.State);
+        Assert.Empty(JourneyProgress.LevelCheckpoints(items, "missing", (item, _) => item.Title));
+    }
+
+    [Fact]
     public void ResumeUsesSavedStepOnlyWhenItsPrerequisiteIsComplete()
     {
         var item = new RoadmapItemDto { LastLearningStep = "reflection", CompletedActivityCount = 5 };
