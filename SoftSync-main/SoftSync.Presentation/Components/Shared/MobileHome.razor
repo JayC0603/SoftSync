@@ -184,8 +184,8 @@
                 }
                 @foreach (var achievement in achievements.Take(achievementsExpanded ? achievements.Count : AchievementPreviewCount))
                 {
-                    <a class="mh-achievement-card" href="@achievement.Url">
-                        <span class="mh-achievement-symbol" aria-hidden="true"><i class="bi @achievement.Icon"></i><span>✦</span><span>✦</span></span>
+                    <a class="mh-achievement-card" href="@achievement.Url" title="@(achievement.Title + " - " + achievement.Detail)">
+                        <span class="mh-achievement-symbol" aria-hidden="true"><i class="bi @achievement.Icon"></i></span>
                         <div class="mh-achievement-copy">
                             <strong>@achievement.Title</strong>
                             <p>@achievement.Detail</p>
@@ -194,9 +194,9 @@
                                 <time datetime="@achievement.At.ToString("O")"><i class="bi bi-calendar4-week" aria-hidden="true"></i>@achievement.At.ToString("dd/MM/yyyy")</time>
                             </div>
                         </div>
-                        <span class="mh-achievement-status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>@T("Hoàn thành", "Completed")</span>
+                        <span class="mh-achievement-status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span class="mh-achievement-status-text">@T("Hoàn thành", "Completed")</span></span>
                         <i class="bi bi-chevron-right mh-achievement-arrow" aria-hidden="true"></i>
-                        <span class="mh-achievement-celebration"><span aria-hidden="true">🎉</span>@(achievement.Result is null ? T("Tuyệt vời! Bạn đã hoàn thành bài học và tiến thêm một bước trên hành trình.", "Great work! You've completed a lesson and taken another step forward.") : T("Tuyệt vời! Bạn đã vượt qua bài kiểm tra và củng cố kiến thức.", "Great work! You've passed the test and strengthened your knowledge."))</span>
+
                     </a>
                 }
             </div>
@@ -221,7 +221,7 @@
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
-    private const int AchievementPreviewCount = 3;
+    private const int AchievementPreviewCount = 1;
     private bool achievementsExpanded;
     private void ToggleAchievements() => achievementsExpanded = !achievementsExpanded;
     private string searchScope = "all";
