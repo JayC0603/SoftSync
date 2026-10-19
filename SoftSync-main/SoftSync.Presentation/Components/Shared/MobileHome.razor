@@ -66,10 +66,13 @@
         else if (mentorFailed) { <p role="status">@T("Chưa thể tải cố vấn.", "Mentors could not be loaded.") <button type="button" class="mh-retry" @onclick="LoadMentorsAsync">@T("Thử lại", "Try again")</button></p> }
         else if (mentors.Count > 0)
         {
+            <div class="ss-mentor-carousel-tools"><span>@T("Kéo ngang để xem cố vấn", "Drag to explore mentors")</span><button type="button" onclick="window.ssDesign.scrollMentors(this,-1)" aria-label="@T("Cố vấn trước", "Previous mentor")"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" onclick="window.ssDesign.scrollMentors(this,1)" aria-label="@T("Cố vấn tiếp theo", "Next mentor")"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
+            <div class="mh-mentor-track ss-mentor-carousel" tabindex="0" aria-label="@T("Danh sách cố vấn, kéo ngang để xem thêm", "Mentors, scroll horizontally to see more")">
             @foreach (var mentor in mentors)
             {
             <article><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="72" height="72" loading="lazy" /><div><h3>@mentor.Name</h3><p>@L.Ui(mentor.Expertise)</p><small>@L.Ui(mentor.ShortBio)</small></div><a class="mh-mentor-detail" href="/mentors/@mentor.Id">@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></article>
             }
+            </div>
         }
         else { <p>@T("Chưa có cố vấn khả dụng.", "No mentors are available yet.")</p> }
     </section>

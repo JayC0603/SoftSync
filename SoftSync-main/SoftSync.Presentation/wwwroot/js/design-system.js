@@ -137,7 +137,7 @@
 
         for (const track of mentorTracks) {
             if (!track.isConnected) { mentorTracks.delete(track); continue; }
-            if (innerWidth > 900 && !track.matches('.ss-home-mentor-carousel')) continue;
+            if (innerWidth > 900 && !track.matches('.ss-home-mentor-carousel, .mentor-cards, .mh-mentor-track')) continue;
             const rect = track.getBoundingClientRect();
             if (rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight || Number(track.dataset.resumeAt || 0) > Date.now() || track.dataset.rotationPaused === 'true' || track.matches(':hover, :focus-within') || document.querySelector('dialog[open]')) continue;
             const max = track.scrollWidth - track.clientWidth;
