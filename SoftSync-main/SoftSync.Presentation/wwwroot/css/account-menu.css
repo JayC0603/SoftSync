@@ -71,3 +71,16 @@ html body .ss-header-profile-dropdown :is(a, button):focus-visible {
     outline: 2px solid var(--ss-primary);
     outline-offset: 2px;
 }
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button {
+    color: var(--ss-danger);
+}
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button:hover {
+    color: var(--ss-danger);
+    background: color-mix(in srgb, var(--ss-danger) 10%, transparent);
+}
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button:focus-visible {
+    outline-color: var(--ss-danger);
+}
