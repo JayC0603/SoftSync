@@ -177,7 +177,7 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .mh-hero { padding: 12px; gap: 8px 4px; position: relative; isolation: isolate; grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr); grid-template-rows: 1fr auto auto; min-height: 208px; border-color: color-mix(in srgb,var(--mh-surface) 80%,var(--mh-border)); }
     .mh-v3 .mh-hero-copy { align-self: start; }
     html body .page .ss-main-content .mh-v3 .mh-hero h2 { margin-top: 8px; font-size: 22px !important; line-height: 1.16; }
-    .mh-v3 .mh-hero-copy p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px; }
+    .mh-v3 .mh-hero-copy p { margin-top: 8px; }
     .mh-v3 .mh-badge { gap: 4px; font-size: 12px; }
     .mh-v3 .mh-badge i { font-size: 16px; }
     .mh-v3 .mh-hero-art { grid-column: 2; grid-row: 1/4; align-self: stretch; display: grid; align-items: end; position: relative; }
@@ -198,12 +198,12 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .mh-skill-timeline a { gap: 6px; padding: 0 4px 4px; }
     .mh-v3 .mh-skill-timeline a > i { width: 25px; height: 25px; font-size: 14px; }
     .mh-v3 .mh-node { width: 32px; height: 32px; font-size: 16px; border-width: 2px; }
-    .mh-v3 .mh-skill-timeline strong { min-height: 2.6em; font-size: 13px; line-height: 1.3; }
+    .mh-v3 .mh-skill-timeline strong { min-height: 2.6em; font-size: 14px; line-height: 1.3; }
     .mh-v3 .mh-skill-timeline small { padding: 3px 6px; font-size: 12px; }
     .mh-v3 .mh-quick-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
     .mh-v3 .mh-quick-grid a { padding: 10px 4px; gap: 4px; border-radius: 10px; }
     .mh-v3 .mh-quick-grid img { width: 32px; height: 32px; }
-    .mh-v3 .mh-quick-grid strong { font-size: 13px; }
+    .mh-v3 .mh-quick-grid strong { font-size: 14px; }
     .mh-v3 .mh-quick-grid span { font-size: 12px; line-height: 1.3; display: block; }
     .mh-v3 .mh-quick-grid a > i { right: 4px; bottom: 7px; font-size: 9px; }
     .mh-v3 .mh-syncy { gap: 8px; padding: 4px 10px 4px 4px; border-radius: 16px; }
@@ -216,14 +216,14 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .mh-recommendation > img,.mh-v3 .mh-lesson-icon { width: 50px; height: 52px; flex-basis: 50px; }
     .mh-v3 .mh-lesson-icon { font-size: 22px; }
     .mh-v3 .mh-recommendation small { font-size: 12px; }
-    .mh-v3 .mh-recommendation strong { font-size: 13px; line-height: 1.3; }
+    .mh-v3 .mh-recommendation strong { font-size: 14px; line-height: 1.3; }
     .mh-v3 .mh-recommendation em { font-size: 12px; }
     .mh-v3 .mh-mentors { position: relative; }
     .mh-v3 .mh-mentor-track { grid-auto-columns: max(170px,calc((100% - 10px)/2)); gap: 10px; padding: 2px 0 4px; }
     .mh-v3 .mh-mentor-track article { grid-template-columns: 44px minmax(0,1fr); padding: 8px; gap: 3px 6px; border-radius: 11px; position: relative; }
     .mh-v3 .mh-mentor-track article > img { width: 44px; height: 52px; border-radius: 50%; }
-    html body .page .ss-main-content .mh-v3 .mh-mentor-track h3 { font-size: 13px !important; line-height: 1.35; }
-    html body .page .ss-main-content .mh-v3 .mh-mentor-track article p { font-size: 12px !important; line-height: 1.35; margin-top: 3px; }
+    html body .page .ss-main-content .mh-v3 .mh-mentor-track h3 { font-size: 14px !important; line-height: 1.35; }
+    html body .page .ss-main-content .mh-v3 .mh-mentor-track article p { font-size: 14px !important; line-height: 1.35; margin-top: 3px; }
     .mh-v3 .mh-mentor-track article small { display: none; }
     .mh-v3 .mh-mentor-detail { position: absolute; inset: 0; display: flex; min-height: 44px; border-radius: 11px; }
     .mh-v3 .mh-mentor-detail > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -232,7 +232,7 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .ss-mentor-carousel-tools { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     .mh-v3 .ss-mentor-carousel-tools:focus-within { position: static; width: auto; height: auto; margin: 0 0 6px; clip-path: none; white-space: normal; }
     html body .page:has(.mh-v3) { overflow-x: visible; }
-    html body .page:has(.mh-v3) .ss-workspace { padding: 0 0 calc(92px + env(safe-area-inset-bottom, 0px)); }
+    html body .page:has(.mh-v3) .ss-workspace { padding: 0 0 calc(68px + env(safe-area-inset-bottom, 0px)); }
     html body .page:has(.mh-v3) .ss-sidebar-toggle { display: none; }
     html body .page:has(.mh-v3) .ss-workspace-left { display: none; }
     html body .page:has(.mh-v3) .ss-mobile-brand { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; font-size: 20px; }
@@ -241,7 +241,7 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     html body .page:has(.mh-v3) .ss-header-actions :is(.ss-header-control, .ss-header-theme) { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 4px; }
     html body .page:has(.mh-v3) .ss-header-fullscreen { display: none; }
     html body .page:has(.mh-v3) .ss-header-language-trigger { border: 0; }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-nav { min-height: 68px; left: 12px; right: 12px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 5px; border-radius: 20px; background: var(--mh-surface); border-color: var(--mh-border); box-shadow: 0 4px 20px #15234a08; }
+    html body .page:has(.mh-v3) .ss-mobile-bottom-nav { min-height: 68px; left: 12px; right: 12px; bottom: 0; padding: 5px 5px calc(5px + env(safe-area-inset-bottom, 0px)); border-radius: 20px; background: var(--mh-surface); border-color: var(--mh-border); box-shadow: 0 4px 20px #15234a08; }
     html body .page:has(.mh-v3) .ss-mobile-bottom-link { min-height: 54px; padding: 5px 1px; gap: 5px; color: var(--mh-muted); }
     html body .page:has(.mh-v3) .ss-mobile-bottom-link i { font-size: 23px; }
     html body .page:has(.mh-v3) .ss-mobile-bottom-link span { font-size: 12px; }
@@ -307,22 +307,28 @@ html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink);
     .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 10px; }
     .mh-v3 .mh-achievement-celebration { padding: 14px; gap: 12px; font-size: 14px; }
     .mh-v3 .mh-achievement-celebration > span { font-size: 30px; }
-    .mh-v3 .mh-motivation { min-height: 215px; padding: 24px 18px; }
-    .mh-v3 .mh-motivation blockquote { width: 72%; gap: 10px; }
-    .mh-v3 .mh-motivation blockquote > i { font-size: 42px; }
-    .mh-v3 .mh-motivation cite { font-size: 16px; margin-top: 16px; }
+    .mh-v3 .mh-motivation { min-height: 160px; padding: 20px 16px; }
+    .mh-v3 .mh-motivation blockquote { width: 65%; gap: 10px; }
+    .mh-v3 .mh-motivation blockquote > i { font-size: 36px; }
+    .mh-v3 .mh-motivation cite { font-size: 14px; margin-top: 12px; }
+    html body .page .ss-main-content .mh-v3 .mh-motivation p { font-size: 14px !important; line-height: 1.5; }
 }
 @media (max-width: 540px) {
-    .mh-v3 .mh-achievement-card { grid-template-columns: 60px minmax(0,1fr) 16px; padding: 12px; gap: 12px 10px; }
-    .mh-v3 .mh-achievement-copy { grid-row: 1 / 3; }
-    .mh-v3 .mh-achievement-copy > strong { font-size: 17px; }
-    .mh-v3 .mh-achievement-status { grid-column: 2; grid-row: 3; justify-self: start; }
-    .mh-v3 .mh-achievement-arrow { grid-row: 1 / 3; font-size: 20px; }
+    .mh-v3 .mh-achievement-card { position: relative; grid-template-columns: 52px minmax(0,1fr) auto; padding: 12px; gap: 12px 10px; }
+    .mh-v3 .mh-achievement-copy { grid-column: 2 / 4; grid-row: 1; }
+    .mh-v3 .mh-achievement-copy > strong { padding-right: 90px; font-size: 16px; line-height: 1.4; }
+    .mh-v3 .mh-achievement-status { grid-column: 3; grid-row: 1; justify-self: end; padding: 4px 6px; gap: 4px; font-size: 12px; }
+    .mh-v3 .mh-achievement-status i { font-size: 14px; }
+    .mh-v3 .mh-achievement-symbol { grid-row: 1; width: 52px; height: 72px; border-radius: 14px; }
+    .mh-v3 .mh-achievement-symbol > i { font-size: 36px; }
+    html body .page .ss-main-content .mh-v3 .mh-achievement-copy > p { margin-top: 6px; padding-right: 14px; font-size: 14px !important; }
+    .mh-v3 .mh-achievement-meta { font-size: 12px; margin-top: 8px; }
+    .mh-v3 .mh-achievement-celebration { padding: 10px; gap: 10px; font-size: 14px; line-height: 1.5; }
+    .mh-v3 .mh-achievement-celebration > span { font-size: 26px; }
+    .mh-v3 .mh-achievement-arrow { position: absolute; right: 12px; top: 52px; font-size: 18px; }
     .mh-v3 .mh-achievement-meta { gap: 8px; }
     .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 8px; }
-    .mh-v3 .mh-motivation blockquote { width: 88%; }
-    .mh-v3 .mh-motivation > img { opacity: .45; }
-    .mh-v3 .mh-motivation > .mh-motivation-trail { opacity: .65; width: 58%; height: 65%; }
-}
-@media (max-width: 374px) {
+    .mh-v3 .mh-motivation blockquote { width: 67%; }
+    .mh-v3 .mh-motivation > img { opacity: .85; }
+    .mh-v3 .mh-motivation > .mh-motivation-trail { opacity: 1; width: 58%; height: 85%; }
 }
