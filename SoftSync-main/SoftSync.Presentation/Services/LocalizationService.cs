@@ -30,6 +30,7 @@ public class LocalizationService
 
     /// <summary>Convenience method identical to the indexer.</summary>
     public string T(string key) => Translations.Get(key, Current);
+    public string Ui(string? text) => UiTranslations.Get(text, Current);
 
     public void SetLanguage(AppLanguage language)
     {

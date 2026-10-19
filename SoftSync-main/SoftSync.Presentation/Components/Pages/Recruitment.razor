@@ -1,72 +1,73 @@
 @page "/recruitment"
 @rendermode InteractiveServer
+@inherits LocalizedComponentBase
 @attribute [Authorize]
 @using Microsoft.AspNetCore.Components.Forms
 @using SoftSync.Presentation.Services
 @inject RecruitmentAiClient RecruitmentAi
 
-<PageTitle>AI Recruitment · SoftSync</PageTitle>
+<PageTitle>@Ui("AI Recruitment") · SoftSync</PageTitle>
 
 <section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
     <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="recruitment-title">
         <header class="tw:mb-8">
             <span class="badge bg-primary">SoftSync AI</span>
-            <h1 id="recruitment-title" class="tw:mt-3 tw:text-3xl tw:font-bold">AI Recruitment</h1>
-            <p>Match and rank candidate CVs against a job description using your existing SoftSync account.</p>
+            <h1 id="recruitment-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("AI Recruitment")</h1>
+            <p>@Ui("Match and rank candidate CVs against a job description using your existing SoftSync account.")</p>
         </header>
 
         <div class="ss-glass tw:rounded-2xl tw:p-6">
             <div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">
                 <div>
-                    <label class="form-label tw:font-semibold" for="cv-files">Candidate CVs (PDF or TXT)</label>
+                    <label class="form-label tw:font-semibold" for="cv-files">@Ui("Candidate CVs (PDF or TXT)")</label>
                     <InputFile id="cv-files" class="form-control" OnChange="SelectCvs" multiple accept=".pdf,.txt" />
-                    <small class="text-muted">Up to @MaxCvCount files, @MaxFileSizeMb MB each.</small>
+                    <small class="text-muted">@UiFormat("Up to {0} files, {1} MB each.", MaxCvCount, MaxFileSizeMb)</small>
                     @if (cvFiles.Count > 0)
                     {
                         <ul class="tw:mt-3">@foreach (var file in cvFiles) { <li>@file.Name</li> }</ul>
                     }
                 </div>
                 <div>
-                    <label class="form-label tw:font-semibold" for="jd-file">Job description file (optional)</label>
+                    <label class="form-label tw:font-semibold" for="jd-file">@Ui("Job description file (optional)")</label>
                     <InputFile id="jd-file" class="form-control" OnChange="SelectJd" accept=".pdf,.txt" />
-                    <label class="form-label tw:mt-4 tw:font-semibold" for="jd-text">Or paste job description</label>
+                    <label class="form-label tw:mt-4 tw:font-semibold" for="jd-text">@Ui("Or paste job description")</label>
                     <textarea id="jd-text" class="form-control" rows="7" @bind="jdText" disabled="@(jdFile is not null)"
-                              placeholder="Responsibilities, required skills, experience..."></textarea>
-                    @if (jdFile is not null) { <small class="text-muted">Selected: @jdFile.Name</small> }
+                              placeholder="@Ui("Responsibilities, required skills, experience...")"></textarea>
+                    @if (jdFile is not null) { <small class="text-muted">@UiFormat("Selected: {0}", jdFile.Name)</small> }
                 </div>
             </div>
 
             <div class="tw:mt-6 tw:flex tw:flex-wrap tw:items-end tw:gap-4">
                 <div>
-                    <label class="form-label" for="model">AI model</label>
+                    <label class="form-label" for="model">@Ui("AI model")</label>
                     <select id="model" class="form-select" @bind="modelId">
-                        <option value="cross_weighted">Weighted Sum (recommended)</option>
+                        <option value="cross_weighted">@Ui("Weighted Sum (recommended)")</option>
                         <option value="cross_mlp">MLP</option>
                         <option value="cross_residual">Residual MLP</option>
                         <option value="cross_attention">Attention</option>
                     </select>
                 </div>
                 <button type="button" class="btn btn-primary" disabled="@running" @onclick="RunMatching">
-                    @(running ? "Analyzing..." : "Match and rank CVs")
+                    @(running ? Ui("Analyzing...") : Ui("Match and rank CVs"))
                 </button>
             </div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(message))
         {
-            <div class="alert @(hasError ? "alert-danger" : "alert-info") tw:mt-6" role="status">@message</div>
+            <div class="alert @(hasError ? "alert-danger" : "alert-info") tw:mt-6" role="status">@(result is not null && !hasError ? UiFormat("Completed: {0} CV(s) ranked. Extraction {1:0.00}s, inference {2:0.00}s.", result.Results.Count, result.ExtractionSeconds, result.InferenceSeconds) : Ui(message))</div>
         }
 
         @if (result is not null)
         {
             <section class="ss-glass tw:mt-6 tw:rounded-2xl tw:p-6" aria-labelledby="ranking-title">
                 <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
-                    <h2 id="ranking-title" class="tw:text-2xl tw:font-bold">Candidate ranking</h2>
+                    <h2 id="ranking-title" class="tw:text-2xl tw:font-bold">@Ui("Candidate ranking")</h2>
                     <span class="badge bg-secondary">@result.ModelUsed · @result.ElapsedSeconds.ToString("0.00")s</span>
                 </div>
                 <div class="table-responsive tw:mt-4">
                     <table class="table table-hover align-middle">
-                        <thead><tr><th>Rank</th><th>CV</th><th>Score</th><th>Confidence</th><th>Decision</th><th>Coverage</th></tr></thead>
+                        <thead><tr><th>@Ui("Rank")</th><th>CV</th><th>@Ui("Score")</th><th>@Ui("Confidence")</th><th>@Ui("Decision")</th><th>@Ui("Coverage")</th></tr></thead>
                         <tbody>
                         @foreach (var item in result.Results)
                         {
@@ -75,7 +76,7 @@
                                 <td>@item.CvFile</td>
                                 <td><strong>@item.Score.ToString("0.00") / 10</strong></td>
                                 <td>@FormatPercent(item.Confidence)</td>
-                                <td><span class="badge @(item.IsMatch ? "bg-success" : "bg-warning text-dark")">@(item.IsMatch ? "Match" : "Review")</span></td>
+                                <td><span class="badge @(item.IsMatch ? "bg-success" : "bg-warning text-dark")">@(item.IsMatch ? Ui("Match") : Ui("Review"))</span></td>
                                 <td><small>CV @item.CvCoverage · JD @item.JdCoverage</small></td>
                             </tr>
                         }

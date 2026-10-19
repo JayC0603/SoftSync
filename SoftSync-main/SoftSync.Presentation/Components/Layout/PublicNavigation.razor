@@ -7,7 +7,7 @@
     <nav class="ss-public-links" aria-label="@Tx("Main navigation", "Điều hướng chính")">
         <NavLink href="/" Match="NavLinkMatch.All">@L["nav.home"]</NavLink>
         <NavLink href="/about">@Tx("About", "Giới thiệu")</NavLink>
-        <NavLink href="/mentors">Mentor</NavLink>
+        <NavLink href="/mentors">@Ui("Mentors")</NavLink>
         <NavLink href="/community">@Tx("Community", "Cộng đồng")</NavLink>
         <NavLink href="/cv">@Tx("Smart CV", "CV thông minh")</NavLink>
     </nav>
@@ -42,7 +42,7 @@
     <details class="ss-public-mobile">
         <summary aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></summary>
         <nav aria-label="@Tx("Mobile navigation", "Điều hướng điện thoại")">
-            <a href="/">@L["nav.home"]</a><a href="/about">@Tx("About", "Giới thiệu")</a><a href="/mentors">Mentor</a><a href="/community">@Tx("Community", "Cộng đồng")</a><a href="/assistant">SYNCY</a>
+            <a href="/">@L["nav.home"]</a><a href="/about">@Tx("About", "Giới thiệu")</a><a href="/mentors">@Ui("Mentors")</a><a href="/community">@Tx("Community", "Cộng đồng")</a><a href="/assistant">SYNCY</a>
             <a href="/cv">@Tx("Smart CV", "CV thông minh")</a>
             <button type="button" class="ss-public-language-menu" @onclick="ToggleLanguage">@Tx("Tiếng Việt", "English")</button>
             <button type="button" onclick="window.ssDesign.toggleTheme()"><i class="bi bi-circle-half" aria-hidden="true"></i> @Tx("Light / dark mode", "Giao diện sáng / tối")</button>

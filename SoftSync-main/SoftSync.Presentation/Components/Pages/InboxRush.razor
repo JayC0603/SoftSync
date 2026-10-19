@@ -13,12 +13,12 @@
 
 <section class="inbox-rush">
     <nav class="practice-journey" aria-label="@Tx("Learning journey", "Hành trình học tập")">
-        <span class="done"><i class="bi bi-check-lg"></i><b>Video</b></span>
-        <span class="done"><i class="bi bi-check-lg"></i><b>Script</b></span>
-        <span class="done"><i class="bi bi-check-lg"></i><b>Summary</b></span>
-        <span class="done"><i class="bi bi-check-lg"></i><b>Quiz</b></span>
-        <span class="active"><i>5</i><b>Practice</b></span>
-        <span><i>6</i><b>Reflection</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>@Ui("Video")</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>@Ui("Script")</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>@Ui("Summary")</b></span>
+        <span class="done"><i class="bi bi-check-lg"></i><b>@Ui("Quiz")</b></span>
+        <span class="active"><i>5</i><b>@Ui("Practice")</b></span>
+        <span><i>6</i><b>@Ui("Reflection")</b></span>
     </nav>
     <header class="ir-hero">
         <button @onclick="Back"><i class="bi bi-arrow-left"></i></button>
@@ -31,7 +31,7 @@
         <section class="ir-guide"><span><b>1</b>@Tx("Choose an estimate", "Chọn thời lượng dự đoán")</span><span><b>2</b>@Tx("Drag a task", "Kéo một công việc")</span><span><b>3</b>@Tx("Drop it into the schedule", "Thả vào thời khóa biểu")</span></section>
         <div class="ir-grid">
             <section class="ir-inbox">
-                <header><div><small>INBOX</small><h2>@Tx("Tasks waiting", "Công việc đang chờ")</h2></div><b>@Unscheduled.Count()</b></header>
+                <header><div><small>@Ui("INBOX")</small><h2>@Tx("Tasks waiting", "Công việc đang chờ")</h2></div><b>@Unscheduled.Count()</b></header>
                 <div class="ir-task-list">
                     @foreach (var task in Unscheduled)
                     {
@@ -61,7 +61,7 @@
                         </div>
                     }
                 </div>
-                @if (!string.IsNullOrWhiteSpace(message)) { <p class="ir-message">@message</p> }
+                @if (!string.IsNullOrWhiteSpace(message)) { <p class="ir-message">@Ui(message)</p> }
                 <footer><button @onclick="Reset">@Tx("Reset schedule", "Xếp lại lịch")</button><button class="primary" disabled="@(FilledSlots == 0 || saving)" @onclick="Finish">@(saving ? Tx("Saving...", "Đang lưu...") : Tx("Finish and score", "Hoàn thành và chấm điểm"))</button></footer>
             </section>
         </div>

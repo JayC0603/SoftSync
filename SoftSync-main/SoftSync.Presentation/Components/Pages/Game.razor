@@ -14,14 +14,14 @@
     <section class="game-workspace tw:mx-auto" aria-labelledby="@(result is not null ? "result-title" : "game-title")" aria-busy="@(loading || submitting)">
         @if (loading)
         {
-            <h1 id="game-title" class="tw:text-3xl tw:font-bold">Mini Game</h1>
+            <h1 id="game-title" class="tw:text-3xl tw:font-bold">@Ui("Mini Game")</h1>
             <p role="status">@Tx("Loading quizzes...", "Đang tải bài kiểm tra...")</p>
         }
         else if (quiz is null)
         {
             <header class="tw:mb-8">
-                <span class="badge bg-primary">Inclusive Skill Challenge</span>
-                <h1 id="game-title" class="tw:mt-3 tw:text-3xl tw:font-bold">Mini Game</h1>
+                <span class="badge bg-primary">@Ui("Inclusive Skill Challenge")</span>
+                <h1 id="game-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Mini Game")</h1>
                 <p>@Tx("Practice soft skills through published 10-question challenges.", "Luyện kỹ năng mềm qua các thử thách 10 câu hỏi đã xuất bản.")</p>
                 <a class="btn btn-outline-primary tw:mt-3" href="/game/history">@Tx("Attempt history", "Lịch sử làm bài")</a>
             </header>
@@ -47,12 +47,12 @@
         else if (result is not null)
         {
             <article class="ss-glass tw:rounded-2xl tw:p-8" aria-labelledby="result-title">
-                <span class="badge @(result.Passed ? "bg-success" : "bg-danger")">@(result.Passed ? "PASS" : "NOT PASS")</span>
+                <span class="badge @(result.Passed ? "bg-success" : "bg-danger")">@(result.Passed ? Ui("PASS") : Ui("NOT PASS"))</span>
                 <h1 id="result-title" class="tw:mt-4 tw:text-3xl tw:font-bold">@result.QuizTitle</h1>
                 <p class="tw:text-xl" aria-label="@Tx($"Score {result.CorrectAnswers} out of {result.TotalQuestions}", $"Điểm {result.CorrectAnswers} trên {result.TotalQuestions}")">
                     @Tx("Score", "Điểm"): <strong>@result.CorrectAnswers / @result.TotalQuestions</strong>
                 </p>
-                <dl><dt>@Tx("Result", "Kết quả")</dt><dd>@(result.Passed ? "PASS" : "NOT PASS")</dd><dt>@Tx("Correct answers", "Câu trả lời đúng")</dt><dd>@result.CorrectAnswers</dd><dt>@Tx("Incorrect answers", "Câu trả lời sai")</dt><dd>@(result.TotalQuestions - result.CorrectAnswers)</dd></dl>
+                <dl><dt>@Tx("Result", "Kết quả")</dt><dd>@(result.Passed ? Ui("PASS") : Ui("NOT PASS"))</dd><dt>@Tx("Correct answers", "Câu trả lời đúng")</dt><dd>@result.CorrectAnswers</dd><dt>@Tx("Incorrect answers", "Câu trả lời sai")</dt><dd>@(result.TotalQuestions - result.CorrectAnswers)</dd></dl>
                 <p>@(result.Passed ? Tx("You passed this challenge.", "Bạn đã vượt qua thử thách.") : Tx("You need at least 5 correct answers to pass.", "Bạn cần ít nhất 5 câu đúng để đạt."))</p>
                 <button type="button" class="btn btn-primary" @onclick="BackToList">@Tx("Back to quizzes", "Về danh sách")</button>
             </article>

@@ -15,8 +15,8 @@
     else {
         <div class="mentor-profile-grid">
             <article class="mentor-profile-main">
-                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@Tx("SOFTSYNC MENTOR", "MENTOR SOFTSYNC")</span><h1 id="mentor-title">@mentor.Name</h1><strong>@mentor.Expertise</strong></div></header>
-                <section><h2>@Tx("How this mentor can help", "Mentor này có thể hỗ trợ gì")</h2><p>@mentor.ShortBio</p><p>@Tx("Use a support request to describe the decision, conversation or learning step where you feel stuck. The mentor receives only what you choose to write below.", "Dùng yêu cầu hỗ trợ để mô tả quyết định, cuộc trò chuyện hoặc bước học nơi bạn đang gặp khó. Mentor chỉ nhận nội dung bạn chủ động viết bên dưới.")</p></section>
+                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@Tx("SOFTSYNC MENTOR", "MENTOR SOFTSYNC")</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise)</strong></div></header>
+                <section><h2>@Tx("How this mentor can help", "Mentor này có thể hỗ trợ gì")</h2><p>@Ui(mentor.ShortBio)</p><p>@Tx("Use a support request to describe the decision, conversation or learning step where you feel stuck. The mentor receives only what you choose to write below.", "Dùng yêu cầu hỗ trợ để mô tả quyết định, cuộc trò chuyện hoặc bước học nơi bạn đang gặp khó. Mentor chỉ nhận nội dung bạn chủ động viết bên dưới.")</p></section>
                 <section><h2>@Tx("A focused support process", "Quy trình hỗ trợ tập trung")</h2><ol><li><span>1</span>@Tx("Describe one concrete learning goal.", "Mô tả một mục tiêu học cụ thể.")</li><li><span>2</span>@Tx("Choose whether to share learning context.", "Chọn có chia sẻ ngữ cảnh học hay không.")</li><li><span>3</span>@Tx("SoftSync records your request for follow-up.", "SoftSync lưu yêu cầu để tiếp tục xử lý.")</li></ol></section>
             </article>
             <aside class="mentor-request" aria-labelledby="request-title">

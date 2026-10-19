@@ -294,7 +294,7 @@
                                     {
                                         <button class="ss-seg-1 @(selectedSkillIds.Contains(s.Id) ? "active" : "")"
                                                 @onclick="() => ToggleSkill(s.Id)" type="button">
-                                            <i class="bi @s.IconName tw:me-1"></i> @s.Name
+                                            <i class="bi @s.IconName tw:me-1"></i> @Ui(s.Name)
                                         </button>
                                     }
                                 }

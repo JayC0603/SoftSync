@@ -6,7 +6,7 @@
 @inject ISkillService SkillService
 @inject IMentorService MentorService
 
-<PageTitle>@(skill?.Name ?? Tx("Skill community", "Nhóm kỹ năng")) · SoftSync</PageTitle>
+<PageTitle>@(skill is null ? Tx("Skill community", "Nhóm kỹ năng") : Ui(skill.Name)) · SoftSync</PageTitle>
 <section class="eco-page skill-community" aria-labelledby="skill-community-title">
     <p class="eco-inline-note">@Tx("This page lists learning guidance and mentors. Group membership, posts and comments are not available here. Send a private mentor request if you need feedback.", "Trang này cung cấp hướng dẫn học và danh sách Mentor. Hiện chưa có tham gia nhóm, bài đăng hoặc bình luận. Nếu cần phản hồi, hãy gửi yêu cầu hỗ trợ riêng cho Mentor.")</p>
     <a class="eco-back" href="/community"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("Community", "Cộng đồng")</a>
@@ -24,13 +24,13 @@
     }
     else
     {
-        <header class="skill-community-head"><i class="bi @skill.IconName" aria-hidden="true"></i><div><span>@Tx("SKILL COMMUNITY", "NHÓM KỸ NĂNG")</span><h1 id="skill-community-title">@skill.Name</h1><p>@skill.Description</p></div><a class="eco-primary" href="/roadmap">@Tx("Open roadmap", "Mở lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></header>
+        <header class="skill-community-head"><i class="bi @skill.IconName" aria-hidden="true"></i><div><span>@Tx("SKILL COMMUNITY", "NHÓM KỸ NĂNG")</span><h1 id="skill-community-title">@Ui(skill.Name)</h1><p>@Ui(skill.Description)</p></div><a class="eco-primary" href="/roadmap">@Tx("Open roadmap", "Mở lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></header>
         <div class="skill-community-grid">
             <section aria-labelledby="group-use-title"><h2 id="group-use-title">@Tx("How to use this group", "Cách sử dụng nhóm này")</h2><ol><li>@Tx("Finish the relevant lesson and Practice.", "Hoàn thành bài học và Practice liên quan.")</li><li>@Tx("Bring one specific situation or question.", "Mang theo một tình huống hoặc câu hỏi cụ thể.")</li><li>@Tx("Protect private information when asking for feedback.", "Bảo vệ thông tin riêng tư khi xin phản hồi.")</li></ol></section>
             <section aria-labelledby="related-mentors-title">
                 <h2 id="related-mentors-title">@Tx("Related mentors", "Mentor liên quan")</h2>
                 @if (mentors.Count == 0) { <p class="eco-muted">@Tx("No mentor is currently mapped to this skill.", "Hiện chưa có Mentor được gắn với kỹ năng này.")</p> }
-                else { @foreach (var mentor in mentors) { <a class="skill-mentor" href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" width="48" height="48" /><span><strong>@mentor.Name</strong><small>@mentor.Expertise</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }
+                else { @foreach (var mentor in mentors) { <a class="skill-mentor" href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" width="48" height="48" /><span><strong>@mentor.Name</strong><small>@Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }
             </section>
         </div>
     }

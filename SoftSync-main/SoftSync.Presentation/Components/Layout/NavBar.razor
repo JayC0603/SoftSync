@@ -38,17 +38,17 @@
         <NavLink class="ss-navpill" href="/resources" aria-label="@L["nav.resources"]">
             <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/game" aria-label="Mini Game">
-            <i class="bi bi-controller"></i> <span>@(L.Current == AppLanguage.Vi ? "Mini Game" : "Mini Game")</span>
+        <NavLink class="ss-navpill" href="/game" aria-label="@L.Ui("Mini Game")">
+            <i class="bi bi-controller"></i> <span>@L.Ui("Mini Game")</span>
         </NavLink>
         <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
-        <NavLink class="ss-navpill" href="/cv" aria-label="CV thông minh"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
+        <NavLink class="ss-navpill" href="/cv" aria-label="@L.Ui("Smart CV")"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
         }
     </div>
 
 </nav>
 
-<nav class="ss-mobile-bottom-nav" aria-label="Mobile navigation">
+<nav class="ss-mobile-bottom-nav" aria-label="@L.Ui("Mobile navigation")">
     @if (isAdmin)
     {
         <NavLink class="ss-mobile-bottom-link" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
@@ -73,11 +73,11 @@
         <div class="ss-header-dropdown ss-mobile-menu-panel">
             <header><strong>@(L.Current == AppLanguage.Vi ? "Khám phá SoftSync" : "Explore SoftSync")</strong><button type="button" aria-label="@(L.Current == AppLanguage.Vi ? "Đóng menu" : "Close menu")" onclick="this.closest('details').open=false"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
             <a href="/resources"><i class="bi bi-folder" aria-hidden="true"></i>@L["nav.resources"]</a>
-            <a href="/game"><i class="bi bi-controller" aria-hidden="true"></i>Mini Game</a>
+            <a href="/game"><i class="bi bi-controller" aria-hidden="true"></i>@L.Ui("Mini Game")</a>
             <a href="/assistant"><i class="bi bi-chat-heart" aria-hidden="true"></i>SYNCY</a>
             <a href="/community"><i class="bi bi-people" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Cộng đồng" : "Community")</a>
             <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i>@L["nav.settings"]</a>
-            <AuthorizeView Roles="Teacher" Context="mobileStaff"><Authorized><a href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i>Teacher Studio</a></Authorized></AuthorizeView>
+            <AuthorizeView Roles="Teacher" Context="mobileStaff"><Authorized><a href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i>@L.Ui("Teacher Studio")</a></Authorized></AuthorizeView>
         </div>
     </details>
     }
