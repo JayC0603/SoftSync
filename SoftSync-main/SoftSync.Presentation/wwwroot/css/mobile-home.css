@@ -270,36 +270,36 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
 .mh-v3 .mh-achievement-grid { display: grid; gap: 14px; }
 .mh-v3 .mh-achievement-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 44px; margin-top: 14px; padding: 10px 16px; border: 1px solid var(--mh-border); border-radius: 12px; background: var(--mh-soft); color: var(--mh-accent); font: inherit; font-weight: 600; cursor: pointer; }
 .mh-v3 .mh-achievement-toggle:hover { border-color: var(--mh-accent); }
-.mh-v3 .mh-achievement-card { display: grid; grid-template-columns: 100px minmax(0,1fr) auto; align-items: center; gap: 18px 22px; padding: 24px; border: 1px solid var(--mh-border); border-radius: 24px; background: var(--mh-surface); }
-.mh-v3 .mh-achievement-symbol { position: relative; grid-row: 1 / 3; display: grid; place-items: center; width: 100px; height: 116px; border-radius: 24px; background: var(--mh-soft); color: var(--mh-accent); }
-.mh-v3 .mh-achievement-symbol > i { font-size: 62px; line-height: 1; }
-.mh-v3 .mh-achievement-symbol > span { position: absolute; color: #ffbf36; font-size: 24px; right: 10px; top: 6px; }
+.mh-v3 .mh-achievement-card { display: grid; grid-template-columns: 64px minmax(0,1fr) auto; align-items: center; gap: 12px 16px; padding: 16px; border: 1px solid var(--mh-border); border-radius: 16px; background: var(--mh-surface); }
+.mh-v3 .mh-achievement-symbol { position: relative; grid-row: 1 / 3; display: grid; place-items: center; width: 64px; height: 76px; border-radius: 16px; background: var(--mh-soft); color: var(--mh-accent); }
+.mh-v3 .mh-achievement-symbol > i { font-size: 40px; line-height: 1; }
+.mh-v3 .mh-achievement-symbol > span { position: absolute; color: #ffbf36; font-size: 18px; right: 5px; top: 4px; }
 .mh-v3 .mh-achievement-symbol > span:last-child { top: auto; right: auto; bottom: 8px; left: 10px; }
 .mh-v3 .mh-achievement-copy { grid-column: 2; grid-row: 1 / 3; }
-.mh-v3 .mh-achievement-copy > strong { display: block; font-size: clamp(18px,2.1vw,26px); line-height: 1.35; color: var(--mh-ink); }
-html body .page .ss-main-content .mh-v3 .mh-achievement-copy > p { margin-top: 10px; color: var(--mh-muted); font-size: clamp(14px,1.7vw,21px) !important; line-height: 1.5; }
-.mh-v3 .mh-achievement-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 16px; color: var(--mh-muted); font-size: 17px; }
+.mh-v3 .mh-achievement-copy > strong { display: block; font-size: 18px; line-height: 1.35; color: var(--mh-ink); }
+html body .page .ss-main-content .mh-v3 .mh-achievement-copy > p { margin-top: 6px; color: var(--mh-muted); font-size: 16px !important; line-height: 1.5; }
+.mh-v3 .mh-achievement-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; color: var(--mh-muted); font-size: 14px; }
 .mh-v3 .mh-achievement-meta :is(span,time) { display: inline-flex; align-items: center; gap: 10px; }
 .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 18px; border-left: 1px solid var(--mh-border); }
 .mh-v3 .mh-achievement-meta i { font-size: 22px; }
 .mh-v3 .mh-achievement-status { display: inline-flex; align-items: center; gap: 8px; align-self: start; padding: 8px 14px; border-radius: 99px; color: var(--mh-success); background: color-mix(in srgb,var(--mh-success) 10%,var(--mh-surface)); font-size: 15px; white-space: nowrap; }
 .mh-v3 .mh-achievement-status i { font-size: 23px; }
 .mh-v3 .mh-achievement-arrow { grid-column: 3; justify-self: end; color: var(--mh-accent); font-size: 24px; }
-.mh-v3 .mh-achievement-celebration { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: 20px; background: var(--mh-soft); color: var(--mh-muted); font-size: clamp(14px,1.6vw,19px); line-height: 1.6; }
-.mh-v3 .mh-achievement-celebration > span { font-size: 38px; flex-shrink: 0; }
+.mh-v3 .mh-achievement-celebration { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--mh-soft); color: var(--mh-muted); font-size: 14px; line-height: 1.6; }
+.mh-v3 .mh-achievement-celebration > span { font-size: 28px; flex-shrink: 0; }
 .mh-v3 .mh-achievement-empty { display: flex; align-items: center; gap: 14px; margin: 0; padding: 22px; border: 1px solid var(--mh-border); border-radius: 20px; color: var(--mh-muted); }
 .mh-v3 .mh-achievement-empty > i { color: #f3a723; font-size: 32px; }
-.mh-v3 .mh-motivation { position: relative; isolation: isolate; overflow: hidden; min-height: 270px; display: flex; align-items: center; padding: 36px 30px; border-radius: 26px; background: linear-gradient(115deg,var(--mh-surface) 25%,var(--mh-soft)); }
+.mh-v3 .mh-motivation { position: relative; isolation: isolate; overflow: hidden; min-height: 180px; display: flex; align-items: center; padding: 24px; border-radius: 18px; background: linear-gradient(115deg,var(--mh-surface) 25%,var(--mh-soft)); }
 .mh-v3 .mh-motivation blockquote { position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 18px; width: 61%; }
-.mh-v3 .mh-motivation blockquote > i { color: var(--mh-accent); font-size: 64px; line-height: 1; }
-html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink); font-size: clamp(18px,2.2vw,29px) !important; line-height: 1.5; }
-.mh-v3 .mh-motivation cite { display: block; margin-top: 22px; color: var(--mh-ink); font-size: 21px; font-style: normal; font-weight: 750; }
+.mh-v3 .mh-motivation blockquote > i { color: var(--mh-accent); font-size: 40px; line-height: 1; }
+html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink); font-size: 18px !important; line-height: 1.5; }
+.mh-v3 .mh-motivation cite { display: block; margin-top: 12px; color: var(--mh-ink); font-size: 16px; font-style: normal; font-weight: 750; }
 .mh-v3 .mh-motivation > img { position: absolute; z-index: 0; right: 0; bottom: 0; width: 65%; height: 100%; object-fit: cover; object-position: right; opacity: .75; mask-image: linear-gradient(to right,transparent,#000 65%); }
 .mh-v3 .mh-motivation > .mh-motivation-trail { width: 48%; height: 90%; object-fit: contain; object-position: right bottom; opacity: 1; mask-image: linear-gradient(to right,transparent,#000 30%); }
 @media (max-width: 900px) {
-    .mh-v3 .mh-achievement-card { grid-template-columns: 64px minmax(0,1fr) auto; padding: 16px; gap: 14px 12px; border-radius: 20px; }
-    .mh-v3 .mh-achievement-symbol { width: 64px; height: 82px; border-radius: 18px; }
-    .mh-v3 .mh-achievement-symbol > i { font-size: 44px; }
+    .mh-v3 .mh-achievement-card { grid-template-columns: 56px minmax(0,1fr) auto; padding: 12px; gap: 10px 12px; border-radius: 14px; }
+    .mh-v3 .mh-achievement-symbol { width: 56px; height: 68px; border-radius: 14px; }
+    .mh-v3 .mh-achievement-symbol > i { font-size: 32px; }
     .mh-v3 .mh-achievement-symbol > span { font-size: 18px; right: 3px; }
     .mh-v3 .mh-achievement-status { padding: 6px 9px; font-size: 12px; }
     .mh-v3 .mh-achievement-meta { font-size: 13px; gap: 10px; margin-top: 12px; }
@@ -307,20 +307,20 @@ html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink);
     .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 10px; }
     .mh-v3 .mh-achievement-celebration { padding: 14px; gap: 12px; font-size: 14px; }
     .mh-v3 .mh-achievement-celebration > span { font-size: 30px; }
-    .mh-v3 .mh-motivation { min-height: 160px; padding: 20px 16px; }
-    .mh-v3 .mh-motivation blockquote { width: 65%; gap: 10px; }
-    .mh-v3 .mh-motivation blockquote > i { font-size: 36px; }
+    .mh-v3 .mh-motivation { min-height: 136px; padding: 16px; }
+    .mh-v3 .mh-motivation blockquote { width: 72%; gap: 8px; }
+    .mh-v3 .mh-motivation blockquote > i { font-size: 28px; }
     .mh-v3 .mh-motivation cite { font-size: 14px; margin-top: 12px; }
     html body .page .ss-main-content .mh-v3 .mh-motivation p { font-size: 14px !important; line-height: 1.5; }
 }
 @media (max-width: 540px) {
-    .mh-v3 .mh-achievement-card { position: relative; grid-template-columns: 52px minmax(0,1fr) auto; padding: 12px; gap: 12px 10px; }
+    .mh-v3 .mh-achievement-card { position: relative; grid-template-columns: 44px minmax(0,1fr) auto; padding: 12px; gap: 12px 10px; }
     .mh-v3 .mh-achievement-copy { grid-column: 2 / 4; grid-row: 1; }
     .mh-v3 .mh-achievement-copy > strong { padding-right: 90px; font-size: 16px; line-height: 1.4; }
     .mh-v3 .mh-achievement-status { grid-column: 3; grid-row: 1; justify-self: end; padding: 4px 6px; gap: 4px; font-size: 12px; }
     .mh-v3 .mh-achievement-status i { font-size: 14px; }
-    .mh-v3 .mh-achievement-symbol { grid-row: 1; width: 52px; height: 72px; border-radius: 14px; }
-    .mh-v3 .mh-achievement-symbol > i { font-size: 36px; }
+    .mh-v3 .mh-achievement-symbol { grid-row: 1; width: 44px; height: 60px; border-radius: 14px; }
+    .mh-v3 .mh-achievement-symbol > i { font-size: 32px; }
     html body .page .ss-main-content .mh-v3 .mh-achievement-copy > p { margin-top: 6px; padding-right: 14px; font-size: 14px !important; }
     .mh-v3 .mh-achievement-meta { font-size: 12px; margin-top: 8px; }
     .mh-v3 .mh-achievement-celebration { padding: 10px; gap: 10px; font-size: 14px; line-height: 1.5; }
@@ -328,7 +328,7 @@ html body .page .ss-main-content .mh-v3 .mh-motivation p { color: var(--mh-ink);
     .mh-v3 .mh-achievement-arrow { position: absolute; right: 12px; top: 52px; font-size: 18px; }
     .mh-v3 .mh-achievement-meta { gap: 8px; }
     .mh-v3 .mh-achievement-meta > time:not(:first-child) { padding-left: 8px; }
-    .mh-v3 .mh-motivation blockquote { width: 67%; }
-    .mh-v3 .mh-motivation > img { opacity: .85; }
-    .mh-v3 .mh-motivation > .mh-motivation-trail { opacity: 1; width: 58%; height: 85%; }
+    .mh-v3 .mh-motivation blockquote { width: 72%; }
+    .mh-v3 .mh-motivation > img { opacity: .55; }
+    .mh-v3 .mh-motivation > .mh-motivation-trail { opacity: .85; width: 48%; height: 78%; }
 }
