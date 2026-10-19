@@ -14,10 +14,13 @@
 @inject NavigationManager Nav
 @inject ILogger<RoadmapOverview> Logger
 
-<PageTitle>@Tx("Learning journey", "Hành trình học tập") · SoftSync</PageTitle>
-<HeadContent><link rel="stylesheet" href="css/learning-journey.css?v=20261019-light" /></HeadContent>
+<PageTitle>@Tx("Learn", "Học tập") · SoftSync</PageTitle>
+<HeadContent>
+    <link rel="stylesheet" href="css/learning-journey.css?v=20261019-light" media="(min-width: 901px)" />
+    <link rel="stylesheet" href="css/learn-v3.css?v=20261019-mobile-only" />
+</HeadContent>
 
-<section class="learning-journey" style="@Theme.Css">
+<section class="learning-journey learn-desktop" style="@Theme.Css">
     @if (loading)
     {
         <div class="journey-state" role="status"><span class="journey-spinner" aria-hidden="true"></span><h1>@Tx("Preparing your journey…", "Đang chuẩn bị hành trình của bạn…")</h1></div>
@@ -45,7 +48,7 @@
             }
         </nav>
         <div class="journey-grid">
-            <CurrentLevelHero Theme="Theme" Category="@CategoryName(SelectedItem)" Title="@WeekTitle(SelectedItem, SelectedOrdinal)" Description="@SelectedDescription" Ordinal="SelectedOrdinal" Completed="SelectedItem.CompletedActivityCount" Total="SelectedItem.TotalActivityCount" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnContinue="ContinueLearning" />
+            <CurrentLevelHero Theme="Theme" Category="@CategoryName(SelectedItem)" Title="@WeekTitle(SelectedItem, SelectedOrdinal)" Description="@SelectedDescription" Ordinal="SelectedOrdinal" Completed="SelectedItem.CompletedActivityCount" Total="SelectedItem.TotalActivityCount" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnContinue="ContinueDesktopLearning" />
             <div class="journey-right">
                 <SkillRoadmap Theme="Theme" Category="@CategoryName(SelectedItem)" Checkpoints="Checkpoints" SelectedItemId="SelectedItem.Id" Vietnamese="Vietnamese" OnSelect="SelectCheckpoint" />
                 @if (NextItem is { } next)
@@ -58,10 +61,98 @@
     }
 </section>
 
+<section class="learn-v3">
+    @if (loading)
+    {
+        <div class="journey-state" role="status"><span class="journey-spinner" aria-hidden="true"></span><h1>@Tx("Preparing your journey…", "Đang chuẩn bị hành trình của bạn…")</h1></div>
+    }
+    else if (loadError)
+    {
+        <div class="journey-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>@Tx("We could not load your roadmap", "Chưa thể tải lộ trình")</h1><p>@Tx("Your saved progress is safe. Please try again.", "Tiến độ đã lưu vẫn được giữ. Vui lòng thử lại.")</p><button class="journey-primary" @onclick="LoadRoadmap">@Tx("Try again", "Thử lại")</button></div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="journey-state"><i class="bi bi-map" aria-hidden="true"></i><h1>@Tx("Your journey starts here", "Hành trình của bạn bắt đầu từ đây")</h1><p>@Tx("Complete your skills assessment to receive your personal learning roadmap.", "Hoàn thành đánh giá kỹ năng để nhận lộ trình học dành riêng cho bạn.")</p><a class="journey-primary" href="@($"/assessment/{UserId}")">@Tx("Take assessment", "Đánh giá kỹ năng") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    }
+    else
+    {
+        <div class="lv-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" aria-label="@Tx("Search courses, skills and lessons", "Tìm khóa học, kỹ năng, bài học")" placeholder="@Tx("Search courses, skills and lessons…", "Tìm khóa học, kỹ năng, bài học...")" @bind="learnQuery" @bind:event="oninput" /></div>
+        @if (!string.IsNullOrWhiteSpace(learnQuery))
+        {
+            <div class="lv-results" aria-live="polite">
+                @foreach (var result in LearnSearchResults)
+                {
+                    <button @onclick="() => SelectSearchResult(result)"><span><strong>@L.Ui(result.Title)</strong><small>@L.Ui(result.SkillName)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                }
+                @if (!LearnSearchResults.Any()) { <p>@Tx("No matching lessons found.", "Không tìm thấy bài học phù hợp.")</p> }
+            </div>
+        }
+        <header class="lv-intro"><div><h1>@Tx("Learn", "Học tập")</h1><p>@Tx("A little better, every day.", "Mỗi ngày, một bước tiến mới.")</p></div><svg class="lv-intro-book" viewBox="0 0 150 84" fill="none" aria-hidden="true"><ellipse cx="80" cy="73" rx="65" ry="10" fill="#dfe7ff"/><path d="M74 25C53 11 29 16 18 25L10 66C32 61 52 64 71 74C92 65 112 67 133 71L143 28C121 17 96 16 74 25Z" fill="#7775fa"/><path d="M74 22C55 10 36 12 23 19L15 59C37 55 54 59 71 69L74 22Z" fill="#f5f5ff" stroke="#b3baff" stroke-width="2"/><path d="M74 22C96 12 117 15 135 23L127 63C108 57 90 59 71 69L74 22Z" fill="#edf2ff" stroke="#b3baff" stroke-width="2"/><path d="M31 28L62 36M28 37L60 45M26 46L58 54M85 32L123 31M83 41L121 40M81 50L119 49" stroke="#c5ceff" stroke-width="3" stroke-linecap="round"/><path d="M105 3L108 11L116 14L108 17L105 25L102 17L94 14L102 11Z" fill="#ffd27b"/><path d="M24 2L27 8L33 10L27 12L24 18L22 12L16 10L22 8Z" fill="#ffe6a4"/><path d="M139 4L141 9L146 11L141 13L139 18L137 13L132 11L137 9Z" fill="#9abaff"/></svg></header>
+        <div class="lv-tabs" role="tablist" aria-label="@Tx("Learning view", "Chế độ học tập")">
+            <button id="lv-mine-tab" role="tab" aria-selected="@(!discover ? "true" : "false")" aria-controls="lv-mine" class="@(!discover ? "is-active" : null)" @onclick="() => discover = false">@Tx("My learning", "Học của tôi")</button>
+            <button id="lv-discover-tab" role="tab" aria-selected="@(discover ? "true" : "false")" aria-controls="lv-discover" class="@(discover ? "is-active" : null)" @onclick="() => discover = true">@Tx("Explore", "Khám phá")</button>
+        </div>
+        @if (discover)
+        {
+            <section id="lv-discover" role="tabpanel" aria-labelledby="lv-discover-tab" class="lv-discover">
+                @foreach (var group in SkillGroups)
+                {
+                    <button @onclick="() => ExploreSkill(group.Key)"><i class="bi @SkillTheme.For(group.Key).Icon" aria-hidden="true"></i><span><strong>@CategoryName(group.First())</strong><small>@group.Count(x => x.IsCompleted)/@group.Count() @Tx("levels completed", "cấp độ hoàn thành")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                }
+            </section>
+        }
+        else
+        {
+            <div id="lv-mine" role="tabpanel" aria-labelledby="lv-mine-tab" class="lv-mine">
+                <section class="lv-hero" aria-labelledby="lv-course-title">
+                    <div class="lv-hero-copy"><span class="lv-badge">@(SelectedState == JourneyState.Locked ? Tx("LOCKED", "CHƯA MỞ KHÓA") : SelectedItem.IsCompleted ? Tx("COMPLETED", "HOÀN THÀNH") : Tx("LEARNING", "ĐANG HỌC"))</span><h2 id="lv-course-title">@CategoryName(SelectedItem)</h2><p>@Tx("Level", "Cấp độ") @SelectedOrdinal.ToString("00") · @WeekTitle(SelectedItem, SelectedOrdinal)</p></div>
+                    <img class="lv-hero-art" src="/images/learn-v3/syncy-learning.webp" alt="" width="600" height="450" fetchpriority="high" />
+                    <div class="lv-progress"><progress value="@SelectedItem.ProgressPercent" max="100" aria-label="@Tx("Learning progress", "Tiến độ học tập")">@SelectedItem.ProgressPercent%</progress><strong>@SelectedItem.CompletedActivityCount/@SelectedItem.TotalActivityCount <span>@SelectedItem.ProgressPercent%</span></strong></div>
+                    <div class="lv-hero-meta"><span><i class="bi bi-clock" aria-hidden="true"></i>@CurrentLessons.Count @Tx("activities", "hoạt động")</span><span><i class="bi bi-file-earmark-text" aria-hidden="true"></i>@Tx("Progress saved for each activity", "Tiến độ lưu theo từng hoạt động")</span></div>
+                    <button class="lv-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><i class="bi bi-play-fill" aria-hidden="true"></i>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))<i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                </section>
+                <section aria-labelledby="lv-next-title"><header class="lv-section-heading"><h2 id="lv-next-title">@Tx("Next lesson", "Bài học tiếp theo")</h2><a href="#lv-activities">@Tx("View all", "Xem tất cả") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+                    @if (NextActivity is { } activity)
+                    {
+                        <button class="lv-next" @onclick="() => OpenSelectedStep(activity.Step)"><i class="bi bi-play-fill lv-next-icon" aria-hidden="true"></i><span><strong>@activity.Title</strong><small>@activity.Type</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    }
+                    else { <p class="lv-empty">@Tx("You have completed the activities in this level.", "Bạn đã hoàn thành các hoạt động trong cấp độ này.")</p> }
+                </section>
+                <section aria-labelledby="lv-journey-title"><header class="lv-section-heading"><h2 id="lv-journey-title">@Tx("Your journey", "Hành trình của bạn")</h2><a href="/roadmap/adventure">@Tx("View map", "Xem bản đồ") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+                    <div class="lv-roadmap"><img src="/images/learn-v3/roadmap-landscape.webp" alt="" width="600" height="450" loading="lazy" /><ol>
+                        @foreach (var checkpoint in Checkpoints)
+                        {
+                            <li class="@(checkpoint.State == JourneyState.Completed ? "is-completed" : checkpoint.State == JourneyState.Locked ? "is-locked" : "is-current")"><button disabled="@(checkpoint.State == JourneyState.Locked)" @onclick="() => SelectCheckpoint(checkpoint)"><span class="lv-node">@(checkpoint.State == JourneyState.Completed ? "✓" : checkpoint.Ordinal)</span><span><strong>@checkpoint.Title</strong><small>@if (checkpoint.ItemId == SelectedItem.Id && !checkpoint.Boss && checkpoint.State != JourneyState.Locked) { <text>@SelectedItem.CompletedActivityCount/@SelectedItem.TotalActivityCount @Tx("activities", "hoạt động") · </text> }@if (checkpoint.State == JourneyState.Locked) { <i class="bi bi-lock-fill" aria-hidden="true"></i> }@(checkpoint.State == JourneyState.Completed ? Tx("Completed", "Hoàn thành") : checkpoint.State == JourneyState.Locked ? Tx("Locked", "Chưa mở khóa") : Tx("Learning", "Đang học"))</small></span></button></li>
+                        }
+                    </ol><div class="lv-legend"><span><i></i>@Tx("Learning", "Đang học")</span><span><i></i>@Tx("Completed", "Hoàn thành")</span><span><i></i>@Tx("Locked", "Chưa mở khóa")</span></div></div>
+                </section>
+                <section id="lv-activities" aria-labelledby="lv-activities-title"><header class="lv-section-heading"><h2 id="lv-activities-title">@Tx("Activities in this level", "Bài học trong cấp độ này")</h2><strong>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount</strong></header><p class="lv-section-description">@Tx("Complete each activity to unlock the next step.", "Hoàn thành từng hoạt động để mở khóa bước tiếp theo.")</p>
+                    <div class="lv-activity-list">
+                        @foreach (var lesson in CurrentLessons)
+                        {
+                            <div class="lv-activity @(lesson.Completed ? "is-completed" : lesson.Available ? "is-current" : "is-locked")"><span class="lv-activity-state"><i class="bi @(lesson.Completed ? "bi-check-lg" : lesson.Available ? "bi-play-fill" : "bi-lock-fill")" aria-hidden="true"></i></span><i class="bi @lesson.Icon lv-activity-icon" aria-hidden="true"></i><span class="lv-activity-copy"><strong>@lesson.Title</strong><small>@lesson.Type</small></span><button disabled="@(!lesson.Available)" aria-label="@(lesson.Title + ": " + ActivityAction(lesson))" @onclick="() => OpenSelectedStep(lesson.Step)">@ActivityAction(lesson) @if (!lesson.Completed) { <i class="bi @(lesson.Available ? "bi-arrow-right" : "bi-lock-fill")" aria-hidden="true"></i> }</button></div>
+                        }
+                    </div>
+                </section>
+                <a class="lv-support" href="/mentors"><i class="bi bi-person" aria-hidden="true"></i><span><strong>@Tx("Need support?", "Cần hỗ trợ?")</strong> @Tx("Talk to a Mentor", "Trao đổi cùng Mentor")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            </div>
+        }
+
+    }
+</section>
+
 @code {
     [Parameter] public int UserId { get; set; }
     [SupplyParameterFromQuery(Name = "skill")] public string? RequestedSkill { get; set; }
     private List<RoadmapItemDto> items = [];
+    private string learnQuery = string.Empty;
+    private bool discover;
+    private IEnumerable<RoadmapItemDto> LearnSearchResults => items.Where(x => $"{L.Ui(x.Title)} {L.Ui(x.SkillName)}".Contains(learnQuery.Trim(), StringComparison.CurrentCultureIgnoreCase)).Take(8);
+    private JourneyLesson? NextActivity => SelectedState == JourneyState.Locked ? null : CurrentLessons.FirstOrDefault(x => !x.Completed && x.Available);
+    private void ExploreSkill(string key) { SelectSkill(key); discover = false; }
+    private void SelectSearchResult(RoadmapItemDto item) { selected = item; learnQuery = string.Empty; discover = false; }
+    private string ActivityAction(JourneyLesson lesson) => lesson.Completed ? Tx("Review", "Xem lại") : lesson.Available ? Tx("Continue", "Tiếp tục") : Tx("Locked", "Chưa mở khóa");
+
     private RoadmapItemDto? selected;
     private bool loading = true;
     private bool loadError;
@@ -110,7 +201,8 @@
         var group = items.Where(x => SkillKey(x) == key).ToList();
         selected = group.FirstOrDefault(x => StateOf(x) == JourneyState.Current) ?? group.FirstOrDefault(x => !x.IsCompleted) ?? group.First();
     }
-    private void ContinueLearning() => OpenSelectedStep(JourneyProgress.ResumeStep(SelectedItem));
+    private void ContinueDesktopLearning() => OpenSelectedStep(JourneyProgress.ResumeStep(SelectedItem));
+    private void ContinueLearning() => OpenSelectedStep(NextActivity?.Step ?? JourneyProgress.ResumeStep(SelectedItem));
     private void OpenSelectedStep(int step)
     {
         if (SelectedState == JourneyState.Locked || !JourneyProgress.CanOpen(SelectedItem, step)) return;
