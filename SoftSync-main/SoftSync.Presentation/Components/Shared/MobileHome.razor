@@ -1,0 +1,73 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Components.Journey
+
+<div class="mobile-home">
+    <section class="mh-search" aria-label="@T("Tìm kiếm học tập", "Learning search")">
+        <div class="mh-search-input"><i class="bi bi-search" aria-hidden="true"></i><input type="search" aria-label="@T("Tìm bài học, kỹ năng, lộ trình", "Search lessons, skills and roadmap")" placeholder="@T("Tìm bài học, kỹ năng, lộ trình…", "Find lessons, skills, roadmap…")" @bind="query" @bind:event="oninput" aria-controls="mh-results" />@if (query.Length > 0) { <button type="button" @onclick="() => query = string.Empty" aria-label="@T("Xóa tìm kiếm", "Clear search")"><i class="bi bi-x-lg" aria-hidden="true"></i></button> }</div>
+        @if (!string.IsNullOrWhiteSpace(query))
+        {
+            <div id="mh-results" class="mh-results" aria-live="polite">
+                <p>@T("Tìm trong bài học và lộ trình của bạn", "Searching your lessons and roadmap")</p>
+                @foreach (var item in Results)
+                {
+                    <a href="@(IsLocked(item) ? "/roadmap" : LessonUrl(item))"><i class="bi @(IsLocked(item) ? "bi-lock" : "bi-journal-text")" aria-hidden="true"></i><span><strong>@item.Title</strong><small>@item.SkillName · @T("Bài học", "Lesson")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                }
+                @if (!Results.Any()) { <p>@T("Không tìm thấy nội dung phù hợp.", "No matching content found.")</p> }
+            </div>
+        }
+    </section>
+
+    <header class="mh-welcome"><h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1><p>@T("Hôm nay là một ngày tuyệt vời để học thêm điều mới!", "Today is a great day to learn something new!")</p></header>
+
+    <section class="mh-hero" aria-labelledby="mh-hero-title">
+        <div class="mh-hero-copy"><span class="mh-badge"><i class="bi bi-play-circle-fill" aria-hidden="true"></i>@(AllDone ? T("Lộ trình hoàn thành", "Roadmap complete") : T("Tiếp tục học tập", "Continue learning"))</span><h2 id="mh-hero-title">@(Current?.Title ?? T("Bắt đầu hành trình của bạn", "Start your journey"))</h2><p>@(Current?.Objective ?? T("Khám phá thế mạnh của bạn và nhận lộ trình học phù hợp.", "Discover your strengths and get a personal learning roadmap."))</p></div>
+        <div class="mh-hero-art" aria-hidden="true"><span>✦</span><img src="/images/syncy-robot.png" alt="" width="180" height="180" fetchpriority="high" /></div>
+        @if (Current is not null)
+        {
+            <div class="mh-progress"><div><span>@Current.CompletedActivityCount/@Current.TotalActivityCount @T("hoạt động", "activities")</span><strong>@Percent%</strong></div><progress value="@Percent" max="100" aria-label="@T("Tiến độ bài học", "Lesson progress")">@Percent%</progress></div>
+        }
+        <a class="mh-primary" href="@(Current is null ? $"/assessment/{User.Id}" : AllDone ? "/progress" : LessonUrl(Current))"><i class="bi @(AllDone ? "bi-check-circle" : "bi-play-fill")" aria-hidden="true"></i>@(Current is null ? T("Bắt đầu đánh giá", "Start assessment") : AllDone ? T("Xem thành quả", "View achievements") : T("Tiếp tục bài học", "Continue lesson"))<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+    </section>
+
+    <section class="mh-stats" aria-label="@T("Tổng quan học tập", "Learning overview")">
+        <a href="/progress"><i class="bi bi-book-fill" aria-hidden="true"></i><strong>@Items.Count(x => x.IsCompleted)</strong><span>@T("Bài học hoàn thành", "Lessons completed")</span></a>
+        <a href="/progress"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><strong>@Items.Sum(x => x.CompletedActivityCount)</strong><span>@T("Hoạt động hoàn thành", "Activities completed")</span></a>
+        <a href="/progress"><i class="bi bi-star-fill" aria-hidden="true"></i><strong>@User.ExperiencePoints.ToString("N0")</strong><span>@T("XP tích lũy", "Total XP")</span></a>
+    </section>
+
+    <section class="mh-roadmap mh-surface"><header><h2><i class="bi bi-map" aria-hidden="true"></i>@T("Lộ trình của bạn", "Your roadmap")</h2><a href="/roadmap">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        @if (Items.Count == 0) { <p>@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p> }
+        else if (AllDone) { <p><i class="bi bi-check-circle" aria-hidden="true"></i> @T("Bạn đã hoàn thành lộ trình hiện tại!", "You have completed your current roadmap!")</p><a href="@($"/assessment/{User.Id}")">@T("Đánh giá lại kỹ năng", "Reassess your skills") →</a> }
+        else
+        {
+            <ol>@foreach (var item in Items.Where(x => !x.IsCompleted).Take(2)) {
+                <li class="@(IsLocked(item) ? "is-locked" : "is-current")"><a href="@(IsLocked(item) ? "/roadmap" : LessonUrl(item))"><span class="mh-node">@item.WeekNumber</span><span><strong>@item.Title</strong><small>@item.CompletedActivityCount/@item.TotalActivityCount @T("hoạt động", "activities")</small><em>@(IsLocked(item) ? T("Chưa mở khóa", "Locked") : T("Đang học", "Learning"))</em></span><i class="bi @(IsLocked(item) ? "bi-lock" : "bi-chevron-right")" aria-hidden="true"></i></a></li>
+            }</ol>
+        }
+        <div class="mh-mountain" aria-hidden="true"><i class="bi bi-flag-fill"></i></div>
+    </section>
+
+    <a href="/assistant" class="mh-syncy"><img src="/images/syncy-robot.png" alt="" width="90" height="100" loading="lazy" /><span><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong><small>@T("Trợ lý AI của bạn", "Your AI companion")</small><p>@T("Đặt câu hỏi, nhận gợi ý lộ trình và giải đáp về kỹ năng.", "Ask questions, get roadmap suggestions and explore your skills.")</p></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+
+    <section class="mh-quick mh-surface"><h2>@T("Truy cập nhanh", "Quick access")</h2><div>
+        <a href="/progress"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><strong>@T("Tiến độ", "Progress")</strong><span>@T("Xem quá trình học tập", "Your learning journey")</span></a>
+        <a href="/resources"><i class="bi bi-folder-fill" aria-hidden="true"></i><strong>@T("Tài nguyên", "Resources")</strong><span>@T("Tài liệu và mẫu CV", "Guides and CV templates")</span></a>
+        <a href="@($"/assessment/{User.Id}")"><i class="bi bi-clipboard-check-fill" aria-hidden="true"></i><strong>@T("Kiểm tra", "Assessment")</strong><span>@T("Đánh giá kỹ năng", "Assess your skills")</span></a>
+        <a href="/community"><i class="bi bi-people-fill" aria-hidden="true"></i><strong>@T("Cộng đồng", "Community")</strong><span>@T("Kết nối và thảo luận", "Connect and discuss")</span></a>
+    </div></section>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
+    private string query = string.Empty;
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private string Name => User.PublicName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? User.PublicName;
+    private RoadmapItemDto? Current => Items.FirstOrDefault(x => !x.IsCompleted) ?? Items.LastOrDefault();
+    private bool AllDone => Items.Count > 0 && Items.All(x => x.IsCompleted);
+    private int Percent => Math.Clamp(Current?.ProgressPercent ?? 0, 0, 100);
+    private bool IsLocked(RoadmapItemDto item) => !item.IsCompleted && item.Id != Current?.Id;
+    private string LessonUrl(RoadmapItemDto item) => $"/roadmap/lecture/{User.Id}/{item.Id}?step={JourneyProgress.ResumeStep(item)}";
+    private IEnumerable<RoadmapItemDto> Results => Items.Where(x => $"{x.Title} {x.SkillName}".Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase)).Take(8);
+}

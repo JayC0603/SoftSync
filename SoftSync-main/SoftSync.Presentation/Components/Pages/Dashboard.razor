@@ -11,13 +11,19 @@
 @inject IAssessmentService AssessmentService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
+@inject ILogger<Dashboard> Logger
 
-@if (user is null)
+@if (loadFailed)
+{
+    <UiState IsError="true" Title="@T("Chưa thể tải dữ liệu học tập", "Unable to load learning data")" Description="@T("Vui lòng tải lại trang để thử lại.", "Please reload the page to try again.")" ActionHref="/dashboard" ActionText="@T("Thử lại", "Try again")" />
+}
+else if (user is null)
 {
     <UiState Loading="true" Title="@T("Đang chuẩn bị không gian học tập…", "Preparing your learning space…")" />
 }
 else
 {
+    <MobileHome User="user" Items="roadmapItems" />
     <div class="focus-home ss-learning-dashboard dashboard-reference" aria-labelledby="focus-home-title">
         <header class="focus-home-header">
             <div><h1 id="focus-home-title">@T($"Chào mừng trở lại, {FirstName(user.PublicName)}!", $"Welcome back, {FirstName(user.PublicName)}!") <span aria-hidden="true">👋</span></h1><p>@T("Mỗi bước nhỏ hôm nay là một tiến bộ ngày mai.", "Every small step today is progress for tomorrow.")</p></div>
@@ -101,6 +107,7 @@ else
 
 @code {
     private UserDto? user;
+    private bool loadFailed;
     private List<ProgressDto> progress = [];
     private List<RoadmapItemDto> roadmapItems = [];
     private int completedItems;
@@ -116,6 +123,16 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        try { await LoadDashboardAsync(); }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not load learner dashboard");
+            loadFailed = true;
+        }
+    }
+
+    private async Task LoadDashboardAsync()
+    {
         if ((await AuthProvider.GetAuthenticationStateAsync()).User.IsInRole("Admin"))
         {
             Nav.NavigateTo("/admin/users", true);

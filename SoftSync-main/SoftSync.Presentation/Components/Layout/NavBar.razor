@@ -77,6 +77,10 @@
             <a href="/assistant"><i class="bi bi-chat-heart" aria-hidden="true"></i>SYNCY</a>
             <a href="/community"><i class="bi bi-people" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Cộng đồng" : "Community")</a>
             <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i>@L["nav.settings"]</a>
+            <a href="/about"><i class="bi bi-info-circle" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Về SoftSync" : "About SoftSync")</a>
+            <a href="/mentors"><i class="bi bi-person-heart" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Cố vấn" : "Mentors")</a>
+            <a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook" aria-hidden="true"></i>Facebook ↗</a>
+            <a href="https://softsync.id.vn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-globe2" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Trang web chính thức" : "Official website") ↗</a>
             <AuthorizeView Roles="Teacher" Context="mobileStaff"><Authorized><a href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i>@L.Ui("Teacher Studio")</a></Authorized></AuthorizeView>
         </div>
     </details>
