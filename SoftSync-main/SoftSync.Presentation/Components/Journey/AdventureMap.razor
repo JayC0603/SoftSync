@@ -1,6 +1,6 @@
 @namespace SoftSync.Presentation.Components.Journey
 
-                <section class="ad-map-panel">
+                <section class="ad-map-panel @(!string.IsNullOrWhiteSpace(BackgroundImage) ? "ad-map-illustrated" : null)">
                     <div class="ad-map-title">
                         <h2>@Tx("Your skill roadmap", "Bản đồ kỹ năng")</h2>
                         <p>@Tx("Follow the path to the final summit.", "Đi theo con đường đến đỉnh thử thách.")</p>
@@ -21,6 +21,12 @@
                                     <feGaussianBlur stdDeviation="7" />
                                 </filter>
                             </defs>
+                            @if (!string.IsNullOrWhiteSpace(BackgroundImage))
+                            {
+                                <image href="@BackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                            }
+                            else
+                            {
                             <circle cx="250" cy="170" r="280" fill="url(#@(mapId)-sky)" />
                             <path d="M0 290 65 205 125 270 215 165 315 275 397 174 500 260V760H0Z" fill="#252b62" />
                             <path d="M0 393 75 306 150 365 265 248 343 340 440 254 500 310V760H0Z" fill="#27386f" opacity=".85" />
@@ -34,6 +40,7 @@
                                     <rect x="-3" y="72" width="6" height="13" fill="#685d8a" />
                                 </g>
                             }
+                            }
                             <path d="@MapPath" fill="none" stroke="#131c42" stroke-width="30" stroke-linecap="round" />
                             <path d="@MapPath" fill="none" stroke="#6973bb" stroke-opacity=".56" stroke-width="21" stroke-linecap="round" />
                             <path d="@MapPath" fill="none" stroke="#aaa3ff" stroke-opacity=".5" stroke-dasharray="2 15" stroke-width="3" stroke-linecap="round" />
@@ -41,6 +48,10 @@
                                   stroke-dasharray="@RoadDash" stroke-width="14" stroke-linecap="round" opacity=".65" filter="url(#@(mapId)-glow)" />
                             <path d="@MapPath" pathLength="1000" fill="none" stroke="url(#@(mapId)-road)"
                                   stroke-dasharray="@RoadDash" stroke-width="5" stroke-linecap="round" />
+                            @if (!string.IsNullOrWhiteSpace(BackgroundImage) && Checkpoints.Count > 0)
+                            {
+                                <path d="@SummitPath" fill="none" stroke="#ffcf85" stroke-opacity=".7" stroke-width="3" stroke-dasharray="5 9" stroke-linecap="round" />
+                            }
                             <g transform="translate(250 90)">
                                 <ellipse cy="25" rx="78" ry="24" fill="#4a3f86" />
                                 <path d="M-38 14V-7h76v21" fill="#8063a3" />
@@ -67,7 +78,20 @@
                                     aria-label="@(Tx("Level", "Cấp độ") + " " + ordinal + ": " + entry.Item.Title)"
                                     title="@(isLocked ? Tx("Complete earlier levels to unlock", "Hoàn thành cấp trước để mở khóa") : entry.Item.Title)"
                                     disabled="@isLocked" @onclick="() => OnSelect.InvokeAsync(entry.Item)">
-                                <span class="ad-node-number"><i class="bi @(isCompleted ? "bi-check-lg" : isLocked ? "bi-lock-fill" : "bi-stars")"></i></span>
+                                <span class="ad-node-number">
+                                    @if (!string.IsNullOrWhiteSpace(BackgroundImage))
+                                    {
+                                        <span>@ordinal</span>
+                                        @if (isCompleted || isLocked)
+                                        {
+                                            <i class="ad-node-badge bi @(isCompleted ? "bi-check-lg" : "bi-lock-fill")" aria-hidden="true"></i>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <i class="bi @(isCompleted ? "bi-check-lg" : isLocked ? "bi-lock-fill" : "bi-stars")"></i>
+                                    }
+                                </span>
                                 <span class="ad-node-label"><small>@Tx("Level", "Cấp") @ordinal.ToString("00")</small><strong>@entry.Item.Title</strong></span>
                             </button>
                         }
@@ -83,6 +107,7 @@
     [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
     [Parameter] public int SelectedItemId { get; set; }
     [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public string? BackgroundImage { get; set; }
     [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
     private string Tx(string en, string vi) => Vietnamese ? vi : en;
     private int MapHeight => Math.Max(760, Checkpoints.Count * 150);
@@ -92,6 +117,7 @@
     private int NodeY(int index) => Checkpoints.Count <= 1 ? 430 : (int)Math.Round(MapHeight - 107 - (double)index * (MapHeight - 270) / (Checkpoints.Count - 1));
     private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
     private string NodeStyle(int index) => $"left:{F(NodeX(index) / 5.0)}%;top:{F(NodeY(index) / (double)MapHeight * 100)}%";
+    private string SummitPath => $"M {NodeX(Checkpoints.Count - 1)} {NodeY(Checkpoints.Count - 1)} Q 250 140 250 110";
     private string MapPath {
         get {
             if(Checkpoints.Count == 0) return "";

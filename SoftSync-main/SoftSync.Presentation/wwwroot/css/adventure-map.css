@@ -19,10 +19,17 @@ html body .ad-map-panel .ad-map-node:disabled { opacity:1; cursor:default; }
 .ad-map-panel .ad-map-legend span { display:flex; align-items:center; gap:5px; }
 .ad-map-panel .ad-map-legend span:first-child i { color:#43d3aa; }
 .ad-map-panel .ad-map-legend span:nth-child(2) i { color:#b39aff; }
+/* Anchor the milestone circle itself to the path, independently of label height. */
+html body .ad-map-illustrated .ad-map-node { transform:translate(-50%,-23px); z-index:1; }
+.ad-map-illustrated .ad-node-number { position:relative; flex-shrink:0; font-weight:750; }
+.ad-map-illustrated .ad-node-badge { position:absolute; right:-5px; bottom:-4px; display:grid; place-items:center; width:20px; height:20px; border:2px solid #172143; border-radius:50%; background:#d8d1ff; color:#302956; font-size:10px; }
+.ad-map-illustrated .completed .ad-node-badge { background:#9aedd1; color:#13483b; }
+.ad-map-illustrated .ad-node-label { box-shadow:0 3px 12px #080e2840; }
 html[data-theme='light'] .ad-map-panel { --ad-map-text:#172247; --ad-map-muted:#63718c; background:#e9eaff; border-color:#dce4f6; }
 html[data-theme='light'] .ad-map-panel .ad-node-label { background:#ffffffed; border-color:#d0d5f1; }
 html[data-theme='light'] .ad-map-panel .ad-node-number { color:#fff; }
 @media(max-width:900px) {
+    html body .ad-map-illustrated .ad-map-node { transform:translate(-50%,-18px); }
     .ad-map-panel .ad-map-title { padding:12px 14px 0; }
     .ad-map-panel .ad-node-number { width:36px; height:36px; border-width:2px; font-size:17px; }
     .ad-map-panel .ad-node-label { padding:6px; }
