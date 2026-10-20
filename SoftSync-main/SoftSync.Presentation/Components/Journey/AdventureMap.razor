@@ -23,7 +23,11 @@
                             </defs>
                             @if (!string.IsNullOrWhiteSpace(BackgroundImage))
                             {
-                                <image href="@BackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                                <image class="@(!string.IsNullOrWhiteSpace(LightBackgroundImage) ? "ad-background-dark" : null)" href="@BackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                                @if (!string.IsNullOrWhiteSpace(LightBackgroundImage))
+                                {
+                                    <image class="ad-background-light" href="@LightBackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                                }
                             }
                             else
                             {
@@ -108,6 +112,7 @@
     [Parameter] public int SelectedItemId { get; set; }
     [Parameter] public bool Vietnamese { get; set; }
     [Parameter] public string? BackgroundImage { get; set; }
+    [Parameter] public string? LightBackgroundImage { get; set; }
     [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
     private string Tx(string en, string vi) => Vietnamese ? vi : en;
     private int MapHeight => Math.Max(760, Checkpoints.Count * 150);
