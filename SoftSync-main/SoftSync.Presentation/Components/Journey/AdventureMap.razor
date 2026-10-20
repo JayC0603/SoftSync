@@ -45,9 +45,17 @@
                                 </g>
                             }
                             }
-                            <path d="@MapPath" fill="none" stroke="#131c42" stroke-width="30" stroke-linecap="round" />
-                            <path d="@MapPath" fill="none" stroke="#6973bb" stroke-opacity=".56" stroke-width="21" stroke-linecap="round" />
-                            <path d="@MapPath" fill="none" stroke="#aaa3ff" stroke-opacity=".5" stroke-dasharray="2 15" stroke-width="3" stroke-linecap="round" />
+                            @if (Illustrated)
+                            {
+                                <path class="ad-trail-shadow" d="@MapPath" fill="none" stroke-width="8" stroke-linecap="round" />
+                                <path class="ad-trail-pending" d="@MapPath" fill="none" stroke-width="3" stroke-dasharray="4 8" stroke-linecap="round" />
+                            }
+                            else
+                            {
+                                <path d="@MapPath" fill="none" stroke="#131c42" stroke-width="30" stroke-linecap="round" />
+                                <path d="@MapPath" fill="none" stroke="#6973bb" stroke-opacity=".56" stroke-width="21" stroke-linecap="round" />
+                                <path d="@MapPath" fill="none" stroke="#aaa3ff" stroke-opacity=".5" stroke-dasharray="2 15" stroke-width="3" stroke-linecap="round" />
+                            }
                             <path d="@MapPath" pathLength="1000" fill="none" stroke="url(#@(mapId)-road)"
                                   stroke-dasharray="@RoadDash" stroke-width="14" stroke-linecap="round" opacity=".65" filter="url(#@(mapId)-glow)" />
                             <path d="@MapPath" pathLength="1000" fill="none" stroke="url(#@(mapId)-road)"
@@ -56,6 +64,15 @@
                             {
                                 <path d="@SummitPath" fill="none" stroke="#ffcf85" stroke-opacity=".7" stroke-width="3" stroke-dasharray="5 9" stroke-linecap="round" />
                             }
+                            @if (Illustrated)
+                            {
+                                <g transform="@($"translate(350 {SummitY})")">
+                                    <circle cy="-15" r="30" fill="#ffd38a" fill-opacity=".12" />
+                                    <path d="M0 0V-43M0-43 25-34 0-25" stroke="#ffcf85" stroke-width="3" fill="#f3bd68" stroke-linejoin="round" />
+                                </g>
+                            }
+                            else
+                            {
                             <g transform="translate(250 90)">
                                 <ellipse cy="25" rx="78" ry="24" fill="#4a3f86" />
                                 <path d="M-38 14V-7h76v21" fill="#8063a3" />
@@ -63,6 +80,7 @@
                                 <path d="M0-48v-22m0 0 25 9-25 9Z" stroke="#ffe3a6" fill="#b58eff" stroke-width="2" />
                                 <circle cy="-10" r="26" fill="#ffc471" fill-opacity=".18" />
                             </g>
+                            }
                             <g fill="#d7dcff" opacity=".55">
                                 <circle cx="32" cy="112" r="2"/><circle cx="94" cy="181" r="1.5"/>
                                 <circle cx="420" cy="118" r="2"/><circle cx="458" cy="319" r="1.5"/>
@@ -115,14 +133,18 @@
     [Parameter] public string? LightBackgroundImage { get; set; }
     [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
     private string Tx(string en, string vi) => Vietnamese ? vi : en;
-    private int MapHeight => Math.Max(760, Checkpoints.Count * 150);
+    private bool Illustrated => !string.IsNullOrWhiteSpace(BackgroundImage);
+    private int MapHeight => Illustrated ? Math.Max(540, Checkpoints.Count * 125 + 170) : Math.Max(760, Checkpoints.Count * 150);
     private static readonly (int X, int Y, double Size)[] Trees =
     [(35,420,.85),(455,365,.9),(85,315,.64),(402,294,.74),(42,615,1.13),(425,584,.9),(155,191,.7),(392,172,.7),(82,697,.9),(355,682,.77),(10,228,.65)];
-    private int NodeX(int index) => index % 2 == 0 ? 170 : 330;
-    private int NodeY(int index) => Checkpoints.Count <= 1 ? 430 : (int)Math.Round(MapHeight - 107 - (double)index * (MapHeight - 270) / (Checkpoints.Count - 1));
+    private int NodeX(int index) => Illustrated ? index % 2 == 0 ? 100 : 250 : index % 2 == 0 ? 170 : 330;
+    private int NodeY(int index) => Illustrated
+        ? Checkpoints.Count <= 1 ? MapHeight - 110 : (int)Math.Round(MapHeight - 90 - (double)index * (MapHeight - 90 - Math.Max(190, SummitY + 75)) / (Checkpoints.Count - 1))
+        : Checkpoints.Count <= 1 ? 430 : (int)Math.Round(MapHeight - 107 - (double)index * (MapHeight - 270) / (Checkpoints.Count - 1));
     private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
     private string NodeStyle(int index) => $"left:{F(NodeX(index) / 5.0)}%;top:{F(NodeY(index) / (double)MapHeight * 100)}%";
-    private string SummitPath => $"M {NodeX(Checkpoints.Count - 1)} {NodeY(Checkpoints.Count - 1)} Q 250 140 250 110";
+    private int SummitY => (int)Math.Round(MapHeight * .24);
+    private string SummitPath => $"M {NodeX(Checkpoints.Count - 1)} {NodeY(Checkpoints.Count - 1)} Q 350 {SummitY + 65} 350 {SummitY}";
     private string MapPath {
         get {
             if(Checkpoints.Count == 0) return "";
