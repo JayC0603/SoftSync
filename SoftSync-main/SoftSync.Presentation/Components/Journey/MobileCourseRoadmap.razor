@@ -1,0 +1,38 @@
+@namespace SoftSync.Presentation.Components.Journey
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+
+<div class="lm-roadmap">
+    @foreach (var level in Levels)
+    {
+        var ordinal = AllItems.Where(x => SkillTheme.KeyFor(x) == SkillTheme.KeyFor(level)).ToList().IndexOf(level) + 1;
+        var locked = JourneyProgress.State(level, AllItems.ToList().IndexOf(level), JourneyProgress.ActiveIndex(AllItems), RoadmapReviewMode.Enabled) == JourneyState.Locked;
+        <details @key="level.Id" class="lm-level @(level.IsCompleted ? "is-complete" : null) @(!locked && !level.IsCompleted && level.Id == SelectedId ? "is-current" : null)" open="@(level.Id == SelectedId)">
+            <summary><span class="lm-level-number">@(level.IsCompleted ? "✓" : ordinal.ToString())</span><strong>@Title(level, ordinal)</strong><small>@level.CompletedActivityCount/@level.TotalActivityCount</small><span class="lm-chevron" aria-hidden="true"></span></summary>
+            <div class="lm-level-body">
+                @foreach (var activity in Compact ? Activities.Skip(Math.Max(0, JourneyProgress.ResumeStep(level) - 1)).Take(3) : Activities)
+                {
+                    var completed = JourneyProgress.Completed(level, activity.Step);
+                    var available = !locked && JourneyProgress.CanOpen(level, activity.Step);
+                    var current = available && !completed;
+                    <button type="button" class="lm-lesson @(completed ? "is-complete" : current ? "is-current" : "is-locked")" disabled="@(!available)" @onclick="() => OnOpen.InvokeAsync((level, activity.Step))">
+                        <span class="lm-lesson-state" aria-hidden="true">@(completed ? "✓" : current ? "▶" : activity.Step.ToString("00"))</span>
+                        <span class="lm-lesson-copy"><strong>@(Vietnamese ? activity.Vi : activity.En)</strong><small>@(Vietnamese ? activity.TypeVi : activity.TypeEn)@(!available ? Vietnamese ? " · Chưa mở khóa" : " · Locked" : "")</small></span>
+                        @if (current) { <span class="lm-chevron" aria-hidden="true"></span> }
+                    </button>
+                }
+            </div>
+        </details>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<RoadmapItemDto> AllItems { get; set; } = [];
+    [Parameter] public IReadOnlyList<RoadmapItemDto> Levels { get; set; } = [];
+    [Parameter] public int SelectedId { get; set; }
+    [Parameter] public bool Vietnamese { get; set; } = true;
+    [Parameter] public bool Compact { get; set; }
+    [Parameter, EditorRequired] public Func<RoadmapItemDto, int, string> Title { get; set; } = default!;
+    [Parameter] public IReadOnlyList<(int Step, string En, string Vi, string TypeEn, string TypeVi, string Icon)> Activities { get; set; } = [];
+    [Parameter] public EventCallback<(RoadmapItemDto Level, int Step)> OnOpen { get; set; }
+}

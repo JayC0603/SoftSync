@@ -61,80 +61,116 @@
     }
 </section>
 
-<section class="learn-v3">
+<link rel="stylesheet" href="css/learn-mobile-reference.css?v=20261021-v2" />
+<section class="learn-v3 @(CourseDetail ? "lm-detail" : "lm-overview")">
     @if (loading)
     {
-        <div class="journey-state" role="status"><span class="journey-spinner" aria-hidden="true"></span><h1>@Tx("Preparing your journey…", "Đang chuẩn bị hành trình của bạn…")</h1></div>
+        <div class="lm-state" role="status">@Tx("Preparing your journey…", "Đang chuẩn bị hành trình của bạn…")</div>
     }
     else if (loadError)
     {
-        <div class="journey-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>@Tx("We could not load your roadmap", "Chưa thể tải lộ trình")</h1><p>@Tx("Your saved progress is safe. Please try again.", "Tiến độ đã lưu vẫn được giữ. Vui lòng thử lại.")</p><button class="journey-primary" @onclick="LoadRoadmap">@Tx("Try again", "Thử lại")</button></div>
+        <div class="lm-state" role="alert"><h1>@Tx("Could not load your roadmap", "Chưa thể tải lộ trình")</h1><p>@Tx("Please try again.", "Vui lòng thử lại.")</p><button class="lm-primary" @onclick="LoadRoadmap">@Tx("Try again", "Thử lại")</button></div>
     }
     else if (items.Count == 0)
     {
-        <div class="journey-state"><i class="bi bi-map" aria-hidden="true"></i><h1>@Tx("Your journey starts here", "Hành trình của bạn bắt đầu từ đây")</h1><p>@Tx("Complete your skills assessment to receive your personal learning roadmap.", "Hoàn thành đánh giá kỹ năng để nhận lộ trình học dành riêng cho bạn.")</p><a class="journey-primary" href="@($"/assessment/{UserId}")">@Tx("Take assessment", "Đánh giá kỹ năng") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+        <div class="lm-state"><img src="/images/learn-v4/hero-syncy.png" alt="" /><h1>@Tx("Your journey starts here", "Hành trình của bạn bắt đầu từ đây")</h1><p>@Tx("Complete your skills assessment to receive your learning roadmap.", "Hoàn thành đánh giá kỹ năng để nhận lộ trình học của bạn.")</p><a class="lm-primary" href="@($"/assessment/{UserId}")">@Tx("Take assessment", "Đánh giá kỹ năng")</a></div>
+    }
+    else if (CourseDetail)
+    {
+        <header class="lm-detail-heading"><a class="lm-back" href="/roadmap" aria-label="@Tx("Back to learning", "Quay lại Học tập")">‹</a><h1>@CategoryName(SelectedItem)</h1></header>
+        <article class="lm-summary">
+            <img class="lm-cover" src="@CourseImage(SelectedKey)" alt="" fetchpriority="high" />
+            <div class="lm-summary-copy"><span class="lm-badge">@Tx("Skill development", "Phát triển kỹ năng")</span><h2>@CategoryName(SelectedItem)</h2><p>@WeekDescription(SelectedItem)</p>
+                <div class="lm-course-total"><strong>@Tx("Course progress", "Tiến độ toàn khóa")</strong><span>@CourseCompleted/@CourseTotal @Tx("activities", "hoạt động")</span></div>
+                <div class="lm-progress-row"><progress value="@CourseCompleted" max="@Math.Max(1, CourseTotal)" aria-label="@Tx("Course progress", "Tiến độ toàn khóa")"></progress><strong>@CoursePercent%</strong></div>
+            </div>
+        </article>
+        <div class="lm-detail-tabs" role="tablist" aria-label="@Tx("Course sections", "Nội dung khóa học")">
+            @foreach (var tab in CourseTabs)
+            {
+                <button id="@($"lm-tab-{tab.Id}")" role="tab" aria-selected="@(detailTab == tab.Id ? "true" : "false")" aria-controls="lm-detail-panel" class="@(detailTab == tab.Id ? "is-active" : null)" @onclick="() => detailTab = tab.Id">@Tx(tab.En, tab.Vi)</button>
+            }
+        </div>
+        <section id="lm-detail-panel" role="tabpanel" aria-labelledby="@($"lm-tab-{detailTab}")">
+            @if (detailTab == 0)
+            {
+                <MobileCourseRoadmap AllItems="items" Levels="SelectedItems" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" Activities="Activities" OnOpen="OpenRoadmapActivity" />
+            }
+            else if (detailTab == 1)
+            {
+                <MobileLearningMaterials Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" />
+            }
+            else
+            {
+                <div class="lm-discussion"><img src="/images/learn-v3/mentor-support.png" alt="" /><h2>@Tx("Learn together", "Cùng trao đổi, cùng tiến bộ")</h2><p>@Tx("Ask SYNCY about your lesson or discuss it with a Mentor.", "Hỏi SYNCY về bài đang học hoặc trao đổi cùng Mentor.")</p><a class="lm-primary" href="/assistant">@Tx("Ask SYNCY", "Đặt câu hỏi cho SYNCY")</a><a href="/mentors">@Tx("Talk to a Mentor", "Trao đổi cùng Mentor")</a></div>
+            }
+        </section>
+        @if (detailTab == 0)
+        {
+            <div class="lm-continue-wrap"><button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))</button></div>
+            <section><header class="lm-section-heading"><h2>@Tx("Learning materials", "Tài liệu học tập")</h2><button @onclick="() => detailTab = 1">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileLearningMaterials Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" /></section>
+        }
+        <a class="lm-support" href="/assistant"><img src="/images/learn-v3/mentor-support.png" alt="" loading="lazy" /><span><strong>@Tx("Need support?", "Cần hỗ trợ?")</strong><small>@Tx("Ask SYNCY or talk to a Mentor.", "Đặt câu hỏi cho SYNCY hoặc trao đổi cùng Mentor.")</small><em>@Tx("Ask a question", "Đặt câu hỏi") <span aria-hidden="true">›</span></em></span></a>
     }
     else
     {
-        <div class="lv-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" aria-label="@Tx("Search courses, skills and lessons", "Tìm khóa học, kỹ năng, bài học")" placeholder="@Tx("Search courses, skills and lessons…", "Tìm khóa học, kỹ năng, bài học...")" @bind="learnQuery" @bind:event="oninput" /></div>
+        <div class="lv-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" aria-label="@Tx("Search learning", "Tìm kiếm học tập")" placeholder="@Tx("Search courses, skills, lessons…", "Tìm khóa học, kỹ năng, bài học…")" @bind="learnQuery" @bind:event="oninput" /></div>
         @if (!string.IsNullOrWhiteSpace(learnQuery))
         {
             <div class="lv-results" aria-live="polite">
                 @foreach (var result in LearnSearchResults)
                 {
-                    <button @onclick="() => SelectSearchResult(result)"><span><strong>@L.Ui(result.Title)</strong><small>@L.Ui(result.SkillName)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <button @onclick="() => SelectSearchResult(result)"><span><strong>@L.Ui(result.Title)</strong><small>@L.Ui(result.SkillName)</small></span><span aria-hidden="true">›</span></button>
                 }
                 @if (!LearnSearchResults.Any()) { <p>@Tx("No matching lessons found.", "Không tìm thấy bài học phù hợp.")</p> }
             </div>
         }
-        <header class="lv-intro"><div><h1>@Tx("Learn", "Học tập")</h1><p>@Tx("A little better, every day.", "Mỗi ngày, một bước tiến mới.")</p></div><svg class="lv-intro-book" viewBox="0 0 150 84" fill="none" aria-hidden="true"><ellipse cx="80" cy="73" rx="65" ry="10" fill="#dfe7ff"/><path d="M74 25C53 11 29 16 18 25L10 66C32 61 52 64 71 74C92 65 112 67 133 71L143 28C121 17 96 16 74 25Z" fill="#7775fa"/><path d="M74 22C55 10 36 12 23 19L15 59C37 55 54 59 71 69L74 22Z" fill="#f5f5ff" stroke="#b3baff" stroke-width="2"/><path d="M74 22C96 12 117 15 135 23L127 63C108 57 90 59 71 69L74 22Z" fill="#edf2ff" stroke="#b3baff" stroke-width="2"/><path d="M31 28L62 36M28 37L60 45M26 46L58 54M85 32L123 31M83 41L121 40M81 50L119 49" stroke="#c5ceff" stroke-width="3" stroke-linecap="round"/><path d="M105 3L108 11L116 14L108 17L105 25L102 17L94 14L102 11Z" fill="#ffd27b"/><path d="M24 2L27 8L33 10L27 12L24 18L22 12L16 10L22 8Z" fill="#ffe6a4"/><path d="M139 4L141 9L146 11L141 13L139 18L137 13L132 11L137 9Z" fill="#9abaff"/></svg></header>
+        <header class="lv-intro"><div><h1>@Tx("Learn", "Học tập")</h1><p>@Tx("A little better, every day.", "Mỗi ngày, một bước tiến mới.")</p></div><img src="/images/learn-v3/roadmap-landscape.webp" alt="" /></header>
         <div class="lv-tabs" role="tablist" aria-label="@Tx("Learning view", "Chế độ học tập")">
             <button id="lv-mine-tab" role="tab" aria-selected="@(!discover ? "true" : "false")" aria-controls="lv-mine" class="@(!discover ? "is-active" : null)" @onclick="() => discover = false">@Tx("My learning", "Học của tôi")</button>
             <button id="lv-discover-tab" role="tab" aria-selected="@(discover ? "true" : "false")" aria-controls="lv-discover" class="@(discover ? "is-active" : null)" @onclick="() => discover = true">@Tx("Explore", "Khám phá")</button>
         </div>
         @if (discover)
         {
-            <section id="lv-discover" role="tabpanel" aria-labelledby="lv-discover-tab" class="lv-discover">
+            <section id="lv-discover" role="tabpanel" aria-labelledby="lv-discover-tab" class="lm-discover">
                 @foreach (var group in SkillGroups)
                 {
-                    <button @onclick="() => ExploreSkill(group.Key)"><i class="bi @SkillTheme.For(group.Key).Icon" aria-hidden="true"></i><span><strong>@CategoryName(group.First())</strong><small>@group.Count(x => x.IsCompleted)/@group.Count() @Tx("levels completed", "cấp độ hoàn thành")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <button class="lm-discover-course" @onclick="() => ExploreSkill(group.Key)"><img src="@CourseImage(group.Key)" alt="" loading="lazy" /><span><strong>@CategoryName(group.First())</strong><small>@group.Count() @Tx("levels", "chặng") · @group.Sum(x => x.TotalActivityCount) @Tx("activities", "hoạt động")</small></span><span aria-hidden="true">›</span></button>
                 }
             </section>
         }
         else
         {
             <div id="lv-mine" role="tabpanel" aria-labelledby="lv-mine-tab" class="lv-mine">
-                <VietnamAdventureMap Items="items" UserId="UserId" Vietnamese="Vietnamese" SelectedSkill="@SelectedKey" SelectedSkillChanged="SelectSkill" />
-                <JourneyContinueCard Items="items" UserId="UserId" Vietnamese="Vietnamese" SelectedSkill="@SelectedKey" />
-                <JourneySuggestions Items="items" Vietnamese="Vietnamese" />
-                <section class="lv-hero" aria-labelledby="lv-course-title">
-                    <div class="lv-hero-copy"><span class="lv-badge">@(SelectedState == JourneyState.Locked ? Tx("LOCKED", "CHƯA MỞ KHÓA") : SelectedItem.IsCompleted ? Tx("COMPLETED", "HOÀN THÀNH") : Tx("LEARNING", "ĐANG HỌC"))</span><h2 id="lv-course-title">@CategoryName(SelectedItem)</h2><p>@Tx("Level", "Cấp độ") @SelectedOrdinal.ToString("00") · @WeekTitle(SelectedItem, SelectedOrdinal)</p></div>
-                    <img class="lv-hero-art" src="/images/learn-v4/hero-syncy.png" alt="" width="1426" height="1079" fetchpriority="high" />
-                    <div class="lv-progress"><progress value="@SelectedItem.ProgressPercent" max="100" aria-label="@Tx("Learning progress", "Tiến độ học tập")">@SelectedItem.ProgressPercent%</progress><strong>@SelectedItem.CompletedActivityCount/@SelectedItem.TotalActivityCount <span>@SelectedItem.ProgressPercent%</span></strong></div>
-                    <div class="lv-hero-meta"><span><i class="bi bi-clock" aria-hidden="true"></i>@CurrentLessons.Count @Tx("activities", "hoạt động")</span><span><i class="bi bi-file-earmark-text" aria-hidden="true"></i>@Tx("Progress saved for each activity", "Tiến độ lưu theo từng hoạt động")</span></div>
-                    <button class="lv-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><i class="bi bi-play-fill" aria-hidden="true"></i>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))<i class="bi bi-chevron-right" aria-hidden="true"></i></button>
-                </section>
-                <section aria-labelledby="lv-next-title"><header class="lv-section-heading"><h2 id="lv-next-title">@Tx("Next lesson", "Bài học tiếp theo")</h2><a href="#lv-activities">@Tx("View all", "Xem tất cả") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-                    @if (NextActivity is { } activity)
-                    {
-                        <button class="lv-next" @onclick="() => OpenSelectedStep(activity.Step)"><i class="bi bi-play-fill lv-next-icon" aria-hidden="true"></i><span><strong>@activity.Title</strong><small>@activity.Type</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
-                    }
-                    else if (SelectedState == JourneyState.Locked) { <p class="lv-empty">@Tx("Complete the current level to unlock these activities.", "Hoàn thành cấp độ hiện tại để mở khóa các hoạt động này.")</p> }
-                    else { <p class="lv-empty">@Tx("You have completed the activities in this level.", "Bạn đã hoàn thành các hoạt động trong cấp độ này.")</p> }
-                </section>
-                <section id="lv-activities" aria-labelledby="lv-activities-title"><header class="lv-section-heading"><h2 id="lv-activities-title">@Tx("Activities in this level", "Bài học trong cấp độ này")</h2><strong>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount</strong></header><p class="lv-section-description">@Tx("Complete each activity to unlock the next step.", "Hoàn thành từng hoạt động để mở khóa bước tiếp theo.")</p>
-                    <div class="lv-activity-list">
-                        @foreach (var lesson in CurrentLessons)
+                <section class="lm-journey"><header><h2>@Tx("Your skill journey", "Hành trình kỹ năng")</h2><p>@Tx("Explore your learning journey across Vietnam.", "Khám phá lộ trình của bạn trên bản đồ Việt Nam.")</p></header><VietnamAdventureMap Items="items" UserId="UserId" Vietnamese="Vietnamese" Compact="@(MapMode != "full")" SelectedSkill="@SelectedKey" SelectedSkillChanged="SelectSkill" /></section>
+                <section>
+                    <header class="lm-section-heading"><h2>@Tx("Continue learning", "Tiếp tục học")</h2><span class="lm-status">@(SelectedState == JourneyState.Locked ? Tx("Locked", "Chưa mở khóa") : SelectedItem.IsCompleted ? Tx("Completed", "Hoàn thành") : Tx("Learning", "Đang học"))</span></header>
+                    <article class="lm-featured">
+                        <button class="lm-featured-info" @onclick="() => ExploreSkill(SelectedKey)"><img src="@CourseImage(SelectedKey)" alt="" /><span><strong>@CategoryName(SelectedItem)</strong><small>@SelectedItem.CompletedActivityCount/@SelectedItem.TotalActivityCount @Tx("activities", "hoạt động")</small><span class="lm-progress-row"><progress value="@SelectedItem.CompletedActivityCount" max="@Math.Max(1, SelectedItem.TotalActivityCount)" aria-label="@Tx("Current level progress", "Tiến độ chặng hiện tại")"></progress><b>@SelectedItem.ProgressPercent%</b></span></span></button>
+                        <button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))<span aria-hidden="true">›</span></button>
+                    </article>
+                    <div class="lm-courses">
+                        @foreach (var group in SkillGroups.Where(g => g.Key != SelectedKey))
                         {
-                            <div class="lv-activity @(lesson.Completed ? "is-completed" : lesson.Available ? "is-current" : "is-locked")"><span class="lv-activity-state"><i class="bi @(lesson.Completed ? "bi-check-lg" : lesson.Available ? "bi-play-fill" : "bi-lock-fill")" aria-hidden="true"></i></span><i class="bi @lesson.Icon lv-activity-icon" aria-hidden="true"></i><span class="lv-activity-copy"><strong>@lesson.Title</strong><small>@lesson.Type</small></span><button disabled="@(!lesson.Available)" aria-label="@(lesson.Title + ": " + ActivityAction(lesson))" @onclick="() => OpenSelectedStep(lesson.Step)">@ActivityAction(lesson) @if (!lesson.Completed) { <i class="bi @(lesson.Available ? "bi-arrow-right" : "bi-lock-fill")" aria-hidden="true"></i> }</button></div>
+                            var total = group.Sum(x => x.TotalActivityCount);
+                            var completed = group.Sum(x => x.CompletedActivityCount);
+                            var percent = total == 0 ? 0 : (int)Math.Round(completed * 100d / total);
+                            <button class="lm-course" @onclick="() => ExploreSkill(group.Key)"><img src="@CourseImage(group.Key)" alt="" loading="lazy" /><strong>@CategoryName(group.First())</strong><small>@(completed == 0 ? Tx("Not started", "Chưa bắt đầu") : $"{completed}/{total} {Tx("activities", "hoạt động")}")</small><span class="lm-progress-row"><progress value="@completed" max="@Math.Max(1,total)" aria-label="@CategoryName(group.First())"></progress><b>@percent%</b></span></button>
                         }
                     </div>
                 </section>
-                <a class="lv-support" href="/mentors"><i class="bi bi-person" aria-hidden="true"></i><span><strong>@Tx("Need support?", "Cần hỗ trợ?")</strong> @Tx("Talk to a Mentor", "Trao đổi cùng Mentor")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                <section><header class="lm-section-heading"><h2>@Tx("Next activity", "Hoạt động tiếp theo")</h2></header>
+                    @if (NextActivity is { } activity)
+                    {
+                        <button class="lm-next" @onclick="() => OpenSelectedStep(activity.Step)"><img src="/images/learn-v3/study-planner.png" alt="" loading="lazy" /><span><strong>@activity.Title</strong><small>@CategoryName(SelectedItem) · @Tx("Activity", "Hoạt động") @activity.Step/@SelectedItem.TotalActivityCount</small></span><span class="lm-arrow" aria-hidden="true">›</span></button>
+                    }
+                    else { <p class="lm-empty">@(SelectedState == JourneyState.Locked ? Tx("Complete the previous level to unlock.", "Hoàn thành chặng trước để mở khóa.") : Tx("You have completed this level.", "Bạn đã hoàn thành chặng này."))</p> }
+                </section>
+                <section><header class="lm-section-heading"><h2>@Tx("Course roadmap", "Lộ trình khóa học")</h2><button @onclick="() => ExploreSkill(SelectedKey)">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileCourseRoadmap Compact="true" AllItems="items" Levels="OverviewLevels" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" Activities="Activities" OnOpen="OpenRoadmapActivity" /></section>
             </div>
         }
-
     }
+    <MobileSiteFooter />
 </section>
 
 @code {
@@ -143,10 +179,50 @@
     private List<RoadmapItemDto> items = [];
     private string learnQuery = string.Empty;
     private bool discover;
+    [SupplyParameterFromQuery(Name = "course")] public string? Course { get; set; }
+    [SupplyParameterFromQuery(Name = "map")] public string? MapMode { get; set; }
+    private bool CourseDetail => !string.IsNullOrWhiteSpace(Course);
+    private int detailTab;
+    private static readonly (int Id, string En, string Vi)[] CourseTabs = [(0, "Roadmap", "Lộ trình"), (1, "Materials", "Tài liệu"), (2, "Discussion", "Thảo luận")];
+    private int CourseCompleted => SelectedItems.Sum(x => x.CompletedActivityCount);
+    private int CourseTotal => SelectedItems.Sum(x => x.TotalActivityCount);
+    private int CoursePercent => CourseTotal == 0 ? 0 : (int)Math.Round(CourseCompleted * 100d / CourseTotal);
+    private IReadOnlyList<RoadmapItemDto> OverviewLevels
+    {
+        get
+        {
+            var levels = SelectedItems;
+            var index = Math.Max(0, levels.FindIndex(x => x.Id == SelectedItem.Id));
+            return levels.Skip(Math.Max(0, index - 1)).Take(3).ToList();
+        }
+    }
+    private void OpenRoadmapActivity((RoadmapItemDto Level, int Step) activity) => OpenLevelActivity(activity.Level, activity.Step);
+    private static string CourseImage(string key) => key switch
+    {
+        "time" => "/images/learn-v3/study-planner.png",
+        "communication" => "/images/learn-v3/communication-cards.png",
+        "critical" => "/images/home-v3/quote-landscape.webp",
+        _ => "/images/learn-v3/syncy-learning.webp"
+    };
+    private void OpenLevelActivity(RoadmapItemDto level, int step)
+    {
+        if (StateOf(level) == JourneyState.Locked || !JourneyProgress.CanOpen(level, step)) return;
+        selected = level;
+        OpenSelectedStep(step);
+    }
     private IEnumerable<RoadmapItemDto> LearnSearchResults => items.Where(x => $"{L.Ui(x.Title)} {L.Ui(x.SkillName)}".Contains(learnQuery.Trim(), StringComparison.CurrentCultureIgnoreCase)).Take(8);
     private JourneyLesson? NextActivity => SelectedState == JourneyState.Locked ? null : CurrentLessons.FirstOrDefault(x => !x.Completed && x.Available);
-    private void ExploreSkill(string key) { SelectSkill(key); discover = false; }
-    private void SelectSearchResult(RoadmapItemDto item) { selected = item; learnQuery = string.Empty; discover = false; }
+    private void ExploreSkill(string key) { SelectSkill(key); discover = false; detailTab = 0; Nav.NavigateTo($"/roadmap?course={Uri.EscapeDataString(key)}"); }
+    private void SelectSearchResult(RoadmapItemDto item) { selected = item; learnQuery = string.Empty; discover = false; detailTab = 0; Nav.NavigateTo($"/roadmap?course={Uri.EscapeDataString(SkillKey(item))}&level={item.Id}"); }
+    [SupplyParameterFromQuery(Name = "level")] public int? RequestedLevel { get; set; }
+    private void ApplyCourseSelection()
+    {
+        if (!string.IsNullOrWhiteSpace(Course) && items.Any(x => SkillKey(x) == Course))
+        {
+            if (SkillKey(SelectedItem) != Course) SelectSkill(Course);
+            if (RequestedLevel is { } level && items.FirstOrDefault(x => x.Id == level && SkillKey(x) == Course) is { } match) selected = match;
+        }
+    }
     private string ActivityAction(JourneyLesson lesson) => lesson.Completed ? Tx("Review", "Xem lại") : lesson.Available ? Tx("Continue", "Tiếp tục") : Tx("Locked", "Chưa mở khóa");
 
     private RoadmapItemDto? selected;
@@ -170,6 +246,7 @@
     {
         if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))
             SelectSkill(RequestedSkill);
+        if (items.Count > 0) ApplyCourseSelection();
     }
     private async Task LoadRoadmap()
     {
@@ -187,6 +264,7 @@
                 ?? (items.Count == 0 ? null : items[ActiveIndex]);
             if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))
                 SelectSkill(RequestedSkill);
+            if (items.Count > 0) ApplyCourseSelection();
         }
         catch (Exception ex)
         {

@@ -7,12 +7,25 @@ export function loadLandmarks() {
     }).catch(error => { landmarksPromise = null; throw error; });
     return landmarksPromise;
 }
+// Adventure coordinates are a view projection, not real-world geographic positions.
+// The original landmark and lesson IDs are retained for detail/navigation/authorization.
+export const adventureBounds = [[0, 0], [12, 8]];
+export function adventurePoint(index, count) {
+    if(count<=5) {
+        const t=index/Math.max(1,count-1);
+        return [3+5.5*t,6-3*t];
+    }
+    const rows = Math.max(1, Math.ceil(count / 3));
+    const row = Math.floor(index / 3), col = index % 3;
+    const x = (row % 2 ? 3 - col : col + 1) * 3;
+    return [x, 6.7 - row * (5.4 / Math.max(1, rows - 1)) - col * .5];
+}
 export function checkpointData(stops, geography) {
     const places = new Map(geography.features.map(feature => [feature.properties.id, feature]));
-    return { type: 'FeatureCollection', features: stops.flatMap(stop => {
+    return { type: 'FeatureCollection', features: stops.flatMap((stop, index) => {
         const place = places.get(stop.landmarkId);
-        return place ? [{ type: 'Feature', id: stop.id, geometry: place.geometry,
-            properties: { ...stop, place: place.properties.name, label: `${stop.boss ? '🏆' : stop.order}  ${stop.title}`, short: String(stop.order) } }] : [];
+        return place ? [{ type: 'Feature', id: stop.id, geometry: {type:'Point',coordinates:adventurePoint(index, stops.length)},
+            properties: { ...stop, place: place.properties.name, placeEn: place.properties.nameEn, source: place.properties.source, label: `${stop.order}`, short: String(stop.order) } }] : [];
     }) };
 }
 export function routeData(data) {
@@ -33,22 +46,14 @@ export function routeData(data) {
 }
 export function baseStyle(dark) {
     return {
-        version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-        sources: { geography: { type: 'vector', url: 'https://tiles.openfreemap.org/planet',
-            attribution: '<a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' } },
+        version: 8,
+        sources: { landscape: { type: 'image', url: '/images/journey/vietnam-adventure-coast-v1.png',
+            coordinates: [[0,8],[12,8],[12,0],[0,0]] } },
         layers: [
-            { id: 'land', type: 'background', paint: { 'background-color': dark ? '#233b40' : '#d6ebc4' } },
-            { id: 'forest', type: 'fill', source: 'geography', 'source-layer': 'landcover', paint: { 'fill-color': dark ? '#2b554e' : '#a4d4a3', 'fill-opacity': .65 } },
-            { id: 'parks', type: 'fill', source: 'geography', 'source-layer': 'park', minzoom: 5, paint: { 'fill-color': dark ? '#365e51' : '#b1dcb0', 'fill-opacity': .5 } },
-            { id: 'sea', type: 'fill', source: 'geography', 'source-layer': 'water', paint: { 'fill-color': dark ? '#142b4a' : '#8ed4f5' } },
-            { id: 'rivers', type: 'line', source: 'geography', 'source-layer': 'waterway', minzoom: 6, paint: { 'line-color': dark ? '#427591' : '#78c6ec', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, .7, 13, 3] } },
-            { id: 'provinces', type: 'line', source: 'geography', 'source-layer': 'boundary', minzoom: 6,
-                filter: ['all', ['>=', ['get', 'admin_level'], 4], ['!=', ['get', 'maritime'], 1]],
-                paint: { 'line-color': dark ? '#628a83' : '#7daf9c', 'line-width': .65, 'line-dasharray': [3, 3] } },
-            { id: 'places', type: 'symbol', source: 'geography', 'source-layer': 'place', minzoom: 7,
-                filter: ['in', ['get', 'class'], ['literal', ['state', 'city', 'town']]],
-                layout: { 'text-field': ['coalesce', ['get', 'name:vi'], ['get', 'name:latin'], ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'text-size': 11, 'text-max-width': 8 },
-                paint: { 'text-color': dark ? '#d5e9dc' : '#35574e', 'text-halo-color': dark ? '#203a35' : '#eaf5dc', 'text-halo-width': 2 } }
+            { id: 'land', type: 'background', paint: { 'background-color': dark ? '#162f40' : '#b6dced' } },
+            { id: 'adventure-landscape', type: 'raster', source: 'landscape', paint: { 'raster-brightness-max': dark ? .72 : 1, 'raster-fade-duration':0 } }
         ]
     };
 }
+/* Geographic source is retained independently in vietnam-landmarks.json.
+   The adventure illustration intentionally makes no boundary/coordinate claims. */

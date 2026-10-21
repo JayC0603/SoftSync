@@ -1,0 +1,40 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+
+<footer class="lm-site-footer" aria-label="@T("Thông tin SoftSync", "About SoftSync")">
+    <div class="lm-footer-top">
+        <a class="lm-footer-brand" href="/dashboard" aria-label="@T("Trang chủ SoftSync", "SoftSync home")">
+            <img src="/images/logo.png" alt="" width="28" height="28" />
+            <strong>SoftSync</strong>
+        </a>
+        <div class="lm-footer-socials" role="group" aria-label="@T("Kết nối SoftSync", "Connect with SoftSync")">
+            <a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+            <span role="link" aria-disabled="true" aria-label="YouTube"><i class="bi bi-youtube" aria-hidden="true"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Email"><i class="bi bi-envelope-fill" aria-hidden="true"></i></span>
+        </div>
+        <p>@T("Học kỹ năng mềm cùng AI.", "Learn soft skills with AI.")</p>
+    </div>
+    <nav class="lm-footer-about" aria-label="@T("Khám phá SoftSync", "Explore SoftSync")">
+        <a href="/about">@T("Về chúng tôi", "About us")</a>
+        <a href="/mentors">Mentor</a>
+        <a href="/community">@T("Cộng đồng", "Community")</a>
+        <a href="/resources">@T("Tài nguyên", "Resources")</a>
+    </nav>
+    <nav class="lm-footer-legal" aria-label="@T("Hỗ trợ và pháp lý", "Support and legal")">
+        <span aria-disabled="true">@T("Trợ giúp", "Help")</span>
+        <span aria-disabled="true">@T("Chính sách bảo mật", "Privacy policy")</span>
+        <span aria-disabled="true">@T("Điều khoản sử dụng", "Terms of use")</span>
+        <span aria-disabled="true">@T("Liên hệ", "Contact")</span>
+    </nav>
+    <div class="lm-footer-copyright">
+        <small>© @DateTime.UtcNow.AddHours(7).Year SoftSync</small>
+        @if (typeof(MobileSiteFooter).Assembly.GetName().Version is { } version)
+        {
+            <small>@T("Phiên bản", "Version") @version.ToString(3)</small>
+        }
+    </div>
+</footer>
+
+@code {
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+}

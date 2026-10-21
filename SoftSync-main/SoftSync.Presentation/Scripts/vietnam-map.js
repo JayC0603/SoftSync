@@ -1,11 +1,11 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '../Styles/vietnam-mobile.css';
-import { baseStyle, loadLandmarks } from './vietnam-map-data.js';
+import { baseStyle, loadLandmarks, adventureBounds } from './vietnam-map-data.js';
 import { addJourneyLayers, updateJourneyLayers } from './vietnam-map-layers.js';
 
 const instances = new WeakMap();
-const bounds = [[102, 8], [116, 24]];
+const bounds = adventureBounds;
 const isDark = () => document.documentElement.dataset.theme === 'dark';
 function notify(state, method, ...args) { if (!state.disposed) return state.callback.invokeMethodAsync(method, ...args).catch(() => {}); }
 function paintTheme(state) {
@@ -13,9 +13,17 @@ function paintTheme(state) {
     for (const layer of baseStyle(isDark()).layers) for (const [key, value] of Object.entries(layer.paint || {})) state.map.setPaintProperty(layer.id, key, value);
 }
 function fit(state) {
-    if (!state.map) return;
+    if (!state.map || state.disposed || state.canvas.clientWidth < 1 || state.canvas.clientHeight < 1) return;
     state.map.resize();
-    state.map.fitBounds(bounds, { padding: { top: 40, bottom: 28, left: 30, right: 45 }, duration: 0 });
+    state.map.setMinZoom(0);
+    const camera=state.map.cameraForBounds(bounds,{padding:0});
+    const ratio=state.canvas.clientWidth / Math.max(1,state.canvas.clientHeight);
+    const coverZoom=Math.min(state.map.getMaxZoom(),Math.max(0,camera.zoom+Math.abs(Math.log2(ratio/(12/8)))));
+    state.map.jumpTo({center:[6,4],zoom:coverZoom});
+    state.map.setMinZoom(coverZoom);
+    const visible=state.map.getBounds();
+    state.sceneViewport={west:visible.getWest(),east:visible.getEast(),south:visible.getSouth(),north:visible.getNorth()};
+    if(state.loaded)apply(state);
 }
 async function start(state) {
     if (state.disposed || state.map || state.starting || state.failed || !state.media.matches) return;
@@ -24,8 +32,8 @@ async function start(state) {
         state.geography = await loadLandmarks();
         if (state.disposed) return;
         state.map = new maplibregl.Map({ container: state.canvas, style: baseStyle(isDark()),
-            center: [108, 16], zoom: 4, minZoom: 3, maxZoom: 14, maxBounds: [[97, 3], [122, 28]],
-            cooperativeGestures: true, attributionControl: { compact: true },
+            center: [6, 4], zoom: 4, minZoom: 0, maxZoom: 12, maxBounds:bounds,
+            cooperativeGestures: true, attributionControl: { compact: true, customAttribution: 'Phong cảnh minh họa · SoftSync · <a href="https://www.wikidata.org/wiki/Wikidata:Licensing">Địa danh: Wikidata CC0</a>' },
             dragRotate: false, pitchWithRotate: false, touchPitch: false });
         state.map.scrollZoom.disable(); // Normal page scrolling always remains available in the preview.
         const recordViewport = () => {
@@ -34,6 +42,7 @@ async function start(state) {
             state.canvas.dataset.mapCenter = `${center.lng.toFixed(5)},${center.lat.toFixed(5)}`;
         };
         state.map.on('moveend', recordViewport);
+        state.map.on('render',()=>layoutLabels(state));
         state.timeout = setTimeout(() => notify(state, 'MapStatus', false), 15000);
         state.map.once('load', async () => {
             if (state.disposed) return;
@@ -44,37 +53,66 @@ async function start(state) {
             notify(state, 'MapStatus', true);
         });
         state.map.on('error', event => { if (!state.loaded) console.warn('Vietnam map:', event.error?.message); });
-        state.map.on('click', 'checkpoint-circles', event => { state.focusBefore = document.activeElement; notify(state, 'ShowStop', event.features[0].properties.id); });
-        state.map.on('click', 'checkpoint-clusters', async event => {
-            const feature = event.features[0];
-            const leaves = await state.map.getSource('checkpoints').getClusterLeaves(feature.properties.cluster_id, 100, 0);
-            state.focusBefore = document.activeElement;
-            notify(state, 'ShowCluster', leaves.map(x => x.properties.id));
-        });
-        const showPlace = event => {
-            if (state.map.queryRenderedFeatures(event.point, { layers: ['checkpoint-circles', 'checkpoint-clusters'] }).length) return;
-            const place = event.features[0].properties;
-            state.focusBefore = document.activeElement;
-            notify(state, 'ShowPlace', state.payload.vietnamese ? place.name : place.nameEn, place.source);
-        };
-        for (const id of ['landmark-icons', 'island-points', 'city-names', 'island-names']) state.map.on('click', id, showPlace);
-        for (const id of ['checkpoint-circles', 'checkpoint-clusters', 'landmark-icons', 'island-points']) {
-            state.map.on('mouseenter', id, () => { state.map.getCanvas().style.cursor = 'pointer'; });
-            state.map.on('mouseleave', id, () => { state.map.getCanvas().style.cursor = ''; });
-        }
     } catch (error) { state.failed = true; console.warn('Vietnam map unavailable:', error.message); notify(state, 'MapStatus', false); }
     finally { state.starting = false; }
 }
 function apply(state) {
     if (!state.loaded || state.disposed) return;
-    state.data = updateJourneyLayers(state.map, state.payload, state.geography);
+    state.data = updateJourneyLayers(state.map, state.payload, state.geography, state.sceneViewport);
+    state.markers?.forEach(x=>x.marker.remove());
+    state.markers=state.data.features.map(feature=>{
+        const p=feature.properties, button=document.createElement('button');
+        button.type='button';button.className=`vn-adventure-stop ${p.state}`;button.dataset.stopId=p.id;
+        button.setAttribute('aria-label',`${state.payload.vietnamese?p.place:p.placeEn} · ${p.title} · ${p.status}`);
+        const dot=document.createElement('span');dot.className='vn-stop-dot';dot.textContent=p.state==='completed'?'✓':p.state==='locked'?'🔒':'●';dot.setAttribute('aria-hidden','true');
+        const label=document.createElement('span');label.className='vn-stop-label';label.textContent=state.payload.vietnamese?p.place:p.placeEn;
+        button.append(dot,label);
+        button.addEventListener('click',event=>{event.stopPropagation();state.focusBefore=button;if(button.clusterIds?.length>1)notify(state,'ShowCluster',button.clusterIds);else notify(state,'ShowStop',p.id)});
+        const marker=new maplibregl.Marker({element:button,anchor:'center'}).setLngLat(feature.geometry.coordinates).addTo(state.map);
+        return {marker,button,label,dot,feature};
+    });
+    // Retain discovery of existing places without turning the illustration into
+    // a geographic map. Positions below are artwork slots, never source coordinates.
+    if(!state.root.classList.contains('vn-compact')) {
+        const positions=[[2,6.5],[5,5],[9,2],[8,6.5],[10,4.5]];
+        state.geography.features.forEach((feature,index)=>{
+            if(state.payload.stops.some(s=>s.landmarkId===feature.properties.id))return;
+            const p=feature.properties,button=document.createElement('button');
+            button.type='button';button.className='vn-adventure-stop vn-adventure-place';
+            const label=document.createElement('span');label.className='vn-stop-label';label.textContent=state.payload.vietnamese?p.name:p.nameEn;
+            button.append(label);button.setAttribute('aria-label',label.textContent);
+            button.addEventListener('click',e=>{e.stopPropagation();state.focusBefore=button;notify(state,'ShowPlace',label.textContent,p.source)});
+            let [x,y]=positions[index%positions.length];
+            if(state.sceneViewport){const v=state.sceneViewport;x=v.west+x/12*(v.east-v.west);y=v.south+y/8*(v.north-v.south);}
+            const marker=new maplibregl.Marker({element:button}).setLngLat([x,y]).addTo(state.map);
+            state.markers.push({marker,button,label});
+        });
+    }
     try { localStorage.setItem(`ss-journey-skill:${state.payload.userId}`, state.payload.selectedKey); } catch { /* Private mode. */ }
+}
+function layoutLabels(state) {
+    if(!state.markers)return;
+    const accepted=[], stage=state.canvas.getBoundingClientRect();
+    for(const entry of state.markers) {
+        entry.button.style.visibility='';entry.button.clusterIds=entry.feature?[entry.feature.properties.id]:[];
+        if(entry.dot)entry.dot.textContent=entry.feature.properties.state==='completed'?'✓':entry.feature.properties.state==='locked'?'🔒':'●';
+        entry.button.classList.remove('is-condensed');
+        const r=entry.button.getBoundingClientRect();
+        if(r.left<stage.left+5||r.right>stage.right-5||accepted.some(a=>r.left<a.right+5&&r.right>a.left-5&&r.top<a.bottom+5&&r.bottom>a.top-5))entry.button.classList.add('is-condensed');
+        const actual=entry.button.getBoundingClientRect();
+        const neighbor=accepted.find(a=>actual.left<a.right+4&&actual.right>a.left-4&&actual.top<a.bottom+4&&actual.bottom>a.top-4);
+        if(neighbor && entry.feature && neighbor.entry.feature){
+            entry.button.style.visibility='hidden';
+            neighbor.entry.button.clusterIds.push(entry.feature.properties.id);
+            neighbor.entry.dot.textContent=String(neighbor.entry.button.clusterIds.length);
+        } else accepted.push({...actual.toJSON(),entry});
+    }
 }
 export async function mount(root, canvas, payload, callback) {
     if (instances.has(root)) return update(root, payload);
     const state = { root, canvas, payload, callback, media: matchMedia('(max-width:900px)'), disposed: false };
     instances.set(root, state);
-    state.onResize = () => { if (!state.map) start(state); else state.map.resize(); };
+    state.onResize = () => { if (!state.map) start(state); else if(state.loaded)fit(state); else state.map.resize(); };
     state.resizeObserver = new ResizeObserver(state.onResize); state.resizeObserver.observe(canvas);
     state.onMedia = () => { if (state.media.matches) start(state); };
     state.media.addEventListener('change', state.onMedia);
@@ -97,7 +135,7 @@ export function control(root, action) {
     if (action === 'reset') fit(state);
     if (action === 'current') {
         const feature = state.data.features.find(x => x.properties.state === 'current') || state.data.features[0];
-        if (feature) state.map.flyTo({ center: feature.geometry.coordinates, zoom: 7, duration: matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 500 });
+        if (feature) state.map.flyTo({ center: feature.geometry.coordinates, zoom: Math.max(state.map.getMinZoom()+1,6), duration: matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 500 });
     }
 }
 export function expand(root, expanded = false) {

@@ -1,4 +1,16 @@
 /* New journey UI is opt-in and mobile-only; the laptop layout and controls remain unchanged. */
+/* Scenic checkpoint markers contain only location labels; details open on click. */
+.vn-adventure-stop { display:flex;align-items:center;gap:6px;min-height:44px;padding:4px 10px 4px 5px;border:2px solid #fff;border-radius:24px;background:#fff;color:#17254b;box-shadow:0 2px 8px #14274b35;font-size:12px;font-weight:650;white-space:nowrap;cursor:pointer; }
+.vn-stop-dot { display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#7453ef;color:#fff;font-size:13px; }
+.vn-adventure-stop.completed .vn-stop-dot { background:#18a77c; }
+.vn-adventure-stop.locked .vn-stop-dot { background:#8e9bb4;font-size:11px; }
+.vn-adventure-stop.current { background:#7752ef;color:#fff; }
+.vn-adventure-stop.is-condensed { padding:4px;border-radius:50%; }
+.vn-adventure-stop.is-condensed .vn-stop-label { display:none; }
+.vn-adventure-place { background:#ffffffe8;font-size:11px; }
+.vn-adventure-place.is-condensed { visibility:hidden; }
+.vn-adventure-stop:focus-visible { outline:3px solid #2876ef;outline-offset:3px; }
+.vn-map-stage .maplibregl-ctrl-attrib { max-width:100%;font-size:9px; }
 .vn-journey,.mh-vietnam,.vm-continue,.vn-full-map,.vm-suggestions { display:none; }
 @media(max-width:900px) {
     .vn-journey,.vm-continue,.mh-vietnam,.vm-suggestions { --vm-ink:#101338; --vm-muted:#7883a6; --vm-surface:#fff; --vm-line:#e6eafb; --vm-purple:#7853ff; --vm-soft:#f3f0ff; color:var(--vm-ink); }
@@ -56,4 +68,9 @@
     html body .page .learn-v3 .lv-activity button { min-height:44px; border-radius:10px; }.vn-journey .maplibregl-ctrl-attrib-button { min-height:24px; }
     @media(max-width:359px) { .vn-heading { gap:6px; }html body .page .vn-journey .vn-heading h2 { font-size:16px!important; }.vn-heading .vm-link { font-size:11px!important; }.vn-legend { gap:8px; font-size:9px; }.vm-continue { padding:15px 12px; grid-template-columns:32px minmax(0,1fr); gap:10px; }.vm-level { width:32px; height:32px; font-size:19px; }.vm-continue-progress { flex-wrap:wrap; }.vm-continue-progress > span { margin-left:auto; } }
     @media(prefers-reduced-motion:reduce) { .vn-spinner { animation:none; } }
+}
+@media(max-width:900px) {
+    .vn-journey .vn-controls { display:flex; }
+    .vn-journey .vn-controls button { border-bottom:0;border-right:1px solid #edf0f8; }
+    .vn-journey .vn-controls button:last-child { border-right:0; }
 }
