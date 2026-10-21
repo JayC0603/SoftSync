@@ -82,7 +82,7 @@
         if (mentorTracks.has(track)) return;
         mentorTracks.add(track);
         const postpone = () => { track.dataset.resumeAt = String(Date.now() + 8000); };
-        for (const event of ['pointerdown', 'wheel', 'keydown', 'focusin', 'pointerleave', 'focusout'])
+        for (const event of (track.matches('.sh-mentor-grid') ? ['pointerdown', 'wheel', 'keydown', 'focusin'] : ['pointerdown', 'wheel', 'keydown', 'focusin', 'pointerleave', 'focusout']))
             track.addEventListener(event, postpone, { passive: true });
         let drag = null;
         let suppressClick = false;
@@ -139,10 +139,18 @@
             if (!track.isConnected) { mentorTracks.delete(track); continue; }
             if (innerWidth > 900 && !track.matches('.ss-home-mentor-carousel, .mentor-cards, .mh-mentor-track')) continue;
             const rect = track.getBoundingClientRect();
-            if (rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight || Number(track.dataset.resumeAt || 0) > Date.now() || track.dataset.rotationPaused === 'true' || track.matches(':hover, :focus-within') || document.querySelector('dialog[open]')) continue;
+            const compactHome = track.matches('.sh-mentor-grid');
+            const outside = compactHome ? rect.bottom <= 0 || rect.top >= innerHeight : rect.top < 0 || rect.top + Math.min(rect.height, 240) > innerHeight;
+            if (outside || Number(track.dataset.resumeAt || 0) > Date.now() || track.dataset.rotationPaused === 'true' || track.matches(compactHome ? ':focus-within' : ':hover, :focus-within') || document.querySelector('dialog[open]')) continue;
             const max = track.scrollWidth - track.clientWidth;
             if (max <= 1) continue;
             const step = mentorStep(track);
+            const loopWidth = Number(track.dataset.loopCount || 0) * step;
+            if (compactHome && loopWidth > 0) {
+                if (track.scrollLeft >= loopWidth - 2) track.scrollTo({ left: track.scrollLeft - loopWidth, behavior: 'instant' });
+                track.scrollTo({ left: Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
+                continue;
+            }
             track.scrollTo({ left: track.scrollLeft >= max - 2 ? 0 : Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
         }
     }, 5500);

@@ -1,0 +1,76 @@
+{
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 375,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 201.578125,
+      "statsBottom": 594.0625,
+      "heroTitleBottom": 375.671875,
+      "ctaTop": 437.671875
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 184,
+      "statsBottom": 576.484375,
+      "heroTitleBottom": 352.28125,
+      "ctaTop": 414.28125
+    },
+    {
+      "theme": "light",
+      "width": 430,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 184,
+      "statsBottom": 576.484375,
+      "heroTitleBottom": 352.28125,
+      "ctaTop": 414.28125
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 201.578125,
+      "statsBottom": 594.0625,
+      "heroTitleBottom": 375.671875,
+      "ctaTop": 437.671875
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 184,
+      "statsBottom": 576.484375,
+      "heroTitleBottom": 352.28125,
+      "ctaTop": 414.28125
+    },
+    {
+      "theme": "dark",
+      "width": 430,
+      "overflow": false,
+      "greeting": 70,
+      "goal": 63.09375,
+      "hero": 184,
+      "statsBottom": 576.484375,
+      "heroTitleBottom": 352.28125,
+      "ctaTop": 414.28125
+    }
+  ],
+  "checks": [
+    "Autoplay with two mentors, partial viewport visibility and pointer hover.",
+    "Touch pauses autoplay.",
+    "Loop resets at duplicate boundary and continues without exhausting scroll range."
+  ],
+  "errors": []
+}

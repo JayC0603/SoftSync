@@ -1,0 +1,29 @@
+{
+  "note": "Long text fixture in browser DOM only; no account or application data writes.",
+  "results": [
+    {
+      "width": 375,
+      "scroll": 375,
+      "title": 375.671875,
+      "cta": 437.671875,
+      "goalHeight": 63.09375,
+      "heroHeight": 201.578125
+    },
+    {
+      "width": 390,
+      "scroll": 390,
+      "title": 375.671875,
+      "cta": 437.671875,
+      "goalHeight": 63.09375,
+      "heroHeight": 201.578125
+    },
+    {
+      "width": 430,
+      "scroll": 430,
+      "title": 375.671875,
+      "cta": 437.671875,
+      "goalHeight": 63.09375,
+      "heroHeight": 201.578125
+    }
+  ]
+}

@@ -18,12 +18,12 @@
         }
     </section>
     <header class="sh-greeting">
-        <h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1>
-        <p>@T("Tiếp tục hành trình học tập của bạn.", "Continue your learning journey.")<br />@T("Hôm nay chúng ta sẽ tiến bộ hơn!", "Let's make progress today!")</p>
+        <h1>@T($"Chào {Name}!", $"Hi {Name}!") <span aria-hidden="true">👋</span></h1>
+        <p>@T("Sẵn sàng cho một bước tiến mới?", "Ready for your next step?")</p>
         <img src="/images/home-approved/welcome_vietnam_mountain.webp" alt="" />
     </header>
     <section class="sh-goal sh-card">
-        <div><h2>@T("Mục tiêu hôm nay", "Today's goal")</h2><p>@(Current is {} goalItem ? L.Ui(goalItem.Title) : Goal)</p>@if(Current is not null) { <small>@(AllDone ? T("Nhìn lại thành quả học tập của bạn.", "Reflect on your learning progress.") : T("Hoàn thành 1 bài học để duy trì tiến độ.", "Complete a lesson to keep progressing."))</small> }</div>
+        <div><h2>@T("Mục tiêu hôm nay", "Today's goal")</h2><p>@(Current is null ? Goal : AllDone ? T("Nhìn lại thành quả học tập", "Review your progress") : T("Hoàn thành 1 bài học", "Complete one lesson"))</p></div>
         <a href="@ContinueUrl">@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
     </section>
     <section class="sh-continue sh-card" aria-labelledby="sh-continue-title">
@@ -33,8 +33,8 @@
             @if (Current is {} current)
             {
                 <h3>@L.Ui(current.Title)</h3>
-                <p><strong>@T($"Chặng {Ordinal(current)}/{SelectedItems.Count}", $"Level {Ordinal(current)}/{SelectedItems.Count}")</strong><br />@L.Ui(current.SkillName)</p>
-                <p>@T($"{current.CompletedActivityCount}/{current.TotalActivityCount} hoạt động đã hoàn thành", $"{current.CompletedActivityCount}/{current.TotalActivityCount} activities completed")</p>
+                <p><strong>@T($"Chặng {Ordinal(current)}/{SelectedItems.Count}", $"Level {Ordinal(current)}/{SelectedItems.Count}")</strong></p>
+                <p>@T($"{current.CompletedActivityCount}/{current.TotalActivityCount} hoạt động", $"{current.CompletedActivityCount}/{current.TotalActivityCount} activities")</p>
             }
             else { <p class="sh-lesson-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p> }
             <a class="sh-primary" href="@ContinueUrl">@(Current is null ? T("Bắt đầu đánh giá", "Start assessment") : AllDone ? T("Xem thành quả", "View progress") : Locked(Current) ? T("Xem lộ trình", "View roadmap") : T("Tiếp tục bài học", "Continue lesson")) <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
@@ -82,7 +82,7 @@
     <section class="sh-mentors sh-card"><header class="sh-heading"><h2>@T("Đội ngũ cố vấn đồng hành", "Your mentor team")</h2><a href="/mentors">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
         @if (MentorLoading) { <p class="sh-empty" role="status">@T("Đang tải cố vấn…", "Loading mentors…")</p> }
         else if (MentorFailed) { <p class="sh-empty">@T("Chưa thể tải cố vấn.", "Unable to load mentors.") <button @onclick="RetryMentors">@T("Thử lại", "Retry")</button></p> }
-        else { <div class="sh-mentor-grid ss-mentor-carousel" tabindex="0" aria-label="@T("Danh sách cố vấn, kéo ngang để xem thêm", "Mentors, scroll horizontally to explore")">@foreach (var mentor in Mentors) { <a href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" /><span><strong>@mentor.Name</strong><small>@L.Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }@if (Mentors.Count == 0) { <p class="sh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors available.")</p> }</div> }
+        else { <div class="sh-mentor-grid ss-mentor-carousel" data-loop-count="@(Mentors.Count > 1 ? Mentors.Count : 0)" tabindex="0" aria-label="@T("Danh sách cố vấn, kéo ngang để xem thêm", "Mentors, scroll horizontally to explore")">@foreach (var mentor in Mentors) { <a href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" /><span><strong>@mentor.Name</strong><small>@L.Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }@if (Mentors.Count > 1) { @foreach (var mentor in Mentors) { <a class="sh-mentor-repeat" href="/mentors/@mentor.Id" aria-hidden="true" tabindex="-1"><img src="@mentor.AvatarUrl" alt="" /><span><strong>@mentor.Name</strong><small>@L.Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }@if (Mentors.Count == 0) { <p class="sh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors available.")</p> }</div> }
     </section>
     <section class="sh-achievements sh-card"><header class="sh-heading"><h2>@T("Thành tích gần đây", "Recent achievements")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
         <div id="sh-achievement-list">
