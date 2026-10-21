@@ -72,8 +72,8 @@
         </div>
     </section>
     <a class="sh-syncy sh-card" href="/assistant">
-        <img src="/images/home-approved/syncy_support.webp" alt="" />
-        <span><span class="sh-syncy-title"><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong><small>@T("Trợ lý AI của bạn", "Your AI assistant")</small></span><small>@T("Đặt câu hỏi, nhờ gợi ý lộ trình hoặc giải đáp thắc mắc về kỹ năng, nghề nghiệp nhé!", "Ask questions or get help with your roadmap, skills and career!")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <img src="/images/syncy-robot.png" alt="" width="72" height="72" />
+        <span><span class="sh-syncy-title"><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong></span><small>@T("Giải đáp kỹ năng, gợi ý lộ trình.", "Skill advice and learning guidance.")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i>
     </a>
     <section class="sh-recommendation sh-card"><header class="sh-heading"><h2>@T("Gợi ý dành cho bạn", "Suggestions for you")</h2><a href="/roadmap">@T("Xem thêm", "Explore") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
         @if (Suggestion is {} suggestion) { <a class="sh-list-row" href="@Lesson(suggestion)"><img src="@Thumbnail(suggestion)" alt="" /><span><small class="sh-skill-label">@L.Ui(suggestion.SkillName)</small><strong>@L.Ui(suggestion.Title)</strong><small>@T($"{suggestion.CompletedActivityCount}/{suggestion.TotalActivityCount} hoạt động", $"{suggestion.CompletedActivityCount}/{suggestion.TotalActivityCount} activities")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }
