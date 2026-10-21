@@ -10,6 +10,7 @@
         var locked = JourneyProgress.State(level, AllItems.ToList().IndexOf(level), JourneyProgress.ActiveIndex(AllItems), RoadmapReviewMode.Enabled) == JourneyState.Locked;
         <details @key="level.Id" class="lm-level @(level.IsCompleted ? "is-complete" : null) @(!locked && !level.IsCompleted && level.Id == SelectedId ? "is-current" : null)" open="@(level.Id == SelectedId)">
             <summary><span class="lm-level-number">@(level.IsCompleted ? "✓" : ordinal.ToString())</span><strong>@Title(level, ordinal)</strong><small>@level.CompletedActivityCount/@level.TotalActivityCount</small><span class="lm-chevron" aria-hidden="true"></span></summary>
+            <progress class="lm-level-progress" value="@level.CompletedActivityCount" max="@Math.Max(1, level.TotalActivityCount)" aria-label="@(Vietnamese ? "Tiến độ bài học" : "Lesson progress")"></progress>
             <div class="lm-level-body">
                 @if (activities.Count == 0) { <p>@(Vietnamese ? "Bài học này chưa có nội dung." : "Lesson content is not available yet.")</p> }
                 @foreach (var activity in Compact ? activities.Skip(Math.Max(0, JourneyProgress.ResumeStep(level) - 1)).Take(3) : activities)
@@ -17,10 +18,11 @@
                     var completed = JourneyProgress.Completed(level, activity.Step);
                     var available = !locked && JourneyProgress.CanOpen(level, activity.Step);
                     var current = available && !completed;
-                    <button type="button" class="lm-lesson @(completed ? "is-complete" : current ? "is-current" : "is-locked")" disabled="@(!available)" @onclick="() => OnOpen.InvokeAsync((level, activity.Step))">
-                        <span class="lm-lesson-state" aria-hidden="true">@(completed ? "✓" : current ? "▶" : activity.Step.ToString("00"))</span>
-                        <span class="lm-lesson-copy"><strong>@(Vietnamese ? activity.Vi : activity.En)</strong><small>@(Vietnamese ? activity.TypeVi : activity.TypeEn)@(!available ? Vietnamese ? " · Chưa mở khóa" : " · Locked" : "")</small></span>
-                        @if (current) { <span class="lm-chevron" aria-hidden="true"></span> }
+                    <button type="button" class="lm-lesson @(completed ? "is-complete" : current ? "is-current" : "is-locked")" disabled="@(!available)" aria-current="@(current ? "step" : null)" @onclick="() => OnOpen.InvokeAsync((level, activity.Step))">
+                        <span class="lm-lesson-icon" aria-hidden="true"><i class="@(!available ? "bi bi-lock-fill" : current ? "bi bi-play-fill" : activity.Icon)"></i></span>
+                        <span class="lm-lesson-copy"><strong>@(activity.Step == 1 ? Vietnamese ? "Video bài học" : "Video lesson" : Vietnamese ? activity.Vi : activity.En)</strong><small>@ActivitySubtitle(activity, completed, available, current)</small></span>
+                        @if (completed) { <span class="lm-lesson-status is-done" aria-label="@(Vietnamese ? "Đã hoàn thành" : "Completed")"><i class="bi bi-check-lg" aria-hidden="true"></i></span> }
+                        else if (current) { <span class="lm-lesson-status is-next" aria-hidden="true"><i class="bi bi-chevron-right"></i></span> }
                     </button>
                 }
             </div>
@@ -29,6 +31,15 @@
 </div>
 
 @code {
+    private string ActivitySubtitle(RoadmapActivityDefinition activity, bool completed, bool available, bool current)
+    {
+        if (!available) return Vietnamese ? "Chưa mở khóa" : "Locked";
+        if (current) return Vietnamese ? "Tiếp tục học" : "Continue learning";
+        if (activity.Step == 2) return Vietnamese ? "Lý thuyết · Đã hoàn thành" : "Theory · Completed";
+        if (activity.Step == 3) return Vietnamese ? "Kiến thức chính" : "Key takeaways";
+        return completed ? Vietnamese ? "Đã hoàn thành" : "Completed" : Vietnamese ? activity.TypeVi : activity.TypeEn;
+    }
+
     [Parameter] public IReadOnlyList<RoadmapItemDto> AllItems { get; set; } = [];
     [Parameter] public IReadOnlyList<RoadmapItemDto> Levels { get; set; } = [];
     [Parameter] public int SelectedId { get; set; }
