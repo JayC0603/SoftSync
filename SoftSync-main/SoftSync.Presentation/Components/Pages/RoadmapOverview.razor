@@ -80,7 +80,7 @@
         <header class="lm-detail-heading"><a class="lm-back" href="/roadmap" aria-label="@Tx("Back to learning", "Quay lại Học tập")">‹</a><h1>@CategoryName(SelectedItem)</h1></header>
         <article class="lm-summary">
             <img class="lm-cover" src="@CourseImage(SelectedKey)" alt="" fetchpriority="high" />
-            <div class="lm-summary-copy"><span class="lm-badge">@Tx("Skill development", "Phát triển kỹ năng")</span><h2>@CategoryName(SelectedItem)</h2><p>@WeekDescription(SelectedItem)</p>
+            <div class="lm-summary-copy"><span class="lm-badge">@Tx("Skill development", "Phát triển kỹ năng")</span><h2>@CategoryName(SelectedItem)</h2><p>@SelectedDescription</p>
                 <div class="lm-course-total"><strong>@Tx("Course progress", "Tiến độ toàn khóa")</strong><span>@CourseCompleted/@CourseTotal @Tx("activities", "hoạt động")</span></div>
                 <div class="lm-progress-row"><progress value="@CourseCompleted" max="@Math.Max(1, CourseTotal)" aria-label="@Tx("Course progress", "Tiến độ toàn khóa")"></progress><strong>@CoursePercent%</strong></div>
             </div>
@@ -94,11 +94,11 @@
         <section id="lm-detail-panel" role="tabpanel" aria-labelledby="@($"lm-tab-{detailTab}")">
             @if (detailTab == 0)
             {
-                <MobileCourseRoadmap AllItems="items" Levels="SelectedItems" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" Activities="Activities" OnOpen="OpenRoadmapActivity" />
+                <MobileCourseRoadmap AllItems="items" Levels="SelectedItems" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" OnOpen="OpenRoadmapActivity" />
             }
             else if (detailTab == 1)
             {
-                <MobileLearningMaterials Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" />
+                <MobileLearningMaterials AllItems="items" Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" />
             }
             else
             {
@@ -107,8 +107,8 @@
         </section>
         @if (detailTab == 0)
         {
-            <div class="lm-continue-wrap"><button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))</button></div>
-            <section><header class="lm-section-heading"><h2>@Tx("Learning materials", "Tài liệu học tập")</h2><button @onclick="() => detailTab = 1">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileLearningMaterials Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" /></section>
+            <div class="lm-continue-wrap"><button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked || CurrentLessons.Count == 0)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))</button></div>
+            <section><header class="lm-section-heading"><h2>@Tx("Learning materials", "Tài liệu học tập")</h2><button @onclick="() => detailTab = 1">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileLearningMaterials AllItems="items" Item="SelectedItem" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" /></section>
         }
         <a class="lm-support" href="/assistant"><img src="/images/learn-v3/mentor-support.png" alt="" loading="lazy" /><span><strong>@Tx("Need support?", "Cần hỗ trợ?")</strong><small>@Tx("Ask SYNCY or talk to a Mentor.", "Đặt câu hỏi cho SYNCY hoặc trao đổi cùng Mentor.")</small><em>@Tx("Ask a question", "Đặt câu hỏi") <span aria-hidden="true">›</span></em></span></a>
     }
@@ -147,7 +147,7 @@
                     <header class="lm-section-heading"><h2>@Tx("Continue learning", "Tiếp tục học")</h2><span class="lm-status">@(SelectedState == JourneyState.Locked ? Tx("Locked", "Chưa mở khóa") : SelectedItem.IsCompleted ? Tx("Completed", "Hoàn thành") : Tx("Learning", "Đang học"))</span></header>
                     <article class="lm-featured">
                         <button class="lm-featured-info" @onclick="() => ExploreSkill(SelectedKey)"><img src="@CourseImage(SelectedKey)" alt="" /><span><strong>@CategoryName(SelectedItem)</strong><small>@SelectedItem.CompletedActivityCount/@SelectedItem.TotalActivityCount @Tx("activities", "hoạt động")</small><span class="lm-progress-row"><progress value="@SelectedItem.CompletedActivityCount" max="@Math.Max(1, SelectedItem.TotalActivityCount)" aria-label="@Tx("Current level progress", "Tiến độ chặng hiện tại")"></progress><b>@SelectedItem.ProgressPercent%</b></span></span></button>
-                        <button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))<span aria-hidden="true">›</span></button>
+                        <button class="lm-primary" disabled="@(SelectedState == JourneyState.Locked || CurrentLessons.Count == 0)" @onclick="ContinueLearning"><span aria-hidden="true">▶</span>@(SelectedItem.IsCompleted ? Tx("Review lesson", "Xem lại bài học") : Tx("Continue learning", "Tiếp tục học"))<span aria-hidden="true">›</span></button>
                     </article>
                     <div class="lm-courses">
                         @foreach (var group in SkillGroups.Where(g => g.Key != SelectedKey))
@@ -164,9 +164,10 @@
                     {
                         <button class="lm-next" @onclick="() => OpenSelectedStep(activity.Step)"><img src="/images/learn-v3/study-planner.png" alt="" loading="lazy" /><span><strong>@activity.Title</strong><small>@CategoryName(SelectedItem) · @Tx("Activity", "Hoạt động") @activity.Step/@SelectedItem.TotalActivityCount</small></span><span class="lm-arrow" aria-hidden="true">›</span></button>
                     }
+                    else if (!RoadmapLearningContent.HasContent(SelectedItem, items)) { <p class="lm-empty">@Tx("Lesson content is not available yet.", "Bài học này chưa có nội dung.")</p> }
                     else { <p class="lm-empty">@(SelectedState == JourneyState.Locked ? Tx("Complete the previous level to unlock.", "Hoàn thành chặng trước để mở khóa.") : Tx("You have completed this level.", "Bạn đã hoàn thành chặng này."))</p> }
                 </section>
-                <section><header class="lm-section-heading"><h2>@Tx("Course roadmap", "Lộ trình khóa học")</h2><button @onclick="() => ExploreSkill(SelectedKey)">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileCourseRoadmap Compact="true" AllItems="items" Levels="OverviewLevels" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" Activities="Activities" OnOpen="OpenRoadmapActivity" /></section>
+                <section><header class="lm-section-heading"><h2>@Tx("Course roadmap", "Lộ trình khóa học")</h2><button @onclick="() => ExploreSkill(SelectedKey)">@Tx("View all", "Xem tất cả") <span aria-hidden="true">›</span></button></header><MobileCourseRoadmap Compact="true" AllItems="items" Levels="OverviewLevels" SelectedId="SelectedItem.Id" Vietnamese="Vietnamese" Title="WeekTitle" OnOpen="OpenRoadmapActivity" /></section>
             </div>
         }
     }
@@ -235,8 +236,8 @@
     private int ActiveIndex => JourneyProgress.ActiveIndex(items);
     private int SelectedOrdinal => WeekOrdinal(SelectedItem);
     private JourneyState SelectedState => StateOf(SelectedItem);
-    private IEnumerable<IGrouping<string, RoadmapItemDto>> SkillGroups => items.GroupBy(SkillKey).OrderBy(x => SkillRank(x.Key));
-    private List<RoadmapItemDto> SelectedItems => items.Where(x => SkillKey(x) == SelectedKey).ToList();
+    private IEnumerable<IGrouping<string, RoadmapItemDto>> SkillGroups => items.GroupBy(SkillKey);
+    private List<RoadmapItemDto> SelectedItems => RoadmapLearningContent.Levels(SelectedItem, items).ToList();
     private RoadmapItemDto? NextItem => SelectedItems.SkipWhile(x => x.Id != SelectedItem.Id).Skip(1).FirstOrDefault();
     private string SelectedDescription => !string.IsNullOrWhiteSpace(SelectedItem.Objective) ? SelectedItem.Objective : !string.IsNullOrWhiteSpace(SelectedItem.Description) ? SelectedItem.Description : WeekDescription(SelectedItem);
     private JourneyState StateOf(RoadmapItemDto item) => JourneyProgress.State(item, items.IndexOf(item), ActiveIndex, RoadmapReviewMode.Enabled);
@@ -283,7 +284,7 @@
     private void ContinueLearning() => OpenSelectedStep(NextActivity?.Step ?? JourneyProgress.ResumeStep(SelectedItem));
     private void OpenSelectedStep(int step)
     {
-        if (SelectedState == JourneyState.Locked || !JourneyProgress.CanOpen(SelectedItem, step)) return;
+        if (SelectedState == JourneyState.Locked || !RoadmapLearningContent.HasContent(SelectedItem, items) || !JourneyProgress.CanOpen(SelectedItem, step)) return;
         Nav.NavigateTo($"/roadmap/lecture/{UserId}/{SelectedItem.Id}?step={step}");
     }
     private void OpenCheckpoint(JourneyCheckpoint checkpoint)
@@ -301,78 +302,12 @@
 
     private IReadOnlyList<JourneyLesson> CurrentLessons => Activities.Select(x => new JourneyLesson(x.Step, Tx(x.En, x.Vi), Tx(x.TypeEn, x.TypeVi), x.Icon,
         JourneyProgress.Completed(SelectedItem, x.Step), SelectedState != JourneyState.Locked && JourneyProgress.CanOpen(SelectedItem, x.Step))).ToList();
-    private static readonly (int Step, string En, string Vi, string TypeEn, string TypeVi, string Icon)[] Activities =
-    [
-        (1, "Core lesson", "Bài học nền tảng", "Video", "Video", "bi-play-btn"),
-        (2, "Lesson script", "Kịch bản bài học", "Theory", "Lý thuyết", "bi-file-text"),
-        (3, "Key takeaways", "Tóm tắt kiến thức", "Summary", "Tóm tắt", "bi-lightbulb"),
-        (4, "Knowledge check", "Kiểm tra kiến thức", "Quiz", "Quiz", "bi-ui-checks"),
-        (5, "Applied practice", "Thực hành tình huống", "Interactive practice", "Thực hành tương tác", "bi-chat-square-dots"),
-        (6, "Reflection & AI feedback", "Phản tư & AI feedback", "Reflection", "Phản tư", "bi-stars")
-    ];
+    private IReadOnlyList<RoadmapActivityDefinition> Activities => RoadmapLearningContent.ActivitiesFor(SelectedItem, items);
     private static string SkillKey(RoadmapItemDto item) => SkillTheme.KeyFor(item);
-    private static int SkillRank(string key) => key switch { "communication" => 0, "time" => 1, "critical" => 2, "teamwork" => 3, _ => 4 };
-    private int WeekOrdinal(RoadmapItemDto item) => items.Where(x => SkillKey(x) == SkillKey(item)).ToList().FindIndex(x => x.Id == item.Id) + 1;
-    private string CategoryName(RoadmapItemDto item) => SkillKey(item) switch
-    {
-        "communication" => Tx("Communication skills", "Kỹ năng giao tiếp"),
-        "time" => Tx("Time management", "Quản lý thời gian"),
-        "critical" => Tx("Critical thinking", "Tư duy phản biện"),
-        "teamwork" => Tx("Teamwork", "Làm việc nhóm"),
-        _ => item.SkillName
-    };
+    private int WeekOrdinal(RoadmapItemDto item) => RoadmapLearningContent.Ordinal(item, items);
+    private string CategoryName(RoadmapItemDto item) => item.SkillName;
     private string Tx(string en, string vi) => Vietnamese ? vi : en;
-    private string WeekTitle(RoadmapItemDto item, int n)
-    {
-        if (string.IsNullOrWhiteSpace(item.Title)) return $"{Tx("Level", "Cấp độ")} {n}";
-        var title = System.Text.RegularExpressions.Regex.Replace(item.Title, @"^Tuần\s+\d+\s*[-–:]\s*", "").Trim();
-        if (Vietnamese) return title;
-        // Translate only known catalog titles; custom/new content retains its real title.
-        var canonical = title.ToLowerInvariant();
-        if (canonical is "nền tảng giao tiếp" or "lắng nghe chủ động" or "phản hồi xây dựng" or "giao tiếp nâng cao"
-            or "nền tảng kỹ năng quản lý thời gian" or "thực hành kỹ năng quản lý thời gian"
-            or "nền tảng kỹ năng tư duy phản biện" or "thực hành kỹ năng tư duy phản biện")
-            return CatalogTitle(item, n);
-        return title;
-    }
-    private string CatalogTitle(RoadmapItemDto item, int n) => SkillKey(item) switch
-    {
-        "communication" => n switch
-        {
-            1 => Tx("Communication foundations", "Nền tảng giao tiếp"),
-            2 => Tx("Active listening", "Lắng nghe chủ động"),
-            3 => Tx("Constructive feedback", "Phản hồi xây dựng"),
-            4 => Tx("Advanced communication", "Giao tiếp nâng cao"),
-            _ => Tx($"Communication · Week {n}", $"Giao tiếp · Tuần {n}")
-        },
-        "time" => n switch
-        {
-            1 => Tx("Time management foundations", "Nền tảng kỹ năng quản lý thời gian"),
-            2 => Tx("Time management practice", "Thực hành kỹ năng quản lý thời gian"),
-            _ => Tx($"Time management · Week {n}", $"Quản lý thời gian · Tuần {n}")
-        },
-        "critical" => n switch
-        {
-            1 => Tx("Critical thinking foundations", "Nền tảng tư duy phản biện"),
-            2 => Tx("Critical thinking practice", "Thực hành tư duy phản biện"),
-            _ => Tx($"Critical thinking · Week {n}", $"Tư duy phản biện · Tuần {n}")
-        },
-        _ => string.IsNullOrWhiteSpace(item.Title) ? $"{Tx("Week", "Tuần")} {n}" : item.Title
-    };
-
-    private string WeekDescription(RoadmapItemDto item) => SkillKey(item) switch
-    {
-        "communication" => Tx(
-            "Build communication skills through video, synchronized theory, quizzes, and realistic practice.",
-            "Rèn kỹ năng giao tiếp qua video, lý thuyết đồng bộ, quiz và tình huống thực tế."),
-        "time" => Tx(
-            "Learn the core principles of time management and practice building sustainable study habits.",
-            "Nắm lý thuyết cốt lõi của kỹ năng quản lý thời gian và luyện tập để hình thành thói quen bền vững."),
-        "critical" => Tx(
-            "Strengthen critical thinking through evidence, structured reasoning, and applied exercises.",
-            "Phát triển tư duy phản biện qua bằng chứng, lập luận có cấu trúc và bài tập ứng dụng."),
-        _ => Tx(
-            "Learn through video, theory, quiz and practical activities.",
-            "Học qua video, lý thuyết, quiz và các hoạt động thực hành.")
-    };
+    private string WeekTitle(RoadmapItemDto item, int _) => item.Title;
+    private string WeekDescription(RoadmapItemDto item) =>
+        !string.IsNullOrWhiteSpace(item.Description) ? item.Description : item.Objective;
 }

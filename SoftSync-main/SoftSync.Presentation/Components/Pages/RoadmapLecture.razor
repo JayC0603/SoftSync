@@ -6,6 +6,7 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
+@using SoftSync.Presentation.Components.Journey
 @using System.Text.Json
 @inject IRoadmapService RoadmapService
 @inject AuthenticationStateProvider AuthProvider
@@ -333,13 +334,8 @@
     private int timeManagementLessonNumber;
     private bool IsTimeManagementLesson => timeManagementLessonNumber > 0;
     private string VideoSource => IsTimeManagementLesson ? $"/videos/time-management-mentor-lesson-{timeManagementLessonNumber}.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
-    private string LessonTitle => timeManagementLessonNumber == 1
-        ? Tx("Introduction to Time Management Skills", "Giới thiệu về kỹ năng quản lý thời gian")
-        : timeManagementLessonNumber == 2
-        ? Tx("Organizing and Prioritizing Important Work", "Sắp xếp và ưu tiên những công việc quan trọng")
-        : communicationLessonNumber == 2
-        ? Tx("Active Listening: A Foundation of Communication", "Kỹ năng lắng nghe - nền tảng của giao tiếp")
-        : Tx("Introduction to Communication Skills", "Giới thiệu về kỹ năng giao tiếp");
+    private IReadOnlyList<RoadmapItemDto> lessonRoadmap = [];
+    private string LessonTitle => item is null ? string.Empty : RoadmapLearningContent.LessonTitle(item, lessonRoadmap, IsVi);
     private int currentStep = 1;
     private string? saveError;
     private List<CommunicationQuizQuestion> quizQuestions = [];
@@ -404,15 +400,14 @@
         if (signedIn <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
         UserId = signedIn;
         var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId, UserId);
+        lessonRoadmap = roadmap.Items;
         item = roadmap.Items.FirstOrDefault(x => x.Id == ItemId);
         if (item is not null)
         {
-            var communication = roadmap.Items.Where(IsCommunication).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-            communicationLessonNumber = communication.FindIndex(x => x.Id == item.Id) + 1;
-            var timeManagement = roadmap.Items.Where(IsTimeManagement).OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
-            timeManagementLessonNumber = timeManagement.FindIndex(x => x.Id == item.Id) + 1;
+            communicationLessonNumber = SkillTheme.KeyFor(item) == "communication" ? RoadmapLearningContent.Ordinal(item, lessonRoadmap) : 0;
+            timeManagementLessonNumber = SkillTheme.KeyFor(item) == "time" ? RoadmapLearningContent.Ordinal(item, lessonRoadmap) : 0;
             isTimeManagementLessonOne = timeManagementLessonNumber == 1;
-            isSupportedCommunicationLesson = communicationLessonNumber is 1 or 2 || timeManagementLessonNumber is 1 or 2;
+            isSupportedCommunicationLesson = RoadmapLearningContent.HasContent(item, lessonRoadmap);
             currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "practice" or "scenario" => 5, "reflection" => 6, _ => 1 };
             if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
             if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
@@ -674,7 +669,7 @@
         else { reflectionMessage = Tx("Could not complete the week.", "Không thể hoàn thành tuần."); reflectionError = true; }
         savingReflection = false;
     }
-    private static readonly (int Id, string En, string Vi, string Icon)[] Steps = [(1,"Video","Video","bi bi-play-circle"),(2,"Script","Script","bi bi-file-text"),(3,"Summary","Tóm tắt","bi bi-lightbulb"),(4,"Quiz","Quiz","bi bi-ui-checks"),(5,"Practice","Thực hành","bi bi-person-workspace"),(6,"Reflection","Phản tư","bi bi-stars")];
+    private static IReadOnlyList<RoadmapActivityDefinition> Steps => RoadmapLearningContent.Activities;
     private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public string AiFeedback { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
 }
 

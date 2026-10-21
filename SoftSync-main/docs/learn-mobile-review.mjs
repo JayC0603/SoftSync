@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+const origin=process.env.REVIEW_ORIGIN??'http://localhost:5104';
 const tabs = await (await fetch('http://127.0.0.1:9333/json/list')).json();
 const tab = tabs.find(x => x.type === 'page');
 if (!tab) throw new Error('No review browser page');
@@ -15,10 +16,10 @@ const mode=process.argv[2]??'inspect', width=Number(process.argv[3]??390);
 await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
 try {
 if(mode==='login'){
- await send('Page.navigate',{url:'http://localhost:5104/Account/Login'});await pause(1800);
+ await send('Page.navigate',{url:origin+'/Account/Login'});await pause(1800);
  console.log(await evaluate(`(()=>{const form=document.querySelector('form');const email=form?.querySelector('#login-identifier');const password=form?.querySelector('input[type=password]');if(!email||!password)return document.body.innerText;email.value='demo@softsync.local';password.value='Demo@12345';form.requestSubmit();return 'submitted';})()`));await pause(1800);
 } else if(mode==='navigate'){
- await send('Page.navigate',{url:'http://localhost:5104'+(process.argv[4]??'/roadmap')});await pause(2200);
+ await send('Page.navigate',{url:origin+(process.argv[4]??'/roadmap')});await pause(2200);
 } else if(mode==='assess'){
  for(let i=0;i<60;i++){
   const result=await evaluate(`(()=>{const option=document.querySelector('.assessment-option');if(option){option.click();return 'option';}return location.pathname;})()`);
@@ -33,7 +34,7 @@ if(mode==='login'){
 } else if(mode==='verify'){
  const results=[];
  for(const route of ['/roadmap','/roadmap?course=time']){
-  await send('Page.navigate',{url:'http://localhost:5104'+route});await ready();await pause(1200);
+  await send('Page.navigate',{url:origin+route});await ready();await pause(1200);
   for(const reviewWidth of [360,390,430,1280]){
    await send('Emulation.setDeviceMetricsOverride',{width:reviewWidth,height:844,deviceScaleFactor:1,mobile:reviewWidth<901});await pause(200);
    const result=await evaluate(`({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,heading:document.querySelector('.lm-detail-heading h1')?.textContent,desktopVisible:document.querySelector('.learn-desktop')?.getBoundingClientRect().height>0,brokenImages:[...document.querySelectorAll('.learn-v3 img')].filter(x=>x.complete&&x.naturalWidth===0).map(x=>x.src)})`);
@@ -50,11 +51,35 @@ if(mode==='login'){
   const selected=await evaluate(`document.querySelector('#lm-tab-${id}').getAttribute('aria-selected')`);
   if(selected!=='true')throw new Error('Tab did not activate: '+id);
  }
- await send('Page.navigate',{url:'http://localhost:5104/roadmap'});await pause(1200);
+ await send('Page.navigate',{url:origin+'/roadmap'});await pause(1200);
  await evaluate("document.querySelector('.lm-featured .lm-primary').click()");await pause(1000);
  const lesson=await evaluate('location.pathname');
  if(!lesson.includes('/roadmap/lecture/'))throw new Error('Continue did not open lesson');
  console.log(JSON.stringify({checks:results,tabs:'passed',continueRoute:lesson}));
+ } else if(mode==='footer-check'){
+ const samples=[];
+ for(const route of ['/dashboard','/roadmap','/roadmap?course=time']){
+  await send('Page.navigate',{url:origin+route});await pause(1800);
+  for(let attempt=0;attempt<100;attempt++){if(await evaluate("!!document.querySelector('.shared-mobile-footer')"))break;await pause(100);}
+  for(const checkWidth of [360,390,430]){
+   await send('Emulation.setDeviceMetricsOverride',{width:checkWidth,height:844,deviceScaleFactor:1,mobile:true});await pause(100);
+   const footer=await evaluate(`(()=>{const f=document.querySelector('.shared-mobile-footer');if(!f)throw Error('Missing shared footer');const style=getComputedStyle(f);return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,html:f.innerHTML,font:style.fontFamily,links:[...f.querySelectorAll('a')].map(x=>x.getAttribute('href')),legalColumns:getComputedStyle(f.querySelector('nav:last-of-type')).gridTemplateColumns.split(' ').length,footerBottom:f.getBoundingClientRect().bottom+scrollY};})()`);
+   if(footer.scrollWidth>footer.width)throw Error('Footer overflows');
+   if(footer.legalColumns!==2)throw Error('Legal columns differ from homepage');
+   samples.push({route,...footer});
+  }
+ }
+ const baseline=samples[0];
+ for(const sample of samples)if(sample.html!==baseline.html||sample.font!==baseline.font)throw Error('Homepage and learning footer differ');
+ await mkdir('docs',{recursive:true});await writeFile('docs/shared-learning-footer-review.json',JSON.stringify({footer:'identical',checks:samples.map(({html,...x})=>x)},null,2));
+ console.log('Shared footer matches on homepage, overview and course detail at 360/390/430px.');
+} else if(mode==='footer-shot'){
+ await evaluate("window.scrollTo(0,document.documentElement.scrollHeight)");await pause(150);
+ const box=await evaluate("(()=>{const r=document.querySelector('.shared-mobile-footer').getBoundingClientRect();return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height,scale:1};})()");
+ const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:box});
+ await mkdir('docs/screenshots',{recursive:true});
+ const path='docs/screenshots/shared-footer-learning-'+width+'.png';
+ await writeFile(path,Buffer.from(shot.data,'base64'));console.log(path);
 } else if(mode==='shot'){
  await pause(800);await evaluate('document.fonts.ready');
  const initial=await send('Page.getLayoutMetrics');

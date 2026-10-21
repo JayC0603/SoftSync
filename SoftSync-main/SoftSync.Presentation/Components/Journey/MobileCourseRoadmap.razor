@@ -5,12 +5,14 @@
 <div class="lm-roadmap">
     @foreach (var level in Levels)
     {
-        var ordinal = AllItems.Where(x => SkillTheme.KeyFor(x) == SkillTheme.KeyFor(level)).ToList().IndexOf(level) + 1;
+        var ordinal = RoadmapLearningContent.Ordinal(level, AllItems);
+        var activities = RoadmapLearningContent.ActivitiesFor(level, AllItems);
         var locked = JourneyProgress.State(level, AllItems.ToList().IndexOf(level), JourneyProgress.ActiveIndex(AllItems), RoadmapReviewMode.Enabled) == JourneyState.Locked;
         <details @key="level.Id" class="lm-level @(level.IsCompleted ? "is-complete" : null) @(!locked && !level.IsCompleted && level.Id == SelectedId ? "is-current" : null)" open="@(level.Id == SelectedId)">
             <summary><span class="lm-level-number">@(level.IsCompleted ? "✓" : ordinal.ToString())</span><strong>@Title(level, ordinal)</strong><small>@level.CompletedActivityCount/@level.TotalActivityCount</small><span class="lm-chevron" aria-hidden="true"></span></summary>
             <div class="lm-level-body">
-                @foreach (var activity in Compact ? Activities.Skip(Math.Max(0, JourneyProgress.ResumeStep(level) - 1)).Take(3) : Activities)
+                @if (activities.Count == 0) { <p>@(Vietnamese ? "Bài học này chưa có nội dung." : "Lesson content is not available yet.")</p> }
+                @foreach (var activity in Compact ? activities.Skip(Math.Max(0, JourneyProgress.ResumeStep(level) - 1)).Take(3) : activities)
                 {
                     var completed = JourneyProgress.Completed(level, activity.Step);
                     var available = !locked && JourneyProgress.CanOpen(level, activity.Step);
@@ -33,6 +35,5 @@
     [Parameter] public bool Vietnamese { get; set; } = true;
     [Parameter] public bool Compact { get; set; }
     [Parameter, EditorRequired] public Func<RoadmapItemDto, int, string> Title { get; set; } = default!;
-    [Parameter] public IReadOnlyList<(int Step, string En, string Vi, string TypeEn, string TypeVi, string Icon)> Activities { get; set; } = [];
     [Parameter] public EventCallback<(RoadmapItemDto Level, int Step)> OnOpen { get; set; }
 }
