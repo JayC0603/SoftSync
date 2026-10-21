@@ -35,7 +35,7 @@
   border-radius: 12px;
   background: var(--cv-surface);
   color: var(--text-dark);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
   cursor: pointer;
   transition: 0.2s;
@@ -68,7 +68,7 @@
     width: auto;
     min-width: 0;
     padding: 0 12px;
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 

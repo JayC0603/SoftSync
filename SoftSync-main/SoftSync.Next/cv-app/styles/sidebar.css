@@ -97,7 +97,7 @@
   border: none;
   background: transparent;
   text-align: left;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-gray);
   border-radius: 10px;
@@ -166,7 +166,7 @@
   display: block;
   font-weight: 700;
   color: var(--text-dark);
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -174,7 +174,7 @@
 
 .user-email {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -191,7 +191,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: default;
 }
 
@@ -203,7 +203,7 @@
   padding: 10px;
   border-radius: 10px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }

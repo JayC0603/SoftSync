@@ -107,7 +107,7 @@ html {
   display: flex;
   gap: 30px;
   margin-left: 22px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600
 }
 
@@ -120,7 +120,7 @@ html {
   align-items: center;
   gap: 24px;
   margin-left: auto;
-  font-size: 14px
+  font-size: 16px
 }
 
 .marketing .primary,.marketing .secondary {
@@ -130,7 +130,7 @@ html {
   gap: 12px;
   border-radius: 13px;
   padding: 15px 22px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.35;
   transition: transform .2s,box-shadow .2s;
@@ -183,7 +183,7 @@ html {
 }
 
 .marketing .eyebrow {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 750;
   letter-spacing: 3px;
   color: var(--ss-accent);
@@ -229,12 +229,12 @@ html {
 }
 
 .marketing .benefits b {
-  font-size: 11px;
+  font-size: 14px;
   display: block
 }
 
 .marketing .benefits small {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--ss-muted);
   display: block;
   margin-top: 4px
@@ -619,7 +619,7 @@ html {
 
 .marketing .section-heading .eyebrow {
   margin-bottom: 10px;
-  font-size: 9px
+  font-size: 14px
 }
 
 .marketing .section-heading h2 {
@@ -630,7 +630,7 @@ html {
 }
 
 .marketing .section-heading p {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ss-muted)
 }
 
@@ -680,7 +680,7 @@ html {
 }
 
 .marketing .feature-card p {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   color: var(--ss-muted);
   margin-bottom: 13px
@@ -690,7 +690,7 @@ html {
   list-style: none;
   padding: 0;
   margin: 0 0 22px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 2.2
 }
 
@@ -704,7 +704,7 @@ html {
   width: 14px;
   height: 14px;
   margin-right: 7px;
-  font-size: 10px
+  font-size: 14px
 }
 
 .marketing .journey-card {
@@ -730,7 +730,7 @@ html {
 
 .marketing .journey-copy .secondary {
   margin-top: 12px;
-  font-size: 12px;
+  font-size: 14px;
   padding: 13px 15px
 }
 
@@ -752,7 +752,7 @@ html {
   bottom: 43px;
   right: 28px;
   color: #b5f6db;
-  font-size: 13px;
+  font-size: 14px;
   z-index: 1
 }
 
@@ -807,7 +807,7 @@ html {
   align-items: center;
   color: var(--ss-accent)!important;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 24px
 }
 
@@ -916,12 +916,12 @@ html {
 }
 
 .marketing .step h3 {
-  font-size: 13px;
+  font-size: 14px;
   margin: 2px 0 5px
 }
 
 .marketing .step p {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ss-muted);
   margin-bottom: 0
 }
@@ -938,7 +938,7 @@ html {
 }
 
 .marketing .bottom-cta .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   margin-bottom: 10px
 }
 
@@ -954,7 +954,7 @@ html {
   gap: 24px;
   border-top: 1px solid var(--ss-border);
   padding: 25px 0;
-  font-size: 12px
+  font-size: 14px
 }
 
 .marketing .footer .brand {
@@ -1002,7 +1002,7 @@ html {
 
 .marketing .course-card p {
   color: var(--ss-muted);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.7
 }
 
@@ -1012,7 +1012,7 @@ html {
 
 .marketing .course-status {
   color: var(--ss-accent)!important;
-  font-size: 11px!important;
+  font-size: 14px!important;
   font-weight: 700
 }
 
@@ -1229,7 +1229,7 @@ html {
 }
 
 .marketing .desktop-links {
-  font-size: 12px
+  font-size: 14px
 }
 
 .marketing .bottom-cta h2 {
@@ -1291,7 +1291,7 @@ html {
 .marketing .mobile-menu nav a {
   padding: 12px;
   border-radius: 6px;
-  font-size: 14px
+  font-size: 16px
 }
 
 .marketing .mobile-menu nav a:hover {
@@ -1309,13 +1309,13 @@ html {
 }
 
 .marketing .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 2.6px;
   margin-bottom: 18px
 }
 
 .marketing .intro {
-  font-size: 14px
+  font-size: 16px
 }
 
 .marketing .actions {
@@ -1324,7 +1324,7 @@ html {
 }
 
 .marketing .actions>a {
-  font-size: 12px;
+  font-size: 14px;
   padding: 13px 14px
 }
 
@@ -1338,7 +1338,7 @@ html {
 }
 
 .marketing .benefits b {
-  font-size: 9px
+  font-size: 14px
 }
 
 .marketing .benefits small {
@@ -1522,7 +1522,7 @@ html {
 }
 
 .marketing .section-heading p {
-  font-size: 12px
+  font-size: 14px
 }
 
 .marketing .bento-grid {
@@ -1595,7 +1595,7 @@ html {
 .marketing .footer p {
   width: 100%;
   order: 3;
-  font-size: 11px
+  font-size: 14px
 }
 
 .marketing .footer .brand {
@@ -1619,3 +1619,9 @@ html {
   transition: none!important;
   animation: none!important
 }}
+.marketing .intro { font-size:18px; }
+.marketing .feature-card p, .marketing .feature-card ul { font-size:16px; line-height:1.65; }
+.marketing .benefits { flex-wrap:wrap; }
+.marketing .benefits > div { min-width:160px; }
+.marketing .steps .step p { font-size:16px; }
+.marketing .steps .step h3 { font-size:17px; }

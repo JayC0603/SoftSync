@@ -1,0 +1,15 @@
+@inject IWebHostEnvironment HostEnvironment
+
+@if (HostEnvironment.WebRootFileProvider.GetFileInfo($"images/brand/{ImageName}").Exists)
+{
+    <figure class="ss-brand-image">
+        <img src="@($"/images/brand/{ImageName}")" alt="@Alt" width="1672" height="941" loading="lazy" decoding="async" />
+        <figcaption>@Caption</figcaption>
+    </figure>
+}
+
+@code {
+    [Parameter, EditorRequired] public string ImageName { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Alt { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Caption { get; set; } = string.Empty;
+}

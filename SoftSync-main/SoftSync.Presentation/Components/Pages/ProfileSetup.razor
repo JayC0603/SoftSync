@@ -4,6 +4,7 @@
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
+@using SoftSync.Common
 @using SoftSync.Common.Enums
 @inject IUserService UserService
 @inject IAssessmentService AssessmentService
@@ -67,10 +68,10 @@
                 case 1:
                     <label class="form-label tw:font-medium">@L["wizard.about.ageGroup"]</label>
                     <div class="tw:grid tw:grid-cols-2 tw:sm:grid-cols-4 tw:gap-3 tw:mb-6">
-                        @foreach (var ag in ageGroups)
+                        @foreach (var ag in ProfileAgeGroups.Options)
                         {
                             <button class="wiz-choice @(ageGroup == ag.Key ? "selected" : "")" @onclick="() => SetAgeGroup(ag.Key)">
-                                @L[ag.Value]
+                                @L[ag.LabelKey]
                             </button>
                         }
                     </div>
@@ -140,13 +141,13 @@
 
             @if (step < LastStep)
             {
-                <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="Next" disabled="@(!CanAdvance)">
+                <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="Next" disabled="@(!stateRestored || !CanAdvance)">
                     @L["wizard.next"] <i class="bi bi-arrow-right tw:ms-2"></i>
                 </button>
             }
             else
             {
-                <button class="ss-btn-primary tw:px-8 tw:py-3 tw:w-full tw:text-lg" @onclick="Finish">
+                <button class="ss-btn-primary tw:px-8 tw:py-3 tw:w-full tw:text-lg" @onclick="Finish" disabled="@(!stateRestored)">
                     <i class="bi bi-rocket-takeoff tw:me-2"></i> @L["wizard.start"]
                 </button>
             }
@@ -161,19 +162,11 @@
     private int userId;
     private Gender mascotGender = Gender.Unspecified;
     private string firstName = "";
-    private string ageGroup = "";
+    private string ageGroup => ProfileAgeGroups.ForAge(user.Age);
     private bool stateRestored;
 
     private IEnumerable<SkillDto>? skills;
     private readonly List<int> selectedSkillIds = new();
-
-    private readonly (string Key, string Value)[] ageGroups =
-    {
-        ("<18", "wizard.age.under18"),
-        ("18-22", "wizard.age.1822"),
-        ("23-27", "wizard.age.2327"),
-        ("28+", "wizard.age.28plus")
-    };
 
     private readonly (string Key, string Value)[] goals =
     {
@@ -186,7 +179,7 @@
     private bool CanAdvance => step switch
     {
         0 => !string.IsNullOrWhiteSpace(user.FullName),
-        1 => user.Gender != Gender.Unspecified || !string.IsNullOrEmpty(ageGroup),
+        1 => !string.IsNullOrEmpty(ageGroup),
         2 => !string.IsNullOrWhiteSpace(user.Goal),
         3 => selectedSkillIds.Any(),
         _ => true
@@ -233,14 +226,18 @@
         stateRestored = true;
         var saved = await JS.InvokeAsync<WizardState?>("ssWizard.get", userId);
         if (saved is null)
+        {
+            await InvokeAsync(StateHasChanged);
             return;
+        }
 
         step = Math.Clamp(saved.Step, 0, LastStep);
         user.FullName = saved.FullName;
-        user.Age = saved.Age;
+        user.Age = ProfileAgeGroups.ForAge(saved.Age) != "" ? saved.Age : user.Age;
         user.Gender = saved.Gender;
         user.Goal = saved.Goal;
-        ageGroup = saved.AgeGroup;
+        if (user.Age == 0 && ProfileAgeGroups.Options.Any(x => x.Key == saved.AgeGroup))
+            user.Age = ProfileAgeGroups.Select(saved.AgeGroup, user.Age);
         mascotGender = saved.Gender;
         firstName = FirstNameOf(saved.FullName);
         selectedSkillIds.Clear();
@@ -257,8 +254,7 @@
 
     private async Task SetAgeGroup(string group)
     {
-        ageGroup = group;
-        user.Age = group switch { "<18" => 17, "18-22" => 20, "23-27" => 25, _ => 30 };
+        user.Age = ProfileAgeGroups.Select(group, user.Age);
         await SaveWizardStateAsync();
     }
 
@@ -295,6 +291,12 @@
 
     private async Task Finish()
     {
+        if (string.IsNullOrEmpty(ageGroup))
+        {
+            step = 1;
+            await SaveWizardStateAsync();
+            return;
+        }
         await UserService.UpdateProfileAsync(userId, user);
         if (selectedSkillIds.Any())
         {

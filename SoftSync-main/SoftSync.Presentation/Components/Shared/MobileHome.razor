@@ -40,6 +40,7 @@
         }
     </section>
 
+
     <header class="mh-welcome">
         <div><h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1><p>@T("Tiếp tục hành trình học tập của bạn. Hôm nay chúng ta sẽ tiến bộ hơn!", "Continue your learning journey. Let's make a little progress today!")</p></div>
         <img src="@Asset("welcome-landscape")" class="mh-welcome-art" alt="" width="320" height="120" />
@@ -217,10 +218,14 @@
     </section>
 </div>
 
+<StrictMobileHome User="User" Items="Items" Mentors="mentors" MentorLoading="mentorLoading" MentorFailed="mentorFailed" RetryMentors="LoadMentorsAsync" />
+
 @code {
     [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
     private string query = string.Empty;
+    private string? mobileSkill;
+    private void PickMobileSkill(string key) => mobileSkill = key;
     private const int AchievementPreviewCount = 1;
     private bool achievementsExpanded;
     private void ToggleAchievements() => achievementsExpanded = !achievementsExpanded;

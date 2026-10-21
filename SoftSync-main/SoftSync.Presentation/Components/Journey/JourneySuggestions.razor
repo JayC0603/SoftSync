@@ -1,0 +1,26 @@
+@namespace SoftSync.Presentation.Components.Journey
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+
+@if (Suggestions.Count > 0)
+{
+    <section class="vm-suggestions"><header><h2>@T("Gợi ý học tiếp", "Continue exploring")</h2><a class="vm-link" href="/roadmap">@T("Xem tất cả", "View all")<i class="bi bi-chevron-right" aria-hidden="true"></i></a></header><div>
+        @foreach (var item in Suggestions)
+        {
+            <a href="@($"/roadmap?skill={Uri.EscapeDataString(SkillTheme.KeyFor(item))}")"><span class="vm-suggestion-art"><i class="bi @SkillTheme.For(SkillTheme.KeyFor(item)).Icon" aria-hidden="true"></i></span><span><strong>@item.Title</strong><small><i class="bi bi-book" aria-hidden="true"></i>@item.TotalActivityCount @T("hoạt động", "activities")</small><em>@T("Trong lộ trình của bạn", "In your roadmap")</em></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        }
+    </div></section>
+}
+@code {
+    [Parameter] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
+    [Parameter] public bool Vietnamese { get; set; } = true;
+    private IReadOnlyList<RoadmapItemDto> Suggestions
+    {
+        get
+        {
+            var ordered = VietnamJourney.Order(Items);
+            return ordered.Where((item, index) => !item.IsCompleted && JourneyProgress.State(item, index, JourneyProgress.ActiveIndex(ordered), RoadmapReviewMode.Enabled) != JourneyState.Locked).Take(2).ToList();
+        }
+    }
+    private string T(string vi, string en) => Vietnamese ? vi : en;
+}

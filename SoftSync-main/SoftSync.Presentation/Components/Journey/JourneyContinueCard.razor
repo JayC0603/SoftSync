@@ -1,0 +1,32 @@
+@namespace SoftSync.Presentation.Components.Journey
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+
+@if (Item is { } item)
+{
+    <article class="vm-continue">
+        <span class="vm-level" aria-hidden="true">@Ordinal</span>
+        <div class="vm-continue-copy"><div class="vm-continue-heading"><h2>@item.Title</h2><span class="vm-status"><i class="bi @(Locked ? "bi-lock" : item.IsCompleted ? "bi-check-circle" : "bi-clock")" aria-hidden="true"></i>@(Locked ? T("Chưa mở khóa", "Locked") : item.IsCompleted ? T("Hoàn thành", "Completed") : T("Đang học", "Learning"))</span></div><p>@(string.IsNullOrWhiteSpace(item.Objective) ? item.Description : item.Objective)</p><div class="vm-continue-progress"><progress value="@item.CompletedActivityCount" max="@Math.Max(1, item.TotalActivityCount)" aria-label="@T("Tiến độ bài học", "Lesson progress")"></progress><span>@item.CompletedActivityCount / @item.TotalActivityCount @T("hoạt động", "activities")</span></div></div>
+        @if (Locked)
+        {
+            <button class="vm-primary" disabled><i class="bi bi-lock" aria-hidden="true"></i>@T("Hoàn thành bài trước để mở khóa", "Complete the previous lesson to unlock")</button>
+        }
+        else
+        {
+            <a class="vm-primary" href="@($"/roadmap/lecture/{UserId}/{item.Id}?step={JourneyProgress.ResumeStep(item)}")"><i class="bi bi-play-fill" aria-hidden="true"></i>@(item.IsCompleted ? T("Xem lại bài học", "Review lesson") : T("Tiếp tục học", "Continue learning"))<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        }
+    </article>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
+    [Parameter] public string? SelectedSkill { get; set; }
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public bool Vietnamese { get; set; } = true;
+    private IReadOnlyList<RoadmapItemDto> Ordered => VietnamJourney.Order(Items);
+    private RoadmapItemDto? Item => Ordered.Where(x => SelectedSkill is null || SkillTheme.KeyFor(x) == SelectedSkill).FirstOrDefault(x => !x.IsCompleted)
+        ?? Ordered.LastOrDefault(x => SelectedSkill is null || SkillTheme.KeyFor(x) == SelectedSkill);
+    private int Ordinal => Item is null ? 0 : Ordered.Where(x => SkillTheme.KeyFor(x) == SkillTheme.KeyFor(Item)).ToList().FindIndex(x => x.Id == Item.Id) + 1;
+    private bool Locked => Item is { } item && JourneyProgress.State(item, Ordered.ToList().IndexOf(item), JourneyProgress.ActiveIndex(Ordered), RoadmapReviewMode.Enabled) == JourneyState.Locked;
+    private string T(string vi, string en) => Vietnamese ? vi : en;
+}

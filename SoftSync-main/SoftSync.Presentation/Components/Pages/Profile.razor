@@ -89,8 +89,8 @@
                     <div class="tw:font-medium">@email</div>
                 </div>
                 <div>
-                    <div class="text-muted tw:text-sm">@L["profile.age"]</div>
-                    <div class="tw:font-medium">@user.Age</div>
+                    <div class="text-muted tw:text-sm">@L["wizard.about.ageGroup"]</div>
+                    <div class="tw:font-medium">@(ProfileAgeGroups.LabelKey(user.Age) is { Length: > 0 } ageLabel ? L[ageLabel] : "—")</div>
                 </div>
                 <div class="tw:sm:col-span-2">
                     <div class="text-muted tw:text-sm">@L["profile.goal"]</div>

@@ -34,7 +34,7 @@
 }
 
 .ranking-controlbar-stat span {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
 }
 
@@ -53,7 +53,7 @@
 }
 
 .ranking-controlbar-field > span {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-gray);
   text-transform: uppercase;
@@ -66,7 +66,7 @@
 }
 
 .ranking-controlbar-jd p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dark);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -76,13 +76,13 @@
 .ranking-controlbar-select {
   height: 32px;
   padding: 0 28px 0 10px;
-  font-size: 13px;
+  font-size: 14px;
   min-width: 200px;
   max-width: 260px;
 }
 
 .ranking-controlbar-elapsed {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
   font-variant-numeric: tabular-nums;
 }
@@ -156,7 +156,7 @@
 }
 
 .ranking-tabs button {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   padding: 0 14px;
   letter-spacing: 0;
@@ -235,7 +235,7 @@
 }
 
 .ranking-selected-info strong {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dark);
   font-weight: 500;
   overflow: hidden;
@@ -244,7 +244,7 @@
 }
 
 .ranking-selected-info span {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-gray);
   margin-top: 1px;
 }
@@ -282,7 +282,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
 }
 
@@ -290,7 +290,7 @@
   background: transparent;
   border: none;
   color: var(--primary-color);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   padding: 4px 8px;
@@ -344,7 +344,7 @@
 }
 
 .ranking-progress-label {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
   white-space: nowrap;
 }
@@ -390,7 +390,7 @@
   min-width: 36px;
   font-weight: 600;
   color: var(--text-dark);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .ranking-match-dot {
@@ -440,7 +440,7 @@
   border-radius: 10px;
   padding: 6px 12px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   min-width: 50px;
   text-align: center;
 }
@@ -462,7 +462,7 @@
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-gray);
 }
 
@@ -492,7 +492,7 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -519,7 +519,7 @@
   border: none;
   color: var(--text-gray);
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14px;
   padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
@@ -548,7 +548,7 @@
 }
 
 .tab-badge {
-  font-size: 10px;
+  font-size: 14px;
   padding: 1px 6px;
   border-radius: 10px;
   background: rgba(0,0,0,0.1);
@@ -592,7 +592,7 @@
 }
 
 .ranking-detail-json h4 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-dark);
   margin-bottom: 10px;

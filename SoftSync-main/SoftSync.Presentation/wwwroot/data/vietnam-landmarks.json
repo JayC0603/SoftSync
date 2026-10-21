@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "license": "CC0-1.0",
+    "source": "Wikidata P625; city representative points, not individual monument coordinates or administrative boundaries",
+    "verified": "2026-10-20"
+  },
+  "features": [
+    {"type":"Feature","id":"hanoi","properties":{"id":"hanoi","name":"Hà Nội","nameEn":"Hanoi","kind":"city","decoration":"pagoda","source":"https://www.wikidata.org/wiki/Q1858"},"geometry":{"type":"Point","coordinates":[105.8411694,21.0245]}},
+    {"type":"Feature","id":"danang","properties":{"id":"danang","name":"Đà Nẵng","nameEn":"Da Nang","kind":"city","decoration":"bridge","source":"https://www.wikidata.org/wiki/Q25282"},"geometry":{"type":"Point","coordinates":[108.2097222,16.0694444]}},
+    {"type":"Feature","id":"hcm","properties":{"id":"hcm","name":"TP. Hồ Chí Minh","nameEn":"Ho Chi Minh City","kind":"city","decoration":"skyline","source":"https://www.wikidata.org/wiki/Q1854"},"geometry":{"type":"Point","coordinates":[106.7019444,10.7755556]}},
+    {"type":"Feature","id":"hoangsa","properties":{"id":"hoangsa","name":"Quần đảo Hoàng Sa","nameEn":"Hoang Sa Islands","kind":"archipelago","source":"https://www.wikidata.org/wiki/Q274388"},"geometry":{"type":"Point","coordinates":[112,16.5]}},
+    {"type":"Feature","id":"truongsa","properties":{"id":"truongsa","name":"Quần đảo Trường Sa","nameEn":"Truong Sa Islands","kind":"archipelago","source":"https://www.wikidata.org/wiki/Q215664"},"geometry":{"type":"Point","coordinates":[114,10]}}
+  ]
+}

@@ -7,6 +7,7 @@
 @using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
+@using SoftSync.Presentation.Components.Journey
 @inject IRoadmapService RoadmapService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
@@ -31,6 +32,10 @@
     }
     else
     {
+        <div class="vn-full-map">
+            <VietnamAdventureMap Items="items" UserId="userId" Vietnamese="@(L.Current == AppLanguage.Vi)" SelectedSkill="@selectedSkill" SelectedSkillChanged="PickSkill" />
+            <JourneyContinueCard Items="items" UserId="userId" Vietnamese="@(L.Current == AppLanguage.Vi)" SelectedSkill="@selectedSkill" />
+        </div>
         <header class="ad-page-head">
             <div>
                 <span class="ad-kicker">@Ui("SOFTSYNC · LEVEL JOURNEY")</span>

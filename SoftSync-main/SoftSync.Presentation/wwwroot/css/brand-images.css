@@ -1,0 +1,26 @@
+html body .ss-public-site .ss-brand-image {
+    display: block;
+    width: 100%;
+    max-width: 1216px;
+    margin: clamp(24px, 4vw, 56px) auto;
+    padding: 0;
+}
+html body .ss-public-site .ss-brand-image img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+}
+html body .ss-public-site .ss-brand-image figcaption {
+    margin-top: 14px;
+    padding-inline: 4px;
+    color: var(--ss-text-muted, #626a7f);
+    font-size: 14px;
+    line-height: 1.65;
+    text-align: left;
+}
+@media (max-width: 600px) {
+    html body .ss-public-site .ss-brand-image img { border-radius: 10px; }
+    html body .ss-public-site .ss-brand-image figcaption { font-size: 13px; }
+}

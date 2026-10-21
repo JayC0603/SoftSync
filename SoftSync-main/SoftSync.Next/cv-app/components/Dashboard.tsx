@@ -357,6 +357,7 @@ export default function Dashboard() {
               onConfirmSave={handleConfirmSave}
               onRemove={removeFile}
               onToggleSavedCvs={handleToggleSavedCvs}
+              onNavigate={setActiveMenu}
             />
           )}
 

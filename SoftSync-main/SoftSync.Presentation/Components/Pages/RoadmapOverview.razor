@@ -15,11 +15,10 @@
 @inject ILogger<RoadmapOverview> Logger
 
 <PageTitle>@Tx("Learn", "Học tập") · SoftSync</PageTitle>
-<HeadContent>
+@* Keep page styles attached during enhanced navigation from the interactive dashboard. *@
     <link rel="stylesheet" href="css/adventure-map.css?v=20261020-mobile-trail-v2" />
     <link rel="stylesheet" href="css/learning-journey.css?v=20261019-light" media="(min-width: 901px)" />
     <link rel="stylesheet" href="css/learn-v3.css?v=20261019-v4-mobile" />
-</HeadContent>
 
 <section class="learning-journey learn-desktop" style="@Theme.Css">
     @if (loading)
@@ -105,6 +104,9 @@
         else
         {
             <div id="lv-mine" role="tabpanel" aria-labelledby="lv-mine-tab" class="lv-mine">
+                <VietnamAdventureMap Items="items" UserId="UserId" Vietnamese="Vietnamese" SelectedSkill="@SelectedKey" SelectedSkillChanged="SelectSkill" />
+                <JourneyContinueCard Items="items" UserId="UserId" Vietnamese="Vietnamese" SelectedSkill="@SelectedKey" />
+                <JourneySuggestions Items="items" Vietnamese="Vietnamese" />
                 <section class="lv-hero" aria-labelledby="lv-course-title">
                     <div class="lv-hero-copy"><span class="lv-badge">@(SelectedState == JourneyState.Locked ? Tx("LOCKED", "CHƯA MỞ KHÓA") : SelectedItem.IsCompleted ? Tx("COMPLETED", "HOÀN THÀNH") : Tx("LEARNING", "ĐANG HỌC"))</span><h2 id="lv-course-title">@CategoryName(SelectedItem)</h2><p>@Tx("Level", "Cấp độ") @SelectedOrdinal.ToString("00") · @WeekTitle(SelectedItem, SelectedOrdinal)</p></div>
                     <img class="lv-hero-art" src="/images/learn-v4/hero-syncy.png" alt="" width="1426" height="1079" fetchpriority="high" />
@@ -119,9 +121,6 @@
                     }
                     else if (SelectedState == JourneyState.Locked) { <p class="lv-empty">@Tx("Complete the current level to unlock these activities.", "Hoàn thành cấp độ hiện tại để mở khóa các hoạt động này.")</p> }
                     else { <p class="lv-empty">@Tx("You have completed the activities in this level.", "Bạn đã hoàn thành các hoạt động trong cấp độ này.")</p> }
-                </section>
-                <section aria-labelledby="lv-journey-title"><header class="lv-section-heading"><h2 id="lv-journey-title">@Tx("Your journey", "Hành trình của bạn")</h2></header>
-                    <AdventureMap BackgroundImage="/images/journey/skill-map-mountains-v1.png" LightBackgroundImage="/images/journey/skill-map-mountains-light-v1.png" Checkpoints="SharedCheckpoints" SelectedItemId="SelectedItem.Id" Vietnamese="Vietnamese" OnSelect="OpenCheckpoint" />
                 </section>
                 <section id="lv-activities" aria-labelledby="lv-activities-title"><header class="lv-section-heading"><h2 id="lv-activities-title">@Tx("Activities in this level", "Bài học trong cấp độ này")</h2><strong>@SelectedItem.CompletedActivityCount / @SelectedItem.TotalActivityCount</strong></header><p class="lv-section-description">@Tx("Complete each activity to unlock the next step.", "Hoàn thành từng hoạt động để mở khóa bước tiếp theo.")</p>
                     <div class="lv-activity-list">

@@ -12,8 +12,9 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: false,
     rollupOptions: {
+      preserveEntrySignatures: 'strict',
       // Single JS entry that imports the stylesheet; Vite emits app.js + app.css.
-      input: { app: 'Scripts/main.js' },
+      input: { app: 'Scripts/main.js', 'vietnam-map': 'Scripts/vietnam-map.js' },
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
