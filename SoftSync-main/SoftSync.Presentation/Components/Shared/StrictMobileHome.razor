@@ -17,47 +17,87 @@
             </div>
         }
     </section>
-    <header class="sh-greeting"><h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1><p>@T("Tiếp tục hành trình phát triển kỹ năng của bạn.", "Continue your skills development journey.")</p><img src="/images/home-v3/welcome-landscape.webp" alt="" /></header>
-    <a class="sh-goal sh-card" href="@ContinueUrl"><i class="bi bi-bullseye" aria-hidden="true"></i><span><strong>@T("Mục tiêu hôm nay", "Today's goal")</strong><small>@Goal</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+    <header class="sh-greeting">
+        <h1>@T($"Chào mừng trở lại, {Name}!", $"Welcome back, {Name}!") <span aria-hidden="true">👋</span></h1>
+        <p>@T("Tiếp tục hành trình học tập của bạn.", "Continue your learning journey.")<br />@T("Hôm nay chúng ta sẽ tiến bộ hơn!", "Let's make progress today!")</p>
+        <img src="/images/home-approved/welcome_vietnam_mountain.webp" alt="" />
+    </header>
+    <section class="sh-goal sh-card">
+        <div><h2>@T("Mục tiêu hôm nay", "Today's goal")</h2><p>@(Current is {} goalItem ? L.Ui(goalItem.Title) : Goal)</p>@if(Current is not null) { <small>@(AllDone ? T("Nhìn lại thành quả học tập của bạn.", "Reflect on your learning progress.") : T("Hoàn thành 1 bài học để duy trì tiến độ.", "Complete a lesson to keep progressing."))</small> }</div>
+        <a href="@ContinueUrl">@T("Xem chi tiết", "View details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+    </section>
     <section class="sh-continue sh-card" aria-labelledby="sh-continue-title">
-        <header><h2 id="sh-continue-title">@T("Tiếp tục học", "Continue learning")</h2>@if (Current is not null) { <span class="sh-status">@(AllDone ? T("Hoàn thành", "Completed") : Locked(Current) ? T("Chưa mở khóa", "Locked") : T("Đang học", "Learning"))</span> }</header>
-        @if (Current is { } current)
+        <img class="sh-lesson-art" src="/images/home-approved/hero_student_laptop.webp" alt="" />
+        <div class="sh-lesson-copy">
+            <h2 id="sh-continue-title">@T("BÀI HỌC HIỆN TẠI", "CURRENT LESSON")</h2>
+            @if (Current is {} current)
+            {
+                <h3>@L.Ui(current.Title)</h3>
+                <p><strong>@T($"Chặng {Ordinal(current)}/{SelectedItems.Count}", $"Level {Ordinal(current)}/{SelectedItems.Count}")</strong><br />@L.Ui(current.SkillName)</p>
+                <p>@T($"{current.CompletedActivityCount}/{current.TotalActivityCount} hoạt động đã hoàn thành", $"{current.CompletedActivityCount}/{current.TotalActivityCount} activities completed")</p>
+            }
+            else { <p class="sh-lesson-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p> }
+            <a class="sh-primary" href="@ContinueUrl">@(Current is null ? T("Bắt đầu đánh giá", "Start assessment") : AllDone ? T("Xem thành quả", "View progress") : Locked(Current) ? T("Xem lộ trình", "View roadmap") : T("Tiếp tục bài học", "Continue lesson")) <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        </div>
+    </section>
+    <section class="sh-stats" aria-label="@T("Thống kê học tập", "Learning statistics")">
+        <a href="/progress"><strong>@Items.Count(x => x.IsCompleted)</strong><small>@T("Bài học hoàn thành", "Lessons completed")</small></a>
+        <a href="/progress"><strong>@Completed</strong><small>@T("Hoạt động hoàn thành", "Activities completed")</small></a>
+        <a href="/progress"><strong>@User.ExperiencePoints</strong><small>@T("XP tích lũy", "Total XP")</small></a>
+        <a href="/progress"><strong>@User.Level</strong><small>@T("Cấp độ hiện tại", "Current level")</small></a>
+    </section>
+    <section class="sh-journey sh-card">
+        <header class="sh-heading"><h2>@T("Hành trình phát triển kỹ năng", "Your skills journey")</h2><a href="@MapUrl">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        @foreach(var track in Ordered.GroupBy(SkillTheme.KeyFor))
         {
-            <div class="sh-continue-body"><img src="@Thumbnail(current)" alt="" /><div><h3>@L.Ui(current.SkillName)</h3><p>@T($"Chặng {Ordinal(current)}/{SelectedItems.Count} · {L.Ui(current.Title)}", $"Level {Ordinal(current)}/{SelectedItems.Count} · {L.Ui(current.Title)}")</p><div class="sh-bar-row"><progress value="@current.ProgressPercent" max="100" aria-label="@T("Tiến độ bài học", "Lesson progress")"></progress><strong>@current.ProgressPercent%</strong></div></div></div>
+            var lessons = track.ToList();
+            var target = lessons.FirstOrDefault(x => x.IsNextRecommended && !x.IsCompleted && !Locked(x)) ?? lessons.FirstOrDefault(x => !x.IsCompleted && !Locked(x)) ?? lessons.LastOrDefault(x => x.IsCompleted) ?? lessons[0];
+            var done = lessons.Sum(x => x.CompletedActivityCount);
+            var total = lessons.Sum(x => x.TotalActivityCount);
+            var percent = RoadmapProgressCalculator.Percent(done, total);
+            <a class="sh-journey-row" href="@($"/roadmap?skill={Uri.EscapeDataString(track.Key)}")">
+                <img src="/images/home-approved/journey_mountains_student.webp" alt="" />
+                <div><h3>@L.Ui(string.IsNullOrWhiteSpace(target.SkillName) ? target.Title : target.SkillName)</h3><div class="sh-bar-row"><small>@T($"{(lessons.All(x=>x.IsCompleted) ? "Hoàn thành" : "Đang học")} · {done}/{total} hoạt động", $"{done}/{total} activities")</small><strong>@percent%</strong></div><progress value="@percent" max="100" aria-label="@L.Ui(target.SkillName)"></progress></div>
+            </a>
         }
-        else { <p class="sh-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p> }
-        <a class="sh-primary" href="@ContinueUrl"><i class="bi bi-play-fill" aria-hidden="true"></i>@(Current is null ? T("Bắt đầu đánh giá", "Start assessment") : AllDone ? T("Xem thành quả", "View progress") : Locked(Current) ? T("Xem lộ trình", "View roadmap") : T("Tiếp tục học", "Continue learning"))<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        @if(Items.Count == 0) { <p class="sh-empty">@T("Chưa có lộ trình học tập.", "No learning roadmap yet.") <a href="@ContinueUrl">@T("Bắt đầu đánh giá", "Start assessment")</a></p> }
     </section>
-    <section class="sh-map" aria-label="@T("Bản đồ hành trình của bạn", "Your journey map")">
-        <VietnamAdventureMap Items="Items" UserId="User.Id" Vietnamese="Vi" SelectedSkill="selectedSkill" SelectedSkillChanged="SelectSkill" Compact="true" />
+    <section class="sh-quick sh-card">
+        <header class="sh-heading"><h2>@T("Truy cập nhanh", "Quick access")</h2></header>
+        <div class="sh-quick-grid">
+            <a href="/progress"><img src="/images/home-approved/quick_progress.webp" alt="" /><span><strong>@T("Tiến độ", "Progress")</strong><small>@T("Xem quá trình học tập", "View learning progress")</small><i class="bi bi-chevron-right" aria-hidden="true"></i></span></a>
+            <a href="/resources"><img src="/images/home-approved/quick_resources.webp" alt="" /><span><strong>@T("Tài nguyên", "Resources")</strong><small>@T("Tài liệu, mẫu CV, biểu mẫu…", "Documents, CV templates…")</small><i class="bi bi-chevron-right" aria-hidden="true"></i></span></a>
+            <a href="@($"/assessment/{User.Id}")"><img src="/images/home-approved/quick_test.webp" alt="" /><span><strong>@T("Kiểm tra", "Assessment")</strong><small>@T("Bài kiểm tra kỹ năng", "Skills assessment")</small><i class="bi bi-chevron-right" aria-hidden="true"></i></span></a>
+            <a href="/community"><img src="/images/home-approved/quick_community.webp" alt="" /><span><strong>@T("Cộng đồng", "Community")</strong><small>@T("Kết nối và thảo luận", "Connect and discuss")</small><i class="bi bi-chevron-right" aria-hidden="true"></i></span></a>
+        </div>
     </section>
-    <section class="sh-progress"><header class="sh-heading"><h2>@T("Tiến độ tổng quan", "Overall progress")</h2><a href="/progress">@T("Chi tiết", "Details") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header><div class="sh-card"><div class="sh-overall"><div class="sh-ring" style="@($"--sh-percent:{Overall}%")" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Overall" aria-label="@T("Tiến độ toàn bộ lộ trình", "Overall roadmap progress")"><strong>@Overall%</strong></div><div><progress value="@Overall" max="100" aria-label="@T("Tiến độ tổng quan", "Overall progress")"></progress><p>@T($"Đã hoàn thành {Completed}/{Total} hoạt động", $"Completed {Completed}/{Total} activities")</p></div></div><div class="sh-stats"><a href="/roadmap"><i class="bi bi-book" aria-hidden="true"></i><span><strong>@ActiveSkills</strong><small>@T("Kỹ năng đang học", "Active skills")</small></span></a><a href="/progress"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><strong>@Completed</strong><small>@T("Hoạt động đã xong", "Activities completed")</small></span></a><a href="/progress"><i class="bi bi-fire" aria-hidden="true"></i><span><strong>@Streak</strong><small>@T("Ngày liên tiếp", "Day streak")</small></span></a></div></div></section>
-    <section class="sh-recommendation"><header class="sh-heading"><h2>@T("Đề xuất cho bạn", "Suggestions for you")</h2><a href="/roadmap">@T("Xem thêm", "Explore") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-        @if (Suggestion is { } suggestion) { <a class="sh-list-row sh-card" href="@Lesson(suggestion)"><img src="@Thumbnail(suggestion)" alt="" /><span><strong>@L.Ui(suggestion.Title)</strong><small>@L.Ui(suggestion.SkillName)</small><small>@L.Ui(suggestion.Objective)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }
-        else { <p class="sh-card sh-empty">@T("Chưa có đề xuất khác trong lộ trình của bạn.", "No other suggestions in your roadmap yet.")</p> }
+    <a class="sh-syncy sh-card" href="/assistant">
+        <img src="/images/home-approved/syncy_support.webp" alt="" />
+        <span><span class="sh-syncy-title"><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong><small>@T("Trợ lý AI của bạn", "Your AI assistant")</small></span><small>@T("Đặt câu hỏi, nhờ gợi ý lộ trình hoặc giải đáp thắc mắc về kỹ năng, nghề nghiệp nhé!", "Ask questions or get help with your roadmap, skills and career!")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i>
+    </a>
+    <section class="sh-recommendation sh-card"><header class="sh-heading"><h2>@T("Gợi ý dành cho bạn", "Suggestions for you")</h2><a href="/roadmap">@T("Xem thêm", "Explore") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        @if (Suggestion is {} suggestion) { <a class="sh-list-row" href="@Lesson(suggestion)"><img src="@Thumbnail(suggestion)" alt="" /><span><small class="sh-skill-label">@L.Ui(suggestion.SkillName)</small><strong>@L.Ui(suggestion.Title)</strong><small>@T($"{suggestion.CompletedActivityCount}/{suggestion.TotalActivityCount} hoạt động", $"{suggestion.CompletedActivityCount}/{suggestion.TotalActivityCount} activities")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }
+        else { <p class="sh-empty">@T("Chưa có đề xuất khác trong lộ trình của bạn.", "No other suggestions in your roadmap yet.")</p> }
     </section>
-    <section class="sh-quick"><header class="sh-heading"><h2>@T("Truy cập nhanh", "Quick access")</h2></header><div>
-        <a href="/progress"><img src="/images/home-v3/quick-progress.webp" alt="" /><strong>@T("Tiến độ", "Progress")</strong></a>
-        <a href="/resources"><img src="/images/home-v3/quick-resources.webp" alt="" /><strong>@T("Tài nguyên", "Resources")</strong></a>
-        <a href="@($"/assessment/{User.Id}")"><img src="/images/home-v3/quick-quiz.webp" alt="" /><strong>@T("Kiểm tra", "Assessment")</strong></a>
-        <a href="/community"><img src="/images/home-v3/quick-community.webp" alt="" /><strong>@T("Cộng đồng", "Community")</strong></a>
-        <a href="/assistant"><i class="bi bi-chat-dots-fill" aria-hidden="true"></i><strong>@T("Hỏi SYNCY", "Ask SYNCY")</strong></a>
-    </div></section>
-    <section class="sh-recent"><header class="sh-heading"><h2>@T("Hoạt động gần đây", "Recent activity")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header><div class="sh-card">
-        @foreach (var entry in Recent.Take(3)) { <a class="sh-list-row" href="@entry.Url"><img src="@Thumbnail(entry.Item)" alt="" /><span><strong>@entry.Title</strong><small>@L.Ui(entry.Item.SkillName)</small></span><time datetime="@entry.At.ToString("O")">@LocalDate(entry.At)</time><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }
-        @if (Recent.Count == 0) { <p class="sh-empty">@T("Chưa có hoạt động học tập được ghi nhận.", "No learning activity recorded yet.")</p> }
-    </div></section>
-    <section class="sh-mentors"><header class="sh-heading"><h2>@T("Đội ngũ cố vấn đồng hành", "Your mentor team")</h2><a href="/mentors">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-        @if (MentorLoading) { <p class="sh-card sh-empty" role="status">@T("Đang tải cố vấn…", "Loading mentors…")</p> }
-        else if (MentorFailed) { <p class="sh-card sh-empty">@T("Chưa thể tải cố vấn.", "Unable to load mentors.") <button @onclick="RetryMentors">@T("Thử lại", "Retry")</button></p> }
-        else { <div class="sh-mentor-grid">@foreach (var mentor in Mentors.Take(2)) { <a class="sh-card" href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" /><span><strong>@mentor.Name</strong><small>@L.Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }@if (Mentors.Count == 0) { <p class="sh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors available.")</p> }</div> }
+    <section class="sh-mentors sh-card"><header class="sh-heading"><h2>@T("Đội ngũ cố vấn đồng hành", "Your mentor team")</h2><a href="/mentors">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        @if (MentorLoading) { <p class="sh-empty" role="status">@T("Đang tải cố vấn…", "Loading mentors…")</p> }
+        else if (MentorFailed) { <p class="sh-empty">@T("Chưa thể tải cố vấn.", "Unable to load mentors.") <button @onclick="RetryMentors">@T("Thử lại", "Retry")</button></p> }
+        else { <div class="sh-mentor-grid">@foreach (var mentor in Mentors.Take(2)) { <a href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" /><span><strong>@mentor.Name</strong><small>@L.Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> }@if (Mentors.Count == 0) { <p class="sh-empty">@T("Chưa có cố vấn khả dụng.", "No mentors available.")</p> }</div> }
     </section>
-    <section class="sh-achievements"><header class="sh-heading"><h2>@T("Thành tích gần đây", "Recent achievements")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
-        @if (Achievement is { } achievement) { <a class="sh-list-row sh-card" href="@achievement.Url"><i class="bi bi-trophy-fill sh-trophy" aria-hidden="true"></i><span><strong>@achievement.Title</strong><small>@L.Ui(achievement.Item.Title)</small></span><time datetime="@achievement.At.ToString("O")">@LocalDate(achievement.At)</time><i class="bi bi-check-circle-fill" aria-hidden="true"></i></a> }
-        else { <p class="sh-card sh-empty">@T("Hoàn thành bài học đầu tiên để ghi lại thành tích của bạn.", "Complete your first lesson to record an achievement.")</p> }
+    <section class="sh-achievements sh-card"><header class="sh-heading"><h2>@T("Thành tích gần đây", "Recent achievements")</h2><a href="/progress">@T("Xem tất cả", "View all") <i class="bi bi-chevron-right" aria-hidden="true"></i></a></header>
+        <div id="sh-achievement-list">
+        @foreach(var achievement in Achievements.Take(achievementsExpanded ? int.MaxValue : 1)) { <a @key="achievement.Key" class="sh-list-row" href="@achievement.Url"><i class="bi bi-trophy-fill sh-trophy" aria-hidden="true"></i><span><strong>@achievement.Title</strong><small>@L.Ui(achievement.Item.Title)</small></span><time datetime="@achievement.At.ToString("O")">@LocalDate(achievement.At)</time><i class="bi bi-check-circle-fill" aria-hidden="true"></i></a> }
+        </div>
+        @if(Achievements.Count == 0) { <p class="sh-empty">@T("Hoàn thành bài học đầu tiên để ghi lại thành tích của bạn.", "Complete your first lesson to record an achievement.")</p> }
+        @if(Achievements.Count > 1) { <button class="sh-show-more" aria-expanded="@achievementsExpanded.ToString().ToLowerInvariant()" aria-controls="sh-achievement-list" @onclick="() => achievementsExpanded = !achievementsExpanded">@(achievementsExpanded ? T("Thu gọn", "Show less") : T($"Xem thêm ({Achievements.Count - 1})", $"Show more ({Achievements.Count - 1})")) <i class="bi @(achievementsExpanded ? "bi-chevron-up" : "bi-chevron-down")" aria-hidden="true"></i></button> }
     </section>
-    <section class="sh-quote sh-card"><i class="bi bi-quote" aria-hidden="true"></i><blockquote><p>@T("“Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.”", "“Every small step today builds a better version of you tomorrow.”")</p><cite>— SYNCY</cite></blockquote><img src="/images/home-v3/quote-landscape.webp" alt="" /></section>
-    <footer class="sh-footer"><div class="sh-footer-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong><small>@T("Học kỹ năng mềm cùng AI.", "Learn soft skills with AI.")</small></div><nav aria-label="@T("Thông tin SoftSync", "About SoftSync")"><a href="/about">@T("Về SoftSync", "About SoftSync")</a><span aria-disabled="true" title="TBD — URL">@T("Trợ giúp", "Help")</span><span aria-disabled="true" title="TBD — URL">@T("Chính sách bảo mật", "Privacy")</span><span aria-disabled="true" title="TBD — URL">@T("Điều khoản", "Terms")</span></nav><div class="sh-footer-contact"><a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a><span aria-disabled="true" title="TBD — URL">@T("Liên hệ", "Contact")</span><button type="button" onclick="window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});document.getElementById('main-content')?.scrollTo({top:0})">@T("Về đầu trang", "Back to top") ↑</button></div><small>© @DateTime.UtcNow.AddHours(7).Year SoftSync</small></footer>
+    <section class="sh-quote sh-card"><i class="bi bi-quote" aria-hidden="true"></i><blockquote><p>@T("Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.", "Every small step today builds a better version of you tomorrow.")</p><cite>— SYNCY</cite></blockquote><img src="/images/home-approved/quote_landscape.webp" alt="" /></section>
+    <footer class="sh-footer">
+        <div class="sh-footer-top"><div class="sh-footer-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong><small>@T("Học kỹ năng mềm cùng AI.", "Learn soft skills with AI.")</small></div><a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a></div>
+        <nav aria-label="@T("Thông tin SoftSync", "About SoftSync")"><a href="/about">@T("Về chúng tôi", "About us")</a><a href="/mentors">Mentor</a><a href="/community">@T("Cộng đồng", "Community")</a><a href="/resources">@T("Tài nguyên", "Resources")</a></nav>
+        <nav aria-label="@T("Hỗ trợ và pháp lý", "Support and legal")"><span aria-disabled="true" title="TBD — URL">@T("Trợ giúp", "Help")</span><span aria-disabled="true" title="TBD — URL">@T("Chính sách bảo mật", "Privacy")</span><span aria-disabled="true" title="TBD — URL">@T("Điều khoản sử dụng", "Terms")</span><span aria-disabled="true" title="TBD — URL">@T("Liên hệ", "Contact")</span></nav>
+        <small class="sh-copyright">© @DateTime.UtcNow.AddHours(7).Year SoftSync</small>
+    </footer>
 </div>
 
 @code {
@@ -95,14 +135,19 @@
     private static IEnumerable<(DateTime At, int Step)> Stamps(RoadmapItemDto item) { var dates = new[] { item.VideoCompletedAtUtc, item.ScriptCompletedAtUtc, item.SummaryCompletedAtUtc, item.PracticeCompletedAtUtc, item.ScenarioCompletedAtUtc, item.ReflectionCompletedAtUtc }; for (var i = 0; i < dates.Length; i++) if (dates[i] is { } at) yield return (at, i + 1); }
     private int Streak { get { var days = Items.SelectMany(Stamps).Select(x => x.At.AddHours(7).Date).ToHashSet(); var today = DateTime.UtcNow.AddHours(7).Date; var cursor = days.Contains(today) ? today : today.AddDays(-1); var count = 0; while (days.Contains(cursor)) { count++; cursor = cursor.AddDays(-1); } return count; } }
     private string LocalDate(DateTime at) => at.AddHours(7).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-    private sealed record HomeEvent(RoadmapItemDto Item, string Title, DateTime At, string Url, bool Achievement);
+    private sealed record HomeEvent(RoadmapItemDto Item, string Title, DateTime At, string Url, bool Achievement, string Key);
     private List<HomeEvent> Events => Ordered.SelectMany(item => {
         var names = new[] { T("Video", "Video"), T("Nội dung", "Reading"), T("Tóm tắt", "Summary"), T("Quiz", "Quiz"), T("Thực hành", "Practice"), T("Phản tư", "Reflection") };
-        var events = Stamps(item).Select(x => new HomeEvent(item, $"{names[x.Step - 1]}: {L.Ui(item.Title)}", x.At, $"/roadmap/lecture/{User.Id}/{item.Id}?step={x.Step}", false)).ToList();
-        if (item.IsCompleted && Stamps(item).Any()) events.Add(new(item, T("Hoàn thành bài học", "Lesson completed"), Stamps(item).Max(x => x.At), Lesson(item), true));
-        events.AddRange(item.QuizHistory.Where(x => x.SubmittedAtUtc != default).Select(x => new HomeEvent(item, x.Passed ? T("Vượt qua kiểm tra", "Knowledge check passed") : T("Làm bài kiểm tra", "Knowledge check submitted"), x.SubmittedAtUtc, $"/roadmap/lecture/{User.Id}/{item.Id}?step=4", x.Passed)));
+        // A passing quiz writes both PracticeCompletedAtUtc and QuizHistory using
+        // the same timestamp. Render that persisted event once, preserving every
+        // distinct attempt (including multiple valid attempts on the same day).
+        var events = Stamps(item).Where(x => x.Step != 4 || !item.QuizHistory.Any(q => q.SubmittedAtUtc == x.At))
+            .Select(x => new HomeEvent(item, $"{names[x.Step - 1]}: {L.Ui(item.Title)}", x.At, $"/roadmap/lecture/{User.Id}/{item.Id}?step={x.Step}", false, $"{item.Id}:step:{x.Step}:{x.At.Ticks}")).ToList();
+        if (item.IsCompleted && Stamps(item).Any()) events.Add(new(item, T("Hoàn thành bài học", "Lesson completed"), Stamps(item).Max(x => x.At), Lesson(item), true, $"{item.Id}:completed"));
+        events.AddRange(item.QuizHistory.Where(x => x.SubmittedAtUtc != default).Select(x => new HomeEvent(item, x.Passed ? T("Vượt qua kiểm tra", "Knowledge check passed") : T("Làm bài kiểm tra", "Knowledge check submitted"), x.SubmittedAtUtc, $"/roadmap/lecture/{User.Id}/{item.Id}?step=4", x.Passed, $"{item.Id}:quiz:{x.AttemptNumber}:{x.SubmittedAtUtc.Ticks}")));
         return events;
     }).OrderByDescending(x => x.At).ToList();
-    private List<HomeEvent> Recent => Events.Where(x => !x.Achievement || x.Title != T("Hoàn thành bài học", "Lesson completed")).DistinctBy(x => (x.Item.Id, x.At, x.Url)).ToList();
-    private HomeEvent? Achievement => Events.FirstOrDefault(x => x.Achievement);
+    private List<HomeEvent> Recent => Events.Where(x => !x.Achievement || x.Key != $"{x.Item.Id}:completed").DistinctBy(x => x.Key).ToList();
+    private bool achievementsExpanded;
+    private List<HomeEvent> Achievements => Events.Where(x => x.Achievement).DistinctBy(x => x.Key).ToList();
 }
