@@ -145,10 +145,9 @@
             const max = track.scrollWidth - track.clientWidth;
             if (max <= 1) continue;
             const step = mentorStep(track);
-            const loopWidth = Number(track.dataset.loopCount || 0) * step;
-            if (compactHome && loopWidth > 0) {
-                if (track.scrollLeft >= loopWidth - 2) track.scrollTo({ left: track.scrollLeft - loopWidth, behavior: 'instant' });
-                track.scrollTo({ left: Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
+            if (compactHome) {
+                const atEnd = track.scrollLeft >= max - 2;
+                track.scrollTo({ left: atEnd ? 0 : Math.min(max, track.scrollLeft + step), behavior: atEnd ? 'instant' : 'smooth' });
                 continue;
             }
             track.scrollTo({ left: track.scrollLeft >= max - 2 ? 0 : Math.min(max, track.scrollLeft + step), behavior: 'smooth' });
