@@ -93,10 +93,17 @@
     </section>
     <section class="sh-quote sh-card"><i class="bi bi-quote" aria-hidden="true"></i><blockquote><p>@T("Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.", "Every small step today builds a better version of you tomorrow.")</p><cite>— SYNCY</cite></blockquote><img src="/images/home-approved/quote_landscape.webp" alt="" /></section>
     <footer class="sh-footer">
-        <div class="sh-footer-top"><div class="sh-footer-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong><small>@T("Học kỹ năng mềm cùng AI.", "Learn soft skills with AI.")</small></div><a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a></div>
+                <div class="sh-footer-top">
+            <div class="sh-footer-brand"><img src="/images/logo.png" alt="" /><strong>SoftSync</strong><small>@T("Học kỹ năng mềm cùng AI.", "Learn soft skills with AI.")</small></div>
+            <div class="sh-footer-socials" role="group" aria-label="@T("Kết nối SoftSync", "Connect with SoftSync")">
+                <a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+                <span role="link" aria-disabled="true" aria-label="YouTube" title="@T("YouTube — sẽ bổ sung liên kết", "YouTube — link coming soon")"><i class="bi bi-youtube" aria-hidden="true"></i></span>
+                <span role="link" aria-disabled="true" aria-label="Email" title="@T("Email — sẽ bổ sung địa chỉ", "Email — address coming soon")"><i class="bi bi-envelope-fill" aria-hidden="true"></i></span>
+            </div>
+        </div>
         <nav aria-label="@T("Thông tin SoftSync", "About SoftSync")"><a href="/about">@T("Về chúng tôi", "About us")</a><a href="/mentors">Mentor</a><a href="/community">@T("Cộng đồng", "Community")</a><a href="/resources">@T("Tài nguyên", "Resources")</a></nav>
         <nav aria-label="@T("Hỗ trợ và pháp lý", "Support and legal")"><span aria-disabled="true" title="TBD — URL">@T("Trợ giúp", "Help")</span><span aria-disabled="true" title="TBD — URL">@T("Chính sách bảo mật", "Privacy")</span><span aria-disabled="true" title="TBD — URL">@T("Điều khoản sử dụng", "Terms")</span><span aria-disabled="true" title="TBD — URL">@T("Liên hệ", "Contact")</span></nav>
-        <small class="sh-copyright">© @DateTime.UtcNow.AddHours(7).Year SoftSync</small>
+        <div class="sh-copyright"><small>© @DateTime.UtcNow.AddHours(7).Year SoftSync</small>@if (typeof(StrictMobileHome).Assembly.GetName().Version is {} version) { <small>@T("Phiên bản", "Version") @version.ToString(3)</small> }</div>
     </footer>
 </div>
 
