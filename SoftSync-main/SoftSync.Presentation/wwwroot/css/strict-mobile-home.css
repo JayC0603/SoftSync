@@ -81,7 +81,15 @@
  .sh-list-row { display:flex;align-items:center;gap:9px;min-height:64px;padding:6px 0; }.sh-list-row>img { flex:0 0 80px;width:80px;height:60px;border-radius:8px;object-fit:cover; }.sh-list-row>span { flex:1; }.sh-list-row strong { display:block;font-size:14px;line-height:1.45;overflow-wrap:anywhere; }.sh-list-row>i:last-child { flex-shrink:0;color:var(--sh-muted);font-size:14px; }.sh-list-row time { flex:0 0 auto;font-size:12px;color:var(--sh-muted); }
  .sh-home .sh-skill-label { color:var(--sh-blue);margin-bottom:4px; }
  .sh-mentor-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }.sh-mentor-grid>a { display:flex;align-items:center;gap:6px;padding:8px 6px;border:1px solid var(--sh-border);border-radius:10px; }.sh-mentor-grid img { flex:0 0 40px;width:40px;height:48px;border-radius:50%;object-fit:cover; }.sh-mentor-grid>a>span { flex:1; }.sh-mentor-grid strong { display:block;font-size:12px;line-height:1.4;overflow-wrap:anywhere; }.sh-mentor-grid small { margin-top:3px; }.sh-mentor-grid>a>i { font-size:12px;color:var(--sh-muted); }
+ .sh-mentor-grid.ss-mentor-carousel { grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 8px)/2);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none; }
+ .sh-mentor-grid.ss-mentor-carousel::-webkit-scrollbar { display:none; }
+ .sh-mentor-grid.ss-mentor-carousel>a { scroll-snap-align:start; }
+ .sh-mentor-grid.ss-mentor-carousel.is-dragging { cursor:grabbing;user-select:none;scroll-snap-type:none; }
+ .sh-mentor-grid.ss-mentor-carousel>.sh-empty { grid-column:1 / -1; }
  .sh-trophy { color:#e8a315;font-size:29px; }.sh-achievements .sh-list-row { flex-wrap:wrap; }.sh-achievements .sh-list-row>span { flex-basis:40%; }.sh-achievements .sh-list-row>i:last-child { color:#14a477; }
+ .sh-achievements .sh-list-row strong { font-size:16px;font-weight:700;line-height:1.4; }
+ html body .page .sh-home .sh-achievements .sh-list-row :is(small,time) { font-size:14px!important;line-height:1.5; }
+ .sh-home .sh-achievements .sh-show-more { font-size:13px;font-weight:600; }
  .sh-achievements .sh-list-row+.sh-list-row { border-top:1px solid var(--sh-border); }
  .sh-show-more { display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;border:1px solid var(--sh-border);border-radius:10px;background:var(--sh-soft);color:var(--sh-blue);font-weight:650;font-size:14px;cursor:pointer;margin-top:4px; }
  .sh-quote { position:relative;isolation:isolate;display:flex;gap:8px;align-items:flex-start;padding:16px 12px;overflow:hidden;min-height:104px; }.sh-quote>i { color:#2686fa;font-size:26px; }.sh-quote blockquote { width:64%; }.sh-quote blockquote p { color:var(--sh-ink)!important;font-size:14px!important;font-weight:600; }.sh-quote cite { display:block;margin-top:6px;font-size:12px;font-style:normal;font-weight:650; }.sh-quote>img { position:absolute;right:0;bottom:0;width:52%;height:100%;object-fit:cover;z-index:-1;mask-image:linear-gradient(to right,transparent,#000 48%); }
@@ -95,6 +103,7 @@
  html[data-theme="dark"] .sh-lesson-art,html[data-theme="dark"] .sh-greeting>img,html[data-theme="dark"] .sh-quote>img { opacity:.65; }
  html body .page .ss-main-content .sh-home .sh-search>div:first-child input { box-shadow:none!important;border:0!important;border-radius:0!important;background:transparent!important; }
  @media(max-width:359px) {
+ .sh-mentor-grid.ss-mentor-carousel { grid-auto-columns:100%; }
  .sh-home { gap:14px; }.sh-quick-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.sh-quick-grid img { height:66px; }.sh-mentor-grid { grid-template-columns:minmax(0,1fr); }.sh-stats { gap:5px; }.sh-stats>a { padding:10px 7px; }
  html body .page .sh-home h1 { font-size:22px!important; }html body .page .sh-home h2 { font-size:17px!important; }html body .page .sh-home .sh-continue h2 { font-size:12px!important; }
  .sh-heading { flex-wrap:wrap;gap:0 6px; }.sh-heading h2 { flex-basis:62%; }.sh-goal { padding:12px;flex-wrap:wrap; }.sh-goal>div { flex-basis:100%; }.sh-goal>a { margin-left:auto; }.sh-lesson-copy { width:67%; }.sh-lesson-art { width:45%; }.sh-journey-row { grid-template-columns:38% minmax(0,1fr);gap:8px; }

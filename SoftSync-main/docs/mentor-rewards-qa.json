@@ -1,0 +1,71 @@
+{
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 375,
+      "overflow": false,
+      "track": 329,
+      "card": 160.5,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "overflow": false,
+      "track": 344,
+      "card": 168,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    },
+    {
+      "theme": "light",
+      "width": 430,
+      "overflow": false,
+      "track": 384,
+      "card": 188,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "overflow": false,
+      "track": 329,
+      "card": 160.5,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "overflow": false,
+      "track": 344,
+      "card": 168,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    },
+    {
+      "theme": "dark",
+      "width": 430,
+      "overflow": false,
+      "track": 384,
+      "card": 188,
+      "title": "16px",
+      "body": "14px",
+      "more": "13px"
+    }
+  ],
+  "checks": [
+    "Mentor cards move left automatically; all real mentors available.",
+    "Keyboard focus pauses autoplay.",
+    "Arrow keys navigate the carousel.",
+    "Reduced motion disables autoplay."
+  ],
+  "errors": []
+}
