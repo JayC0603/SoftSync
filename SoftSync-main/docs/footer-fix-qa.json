@@ -1,0 +1,365 @@
+{
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 320,
+      "scroll": 320,
+      "footerHeight": 176,
+      "footerBottom": 735.8125,
+      "navTop": 746.625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 647.8125,
+          "bottom": 675.8125,
+          "right": 154
+        },
+        {
+          "x": 166,
+          "y": 647.8125,
+          "bottom": 675.8125,
+          "right": 306
+        },
+        {
+          "x": 14,
+          "y": 675.8125,
+          "bottom": 703.8125,
+          "right": 154
+        },
+        {
+          "x": 166,
+          "y": 675.8125,
+          "bottom": 703.8125,
+          "right": 306
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "light",
+      "width": 360,
+      "scroll": 360,
+      "footerHeight": 176,
+      "footerBottom": 749.59375,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.59375,
+          "bottom": 689.59375,
+          "right": 174
+        },
+        {
+          "x": 186,
+          "y": 661.59375,
+          "bottom": 689.59375,
+          "right": 346
+        },
+        {
+          "x": 14,
+          "y": 689.59375,
+          "bottom": 717.59375,
+          "right": 174
+        },
+        {
+          "x": 186,
+          "y": 689.59375,
+          "bottom": 717.59375,
+          "right": 346
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "scroll": 375,
+      "footerHeight": 176,
+      "footerBottom": 749.625,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.625,
+          "bottom": 689.625,
+          "right": 181.5
+        },
+        {
+          "x": 193.5,
+          "y": 661.625,
+          "bottom": 689.625,
+          "right": 361
+        },
+        {
+          "x": 14,
+          "y": 689.625,
+          "bottom": 717.625,
+          "right": 181.5
+        },
+        {
+          "x": 193.5,
+          "y": 689.625,
+          "bottom": 717.625,
+          "right": 361
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scroll": 390,
+      "footerHeight": 176,
+      "footerBottom": 750.046875,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 662.046875,
+          "bottom": 690.046875,
+          "right": 189
+        },
+        {
+          "x": 201,
+          "y": 662.046875,
+          "bottom": 690.046875,
+          "right": 376
+        },
+        {
+          "x": 14,
+          "y": 690.046875,
+          "bottom": 718.046875,
+          "right": 189
+        },
+        {
+          "x": 201,
+          "y": 690.046875,
+          "bottom": 718.046875,
+          "right": 376
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "light",
+      "width": 430,
+      "scroll": 430,
+      "footerHeight": 176,
+      "footerBottom": 749.671875,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.671875,
+          "bottom": 689.671875,
+          "right": 209
+        },
+        {
+          "x": 221,
+          "y": 661.671875,
+          "bottom": 689.671875,
+          "right": 416
+        },
+        {
+          "x": 14,
+          "y": 689.671875,
+          "bottom": 717.671875,
+          "right": 209
+        },
+        {
+          "x": 221,
+          "y": 689.671875,
+          "bottom": 717.671875,
+          "right": 416
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scroll": 320,
+      "footerHeight": 176,
+      "footerBottom": 735.8125,
+      "navTop": 746.625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 647.8125,
+          "bottom": 675.8125,
+          "right": 154
+        },
+        {
+          "x": 166,
+          "y": 647.8125,
+          "bottom": 675.8125,
+          "right": 306
+        },
+        {
+          "x": 14,
+          "y": 675.8125,
+          "bottom": 703.8125,
+          "right": 154
+        },
+        {
+          "x": 166,
+          "y": 675.8125,
+          "bottom": 703.8125,
+          "right": 306
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "dark",
+      "width": 360,
+      "scroll": 360,
+      "footerHeight": 176,
+      "footerBottom": 749.59375,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.59375,
+          "bottom": 689.59375,
+          "right": 174
+        },
+        {
+          "x": 186,
+          "y": 661.59375,
+          "bottom": 689.59375,
+          "right": 346
+        },
+        {
+          "x": 14,
+          "y": 689.59375,
+          "bottom": 717.59375,
+          "right": 174
+        },
+        {
+          "x": 186,
+          "y": 689.59375,
+          "bottom": 717.59375,
+          "right": 346
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "scroll": 375,
+      "footerHeight": 176,
+      "footerBottom": 749.625,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.625,
+          "bottom": 689.625,
+          "right": 181.5
+        },
+        {
+          "x": 193.5,
+          "y": 661.625,
+          "bottom": 689.625,
+          "right": 361
+        },
+        {
+          "x": 14,
+          "y": 689.625,
+          "bottom": 717.625,
+          "right": 181.5
+        },
+        {
+          "x": 193.5,
+          "y": 689.625,
+          "bottom": 717.625,
+          "right": 361
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scroll": 390,
+      "footerHeight": 176,
+      "footerBottom": 750.046875,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 662.046875,
+          "bottom": 690.046875,
+          "right": 189
+        },
+        {
+          "x": 201,
+          "y": 662.046875,
+          "bottom": 690.046875,
+          "right": 376
+        },
+        {
+          "x": 14,
+          "y": 690.046875,
+          "bottom": 718.046875,
+          "right": 189
+        },
+        {
+          "x": 201,
+          "y": 690.046875,
+          "bottom": 718.046875,
+          "right": 376
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    },
+    {
+      "theme": "dark",
+      "width": 430,
+      "scroll": 430,
+      "footerHeight": 176,
+      "footerBottom": 749.671875,
+      "navTop": 761.015625,
+      "legal": [
+        {
+          "x": 14,
+          "y": 661.671875,
+          "bottom": 689.671875,
+          "right": 209
+        },
+        {
+          "x": 221,
+          "y": 661.671875,
+          "bottom": 689.671875,
+          "right": 416
+        },
+        {
+          "x": 14,
+          "y": 689.671875,
+          "bottom": 717.671875,
+          "right": 209
+        },
+        {
+          "x": 221,
+          "y": 689.671875,
+          "bottom": 717.671875,
+          "right": 416
+        }
+      ],
+      "mainLinkCount": 4,
+      "social": "https://www.facebook.com/SoftSyncSpace"
+    }
+  ],
+  "errors": []
+}
