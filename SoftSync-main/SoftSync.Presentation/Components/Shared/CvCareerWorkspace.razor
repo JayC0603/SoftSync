@@ -1,6 +1,7 @@
-﻿@inherits LocalizedComponentBase
+@using CvReviewException = SoftSync.Presentation.Services.CvReviewException
+@inherits LocalizedComponentBase
 @implements IAsyncDisposable
-@inject CvReviewService Review
+@inject SoftSync.Presentation.Services.CvReviewService Review
 @using SoftSync.BLL.Services
 @using System.Text.Json
 @inject IServiceScopeFactory Scopes

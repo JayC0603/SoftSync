@@ -1,0 +1,1292 @@
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-blur: 18px;
+    --glass-highlight: rgba(255, 255, 255, 0.9);
+
+    /* Plain copies of the brand colors. Tailwind v4 tree-shakes unused @theme
+       vars out of the output, so the custom CSS below (gradient, aurora blobs)
+       can't rely on --color-brand* being emitted — define them here too. */
+    --color-brand: #6366f1;
+    --color-brand-dark: #4f46e5;
+    --color-brand-accent: #ec4899;
+    --color-brand-violet: #8b5cf6;
+
+    /* Primary action gradient — a vivid blue so buttons stand out against the
+       light aurora background. */
+    --gradient: linear-gradient(135deg, var(--color-brand), var(--color-brand-violet));
+    --gradient-action: linear-gradient(135deg, #2563eb, #3b82f6);
+
+    /* Shared interaction tokens: quick enough to feel immediate, consistent
+       across mouse, keyboard and touch input. */
+    --ss-motion-fast: 180ms;
+    --ss-focus-ring: #4f46e5;
+
+    /* SoftSync product design system — semantic tokens shared by every page. */
+    --ss-canvas: #f8f9fc;
+    --ss-surface: #ffffff;
+    --ss-surface-soft: #f3f4fb;
+    --ss-surface-accent: #eef2ff;
+    --ss-text: #151a35;
+    --ss-text-muted: #667085;
+    --ss-border: #e2e5ef;
+    --ss-primary: #4f46e5;
+    --ss-primary-hover: #4338ca;
+    --ss-success: #16845b;
+    --ss-warning: #b25e09;
+    --ss-danger: #c83c4b;
+    --ss-radius-sm: 10px;
+    --ss-radius-md: 14px;
+    --ss-radius-lg: 20px;
+    --ss-radius-xl: 28px;
+    --ss-shadow-sm: 0 6px 18px rgba(24, 32, 72, 0.06);
+    --ss-shadow-md: 0 16px 42px rgba(24, 32, 72, 0.09);
+    --ss-content-width: 1280px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--ss-focus-ring) 78%, white);
+    outline-offset: 3px;
+}
+
+.ss-skip-link {
+    position: fixed;
+    z-index: 10000;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--ss-radius-sm);
+    color: #fff;
+    background: var(--ss-primary);
+    box-shadow: var(--ss-shadow-md);
+    transform: translateY(-200%);
+}
+
+.ss-skip-link:focus {
+    color: #fff;
+    transform: translateY(0);
+}
+
+.ss-quiz-option {
+    overflow-wrap: anywhere;
+}
+
+.ss-quiz-option:focus-within {
+    border-color: var(--ss-primary) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-primary) 18%, transparent);
+}
+
+:where(button, a, [role="button"]) {
+    touch-action: manipulation;
+}
+
+html[data-theme="dark"] {
+    --ss-focus-ring: #c4b5fd;
+    --ss-canvas: #101225;
+    --ss-surface: #191b33;
+    --ss-surface-soft: #22243f;
+    --ss-surface-accent: #27264d;
+    --ss-text: #f5f6ff;
+    --ss-text-muted: #b1b8cc;
+    --ss-border: rgba(196, 181, 253, 0.18);
+    --ss-primary: #a78bfa;
+    --ss-primary-hover: #c4b5fd;
+    --ss-shadow-sm: 0 8px 22px rgba(2, 6, 23, 0.22);
+    --ss-shadow-md: 0 18px 50px rgba(2, 6, 23, 0.32);
+}
+
+/* ===== Liquid Glass System ===== */
+.ss-glass {
+    position: relative;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass);
+    box-shadow: var(--shadow-glass), inset 0 1px 0 var(--glass-highlight);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Specular highlight glancing off the top-left corner. */
+.ss-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Diagonal sheen drifting across the surface. */
+.ss-glass::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(105deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.35) 45%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.35) 55%,
+        rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    z-index: -1;
+    animation: var(--animate-sheen);
+}
+
+.ss-glass:hover {
+    background: var(--glass-bg-strong);
+    box-shadow: var(--shadow-glass-hover), inset 0 1px 0 var(--glass-highlight);
+    transform: translateY(-4px);
+}
+
+/* Cursor-reactive variant: --mx/--my set by main.js. */
+.ss-glass-interactive {
+    --mx: 50%;
+    --my: 50%;
+}
+
+.ss-glass-interactive::before {
+    background:
+        radial-gradient(20rem 20rem at var(--mx) var(--my), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 45%),
+        radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 55%);
+}
+
+/* Shared liquid surface for the app's standard cards and navigation. */
+:where(.ss-card, .ss-navbar, .assistant-chat-card, .dash-card) {
+    border: 1px solid color-mix(in srgb, var(--glass-border) 82%, transparent);
+    box-shadow:
+        0 14px 38px rgba(76, 29, 149, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -1px 0 rgba(124, 92, 252, 0.06);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    backdrop-filter: blur(22px) saturate(165%);
+}
+
+@supports (background: color-mix(in srgb, white 50%, transparent)) {
+    :where(.ss-card, .assistant-chat-card, .dash-card) {
+        background:
+            linear-gradient(145deg,
+                color-mix(in srgb, var(--glass-bg-strong) 78%, white 12%),
+                color-mix(in srgb, var(--glass-bg) 88%, #ddd6fe 12%));
+    }
+}
+
+html[data-theme="dark"] :where(.ss-card, .ss-navbar, .assistant-chat-card, .dash-card) {
+    box-shadow:
+        0 18px 46px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        inset 0 -1px 0 rgba(139, 92, 246, 0.08);
+}
+
+@keyframes ss-glass-sheen {
+    0%   { left: -60%; opacity: 0; }
+    35%  { opacity: 0.8; }
+    60%  { left: 130%; opacity: 0; }
+    100% { left: 130%; opacity: 0; }
+}
+
+@keyframes ss-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
+
+@keyframes ss-blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(4%, -6%) scale(1.08); }
+    66%      { transform: translate(-5%, 3%) scale(0.95); }
+}
+
+.ss-gradient-text {
+    background: var(--gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ss-glass::after { animation: none; }
+    .ss-glass::after { opacity: 0; }
+    .ss-glass, .ss-glass:hover { transition: none; }
+}
+
+/* ===== Dark theme =====
+   Applied by setting data-theme="dark" on <html> (see ssTheme in main.js).
+   Overrides the glass tokens + base surfaces so the liquid-glass system reads
+   correctly on a dark canvas. */
+html[data-theme="dark"] {
+    --glass-bg: rgba(32, 28, 60, 0.62);
+    --glass-bg-strong: rgba(24, 21, 47, 0.9);
+    --glass-border: rgba(139, 92, 246, 0.24);
+    --glass-highlight: rgba(255, 255, 255, 0.06);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.45);
+    --shadow-glass-hover: 0 16px 48px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+}
+html[data-theme="dark"] body { color: #ede9fe; }
+html[data-theme="dark"] .text-muted { color: #9ca3af !important; }
+html[data-theme="dark"] .ss-card,
+html[data-theme="dark"] .card { color: #e5e7eb; }
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+    background-color: rgba(45, 39, 86, 0.6);
+    color: #ede9fe;
+    border-color: rgba(139, 92, 246, 0.3);
+}
+html[data-theme="dark"] .form-control::placeholder { color: #6b7280; }
+html[data-theme="dark"] .btn-light { background: rgba(255,255,255,0.1); color: #e5e7eb; border-color: transparent; }
+
+/* Chat surfaces need stronger contrast than the generic glass cards. The legacy
+   app.css bubble styles use dark text, which becomes unreadable in dark mode. */
+.chat-assistant {
+    color: #1f2937;
+    background: rgba(255, 255, 255, 0.82);
+}
+.chat-user {
+    color: #ffffff;
+}
+html[data-theme="dark"] .chat-assistant {
+    color: #f8fafc !important;
+    background: rgba(15, 23, 42, 0.78) !important;
+    border-color: rgba(139, 92, 246, 0.34);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 30px rgba(2,6,23,0.22);
+}
+html[data-theme="dark"] .chat-bubble.text-muted {
+    color: #cbd5e1 !important;
+}
+html[data-theme="dark"] .input-group .form-control {
+    color: #f8fafc;
+    background-color: rgba(30, 27, 75, 0.72);
+    border-color: rgba(139, 92, 246, 0.45);
+}
+html[data-theme="dark"] .input-group .form-control::placeholder {
+    color: #c4b5fd;
+    opacity: 0.78;
+}
+
+/* Accessibility: user opted to reduce motion in Settings (mirrors the media query). */
+html[data-reduce-motion="1"] .ss-glass::after,
+html[data-reduce-motion="1"] .wiz-mascot,
+html[data-reduce-motion="1"] .ss-welcome-mascot { animation: none !important; }
+html[data-reduce-motion="1"] * { scroll-behavior: auto !important; }
+
+/* ===== Settings page ===== */
+.ss-settings-shell { max-width: 1200px; }
+.ss-settings-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .ss-settings-grid { grid-template-columns: 1fr; } }
+
+/* Sidebar card */
+.ss-side { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 1rem; }
+@media (max-width: 900px) { .ss-side { position: static; } }
+.ss-side-card {
+    background: rgba(255,255,255,0.65);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.25rem;
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-glass);
+}
+html[data-theme="dark"] .ss-side-card {
+    background: linear-gradient(160deg, rgba(38, 32, 74, 0.85), rgba(24, 21, 47, 0.85));
+    border-color: rgba(139, 92, 246, 0.22);
+}
+.ss-side-eyebrow {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--color-brand); text-transform: uppercase; margin-bottom: 0.4rem;
+}
+.ss-side-title {
+    font-size: 1.65rem; font-weight: 800; color: #1f2937;
+    display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.35rem;
+}
+html[data-theme="dark"] .ss-side-title { color: #f3f4f6; }
+.ss-side-star { color: var(--color-brand-accent); font-size: 1rem; }
+.ss-side-sub { color: #6b7280; font-size: 0.85rem; margin: 0 0 1rem; line-height: 1.4; }
+html[data-theme="dark"] .ss-side-sub { color: #9ca3af; }
+
+.ss-settings-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+.ss-settings-nav button {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.7rem 0.9rem; border-radius: 14px;
+    border: none; background: transparent; text-align: left;
+    font-weight: 600; color: #6b7280; cursor: pointer;
+    transition: all 0.15s ease; width: 100%; font-size: 0.92rem;
+}
+.ss-settings-nav button > i:first-child { font-size: 1.05rem; }
+.ss-nav-caret { margin-left: auto; opacity: 0; transition: opacity 0.15s ease; }
+.ss-settings-nav button:hover { background: rgba(99,102,241,0.08); color: var(--color-brand-dark); }
+.ss-settings-nav button.active { background: var(--gradient); color: #fff; box-shadow: 0 8px 20px rgba(99,102,241,0.35); }
+.ss-settings-nav button.active .ss-nav-caret { opacity: 1; }
+html[data-theme="dark"] .ss-settings-nav button { color: #9ca3af; }
+html[data-theme="dark"] .ss-settings-nav button:hover { color: #fff; }
+
+/* Go Premium promo */
+.ss-premium {
+    position: relative;
+    background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(139,92,246,0.14));
+    border: 1px solid rgba(236,72,153,0.25);
+    border-radius: 20px; padding: 1.1rem 1rem 1rem;
+    text-align: center;
+}
+.ss-premium-crown {
+    position: absolute; top: -12px; right: 14px;
+    transform: rotate(15deg);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+}
+/* Inline gold crown SVG (Bootstrap Icons has no crown glyph). */
+.ss-crown { vertical-align: -0.15em; }
+.ss-crown-corner { width: 1.6rem; height: 1.6rem; }
+
+/* Floating glass "saved" toast — centered near the top, runs its lifecycle
+   (appear → hold → fade away) once, then ends invisible. Remounted via @key
+   on each save so the animation replays only when something changes. */
+.ss-toast {
+    position: fixed;
+    top: 84px; left: 50%;
+    z-index: 300;
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    max-width: min(90vw, 460px);
+    padding: 0.85rem 1.4rem;
+    border-radius: 16px;
+    background: rgba(220, 252, 231, 0.75);
+    border: 1px solid rgba(134, 239, 172, 0.7);
+    color: #166534;
+    font-weight: 600; font-size: 0.9rem;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-glass-hover);
+    pointer-events: none;
+    opacity: 0;
+    animation: ss-toast-life 3.4s ease forwards;
+}
+.ss-toast i { font-size: 1.05rem; }
+html[data-theme="dark"] .ss-toast {
+    background: rgba(22, 101, 52, 0.4);
+    border-color: rgba(134, 239, 172, 0.4);
+    color: #bbf7d0;
+}
+@keyframes ss-toast-life {
+    0%   { opacity: 0; transform: translate(-50%, -16px) scale(0.96); }
+    10%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    82%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -12px) scale(0.98); }
+}
+html[data-reduce-motion="1"] .ss-toast { animation: ss-toast-life-rm 3.4s linear forwards; }
+@keyframes ss-toast-life-rm {
+    0%, 6% { opacity: 1; transform: translate(-50%, 0); }
+    88%, 100% { opacity: 0; transform: translate(-50%, 0); }
+}
+.ss-premium-title { font-size: 1rem; font-weight: 800; margin: 0 0 0.35rem; color: #1f2937; }
+html[data-theme="dark"] .ss-premium-title { color: #f3f4f6; }
+.ss-premium-sub { font-size: 0.78rem; color: #6b7280; margin: 0 0 0.85rem; line-height: 1.4; }
+html[data-theme="dark"] .ss-premium-sub { color: #9ca3af; }
+
+/* Main column */
+.ss-main { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Hero banner */
+.ss-hero {
+    position: relative; overflow: hidden;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 90% 20%, rgba(236,72,153,0.35), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(139,92,246,0.35), transparent 60%),
+        linear-gradient(120deg, rgba(224,231,255,0.9), rgba(243,232,255,0.9));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+}
+html[data-theme="dark"] .ss-hero {
+    background:
+        radial-gradient(circle at 90% 20%, rgba(236,72,153,0.35), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(139,92,246,0.45), transparent 60%),
+        linear-gradient(120deg, rgba(30,27,75,0.75), rgba(49,46,129,0.7));
+}
+.ss-hero-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 1.75rem;
+}
+@media (max-width: 720px) {
+    .ss-hero-inner { grid-template-columns: 1fr; text-align: center; }
+}
+.ss-hero-avatar {
+    position: relative;
+    width: 92px; height: 92px; border-radius: 999px;
+    background: var(--gradient); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem; flex-shrink: 0;
+    box-shadow: 0 10px 25px rgba(99,102,241,0.35);
+    margin: 0 auto;
+}
+.ss-hero-avatar .ss-avatar-img { width: 100%; height: 100%; border-radius: 999px; object-fit: cover; }
+.ss-hero-fallback { display: none; font-size: 2.4rem; }
+.ss-hero-avatar .ss-avatar-edit {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 32px; height: 32px; border-radius: 999px;
+    background: #fff; color: var(--color-brand);
+    border: 2px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.9rem;
+}
+
+.ss-hero-name-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+@media (max-width: 720px) { .ss-hero-name-row { justify-content: center; } }
+.ss-hero-name { font-size: 1.6rem; font-weight: 800; margin: 0; color: #1f2937; }
+html[data-theme="dark"] .ss-hero-name { color: #f9fafb; }
+.ss-hero-quote { margin: 0.4rem 0 0; font-style: italic; color: #6b7280; font-size: 0.92rem; max-width: 380px; }
+html[data-theme="dark"] .ss-hero-quote { color: #cbd5e1; }
+
+.ss-hero-stats { display: flex; gap: 1.25rem; }
+@media (max-width: 720px) { .ss-hero-stats { justify-content: center; } }
+.ss-stat { text-align: center; min-width: 60px; }
+.ss-stat-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; margin: 0 auto 0.35rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.ss-stat-icon--xp     { background: #eef2ff; color: #6366f1; }
+.ss-stat-icon--streak { background: #ffedd5; color: #ea580c; }
+.ss-stat-icon--badge  { background: #dcfce7; color: #16a34a; }
+.ss-stat-num { font-size: 1.4rem; font-weight: 800; color: #1f2937; line-height: 1; }
+html[data-theme="dark"] .ss-stat-num { color: #f9fafb; }
+.ss-stat-label { font-size: 0.75rem; color: #6b7280; margin-top: 0.15rem; }
+html[data-theme="dark"] .ss-stat-label { color: #9ca3af; }
+
+/* Flat card variant for panels below the hero */
+.ss-card--flat {
+    background: rgba(255,255,255,0.75);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-glass);
+}
+html[data-theme="dark"] .ss-card--flat {
+    background: linear-gradient(160deg, rgba(30, 27, 61, 0.9), rgba(20, 18, 40, 0.92));
+    border-color: rgba(139, 92, 246, 0.18);
+}
+
+.ss-panel-title { font-size: 1.15rem; font-weight: 800; margin: 0; color: #1f2937; }
+html[data-theme="dark"] .ss-panel-title { color: #f3f4f6; }
+.ss-section-heading { font-size: 0.95rem; font-weight: 700; color: #374151; margin: 0; }
+html[data-theme="dark"] .ss-section-heading { color: #e5e7eb; }
+
+/* Ghost pill button (Change password in the header) */
+.ss-ghost-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 0.9rem; border-radius: 999px;
+    background: rgba(99,102,241,0.08);
+    color: var(--color-brand-dark);
+    border: 1px solid rgba(99,102,241,0.25);
+    font-weight: 600; font-size: 0.85rem;
+    text-decoration: none; transition: all 0.15s ease;
+}
+.ss-ghost-btn:hover { background: rgba(99,102,241,0.14); color: var(--color-brand-dark); }
+html[data-theme="dark"] .ss-ghost-btn { background: rgba(99,102,241,0.15); color: #c7d2fe; }
+
+/* Floating-label field with a leading icon */
+.ss-field {
+    position: relative;
+    display: flex; align-items: center; gap: 0.6rem;
+    border: 1.5px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 0.6rem 0.9rem;
+    background: rgba(255,255,255,0.6);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ss-field:focus-within { border-color: var(--color-brand); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+html[data-theme="dark"] .ss-field {
+    background: rgba(45, 39, 86, 0.55);
+    border-color: rgba(139, 92, 246, 0.25);
+}
+.ss-field-icon { color: var(--color-brand); font-size: 1rem; flex-shrink: 0; }
+.ss-field-body { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ss-field-label { font-size: 0.72rem; color: #6b7280; font-weight: 600; margin: 0; }
+html[data-theme="dark"] .ss-field-label { color: #9ca3af; }
+.ss-field-input {
+    border: none; background: transparent; padding: 0; margin: 0;
+    font-size: 0.95rem; font-weight: 500; color: #1f2937;
+    outline: none; width: 100%;
+}
+.ss-field-input:disabled { color: #6b7280; }
+html[data-theme="dark"] .ss-field-input { color: #f3f4f6; }
+html[data-theme="dark"] .ss-field-input:disabled { color: #9ca3af; }
+
+/* Linked accounts grid */
+.ss-linked-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
+.ss-linked {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    border: 1.5px solid var(--glass-border);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.6);
+}
+html[data-theme="dark"] .ss-linked {
+    background: rgba(45, 39, 86, 0.55);
+    border-color: rgba(139, 92, 246, 0.25);
+}
+.ss-linked-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; flex-shrink: 0;
+}
+.ss-linked-body { flex: 1; min-width: 0; }
+.ss-linked-name { font-weight: 700; font-size: 0.9rem; color: #1f2937; }
+html[data-theme="dark"] .ss-linked-name { color: #f3f4f6; }
+.ss-linked-state { font-size: 0.75rem; color: #6b7280; }
+.ss-linked-state.connected { color: #16a34a; font-weight: 600; }
+.ss-linked-check { color: #16a34a; font-size: 1.2rem; }
+.ss-linked-btn {
+    border: 1px solid var(--color-brand); background: transparent;
+    color: var(--color-brand); border-radius: 999px;
+    padding: 0.35rem 0.8rem; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s ease;
+}
+.ss-linked-btn:hover:not(:disabled) { background: var(--gradient); color: #fff; border-color: transparent; }
+.ss-linked-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Priority-skill / segmented pills — retained from previous version */
+.ss-seg { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; }
+.ss-seg button {
+    border: 2px solid var(--glass-border);
+    background: rgba(255,255,255,0.5);
+    border-radius: 12px; padding: 0.5rem 0.9rem;
+    font-weight: 600; font-size: 0.9rem; color: #374151; cursor: pointer;
+    transition: all 0.15s ease;
+}
+html[data-theme="dark"] .ss-seg button {
+    background: rgba(45, 39, 86, 0.7);
+    border-color: rgba(139, 92, 246, 0.28);
+    color: #ddd6fe;
+}
+.ss-seg button:hover { border-color: var(--color-brand); }
+.ss-seg button.active { border-color: var(--color-brand); background: var(--gradient); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,0.4); }
+
+/* Chip pills for goals + priority skills (reuse the wizard choice look). */
+.ss-seg-1 {
+    display: inline-flex; align-items: center;
+    border: 2px solid var(--glass-border);
+    background: rgba(255,255,255,0.5);
+    border-radius: 999px; padding: 0.5rem 1rem;
+    font-weight: 600; font-size: 0.9rem; color: #374151; cursor: pointer;
+    transition: all 0.15s ease;
+}
+.ss-seg-1:hover { border-color: var(--color-brand); }
+.ss-seg-1.active { border-color: var(--color-brand); background: var(--gradient); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,0.4); }
+html[data-theme="dark"] .ss-seg-1 {
+    background: rgba(45, 39, 86, 0.7);
+    border-color: rgba(139, 92, 246, 0.28);
+    color: #ddd6fe;
+}
+html[data-theme="dark"] .ss-seg-1.active { border-color: var(--color-brand); background: var(--gradient); color: #fff; }
+
+/* Notifications / privacy rows */
+.ss-notif-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.9rem 0; border-bottom: 1px dashed var(--glass-border);
+}
+.ss-notif-row:last-child { border-bottom: none; }
+
+/* Billing plan tile */
+.ss-billing-plan {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem 1.1rem;
+    background: rgba(99,102,241,0.06);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 14px;
+}
+html[data-theme="dark"] .ss-billing-plan {
+    background: rgba(99,102,241,0.16);
+    border-color: rgba(139,92,246,0.35);
+}
+html[data-theme="dark"] .ss-notif-row { border-color: rgba(139,92,246,0.18); }
+
+.ss-danger-zone { border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 16px; }
+
+/* ===========================================================================
+   Responsive application shell
+   The component pages keep their desktop identity while these rules provide
+   consistent tablet/mobile spacing, safe areas and touch-sized controls.
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .ss-main-content {
+        width: 100%;
+        max-width: 100%;
+        padding-inline: clamp(1rem, 3vw, 1.75rem) !important;
+    }
+
+    .ss-settings-shell,
+    .max-720,
+    .max-800 {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 760px) {
+    html {
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        min-width: 320px;
+        overflow-x: hidden;
+        overscroll-behavior-x: none;
+    }
+
+    .ss-main-content {
+        padding: 1rem 0.75rem calc(6rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* Prevent media and long content from creating horizontal page scroll. */
+    img,
+    video,
+    canvas,
+    iframe {
+        max-width: 100%;
+    }
+
+    video,
+    iframe {
+        height: auto;
+    }
+
+    pre,
+    code,
+    .table-responsive,
+    table {
+        max-width: 100%;
+    }
+
+    .table-responsive,
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 16px prevents iOS Safari from zooming the page when a field receives focus. */
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        font-size: 16px !important;
+    }
+
+    button,
+    [role="button"],
+    a.ss-btn-primary,
+    .btn {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .ss-card,
+    .ss-card--flat,
+    .ss-glass {
+        border-radius: 18px;
+    }
+
+    /* Normalize large desktop utility padding inside cards. */
+    .ss-main-content .tw\:p-8 { padding: 1.25rem !important; }
+    .ss-main-content .tw\:p-6 { padding: 1rem !important; }
+    .ss-main-content .tw\:gap-6 { gap: 1rem !important; }
+
+    /* Profile actions become easy-to-tap full-width controls. */
+    .max-720 .ss-card > button {
+        width: 100%;
+        margin: 0.65rem 0 0 !important;
+    }
+    .max-720 .ss-avatar-upload {
+        width: 92px;
+        height: 92px;
+    }
+
+    /* Settings sidebar becomes a horizontal tab rail instead of a tall block. */
+    .ss-settings-grid { gap: 0.9rem; }
+    .ss-side { gap: 0.75rem; }
+    .ss-side-card { padding: 0.55rem; border-radius: 17px; }
+    .ss-side-eyebrow,
+    .ss-side-title,
+    .ss-side-sub { display: none; }
+    .ss-settings-nav {
+        display: flex;
+        flex-direction: row;
+        gap: 0.35rem;
+        overflow-x: auto;
+        padding: 0.15rem 0.05rem 0.35rem;
+        scrollbar-width: none;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+    .ss-settings-nav::-webkit-scrollbar { display: none; }
+    .ss-settings-nav button {
+        width: auto;
+        min-width: max-content;
+        min-height: 44px;
+        padding: 0.6rem 0.8rem;
+        scroll-snap-align: start;
+    }
+    .ss-settings-nav .ss-nav-caret { display: none; }
+    .ss-premium { display: none; }
+    .ss-hero-inner { gap: 0.9rem; padding: 1.15rem; }
+    .ss-hero-avatar { width: 78px; height: 78px; }
+    .ss-hero-name { font-size: 1.3rem; }
+    .ss-hero-stats {
+        width: 100%;
+        justify-content: space-around;
+        gap: 0.5rem;
+    }
+    .ss-notif-row,
+    .ss-billing-plan {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .ss-linked-grid { grid-template-columns: 1fr; }
+
+    /* Curriculum, progress and assessment content stays within the viewport. */
+    body .sr-page,
+    body .pg-main,
+    body .dash-shell,
+    body .assistant-shell,
+    body .cq-page,
+    body .rp-page,
+    body .vp-page,
+    body .tm-page,
+    body .ir,
+    body .fb,
+    body .tmq,
+    body .tml2,
+    body .tmv3,
+    body .tmv4 {
+        width: 100%;
+        max-width: 100%;
+        padding-inline: 0 !important;
+    }
+
+    .sr-skill-tabs,
+    .sr-level-tabs,
+    .pg-track-tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sr-skill-tabs::-webkit-scrollbar,
+    .sr-level-tabs::-webkit-scrollbar,
+    .pg-track-tabs::-webkit-scrollbar { display: none; }
+
+    .pg-card,
+    .pg-hero,
+    .pg-kpi,
+    .sr-week,
+    .sr-level-panel {
+        min-width: 0;
+        overflow: hidden;
+    }
+    .pg-radar {
+        max-width: 100%;
+        transform-origin: center;
+    }
+    .pg-path-list button {
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+    }
+    .pg-path-list button > :last-child { display: none; }
+
+    /* Quiz options use the entire row and never squeeze answer text. */
+    .answers button,
+    .cq-options button {
+        width: 100%;
+        min-width: 0;
+    }
+    .tmq article footer,
+    .result > div {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .tmq article footer button,
+    .result > div button { width: 100%; }
+
+    /* Game surfaces: compact cards, horizontal task trays and touch scrolling. */
+    .tasks,
+    .inbox,
+    .priority-list,
+    .tm-task-list {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
+    .tasks span,
+    .inbox article,
+    [draggable="true"] {
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+    .slots,
+    .boxes,
+    .legend,
+    .review { grid-template-columns: 1fr !important; }
+    .day footer,
+    .play footer,
+    .actions,
+    .summary {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .day footer button,
+    .play footer button,
+    .actions button { width: 100%; }
+
+    /* Floating assistants remain above the bottom navigation and safe area. */
+    .ss-chat-widget,
+    .ss-chat-fab,
+    .dash-syncy-fab {
+        bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    }
+    .ss-chat-panel {
+        right: 0.75rem !important;
+        bottom: calc(10rem + env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - 12rem);
+        overflow-y: auto;
+    }
+
+    /* Dialogs stay usable in landscape and on short phones. */
+    [role="dialog"],
+    .ss-modal,
+    .ss-mentor-modal {
+        max-width: calc(100vw - 1.5rem) !important;
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 390px) {
+    .ss-main-content { padding-inline: 0.6rem !important; }
+    .ss-card,
+    .ss-card--flat { border-radius: 15px; }
+    .ss-hero-stats { gap: 0.2rem; }
+    .ss-stat { min-width: 0; }
+    .ss-stat-num { font-size: 1.15rem; }
+    .ss-stat-label { font-size: 0.66rem; }
+    .badge-row,
+    .pg-mini,
+    .pg-badges > div { grid-template-columns: 1fr !important; }
+}
+
+/* ===========================================================================
+   SoftSync cohesion layer
+   Normalizes the visual language across dashboard, roadmap, lessons, quizzes,
+   assistant, profile/settings and practice games without changing their flows.
+   ========================================================================== */
+html { background: var(--ss-canvas); }
+body {
+    color: var(--ss-text);
+    background: var(--ss-canvas);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+}
+
+.ss-main-content {
+    width: min(100%, calc(var(--ss-content-width) + 2rem));
+    margin-inline: auto;
+}
+
+.ss-main-content :is(h1, h2, h3, h4) {
+    color: var(--ss-text);
+    line-height: 1.15;
+    text-wrap: balance;
+}
+.ss-main-content h1 { letter-spacing: -0.04em; }
+.ss-main-content :is(p, small, .text-muted) { text-wrap: pretty; }
+
+/* One canvas across every signed-in product surface. */
+body :is(
+    .pr-page,.lesson-page,.vp-page,.pg-main,.pg-shell,.assistant-layout,
+    .assistant-shell,.community-shell,.case-workspace,.inbox-rush,
+    .coursera-roadmap,.wizard-shell,.ss-settings-shell,.dash-home,
+    .max-720,.max-800,.completed-shell,.guest-error
+) {
+    color: var(--ss-text);
+}
+body :is(.pr-page,.lesson-page,.pg-main,.assistant-shell,.case-workspace,.inbox-rush,.coursera-roadmap) {
+    background-color: var(--ss-canvas) !important;
+}
+
+/* Shared surface geometry: restrained corners and one elevation scale. */
+body .ss-main-content :is(
+    .ss-card,.ss-card--flat,.dash-card,.week-card,.community-card,
+    .pr-week-card,.pr-side-card,.lesson-top,.lesson-content,.quiz-card,
+    .quiz-result,.assistant-chat-card,.vp-studio,.vp-results,.vp-grid > aside,
+    .pg-card,.overall-card,.content-card,.weekly-challenge,.wiz-card,
+    .case-card,.result-card,.completed-card
+) {
+    border-color: var(--ss-border) !important;
+    border-radius: var(--ss-radius-lg) !important;
+    box-shadow: var(--ss-shadow-sm) !important;
+}
+
+body .ss-main-content :is(
+    .lesson-top,.lesson-content,.quiz-card,.vp-studio,.vp-results,
+    .vp-grid > aside,.assistant-chat-card,.community-card,.pr-week-card
+) {
+    background-color: color-mix(in srgb, var(--ss-surface) 94%, transparent) !important;
+}
+
+/* Hero blocks use the same spatial rhythm while retaining page illustrations. */
+body .ss-main-content :is(
+    .community-hero,.vp-hero,.assistant-hero,.pg-hero,.pr-hero,
+    .assessment-hero,.result-hero,.ss-hero
+) {
+    border: 1px solid var(--ss-border);
+    border-radius: var(--ss-radius-xl) !important;
+    box-shadow: var(--ss-shadow-sm);
+}
+
+/* Buttons: stable hit area, weight and motion. Existing semantic colors remain. */
+body .ss-main-content :is(button,.btn,[role="button"]) {
+    min-height: 44px;
+    border-radius: var(--ss-radius-md);
+    font-family: inherit;
+    font-weight: 750;
+    transition:
+        color var(--ss-motion-fast) ease,
+        background-color var(--ss-motion-fast) ease,
+        border-color var(--ss-motion-fast) ease,
+        box-shadow var(--ss-motion-fast) ease,
+        transform var(--ss-motion-fast) ease;
+}
+body .ss-main-content :is(button,.btn,[role="button"]):active:not(:disabled) {
+    transform: scale(0.985);
+}
+body .ss-main-content :is(button,.btn):disabled {
+    cursor: not-allowed;
+    opacity: .48;
+}
+body .ss-main-content :is(.primary,.dash-primary,.ss-btn-primary,.btn-primary,.quiz-next) {
+    border-color: transparent !important;
+    color: #fff !important;
+    background: var(--ss-primary) !important;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--ss-primary) 24%, transparent) !important;
+}
+body .ss-main-content :is(.primary,.dash-primary,.ss-btn-primary,.btn-primary,.quiz-next):hover:not(:disabled) {
+    background: var(--ss-primary-hover) !important;
+}
+
+/* Forms share field height, border, focus and dark-mode behavior. */
+body .ss-main-content :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select) {
+    min-height: 46px;
+    border: 1px solid var(--ss-border) !important;
+    border-radius: var(--ss-radius-md) !important;
+    color: var(--ss-text) !important;
+    background-color: var(--ss-surface) !important;
+    box-shadow: none !important;
+    font-family: inherit;
+}
+body .ss-main-content :is(input,select,textarea,.form-control,.form-select):focus {
+    border-color: var(--ss-primary) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-primary) 14%, transparent) !important;
+}
+body .ss-main-content :is(input,textarea)::placeholder { color: var(--ss-text-muted); opacity: .78; }
+
+/* Tabs, progress and feedback states use semantic tokens consistently. */
+body .ss-main-content :is(.quiz-progress,.journey-progress,.progress,.skill-track) {
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--ss-surface-soft) !important;
+}
+body .ss-main-content :is(.quiz-progress i,.journey-progress span,.progress-bar,.skill-track i) {
+    background: var(--ss-primary) !important;
+}
+body .ss-main-content :is(.saved-complete,.success,.alert-success) {
+    color: var(--ss-success) !important;
+    border-color: color-mix(in srgb, var(--ss-success) 28%, transparent) !important;
+}
+body .ss-main-content :is(.save-error,.alert-danger,.validation-message) { color: var(--ss-danger) !important; }
+
+/* Dark mode parity for component-local styles that only define light surfaces. */
+html[data-theme="dark"] body .ss-main-content :is(
+    .lesson-top,.lesson-content,.quiz-card,.quiz-result,.pr-week-card,
+    .community-card,.week-card,.assistant-chat-card,.vp-studio,.vp-results,
+    .vp-grid > aside,.wiz-card,.ss-card,.ss-card--flat
+) {
+    color: var(--ss-text) !important;
+    background: var(--ss-surface) !important;
+    border-color: var(--ss-border) !important;
+}
+html[data-theme="dark"] body .ss-main-content :is(p,small,.text-muted) { color: var(--ss-text-muted); }
+
+@media (hover: hover) and (pointer: fine) {
+    body .ss-main-content :is(
+        .community-card,.pr-week-card,.pg-card,.course-cards button,
+        .quick-links button,.mentor-cards article
+    ):hover {
+        border-color: color-mix(in srgb, var(--ss-primary) 34%, var(--ss-border)) !important;
+        box-shadow: var(--ss-shadow-md) !important;
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 760px) {
+    body { font-size: 1rem; }
+    .ss-main-content :is(h1,.display-1,.display-2) { font-size: clamp(2rem, 10vw, 3rem) !important; }
+    body .ss-main-content :is(.community-hero,.vp-hero,.assistant-hero,.pg-hero,.pr-hero,.ss-hero) {
+        border-radius: var(--ss-radius-lg) !important;
+    }
+    body .ss-main-content :is(
+        .ss-card,.ss-card--flat,.dash-card,.week-card,.community-card,
+        .pr-week-card,.pr-side-card,.lesson-top,.lesson-content,.quiz-card,
+        .assistant-chat-card,.vp-studio,.vp-results
+    ) { border-radius: 16px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body .ss-main-content *, body .ss-main-content *::before, body .ss-main-content *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+html.ss-high-contrast { filter: contrast(1.12); }
+html.ss-large-text { font-size: 112.5%; }
+
+html[data-reduce-motion="1"] body .ss-main-content *,
+html[data-reduce-motion="1"] body .ss-main-content *::before,
+html[data-reduce-motion="1"] body .ss-main-content *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+}
+
+body .ss-main-content :is(h1, h2, h3, p, li, dd, label, legend, summary, .btn) {
+    overflow-wrap: anywhere;
+}
+
+/* ===========================================================================
+   Senior review corrections
+   Breaks the "everything is a card" pattern and restores page-specific focus.
+   ========================================================================== */
+
+/* Dashboard: learning first; utilities read as navigation, not mini products. */
+body .dash-home .dash-content {
+    width: min(100%, 1240px);
+    margin: 2.5rem auto 0;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, .75fr);
+    gap: 2rem;
+}
+body .dash-home :is(.quick-section,.recommend-section) > h3 {
+    margin-bottom: 1rem;
+    font-size: 1.12rem;
+    letter-spacing: -.02em;
+}
+body .dash-home .quick-links {
+    gap: .5rem;
+    padding: .45rem;
+    border: 1px solid var(--ss-border);
+    border-radius: 18px;
+    background: var(--ss-surface);
+}
+body .dash-home .quick-links button {
+    min-height: 58px;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .dash-home .quick-links button:hover { background: var(--ss-surface-accent) !important; transform: none; }
+body .dash-home .quick-links button > i { width: 36px; height: 36px; flex-basis: 36px; border-radius: 10px; }
+body .dash-home .recommend-section { margin-top: 2rem; }
+body .dash-home .course-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--ss-border);
+}
+body .dash-home .course-cards button {
+    min-height: 96px;
+    padding: 1rem .25rem;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ss-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .dash-home .course-cards button:hover { padding-left: .65rem; background: var(--ss-surface-soft) !important; transform: none; }
+body .dash-home .course-cards strong { font-size: .98rem; }
+body .dash-home .course-cards small { max-width: 64ch; font-size: .82rem; }
+body .dash-home .week-card { align-self: start; position: sticky; top: 108px; padding: 1.35rem; }
+body .dash-home .mentor-bar {
+    width: min(100%, 1240px);
+    margin: 3.5rem auto 0;
+    padding: 2rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--ss-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+body .dash-home .mentor-cards article { box-shadow: none; }
+
+/* Roadmap: emphasize sequence and current state; remove ornamental glass. */
+body .pr-page { background: var(--ss-canvas) !important; }
+body .pr-page .pr-shell { max-width: 1320px; }
+body .pr-page .pr-grid { gap: 1.5rem; }
+body .pr-page .pr-main-card {
+    border: 1px solid var(--ss-border) !important;
+    border-radius: 22px !important;
+    background: var(--ss-surface) !important;
+    box-shadow: var(--ss-shadow-sm) !important;
+}
+body .pr-page .pr-week-card {
+    border-radius: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body .pr-page .pr-week-card.current,
+body .pr-page .pr-week-card.selected {
+    border-color: color-mix(in srgb, var(--ss-primary) 46%, var(--ss-border)) !important;
+    background: var(--ss-surface-accent) !important;
+}
+body .pr-page .pr-module-list { gap: .65rem; }
+body .pr-page .pr-module {
+    min-height: 68px;
+    border-color: var(--ss-border) !important;
+    border-radius: 12px !important;
+    background: var(--ss-surface) !important;
+    box-shadow: none !important;
+}
+body .pr-page .pr-module.current { border-left: 4px solid var(--ss-primary) !important; }
+body .pr-page .pr-side-card { box-shadow: none !important; }
+body .pr-page .pr-suggestion { background: var(--ss-surface-soft) !important; }
+
+/* Lesson + quiz: reading and answering are the focus, chrome recedes. */
+body .lesson-page { background: var(--ss-canvas) !important; }
+body .lesson-page .lesson-shell { max-width: 1120px; }
+body .lesson-page .lesson-top {
+    padding: 1.1rem 1.4rem;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+}
+body .lesson-page .lesson-steps {
+    border-color: var(--ss-border);
+    border-radius: 14px;
+    box-shadow: none;
+}
+body .lesson-page .lesson-steps button { min-height: 56px; border-radius: 0; }
+body .lesson-page .lesson-content { padding: clamp(1.25rem, 3vw, 2.5rem); box-shadow: none !important; }
+body .lesson-page :is(.theory,.quiz-card,.quiz-result,.learning-review,.ai-reflection) { max-width: 820px; margin-inline: auto; }
+body .lesson-page .quiz-options button {
+    min-height: 58px;
+    border-color: var(--ss-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+body .lesson-page .quiz-options button:hover:not(:disabled) { border-color: var(--ss-primary); background: var(--ss-surface-accent); }
+body .lesson-page .summary-card { border: 1px solid var(--ss-border); background: var(--ss-surface-soft); }
+
+/* Assistant: chat dominates; mascot and suggestions become supporting context. */
+body .assistant-shell { background: var(--ss-canvas) !important; }
+body .assistant-hero { min-height: 120px; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
+body .assistant-hero > img { width: 130px; height: 120px; }
+body .assistant-chat-card { min-height: 360px; max-height: 58dvh; box-shadow: none !important; }
+body .assistant-prompts button { box-shadow: none !important; }
+
+html[data-theme="dark"] body :is(.dash-home .quick-links,.pr-page .pr-main-card,.lesson-page .summary-card) {
+    background: var(--ss-surface) !important;
+    border-color: var(--ss-border) !important;
+}
+
+@media (max-width: 1000px) {
+    body .dash-home .dash-content { grid-template-columns: 1fr; }
+    body .dash-home .week-card { position: static; }
+}
+
+@media (max-width: 760px) {
+    body .dash-home .dash-content { margin-top: 1.5rem; gap: 1.5rem; }
+    body .dash-home .quick-links { grid-template-columns: 1fr 1fr; }
+    body .dash-home .course-cards button { min-height: 108px; }
+    body .dash-home .mentor-bar { margin-top: 2.25rem; padding-top: 1.5rem; }
+    body .pr-page .pr-main-card { border-radius: 16px !important; }
+    body .lesson-page .lesson-content { padding: 1rem; }
+    body .lesson-page .lesson-steps { overflow-x: auto; grid-template-columns: repeat(6, minmax(92px, 1fr)); }
+    body .assistant-hero > img { display: none; }
+    body .assistant-chat-card { min-height: 52dvh; max-height: 62dvh; }
+}
+/* Personal planner: compact desktop calendar and readable mobile agenda. */
+.schedule-page { max-width: 1450px; margin-inline: auto; padding: clamp(1rem, 3vw, 2.5rem); color: #17233f; }
+.schedule-header { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin: 1.5rem 0 1.75rem; }
+.schedule-header h1 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 780; letter-spacing: -.04em; margin: .45rem 0; }
+.schedule-header p { color: #5b6681; margin: 0; }
+.schedule-eyebrow { color: #5c47dd; font-size: .75rem; font-weight: 800; letter-spacing: .12em; }
+.schedule-add { min-height: 46px; border-radius: 12px; box-shadow: 0 9px 20px rgba(79,70,229,.16); white-space: nowrap; }
+.schedule-surface { background: #fff; border: 1px solid #dfe4f0; border-radius: 22px; box-shadow: 0 12px 32px rgba(28,38,92,.07); padding: 1.25rem; }
+.schedule-toolbar, .schedule-navigation { display: flex; align-items: center; gap: .65rem; }
+.schedule-toolbar { justify-content: space-between; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.schedule-navigation h2 { margin: 0 0 0 .35rem; font-size: 1.25rem; font-weight: 750; }
+.schedule-icon-btn { border: 1px solid #d8dfed; color: #38425c; background: #fff; border-radius: 10px; min-width: 38px; min-height: 38px; }
+.schedule-icon-btn:hover, .schedule-week-heading button:hover { background: #f0efff; color: #5140d7; }
+.schedule-view-switch { display: inline-flex; background: #f1f3fa; border-radius: 12px; padding: 4px; }
+.schedule-view-switch button { border: 0; background: transparent; border-radius: 9px; min-height: 34px; padding: .25rem .85rem; color: #47536d; font-weight: 650; }
+.schedule-view-switch button.selected { background: #fff; color: #4f3fc9; box-shadow: 0 2px 7px rgba(42,49,87,.09); }
+.schedule-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #e3e8f2; border-top: 1px solid #e3e8f2; }
+.schedule-day-name { padding: .7rem; text-align: center; background: #f8f9fd; color: #64718b; font-size: .78rem; font-weight: 700; }
+.schedule-day { min-width: 0; min-height: 132px; border-right: 1px solid #e3e8f2; border-bottom: 1px solid #e3e8f2; padding: .5rem; }
+.schedule-day.is-outside { background: #f9fafe; }
+.schedule-day.is-today, .schedule-week-day.is-today { background: #f5f3ff; }
+.schedule-day-number { border: 0; background: transparent; border-radius: 50%; min-width: 30px; min-height: 30px; font-weight: 700; color: #24304a; }
+.schedule-day.is-today .schedule-day-number { background: #5145d9; color: #fff; }
+.schedule-day-tasks { display: grid; gap: .3rem; margin-top: .35rem; }
+.schedule-task { display: flex; align-items: start; gap: .4rem; width: 100%; min-width: 0; border: 1px solid #e2e6f2; border-left: 3px solid #8979e5; border-radius: 9px; background: #fff; padding: .35rem .45rem; text-align: left; color: #202b46; line-height: 1.3; transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease; }
+.schedule-task:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(37,40,81,.12); }
+.schedule-task.priority-high { border-left-color: #c95a49; }
+.schedule-task.priority-low { border-left-color: #72a4a0; }
+.schedule-task.is-complete { opacity: .65; }
+.schedule-task.is-complete .schedule-task-title { text-decoration: line-through; }
+.schedule-task-time { flex: 0 0 auto; color: #5a6681; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.schedule-task-title { min-width: 0; overflow-wrap: anywhere; font-size: .8rem; font-weight: 650; }
+.schedule-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .55rem; }
+.schedule-week-day { min-width: 0; min-height: 250px; padding: .7rem; border: 1px solid #e2e6f2; border-radius: 13px; }
+.schedule-week-day .schedule-task { margin-bottom: .45rem; flex-direction: column; }
+.schedule-week-heading { display: flex; justify-content: space-between; align-items: center; gap: .3rem; margin-bottom: .75rem; }
+.schedule-week-heading h3 { font-size: .85rem; font-weight: 760; margin: 0; }
+.schedule-week-heading small { display: block; color: #5546d8; }
+.schedule-week-heading button { flex: none; border: 0; background: transparent; border-radius: 8px; min-width: 30px; min-height: 30px; color: #5145d9; }
+.schedule-mobile { display: none; }
+.schedule-empty { text-align: center; padding: 2.5rem 1rem; }
+.schedule-empty > i { color: #6957dd; font-size: 2.2rem; }
+.schedule-empty h3 { margin: .5rem 0; font-size: 1.2rem; }
+.schedule-empty p { color: #5b6681; }
+.schedule-dialog { border: 1px solid #dfe3ee; border-radius: 18px; width: min(95vw, 520px); max-height: min(90vh, 850px); overflow: auto; padding: 1.5rem; color: #1b2742; box-shadow: 0 24px 70px rgba(16,20,53,.25); animation: schedule-enter .18s ease-out; }
+.schedule-dialog::backdrop { background: rgba(18,24,49,.55); }
+.schedule-dialog-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.schedule-dialog-header h2 { margin: 0; font-size: 1.4rem; overflow-wrap: anywhere; }
+.schedule-field { margin-bottom: .9rem; }
+.schedule-field label { display: block; font-weight: 650; margin-bottom: .3rem; }
+.schedule-field .schedule-checkbox { display: inline-flex; align-items: center; gap: .5rem; }
+.schedule-times { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.schedule-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; margin-top: 1.35rem; }
+.schedule-detail-date { color: #5d4cda; font-weight: 700; }
+.schedule-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.schedule-page button:focus-visible, .schedule-dialog button:focus-visible, .schedule-dialog input:focus-visible, .schedule-dialog textarea:focus-visible, .schedule-dialog select:focus-visible { outline: 3px solid #3623b5; outline-offset: 2px; }
+@keyframes schedule-enter { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
+@media (max-width: 900px) { .schedule-week { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .schedule-header { align-items: start; flex-direction: column; } .schedule-add { width: 100%; } .schedule-surface { padding: .85rem; } .schedule-desktop { display: none; } .schedule-mobile { display: block; } .schedule-agenda-day { border-top: 1px solid #e4e8f0; padding: .75rem 0; } .schedule-agenda-day .schedule-task { margin-bottom: .4rem; } .schedule-navigation { flex-wrap: wrap; } .schedule-navigation h2 { width: 100%; margin: .3rem 0; } }
+@media (prefers-reduced-motion: reduce) { .schedule-task, .schedule-dialog { transition: none; animation: none; } .schedule-task:hover { transform: none; } }
+html[data-reduce-motion="1"] .schedule-task, html[data-reduce-motion="1"] .schedule-dialog { transition: none; animation: none; }
+html[data-reduce-motion="1"] .schedule-task:hover { transform: none; }
+html[data-theme="dark"] .schedule-page { color: #f4f1ff; }
+html[data-theme="dark"] .schedule-surface, html[data-theme="dark"] .schedule-dialog, html[data-theme="dark"] .schedule-task { background: #25213e; color: #f3f0ff; border-color: #534b74; }
+html[data-theme="dark"] .schedule-day-name, html[data-theme="dark"] .schedule-day.is-outside, html[data-theme="dark"] .schedule-day.is-today, html[data-theme="dark"] .schedule-week-day.is-today { background: #302a4c; }
+html[data-theme="dark"] .schedule-day-number, html[data-theme="dark"] .schedule-task-time { color: #e6e0ff; }

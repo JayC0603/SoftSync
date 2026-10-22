@@ -14,6 +14,9 @@
 
 # Local secrets / uploads
 .env
+**/data-protection-keys/
+*.pfx
+*.p12
 **/appsettings.*.local.json
 **/wwwroot/uploads/
 

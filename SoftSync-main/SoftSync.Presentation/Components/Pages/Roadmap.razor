@@ -402,7 +402,7 @@
 
         // Old plans can contain generic intro/summary rows without a SkillName.
         // Keep them in the database to preserve history, but do not present them
-        // as personalized skill weeks in this new UI.
+        // as personalized skill weeks in this new DesktopText.
         items = roadmap.Items
             .Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
             .OrderBy(x => SkillRank(SkillKey(x)))

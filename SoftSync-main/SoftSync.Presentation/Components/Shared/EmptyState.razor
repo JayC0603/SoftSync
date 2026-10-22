@@ -1,0 +1,11 @@
+<section class="ss-empty" role="status">
+    <i class="bi bi-journal-bookmark" aria-hidden="true"></i>
+    <h2>@Title</h2><p>@Description</p>
+    @if (!string.IsNullOrWhiteSpace(ActionHref)) { <a href="@ActionHref" class="btn btn-primary">@ActionLabel</a> }
+</section>
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "";
+    [Parameter] public string? ActionHref { get; set; }
+    [Parameter] public string? ActionLabel { get; set; }
+}

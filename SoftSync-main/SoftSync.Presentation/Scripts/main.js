@@ -290,3 +290,48 @@ document.addEventListener('enhancedload', () => {
     window.ssFontSize.init();
     window.ssContrast.init();
 });
+
+window.ssAccessibility = {
+    apply(largeText, highContrast, captions) {
+        document.documentElement.classList.toggle('ss-large-text', !!largeText);
+        document.documentElement.classList.toggle('ss-high-contrast', !!highContrast);
+        document.documentElement.setAttribute('data-captions', captions ? 'on' : 'off');
+    },
+    set(largeText, highContrast, captions) {
+        try { localStorage.setItem('ss-accessibility', JSON.stringify({ largeText: !!largeText, highContrast: !!highContrast, captions: captions !== false })); } catch { /* ignore */ }
+        this.apply(largeText, highContrast, captions !== false);
+    },
+    init() {
+        try { const p = JSON.parse(localStorage.getItem('ss-accessibility') || '{}'); this.apply(!!p.largeText, !!p.highContrast, p.captions !== false); return p; } catch { this.apply(false, false, true); return {}; }
+    }
+};
+try { window.ssFontSize.init(); } catch { /* ignore */ }
+try { window.ssAccessibility.init(); } catch { /* ignore */ }
+window.ssSchedule = {
+  today: () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; },
+  show: dialog => { if (dialog && !dialog.open) dialog.showModal(); },
+  close: dialog => { if (dialog?.open) dialog.close(); }
+};
+
+// The incoming views are mounted only above the existing mobile breakpoint.
+window.ssDesktopVariant = (() => {
+    let nextId = 0;
+    const subscriptions = new Map();
+    return {
+        subscribe(reference) {
+            const id = ++nextId;
+            const query = window.matchMedia('(min-width: 901px)');
+            const notify = () => reference.invokeMethodAsync('SetDesktop', query.matches).catch(() => {});
+            query.addEventListener('change', notify);
+            subscriptions.set(id, { query, notify });
+            notify();
+            return id;
+        },
+        unsubscribe(id) {
+            const entry = subscriptions.get(id);
+            if (!entry) return;
+            entry.query.removeEventListener('change', entry.notify);
+            subscriptions.delete(id);
+        }
+    };
+})();

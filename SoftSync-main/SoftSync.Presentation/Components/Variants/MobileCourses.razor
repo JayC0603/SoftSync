@@ -1,0 +1,33 @@
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
+@inject ICourseService CoursesService
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>@Ui("Courses") · SoftSync</PageTitle>
+<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
+<header class="tw:mb-8"><span class="badge bg-primary">@Ui("Inclusive Learning")</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Courses")</h1><p>@Ui("Video, caption, transcript and persistent learning progress.")</p></header>
+@if(loading){<p role="status">@Ui("Loading courses...")</p>}
+@if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@Ui(message)</div>}
+<div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">@foreach(var course in courses){<article class="ss-glass tw:rounded-2xl tw:p-6" aria-labelledby="course-title-@course.Id">
+@if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText" class="tw:mb-4 tw:h-48 tw:w-full tw:rounded-xl tw:object-cover"/>}
+<h2 id="course-title-@course.Id" class="tw:text-xl tw:font-bold">@course.Title</h2><p>@course.Description</p><div class="progress" role="progressbar" aria-label="@UiFormat("Course progress for {0}", course.Title)" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="@UiFormat("{0} percent complete", course.ProgressPercentage)"><div class="progress-bar" style="width:@course.ProgressPercentage%">@course.ProgressPercentage%</div></div>
+<dl class="tw:mt-3"><dt>@Ui("Lessons completed")</dt><dd>@course.CompletedLessons / @course.TotalLessons</dd><dt>@Ui("Final Quiz")</dt><dd>@(course.FinalQuizId is null ? Ui("Not required") : course.FinalQuizResult is null ? Ui("Not Started") : course.FinalQuizResult == QuizAttemptResult.Pass ? Ui("Pass") : Ui("Not Pass"))</dd><dt>@Ui("Course Status")</dt><dd>@(course.IsCompleted ? Ui("Completed") : Ui("In Progress"))</dd></dl>
+@if(course.IsCompleted){<div class="alert alert-success" role="status"><strong>@Ui("Course Completed")</strong></div>}
+else if(course.FinalQuizResult == QuizAttemptResult.NotPass){<div class="alert alert-warning" role="status">@Ui("Final quiz not passed yet. You may retry.")</div>}
+else if(course.FinalQuizId is not null){<p>@Ui("Complete all required lessons and pass the final quiz.")</p>}
+else {<p>@Ui("Complete all required lessons to finish this course.")</p>}
+<button type="button" class="btn btn-primary tw:my-3" @onclick="()=>Enroll(course.Id)">@Ui("Enroll / Continue")</button>
+<ol>@foreach(var lesson in course.Lessons){<li class="tw:mb-4"><h3 class="tw:text-lg tw:font-semibold">@lesson.Title</h3>@if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video class="tw:w-full" controls preload="metadata" aria-label="@UiFormat("Video lesson: {0}", lesson.Title)"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="@Ui("Vietnamese captions")" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p class="tw:text-sm tw:text-slate-700">@Ui("Captions are not available for this video.")</p>}}@if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details><summary>@UiFormat("Transcript for {0}", lesson.Title)</summary><div class="tw:whitespace-pre-wrap">@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p class="tw:text-sm tw:text-slate-700">@Ui("A transcript is not available for this video.")</p>}<button type="button" class="btn btn-sm btn-outline-success tw:mt-2" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? Ui("Lesson completed") : Ui("Mark lesson completed"))</button></li>}</ol>
+@if(course.FinalQuizId is int finalQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? Ui("Retry Final Quiz") : Ui("Open Final Quiz"))</a>}
+</article>}</div>
+</section></section>
+@code{
+private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
+protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
+private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
+private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
+private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Lesson progress saved.":"Enroll before completing a lesson.";await Reload();}
+}

@@ -19,8 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SoftSync.BLL\SoftSync.BLL.csproj" />
-    <Compile Include="..\SoftSync.Presentation\Components\Journey\JourneyModels.cs" Link="JourneyModels.cs" />
-    <Compile Include="..\SoftSync.Presentation\Components\Journey\RoadmapLearningContent.cs" Link="RoadmapLearningContent.cs" />
-    <Compile Include="..\SoftSync.Presentation\Components\Journey\VietnamJourney.cs" Link="VietnamJourney.cs" />
+    <ProjectReference Include="..\SoftSync.Presentation\SoftSync.Presentation.csproj" />
   </ItemGroup>
 </Project>

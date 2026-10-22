@@ -5,8 +5,11 @@ namespace SoftSync.BLL.Services;
 
 public static class ChallengeRules
 {
-    public const int RequiredQuestionCount = 10;
-    public const int PassingScore = 5;
+    public static int MinimumPassingAnswers(int totalQuestions) =>
+        totalQuestions > 0 ? totalQuestions / 2 + totalQuestions % 2 : throw new ArgumentOutOfRangeException(nameof(totalQuestions));
+
+    public static bool IsPassing(int correctAnswers, int totalQuestions) =>
+        totalQuestions > 0 && correctAnswers <= totalQuestions && correctAnswers >= MinimumPassingAnswers(totalQuestions);
 
     public static bool IsValidQuestion(ChallengeQuestion question) =>
         !string.IsNullOrWhiteSpace(question.QuestionText)
@@ -15,7 +18,7 @@ public static class ChallengeRules
         && question.Options.All(option => !string.IsNullOrWhiteSpace(option.Text));
 
     public static bool CanPublish(IReadOnlyCollection<ChallengeQuestion> questions) =>
-        questions.Count == RequiredQuestionCount && questions.All(IsValidQuestion);
+        questions.Count > 0 && questions.All(IsValidQuestion);
 
     public static bool IsValidAiDraft(AiQuizQuestionDraftDto? draft) =>
         draft is not null && !string.IsNullOrWhiteSpace(draft.QuestionText) && !string.IsNullOrWhiteSpace(draft.Explanation)
@@ -25,8 +28,8 @@ public static class ChallengeRules
 
     public static int Grade(IReadOnlyCollection<ChallengeQuestion> questions, IReadOnlyDictionary<int, int> selectedOptions)
     {
-        if (!CanPublish(questions) || selectedOptions.Count != RequiredQuestionCount)
-            throw new ArgumentException("A submission must answer all ten valid questions.", nameof(selectedOptions));
+        if (!CanPublish(questions) || selectedOptions.Count != questions.Count)
+            throw new ArgumentException("A submission must answer every valid question in the quiz.", nameof(selectedOptions));
 
         var score = 0;
         foreach (var question in questions)

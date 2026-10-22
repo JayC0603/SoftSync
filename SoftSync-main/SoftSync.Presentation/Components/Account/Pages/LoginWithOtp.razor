@@ -23,11 +23,11 @@
 {
     <EditForm Model="RequestInput" method="post" OnValidSubmit="SendCode" FormName="otp-request">
         <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+        <LocalizedValidationSummary class="text-danger tw:mb-3" role="alert" />
         <div class="tw:mb-4">
             <label class="form-label tw:font-medium">@L["auth.phone"]</label>
             <InputText @bind-Value="RequestInput.PhoneNumber" class="form-control form-control-lg" autocomplete="tel" placeholder="+84..." />
-            <ValidationMessage For="() => RequestInput.PhoneNumber" class="text-danger" />
+            <LocalizedValidationMessage For="() => RequestInput.PhoneNumber" class="text-danger" />
         </div>
         <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.sendCode"]</button>
     </EditForm>
@@ -36,12 +36,12 @@ else
 {
     <EditForm Model="VerifyInput" method="post" OnValidSubmit="VerifyCode" FormName="otp-verify">
         <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger tw:mb-3" role="alert" />
+        <LocalizedValidationSummary class="text-danger tw:mb-3" role="alert" />
         <input type="hidden" name="VerifyInput.PhoneNumber" value="@VerifyInput.PhoneNumber" />
         <div class="tw:mb-4">
             <label class="form-label tw:font-medium">@L["auth.enterCode"]</label>
             <InputText @bind-Value="VerifyInput.Code" class="form-control form-control-lg" inputmode="numeric" autocomplete="one-time-code" />
-            <ValidationMessage For="() => VerifyInput.Code" class="text-danger" />
+            <LocalizedValidationMessage For="() => VerifyInput.Code" class="text-danger" />
         </div>
         <button type="submit" class="ss-btn-primary tw:w-full tw:py-3 tw:text-lg">@L["auth.verifyLogin"]</button>
     </EditForm>

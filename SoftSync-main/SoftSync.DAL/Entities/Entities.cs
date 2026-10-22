@@ -45,6 +45,10 @@ public class ApplicationUser : IdentityUser<int>
     public ThemePreference Theme { get; set; } = ThemePreference.Light;
     /// <summary>Accessibility: reduce non-essential motion/animation.</summary>
     public bool ReduceMotion { get; set; }
+    public PreferredLearningMode PreferredLearningMode { get; set; } = PreferredLearningMode.Text;
+    public bool LargeText { get; set; }
+    public bool HighContrast { get; set; }
+    public bool CaptionEnabled { get; set; } = true;
 
     // Navigation properties
     public ICollection<UserSkillSelection> SkillSelections { get; set; } = new List<UserSkillSelection>();

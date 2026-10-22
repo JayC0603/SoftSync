@@ -3,6 +3,12 @@
    clash with it (buttons, headings, borders). */
 @import "tailwindcss/theme.css" layer(theme) prefix(tw);
 @import "tailwindcss/utilities.css" layer(utilities) prefix(tw);
+@import "./desktop-branch.css" screen and (min-width: 901px);
+@import "./softsync-background.css" screen and (min-width: 901px);
+@import "./scene-pages.css" screen and (min-width: 901px);
+@import "./desktop-learning-platform.css" screen and (min-width: 901px);
+@import "./desktop-app.css" screen and (min-width: 901px);
+
 
 /* Scan Razor + JS so class usage there is picked up by the JIT. */
 @source "../Components/**/*.razor";

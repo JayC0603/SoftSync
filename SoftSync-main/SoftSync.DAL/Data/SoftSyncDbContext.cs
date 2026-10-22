@@ -28,6 +28,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<Mentor> Mentors { get; set; }
     public DbSet<MentorSupportRequest> MentorSupportRequests { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<AiProviderConfiguration> AiProviderConfigurations { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }
     public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
@@ -42,10 +43,25 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
 
     public DbSet<CvDocumentRecord> CvDocuments { get; set; }
     public DbSet<CvReviewRecord> CvReviews { get; set; }
+    public DbSet<ScheduleTask> ScheduleTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var ai = modelBuilder.Entity<AiProviderConfiguration>();
+        ai.Property(x => x.DisplayName).HasMaxLength(120);
+        ai.Property(x => x.Model).HasMaxLength(200);
+        ai.Property(x => x.CvModel).HasMaxLength(200);
+        ai.Property(x => x.Endpoint).HasMaxLength(500);
+        ai.Property(x => x.Revision).IsConcurrencyToken();
+        ai.HasIndex(x => x.IsDefault).IsUnique().HasFilter("\"IsDefault\" = TRUE");
+        ai.ToTable(t => t.HasCheckConstraint("CK_AiProvider_DefaultEnabled", "NOT \"IsDefault\" OR \"IsEnabled\""));
+        modelBuilder.Entity<CvDocument>().Property(x => x.OriginalFileName).HasMaxLength(255);
+        modelBuilder.Entity<CvDocument>().HasIndex(x => new { x.UserId, x.UploadedAtUtc });
+        modelBuilder.Entity<CvDocument>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvAnalysis>().Property(x => x.Model).HasMaxLength(200);
+        modelBuilder.Entity<CvAnalysis>().HasIndex(x => new { x.CvDocumentId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvAnalysis>().HasOne(x => x.Document).WithMany(x => x.Analyses).HasForeignKey(x => x.CvDocumentId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Announcement>().HasIndex(x => new { x.PublishedAtUtc, x.Id });
         modelBuilder.Entity<Announcement>().HasOne(x => x.Sender).WithMany()
@@ -102,6 +118,11 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
         modelBuilder.Entity<QuizAttemptAnswer>().HasOne(x => x.SelectedOption).WithMany().HasForeignKey(x => x.SelectedOptionId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.UserId);
         modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.MentorId);
+        var schedule = modelBuilder.Entity<ScheduleTask>();
+        schedule.Property(x => x.Title).HasMaxLength(200);
+        schedule.Property(x => x.Description).HasMaxLength(2000);
+        schedule.HasIndex(x => new { x.UserId, x.Date });
+        schedule.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
 
         // Seed Data
         SeedData(modelBuilder);
