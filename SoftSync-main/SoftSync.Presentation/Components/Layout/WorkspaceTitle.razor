@@ -1,4 +1,4 @@
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @implements IDisposable
 @inject NavigationManager Navigation
@@ -14,6 +14,7 @@
         "resources" => L["nav.resources"],
         "profile" => L["nav.profile"],
         "settings" => L["nav.settings"],
+        "more" => L.Current == AppLanguage.Vi ? "Thêm" : "More",
         "notifications" => L["nav.notifications"],
         "assistant" => "SYNCY",
         "cv" or "recruitment" => L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV",

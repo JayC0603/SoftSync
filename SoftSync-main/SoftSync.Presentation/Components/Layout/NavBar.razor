@@ -1,4 +1,4 @@
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @implements IDisposable
 @using SoftSync.Presentation.Services
 @inject LocalizationService L
@@ -67,23 +67,7 @@
         <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
     </NavLink>
     <NavLink class="ss-mobile-bottom-link" href="/cv"><i class="bi bi-file-earmark-person"></i><span>CV</span></NavLink>
-    <details class="ss-mobile-more ss-header-menu">
-        <summary class="ss-mobile-bottom-link"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></summary>
-        <button type="button" class="ss-mobile-menu-backdrop" aria-label="@(L.Current == AppLanguage.Vi ? "Đóng menu" : "Close menu")" onclick="this.closest('details').open=false"></button>
-        <div class="ss-header-dropdown ss-mobile-menu-panel">
-            <header><strong>@(L.Current == AppLanguage.Vi ? "Khám phá SoftSync" : "Explore SoftSync")</strong><button type="button" aria-label="@(L.Current == AppLanguage.Vi ? "Đóng menu" : "Close menu")" onclick="this.closest('details').open=false"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
-            <a href="/resources"><i class="bi bi-folder" aria-hidden="true"></i>@L["nav.resources"]</a>
-            <a href="/game"><i class="bi bi-controller" aria-hidden="true"></i>@L.Ui("Mini Game")</a>
-            <a href="/assistant"><i class="bi bi-chat-heart" aria-hidden="true"></i>SYNCY</a>
-            <a href="/community"><i class="bi bi-people" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Cộng đồng" : "Community")</a>
-            <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i>@L["nav.settings"]</a>
-            <a href="/about"><i class="bi bi-info-circle" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Về SoftSync" : "About SoftSync")</a>
-            <a href="/mentors"><i class="bi bi-person-heart" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Cố vấn" : "Mentors")</a>
-            <a href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook" aria-hidden="true"></i>Facebook ↗</a>
-            <a href="https://softsync.id.vn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-globe2" aria-hidden="true"></i>@(L.Current == AppLanguage.Vi ? "Trang web chính thức" : "Official website") ↗</a>
-            <AuthorizeView Roles="Teacher" Context="mobileStaff"><Authorized><a href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i>@L.Ui("Teacher Studio")</a></Authorized></AuthorizeView>
-        </div>
-    </details>
+    <NavLink class="ss-mobile-bottom-link" href="/more"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></NavLink>
     }
 </nav>
 
