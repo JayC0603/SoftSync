@@ -220,6 +220,8 @@ builder.Services.AddScoped<KnowledgeBasedAiAssistantService>();
 builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
 builder.Services.AddSingleton<PdfDocumentKnowledge>();
 builder.Services.AddScoped<HuggingFaceJsonClient>();
+builder.Services.AddScoped<CvReviewService>();
+builder.Services.AddScoped<CvWorkspaceService>();
 builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
 builder.Services.AddScoped<IAiQuizService, AiQuizService>();
 builder.Services.AddScoped<IRoleplayAiService, HuggingFaceRoleplayAiService>();
@@ -293,6 +295,7 @@ app.UseAuthorization();
 
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
+app.MapCvReviewEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

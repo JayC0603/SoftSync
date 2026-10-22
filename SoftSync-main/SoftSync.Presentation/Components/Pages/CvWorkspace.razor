@@ -8,21 +8,19 @@
 @inject IJSRuntime JS
 
 <PageTitle>@Ui("CV thông minh") · SoftSync</PageTitle>
-<section class="ss-cv-workspace" aria-labelledby="cv-title">
-    <header class="ss-cv-heading"><div><span>@Ui("SOFTSYNC CAREER")</span><h1 id="cv-title">@Ui("CV thông minh")</h1><p>@Ui("Lưu trữ, so khớp, xếp hạng, so sánh và tìm kiếm CV trong không gian SoftSync.")</p></div><a href="/roadmap">← @Ui("Back to learning")</a></header>
+<section class="ss-cv-workspace" aria-label="Smart CV">
+    <CvCareerWorkspace />
     @if (Options.Value.Configured)
     {
-        <div class="ss-cv-frame-container">
+        <details class="cv-legacy-tools"><summary>Công cụ CV mở rộng</summary><div class="ss-cv-frame-container">
             <p id="cv-connection-status" class="ss-cv-connection" role="status">@Ui("Đang kết nối tài khoản SoftSync…")</p>
             <iframe id="softsync-cv-frame" src="@FrameUrl" title="@Ui("Các công cụ CV của SoftSync")"
                 allow="clipboard-write" referrerpolicy="no-referrer"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-top-navigation-by-user-activation"></iframe>
-        </div>
+        </div></details>
     }
-    else
-    {
-        <div class="ss-card ss-cv-unavailable"><h2>@Ui("Dịch vụ CV chưa được kết nối")</h2><p>@Ui("Khu vực CV dùng tài khoản SoftSync của bạn. Dịch vụ đang chờ được cấu hình.")</p><a href="/recruitment" class="ss-btn-primary">@Ui("Mở công cụ so khớp hiện có")</a></div>
-    }
+
+    <MobileSiteFooter />
 </section>
 
 <style>

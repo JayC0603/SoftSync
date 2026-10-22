@@ -3072,6 +3072,90 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("CourseLessonProgress");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvDocumentRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<byte[]>("OriginalFile")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(40000)
+                        .HasColumnType("character varying(40000)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.ToTable("CvDocuments");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvReviewRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("JobDescription")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.ToTable("CvReviews");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -3933,6 +4017,35 @@ namespace SoftSync.DAL.Migrations
                     b.Navigation("Enrollment");
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvDocumentRecord", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.CvReviewRecord", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.CvDocumentRecord", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.ProgressLog", b =>

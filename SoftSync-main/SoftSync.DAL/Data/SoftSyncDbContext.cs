@@ -40,6 +40,9 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<UserNotification> UserNotifications { get; set; }
 
+    public DbSet<CvDocumentRecord> CvDocuments { get; set; }
+    public DbSet<CvReviewRecord> CvReviews { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -53,6 +56,15 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
             .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<UserNotification>().HasOne(x => x.Announcement).WithMany(x => x.Recipients)
             .HasForeignKey(x => x.AnnouncementId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CvDocumentRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvDocumentRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.Document).WithMany()
+            .HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.SetNull);
 
         // Many-to-Many: User <-> Skill (Selections)
         modelBuilder.Entity<UserSkillSelection>()
