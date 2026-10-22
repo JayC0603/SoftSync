@@ -14,7 +14,7 @@
         {
             <button type="submit" class="external-google tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2"
                     name="provider" value="@provider.Name" title="@provider.DisplayName">
-                <span class="google-mark" aria-hidden="true">G</span>
+                <GoogleMark />
                 <span>@GoogleButtonLabel</span>
             </button>
         }
@@ -30,7 +30,7 @@ else
 {
     <div class="external-login-form">
         <button type="button" class="external-google" disabled aria-describedby="google-unavailable">
-            <span class="google-mark" aria-hidden="true">G</span>
+            <GoogleMark />
             <span>@GoogleButtonLabel</span>
         </button>
         <p id="google-unavailable" class="external-help">@L["auth.googleNotConfigured"]</p>
