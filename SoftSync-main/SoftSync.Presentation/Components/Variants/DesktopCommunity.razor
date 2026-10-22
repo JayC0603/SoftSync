@@ -1,0 +1,112 @@
+@inherits LocalizedComponentBase
+
+<div class="community-shell tw:mx-auto">
+    <section class="community-hero ss-card">
+        <div>
+            <span class="community-eyebrow">SOFTSYNC SPACE</span>
+            <h1>👥 @L["community.hub.title"]</h1>
+            <p>@L["community.hub.subtitle"]</p>
+        </div>
+        <div class="community-stats">
+            <div><strong>2,500+</strong><span>@L["community.stats.members"]</span></div>
+            <div><strong>20+</strong><span>@L["community.stats.events"]</span></div>
+            <div><strong>150+</strong><span>@L["community.stats.discussions"]</span></div>
+        </div>
+    </section>
+
+    <section class="community-grid">
+        @foreach (var channel in Channels)
+        {
+            <article class="community-card ss-card ss-glass-interactive">
+                <div class="community-icon @channel.ColorClass"><i class="bi @channel.Icon"></i></div>
+                <div class="community-copy">
+                    <h2>@channel.Name</h2>
+                    <p>@L[channel.DescriptionKey]</p>
+                </div>
+                @if (channel.Url is not null)
+                {
+                    <a href="@channel.Url" target="_blank" rel="noopener noreferrer" class="community-link-btn">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></a>
+                }
+                else
+                {
+                    <button type="button" @onclick="() => ShowPending(channel.Name)">@L[channel.ActionKey] <i class="bi bi-arrow-up-right"></i></button>
+                }
+            </article>
+        }
+    </section>
+
+    @if (!string.IsNullOrEmpty(notification))
+    {
+        <div class="community-notice" role="status"><i class="bi bi-info-circle-fill"></i> @notification</div>
+    }
+</div>
+
+@code {
+    private string? notification;
+
+    private static readonly Channel[] Channels =
+    [
+        new("Discord", "bi-discord", "discord", "community.discord.desc", "community.action.join"),
+        new("Facebook", "bi-facebook", "facebook", "community.facebook.desc", "community.action.follow", "https://www.facebook.com/SoftSyncSpace?locale=vi_VN"),
+        new("TikTok", "bi-tiktok", "tiktok", "community.tiktok.desc", "community.action.follow"),
+        new("YouTube", "bi-youtube", "youtube", "community.youtube.desc", "community.action.subscribe"),
+        new("Website", "bi-globe2", "website", "community.website.desc", "community.action.visit"),
+        new("Events", "bi-calendar-event-fill", "events", "community.events.desc", "community.action.view")
+    ];
+
+    private void ShowPending(string channel) => notification = string.Format(L["community.linkPending"], channel);
+    private sealed record Channel(string Name, string Icon, string ColorClass, string DescriptionKey, string ActionKey, string? Url = null);
+}
+
+<style>
+    .community-shell { max-width: 1080px; padding: 1.25rem 0 3rem; }
+    .community-hero { display: grid; grid-template-columns: 1.35fr 1fr; align-items: center; gap: 2rem; padding: 2rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(237,233,254,.76)); }
+    .community-eyebrow { color: #6366f1; letter-spacing: .15em; font-size: .72rem; font-weight: 900; }
+    .community-hero h1 { margin: .45rem 0 .55rem; color: #111827; font-size: clamp(1.9rem, 4vw, 2.65rem); font-weight: 900; }
+    .community-hero p { color: #64748b; max-width: 600px; margin: 0; line-height: 1.65; font-weight: 600; }
+    .community-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; }
+    .community-stats div { text-align: center; padding: 1rem .5rem; border: 1px solid rgba(99,102,241,.16); border-radius: 18px; background: rgba(255,255,255,.62); }
+    .community-stats strong, .community-stats span { display: block; }
+    .community-stats strong { color: #4f46e5; font-size: 1.2rem; }
+    .community-stats span { color: #64748b; margin-top: .2rem; font-size: .75rem; font-weight: 700; }
+    .community-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .community-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: 1.25rem; }
+    .community-icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 16px; font-size: 1.45rem; }
+    .discord { color: #5865f2; background: #eef0ff; } .facebook { color: #1877f2; background: #e8f2ff; }
+    .tiktok { color: #111827; background: #f1f5f9; } .youtube { color: #ff0000; background: #fff0f0; }
+    .website { color: #7c3aed; background: #f3e8ff; } .events { color: #ea580c; background: #fff7ed; }
+    .community-copy h2 { color: #111827; margin: 0 0 .2rem; font-size: 1.05rem; font-weight: 850; }
+    .community-copy p { color: #64748b; margin: 0; font-size: .85rem; }
+
+    .community-card button,
+    .community-card .community-link-btn {
+        color: #4f46e5;
+        background: rgba(99,102,241,.1);
+        border: 1px solid rgba(99,102,241,.22);
+        border-radius: 999px;
+        padding: .5rem .75rem;
+        font-size: .8rem;
+        font-weight: 800;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        text-decoration: none;
+    }
+
+        .community-card button:hover,
+        .community-card .community-link-btn:hover {
+            color: white;
+            background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        }
+    .community-notice { display: flex; align-items: center; gap: .55rem; margin-top: 1rem; padding: .9rem 1rem; color: #4338ca; background: rgba(238,242,255,.88); border: 1px solid rgba(99,102,241,.25); border-radius: 14px; font-weight: 650; }
+    html[data-theme="dark"] .community-hero { background: linear-gradient(135deg,rgba(45,39,86,.86),rgba(30,27,75,.78)); }
+    html[data-theme="dark"] .community-hero h1, html[data-theme="dark"] .community-copy h2 { color: #f8fafc; }
+    html[data-theme="dark"] .community-hero p, html[data-theme="dark"] .community-copy p { color: #cbd5e1; }
+    html[data-theme="dark"] .community-stats div { background: rgba(67,56,132,.38); border-color: rgba(196,181,253,.25); }
+    html[data-theme="dark"] .community-stats strong { color: #c4b5fd; }
+    html[data-theme="dark"] .community-stats span { color: #cbd5e1; }
+    html[data-theme="dark"] .community-notice { color: #ddd6fe; background: rgba(49,46,129,.72); }
+    @@media (max-width: 800px) { .community-hero { grid-template-columns: 1fr; } .community-grid { grid-template-columns: 1fr; } }
+    @@media (max-width: 480px) { .community-stats { grid-template-columns: 1fr; } .community-card { grid-template-columns: auto 1fr; } .community-card button { grid-column: 1 / -1; width: 100%; } }
+</style>

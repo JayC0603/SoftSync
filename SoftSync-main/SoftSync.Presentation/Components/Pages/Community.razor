@@ -1,36 +1,4 @@
 @page "/community"
-@layout PublicLayout
 @rendermode InteractiveServer
-@inherits LocalizedComponentBase
-@using SoftSync.Common.Enums
-@inject ISkillService SkillService
-
-<PageTitle>@Tx("Learning community", "Cộng đồng học tập") · SoftSync</PageTitle>
-<section class="eco-page community-page" aria-labelledby="community-title">
-    <header class="eco-page-head eco-page-head-compact"><span>@Tx("LEARN TOGETHER", "HỌC CÙNG NHAU")</span><h1 id="community-title">@Tx("Learning guidance and mentor support", "Hướng dẫn học và kết nối Mentor")</h1><p>@Tx("Browse skill guides and mentor profiles. Discussion groups, posts and comments are not available yet.", "Xem hướng dẫn kỹ năng và hồ sơ Mentor. Hiện chưa có nhóm thảo luận, bài đăng hoặc bình luận.")</p></header>
-    <section class="community-feature" aria-labelledby="activity-title"><div><span>@Tx("THIS WEEK", "TUẦN NÀY")</span><h2 id="activity-title">@Tx("Bring a specific question to your mentor", "Chuẩn bị câu hỏi cụ thể trước khi nhờ Mentor")</h2><p>@Tx("Bring one concrete question or situation. Focused context makes peer and mentor support more useful.", "Mang theo một câu hỏi hoặc tình huống cụ thể. Ngữ cảnh tập trung giúp hỗ trợ từ bạn học và Mentor hữu ích hơn.")</p></div><a class="eco-primary" href="/roadmap">@Tx("Continue learning", "Tiếp tục học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></section>
-    <section class="community-section" aria-labelledby="groups-title"><div class="eco-section-title"><div><span>@Tx("SKILL GUIDES", "HƯỚNG DẪN KỸ NĂNG")</span><h2 id="groups-title">@Tx("Start with what you are learning", "Bắt đầu từ kỹ năng bạn đang học")</h2></div></div>
-        @if(loading){<div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading skill guides...", "Đang tải hướng dẫn kỹ năng...")</p></div>}
-        else if(loadError){<div class="eco-state eco-state-error" role="alert"><p>@Tx("Could not load the guides.", "Không tải được hướng dẫn.")</p><button @onclick="LoadAsync">@Tx("Retry", "Thử lại")</button></div>}
-        else if(skills.Count==0){<div class="eco-state"><i class="bi bi-people" aria-hidden="true"></i><h3>@Tx("No skill guides are available yet", "Chưa có hướng dẫn kỹ năng khả dụng")</h3><p>@Tx("Please check back later.", "Vui lòng quay lại sau.")</p></div>}
-        else{<div class="community-groups">@foreach(var skill in skills){<a href="/community/skills/@skill.Id"><i class="bi @skill.IconName" aria-hidden="true"></i><span><strong>@Ui(skill.Name)</strong><small>@Ui(skill.Description)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>}</div>}
-    </section>
-
-    <section class="community-section" aria-labelledby="channels-title"><div class="eco-section-title"><div><span>@Tx("OFFICIAL CHANNEL", "KÊNH CHÍNH THỨC")</span><h2 id="channels-title">@Tx("More from SoftSync", "Thông tin khác từ SoftSync")</h2></div></div><a class="community-channel" href="https://softsync.id.vn/" target="_blank" rel="noopener noreferrer"><i class="bi bi-globe2" aria-hidden="true"></i><span><strong>@Tx("SoftSync website", "Website SoftSync")</strong><small>@Tx("Product information and public learning resources", "Thông tin sản phẩm và tài nguyên học công khai")</small></span><span>@Tx("Open external site", "Mở trang ngoài")<i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></span></a></section>
-    <section class="community-guidelines"><i class="bi bi-shield-check" aria-hidden="true"></i><div><h2>@Tx("Learn respectfully", "Học tập tôn trọng")</h2><p>@Tx("Share situations without exposing another person's private information. Give feedback about observable behaviour, not personal labels.", "Chia sẻ tình huống mà không tiết lộ thông tin riêng tư của người khác. Phản hồi về hành vi có thể quan sát, không gắn nhãn con người.")</p></div></section>
-</section>
-
-@code {
-    private List<SkillDto> skills = [];
-    private bool loading = true;
-    private bool loadError;
-    protected override Task OnInitializedAsync() => LoadAsync();
-    private async Task LoadAsync()
-    {
-        loading = true; loadError = false;
-        try { skills = (await SkillService.GetAllSkillsAsync()).ToList(); }
-        catch { loadError = true; }
-        finally { loading = false; }
-    }
-    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
-}
+@using SoftSync.Presentation.Components.Variants
+<DesktopVariant><Desktop><DesktopCommunity /></Desktop><Mobile><MobileCommunity /></Mobile></DesktopVariant>

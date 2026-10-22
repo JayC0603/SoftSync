@@ -1,0 +1,65 @@
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Services
+@inject IUserService UserService
+@inject IRoadmapService RoadmapService
+@inject IAssessmentService AssessmentService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+@inject ILogger<Dashboard> Logger
+
+@if (loadFailed)
+{
+    <UiState IsError="true" Title="@T("Chưa thể tải dữ liệu học tập", "Unable to load learning data")" Description="@T("Vui lòng tải lại trang để thử lại.", "Please reload the page to try again.")" ActionHref="/dashboard" ActionText="@T("Thử lại", "Try again")" />
+}
+else if (user is null)
+{
+    <UiState Loading="true" Title="@T("Đang chuẩn bị không gian học tập…", "Preparing your learning space…")" />
+}
+else
+{
+    <MobileHome User="user" Items="roadmapItems" />
+}
+
+@code {
+    private UserDto? user;
+    private bool loadFailed;
+    private List<RoadmapItemDto> roadmapItems = [];
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try { await LoadDashboardAsync(); }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not load learner dashboard");
+            loadFailed = true;
+        }
+    }
+
+    private async Task LoadDashboardAsync()
+    {
+        if ((await AuthProvider.GetAuthenticationStateAsync()).User.IsInRole("Admin"))
+        {
+            Nav.NavigateTo("/admin/users", true);
+            return;
+        }
+        var id = await AuthProvider.GetUserIdAsync();
+        user = await UserService.GetUserByIdAsync(id);
+        if (user is null) { Nav.NavigateTo("/Account/Login", true); return; }
+        if (user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal))
+        {
+            // Returning learners may have results predating the current profile fields.
+            // Keep their dashboard accessible instead of replaying onboarding.
+            var hasCompletedAssessment = (await AssessmentService.GetLatestResultsAsync(id, id)).Any();
+            if (!hasCompletedAssessment) { Nav.NavigateTo("/profile-setup", true); return; }
+        }
+
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id, id);
+        roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+
+    }
+
+}

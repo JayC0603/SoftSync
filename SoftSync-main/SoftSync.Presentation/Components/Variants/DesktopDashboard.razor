@@ -1,0 +1,160 @@
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common.Dtos
+@using SoftSync.Presentation.Services
+@inject IUserService UserService
+@inject IProgressService ProgressService
+@inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+@if (user is null)
+{
+    <div class="home-loading"><span></span>@T("Đang chuẩn bị không gian học tập...", "Preparing your learning space...")</div>
+}
+else
+{
+    <main class="home-v2">
+        <section class="home-main">
+            <header class="welcome-copy">
+                <div class="morning"><i class="bi bi-sun-fill"></i> @T("Chào buổi sáng", "Good Morning"), @FirstName(user.PublicName)! <i class="bi bi-sun-fill"></i></div>
+                <h1>@T("Xin chào", "Hello"), @FirstName(user.PublicName)! <span>👋</span></h1>
+                <p>@T("Hôm nay là một ngày tuyệt vời để phát triển bản thân!", "Today is a great day to grow and improve yourself!")</p>
+                <div class="streak-card"><i class="bi bi-fire"></i><span>@T("Chuỗi học tập", "Learning streak")<strong>7 @T("ngày", "days")</strong><small>@T("Giữ vững phong độ nhé!", "Keep up the momentum!")</small></span></div>
+            </header>
+
+            <section class="continue-card">
+                <div class="continue-copy">
+                    <span class="learning-pill"><i class="bi bi-play-fill"></i> @T("Đang học", "Learning")</span>
+                    <h2>@T("Bài", "Lesson") @CurrentStep: @CurrentTitle</h2>
+                    <div class="lesson-progress"><span style="width:@CurrentPercent%"></span></div><b>@CurrentPercent%</b>
+                    <div class="continue-foot"><span><i class="bi bi-clock"></i> 12 @T("phút còn lại", "minutes left")</span><button @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-play-fill"></i> @T("Tiếp tục học", "Continue learning")</button></div>
+                </div>
+                <img src="/images/syncy-fish.png" alt="SYNCY mascot" />
+            </section>
+
+            <section class="stat-grid">
+                <article><i class="bi bi-stars stat-xp"></i><div><strong>@user.ExperiencePoints <small>XP</small></strong><span>@T("Tổng kinh nghiệm", "Total experience")</span></div><em style="width:@user.LevelProgressPercent%"></em></article>
+                <article><i class="bi bi-gem stat-level"></i><div><strong>@T("Cấp", "Level") @user.Level</strong><span>@T("Cấp hiện tại", "Current level")</span></div><em style="width:@user.LevelProgressPercent%"></em></article>
+                <article><i class="bi bi-clipboard2-check-fill stat-done"></i><div><strong>@completedItems <small>/ @totalItems</small></strong><span>@T("Bài hoàn thành", "Lessons completed")</span></div><em style="width:@CompletionPercent%"></em></article>
+                <article><i class="bi bi-fire stat-fire"></i><div><strong>7 @T("ngày", "days")</strong><span>@T("Liên tiếp", "In a row")</span></div><em style="width:76%"></em></article>
+            </section>
+
+            <div class="content-grid">
+                <section class="panel roadmap-panel">
+                    <div class="panel-head"><h3><i class="bi bi-map-fill"></i> @T("Lộ trình của bạn", "Your roadmap")</h3><button @onclick='() => Nav.NavigateTo("/roadmap")'>@T("Xem toàn bộ lộ trình", "View full roadmap") <i class="bi bi-arrow-right"></i></button></div>
+                    <div class="roadmap-list">
+                        @foreach (var item in VisibleRoadmap)
+                        {
+                            var index = roadmapItems.IndexOf(item) + 1;
+                            var current = !item.IsCompleted && index == CurrentStep;
+                            <button class="roadmap-row @(item.IsCompleted ? "done" : current ? "current" : "locked")" disabled="@(!item.IsCompleted && !current)" @onclick='() => Nav.NavigateTo("/roadmap")'>
+                                <i class="bi @(item.IsCompleted ? "bi-check-lg" : current ? "bi-stars" : "bi-lock-fill")"></i>
+                                <span><strong>@DisplayTitle(item, index)</strong><small>@item.Description</small></span>
+                                <em>@(item.IsCompleted ? T("Đã hoàn thành", "Completed") : current ? T("Đang học", "Learning") : T("Bị khóa", "Locked"))</em>
+                            </button>
+                        }
+                    </div>
+                </section>
+
+                <section class="panel suggestion-panel">
+                    <div class="panel-head"><h3><i class="bi bi-stars"></i> @T("Gợi ý hôm nay", "Today's suggestion")</h3><small>@T("Dành riêng cho bạn", "Made for you")</small></div>
+                    <div class="suggestion-body"><div class="suggestion-icon"><i class="bi bi-clipboard2-check"></i><i class="bi bi-clock-fill"></i></div><div><h4>@T("Hoàn thành bài học", "Complete the lesson")<br />@CurrentTitle</h4><p>@T("Bạn đang tiến rất tốt! Hoàn thành bài học này để nắm vững cách sắp xếp công việc hiệu quả.", "You're doing great! Complete this lesson to strengthen your practical skills.")</p><button @onclick='() => Nav.NavigateTo("/roadmap")'>@T("Bắt đầu ngay", "Start now") <i class="bi bi-arrow-right"></i></button></div></div>
+                </section>
+
+                <section class="panel skills-panel">
+                    <div class="panel-head"><h3><i class="bi bi-map-fill"></i> @T("Tiến độ kỹ năng", "Skill progress")</h3><button @onclick='() => Nav.NavigateTo("/progress")'>@T("Xem phân tích chi tiết", "View detailed analysis") <i class="bi bi-arrow-right"></i></button></div>
+                    <div class="skill-rings">
+                        @foreach (var item in SkillCards)
+                        {
+                            <div><div class="ring" style="--value:@item.PercentComplete;--ring:@RingColor(item.PercentComplete)"><span>@item.PercentComplete%</span></div><small>@item.SkillName</small></div>
+                        }
+                    </div>
+                </section>
+
+                <section class="panel achievements-panel">
+                    <div class="panel-head"><h3><i class="bi bi-trophy-fill"></i> @T("Thành tích gần đây", "Recent achievements")</h3><button @onclick='() => Nav.NavigateTo("/progress")'>@T("Xem tất cả", "View all") <i class="bi bi-arrow-right"></i></button></div>
+                    <div class="achievement-list">
+                        <div><i class="bi bi-play-fill violet"></i><strong>@T("Người bắt đầu", "First step")</strong><small>@user.CreatedAt.ToString("dd/MM/yyyy")</small></div>
+                        <div><i class="bi bi-check-lg green"></i><strong>@T("Hoàn thành bài", "Lesson finisher")</strong><small>@completedItems @T("bài", "lessons")</small></div>
+                        <div><i class="bi bi-star-fill blue"></i><strong>@T("Học tập đều đặn", "Consistent learner")</strong><small>@user.ExperiencePoints XP</small></div>
+                        <div><i class="bi bi-fire orange"></i><strong>@T("Tập trung cao", "Highly focused")</strong><small>@T("Hôm nay", "Today")</small></div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <aside class="syncy-column">
+            <section class="syncy-panel">
+                <div class="syncy-title"><h3><i class="bi bi-stars"></i> SYNCY AI</h3><button aria-label="Settings" @onclick='() => Nav.NavigateTo("/settings")'><i class="bi bi-gear"></i></button></div>
+                <div class="syncy-message"><strong>@T("Xin chào", "Hello") @FirstName(user.PublicName)! 👋</strong><p>@T("Đây là kế hoạch học tập được SYNCY gợi ý cho bạn hôm nay.", "Here is the learning plan SYNCY suggests for you today.")</p></div>
+                <button class="syncy-task" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-bullseye"></i><span><strong>@CurrentTitle</strong><small><i class="bi bi-clock"></i> 12 @T("phút", "minutes")</small></span><b>›</b></button>
+                <button class="syncy-task" @onclick='() => Nav.NavigateTo("/roadmap")'><i class="bi bi-book-fill"></i><span><strong>@T("Làm Mini Quiz", "Take Mini Quiz")</strong><small><i class="bi bi-clock"></i> 5 @T("phút", "minutes")</small></span><b>›</b></button>
+                <button class="syncy-task" @onclick='() => Nav.NavigateTo("/progress")'><i class="bi bi-bar-chart-fill"></i><span><strong>@T("Xem tiến độ kỹ năng", "View skill progress")</strong><small><i class="bi bi-clock"></i> 3 @T("phút", "minutes")</small></span><b>›</b></button>
+                <button class="syncy-chat" @onclick='() => Nav.NavigateTo("/assistant")'><i class="bi bi-chat-dots-fill"></i> @T("Chat với SYNCY", "Chat with SYNCY")</button>
+            </section>
+            <section class="did-you-know"><i class="bi bi-lightbulb-fill"></i><div><strong>@T("Bạn có biết?", "Did you know?")</strong><p>@T("Học 15 phút mỗi ngày giúp bạn ghi nhớ tốt hơn 80% kiến thức!", "Studying 15 minutes a day can help you retain up to 80% more!")</p></div><img src="/images/syncy-fish.png" alt="SYNCY" /></section>
+        </aside>
+    </main>
+}
+
+@code {
+    private UserDto? user;
+    private List<ProgressDto> progress = [];
+    private List<RoadmapItemDto> roadmapItems = [];
+    private int completedItems;
+    private int totalItems;
+
+    private bool Vi => L.Current == AppLanguage.Vi;
+    private string T(string vi, string en) => Vi ? vi : en;
+    private int CurrentStep => Math.Max(1, roadmapItems.FindIndex(x => !x.IsCompleted) + 1);
+    private RoadmapItemDto? CurrentItem => roadmapItems.FirstOrDefault(x => !x.IsCompleted) ?? roadmapItems.LastOrDefault();
+    private string CurrentTitle => CurrentItem?.Title ?? T("Ưu tiên công việc", "Prioritizing tasks");
+    private int CurrentPercent => progress.Count == 0 ? 0 : Math.Clamp(progress.Max(x => x.PercentComplete), 0, 100);
+    private int CompletionPercent => totalItems == 0 ? 0 : completedItems * 100 / totalItems;
+    private IEnumerable<RoadmapItemDto> VisibleRoadmap => roadmapItems.Take(5);
+    private IEnumerable<ProgressDto> SkillCards => progress.Take(4).Concat(DefaultSkills()).Take(4);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var id = await AuthProvider.GetUserIdAsync();
+        user = await UserService.GetUserByIdAsync(id);
+        if (user is null || user.Age <= 0 || string.IsNullOrWhiteSpace(user.Goal)) { Nav.NavigateTo("/profile-setup", true); return; }
+        progress = (await ProgressService.GetUserProgressAsync(id)).ToList();
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(id);
+        roadmapItems = roadmap.Items.OrderBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+        totalItems = roadmapItems.Count;
+        completedItems = roadmapItems.Count(x => x.IsCompleted);
+    }
+
+    private IEnumerable<ProgressDto> DefaultSkills()
+    {
+        var defaults = new[] { T("Quản lý thời gian", "Time management"), T("Giao tiếp", "Communication"), T("Tư duy phản biện", "Critical thinking"), T("Làm việc nhóm", "Teamwork") };
+        foreach (var (name, index) in defaults.Select((name, index) => (name, index)))
+            if (!progress.Any(x => string.Equals(x.SkillName, name, StringComparison.OrdinalIgnoreCase)))
+                yield return new ProgressDto { SkillName = name, PercentComplete = index == 0 ? CompletionPercent : 0 };
+    }
+
+    private string DisplayTitle(RoadmapItemDto item, int index) => index == 1 ? $"{T("Video giới thiệu", "Introduction video")}" : $"{T("Bài", "Lesson")} {index - 1}: {item.Title}";
+    private static string RingColor(int value) => value >= 60 ? "#7657f6" : value >= 40 ? "#2698ec" : value >= 30 ? "#35ad66" : "#ff841c";
+    private static string FirstName(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? value;
+}
+
+<style>
+    .home-loading{min-height:70vh;display:grid;place-items:center;align-content:center;gap:1rem;color:#626a85;font-weight:700}.home-loading span{width:44px;height:44px;border:4px solid #e7e5ff;border-top-color:#6848ef;border-radius:50%;animation:home-spin .8s linear infinite}@@keyframes home-spin{to{transform:rotate(360deg)}}
+    .home-v2{--ink:#101936;--muted:#66708d;--purple:#7047ef;max-width:1500px;margin:0 auto;padding:2rem 1.5rem 4rem;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:1.5rem;color:var(--ink)}
+    .home-main{min-width:0;display:grid;grid-template-columns:360px minmax(0,1fr);gap:1.2rem}.welcome-copy{padding:.3rem 0}.morning{color:#1748de;font-weight:700;font-size:.86rem}.morning i{color:#ffad15}.welcome-copy h1{margin:1rem 0 .35rem;font-size:2.6rem;font-weight:900;letter-spacing:-.045em}.welcome-copy h1 span{font-size:2rem}.welcome-copy>p{max-width:310px;margin:0;color:var(--muted);font-size:1.08rem;line-height:1.5}.streak-card{width:245px;margin-top:1.15rem;padding:.72rem 1rem;display:flex;align-items:center;gap:.8rem;background:#fff;border:1px solid #e7e9f7;border-radius:16px;box-shadow:0 10px 28px rgba(64,55,145,.08)}.streak-card>i{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;color:#f56b19;background:#fff1e7;font-size:1.7rem}.streak-card span,.streak-card strong,.streak-card small{display:block}.streak-card span{font-size:.72rem}.streak-card strong{margin:.1rem 0;font-size:1.15rem}.streak-card small{color:#6848ef}
+    .continue-card{position:relative;min-height:265px;padding:1.6rem;overflow:hidden;border-radius:25px;color:#fff;background:radial-gradient(circle at 85% 18%,rgba(180,112,255,.9),transparent 36%),linear-gradient(135deg,#3a80ef,#7049f4 63%,#9b4aee);box-shadow:0 20px 45px rgba(79,70,229,.28)}.continue-card:after{content:"";position:absolute;right:-35px;top:-80px;width:330px;height:330px;border:3px solid rgba(255,255,255,.25);border-radius:50%}.continue-copy{position:relative;z-index:2;max-width:64%}.learning-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.42rem .72rem;border-radius:10px;background:rgba(255,255,255,.15)}.continue-card h2{margin:1rem 0;font-size:1.65rem}.lesson-progress{display:inline-block;width:72%;height:15px;vertical-align:middle;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden}.lesson-progress span{display:block;height:100%;border-radius:inherit;background:#fff}.continue-copy>b{margin-left:.6rem}.continue-foot{margin-top:1.8rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}.continue-foot>span{font-weight:600}.continue-foot button{padding:.85rem 1.35rem;border:0;border-radius:14px;color:#5238dd;background:#fff;font-weight:800}.continue-card>img{position:absolute;z-index:1;right:-15px;bottom:-15px;width:295px;height:270px;object-fit:contain;filter:drop-shadow(0 20px 22px rgba(36,23,121,.3))}
+    .stat-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.stat-grid article{position:relative;overflow:hidden;padding:1rem;display:flex;align-items:center;gap:.9rem;border:1px solid #e8e9f5;border-radius:16px;background:#fff;box-shadow:0 9px 22px rgba(45,39,107,.06)}.stat-grid article>i{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;font-size:1.5rem}.stat-xp{color:#7047ef;background:#eeeaff}.stat-level{color:#1877e8;background:#e8f3ff}.stat-done{color:#1faa5e;background:#e9f9ef}.stat-fire{color:#f57818;background:#fff0e4}.stat-grid strong,.stat-grid span{display:block}.stat-grid strong{font-size:1.25rem}.stat-grid strong small{font-size:.75rem}.stat-grid span{margin-top:.18rem;color:var(--muted);font-size:.72rem}.stat-grid em{position:absolute;left:1rem;bottom:.65rem;height:4px;border-radius:99px;background:linear-gradient(90deg,#6e48f4,#a25af5)}
+    .content-grid{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:1rem}.panel{padding:1.25rem;border:1px solid #e7e8f5;border-radius:18px;background:rgba(255,255,255,.94);box-shadow:0 10px 30px rgba(54,48,121,.07)}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}.panel-head h3{margin:0;font-size:1rem;font-weight:850}.panel-head h3 i{margin-right:.45rem;color:#6e48ef}.panel-head button{border:0;color:#5139df;background:transparent;font-size:.74rem;font-weight:700}.panel-head small{color:#838ba2;font-size:.68rem}
+    .roadmap-list{display:grid}.roadmap-row{display:flex;align-items:center;gap:.7rem;width:100%;min-height:55px;padding:.55rem;border:0;border-bottom:1px solid #edf0f6;color:var(--ink);background:transparent;text-align:left}.roadmap-row>i{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:50%;color:#fff;background:#23b76a}.roadmap-row>span{min-width:0;flex:1}.roadmap-row strong,.roadmap-row small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.roadmap-row strong{font-size:.78rem}.roadmap-row small{margin-top:.2rem;color:var(--muted);font-size:.67rem}.roadmap-row em{padding:.3rem .55rem;border-radius:99px;color:#249857;background:#eaf9ef;font-size:.62rem;font-style:normal}.roadmap-row.current{background:#f6f4ff}.roadmap-row.current>i{background:#2d6de7}.roadmap-row.current em{color:#304ec8;background:#ebefff}.roadmap-row.locked{opacity:.55}.roadmap-row.locked>i{background:#9aa2b6}.roadmap-row.locked em{color:#6f7892;background:#eef0f5}
+    .suggestion-body{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:1rem}.suggestion-icon{position:relative;display:grid;place-items:center;width:120px;height:120px;border-radius:50%;color:#7047ef;background:#efecff;font-size:3.2rem}.suggestion-icon i:last-child{position:absolute;right:8px;bottom:10px;color:#2780ef;font-size:2rem}.suggestion-body h4{margin:0;font-size:1rem;line-height:1.45}.suggestion-body p{margin:.55rem 0;color:var(--muted);font-size:.72rem;line-height:1.55}.suggestion-body button{width:100%;padding:.65rem;border:0;border-radius:12px;color:#fff;background:linear-gradient(90deg,#566bf3,#863ceb);font-weight:800;font-size:.75rem}
+    .skills-panel{grid-column:1/2}.skill-rings{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}.skill-rings>div{text-align:center}.ring{--value:0;--ring:#7657f6;position:relative;width:72px;height:72px;margin:auto;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--value)*1%),#e9ebf3 0)}.ring:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}.ring span{position:relative;z-index:1;color:var(--ring);font-weight:900}.skill-rings small{display:block;margin-top:.45rem;font-size:.62rem;line-height:1.2}
+    .achievements-panel{grid-column:2/3}.achievement-list{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;text-align:center}.achievement-list>div{min-width:0}.achievement-list i{display:grid;place-items:center;width:55px;height:55px;margin:auto;border:7px solid #d7d4ff;clip-path:polygon(50% 0,90% 20%,100% 65%,72% 100%,28% 100%,0 65%,10% 20%);color:#fff;font-size:1.3rem}.achievement-list .violet{background:#6634bc}.achievement-list .green{background:#119b74}.achievement-list .blue{background:#176bd7}.achievement-list .orange{background:#ed741d}.achievement-list strong,.achievement-list small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.achievement-list strong{margin-top:.5rem;font-size:.64rem}.achievement-list small{margin-top:.2rem;color:var(--muted);font-size:.56rem}
+    .syncy-column{min-width:0}.syncy-panel{position:sticky;top:90px;padding:1.35rem;border:1px solid #e1e5f3;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 18px 45px rgba(67,56,152,.1)}.syncy-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}.syncy-title h3{margin:0;color:#5e35e1}.syncy-title h3 i{margin-right:.45rem}.syncy-title button{width:38px;height:38px;border:1px solid #e5e7f3;border-radius:50%;color:#67718d;background:#fff}.syncy-message{padding:1.1rem;border:1px solid #e7e8f2;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(60,50,130,.06)}.syncy-message p{margin:.55rem 0 0;color:#303956;font-size:.78rem;line-height:1.65}.syncy-task{display:flex;align-items:center;gap:.8rem;width:100%;margin-top:.9rem;padding:.85rem;border:1px solid #e7e8f2;border-radius:16px;color:var(--ink);background:#fff;text-align:left}.syncy-task>i{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:13px;color:#6534e9;background:#f0eaff;font-size:1.55rem}.syncy-task:nth-of-type(3)>i{color:#1683e8;background:#e7f3ff}.syncy-task:nth-of-type(4)>i{color:#16a77a;background:#e4f9f3}.syncy-task span{min-width:0;flex:1}.syncy-task strong,.syncy-task small{display:block}.syncy-task strong{font-size:.8rem}.syncy-task small{margin-top:.35rem;color:#65708d;font-size:.65rem}.syncy-task>b{display:grid;place-items:center;width:30px;height:30px;border:1px solid #dedffa;border-radius:50%;color:#5939df}.syncy-chat{width:100%;margin-top:1rem;padding:.9rem;border:0;border-radius:14px;color:#fff;background:linear-gradient(90deg,#3e75ee,#9335ef);font-weight:800}.did-you-know{position:relative;margin-top:1.1rem;min-height:100px;padding:1rem 105px 1rem 1rem;display:flex;align-items:flex-start;gap:.8rem;border:1px solid #e2e6f2;border-radius:18px;background:#fff;overflow:hidden}.did-you-know>i{color:#ffae13;font-size:1.5rem}.did-you-know strong{font-size:.78rem}.did-you-know p{margin:.35rem 0 0;font-size:.67rem;line-height:1.5}.did-you-know img{position:absolute;right:-5px;bottom:-12px;width:115px;height:110px;object-fit:contain}
+    html[data-theme="dark"] .home-v2{--ink:#f7f7ff;--muted:#b7bdd2}html[data-theme="dark"] .streak-card,html[data-theme="dark"] .stat-grid article,html[data-theme="dark"] .panel,html[data-theme="dark"] .syncy-panel,html[data-theme="dark"] .syncy-message,html[data-theme="dark"] .syncy-task,html[data-theme="dark"] .did-you-know{border-color:rgba(166,150,255,.18);background:rgba(28,25,61,.9)}html[data-theme="dark"] .ring:after{background:#1c193d}html[data-theme="dark"] .roadmap-row{color:#f7f7ff;border-color:rgba(166,150,255,.12)}html[data-theme="dark"] .roadmap-row.current{background:rgba(90,65,220,.16)}html[data-theme="dark"] .syncy-title button{color:#ddd6fe;background:#28234f;border-color:#463e75}
+    @@media(max-width:1200px){.home-v2{grid-template-columns:1fr}.syncy-column{display:grid;grid-template-columns:2fr 1fr;gap:1rem}.syncy-panel{position:static}.did-you-know{margin-top:0}.syncy-column .syncy-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}.syncy-title,.syncy-message,.syncy-chat{grid-column:1/-1}.syncy-task{margin-top:0}}
+    @@media(max-width:850px){.home-main{grid-template-columns:1fr}.welcome-copy{display:grid;grid-template-columns:1fr auto;align-items:end}.welcome-copy .morning,.welcome-copy h1,.welcome-copy>p{grid-column:1}.welcome-copy h1{font-size:2rem}.welcome-copy .streak-card{grid-column:2;grid-row:1/4}.stat-grid{grid-template-columns:1fr 1fr}.content-grid{grid-template-columns:1fr}.skills-panel,.achievements-panel{grid-column:auto}.syncy-column{grid-template-columns:1fr}.syncy-column .syncy-panel{grid-template-columns:1fr}.syncy-title,.syncy-message,.syncy-chat{grid-column:auto}}
+    @@media(max-width:560px){.home-v2{padding:1rem .75rem 6rem}.welcome-copy{display:block}.welcome-copy .streak-card{width:100%}.continue-card{min-height:390px}.continue-copy{max-width:100%}.continue-card>img{width:230px;height:200px;opacity:.78}.continue-foot{align-items:flex-start;flex-direction:column}.stat-grid{grid-template-columns:1fr 1fr;gap:.65rem}.stat-grid article{padding:.75rem;gap:.55rem}.stat-grid article>i{width:40px;height:40px}.stat-grid strong{font-size:.9rem}.suggestion-body{grid-template-columns:1fr}.suggestion-icon{margin:auto}.skill-rings,.achievement-list{grid-template-columns:1fr 1fr}.panel-head{align-items:flex-start}.panel-head button{max-width:45%;text-align:right}.roadmap-row em{display:none}}
+</style>
