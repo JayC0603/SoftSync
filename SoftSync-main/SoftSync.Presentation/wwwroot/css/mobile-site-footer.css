@@ -40,7 +40,10 @@
 .ss-site-footer-shell .shared-mobile-footer a:hover { color:var(--ss-primary,#1877f2); }
 html body .ss-workspace,html body .ss-public-site { display:flex; flex-direction:column; min-height:100dvh; }
 html body .ss-workspace>.ss-main-content,html body .ss-public-site>.ss-public-content { flex:1 0 auto; }
-@media(max-width:767px) {
- .ss-workspace>.ss-site-footer-shell { padding-bottom:calc(104px + env(safe-area-inset-bottom,0px)); }
+/* The workspace already reserves the dock height and the device safe area.
+   Keep a small footer inset instead of reserving the dock a second time. */
+@media(max-width:900px) {
  .ss-site-footer-shell { padding-top:20px; padding-bottom:24px; }
+ .ss-workspace>.ss-site-footer-shell { padding-bottom:8px; }
 }
+html[data-mobile-view='true'] .ss-workspace>.ss-site-footer-shell { padding-bottom:8px; }
