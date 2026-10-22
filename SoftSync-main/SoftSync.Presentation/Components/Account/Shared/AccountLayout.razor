@@ -11,6 +11,10 @@
      accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
     <HeadContent><link rel="stylesheet" href="css/neo-login.css?v=3" /></HeadContent>
+    @if (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+    {
+        <HeadContent><link rel="stylesheet" href="css/login-reference.css?v=1" /></HeadContent>
+    }
     <main class="neo-login @(accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) ? "neo-login-compact" : "")">
         <div class="neo-decoration neo-decoration-one" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-two" aria-hidden="true"></div>
@@ -21,6 +25,10 @@
             <a href="/" class="neo-logo" aria-label="SoftSync — Trang chủ"><img src="/images/logo.png" width="112" height="112" alt="Logo nhóm SoftSync" /></a>
             <div class="neo-form-content">@Body</div>
             <p class="neo-tagline">LEARN · BUILD · GROW TOGETHER</p>
+            @if (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+            {
+                <p class="login-brand-caption">@(L.Current == AppLanguage.Vi ? "Học kỹ năng mềm cùng AI." : "Learn soft skills with AI.")</p>
+            }
         </section>
     </main>
 }
