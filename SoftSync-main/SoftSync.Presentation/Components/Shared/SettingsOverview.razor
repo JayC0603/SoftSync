@@ -1,0 +1,49 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Dtos
+
+<section class="ss-settings-overview" aria-labelledby="settings-overview-title">
+    <header class="ss-options-title"><a href="/more" aria-label="@T("Quay lại trang Thêm", "Back to More")"><i class="bi bi-chevron-left" aria-hidden="true"></i></a><h1 id="settings-overview-title">@T("Cài đặt", "Settings")</h1></header>
+    <section class="ss-options-group" aria-labelledby="settings-account-heading">
+        <h2 id="settings-account-heading"><i class="bi bi-person-fill" aria-hidden="true"></i>@T("Tài khoản", "Account")</h2>
+        <a class="ss-option-row ss-settings-person" href="/profile">
+            <span class="ss-settings-person-avatar">@if (!string.IsNullOrWhiteSpace(User.AvatarUrl)) { <img src="@User.AvatarUrl" alt="" /> } else { @Initial }</span>
+            <span><strong>@User.PublicName</strong><small>@L["nav.level"] @User.Level</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+        <button class="ss-option-row" type="button" @onclick='() => OnOpen.InvokeAsync("Account")'><i class="bi bi-person" aria-hidden="true"></i><span>@T("Thông tin cá nhân", "Personal information")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+        <a class="ss-option-row" href="/Account/ChangePassword"><i class="bi bi-lock" aria-hidden="true"></i><span>@T("Đổi mật khẩu", "Change password")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        <button class="ss-option-row" type="button" @onclick='() => OnOpen.InvokeAsync("Account")'><i class="bi bi-link-45deg" aria-hidden="true"></i><span>@T("Tài khoản liên kết", "Linked accounts")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+    </section>
+    <section class="ss-options-group" aria-labelledby="settings-learning-heading">
+        <h2 id="settings-learning-heading"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i>@T("Học tập", "Learning")</h2>
+        @foreach (var item in LearningRows)
+        {
+            <button class="ss-option-row" type="button" @onclick="() => OnOpen.InvokeAsync(item.Section)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+        }
+    </section>
+    <section class="ss-options-group" aria-labelledby="settings-appearance-heading">
+        <h2 id="settings-appearance-heading"><i class="bi bi-palette-fill" aria-hidden="true"></i>@T("Giao diện", "Appearance")</h2>
+        <button class="ss-option-row" type="button" @onclick='() => OnOpen.InvokeAsync("Appearance")'><i class="bi bi-brightness-high" aria-hidden="true"></i><span>@T("Chế độ hiển thị", "Display mode")</span><small>@L[$"settings.theme.{User.Theme.ToString().ToLowerInvariant()}"]</small><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+        <button class="ss-option-row" type="button" @onclick='() => OnOpen.InvokeAsync("Appearance")'><i class="bi bi-translate" aria-hidden="true"></i><span>@T("Ngôn ngữ", "Language")</span><small>@T("Tiếng Việt", "English")</small><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+    </section>
+    <section class="ss-options-group" aria-labelledby="settings-notifications-heading">
+        <h2 id="settings-notifications-heading"><i class="bi bi-bell-fill" aria-hidden="true"></i>@T("Thông báo", "Notifications")</h2>
+        @foreach (var title in new[] { T("Thông báo hệ thống", "System notifications"), T("Thông báo cộng đồng", "Community notifications") })
+        {
+            <button class="ss-option-row" type="button" @onclick='() => OnOpen.InvokeAsync("Notifications")'><i class="bi bi-bell" aria-hidden="true"></i><span>@title</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+        }
+    </section>
+    <section class="ss-options-group" aria-labelledby="settings-other-heading"><h2 id="settings-other-heading"><i class="bi bi-three-dots" aria-hidden="true"></i>@T("Khác", "Other")</h2><SupportOptionLinks /></section>
+    <form action="/Account/Logout" method="post" class="ss-options-logout"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="Account/Login" /><button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>@T("Đăng xuất", "Sign out")</button></form>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
+    [Parameter] public EventCallback<string> OnOpen { get; set; }
+    private string Initial => string.IsNullOrWhiteSpace(User.PublicName) ? "S" : System.Globalization.StringInfo.GetNextTextElement(User.PublicName.Trim()).ToUpperInvariant();
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private (string Icon, string Title, string Section)[] LearningRows => [
+        ("bi-bullseye", T("Mục tiêu học tập", "Learning goals"), "Learning"),
+        ("bi-sliders", T("Tùy chỉnh lộ trình", "Customize roadmap"), "Learning"),
+        ("bi-bell", T("Nhắc nhở học tập", "Learning reminders"), "Notifications")
+    ];
+}

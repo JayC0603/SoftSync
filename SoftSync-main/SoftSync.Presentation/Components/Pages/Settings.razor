@@ -21,7 +21,9 @@
 @inject IJSRuntime JS
 @inject ILogger<Settings> Logger
 
-<div class="ss-settings-shell tw:mx-auto">
+<PageTitle>@L["nav.settings"] · SoftSync</PageTitle>
+<div class="ss-settings-shell tw:mx-auto @(showSettingsDetail ? "ss-settings-show-detail" : "ss-settings-show-overview")">
+    <button type="button" class="ss-settings-detail-back" @onclick="() => showSettingsDetail = false"><i class="bi bi-chevron-left" aria-hidden="true"></i>@L["nav.settings"]</button>
     <UiPageHeader Title="@L["nav.settings"]" Description="@L["redesign.settings.description"]" />
     @if (loadFailed)
     {
@@ -38,6 +40,7 @@
     }
     else
     {
+        <SettingsOverview User="user" OnOpen="OpenSettingsSectionAsync" />
         <fieldset disabled="@(!interactiveReady)" class="tw:m-0 tw:min-w-0 tw:border-0 tw:p-0">
         <div class="ss-settings-grid">
             <!-- Sidebar -->
@@ -533,6 +536,22 @@
 
     private enum Tab { Account, Learning, Notifications, Appearance, Privacy, Danger }
     private Tab tab = Tab.Account;
+    private bool showSettingsDetail;
+    [SupplyParameterFromQuery(Name = "section")] public string? RequestedSection { get; set; }
+    protected override void OnParametersSet()
+    {
+        if (Enum.TryParse<Tab>(RequestedSection, true, out var requested) && Enum.IsDefined(requested))
+        {
+            tab = requested;
+            showSettingsDetail = true;
+        }
+    }
+    private async Task OpenSettingsSectionAsync(string section)
+    {
+        if (!Enum.TryParse<Tab>(section, out var next)) return;
+        showSettingsDetail = true;
+        await SelectTabAsync(next);
+    }
 
     private const long MaxAvatarBytes = 3 * 1024 * 1024;
     private UserDto? user;

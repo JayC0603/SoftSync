@@ -1,0 +1,124 @@
+/* More and Settings share the same lightweight, translucent mobile surfaces. */
+.ss-settings-overview, .ss-settings-detail-back { display: none; }
+.ss-more-page {
+    --option-ink: #11164d;
+    --option-muted: #65739c;
+    --option-line: rgb(158 181 229 / 22%);
+    --option-surface: rgb(255 255 255 / 83%);
+    color: var(--option-ink);
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 6px 0 28px;
+}
+html body .page .ss-more-page h1 { margin: 0; font-size: 42px !important; font-weight: 750; line-height: 1.25; letter-spacing: -.04em; }
+html body .page .ss-more-page > header p { margin: 4px 0 0; font-size: 16px !important; color: var(--option-muted); line-height: 1.5; }
+.ss-more-page > header { margin-bottom: 38px; padding-inline: 4px; }
+.ss-more-features { display: grid; gap: 20px; }
+.ss-more-feature {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 108px;
+    padding: 20px 18px;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid rgb(255 255 255 / 60%);
+    border-radius: 20px;
+    background: var(--option-surface);
+}
+.ss-more-icon { display: grid; place-items: center; flex: 0 0 62px; width: 62px; height: 62px; border-radius: 18px; background: linear-gradient(145deg, #e9e8ff, #f0edff); color: #5035f4; font-size: 34px; }
+.ss-more-copy { flex: 1; min-width: 0; }
+.ss-more-copy strong { display: block; font-size: 18px; font-weight: 700; line-height: 1.4; }
+html body .page .ss-main-content .ss-more-copy small { display: block; margin-top: 4px; font-size: 14px !important; line-height: 1.5; color: var(--option-muted); }
+.ss-more-feature > .bi-chevron-right { flex-shrink: 0; font-size: 16px; }
+.ss-more-settings { margin: 20px 2px 0; padding: 14px 0 22px; border-block: 1px solid var(--option-line); }
+.ss-more-settings .ss-more-icon { color: #1763ff; background: #eaf0ff; }
+.ss-more-feature:hover { color: #255de2; border-color: rgb(111 154 238 / 40%); }
+.ss-option-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 58px;
+    padding: 14px 2px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    text-align: start;
+    cursor: pointer;
+    list-style: none;
+}
+.ss-option-row::-webkit-details-marker { display: none; }
+.ss-option-row > i:first-child { flex: 0 0 27px; width: 27px; text-align: center; font-size: 24px; line-height: 1; }
+.ss-option-row > span:not(.ss-settings-person-avatar) { flex: 1; min-width: 0; }
+.ss-option-row > .bi-chevron-right { margin-left: auto; flex: 0 0 auto; font-size: 14px; }
+html body .page .ss-option-row > small { color: var(--option-muted); font-size: 14px !important; white-space: nowrap; }
+.ss-support-options > :not(:last-child) { border-bottom: 1px solid var(--option-line); }
+.ss-more-page > .ss-support-options { padding: 8px 14px; }
+.ss-more-page > .ss-support-options .ss-option-row { min-height: 70px; }
+.ss-support-note { padding: 0 8px 16px 46px; color: var(--option-muted); }
+.ss-support-note p { margin: 0 0 8px; }
+.ss-support-options details[open] > summary > .bi-chevron-right { rotate: 90deg; }
+.ss-option-row:hover { color: #255de2; }
+:is(.ss-more-feature, .ss-option-row, .ss-options-title a, .ss-settings-detail-back):focus-visible { outline: 3px solid #337cff; outline-offset: 3px; border-radius: 10px; }
+html[data-theme='dark'] body .ss-more-page {
+    --option-ink: #edf2ff; --option-muted: #aabbda; --option-line: rgb(158 181 229 / 18%); --option-surface: rgb(26 38 61 / 94%);
+}
+html[data-theme='dark'] .ss-more-icon { background: #2a2d54; color: #b6a9ff; }
+@media (min-width: 901px) {
+    .ss-more-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ss-more-feature { gap: 16px; }
+    .ss-more-copy strong { font-size: 16px; }
+}
+@media (max-width: 900px) {
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) {
+        --option-ink: #11164d; --option-muted: #65739c; --option-line: rgb(158 181 229 / 22%); --option-surface: rgb(255 255 255 / 83%);
+    }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-workspace {
+        background: radial-gradient(ellipse at 110% 30%, #e8f3ff80, transparent 60%), linear-gradient(125deg, #f9fbff, #eef8ff 55%, #f8faff) !important;
+    }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-main-content.container { padding: 22px 16px 30px !important; background: transparent !important; }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-site-footer-shell { display: none; }
+    .ss-more-page { min-height: calc(100svh - 200px); }
+    .ss-settings-shell { color: var(--option-ink); }
+    .ss-settings-overview { display: grid; gap: 20px; }
+    .ss-settings-show-overview > fieldset,
+    .ss-settings-show-overview > .ss-page-header,
+    .ss-settings-show-overview > :is(header, .ui-page-header) { display: none; }
+    /* The existing editor remains available after selecting a settings row. */
+    .ss-settings-show-detail > .ss-settings-overview { display: none; }
+    .ss-settings-show-detail > .ss-settings-detail-back { display: flex; align-items: center; gap: 12px; min-height: 44px; margin-bottom: 16px; padding: 0 4px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 18px; cursor: pointer; }
+    .ss-options-title { display: flex; align-items: center; gap: 18px; min-height: 44px; margin: -4px 0 2px; }
+    .ss-options-title a { display: grid; place-items: center; width: 36px; height: 44px; color: inherit; text-decoration: none; font-size: 24px; }
+    html body .page .ss-settings-overview .ss-options-title h1 { margin: 0; font-size: 26px !important; line-height: 1.3; font-weight: 750; }
+    .ss-options-group { min-width: 0; padding: 0 16px 4px; border: 1px solid rgb(255 255 255 / 60%); border-radius: 20px; background: var(--option-surface); }
+    html body .page .ss-settings-overview .ss-options-group h2 { display: flex; align-items: center; gap: 16px; min-height: 56px; margin: 0; padding: 12px 2px; border-bottom: 1px solid var(--option-line); color: inherit; font-size: 18px !important; line-height: 1.4; font-weight: 700; }
+    .ss-options-group h2 i { flex: 0 0 27px; font-size: 24px; text-align: center; }
+    .ss-options-group > .ss-option-row:not(:last-child) { border-bottom: 1px solid var(--option-line); }
+    html body .page .ss-main-content .ss-settings-overview .ss-option-row { font-size: 15px !important; font-weight: 400; }
+    html body .page .ss-main-content .ss-settings-overview button.ss-option-row { font-weight: 400; }
+    .ss-settings-person { min-height: 82px; }
+    .ss-settings-person-avatar { display: grid; place-items: center; flex: 0 0 58px; width: 58px; height: 58px; border-radius: 50%; overflow: hidden; background: linear-gradient(130deg, #6360d4, #423ab5); color: #fff; font-size: 28px; }
+    .ss-settings-person-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .ss-settings-person strong { display: block; font-size: 18px; font-weight: 650; }
+    html body .page .ss-settings-person small { display: block; margin-top: 3px; font-size: 14px !important; color: var(--option-muted); }
+    .ss-options-logout { margin: 12px 4px 18px; }
+    .ss-options-logout button { display: flex; justify-content: center; align-items: center; gap: 16px; width: 100%; min-height: 58px; padding: 14px; border: 1px solid #e83958; border-radius: 12px; background: linear-gradient(120deg, #fa4c67, #ec405f); color: #fff; font: inherit; font-size: 19px; font-weight: 600; cursor: pointer; }
+    .ss-options-logout button i { font-size: 25px; }
+    .ss-options-logout button:focus-visible { outline: 3px solid #a51e3a; outline-offset: 3px; }
+    html body .page:has(.ss-settings-shell) .ss-mobile-bottom-link[href='/more'] { color: #0875ff; background: rgb(8 117 255 / 8%); }
+    html[data-theme='dark'] body .page:has(:is(.ss-more-page, .ss-settings-shell)) { --option-ink: #edf2ff; --option-muted: #aabbda; --option-line: rgb(158 181 229 / 18%); --option-surface: rgb(26 38 61 / 94%); }
+    html[data-theme='dark'] body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-workspace { background: linear-gradient(125deg, #0d1629, #101e32) !important; }
+    html[data-theme='dark'] body .page .ss-options-group { border-color: rgb(158 181 229 / 12%); }
+}
+@media (max-width: 360px) {
+    .ss-more-feature { gap: 14px; padding-inline: 14px; }
+    .ss-more-icon { flex-basis: 52px; width: 52px; height: 56px; font-size: 30px; }
+    .ss-more-copy strong { font-size: 17px; }
+    .ss-option-row { gap: 12px; }
+    html body .page .ss-option-row > small { font-size: 12px !important; }
+}
