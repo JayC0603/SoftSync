@@ -33,7 +33,7 @@ SoftSync — nền tảng học kỹ năng mềm bằng AI. **Blazor Server (.NE
 - Blazor Server **không chạy trên Vercel** (serverless, không .NET). Deploy lên host có .NET runtime.
 - `SoftSync.Presentation/Dockerfile` multi-stage (SDK 10 + Node 20 build → aspnet 10 runtime), bind `$PORT` (fallback 8080). `.dockerignore` + `docker-compose.yml` ở gốc repo.
 - `Program.cs`: `UseForwardedHeaders` (proxy TLS) chạy trước Auth; `UseHttpsRedirection` **chỉ ở Development**. `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` để ghi `DateTime` non-UTC không lỗi.
-- Render Web Service (Docker, Dockerfile Path `SoftSync.Presentation/Dockerfile`, context = gốc repo) + Postgres free; env `DATABASE_URL` + `ASPNETCORE_ENVIRONMENT=Production`. Google OAuth redirect: `https://<app>.onrender.com/signin-google`. Free tier ngủ sau ~15' idle.
+- Next.js frontend deploys to `https://<project>.vercel.app`; set the ASP.NET Core host's `FRONTEND_ORIGINS` to that exact origin. The ASP.NET Core backend still requires a .NET-capable host and uses `DATABASE_URL` + `ASPNETCORE_ENVIRONMENT=Production`. Google OAuth redirect remains on the backend host: `https://<backend-host>/signin-google`.
 
 ## Tài khoản demo
 Seed runtime trong `DbInitializer`: `demo@softsync.local` / `Demo@12345`.

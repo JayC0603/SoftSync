@@ -1,0 +1,28 @@
+﻿@page "/more"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@attribute [Authorize]
+
+<PageTitle>@T("Thêm", "More") · SoftSync</PageTitle>
+<section class="ss-more-page" aria-labelledby="more-title">
+    <header><h1 id="more-title">@T("Thêm", "More")</h1><p>@T("Các tính năng mở rộng và cài đặt.", "More features and settings.")</p></header>
+    <nav class="ss-more-features" aria-label="@T("Khám phá và kết nối", "Explore and connect")">
+        @foreach (var item in Explore)
+        {
+            <a class="ss-more-feature" href="@item.Url"><span class="ss-more-icon"><i class="bi @item.Icon" aria-hidden="true"></i></span><span class="ss-more-copy"><strong>@item.Title</strong><small>@item.Description</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        }
+    </nav>
+    <div class="ss-more-settings"><a class="ss-more-feature" href="/settings"><span class="ss-more-icon"><i class="bi bi-gear" aria-hidden="true"></i></span><span class="ss-more-copy"><strong>@T("Cài đặt", "Settings")</strong><small>@T("Tài khoản, ngôn ngữ, thông báo,...", "Account, language, notifications...")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a></div>
+    <SupportOptionLinks />
+    <AuthorizeView Roles="Teacher"><Authorized><section aria-labelledby="more-teaching"><h2 id="more-teaching">@T("Giảng dạy", "Teaching")</h2><div class="ss-more-card"><a href="/teacher"><span><strong>@T("Không gian giảng viên", "Teacher Studio")</strong><small>@T("Quản lý khóa học và nội dung giảng dạy", "Manage courses and teaching content")</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a></div></section></Authorized></AuthorizeView>
+</section>
+
+@code {
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private (string Url, string Icon, string Title, string Description)[] Explore => [
+        ("/resources", "bi-folder", T("Tài nguyên", "Resources"), T("Tài liệu, video và công cụ học tập", "Documents, videos and learning tools")),
+        ("/game", "bi-controller", T("Trò chơi nhỏ", "Mini games"), T("Học mà chơi, ôn tập kiến thức", "Learn through play and review your knowledge")),
+        ("/assistant", "bi-chat-dots", "SYNCY", T("Hỏi đáp và hỗ trợ học tập", "Questions, answers and learning support")),
+        ("/community", "bi-people", T("Cộng đồng", "Community"), T("Trao đổi và chia sẻ cùng người học", "Connect and share with fellow learners"))
+    ];
+}

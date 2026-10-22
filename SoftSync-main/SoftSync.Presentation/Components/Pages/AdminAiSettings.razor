@@ -1,0 +1,129 @@
+@page "/admin/ai/settings"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@using Microsoft.AspNetCore.Identity
+@inject AiProviderService Ai
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>@Ui("Cấu hình AI", "AI configuration") · SoftSync</PageTitle>
+<main class="ss-admin ss-admin-studio" data-admin-section="ai" aria-labelledby="ai-title">
+    <header class="ss-admin-header">
+        <div><span class="ss-admin-eyebrow">SoftSync · Admin</span><h1 id="ai-title">@Ui("Cấu hình Gemini", "Gemini settings")</h1>
+            <p>@Ui("Chọn model cho từng tác vụ và sắp xếp tối đa 3 key dự phòng.", "Choose a model for each task and order up to three backup keys.")</p></div>
+        <a class="btn btn-outline-secondary" href="/admin/dashboard">@Ui("Dashboard", "Dashboard")</a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert @(failed ? "alert-danger" : "alert-success")" role="@(failed ? "alert" : "status")">@message</div>
+    }
+
+    @if (loading)
+    {
+        <p role="status">@Ui("Đang tải cấu hình…", "Loading configuration…")</p>
+    }
+    else
+    {
+        <section class="ss-admin-panel" aria-labelledby="models-title">
+            <div class="ss-admin-panel-heading"><div><h2 id="models-title">@Ui("Model theo tác vụ", "Models by task")</h2><p>@Ui("Danh sách lấy từ các key đang bật. Nếu chưa kết nối, bạn có thể nhập model ID.", "Models are listed from enabled keys. Enter a model ID if no key is connected yet.")</p></div></div>
+            <label class="ss-admin-toggle"><input type="checkbox" @bind="enabled" /><span>@Ui("Bật Gemini cho SYNCY và CV", "Enable Gemini for SYNCY and CV")</span></label>
+            <div class="ss-admin-form-grid">
+                <label>@Ui("Trợ lý SYNCY", "SYNCY assistant")<input class="form-control" list="gemini-models" @bind="chatModel" maxlength="100" /></label>
+                <label>@Ui("Đánh giá CV/JD", "CV/JD review")<input class="form-control" list="gemini-models" @bind="cvModel" maxlength="100" /></label>
+                <label>@Ui("Đánh giá thực hành", "Learning evaluation")<input class="form-control" list="gemini-models" @bind="evaluationModel" maxlength="100" /></label>
+                <datalist id="gemini-models">@foreach (var model in models) { <option value="@model.Name">@model.DisplayName</option> }</datalist>
+            </div>
+            <p class="ss-admin-note">@Ui("Chỉ lưu ID model; model không còn được Google hỗ trợ cần được chọn lại.", "Only the model ID is stored. Select another model if Google retires it.")</p>
+        </section>
+
+        <section class="ss-admin-panel" aria-labelledby="keys-title">
+            <div class="ss-admin-panel-heading"><div><h2 id="keys-title">@Ui("API key và thứ tự dự phòng", "API keys and fallback order")</h2><p>@Ui("Các key trong cùng project dùng chung quota. Gán cùng tên nhóm quota nếu cùng project.", "Keys in the same project share quota. Use the same quota group for keys from one project.")</p></div>
+                <button class="btn btn-outline-primary" type="button" disabled="@(credentials.Count >= 3)" @onclick="AddCredential"><i class="bi bi-plus-lg"></i> @Ui("Thêm key", "Add key")</button></div>
+            @if (credentials.Count == 0) { <p class="ss-admin-empty">@Ui("Chưa có key. Dán key Google AI Studio để bắt đầu.", "No key configured. Paste a Google AI Studio key to begin.")</p> }
+            @foreach (var row in credentials.OrderBy(x => x.Priority).ToList())
+            {
+                var index = credentials.IndexOf(row);
+                <article class="ss-ai-key-row">
+                    <div class="ss-ai-key-priority"><span>@row.Priority</span><div><button type="button" class="btn btn-sm btn-light" title="@Ui("Lên", "Move up")" disabled="@(saving || index == 0)" @onclick="() => Move(row, -1)"><i class="bi bi-chevron-up"></i></button><button type="button" class="btn btn-sm btn-light" title="@Ui("Xuống", "Move down")" disabled="@(saving || index == credentials.Count - 1)" @onclick="() => Move(row, 1)"><i class="bi bi-chevron-down"></i></button></div></div>
+                    <div class="ss-ai-key-fields">
+                        <label>@Ui("Tên gợi nhớ", "Label")<input class="form-control" @bind="row.Name" maxlength="80" placeholder="Primary" /></label>
+                        <label>@Ui("Nhóm project/quota", "Project/quota group")<input class="form-control" @bind="row.QuotaGroup" maxlength="80" placeholder="project-a" /></label>
+                        <label class="ss-ai-key-secret">@Ui("API key", "API key")<input class="form-control" type="password" autocomplete="new-password" @bind="row.Key" placeholder="@KeyPlaceholder(row)" /></label>
+                    </div>
+                    <div class="ss-ai-key-meta"><span class="ss-ai-status @StatusClass(row.Status)">@StatusText(row.Status)</span><span>@row.Fingerprint</span>@if (row.CooldownUntilUtc is { } until) { <span>@Ui("Thử lại sau", "Retry after") @until.ToLocalTime().ToString("HH:mm:ss")</span> }</div>
+                    @if (!string.IsNullOrWhiteSpace(row.LastMessage)) { <p class="ss-admin-note">@row.LastMessage</p> }
+                    <div class="ss-ai-key-actions"><label><input type="checkbox" @bind="row.Enabled" /> @Ui("Đang bật", "Enabled")</label><button class="btn btn-sm btn-outline-secondary" type="button" disabled="@(saving || row.Id <= 0)" @onclick="() => CheckKey(row.Id)">@Ui("Kiểm tra key", "Test key")</button><button class="btn btn-sm btn-outline-danger" type="button" disabled="saving" @onclick="() => Remove(row)">@Ui("Xóa", "Remove")</button></div>
+                </article>
+            }
+        </section>
+
+        <div class="ss-admin-savebar"><span>@Ui("Cấu hình phiên bản", "Configuration version") @version</span><button class="btn btn-primary" type="button" disabled="saving" @onclick="SaveAsync">@(saving ? Ui("Đang lưu…", "Saving…") : Ui("Lưu cấu hình", "Save configuration"))</button></div>
+    }
+</main>
+
+<style>
+    .ss-admin { --admin-border: var(--ss-border, #e6e4f2); --admin-surface: var(--ss-surface, #fff); --admin-ink: var(--ss-text, #24213a); --admin-muted: var(--ss-text-muted, #746f84); max-width: 1280px; margin: 0 auto; padding: 28px 24px 48px; color: var(--admin-ink); }
+    .ss-admin-header,.ss-admin-panel-heading,.ss-admin-savebar { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .ss-admin-header { margin-bottom:24px; }.ss-admin-eyebrow { color:#7357df; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem; }.ss-admin h1 { margin:.35rem 0; font-size:clamp(1.75rem,3vw,2.25rem); }.ss-admin h2 { margin:0 0 4px; font-size:1.25rem; }.ss-admin p { color:var(--admin-muted); margin:0; }
+    .ss-admin-panel { padding:24px; margin:18px 0; border:1px solid var(--admin-border); border-radius:16px; background:var(--admin-surface); box-shadow:0 6px 24px rgba(31,24,70,.045); }.ss-admin-panel-heading { margin-bottom:20px; }.ss-admin-toggle { display:flex; gap:10px; align-items:center; margin:6px 0 18px; font-weight:650; }
+    .ss-admin-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }.ss-admin-form-grid label,.ss-ai-key-fields label { display:grid; gap:7px; font-weight:650; font-size:.9rem; }.ss-admin-note { margin-top:12px!important; font-size:.84rem; }.ss-admin-empty { padding:24px; background:rgba(116,92,223,.06); border-radius:12px; }
+    .ss-ai-key-row { padding:18px 0; border-top:1px solid var(--admin-border); }.ss-ai-key-priority { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }.ss-ai-key-priority>span { display:grid; place-items:center; width:30px; height:30px; border-radius:50%; color:#fff; background:#7357df; font-weight:700; }.ss-ai-key-fields { display:grid; grid-template-columns:minmax(140px,.7fr) minmax(150px,.8fr) minmax(240px,1.5fr); gap:12px; }.ss-ai-key-meta,.ss-ai-key-actions { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:12px; color:var(--admin-muted); font-size:.82rem; }.ss-ai-key-actions { justify-content:flex-end; }.ss-ai-key-actions label { margin-right:auto; display:flex; align-items:center; gap:7px; }.ss-ai-status { padding:4px 9px; border-radius:999px; background:#f2efff; color:#6043c4; font-weight:700; }.ss-ai-status.ready { color:#176b48; background:#e6f6ee; }.ss-ai-status.warn { color:#875700; background:#fff4db; }.ss-ai-status.bad { color:#a22f39; background:#fdebed; }
+    .ss-admin-savebar { position:sticky; bottom:12px; padding:12px 16px; border:1px solid var(--admin-border); border-radius:14px; background:var(--admin-surface); box-shadow:0 8px 30px rgba(31,24,70,.1); z-index:2; }.ss-admin-savebar span { color:var(--admin-muted); font-size:.85rem; }
+    html[data-theme="dark"] .ss-admin-panel,html[data-theme="dark"] .ss-admin-savebar { background:var(--ss-surface); }
+    @@media(max-width:900px) { .ss-admin { padding:20px 14px 36px; }.ss-admin-header { align-items:flex-start; }.ss-admin-form-grid,.ss-ai-key-fields { grid-template-columns:1fr; }.ss-admin-panel { padding:16px; }.ss-admin-savebar { position:static; } }
+</style>
+
+@code {
+    private bool loading = true, saving, failed, enabled;
+    private string message = "", chatModel = "gemini-3.5-flash-lite", cvModel = "gemini-3.5-flash-lite", evaluationModel = "gemini-3.5-flash-lite";
+    private int version;
+    private List<AiCredentialInput> credentials = [];
+    private IReadOnlyList<AiModelView> models = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = await Ai.GetSettingsAsync();
+        enabled = settings.Enabled; chatModel = settings.ChatModel; cvModel = settings.CvModel;
+        evaluationModel = settings.EvaluationModel; version = settings.Version;
+        credentials = settings.Credentials.Select(ToInput).ToList();
+        models = await Ai.ListModelsAsync();
+        loading = false;
+    }
+
+    private void AddCredential() { if (credentials.Count < 3) credentials.Add(new(0, $"Key {credentials.Count + 1}", "", $"project-{credentials.Count + 1}", credentials.Count + 1, true)); }
+    private string KeyPlaceholder(AiCredentialInput row) => row.Id > 0 ? Ui("•••• key đã lưu · để trống để giữ", "•••• saved key · leave blank to keep") : Ui("Dán API key", "Paste API key");
+    private static AiCredentialInput ToInput(AiCredentialView x) => new(x.Id, x.Name, "", x.QuotaGroup, x.Priority, x.Enabled)
+    { Fingerprint = x.Fingerprint, Status = x.Status, LastMessage = x.LastMessage, CooldownUntilUtc = x.CooldownUntilUtc };
+    private void NormalizePriorities() { for (var i = 0; i < credentials.Count; i++) credentials[i].Priority = i + 1; }
+    private void Remove(AiCredentialInput row) { credentials.Remove(row); NormalizePriorities(); }
+    private void Move(AiCredentialInput row, int delta)
+    {
+        var index = credentials.OrderBy(x => x.Priority).ToList().IndexOf(row); var ordered = credentials.OrderBy(x => x.Priority).ToList();
+        var destination = Math.Clamp(index + delta, 0, ordered.Count - 1); (ordered[index], ordered[destination]) = (ordered[destination], ordered[index]);
+        credentials = ordered; NormalizePriorities();
+    }
+    private async Task SaveAsync()
+    {
+        saving = true; message = ""; failed = false;
+        try
+        {
+            var userId = (await Auth.GetAuthenticationStateAsync()).User.GetUserId();
+            await Ai.SaveAsync(new(enabled, chatModel, cvModel, evaluationModel, credentials.OrderBy(x => x.Priority).ToList()), userId);
+            var settings = await Ai.GetSettingsAsync(); version = settings.Version;
+            credentials = settings.Credentials.Select(ToInput).ToList();
+            message = Ui("Đã lưu cấu hình AI.", "AI configuration saved.");
+        }
+        catch (Exception ex) { failed = true; message = Ui("Không lưu được cấu hình: ", "Could not save settings: ") + ex.Message; }
+        finally { saving = false; }
+    }
+    private async Task CheckKey(int id)
+    {
+        saving = true; message = ""; failed = false;
+        try { await Ai.TestCredentialAsync(id); models = await Ai.ListModelsAsync(); message = Ui("Kết nối thành công; model khả dụng đã tải.", "Connection succeeded; available models are loaded."); }
+        catch (Exception ex) { failed = true; message = ex.Message; }
+        finally { var settings = await Ai.GetSettingsAsync(); credentials = settings.Credentials.Select(ToInput).ToList(); saving = false; }
+    }
+    private string StatusText(string status) => status switch { "Ready" => Ui("Sẵn sàng", "Ready"), "CoolingDown" or "QuotaExhausted" => Ui("Đang chờ quota", "Cooling down"), "InvalidCredential" => Ui("Key không hợp lệ", "Invalid key"), "Unavailable" or "ModelUnavailable" => Ui("Không khả dụng", "Unavailable"), _ => Ui("Chưa kiểm tra", "Untested") };
+    private static string StatusClass(string status) => status == "Ready" ? "ready" : status is "InvalidCredential" or "Unavailable" or "ModelUnavailable" ? "bad" : status is "CoolingDown" or "QuotaExhausted" ? "warn" : "";
+}

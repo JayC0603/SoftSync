@@ -1,128 +1,723 @@
 @page "/roadmap/lecture/{UserId:int}/{ItemId:int}"
 @rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
+@using SoftSync.Presentation.Components.Journey
+@using System.Text.Json
 @inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IAiLearningEvaluationService AiEvaluator
 
-<div class="max-900 mx-auto">
-    <div class="tw:mb-4">
-        <button class="btn btn-link text-muted tw:no-underline tw:px-0" @onclick="BackToRoadmap">
-            <i class="bi bi-arrow-left tw:me-1"></i> @L["roadmap.backToRoadmap"]
-        </button>
-    </div>
+<PageTitle>@LessonTitle · SoftSync</PageTitle>
 
-    @if (item == null)
+<section class="lesson-page">
+    @if (loading)
     {
-        <div class="ss-card tw:p-12 tw:text-center">
-            <div class="spinner-border text-primary" role="status"></div>
-        </div>
+        <div class="state"><span></span>@Tx("Loading lesson...", "Đang tải bài học...")</div>
+    }
+    else if (!isSupportedCommunicationLesson)
+    {
+        <button class="back" @onclick="Back"><i class="bi bi-arrow-left"></i>@Tx("Back to Roadmap", "Quay lại Roadmap")</button>
+        <section class="empty"><i class="bi bi-journal-plus"></i><h1>@Tx("Content not available", "Chưa nạp nội dung")</h1><p>@Tx("This week is waiting for new video and theory content.", "Tuần này đang chờ video và lý thuyết mới.")</p></section>
     }
     else
     {
-        <div class="ss-card ss-glass-interactive tw:p-12 lecture-shell">
-            <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
-                <div>
-                    <span class="text-primary tw:font-bold tw:text-sm tw:uppercase">@L["roadmap.week"] @item.WeekNumber</span>
-                    <h2 class="tw:font-bold tw:mb-0">@item.Title</h2>
-                </div>
-                <span class="badge bg-primary">@item.SkillName</span>
-            </div>
-
-            @if (item.IsCompleted)
-            {
-                <div class="lecture-complete tw:mb-4">
-                    <i class="bi bi-patch-check-fill" style="font-size: 2rem;"></i>
-                    <strong>Game 1 đã hoàn thành</strong>
-                    <span>Trang này chỉ còn để xem lại lộ trình. Bạn có thể đi tiếp sang các tuần sau.</span>
-                </div>
-            }
-            else
-            {
-                <div class="lecture-placeholder tw:mb-4">
-                    <i class="bi bi-play-btn-fill tw:me-2"></i>
-                    @L["roadmap.videoUnavailable"]
-                </div>
-            }
-
-            <p class="text-muted tw:mb-0">
-                @item.Description
-            </p>
-
-            <div class="tw:mt-8 tw:text-end">
-                @if (item.IsCompleted)
+        <div class="lesson-shell">
+            <header class="lesson-top">
+                <button @onclick="Back"><i class="bi bi-arrow-left"></i>@Ui("Roadmap")</button>
+                <div><small>@(IsTimeManagementLesson ? Tx($"TIME MANAGEMENT · WEEK {timeManagementLessonNumber}", $"QUẢN LÝ THỜI GIAN · TUẦN {timeManagementLessonNumber}") : Tx($"COMMUNICATION SKILLS · WEEK {communicationLessonNumber}", $"KỸ NĂNG GIAO TIẾP · TUẦN {communicationLessonNumber}"))</small><h1>@LessonTitle</h1></div>
+                @if (item!.IsCompleted)
                 {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled style="opacity:.65; cursor:not-allowed;">
-                        Đã hoàn thành Game 1
-                    </button>
-                }
-                else if (item.WeekNumber == 1)
-                {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" @onclick="GoToGame">
-                        @L["roadmap.continueToGame"] <i class="bi bi-arrow-right tw:ms-2"></i>
-                    </button>
+                    <span class="week-complete"><i class="bi bi-check-circle-fill"></i>@Tx("Week completed", "Đã hoàn thành tuần")</span>
                 }
                 else
                 {
-                    <button class="ss-btn-primary tw:px-8 tw:py-3" disabled title="@L["roadmap.gameUnavailable"]" style="opacity:.65; cursor:not-allowed;">
-                        @L["roadmap.gameUnavailable"]
+                    <span>@CompletedCount / 6 @Tx("steps", "bước")</span>
+                }
+            </header>
+
+            <nav class="lesson-steps">
+                @foreach (var step in Steps)
+                {
+                    var unlocked = CanOpen(step.Id);
+                    <button class="@(currentStep == step.Id ? "active" : null) @(IsComplete(step.Id) ? "done" : null)" disabled="@(!unlocked)" @onclick="() => OpenStep(step.Id)">
+                        <span>@(IsComplete(step.Id) ? "✓" : step.Id.ToString())</span><b>@Tx(step.En, step.Vi)</b>@if (!unlocked) { <i class="bi bi-lock-fill"></i> }
                     </button>
                 }
-            </div>
+            </nav>
+
+            <section class="lesson-content">
+                @if (IsComplete(currentStep))
+                {
+                    <div class="saved-complete"><i class="bi bi-check-circle-fill"></i><div><b>@Tx("Completed", "Đã học xong")</b><small>@Tx("Your progress is saved. You can review this section at any time.", "Tiến độ đã được lưu. Bạn có thể xem lại phần này bất kỳ lúc nào.")</small></div></div>
+                }
+                @if (currentStep == 1)
+                {
+                    <div class="video-wrap"><video controls preload="metadata" @onended="VideoEnded"><source src="@VideoSource" type="video/mp4" />@Tx("Your browser does not support video.", "Trình duyệt không hỗ trợ video.")</video></div>
+                    <div class="content-heading"><div><small>@Tx("STEP 1 · VIDEO", "BƯỚC 1 · VIDEO")</small><h2>@LessonTitle</h2><p>@Tx("Watch the entire video to unlock the Script.", "Hãy xem hết video để mở phần Script.")</p></div><span><i class="bi bi-clock"></i> @LessonTitle</span></div>
+                    @if (!item!.IsVideoCompleted) { <div class="notice"><i class="bi bi-info-circle"></i>@Tx("The Script unlocks automatically when the video ends.", "Script sẽ tự mở khi video phát hết.")</div> }
+                    @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error"><i class="bi bi-exclamation-triangle"></i>@saveError</div> }
+                    <div class="actions video-actions">
+                        <button @onclick="Back"><i class="bi bi-arrow-left"></i>@Tx("Back to Roadmap", "Về Roadmap")</button>
+                        <button class="primary" @onclick="CompleteVideoAndOpenScript">
+                            @(item.IsVideoCompleted ? Tx("Next: Script", "Tiếp theo: Script") : Tx("I finished the video · Next", "Tôi đã xem xong · Tiếp theo")) <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                }
+                else if (currentStep == 2)
+                {
+                    <article class="theory">
+                        <div class="content-heading"><div><small>@Tx("STEP 2 · SCRIPT", "BƯỚC 2 · SCRIPT")</small><h2>@LessonTitle</h2><p>@Tx("Theory synchronized with this lesson video.", "Nội dung lý thuyết đồng bộ với video của bài học này.")</p></div></div>
+                        @if (isTimeManagementLessonOne)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Self-management and personal responsibility</h3><p>Time management is not about controlling the clock; it is about managing yourself and your priorities. At university, learning happens largely outside class. A useful guideline is to schedule at least two hours of independent study for every hour of instruction.</p>
+                                <h3>2. Prioritization</h3><ul><li><b>Understand the task:</b> Clarify its requirements, effort, and expected duration before starting.</li><li><b>Use the Eisenhower Matrix:</b> Sort work by importance and urgency so you respond deliberately instead of reacting to everything.</li></ul>
+                                <h3>3. Set SMART goals</h3><p>Effective goals are Specific, Measurable, Attainable, Relevant, and Time-bound. Clear goals connect daily actions with long-term motivation.</p>
+                                <h3>4. Understand yourself and reality</h3><ul><li><b>Track actual time:</b> Compare estimates with the time tasks truly take.</li><li><b>Use your best hours:</b> Schedule demanding work when you are most alert and choose a distraction-free environment.</li></ul>
+                                <h3>5. Stay flexible and persistent</h3><p>A schedule is not rigid. Set realistic deadlines, leave room for unexpected events, and adjust consistently. Time management is a marathon that improves learning, reduces stress, and prepares you for your career.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Tự quản lý và trách nhiệm cá nhân</h3><p>Quản lý thời gian không phải là quản lý kim đồng hồ mà là quản lý chính bản thân và các ưu tiên. Ở đại học, việc học chủ yếu diễn ra ngoài lớp; với mỗi giờ nghe giảng, bạn nên dành ít nhất hai giờ tự học để làm chủ kiến thức.</p>
+                                <h3>2. Kỹ năng ưu tiên</h3><ul><li><b>Hiểu rõ yêu cầu:</b> Xác định nhiệm vụ cần gì, mất bao lâu và phải hoàn thành như thế nào trước khi bắt đầu.</li><li><b>Dùng Ma trận Eisenhower:</b> Phân loại theo mức độ quan trọng và khẩn cấp để tập trung đúng việc thay vì phản ứng với mọi phát sinh.</li></ul>
+                                <h3>3. Thiết lập mục tiêu SMART</h3><p>Mục tiêu hiệu quả cần Cụ thể, Đo lường được, Khả thi, Liên quan và có Thời hạn. Mục tiêu rõ ràng tạo động lực và kết nối hành động hằng ngày với định hướng dài hạn.</p>
+                                <h3>4. Hiểu rõ bản thân và thực tế</h3><ul><li><b>Đo thời gian thực tế:</b> Theo dõi thời gian thật của từng việc để dự tính chính xác hơn.</li><li><b>Chọn thời điểm và không gian:</b> Làm việc khó khi tỉnh táo nhất và tạo môi trường không xao nhãng.</li></ul>
+                                <h3>5. Linh hoạt và kiên trì</h3><p>Kế hoạch không nên cứng nhắc. Hãy đặt hạn chót thực tế, chừa khoảng dự phòng và điều chỉnh khi có tình huống bất ngờ. Quản lý thời gian là một cuộc chạy marathon giúp học tốt hơn, giảm căng thẳng và chuẩn bị cho sự nghiệp.</p>
+                            }
+                        }
+                        else if (timeManagementLessonNumber == 2)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Prevent a negative Domino effect</h3><p>A small delay can trigger a chain of problems: postponing an assignment leads to staying up late, fatigue, and poor performance the next morning. Correct prioritization stops this spiral before it grows.</p>
+                                <h3>2. Manage a heavy workload</h3><p>University study requires strong independence, often including at least two hours of self-study for every classroom hour. Ordering work by value and need prevents overload and protects the quality of your work.</p>
+                                <h3>3. Protect important goals</h3><p>Every task contributes to larger outcomes such as strong grades, graduation, and career readiness. A sensible order ensures that time goes to work that creates meaningful results instead of low-value distractions.</p>
+                                <h3>4. Reduce stress and anxiety</h3><p>Procrastination and disorganization create guilt and panic. A clear plan helps you focus on the most important work and respond calmly when something unexpected appears.</p>
+                                <h3>Core prioritization methods</h3><ul><li><b>Understand requirements:</b> Estimate the time and resources a task truly needs.</li><li><b>Eisenhower Matrix:</b> Classify work by importance and urgency.</li><li><b>Eat the Frog:</b> Complete the hardest or most unpleasant important task early.</li><li><b>Daily Top Three:</b> Select the three most important outcomes for the day.</li></ul><p class="conclusion">Prioritization is the art of managing yourself, not the clock. A thoughtful plan creates room for study, rest, relationships, and personal interests.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Tránh “hiệu ứng Domino” tiêu cực</h3><p>Một trì hoãn nhỏ có thể kéo theo chuỗi vấn đề: thức khuya làm bài, mệt mỏi và làm bài kiểm tra sáng hôm sau không tốt. Ưu tiên đúng giúp chặn vòng xoáy này trước khi mất kiểm soát.</p>
+                                <h3>2. Quản lý khối lượng công việc lớn</h3><p>Học đại học đòi hỏi tính tự chủ cao, thường cần ít nhất hai giờ tự học cho mỗi giờ trên lớp. Sắp xếp theo giá trị và nhu cầu giúp tránh choáng ngợp và duy trì chất lượng công việc.</p>
+                                <h3>3. Bảo đảm đạt mục tiêu quan trọng</h3><p>Mỗi nhiệm vụ là một bước hướng tới điểm số, tốt nghiệp và sự nghiệp. Sắp xếp hợp lý giúp thời gian được đầu tư vào những việc tạo ra kết quả thay vì các hoạt động ít giá trị.</p>
+                                <h3>4. Giảm căng thẳng và lo âu</h3><p>Trì hoãn và thiếu tổ chức tạo ra cảm giác tội lỗi, hoảng loạn. Một kế hoạch rõ ràng giúp bạn tập trung vào việc quan trọng và bình tĩnh xử lý tình huống phát sinh.</p>
+                                <h3>Các phương pháp ưu tiên cốt lõi</h3><ul><li><b>Hiểu rõ yêu cầu:</b> Xác định đúng thời gian và nguồn lực cần thiết.</li><li><b>Ma trận Eisenhower:</b> Phân loại theo mức độ quan trọng và khẩn cấp.</li><li><b>Ăn con ếch:</b> Giải quyết nhiệm vụ quan trọng khó nhất từ sớm.</li><li><b>Top 3 mỗi ngày:</b> Chọn ba kết quả quan trọng nhất cần hoàn thành.</li></ul><p class="conclusion">Ưu tiên là nghệ thuật quản lý bản thân thay vì quản lý đồng hồ. Kế hoạch hợp lý tạo thêm không gian cho học tập, nghỉ ngơi, quan hệ và sở thích cá nhân.</p>
+                            }
+                        }
+                        else if (communicationLessonNumber == 2)
+                        {
+                            @if (!IsVi)
+                            {
+                                <h3>1. Hearing and listening are different</h3><p><b>Hearing</b> is the ear's passive physical response to sound. <b>Listening</b> is an active mental process that requires focus, interpretation, and memory.</p>
+                                <h3>2. Principles of active listening</h3><ul><li><b>Stop talking:</b> Give the speaker your full attention instead of preparing your reply.</li><li><b>Remove distractions:</b> Put away your phone and turn off unrelated sounds.</li><li><b>Show empathy:</b> Understand feelings and perspectives before judging or advising.</li><li><b>Confirm information:</b> Paraphrase or summarize to check that you understood correctly.</li><li><b>Notice non-verbal signals:</b> Observe eye contact, facial expressions, and gestures.</li></ul>
+                                <h3>3. Listening effectively in class</h3><ul><li>Sit where you can maintain eye contact and avoid distractions.</li><li>Notice repeated ideas, changes in tone, and information written on the board.</li><li>Ask questions to clarify and actively process information.</li><li>Take notes to maintain focus and improve recall.</li></ul>
+                                <h3>4. Benefits</h3><p>Active listening builds trust, strengthens relationships, supports conflict resolution, and improves teamwork and career readiness.</p><p class="conclusion">Strong listening takes patience and consistent practice, but it helps you learn better and communicate more professionally.</p>
+                            }
+                            else
+                            {
+                                <h3>1. Phân biệt “Nghe” và “Lắng nghe”</h3><p><b>Nghe</b> là phản xạ vật lý thụ động của tai đối với âm thanh. <b>Lắng nghe</b> là quá trình tâm lý chủ động, đòi hỏi tập trung để diễn giải và ghi nhớ thông tin.</p>
+                                <h3>2. Các nguyên tắc của lắng nghe chủ động</h3><ul><li><b>Ngừng nói:</b> Tập trung vào người nói thay vì chuẩn bị sẵn câu trả lời.</li><li><b>Loại bỏ xao nhãng:</b> Cất điện thoại, tắt nhạc và tập trung hoàn toàn.</li><li><b>Thấu cảm:</b> Hiểu cảm xúc và góc nhìn trước khi phán xét hoặc đưa lời khuyên.</li><li><b>Xác nhận lại:</b> Nhắc lại hoặc tóm tắt để bảo đảm đã hiểu đúng.</li><li><b>Chú ý phi ngôn ngữ:</b> Quan sát ánh mắt, nét mặt và cử chỉ.</li></ul>
+                                <h3>3. Lắng nghe hiệu quả trong lớp học</h3><ul><li>Chọn vị trí dễ tương tác với giảng viên và ít xao nhãng.</li><li>Nhận diện ý được lặp lại, thay đổi tông giọng hoặc nội dung viết trên bảng.</li><li>Đặt câu hỏi để làm rõ và chủ động xử lý thông tin.</li><li>Ghi chú để duy trì tập trung và hỗ trợ ghi nhớ.</li></ul>
+                                <h3>4. Lợi ích</h3><p>Lắng nghe chủ động xây dựng lòng tin, cải thiện quan hệ, hỗ trợ giải quyết xung đột và làm việc nhóm hiệu quả.</p><p class="conclusion">Lắng nghe giỏi cần thời gian và sự kiên trì, nhưng sẽ giúp bạn học tập tốt hơn và giao tiếp chuyên nghiệp hơn.</p>
+                            }
+                        }
+                        else if (!IsVi)
+                        {
+                            <h3>1. Communication is a “two-way street”</h3>
+                            <p>Effective communication means both sending a message and receiving feedback. A basic communication process includes:</p>
+                            <ul><li><b>Sender:</b> The person who creates and delivers the message.</li><li><b>Message:</b> The meaning conveyed through speech, writing, or gestures.</li><li><b>Channel:</b> Face-to-face conversation, email, telephone, or social media.</li><li><b>Receiver:</b> The person who receives and interprets the message.</li><li><b>Feedback:</b> The response that confirms whether the message was understood correctly.</li></ul>
+                            <h3>2. Essential skills for students</h3>
+                            <ul><li><b>Active listening:</b> Focus fully, avoid interrupting, and confirm what you heard.</li><li><b>Non-verbal communication:</b> Eye contact, gestures, clothing, and posture all convey meaning.</li><li><b>Netiquette:</b> Write professional emails with clear subjects, complete sentences, and respectful greetings.</li></ul>
+                            <h3>3. Tips for successful communication</h3>
+                            <ul><li><b>Prepare carefully:</b> Organize ideas logically before presentations or important meetings.</li><li><b>Understand context:</b> Adapt your style to the audience and situation.</li><li><b>Communicate ethically:</b> Be respectful, honest, and fair.</li><li><b>Use simple language:</b> Choose precise, clear words and avoid unnecessary jargon.</li></ul>
+                            <p class="conclusion">Communication takes patience and continuous adjustment. Strong communication improves learning and builds a professional impression for your future career.</p>
+                        }
+                        else
+                        {
+                        <h3>1. Giao tiếp là “con đường hai chiều”</h3>
+                        <p>Giao tiếp hiệu quả không chỉ là gửi đi thông điệp mà còn là tiếp nhận phản hồi. Một quá trình giao tiếp cơ bản gồm:</p>
+                        <ul><li><b>Người gửi:</b> Người tạo ra và truyền đạt thông điệp.</li><li><b>Thông điệp:</b> Nội dung, ý nghĩa muốn truyền tải qua lời nói, chữ viết hoặc cử chỉ.</li><li><b>Kênh truyền tải:</b> Nói trực tiếp, email, điện thoại hoặc mạng xã hội.</li><li><b>Người nhận:</b> Người tiếp nhận và giải mã thông điệp.</li><li><b>Phản hồi:</b> Sự hồi đáp giúp người gửi biết thông điệp đã được hiểu đúng hay chưa.</li></ul>
+                        <h3>2. Các kỹ năng then chốt cho sinh viên</h3>
+                        <ul><li><b>Lắng nghe chủ động:</b> Tập trung hoàn toàn, không ngắt lời và xác nhận lại điều đã nghe để tránh hiểu lầm.</li><li><b>Giao tiếp phi ngôn ngữ:</b> Ánh mắt, điệu bộ, trang phục và tư thế đều truyền tải thông điệp.</li><li><b>Quy tắc ứng xử mạng:</b> Viết email chuyên nghiệp, có tiêu đề rõ ràng, câu chữ hoàn chỉnh và lời chào trang trọng.</li></ul>
+                        <h3>3. Bí quyết để giao tiếp thành công</h3>
+                        <ul><li><b>Luôn chuẩn bị kỹ:</b> Sắp xếp ý tưởng logic trước khi thuyết trình hoặc gặp gỡ quan trọng.</li><li><b>Thấu hiểu bối cảnh:</b> Điều chỉnh phong cách phù hợp với đối tượng và tình huống.</li><li><b>Giao tiếp có đạo đức:</b> Tôn trọng, trung thực và công bằng với người nghe.</li><li><b>Sử dụng ngôn từ đơn giản:</b> Chọn từ chính xác, dễ hiểu và hạn chế biệt ngữ không cần thiết.</li></ul>
+                        <p class="conclusion">Rèn luyện kỹ năng giao tiếp là một hành trình dài cần sự kiên nhẫn và tự điều chỉnh. Giao tiếp tốt giúp bạn học tập hiệu quả và tạo ấn tượng chuyên nghiệp trong tương lai.</p>
+                        }
+                    </article>
+                    <div class="actions"><button @onclick="() => OpenStep(1)"><i class="bi bi-arrow-left"></i>@Tx("Back: Video", "Quay lại: Video")</button><button class="primary" @onclick="FinishScript">@Tx("Next: Summary", "Tiếp theo: Tóm tắt")<i class="bi bi-arrow-right"></i></button></div>
+                }
+                else if (currentStep == 3)
+                {
+                    @if (isTimeManagementLessonOne)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Time management summary", "Tóm tắt kỹ năng quản lý thời gian")</h2><div class="summary-grid"><div><b>@Tx("Manage yourself", "Quản lý bản thân")</b><p>@Tx("Take responsibility for your schedule and measure how long work actually takes.", "Chủ động chịu trách nhiệm với lịch trình và đo thời gian thực tế của công việc.")</p></div><div><b>@Tx("Prioritize with purpose", "Ưu tiên có mục đích")</b><p>@Tx("Use importance, urgency, and SMART goals to decide what deserves attention.", "Dùng mức độ quan trọng, khẩn cấp và mục tiêu SMART để chọn đúng việc cần tập trung.")</p></div><div><b>@Tx("Adjust consistently", "Điều chỉnh bền bỉ")</b><p>@Tx("Work during your best hours, reduce distractions, and adapt when plans change.", "Làm việc vào giờ hiệu quả nhất, giảm xao nhãng và linh hoạt khi kế hoạch thay đổi.")</p></div></div></article>
+                    }
+                    else if (timeManagementLessonNumber == 2)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Prioritization summary", "Tóm tắt sắp xếp và ưu tiên công việc")</h2><div class="summary-grid"><div><b>@Tx("Stop the Domino effect", "Chặn hiệu ứng Domino")</b><p>@Tx("Handle high-value work before delays create fatigue, stress, and missed goals.", "Xử lý việc có giá trị trước khi trì hoãn gây mệt mỏi, căng thẳng và lỡ mục tiêu.")</p></div><div><b>@Tx("Focus on meaningful results", "Tập trung vào kết quả quan trọng")</b><p>@Tx("Order tasks by importance and urgency so your time supports academic and career goals.", "Sắp xếp theo mức độ quan trọng và khẩn cấp để thời gian phục vụ mục tiêu học tập và nghề nghiệp.")</p></div><div><b>@Tx("Use practical methods", "Dùng phương pháp thực tế")</b><p>@Tx("Apply the Eisenhower Matrix, Eat the Frog, and Daily Top Three to build a calm, realistic plan.", "Áp dụng Ma trận Eisenhower, Ăn con ếch và Top 3 mỗi ngày để lập kế hoạch bình tĩnh, thực tế.")</p></div></div></article>
+                    }
+                    else if (communicationLessonNumber == 2)
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Active listening summary", "Tóm tắt lắng nghe chủ động")</h2><div class="summary-grid"><div><b>@Tx("Hearing vs. listening", "Nghe và lắng nghe")</b><p>@Tx("Hearing is passive; listening requires focus, interpretation, and memory.", "Nghe là thụ động; lắng nghe cần tập trung, diễn giải và ghi nhớ.")</p></div><div><b>@Tx("Five active principles", "Năm nguyên tắc chủ động")</b><p>@Tx("Stop talking, remove distractions, empathize, confirm, and observe non-verbal cues.", "Ngừng nói, bỏ xao nhãng, thấu cảm, xác nhận và quan sát phi ngôn ngữ.")</p></div><div><b>@Tx("Learn and build trust", "Học tốt và xây dựng lòng tin")</b><p>@Tx("Questions and note-taking improve learning while attentive listening strengthens relationships.", "Đặt câu hỏi và ghi chú giúp học tốt; lắng nghe chăm chú giúp củng cố quan hệ.")</p></div></div></article>
+                    }
+                    else
+                    {
+                        <article class="summary-card"><i class="bi bi-stars"></i><small>@Tx("STEP 3 · SUMMARY", "BƯỚC 3 · TÓM TẮT")</small><h2>@Tx("Lesson summary", "Tóm tắt bài học")</h2><div class="summary-grid"><div><b>@Tx("Two-way communication", "Giao tiếp hai chiều")</b><p>@Tx("A message is complete only with a sender, receiver, and feedback.", "Thông điệp chỉ hoàn chỉnh khi có người gửi, người nhận và phản hồi.")</p></div><div><b>@Tx("Three foundations", "Ba kỹ năng nền tảng")</b><p>@Tx("Active listening, non-verbal language, and professional netiquette.", "Lắng nghe chủ động, giao tiếp phi ngôn ngữ và ứng xử mạng chuyên nghiệp.")</p></div><div><b>@Tx("Context-aware communication", "Giao tiếp phù hợp")</b><p>@Tx("Prepare, understand context, and communicate clearly and ethically.", "Chuẩn bị kỹ, hiểu bối cảnh và dùng ngôn từ rõ ràng, có đạo đức.")</p></div></div></article>
+                    }
+                    <div class="actions"><button @onclick="() => OpenStep(2)"><i class="bi bi-arrow-left"></i>@Tx("Back: Script", "Quay lại: Script")</button><button class="primary" @onclick="FinishSummary">@Tx("Next: Quiz", "Tiếp theo: Quiz")<i class="bi bi-arrow-right"></i></button></div>
+                }
+                else if (currentStep == 4)
+                {
+                    @if (quizFinished)
+                    {
+                        <section class="quiz-result">
+                            <i class="bi bi-award-fill"></i><small>@Tx("QUIZ RESULT", "KẾT QUẢ QUIZ")</small><h2>@quizScore / 50 · @QuizPercent%</h2><h3>@QuizLevel</h3><p>@QuizComment</p><button @onclick="StartNewQuizAsync">@Tx("Try another 5 questions", "Làm 5 câu khác")</button>
+                        </section>
+                        <div class="actions"><button @onclick="() => OpenStep(3)"><i class="bi bi-arrow-left"></i>@Tx("Back: Summary", "Quay lại: Tóm tắt")</button>@if (quizPassed) { <button class="primary" @onclick="() => OpenStep(5)">@Tx("Next: Practice", "Tiếp theo: Thực hành")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                    else if (quizQuestions.Count > 0)
+                    {
+                        <section class="quiz-sheet">
+                            <header><div><small>@(IsTimeManagementLesson ? Tx("TIME MANAGEMENT PRACTICE · 5 RANDOM QUESTIONS", "THỰC HÀNH QUẢN LÝ THỜI GIAN · 5 CÂU NGẪU NHIÊN") : Tx("COMMUNICATION QUIZ · 5 RANDOM QUESTIONS", "QUIZ GIAO TIẾP · 5 CÂU NGẪU NHIÊN"))</small><h2>@Tx("Answer all five questions", "Trả lời đồng thời 5 câu")</h2></div><b>@quizScore / 50 @Tx("points", "điểm")</b></header>
+                            <div class="quiz-progress"><i style="width:@(revealedQuestions.Count * 20)%"></i></div>
+                            @foreach (var entry in quizQuestions.Select((question, index) => (question, index)))
+                            {
+                                var question = entry.question;
+                                var revealed = revealedQuestions.Contains(question.Id);
+                                <article class="quiz-card">
+                                    <h3><span>@(entry.index + 1)</span>@(IsVi ? question.Vi : question.En)</h3>
+                                    <div class="quiz-options">
+                                        @foreach (var display in quizOptionOrders[question.Id].Select((original, displayIndex) => (original, displayIndex)))
+                                        {
+                                            var original = display.original;
+                                            var selected = selectedAnswers.GetValueOrDefault(question.Id, -1) == original;
+                                            var points = PointsFor(question, original);
+                                            <button class="@(revealed && selected ? points == 10 ? "optimal" : points == 5 ? "neutral" : "negative" : null)" disabled="@revealed" @onclick="() => SelectAnswerAsync(question, original)"><span>@("ABCD"[display.displayIndex])</span>@(IsVi ? question.OptionsVi[original] : question.OptionsEn[original])</button>
+                                        }
+                                    </div>
+                                    @if (revealed)
+                                    {
+                                        var earned = PointsFor(question, selectedAnswers[question.Id]);
+                                        <div class="answer-feedback @(earned == 10 ? "good" : earned == 5 ? "middle" : "bad")"><b>@Tx($"You earned {earned} points", $"Bạn được {earned} điểm")</b><p>@(earned == 10 ? (IsVi ? question.FeedbackVi : question.FeedbackEn) : Tx("This response is not optimal yet. A stronger response stays respectful and addresses the issue directly.", "Cách này chưa tối ưu. Phản hồi tốt hơn cần tôn trọng và giải quyết trực tiếp vấn đề."))</p></div>
+                                    }
+                                </article>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error">@saveError</div> }
+                        </section>
+                        <div class="actions"><button @onclick="() => OpenStep(3)"><i class="bi bi-arrow-left"></i>@Tx("Back: Summary", "Quay lại: Tóm tắt")</button><button class="primary" disabled="@(revealedQuestions.Count < 5)" @onclick="SubmitQuiz">@Tx("Submit and view result", "Nộp bài và xem kết quả")<i class="bi bi-arrow-right"></i></button></div>
+                    }
+                }
+                else if (currentStep == 5)
+                {
+                    @if (UsePracticePipeline)
+                    {
+                        <section class="voice-practice-launch practice-pipeline-launch">
+                            <i class="bi bi-person-workspace"></i>
+                            <small>@Tx("STEP 5 · REQUIRED PRACTICE", "BƯỚC 5 · THỰC HÀNH BẮT BUỘC")</small>
+                            <h2>@Tx("Turn knowledge into a real response", "Biến kiến thức thành phản xạ thực tế")</h2>
+                            <p>@Tx("Complete the applied scenario to use what you learned. Reflection unlocks only after Practice is completed.", "Hoàn thành tình huống ứng dụng để vận dụng nội dung vừa học. Phản tư chỉ mở sau khi hoàn thành Practice.")</p>
+                            <div>
+                                <span><b>3</b>@Tx("Decisions", "Lượt quyết định")</span>
+                                <span><b>10</b>@Tx("Minutes", "Phút")</span>
+                                <span><b>1</b>@Tx("Required step", "Bước bắt buộc")</span>
+                                <span><b><i class="bi bi-lock-fill"></i></b>@Tx("Unlock Reflection", "Mở Phản tư")</span>
+                            </div>
+                            <button class="primary" @onclick="OpenPractice"><i class="bi bi-play-fill"></i>@(item!.IsScenarioCompleted ? Tx("Practice again", "Thực hành lại") : Tx("Start Practice", "Bắt đầu Practice"))</button>
+                        </section>
+                        <div class="actions">
+                            <button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>
+                            @if (item!.IsScenarioCompleted)
+                            {
+                                <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button>
+                            }
+                        </div>
+                    }
+                    else if (isTimeManagementLessonOne)
+                    {
+                        <section class="voice-practice-launch"><i class="bi bi-inboxes-fill"></i><small>@Tx("PRACTICE · INBOX RUSH", "THỰC HÀNH · INBOX RUSH")</small><h2>@Tx("Plan an eight-slot day", "Lập kế hoạch một ngày 8 khung giờ")</h2><p>@Tx("Prioritize realistic student tasks, estimate their duration, and adapt to urgent interruptions.", "Ưu tiên các công việc sinh viên thực tế, ước lượng thời lượng và thích ứng với việc phát sinh khẩn cấp.")</p><div><span><b>50%</b>@Tx("Priority", "Ưu tiên")</span><span><b>30%</b>@Tx("Estimate", "Ước lượng")</span><span><b>20%</b>@Tx("Adapt", "Thích ứng")</span><span><b>8</b>@Tx("Time slots", "Khung giờ")</span></div><button class="primary" @onclick="OpenInboxRush"><i class="bi bi-calendar2-week"></i>@Tx("Open Inbox Rush", "Mở Inbox Rush")</button></section>
+                        <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                    else if (communicationLessonNumber == 2)
+                    {
+                        <section class="voice-practice-launch"><i class="bi bi-mic-fill"></i><small>@Tx("PRACTICE · VOICE LAB", "THỰC HÀNH · PHÒNG LUYỆN GIỌNG")</small><h2>@Tx("30-second communication challenge", "Thử thách giao tiếp 30 giây")</h2><p>@Tx("Choose one of 20 student scenarios, record your response, and review pacing, articulation, pauses, fillers, pitch, and energy.", "Chọn một trong 20 tình huống sinh viên, ghi âm và xem phân tích tốc độ, độ rõ chữ, khoảng lặng, từ đệm, cao độ và năng lượng giọng nói.")</p><div><span><b>3.0</b>@Ui("Pacing")</span><span><b>3.0</b>@Tx("Articulation", "Rõ chữ")</span><span><b>2.0</b>@Tx("Pauses", "Ngắt nghỉ")</span><span><b>2.0</b>@Tx("Tone", "Tông giọng")</span></div><button class="primary" @onclick="OpenVoicePractice"><i class="bi bi-mic"></i>@Tx("Open Voice Lab", "Mở phòng luyện giọng")</button></section>
+                        <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (item!.IsScenarioCompleted) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                    else if (roleplayScenario is not null)
+                    {
+                        <section class="roleplay">
+                            <header><div><small>@Tx("PRACTICE · 3-TURN ROLE-PLAY", "THỰC HÀNH · HỘI THOẠI 3 LƯỢT")</small><h2>@(IsVi ? roleplayScenario.TitleVi : roleplayScenario.TitleEn)</h2><p>@(IsVi ? roleplayScenario.ContextVi : roleplayScenario.ContextEn)</p></div><span>@Math.Min(roleplayUserMessages.Count + 1, 3) / 3</span></header>
+                            <div class="rubric-strip"><span>EQ <b>3</b></span><span>@Tx("Listening", "Lắng nghe") <b>3</b></span><span>I-statement <b>2</b></span><span>@Tx("Solution", "Giải pháp") <b>2</b></span></div>
+                            <div class="chat-box">
+                                @foreach (var message in RoleplayTranscript)
+                                {
+                                    <div class="chat-message @(message.User ? "user" : "ai")"><b>@(message.User ? Tx("You", "Bạn") : "AI")</b><p>@message.Text</p></div>
+                                }
+                            </div>
+                            @if (roleplayResult is null)
+                            {
+                                @if (roleplayUserMessages.Count == 3 || roleplayUserMessages.Count > roleplayAiMessages.Count)
+                                {
+                                    <button class="primary" disabled="@sendingRoleplay" @onclick="SendRoleplay">@Tx("Retry pending response / save", "Thử lại phản hồi / lưu kết quả")</button>
+                                }
+                                else
+                                {
+                                    <div class="chat-compose"><textarea @bind="roleplayInput" disabled="@sendingRoleplay" maxlength="1000" placeholder="@Tx("Write a calm, empathetic response...", "Nhập phản hồi bình tĩnh, thấu cảm...")"></textarea><button disabled="@(string.IsNullOrWhiteSpace(roleplayInput) || sendingRoleplay)" @onclick="SendRoleplay">@Tx("Send", "Gửi")<i class="bi bi-send"></i></button></div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(saveError)) { <div class="save-error" role="alert">@saveError</div> }
+                            }
+                            else
+                            {
+                                <div class="roleplay-result"><h3>@Tx("AI assessment", "Kết quả đánh giá") · @roleplayResult.TotalScore/10</h3><div><span>EQ <b>@roleplayResult.EmotionalIntelligenceScore/3</b></span><span>@Tx("Listening", "Lắng nghe") <b>@roleplayResult.ActiveListeningScore/3</b></span><span>I-statement <b>@roleplayResult.IStatementScore/2</b></span><span>@Tx("Solution", "Giải pháp") <b>@roleplayResult.SolutionScore/2</b></span></div><p>@roleplayResult.Feedback</p></div>
+                            }
+                        </section>
+                        <div class="actions"><button @onclick="() => OpenStep(4)"><i class="bi bi-arrow-left"></i>@Tx("Back: Quiz", "Quay lại: Quiz")</button>@if (roleplayResult is not null) { <button class="primary" @onclick="() => OpenStep(6)">@Tx("Next: Reflection", "Tiếp theo: Phản tư")<i class="bi bi-arrow-right"></i></button> }</div>
+                    }
+                }
+                else if (currentStep == 6)
+                {
+                    <section class="reflection-layout">
+                        <div class="reflection-form">
+                            <header><small>@Tx("STEP 6 · REFLECTION", "BƯỚC 6 · PHẢN TƯ")</small><h2>@Tx("Look back, then move forward", "Nhìn lại để tiến bộ")</h2><p>@Tx("Your answers are private and help turn this lesson into a practical habit.", "Câu trả lời giúp bạn biến bài học thành thói quen thực tế.")</p></header>
+                            @if (item!.IsReflectionCompleted)
+                            {
+                                <div class="reflection-done"><i class="bi bi-check-circle-fill"></i><div><b>@Tx("Week completed", "Đã hoàn thành tuần")</b><span>@Tx("Your reflection is saved. You can review it at any time.", "Phản tư đã được lưu. Bạn có thể xem lại bất kỳ lúc nào.")</span></div></div>
+                            }
+                            <div class="reflection-requirement"><i class="bi bi-info-circle"></i>@Tx("Write more than 5 words for each answer.", "Mỗi câu trả lời chỉ cần trên 5 từ.")</div>
+                            <label><b>1. @Tx("What is the most important thing you learned?", "Điều quan trọng nhất bạn học được là gì?")</b><textarea @bind="reflection.Learning" @bind:event="oninput" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@WordCount(reflection.Learning) @Tx("words", "từ")</small></label>
+                            <label><b>2. @Tx("What did you handle well in the Quiz or Role-play?", "Trong Quiz hoặc Role-play, bạn đã làm tốt điều gì?")</b><textarea @bind="reflection.Strength" @bind:event="oninput" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@WordCount(reflection.Strength) @Tx("words", "từ")</small></label>
+                            <label><b>3. @Tx("What would you change next time?", "Nếu gặp lại tình huống tương tự, bạn sẽ thay đổi điều gì?")</b><textarea @bind="reflection.Improvement" @bind:event="oninput" disabled="@item.IsReflectionCompleted" maxlength="1500"></textarea><small>@WordCount(reflection.Improvement) @Tx("words", "từ")</small></label>
+                            <label class="commitment"><b><i class="bi bi-bullseye"></i>@Tx("My action commitment", "Cam kết hành động")</b><span>@Tx("Next week, I will...", "Trong tuần tới, tôi sẽ...")</span><textarea @bind="reflection.Commitment" @bind:event="oninput" disabled="@item.IsReflectionCompleted" maxlength="1000"></textarea><small>@WordCount(reflection.Commitment) @Tx("words", "từ")</small></label>
+                            <div class="confidence"><div><b>@Tx("Confidence before", "Tự tin trước bài học")</b><input type="range" min="1" max="5" @bind="reflection.ConfidenceBefore" disabled="@item.IsReflectionCompleted" /><span>@reflection.ConfidenceBefore/5</span></div><div><b>@Tx("Confidence now", "Tự tin hiện tại")</b><input type="range" min="1" max="5" @bind="reflection.ConfidenceAfter" disabled="@item.IsReflectionCompleted" /><span>@reflection.ConfidenceAfter/5</span></div></div>
+                            @if (!string.IsNullOrWhiteSpace(reflectionMessage)) { <div class="reflection-message @(reflectionError ? "error" : null)">@reflectionMessage</div> }
+                        </div>
+                        <aside class="learning-review">
+                            <h3>@Tx("Your weekly results", "Kết quả tuần học")</h3>
+                            <div class="result-tile"><i class="bi bi-ui-checks"></i><span>@Ui("Quiz")<b>@LatestQuizScore / 50</b></span></div>
+                            <div class="result-tile"><i class="bi bi-chat-heart"></i><span>@Ui("Role-play")<b>@LatestRoleplayScore / 10</b></span></div>
+                            @if (LatestRoleplay is not null)
+                            {
+                                <div class="mini-rubric"><span>EQ <b>@LatestRoleplay.EmotionalIntelligenceScore/3</b></span><span>@Tx("Listening", "Lắng nghe") <b>@LatestRoleplay.ActiveListeningScore/3</b></span><span>I-statement <b>@LatestRoleplay.IStatementScore/2</b></span><span>@Tx("Solution", "Giải pháp") <b>@LatestRoleplay.SolutionScore/2</b></span></div>
+                            }
+                            <div class="ai-reflection"><b><i class="bi bi-stars"></i>@Ui("AI Feedback")</b><p>@ReflectionFeedback</p></div>
+                            <div class="confidence-change"><span>@Tx("Confidence change", "Thay đổi tự tin")</span><b>@reflection.ConfidenceBefore → @reflection.ConfidenceAfter</b><em>@ConfidenceDelta</em></div>
+                        </aside>
+                    </section>
+                    <div class="actions"><button @onclick="() => OpenStep(5)"><i class="bi bi-arrow-left"></i>@Tx("Back: Practice", "Quay lại: Thực hành")</button><div class="reflection-actions">@if (!item!.IsReflectionCompleted) { <button @onclick="SaveReflectionDraft" disabled="@savingReflection">@Tx("Save draft", "Lưu bản nháp")</button><button class="primary" disabled="@(!ReflectionValid || savingReflection)" @onclick="CompleteReflection">@Tx("Complete week", "Hoàn thành tuần")<i class="bi bi-check-circle"></i></button> } else { <a class="mentor-context-link" href="/mentors">@Tx("Ask a Mentor", "Hỏi Mentor")</a><button class="primary" @onclick="Back">@Tx("View Roadmap", "Xem Roadmap")<i class="bi bi-arrow-right"></i></button> }</div></div>
+                }
+                else
+                {
+                    <section class="empty inner"><i class="@Steps.First(x => x.Id == currentStep).Icon"></i><h2>@Tx(Steps.First(x => x.Id == currentStep).En, Steps.First(x => x.Id == currentStep).Vi)</h2><p>@Tx("This section is waiting for content.", "Phần này đang chờ nạp nội dung tiếp theo.")</p></section>
+                    <div class="actions"><button @onclick="Previous"><i class="bi bi-arrow-left"></i>@Tx("Back", "Quay lại")</button><button class="primary" @onclick="NextOrRoadmap">@Tx(currentStep < 6 ? "Next" : "Roadmap", currentStep < 6 ? "Tiếp theo" : "Về Roadmap")<i class="bi bi-arrow-right"></i></button></div>
+                }
+            </section>
         </div>
     }
-</div>
+</section>
 
 @code {
     [Parameter] public int UserId { get; set; }
     [Parameter] public int ItemId { get; set; }
-
+    [SupplyParameterFromQuery(Name = "step")] public int? RequestedStep { get; set; }
     private RoadmapItemDto? item;
+    private bool loading = true;
+    private bool isSupportedCommunicationLesson;
+    private bool isTimeManagementLessonOne;
+    private int communicationLessonNumber;
+    private int timeManagementLessonNumber;
+    private bool IsTimeManagementLesson => timeManagementLessonNumber > 0;
+    private string VideoSource => IsTimeManagementLesson ? $"/videos/time-management-mentor-lesson-{timeManagementLessonNumber}.mp4" : $"/videos/communication-mentor-lesson-{communicationLessonNumber}.mp4";
+    private IReadOnlyList<RoadmapItemDto> lessonRoadmap = [];
+    private string LessonTitle => item is null ? string.Empty : RoadmapLearningContent.LessonTitle(item, lessonRoadmap, IsVi);
+    private int currentStep = 1;
+    private string? saveError;
+    private List<CommunicationQuizQuestion> quizQuestions = [];
+    private readonly Dictionary<string, string> quizAnswers = [];
+    private readonly Dictionary<int, int[]> quizOptionOrders = [];
+    private readonly Dictionary<int, int> selectedAnswers = [];
+    private readonly HashSet<int> revealedQuestions = [];
+    private int quizScore;
+    private bool quizFinished;
+    private bool quizPassed;
+    private RoleplayScenario? roleplayScenario;
+    private readonly List<string> roleplayUserMessages = [];
+    private readonly List<string> roleplayAiMessages = [];
+    private string roleplayInput = string.Empty;
+    private bool sendingRoleplay;
+    private RoadmapRoleplayAttemptDto? roleplayResult;
+    private RoadmapRoleplayAttemptDto? pendingRoleplayResult;
+    private ReflectionForm reflection = new();
+    private bool savingReflection;
+    private bool reflectionError;
+    private string? reflectionMessage;
+    private RoadmapQuizAttemptDto? LatestQuiz => item?.QuizHistory.LastOrDefault();
+    private RoadmapRoleplayAttemptDto? LatestRoleplay => item?.RoleplayHistory.LastOrDefault();
+    private int LatestQuizScore => LatestQuiz?.Score ?? 0;
+    private double LatestRoleplayScore => LatestRoleplay?.TotalScore ?? 0;
+    private int ConfidenceDelta => reflection.ConfidenceAfter - reflection.ConfidenceBefore;
+    private static int WordCount(string value) => value.Split([' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length;
+    private bool ReflectionValid => WordCount(reflection.Learning) > 5 && WordCount(reflection.Strength) > 5 && WordCount(reflection.Improvement) > 5 && WordCount(reflection.Commitment) > 5;
+    private string ReflectionFeedback => !string.IsNullOrWhiteSpace(reflection.AiFeedback) ? reflection.AiFeedback : LatestRoleplayScore switch { < 5 => Tx("Focus on staying calm, asking a clarifying question, and proposing one concrete next step.", "Hãy tập trung giữ bình tĩnh, đặt câu hỏi làm rõ và đề xuất một bước tiếp theo cụ thể."), < 8.5 => Tx("You are progressing well. Make your I-statements and deadlines more specific.", "Bạn đang tiến bộ tốt. Hãy làm rõ hơn câu I-statement và thời hạn hành động."), _ => Tx("You communicate with empathy and a solution mindset. Keep applying this pattern in real situations.", "Bạn giao tiếp thấu cảm và hướng giải pháp tốt. Hãy tiếp tục áp dụng vào tình huống thực tế.") };
+    // Keep the original skill-specific Practice experiences. The generic
+    // scenario is only a fallback when a lesson has no dedicated activity.
+    private bool UsePracticePipeline => !isTimeManagementLessonOne
+        && communicationLessonNumber != 2
+        && roleplayScenario is null;
+    private IEnumerable<(bool User, string Text)> RoleplayTranscript
+    {
+        get
+        {
+            if (roleplayScenario is null) yield break;
+            yield return (false, IsVi ? roleplayScenario.OpeningVi : roleplayScenario.OpeningEn);
+            for (var i = 0; i < roleplayUserMessages.Count; i++)
+            {
+                yield return (true, roleplayUserMessages[i]);
+                if (i < roleplayAiMessages.Count) yield return (false, roleplayAiMessages[i]);
+            }
+        }
+    }
+    private int QuizPercent => quizScore * 100 / 50;
+    private string QuizLevel => QuizPercent switch { <= 30 => Tx("Passive", "Bị động"), <= 55 => Tx("Developing", "Đang phát triển"), <= 80 => Tx("Proactive", "Chủ động"), _ => Tx("Exceptional", "Làm chủ") };
+    private string QuizComment => !string.IsNullOrWhiteSpace(LatestQuiz?.Feedback) ? LatestQuiz.Feedback : QuizPercent switch
+    {
+        <= 30 => Tx("You tend to avoid issues or react emotionally. Pause before responding and ask questions instead of judging.", "Bạn có xu hướng né tránh hoặc phản ứng theo cảm xúc. Hãy dừng lại trước khi phản hồi và đặt câu hỏi thay vì phán xét."),
+        <= 55 => Tx("You are developing better responses, but sometimes still avoid real dialogue. Practice expressing your needs clearly and gently.", "Bạn đang đi đúng hướng nhưng đôi khi vẫn né tránh đối thoại. Hãy diễn đạt mong muốn rõ ràng và nhẹ nhàng hơn."),
+        <= 80 => Tx("You listen, communicate respectfully, and handle most conflicts well. Keep practicing calm analysis.", "Bạn biết lắng nghe, tôn trọng và xử lý phần lớn xung đột khá tốt. Hãy tiếp tục rèn phản xạ bình tĩnh."),
+        _ => Tx("You stay calm, respect others, and guide difficult conversations toward solutions. Keep leading by example.", "Bạn giữ bình tĩnh, tôn trọng người khác và hướng cuộc trò chuyện đến giải pháp. Hãy tiếp tục phát huy.")
+    };
+    private int CompletedCount => item is null ? 0 : (item.IsVideoCompleted ? 1 : 0) + (item.ScriptCompletedAtUtc.HasValue ? 1 : 0) + (item.SummaryCompletedAtUtc.HasValue ? 1 : 0) + (item.IsPracticeCompleted ? 1 : 0) + (item.IsScenarioCompleted ? 1 : 0) + (item.IsReflectionCompleted ? 1 : 0);
 
     protected override async Task OnInitializedAsync()
     {
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
-        item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
-        if (item is null)
-            Nav.NavigateTo($"/roadmap/{UserId}", true);
+        var signedIn = await AuthProvider.GetUserIdAsync();
+        if (signedIn <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+        UserId = signedIn;
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId, UserId);
+        lessonRoadmap = roadmap.Items;
+        item = roadmap.Items.FirstOrDefault(x => x.Id == ItemId);
+        if (item is not null)
+        {
+            communicationLessonNumber = SkillTheme.KeyFor(item) == "communication" ? RoadmapLearningContent.Ordinal(item, lessonRoadmap) : 0;
+            timeManagementLessonNumber = SkillTheme.KeyFor(item) == "time" ? RoadmapLearningContent.Ordinal(item, lessonRoadmap) : 0;
+            isTimeManagementLessonOne = timeManagementLessonNumber == 1;
+            isSupportedCommunicationLesson = RoadmapLearningContent.HasContent(item, lessonRoadmap);
+            currentStep = item.LastLearningStep?.ToLowerInvariant() switch { "script" => 2, "summary" => 3, "quiz" => 4, "practice" or "scenario" => 5, "reflection" => 6, _ => 1 };
+            if (!CanOpen(currentStep)) currentStep = Math.Clamp(CompletedCount + 1, 1, 6);
+            if (RequestedStep is >= 1 and <= 6 && CanOpen(RequestedStep.Value)) currentStep = RequestedStep.Value;
+            if (currentStep == 4 && RequestedStep == 4 && LatestQuiz is not null)
+            {
+                quizScore = LatestQuiz.Score;
+                quizPassed = LatestQuiz.Passed;
+                quizFinished = true;
+            }
+            else if (currentStep == 4) StartQuiz();
+            if (currentStep == 5 && RequestedStep == 5 && LatestRoleplay is not null)
+                roleplayResult = LatestRoleplay;
+            else if (currentStep == 5) StartRoleplay();
+            LoadReflection();
+        }
+        loading = false;
     }
 
-    private void GoToGame() => Nav.NavigateTo($"/roadmap/game/{UserId}/{ItemId}");
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && item is not null)
+        {
+            var roleplayDraft = await JS.InvokeAsync<RoleplayDraft?>("ssRoadmapRoleplay.get", UserId, ItemId);
+            var scenario = CommunicationRoleplayEngine.Scenarios.FirstOrDefault(x => x.Id == roleplayDraft?.ScenarioId);
+            if (scenario is not null && roleplayDraft is not null && roleplayDraft.HistoryCount == item.RoleplayHistory.Count && roleplayDraft.Messages.Count <= 3
+                && roleplayDraft.Replies.Count <= 2 && roleplayDraft.Replies.Count <= roleplayDraft.Messages.Count
+                && roleplayDraft.Messages.All(x => !string.IsNullOrWhiteSpace(x) && x.Length <= 1000))
+            {
+                roleplayScenario = scenario;
+                roleplayUserMessages.Clear(); roleplayUserMessages.AddRange(roleplayDraft.Messages);
+                roleplayAiMessages.Clear(); roleplayAiMessages.AddRange(roleplayDraft.Replies);
+                StateHasChanged();
+            }
+        }
+        if (!firstRender || item is null || currentStep != 4 || quizFinished)
+            return;
 
-    private void BackToRoadmap() => Nav.NavigateTo($"/roadmap/{UserId}");
+        var draft = await JS.InvokeAsync<RoadmapQuizDraft?>("ssRoadmapQuiz.get", UserId, ItemId);
+        if (TryRestoreQuizDraft(draft))
+            StateHasChanged();
+        else
+            await PersistQuizDraftAsync();
+    }
+
+    private static bool IsCommunication(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("giao tiếp") || value.Contains("communication"); }
+    private static bool IsTimeManagement(RoadmapItemDto x) { var value = $"{x.SkillName} {x.Title}".ToLowerInvariant(); return value.Contains("quản lý thời gian") || value.Contains("time management"); }
+    private bool CanOpen(int step) => item is not null && (item.IsCompleted || step == 1 || step == 2 && item.IsVideoCompleted || step == 3 && item.ScriptCompletedAtUtc.HasValue || step == 4 && item.SummaryCompletedAtUtc.HasValue || step == 5 && item.IsPracticeCompleted || step == 6 && item.IsScenarioCompleted);
+    private bool IsComplete(int step) => item is not null && (item.IsCompleted || step switch { 1 => item.IsVideoCompleted, 2 => item.ScriptCompletedAtUtc.HasValue, 3 => item.SummaryCompletedAtUtc.HasValue, 4 => item.IsPracticeCompleted, 5 => item.IsScenarioCompleted, 6 => item.IsReflectionCompleted, _ => false });
+    private async Task VideoEnded()
+    {
+        if (item is null || item.IsVideoCompleted) return;
+        saveError = null;
+        if (await RoadmapService.MarkVideoCompleteAsync(ItemId, UserId))
+        {
+            item.IsVideoCompleted = true;
+            item.VideoCompletedAtUtc = DateTime.UtcNow;
+            item.LastLearningStep = "script";
+            await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "script");
+        }
+        else
+        {
+            saveError = Tx("Could not save video progress. Please reload and try again.", "Không thể lưu tiến độ video. Hãy tải lại trang và thử lại.");
+        }
+        StateHasChanged();
+    }
+    private async Task CompleteVideoAndOpenScript()
+    {
+        if (item is null) return;
+        if (!item.IsVideoCompleted)
+            await VideoEnded();
+        if (item.IsVideoCompleted)
+            await OpenStep(2);
+    }
+    private async Task OpenStep(int step) { if (!CanOpen(step)) return; currentStep = step; if (step == 4 && quizQuestions.Count == 0) StartQuiz(); if (step == 5 && roleplayScenario is null) StartRoleplay(); var key = step switch { 1 => "video", 2 => "script", 3 => "summary", 4 => "quiz", 5 => "practice", _ => "reflection" }; await RoadmapService.SaveLearningStepAsync(ItemId, UserId, key); if (item is not null) item.LastLearningStep = key; }
+    private async Task FinishScript() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "summary")) { item!.ScriptCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "summary"; currentStep = 3; } }
+    private async Task FinishSummary() { if (await RoadmapService.SaveLearningStepAsync(ItemId, UserId, "quiz")) { item!.SummaryCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "quiz"; currentStep = 4; StartQuiz(); } }
+    private void Previous() => currentStep = Math.Max(1, currentStep - 1);
+    private void NextOrRoadmap() { if (currentStep < 6 && CanOpen(currentStep + 1)) currentStep++; else Back(); }
+    private void Back() => Nav.NavigateTo($"/roadmap/{UserId}");
+    private void OpenPractice() => Nav.NavigateTo($"/roadmap/practice/{UserId}/{ItemId}");
+    private void OpenVoicePractice() => Nav.NavigateTo($"/roadmap/voice-practice/{UserId}/{ItemId}");
+    private void OpenInboxRush() => Nav.NavigateTo($"/roadmap/inbox-rush/{UserId}/{ItemId}");
+    private bool IsVi => L.Current == AppLanguage.Vi;
+    private string Tx(string en, string vi) => IsVi ? vi : en;
+    private void StartQuiz()
+    {
+        var questionBank = IsTimeManagementLesson
+            ? TimeManagementQuizBank.Questions
+            : communicationLessonNumber == 2
+                ? ActiveListeningQuizBank.Questions
+                : CommunicationQuizBank.Questions;
+        var recentIds = item?.QuizHistory.SelectMany(x => x.Answers.Keys).Select(x => int.TryParse(x, out var id) ? id : 0).Where(x => x > 0).ToList() ?? [];
+        var unseen = questionBank.Where(x => !recentIds.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()).ToList();
+        if (unseen.Count < 5)
+        {
+            var lastFive = recentIds.TakeLast(5).ToHashSet();
+            unseen.AddRange(questionBank.Where(x => !unseen.Contains(x) && !lastFive.Contains(x.Id)).OrderBy(_ => Random.Shared.Next()));
+        }
+        quizQuestions = unseen.Take(5).ToList(); quizAnswers.Clear(); quizOptionOrders.Clear(); selectedAnswers.Clear(); revealedQuestions.Clear(); quizScore = 0; quizFinished = false; quizPassed = false; saveError = null;
+        foreach (var question in quizQuestions) quizOptionOrders[question.Id] = Enumerable.Range(0, 4).OrderBy(_ => Random.Shared.Next()).ToArray();
+    }
+
+    private async Task StartNewQuizAsync()
+    {
+        await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId);
+        StartQuiz();
+        await PersistQuizDraftAsync();
+    }
+
+    private bool TryRestoreQuizDraft(RoadmapQuizDraft? draft)
+    {
+        if (draft is null || draft.QuestionIds.Count != 5)
+            return false;
+
+        var bank = IsTimeManagementLesson
+            ? TimeManagementQuizBank.Questions
+            : communicationLessonNumber == 2
+                ? ActiveListeningQuizBank.Questions
+                : CommunicationQuizBank.Questions;
+        var lookup = bank.ToDictionary(question => question.Id);
+        if (draft.QuestionIds.Distinct().Count() != 5 || draft.QuestionIds.Any(id => !lookup.ContainsKey(id)))
+            return false;
+
+        foreach (var id in draft.QuestionIds)
+        {
+            if (!draft.OptionOrders.TryGetValue(id, out var order) || order.Length != 4 ||
+                !order.OrderBy(x => x).SequenceEqual([0, 1, 2, 3]))
+                return false;
+        }
+
+        quizQuestions = draft.QuestionIds.Select(id => lookup[id]).ToList();
+        quizOptionOrders.Clear();
+        selectedAnswers.Clear();
+        revealedQuestions.Clear();
+        quizAnswers.Clear();
+        foreach (var id in draft.QuestionIds)
+            quizOptionOrders[id] = draft.OptionOrders[id];
+        foreach (var answer in draft.SelectedAnswers)
+        {
+            if (!lookup.ContainsKey(answer.Key) || answer.Value is < 0 or > 3 || !draft.QuestionIds.Contains(answer.Key))
+                continue;
+            selectedAnswers[answer.Key] = answer.Value;
+            revealedQuestions.Add(answer.Key);
+            quizAnswers[answer.Key.ToString()] = "ABCD"[answer.Value].ToString();
+        }
+        quizScore = selectedAnswers.Sum(answer => PointsFor(lookup[answer.Key], answer.Value));
+        quizFinished = false;
+        quizPassed = false;
+        saveError = null;
+        return true;
+    }
+
+    private async Task PersistQuizDraftAsync()
+    {
+        if (quizQuestions.Count != 5 || quizFinished)
+            return;
+        var draft = new RoadmapQuizDraft
+        {
+            QuestionIds = quizQuestions.Select(question => question.Id).ToList(),
+            OptionOrders = quizOptionOrders.ToDictionary(entry => entry.Key, entry => entry.Value),
+            SelectedAnswers = new Dictionary<int, int>(selectedAnswers)
+        };
+        await JS.InvokeVoidAsync("ssRoadmapQuiz.set", UserId, ItemId, draft);
+    }
+    private static int PointsFor(CommunicationQuizQuestion question, int option) => option == question.Optimal ? 10 : option == question.Neutral ? 5 : 0;
+    private async Task SelectAnswerAsync(CommunicationQuizQuestion question, int originalOption)
+    {
+        if (revealedQuestions.Contains(question.Id)) return;
+        selectedAnswers[question.Id] = originalOption;
+        revealedQuestions.Add(question.Id);
+        quizScore += PointsFor(question, originalOption);
+        quizAnswers[question.Id.ToString()] = "ABCD"[originalOption].ToString();
+        await PersistQuizDraftAsync();
+    }
+    private async Task SubmitQuiz()
+    {
+        if (revealedQuestions.Count != 5) return;
+        quizPassed = QuizPercent >= 56;
+        var answers = quizQuestions.Select(question => new AiQuizAnswer(
+            IsVi ? question.Vi : question.En,
+            (IsVi ? question.OptionsVi : question.OptionsEn)[selectedAnswers[question.Id]],
+            (IsVi ? question.OptionsVi : question.OptionsEn)[question.Optimal],
+            PointsFor(question, selectedAnswers[question.Id]))).ToList();
+        var feedback = await AiEvaluator.EvaluateQuizAsync(LessonTitle, answers, quizScore, IsVi);
+        var attempt = new RoadmapQuizAttemptDto { Answers = new(quizAnswers), Score = quizScore, TotalQuestions = 5, Passed = quizPassed, Feedback = feedback };
+        if (await RoadmapService.SaveQuizAttemptAsync(ItemId, UserId, attempt)) { item!.QuizHistory.Add(attempt); if (quizPassed) { item.IsPracticeCompleted = true; item.PracticeCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "practice"; } quizFinished = true; await JS.InvokeVoidAsync("ssRoadmapQuiz.clear", UserId, ItemId); }
+        else saveError = Tx("Could not save quiz result. Please try again.", "Không thể lưu kết quả Quiz. Hãy thử lại.");
+    }
+
+    private sealed class RoadmapQuizDraft
+    {
+        public List<int> QuestionIds { get; set; } = [];
+        public Dictionary<int, int[]> OptionOrders { get; set; } = [];
+        public Dictionary<int, int> SelectedAnswers { get; set; } = [];
+    }
+    private void StartRoleplay()
+    {
+        var used = item?.RoleplayHistory.Select(x => x.ScenarioId).ToHashSet() ?? [];
+        var choices = CommunicationRoleplayEngine.Scenarios.Where(x => !used.Contains(x.Id)).ToList();
+        if (choices.Count == 0) choices = CommunicationRoleplayEngine.Scenarios.ToList();
+        roleplayScenario = choices[Random.Shared.Next(choices.Count)]; roleplayUserMessages.Clear(); roleplayAiMessages.Clear(); roleplayInput = string.Empty; roleplayResult = null; pendingRoleplayResult = null;
+    }
+    private sealed class RoleplayDraft
+    {
+        public int ScenarioId { get; set; }
+        public List<string> Messages { get; set; } = [];
+        public List<string> Replies { get; set; } = [];
+        public int HistoryCount { get; set; }
+    }
+    private Task PersistRoleplayDraft() => JS.InvokeVoidAsync("ssRoadmapRoleplay.set", UserId, ItemId,
+        new RoleplayDraft { ScenarioId = roleplayScenario!.Id, Messages = roleplayUserMessages, Replies = roleplayAiMessages, HistoryCount = item!.RoleplayHistory.Count }).AsTask();
+    private async Task SendRoleplay()
+    {
+        if (sendingRoleplay || roleplayScenario is null || roleplayResult is not null) return;
+        var pending = roleplayUserMessages.Count == 3 || roleplayUserMessages.Count > roleplayAiMessages.Count;
+        var value = roleplayInput.Trim();
+        if (!pending && (value.Length == 0 || value.Length > 1000)) return;
+        sendingRoleplay = true; saveError = null;
+        try
+        {
+            if (!pending) { roleplayUserMessages.Add(value); roleplayInput = string.Empty; }
+            await PersistRoleplayDraft();
+            if (roleplayUserMessages.Count < 3)
+            {
+                roleplayAiMessages.Add(await AiEvaluator.ContinueRoleplayAsync(roleplayScenario, roleplayUserMessages, roleplayAiMessages, IsVi));
+                await PersistRoleplayDraft();
+            }
+            else
+            {
+                var result = pendingRoleplayResult ??= await AiEvaluator.GradeRoleplayAsync(roleplayScenario, [.. roleplayUserMessages], [.. roleplayAiMessages], IsVi);
+                await PersistRoleplayDraft();
+                if (await RoadmapService.SaveRoleplayAttemptAsync(ItemId, UserId, result)) { roleplayResult = result; item!.RoleplayHistory.Add(result); item.IsScenarioCompleted = true; item.ScenarioCompletedAtUtc ??= DateTime.UtcNow; item.LastLearningStep = "reflection"; await JS.InvokeVoidAsync("ssRoadmapRoleplay.clear", UserId, ItemId); }
+                else saveError = Tx("Could not save role-play history.", "Không thể lưu lịch sử thực hành.");
+            }
+        }
+        catch (Exception) { saveError = Tx("Your conversation is kept. Retry the pending response or save.", "Hội thoại được giữ lại. Hãy thử lại phản hồi hoặc lưu kết quả."); }
+        finally { sendingRoleplay = false; }
+    }
+    private void LoadReflection()
+    {
+        if (string.IsNullOrWhiteSpace(item?.ReflectionText)) return;
+        try { reflection = JsonSerializer.Deserialize<ReflectionForm>(item.ReflectionText) ?? new(); }
+        catch (JsonException) { reflection = new() { Learning = item.ReflectionText }; }
+    }
+    private string SerializeReflection() => JsonSerializer.Serialize(reflection);
+    private async Task SaveReflectionDraft()
+    {
+        savingReflection = true; reflectionError = false;
+        var ok = await RoadmapService.SaveReflectionDraftAsync(ItemId, UserId, SerializeReflection());
+        reflectionMessage = ok ? Tx("Draft saved.", "Đã lưu bản nháp.") : Tx("Could not save draft.", "Không thể lưu bản nháp."); reflectionError = !ok; savingReflection = false;
+        if (ok && item is not null) item.ReflectionText = SerializeReflection();
+    }
+    private async Task CompleteReflection()
+    {
+        if (!ReflectionValid || item is null) return; savingReflection = true; reflectionError = false;
+        reflection.AiFeedback = await AiEvaluator.EvaluateReflectionAsync(item.Title, SerializeReflection(), LatestQuizScore, LatestRoleplayScore, IsVi);
+        var payload = SerializeReflection(); var ok = await RoadmapService.SaveReflectionAsync(ItemId, UserId, payload);
+        if (ok) { item.ReflectionText = payload; item.IsReflectionCompleted = true; item.ReflectionCompletedAtUtc = DateTime.UtcNow; item.IsCompleted = true; reflectionMessage = Tx("Week completed. The next week is now unlocked.", "Đã hoàn thành tuần. Tuần tiếp theo đã được mở."); }
+        else { reflectionMessage = Tx("Could not complete the week.", "Không thể hoàn thành tuần."); reflectionError = true; }
+        savingReflection = false;
+    }
+    private static IReadOnlyList<RoadmapActivityDefinition> Steps => RoadmapLearningContent.Activities;
+    private sealed class ReflectionForm { public string Learning { get; set; } = string.Empty; public string Strength { get; set; } = string.Empty; public string Improvement { get; set; } = string.Empty; public string Commitment { get; set; } = string.Empty; public string AiFeedback { get; set; } = string.Empty; public int ConfidenceBefore { get; set; } = 3; public int ConfidenceAfter { get; set; } = 3; }
 }
 
 <style>
-    .max-900 { max-width: 900px; }
-    .lecture-shell {
-        border-radius: 24px;
-    }
-    .lecture-placeholder {
-        min-height: 320px;
-        border-radius: 22px;
-        border: 2px dashed rgba(99, 102, 241, 0.25);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        color: var(--primary);
-        background: rgba(99, 102, 241, 0.06);
-    }
-
-    .lecture-complete {
-        min-height: 320px;
-        border-radius: 22px;
-        border: 1px solid rgba(16, 185, 129, 0.18);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        font-size: 1.1rem;
-        color: #059669;
-        background: rgba(16, 185, 129, 0.08);
-        text-align: center;
-        padding: 24px;
-    }
+    .lesson-page{min-height:calc(100vh - 72px);padding:1.5rem;background:#f5f7fb;color:#17233c}.lesson-shell,.back{max-width:1180px;margin:auto}.state,.empty{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.6rem;text-align:center}.state span{width:28px;height:28px;border:3px solid #dce4fa;border-top-color:#2860e8;border-radius:50%;animation:spin .8s linear infinite}.back,.lesson-top>button{border:0;background:transparent;color:#2860e8;font-weight:800}.lesson-top{display:grid;grid-template-columns:180px 1fr auto;align-items:center;padding:1rem 1.3rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.lesson-top small{color:#2860e8;font-size:.6rem;font-weight:900}.lesson-top h1{margin:.2rem 0;font-size:1.25rem}.lesson-top>span{display:flex;align-items:center;gap:.35rem;padding:.45rem .65rem;border-radius:99px;background:#eef3ff;color:#2860e8;font-size:.65rem;font-weight:800}.lesson-top>span.week-complete{color:#237d55;background:#eaf8f1}.lesson-steps{display:grid;grid-template-columns:repeat(6,1fr);margin:1rem 0;border:1px solid #dce4f2;border-radius:12px;background:#fff;overflow:hidden}.lesson-steps button{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem .4rem;border:0;border-right:1px solid #e7ebf3;background:#fff;color:#68758e;font-size:.65rem}.lesson-steps button:last-child{border:0}.lesson-steps span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #cbd5e7;border-radius:50%;font-size:.58rem}.lesson-steps button.active{color:#2860e8;background:#f2f6ff}.lesson-steps button.active span{color:#fff;border-color:#2860e8;background:#2860e8}.lesson-steps button.done span{color:#fff;border-color:#2ba06a;background:#2ba06a}.lesson-content{padding:1.25rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.saved-complete{display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;padding:.7rem .85rem;color:#237d55;border:1px solid #bde7d1;border-radius:9px;background:#effbf5}.saved-complete>i{font-size:1.2rem}.saved-complete b,.saved-complete small{display:block}.saved-complete small{margin-top:.1rem;color:#4f7965;font-size:.65rem}.video-wrap{overflow:hidden;border-radius:10px;background:#090d18}.video-wrap video{display:block;width:100%;max-height:620px}.content-heading{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}.content-heading small{color:#2860e8;font-size:.6rem;font-weight:900}.content-heading h2{margin:.25rem 0;font-size:1.35rem}.content-heading p{margin:0;color:#68758e}.content-heading>span{font-size:.7rem;color:#68758e}.notice{padding:.8rem;color:#725d25;border:1px solid #f0d98f;border-radius:8px;background:#fff9e7}.save-error{display:flex;gap:.45rem;margin-top:.6rem;padding:.75rem;color:#a83b3b;border:1px solid #efbcbc;border-radius:8px;background:#fff2f2}.primary{display:flex;align-items:center;gap:.5rem;margin-left:auto;padding:.75rem 1rem;border:0;border-radius:8px;color:#fff;background:#2860e8;font-weight:800}.primary:disabled{cursor:not-allowed;color:#7f8a9f;background:#e3e8f1}.theory{max-width:850px;margin:auto;font-size:.9rem;line-height:1.75}.theory h3{margin-top:1.5rem;color:#12224a}.theory li{margin:.35rem 0}.conclusion{padding:1rem;border-left:4px solid #2860e8;background:#f2f6ff}.actions{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e3e8f1}.video-actions{align-items:center}.actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;color:#273755;font-weight:800}.summary-card{padding:2rem;text-align:center;border-radius:12px;background:linear-gradient(135deg,#f1f5ff,#f7f1ff)}.summary-card>i{font-size:2rem;color:#5f51dc}.summary-card small{display:block;color:#2860e8;font-weight:900}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;text-align:left}.summary-grid div{padding:1rem;border:1px solid #dbe2f2;border-radius:9px;background:#fff}.summary-grid p{color:#68758e;font-size:.8rem;line-height:1.6}.empty>i{font-size:3rem;color:#2860e8}.empty.inner{min-height:340px}.empty.inner>i{font-size:2rem}.empty p{color:#68758e}@@keyframes spin{to{transform:rotate(360deg)}}@@media(max-width:760px){.lesson-page{padding:.7rem}.lesson-top{grid-template-columns:1fr}.lesson-top>button{text-align:left}.lesson-top>span{justify-self:start}.lesson-steps{grid-template-columns:repeat(3,1fr)}.lesson-steps button{border-bottom:1px solid #e7ebf3}.lesson-steps b{display:none}.summary-grid{grid-template-columns:1fr}.content-heading{display:block}}
+    .quiz-card{max-width:900px;margin:auto;padding:1rem}.quiz-card>header{display:flex;justify-content:space-between;align-items:center}.quiz-card small,.quiz-result small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-card h2{margin:.2rem 0}.quiz-card>header>b{color:#2860e8}.quiz-progress{height:6px;margin:1rem 0 1.5rem;border-radius:99px;background:#e8edf5;overflow:hidden}.quiz-progress i{display:block;height:100%;background:#2860e8}.quiz-card>h3{font-size:1.05rem;line-height:1.55}.quiz-options{display:grid;gap:.65rem;margin-top:1rem}.quiz-options button{display:flex;align-items:center;gap:.75rem;padding:.85rem;text-align:left;border:1px solid #d8e0ed;border-radius:9px;background:#fff;color:#263653}.quiz-options button span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:7px;background:#edf1f7;font-weight:900}.quiz-options button.optimal{border-color:#41aa78;background:#effbf5}.quiz-options button.neutral{border-color:#e2b54a;background:#fff9e9}.quiz-options button.negative{border-color:#e58b8b;background:#fff3f3}.answer-feedback{margin-top:1rem;padding:1rem;border-radius:9px}.answer-feedback p{margin:.35rem 0 0;line-height:1.55}.answer-feedback.good{color:#246f4d;background:#ebf9f2}.answer-feedback.middle{color:#765b17;background:#fff8e3}.answer-feedback.bad{color:#8d3939;background:#fff0f0}.quiz-next{margin-top:1rem}.quiz-result{max-width:720px;margin:auto;padding:2.5rem;text-align:center;border-radius:14px;background:linear-gradient(135deg,#eef4ff,#f7f1ff)}.quiz-result>i{display:block;color:#6554dd;font-size:2.5rem}.quiz-result h2{margin:.5rem 0;font-size:2rem}.quiz-result h3{color:#2860e8}.quiz-result p{line-height:1.65}.quiz-result button{padding:.7rem 1rem;border:1px solid #2860e8;border-radius:8px;background:#fff;color:#2860e8;font-weight:800}
+    .quiz-sheet{max-width:940px;margin:auto}.quiz-sheet>header{display:flex;justify-content:space-between;align-items:center}.quiz-sheet>header small{color:#2860e8;font-size:.62rem;font-weight:900}.quiz-sheet>header h2{margin:.2rem 0}.quiz-sheet>header>b{color:#2860e8}.quiz-sheet .quiz-card{max-width:none;margin:0 0 1rem;padding:1.15rem;border:1px solid #dce4f2;border-radius:11px;background:#fbfcff}.quiz-sheet .quiz-card>h3{display:flex;align-items:flex-start;gap:.7rem;margin-top:0;font-size:1rem}.quiz-sheet .quiz-card>h3>span{display:grid;place-items:center;flex:0 0 28px;height:28px;color:#fff;border-radius:50%;background:#2860e8;font-size:.7rem}
+    .roleplay{max-width:900px;margin:auto}.roleplay>header{display:flex;justify-content:space-between;gap:1rem}.roleplay>header small{color:#2860e8;font-size:.6rem;font-weight:900}.roleplay>header h2{margin:.25rem 0}.roleplay>header p{margin:0;color:#68758e}.roleplay>header>span{display:grid;place-items:center;width:48px;height:48px;color:#2860e8;border-radius:50%;background:#eef3ff;font-weight:900}.rubric-strip,.roleplay-result>div{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0}.rubric-strip span,.roleplay-result span{padding:.55rem;text-align:center;border-radius:7px;background:#f1f4f9;font-size:.63rem}.chat-box{display:grid;gap:.65rem;min-height:260px;max-height:480px;padding:1rem;overflow:auto;border:1px solid #dce4f2;border-radius:10px;background:#f7f9fc}.chat-message{max-width:75%;padding:.7rem .85rem;border-radius:10px;background:#fff;box-shadow:0 2px 8px #2135650d}.chat-message.user{justify-self:end;color:#fff;background:#2860e8}.chat-message b{font-size:.58rem}.chat-message p{margin:.25rem 0 0;line-height:1.55}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:.6rem;margin-top:.75rem}.chat-compose textarea{min-height:90px;padding:.75rem;resize:vertical;border:1px solid #cfd9e9;border-radius:9px}.chat-compose button{padding:0 1rem;color:#fff;border:0;border-radius:9px;background:#2860e8;font-weight:800}.roleplay-result{margin-top:1rem;padding:1rem;border:1px solid #bde7d1;border-radius:10px;background:#effbf5}.roleplay-result h3{margin-top:0;color:#247950}.roleplay-result>p{line-height:1.6}@@media(max-width:600px){.rubric-strip,.roleplay-result>div{grid-template-columns:repeat(2,1fr)}.chat-message{max-width:90%}}
+    .reflection-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:1rem}.reflection-form,.learning-review{padding:1.2rem;border:1px solid #dce4f2;border-radius:12px;background:#fff}.reflection-form>header small{color:#2860e8;font-size:.6rem;font-weight:900}.reflection-form>header h2{margin:.25rem 0}.reflection-form>header p{margin:0 0 1.2rem;color:#68758e}.reflection-form>label{display:grid;position:relative;gap:.4rem;margin-top:1rem}.reflection-form>label>b{font-size:.78rem}.reflection-form textarea{min-height:95px;padding:.75rem;border:1px solid #ccd7e8;border-radius:8px;resize:vertical}.reflection-form label>small{position:absolute;right:.5rem;bottom:.35rem;color:#8993a7;font-size:.55rem}.reflection-form .commitment{padding:1rem;border-radius:10px;background:#f3f6ff}.commitment>b{color:#2860e8}.commitment>span{font-size:.68rem;color:#68758e}.confidence{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}.confidence>div{display:grid;grid-template-columns:1fr auto;gap:.4rem;padding:.8rem;border:1px solid #dce4f2;border-radius:8px}.confidence b{grid-column:1/-1;font-size:.68rem}.confidence input{width:100%}.confidence span{color:#2860e8;font-weight:900}.reflection-done{display:flex;align-items:center;gap:.6rem;padding:.75rem;color:#247950;border:1px solid #bde7d1;border-radius:8px;background:#effbf5}.reflection-done>i{font-size:1.3rem}.reflection-done b,.reflection-done span{display:block}.reflection-done span{font-size:.65rem}.learning-review h3{margin-top:0}.result-tile{display:flex;align-items:center;gap:.7rem;margin:.6rem 0;padding:.8rem;border-radius:9px;background:#f3f6ff}.result-tile>i{color:#2860e8;font-size:1.2rem}.result-tile span,.result-tile b{display:block}.result-tile span{font-size:.65rem}.result-tile b{font-size:1rem}.mini-rubric{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.8rem}.mini-rubric span{padding:.55rem;border-radius:7px;background:#f3f5f9;font-size:.6rem}.mini-rubric b{display:block}.ai-reflection{margin-top:1rem;padding:1rem;border:1px solid #d9d0ff;border-radius:9px;background:#f7f4ff}.ai-reflection b{color:#4e45b8}.ai-reflection p{font-size:.7rem;line-height:1.6}.confidence-change{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding:.8rem;border-top:1px solid #e0e6ef;font-size:.65rem}.confidence-change b{font-size:1rem}.confidence-change em{color:#268b5d;font-style:normal}.reflection-actions{display:flex;gap:.6rem}.reflection-actions>button:not(.primary){padding:.7rem 1rem;border:1px solid #ccd6e7;border-radius:8px;background:#fff;font-weight:800}.reflection-message{margin-top:1rem;padding:.65rem;color:#247950;border-radius:8px;background:#effbf5}.reflection-message.error{color:#9c3838;background:#fff0f0}@@media(max-width:850px){.reflection-layout{grid-template-columns:1fr}.confidence{grid-template-columns:1fr}}
+    .reflection-requirement{display:flex;align-items:center;gap:.4rem;padding:.65rem .75rem;color:#2859b8;border-radius:8px;background:#eef4ff;font-size:.7rem;font-weight:700}
+    /* Shared SoftSync purple/indigo palette and readable lesson typography. */
+    .lesson-page{--lesson-primary:#6847ed;--lesson-primary-2:#7c55f5;font-size:1.06rem;background:radial-gradient(circle at 0 0,#edf3ff 0,transparent 28rem),radial-gradient(circle at 100% 0,#f8eaff 0,transparent 30rem),#f9faff}
+    .back,.lesson-top>button,.lesson-top small,.content-heading small,.summary-card small,
+    .quiz-card small,.quiz-result small,.quiz-card>header>b,.quiz-result h3,
+    .quiz-sheet>header small,.quiz-sheet>header>b,.roleplay>header small,
+    .roleplay>header>span,.reflection-form>header small,.commitment>b,
+    .confidence span,.result-tile>i{color:var(--lesson-primary)}
+    .primary,.quiz-progress i,.quiz-sheet .quiz-card>h3>span,.chat-message.user,
+    .chat-compose button{background:linear-gradient(135deg,var(--lesson-primary),var(--lesson-primary-2))}
+    .lesson-steps button.active{color:var(--lesson-primary);background:#f3efff}
+    .lesson-steps button.active span{border-color:var(--lesson-primary);background:var(--lesson-primary)}
+    .lesson-top>span{color:var(--lesson-primary);background:#f1edff}
+    .conclusion{border-left-color:var(--lesson-primary);background:#f6f3ff}
+    .quiz-result button{color:var(--lesson-primary);border-color:var(--lesson-primary)}
+    .roleplay>header>span{background:#f1edff}
+    .reflection-requirement{color:#5941c6;background:#f3efff}
+    .lesson-top h1{font-size:1.5rem}
+    .lesson-top small,.content-heading small,.quiz-card small,.quiz-result small,
+    .quiz-sheet>header small,.roleplay>header small,.reflection-form>header small{font-size:.72rem}
+    .lesson-top>span,.content-heading>span{font-size:.8rem}
+    .lesson-steps button{font-size:.88rem}
+    .content-heading h2{font-size:1.7rem}
+    .content-heading p,.roleplay>header p,.reflection-form>header p{font-size:1.08rem;line-height:1.65}
+    .theory{font-size:1.1rem;line-height:1.85}
+    .summary-grid p{font-size:1.02rem}
+    .quiz-card>h3,.quiz-sheet .quiz-card>h3{font-size:1.16rem}
+    .quiz-options button,.answer-feedback p,.quiz-result p{font-size:1.04rem}
+    .rubric-strip span,.roleplay-result span{font-size:.76rem}
+    .chat-message b{font-size:.76rem}.chat-message p{font-size:1.04rem}
+    .reflection-form>label>b{font-size:1.02rem}
+    .reflection-form textarea,.chat-compose textarea{font-size:1.06rem;line-height:1.6}
+    .reflection-form label>small{font-size:.7rem}
+    .commitment>span,.confidence b,.reflection-done span,.result-tile span,
+    .ai-reflection p,.confidence-change{font-size:.8rem}
+    .mini-rubric span{font-size:.72rem}
+    .reflection-requirement{font-size:.84rem}
+</style>
+<style>
+    .voice-practice-launch{display:flex;flex-direction:column;align-items:center;max-width:820px;margin:auto;padding:2.5rem;text-align:center;border:1px solid #dcd3ff;border-radius:18px;background:linear-gradient(145deg,#fff,#f5f1ff)}
+    .voice-practice-launch>i{display:grid;place-items:center;width:72px;height:72px;color:#fff;border-radius:50%;background:linear-gradient(135deg,#6847ed,#a855f7);font-size:1.7rem}.voice-practice-launch>small{margin-top:1rem;color:#6847ed;font-weight:900}.voice-practice-launch h2{margin:.35rem 0}.voice-practice-launch>p{max-width:650px;color:#68758e;line-height:1.65}.voice-practice-launch>div{display:grid;grid-template-columns:repeat(4,1fr);width:100%;gap:.6rem;margin:1rem 0}.voice-practice-launch span{padding:.75rem;border-radius:10px;background:#fff;color:#68758e}.voice-practice-launch span b{display:block;color:#6847ed;font-size:1.1rem}.voice-practice-launch .primary{margin:1rem auto 0}@@media(max-width:600px){.voice-practice-launch>div{grid-template-columns:repeat(2,1fr)}}
 </style>

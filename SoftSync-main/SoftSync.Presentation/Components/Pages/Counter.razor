@@ -1,13 +1,14 @@
 ﻿@page "/counter"
+@inherits LocalizedComponentBase
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>@Ui("Counter")</PageTitle>
 
-<h1>Counter</h1>
+<h1>@Ui("Counter")</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">@Ui("Current count:") @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">@Ui("Click me")</button>
 
 @code {
     private int currentCount = 0;

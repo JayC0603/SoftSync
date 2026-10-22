@@ -1,0 +1,21 @@
+:root {
+  --primary-color: #5146d8;
+  --primary-hover: #4338b8;
+  --primary-light: #f1eeff;
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+  --bg-gray: #f1f5f9;
+  --border-color: #e2e8f0;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', 'Segoe UI', sans-serif; overflow: hidden; }
+
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-gray);
+}

@@ -1,0 +1,57 @@
+@page "/about"
+@layout PublicLayout
+@inherits LocalizedComponentBase
+@using SoftSync.Common.Enums
+
+<PageTitle>@T("Về SoftSync — Học để thay đổi", "About SoftSync — Learn to grow")</PageTitle>
+<HeadContent><meta name="description" content="SoftSync kết nối kiến thức, thực hành và phản tư để phát triển kỹ năng mềm." /></HeadContent>
+
+<div class="about-landing">
+    <section class="about-hero" aria-labelledby="about-title">
+        <div class="about-hero-copy">
+            <span class="about-eyebrow"><span></span> @T("CÂU CHUYỆN SOFTSYNC", "THE SOFTSYNC STORY")</span>
+            <h1 id="about-title">@T("Kỹ năng nhỏ.", "Small skills.")<br /><em>@T("Thay đổi lớn.", "Meaningful change.")</em></h1>
+            <p>@T("Chúng tôi tin rằng sự tự tin đến từ những lần bạn dám thử, nhìn lại và tiến thêm một bước.", "We believe confidence grows when you try, reflect and take another step forward.")</p>
+            <div class="about-actions"><a class="about-button" href="/dashboard">@T("Bắt đầu hành trình", "Start your journey") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><a class="about-text-link" href="#our-story">@T("Khám phá SoftSync", "Discover SoftSync") <i class="bi bi-arrow-down" aria-hidden="true"></i></a></div>
+            <div class="about-hero-note"><i class="bi bi-heart" aria-hidden="true"></i> @T("Học có mục tiêu. Thực hành đầy tự tin.", "Learn with purpose. Practice with confidence.")</div>
+        </div>
+        <div class="about-art" aria-label="SYNCY">
+            <div class="about-orbit about-orbit-one"></div><div class="about-orbit about-orbit-two"></div>
+            <span class="about-art-star" aria-hidden="true">✦</span>
+            <img src="/images/syncy-robot.png" alt="SYNCY — người bạn đồng hành của SoftSync" width="320" height="360" />
+            <div class="about-floating about-floating-top"><i class="bi bi-chat-heart" aria-hidden="true"></i><span>@T("Tự tin kết nối", "Connect confidently")</span></div>
+            <div class="about-floating about-floating-bottom"><span class="about-mini-check"><i class="bi bi-check-lg" aria-hidden="true"></i></span><div><strong>@T("Tốt hơn mỗi ngày", "Grow every day")</strong><small>@T("Từ một bước nhỏ của bạn", "One small step at a time")</small></div></div>
+        </div>
+    </section>
+
+    <div class="about-skill-strip" aria-label="@T("Kỹ năng phát triển", "Skills to develop")"><span>@T("Giao tiếp", "Communication")</span><i aria-hidden="true">✦</i><span>@T("Quản lý thời gian", "Time management")</span><i aria-hidden="true">✦</i><span>@T("Làm việc nhóm", "Teamwork")</span><i aria-hidden="true">✦</i><span>@T("Phát triển bản thân", "Personal growth")</span></div>
+
+    <section id="our-story" class="about-story about-section" aria-labelledby="story-title">
+        <div><span class="about-eyebrow">01 / @T("VÌ SAO CHÚNG TÔI BẮT ĐẦU", "WHY WE STARTED")</span><h2 id="story-title">@T("Biết là một chuyện.", "Knowing is one thing.")<br /><span>@T("Làm được là một hành trình.", "Doing takes a journey.")</span></h2></div>
+        <div class="about-story-copy"><p>@T("Bạn biết nên giao tiếp rõ ràng, quản lý thời gian tốt và tự tin trước đám đông. Nhưng một cuộc trò chuyện khó, một lịch học dày hay một buổi thuyết trình cần nhiều hơn kiến thức.", "You know clear communication, good time management and confidence matter. But a difficult conversation, a busy schedule or a presentation takes more than knowledge.")</p><p>@T("SoftSync nối bài học với tình huống thực tế, nối phản hồi với hành động. Chúng tôi đồng hành để bạn tìm thấy bước tiếp theo phù hợp với chính mình.", "SoftSync connects lessons to real situations and feedback to action, helping you find the next step that fits you.")</p><div class="about-story-signature"><img src="/images/logo.png" alt="" width="36" height="36" /><span>SoftSync <small>@T("Không gian cho sự tiến bộ", "A space for growth")</small></span></div></div>
+    </section>
+
+    <BrandImage ImageName="softsync-space-vietnam.jpg"
+                Alt="@T("SoftSync Space — bản đồ Việt Nam, hoa sen và những địa danh kết nối trong không gian học tập", "SoftSync Space — a map of Vietnam, lotus flowers and landmarks connected in a learning space")"
+                Caption="@T("Từ những bước tiến nhỏ, cùng xây dựng một thế hệ trẻ tự tin và kết nối.", "Small steps toward a confident, connected generation.")" />
+    <section class="about-method about-section" aria-labelledby="method-title">
+        <div class="about-section-heading"><span class="about-eyebrow">02 / @T("CÁCH CHÚNG TÔI ĐỒNG HÀNH", "HOW WE HELP")</span><h2 id="method-title">@T("Không chỉ học. Hãy trải nghiệm.", "Go beyond learning. Experience it.")</h2><p>@T("Một vòng học đơn giản, để mỗi kiến thức trở thành một thay đổi có ý nghĩa.", "A simple learning loop that turns knowledge into meaningful change.")</p></div>
+        <div class="about-method-grid">
+            <article><span class="about-step">01</span><div class="about-method-icon"><i class="bi bi-book" aria-hidden="true"></i></div><h3>@T("Học có định hướng", "Learn with direction")</h3><p>@T("Hiểu điểm xuất phát qua đánh giá kỹ năng, rồi tiếp cận bài học theo lộ trình cá nhân hóa.", "Understand your starting point through a skills assessment, then learn with a personalized roadmap.")</p><span class="about-method-tag">@T("Hiểu mình · Xây nền tảng", "Know yourself · Build a foundation")</span></article>
+            <article><span class="about-step">02</span><div class="about-method-icon"><i class="bi bi-lightning-charge" aria-hidden="true"></i></div><h3>@T("Thử trong thực tế", "Practice in context")</h3><p>@T("Kiểm tra kiến thức và ra quyết định trong các tình huống. Tập một hành vi cụ thể, thay vì chỉ đọc thêm lý thuyết.", "Check your knowledge and make decisions in realistic situations. Practice a concrete behavior, beyond theory.")</p><span class="about-method-tag">@T("Tình huống · Hành động", "Scenarios · Action")</span></article>
+            <article><span class="about-step">03</span><div class="about-method-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></div><h3>@T("Nhìn lại để tiến lên", "Reflect to grow")</h3><p>@T("Nhận phản hồi, ghi lại điều bạn học được và chọn một bước nhỏ để áp dụng trong cuộc sống.", "Use feedback, reflect on what you learned and choose a small action for everyday life.")</p><span class="about-method-tag">@T("Phản hồi · Tiến bộ", "Feedback · Growth")</span></article>
+        </div>
+    </section>
+
+    <section class="about-values about-section" aria-labelledby="values-title"><div><span class="about-eyebrow">@T("ĐIỀU CHÚNG TÔI TRÂN TRỌNG", "WHAT MATTERS TO US")</span><h2 id="values-title">@T("Bạn là trung tâm.", "You come first.")<br />@T("Tiến bộ là mục tiêu.", "Growth is the goal.")</h2></div><div class="about-value-list"><article><i class="bi bi-compass" aria-hidden="true"></i><div><h3>@T("Rõ ràng ở mỗi bước", "Clarity at every step")</h3><p>@T("Luôn biết mình đang học gì và nên làm gì tiếp theo.", "Know what you are learning and what comes next.")</p></div></article><article><i class="bi bi-person-heart" aria-hidden="true"></i><div><h3>@T("Phát triển theo nhịp của bạn", "Grow at your own pace")</h3><p>@T("Một hành trình phù hợp với điểm xuất phát và mục tiêu cá nhân.", "A journey shaped around your starting point and goals.")</p></div></article><article><i class="bi bi-shield-check" aria-hidden="true"></i><div><h3>@T("Tôn trọng sự riêng tư", "Respect for privacy")</h3><p>@T("Bạn chọn ngữ cảnh muốn chia sẻ khi gửi yêu cầu hỗ trợ mentor.", "You choose the context to share when requesting mentor support.")</p></div></article></div></section>
+
+    <section class="about-team about-section" aria-labelledby="team-title"><div class="about-section-heading"><span class="about-eyebrow">03 / @T("NHỮNG NGƯỜI ĐỒNG HÀNH", "PEOPLE ALONG THE WAY")</span><h2 id="team-title">@T("Chuyên môn thật. Kết nối thật.", "Real expertise. Human connection.")</h2><p>@T("Đội ngũ cố vấn góp phần định hướng hành trình phát triển của SoftSync.", "Meet the advisors helping shape SoftSync's learning journey.")</p></div><div class="about-team-grid">
+        <a class="about-person" href="/mentors/1"><div class="about-portrait"><img src="/images/mentor-nguyen-hoang-van-anh.png" alt="Th.S. Nguyễn Hoàng Vân Anh" width="240" height="260" loading="lazy" /></div><div class="about-person-copy"><span>@T("CỐ VẤN CHUYÊN MÔN", "PROFESSIONAL ADVISOR")</span><h3>Th.S. Nguyễn Hoàng Vân Anh</h3><p>@T("Tâm lý và phát triển cá nhân", "Psychology and personal development")</p><strong>@T("Gặp gỡ cố vấn", "Meet the advisor") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></strong></div></a>
+        <a class="about-person" href="/mentors/2"><div class="about-portrait"><img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thuỵ Tố Trâm" width="240" height="260" loading="lazy" /></div><div class="about-person-copy"><span>@T("CỐ VẤN CHÍNH", "LEAD MENTOR")</span><h3>Th.S. Nguyễn Thuỵ Tố Trâm</h3><p>@T("Kỹ năng mềm và phát triển cộng đồng", "Soft skills and community development")</p><strong>@T("Gặp gỡ cố vấn", "Meet the advisor") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></strong></div></a>
+        <a class="about-person" href="/mentors/3"><div class="about-portrait"><img src="/images/mentor-nguyen-xuan.png" alt="Th.S. Nguyễn Xuân" width="240" height="260" loading="lazy" /></div><div class="about-person-copy"><span>@T("CỐ VẤN CHUYÊN MÔN", "PROFESSIONAL ADVISOR")</span><h3>Th.S. Nguyễn Xuân</h3><p>@T("Giáo dục và công nghệ", "Education and technology")</p><strong>@T("Gặp gỡ cố vấn", "Meet the advisor") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></strong></div></a>
+    </div></section>
+
+    <section class="about-closing" aria-labelledby="closing-title"><span class="about-eyebrow">@T("BƯỚC TIẾP THEO LÀ CỦA BẠN", "YOUR NEXT STEP")</span><h2 id="closing-title">@T("Một phiên bản tự tin hơn.", "A more confident you.")<br />@T("Bắt đầu từ hôm nay.", "Start today.")</h2><p>@T("Bạn không cần hoàn hảo để bắt đầu. Chỉ cần sẵn sàng cho một bước nhỏ.", "You don't need to be perfect to begin. Just ready for one small step.")</p><a class="about-button" href="/dashboard">@T("Khám phá hành trình của tôi", "Explore my journey") <i class="bi bi-arrow-right" aria-hidden="true"></i></a><a class="about-closing-link" href="/community">@T("Kết nối cùng cộng đồng", "Connect with the community")</a></section>
+</div>
+
+@code { private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en; }

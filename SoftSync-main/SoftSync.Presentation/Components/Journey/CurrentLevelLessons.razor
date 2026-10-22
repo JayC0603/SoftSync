@@ -1,0 +1,24 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+<section class="journey-lessons journey-card" aria-labelledby="journey-lessons-title">
+    <header><div><h2 id="journey-lessons-title">@(Vietnamese ? "Bài học trong cấp độ này" : "Activities in this level")</h2><p>@(Vietnamese ? "Hoàn thành từng hoạt động để mở khóa bước tiếp theo." : "Complete each activity to unlock the next step.")</p></div><span>@Lessons.Count(x => x.Completed) / @Lessons.Count</span></header>
+    <div class="journey-lesson-list">
+        @foreach (var lesson in Lessons)
+        {
+            <div class="journey-lesson @(lesson.Completed ? "is-completed" : lesson.Available ? "is-current" : "is-locked")">
+                <span class="journey-lesson-state" aria-hidden="true"><i class="bi @(lesson.Completed ? "bi-check-lg" : lesson.Available ? "bi-play-fill" : "bi-lock-fill")"></i></span>
+                <span class="journey-lesson-number">@(Vietnamese ? "Bài" : "Step") @lesson.Step</span>
+                <div class="journey-lesson-title"><strong>@lesson.Title</strong><small><i class="bi @lesson.Icon" aria-hidden="true"></i> @lesson.Type</small></div>
+                <button disabled="@(!lesson.Available)" title="@(!lesson.Available ? Vietnamese ? "Hoàn thành hoạt động trước để mở khóa." : "Complete the previous activity to unlock." : null)" aria-label="@($"{ActionLabel(lesson)}: {lesson.Title}")" @onclick="() => OnOpen.InvokeAsync(lesson.Step)">@ActionLabel(lesson) @if (!lesson.Available) { <i class="bi bi-lock" aria-hidden="true"></i> } else if (!lesson.Completed) { <i class="bi bi-arrow-right" aria-hidden="true"></i> }</button>
+            </div>
+        }
+    </div>
+    <a class="journey-mentor" href="/mentors"><i class="bi bi-person-video3" aria-hidden="true"></i>@(Vietnamese ? "Cần hỗ trợ? Trao đổi cùng Mentor" : "Need a hand? Talk to a Mentor")<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<JourneyLesson> Lessons { get; set; } = [];
+    [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public EventCallback<int> OnOpen { get; set; }
+    private string ActionLabel(JourneyLesson lesson) => lesson.Completed ? Vietnamese ? "Xem lại" : "Review" : lesson.Available ? Vietnamese ? "Tiếp tục" : "Continue" : Vietnamese ? "Chưa mở" : "Locked";
+}

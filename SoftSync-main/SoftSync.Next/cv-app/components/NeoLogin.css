@@ -1,0 +1,155 @@
+﻿/* Shared visual design for the ASP.NET and Next.js login screens. */
+.neo-login {
+  --neo-bg: #e4ecfa;
+  --neo-ink: #0c1745;
+  --neo-muted: #57698e;
+  --neo-shadow: #b8c7e1;
+  --neo-highlight: #ffffff;
+  --neo-surface: #e4ecfa;
+  --neo-accent: #5146d8;
+  --neo-line: #b6c5e0;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 82px 24px 35px;
+  overflow: hidden;
+  background: var(--neo-bg);
+  color: var(--neo-ink);
+  font-family: 'Segoe UI', sans-serif;
+}
+[data-theme='dark'] .neo-login, .neo-login[data-login-theme='dark'] {
+  --neo-bg: #19243d;
+  --neo-ink: #f0f5ff;
+  --neo-muted: #afc0e1;
+  --neo-shadow: #0f172b;
+  --neo-highlight: #2c3b59;
+  --neo-surface: #19243d;
+  --neo-accent: #a398ff;
+  --neo-line: #465b7f;
+}
+.neo-login .neo-decoration {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 2px solid var(--neo-highlight);
+  background: linear-gradient(140deg, var(--neo-highlight), var(--neo-bg) 55%, #a99cff);
+  box-shadow: 16px 22px 35px var(--neo-shadow), inset 5px 5px 15px var(--neo-highlight);
+}
+.neo-login .neo-decoration-one { width: 490px; height: 490px; top: -310px; left: -215px; }
+.neo-login .neo-decoration-one::after { content: ''; position: absolute; inset: -34px; z-index: -1; border: 2px solid var(--neo-highlight); border-radius: 50%; box-shadow: inset 0 -16px 26px #7468f5; }
+.neo-login .neo-decoration-two { width: 180px; height: 180px; right: -100px; top: 27%; }
+.neo-login .neo-decoration-three { width: 470px; height: 470px; right: -290px; bottom: -275px; }
+.neo-login .neo-home { position: absolute; top: 30px; left: 34px; display: inline-flex; align-items: center; gap: 8px; color: var(--neo-muted); text-decoration: none; font-size: 13px; font-weight: 600; z-index: 2; }
+.neo-login .neo-home:hover { color: var(--neo-accent); }
+.neo-login .neo-theme { position: absolute; top: 24px; right: 30px; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; border: 1px solid var(--neo-highlight); background: var(--neo-surface); color: var(--neo-ink); font-size: 25px; cursor: pointer; box-shadow: 7px 7px 15px var(--neo-shadow), -5px -5px 12px var(--neo-highlight); }
+.neo-login .neo-theme .bi { font-size: 19px; }
+.neo-login .neo-sun { display: none; }
+[data-theme='dark'] .neo-login .neo-sun { display: block; }
+[data-theme='dark'] .neo-login .neo-moon { display: none; }
+.neo-login .neo-content { position: relative; width: min(440px, 100%); padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; z-index: 1; }
+.neo-login .auth-form-side { width: 100%; display: flex; justify-content: center; }
+.neo-login .neo-logo { display: grid; place-items: center; width: 154px; height: 154px; margin: 0 auto 30px; border-radius: 44px; border: 1px solid var(--neo-highlight); background: linear-gradient(145deg, var(--neo-highlight), var(--neo-bg) 65%); box-shadow: 16px 16px 30px var(--neo-shadow), -12px -12px 28px var(--neo-highlight), inset 1px 1px 3px var(--neo-highlight); }
+.neo-login .neo-logo img { width: 112px; height: 112px; object-fit: contain; border-radius: 28px; box-shadow: 0 10px 20px #29499430; }
+.neo-login .auth-header, .neo-login .login-heading { text-align: center; margin: 0 0 30px; }
+.neo-login .neo-brand-name, .neo-login .login-kicker { display: block; margin: 0 0 10px; color: var(--neo-muted); font-size: 10px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; }
+.neo-login .login-kicker i { display: none; }
+.neo-login .auth-header h1, .neo-login .login-heading h2 { margin: 0 0 10px; color: var(--neo-ink); font-size: clamp(27px, 4vw, 36px); font-weight: 800; line-height: 1.2; letter-spacing: -1.3px; }
+.neo-login .auth-header p, .neo-login .login-heading p { margin: 0; color: var(--neo-muted); font-size: 13px; line-height: 1.6; letter-spacing: .045em; }
+.neo-login .auth-form { display: flex; flex-direction: column; gap: 19px; }
+.neo-login .input-group, .neo-login .login-field { width: 100%; display: block; margin: 0 0 18px; }
+.neo-login .auth-form .input-group { margin: 0; }
+.neo-login .input-group label, .neo-login .login-field label { display: block; color: var(--neo-muted); font-size: 12px; font-weight: 650; margin: 0 0 8px 5px; }
+.neo-login .input-wrapper, .neo-login .login-input-wrap { position: relative; }
+.neo-login .input-wrapper input, .neo-login .login-input-wrap .form-control { width: 100%; min-height: 60px; padding: 17px 48px 17px 48px; border: 1px solid var(--neo-highlight); border-radius: 19px; background: var(--neo-surface); color: var(--neo-ink); font: inherit; font-size: 14px; outline: none; box-shadow: inset 4px 4px 8px var(--neo-shadow), inset -4px -4px 9px var(--neo-highlight), 5px 5px 12px var(--neo-shadow), -4px -4px 10px var(--neo-highlight); transition: box-shadow .18s, border-color .18s; }
+.neo-login .input-wrapper input::placeholder, .neo-login .login-input-wrap .form-control::placeholder { color: var(--neo-muted); opacity: 1; }
+.neo-login .input-wrapper input:focus, .neo-login .login-input-wrap .form-control:focus { background: var(--neo-surface); color: var(--neo-ink); border-color: #7468f5; box-shadow: 0 0 0 3px #7468f526, inset 3px 3px 7px var(--neo-shadow), inset -3px -3px 7px var(--neo-highlight); }
+.neo-login .input-wrapper > svg { position: absolute; top: 50%; left: 17px; transform: translateY(-50%); width: 22px; height: 22px; fill: none; stroke: var(--neo-muted); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.neo-login .login-input-wrap > i { left: 17px; font-size: 20px; color: var(--neo-muted); }
+.neo-login .neo-password-toggle, .neo-login .ss-password-visibility { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 37px; height: 37px; padding: 0; border: 0; background: transparent; color: var(--neo-muted); border-radius: 10px; cursor: pointer; }
+.neo-login .neo-password-toggle svg { position: static; transform: none; width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.neo-login .form-options, .neo-login .login-options { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 5px; color: var(--neo-muted); font-size: 12px; }
+.neo-login .login-options { margin: 23px 0; }
+.neo-login .remember-me { display: flex; align-items: center; gap: 8px; color: var(--neo-muted); font-size: 12px; }
+.neo-login input[type='checkbox'] { width: 18px; height: 18px; accent-color: #5146d8; border-radius: 5px; }
+.neo-login .form-check-input { background-color: var(--neo-surface); border-color: var(--neo-line); }
+.neo-login .form-check-input:checked { background-color: #5146d8; border-color: #5146d8; }
+.neo-login .forgot-password, .neo-login .login-options a, .neo-login .auth-footer a, .neo-login .login-register a { color: var(--neo-accent); font-size: 12px; font-weight: 700; text-decoration: none; }
+.neo-login .forgot-password:hover, .neo-login .auth-footer a:hover, .neo-login .login-register a:hover { text-decoration: underline; }
+.neo-login .submit-button, .neo-login .login-submit { position: relative; width: 100%; min-height: 60px; padding: 16px 56px; display: flex; align-items: center; justify-content: center; border: 1px solid #bcb3ff; border-radius: 999px; color: white; background: linear-gradient(115deg, #9b8bff 0%, #7468f5 22%, #5146d8 72%, #4338b8 100%); box-shadow: 0 14px 25px #5146d84d, inset 2px 2px 5px #ffffff82, inset -3px -3px 7px #4338b8b0; font: inherit; font-size: 19px; font-weight: 750; cursor: pointer; transition: transform .18s, box-shadow .18s; }
+.neo-login .submit-button:hover:not(:disabled), .neo-login .login-submit:hover { transform: translateY(-2px); box-shadow: 0 18px 28px #5146d85e, inset 2px 2px 5px #ffffff82; }
+.neo-login .neo-submit-arrow, .neo-login .login-submit > i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #ffffff18; font-size: 24px; }
+.neo-login .auth-divider, .neo-login .external-divider { display: flex; align-items: center; gap: 15px; margin: 9px 0 0; color: var(--neo-muted); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+.neo-login .auth-divider::before, .neo-login .auth-divider::after, .neo-login .external-divider::before, .neo-login .external-divider::after { content: ''; flex: 1; height: 1px; background: var(--neo-line); }
+.neo-login .auth-divider span { position: static; padding: 0; background: transparent; }
+.neo-login .neo-social { display: flex; flex-direction: column; gap: 18px; margin-top: 25px; }
+.neo-login .neo-social .external-divider { order: -1; margin: 0; }
+.neo-login .external-google { width: 100%; min-height: 50px; border: 1px solid var(--neo-highlight); border-radius: 16px; background: var(--neo-surface); color: var(--neo-ink); box-shadow: 6px 6px 14px var(--neo-shadow), -6px -6px 14px var(--neo-highlight); }
+.neo-login .external-google:hover { background: var(--neo-surface); color: var(--neo-accent); }
+.neo-login .google-rendered-button { min-height: 44px; display: flex; justify-content: center; }
+.neo-login .google-rendered-button > div { width: 100%; min-height: 44px; }
+.neo-login .auth-footer, .neo-login .login-register { border-top: 0; padding: 0; margin: 25px 0 0; text-align: center; color: var(--neo-muted); font-size: 12px; }
+.neo-login .auth-footer p { color: var(--neo-muted); font-size: 12px; margin: 0; }
+.neo-login .login-otp { margin-top: 18px; padding: 12px; min-height: 44px; border: 1px solid var(--neo-line); border-radius: 14px; background: transparent; color: var(--neo-muted); font-size: 12px; }
+.neo-login .login-otp:hover { color: var(--neo-accent); background: var(--neo-surface); }
+.neo-login .neo-tagline { margin: 32px 0 0; text-align: center; color: var(--neo-muted); font-size: 8px; font-weight: 650; letter-spacing: .3em; }
+.neo-login .error-message { border: 1px solid #edb8c1; background: #fff1f3; color: #9e233d; padding: 12px; border-radius: 12px; font-size: 12px; }
+.neo-login .error-message svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.neo-login a:focus-visible, .neo-login button:focus-visible { outline: 3px solid #7468f5; outline-offset: 4px; }
+.neo-login button:disabled, .neo-login input:disabled { opacity: .65; cursor: not-allowed; }
+@media (min-width: 900px) { .neo-login .neo-decoration-one { top: -170px; left: -200px; } .neo-login .neo-decoration-three { right: -210px; bottom: -200px; } }
+@media (max-width: 480px) {
+  .neo-login { padding: 86px 26px 30px; }
+  .neo-login .neo-home { left: 22px; top: 30px; font-size: 11px; }
+  .neo-login .neo-theme { top: 21px; right: 23px; width: 42px; height: 42px; border-radius: 14px; }
+  .neo-login .neo-logo { width: 130px; height: 130px; border-radius: 36px; margin-bottom: 27px; }
+  .neo-login .neo-logo img { width: 94px; height: 94px; border-radius: 24px; }
+  .neo-login .auth-header h1, .neo-login .login-heading h2 { font-size: 29px; }
+  .neo-login .input-wrapper input, .neo-login .login-input-wrap .form-control { min-height: 57px; font-size: 13px; }
+  .neo-login .neo-content { padding: 0; }
+  .neo-login .form-options, .neo-login .login-options { flex-direction: row; align-items: center; font-size: 11px; }
+  .neo-login .neo-tagline { letter-spacing: .22em; }
+}
+@media (max-height: 760px) and (min-width: 600px) {
+  .neo-login { padding-top: 70px; }
+  .neo-login .neo-logo { width: 110px; height: 110px; margin-bottom: 22px; border-radius: 30px; }
+  .neo-login .neo-logo img { width: 82px; height: 82px; border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .neo-login *, .neo-login *::before { transition: none !important; } }
+.neo-login .auth-divider span { font: inherit; color: inherit; }
+.neo-login .text-button { color: var(--neo-accent); font-size: 12px; font-weight: 700; text-decoration: none; }
+.neo-login .text-button:hover { text-decoration: underline; }
+.neo-login .neo-google-status { color: var(--neo-muted); font-size: 11px; line-height: 1.6; text-align: center; margin: -12px 0 0; }
+/* Account design-system defaults use !important; isolate overrides to this page. */
+html body .neo-login .login-submit, html body .neo-login .login-submit:hover {
+  min-height: 60px;
+  padding: 16px 56px !important;
+  border: 1px solid #bcb3ff !important;
+  border-radius: 999px !important;
+  font-size: 19px !important;
+  font-weight: 750 !important;
+  background: linear-gradient(115deg, #9b8bff 0%, #7468f5 22%, #5146d8 72%, #4338b8 100%) !important;
+  box-shadow: 0 14px 25px #5146d84d, inset 2px 2px 5px #ffffff82, inset -3px -3px 7px #4338b8b0 !important;
+}
+.neo-login .login-input-wrap .form-control {
+  color: var(--neo-ink) !important;
+  background: var(--neo-surface) !important;
+  border: 1px solid var(--neo-highlight) !important;
+  border-radius: 19px !important;
+}
+.neo-login .login-input-wrap .form-control:focus {
+  border-color: #7468f5 !important;
+  box-shadow: 0 0 0 3px #7468f526, inset 3px 3px 7px var(--neo-shadow), inset -3px -3px 7px var(--neo-highlight) !important;
+}
+.neo-login .login-field label { color: var(--neo-muted) !important; }
+.neo-login .login-otp {
+  color: var(--neo-muted) !important;
+  background: transparent !important;
+  border: 1px solid var(--neo-line) !important;
+  border-radius: 14px !important;
+  font-size: 12px !important;
+}
+.neo-login.auth-container { display: grid; padding: 82px 24px 35px; align-items: center; justify-content: normal; }
+@media (max-width: 480px) { .neo-login.auth-container { padding: 86px 26px 30px; } }

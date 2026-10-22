@@ -1,0 +1,198 @@
+/* Account disclosure shares the header's outside-click and Escape handling. */
+.ss-public-actions .ss-header-profile {
+    position: relative;
+}
+
+@media (max-width: 760px) {
+    .ss-public-account > span,
+    .ss-public-account > .bi-chevron-down {
+        display: none;
+    }
+}
+
+html body .ss-header-profile-dropdown {
+    width: 300px;
+    max-width: calc(100vw - 32px);
+    padding: 12px;
+    gap: 4px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--ss-surface) 94%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 48px rgb(0 0 0 / 18%);
+}
+
+html body .ss-header-profile-dropdown > a,
+html body .ss-header-profile-dropdown form button {
+    min-height: 52px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.ss-header-profile-dropdown .ss-account-caret {
+    margin-left: auto;
+    color: var(--ss-text-muted);
+    font-size: .8rem;
+}
+
+html body .ss-account-signin {
+    padding: 8px 4px 18px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--ss-border);
+}
+
+html body .ss-account-signin a {
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 999px;
+    background: var(--ss-text);
+    color: var(--ss-surface);
+    font-weight: 650;
+}
+
+html body .ss-account-signin a:hover {
+    background: var(--ss-text);
+    color: var(--ss-surface);
+    text-decoration: underline;
+}
+
+html body .ss-header-profile-dropdown .ss-header-menu-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--ss-border);
+    overflow-wrap: anywhere;
+}
+
+html body .ss-header-profile-dropdown :is(a, button):focus-visible {
+    outline: 2px solid var(--ss-primary);
+    outline-offset: 2px;
+}
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button {
+    color: var(--ss-danger);
+}
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button:hover {
+    color: var(--ss-danger);
+    background: color-mix(in srgb, var(--ss-danger) 10%, transparent);
+}
+
+html body .ss-header-profile-dropdown form[action="/Account/Logout"] button:focus-visible {
+    outline-color: var(--ss-danger);
+}
+
+/* Avatar disclosure, matching the compact glass account card. */
+html body .page .ss-header-user .ss-header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+}
+html body .page .ss-header-user .ss-header-avatar img { width: 100%; height: 100%; }
+html body .page .ss-header-profile-dropdown {
+    width: 232px;
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+    padding: 14px 16px 10px;
+    gap: 0;
+    border: 1px solid rgb(207 217 242 / 85%);
+    border-radius: 18px;
+    background: #f7f9ff;
+    box-shadow: 0 14px 38px rgb(49 65 116 / 16%), inset 0 1px 0 rgb(255 255 255 / 90%);
+    color: var(--ss-text);
+}
+html body .page .ss-header-profile-dropdown .ss-header-menu-identity {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 2px 18px;
+    margin: 0 0 6px;
+    border-bottom: 1px solid var(--ss-border);
+}
+html body .page .ss-account-menu-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    padding: 5px;
+    border-radius: 18px;
+    background: rgb(115 123 222 / 11%);
+}
+html body .page .ss-account-menu-avatar img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 13px;
+}
+html body .page .ss-account-initial {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(145deg, #747cce, #545db4);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    box-shadow: inset 0 1px 2px rgb(255 255 255 / 28%);
+}
+html body .page .ss-account-initial[hidden] { display: none; }
+html body .page .ss-account-menu-copy { min-width: 0; }
+html body .page .ss-account-menu-copy strong {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+html body .page .ss-account-menu-copy small {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ss-text-muted);
+}
+html body .page .ss-header-profile-dropdown > a,
+html body .page .ss-header-profile-dropdown form button {
+    min-height: 46px;
+    padding: 10px 2px;
+    gap: 16px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+html body .page .ss-header-profile-dropdown :is(a, button) > i:first-child {
+    flex: 0 0 24px;
+    font-size: 22px;
+    text-align: center;
+}
+html body .page .ss-header-profile-dropdown form {
+    margin: 6px 0 0;
+    padding: 6px 0 0;
+}
+html body .page .ss-header-profile-dropdown form[action='/Account/Logout'] button { color: #ef5149; }
+html body .page .ss-header-profile[open] > .ss-header-user {
+    background: rgb(115 123 222 / 12%);
+    box-shadow: 0 0 0 4px rgb(115 123 222 / 6%);
+}
+html[data-theme='dark'] body .page .ss-header-profile-dropdown {
+    background: #19233b;
+    border-color: rgb(175 192 230 / 22%);
+    box-shadow: 0 14px 38px rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 255 255 / 9%);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html body .page .ss-header-profile-dropdown {
+        background: linear-gradient(140deg, rgb(255 255 255 / 94%), rgb(242 246 255 / 88%));
+        -webkit-backdrop-filter: blur(24px) saturate(160%);
+        backdrop-filter: blur(24px) saturate(160%);
+    }
+    html[data-theme='dark'] body .page .ss-header-profile-dropdown { background: rgb(25 35 59 / 92%); }
+}
+@media (prefers-reduced-transparency: reduce) {
+    html body .page .ss-header-profile-dropdown { background: #f7f9ff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    html[data-theme='dark'] body .page .ss-header-profile-dropdown { background: #19233b; }
+}

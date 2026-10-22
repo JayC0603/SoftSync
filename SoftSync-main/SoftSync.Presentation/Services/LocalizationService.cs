@@ -14,7 +14,12 @@ public enum AppLanguage
 /// </summary>
 public class LocalizationService
 {
-    public AppLanguage Current { get; private set; } = AppLanguage.En;
+    public LocalizationService(AppLanguage initialLanguage = AppLanguage.Vi)
+    {
+        Current = initialLanguage;
+    }
+
+    public AppLanguage Current { get; private set; }
 
     /// <summary>Raised whenever the language changes.</summary>
     public event Action? OnChanged;
@@ -25,6 +30,7 @@ public class LocalizationService
 
     /// <summary>Convenience method identical to the indexer.</summary>
     public string T(string key) => Translations.Get(key, Current);
+    public string Ui(string? text) => UiTranslations.Get(text, Current);
 
     public void SetLanguage(AppLanguage language)
     {
@@ -37,7 +43,7 @@ public class LocalizationService
 
     /// <summary>Parse a stored culture string (e.g. from localStorage) into a language.</summary>
     public static AppLanguage Parse(string? value) =>
-        string.Equals(value, "vi", StringComparison.OrdinalIgnoreCase) ? AppLanguage.Vi : AppLanguage.En;
+        string.Equals(value, "en", StringComparison.OrdinalIgnoreCase) ? AppLanguage.En : AppLanguage.Vi;
 
     /// <summary>The short code persisted to localStorage.</summary>
     public string Code => Current == AppLanguage.Vi ? "vi" : "en";

@@ -136,6 +136,56 @@ public class RoadmapRepository : Repository<RoadmapItem>, IRoadmapRepository
     }
 }
 
+public interface IRoleplayRepository
+{
+    Task<RoleplaySession?> GetOwnedAsync(int sessionId, int userId);
+    Task<IReadOnlyList<RoleplaySession>> GetHistoryAsync(int userId, int roadmapItemId);
+    Task AddSessionAsync(RoleplaySession session);
+    Task AddTurnAsync(RoleplayTurn turn);
+    Task<bool> SaveChangesAsync();
+}
+
+public class RoleplayRepository(Data.SoftSyncDbContext context) : IRoleplayRepository
+{
+    public Task<RoleplaySession?> GetOwnedAsync(int sessionId, int userId) => context.RoleplaySessions
+        .Include(session => session.Turns)
+        .FirstOrDefaultAsync(session => session.Id == sessionId && session.UserId == userId);
+
+    public async Task<IReadOnlyList<RoleplaySession>> GetHistoryAsync(int userId, int roadmapItemId) => await context.RoleplaySessions
+        .Where(session => session.UserId == userId && session.RoadmapItemId == roadmapItemId)
+        .Include(session => session.Turns)
+        .OrderByDescending(session => session.StartedAtUtc)
+        .ToListAsync();
+
+    public Task AddSessionAsync(RoleplaySession session) { context.RoleplaySessions.Add(session); return Task.CompletedTask; }
+    public Task AddTurnAsync(RoleplayTurn turn) { context.RoleplayTurns.Add(turn); return Task.CompletedTask; }
+    public async Task<bool> SaveChangesAsync() => await context.SaveChangesAsync() > 0;
+}
+
+public interface ICourseRepository
+{
+    IQueryable<Course> Courses { get; }
+    IQueryable<CourseLesson> Lessons { get; }
+    IQueryable<CourseEnrollment> Enrollments { get; }
+    IQueryable<SkillChallenge> Quizzes { get; }
+    IQueryable<QuizAttempt> QuizAttempts { get; }
+    void Add<T>(T entity) where T : class;
+    void RemoveRange<T>(IEnumerable<T> entities) where T : class;
+    Task<bool> SaveChangesAsync();
+}
+
+public class CourseRepository(Data.SoftSyncDbContext context) : ICourseRepository
+{
+    public IQueryable<Course> Courses => context.Courses;
+    public IQueryable<CourseLesson> Lessons => context.CourseLessons;
+    public IQueryable<CourseEnrollment> Enrollments => context.CourseEnrollments;
+    public IQueryable<SkillChallenge> Quizzes => context.SkillChallenges;
+    public IQueryable<QuizAttempt> QuizAttempts => context.QuizAttempts;
+    public void Add<T>(T entity) where T : class => context.Add(entity);
+    public void RemoveRange<T>(IEnumerable<T> entities) where T : class => context.RemoveRange(entities);
+    public async Task<bool> SaveChangesAsync() => await context.SaveChangesAsync() > 0;
+}
+
 public interface ICaseStudyRepository : IRepository<CaseStudy>
 {
     Task<IEnumerable<CaseStudy>> GetBySkillIdAsync(int skillId);
@@ -172,6 +222,7 @@ public class ProgressRepository : Repository<ProgressLog>, IProgressRepository
 public interface IChatRepository : IRepository<ChatMessage>
 {
     Task<IEnumerable<ChatMessage>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<ChatMessage>> GetBySessionAsync(int userId, int sessionId);
 }
 
 public class ChatRepository : Repository<ChatMessage>, IChatRepository
@@ -179,9 +230,37 @@ public class ChatRepository : Repository<ChatMessage>, IChatRepository
     public ChatRepository(Data.SoftSyncDbContext context) : base(context) { }
     public async Task<IEnumerable<ChatMessage>> GetByUserIdAsync(int userId)
     {
-        return await _dbSet.Where(c => c.UserId == userId).OrderBy(c => c.CreatedAt).ToListAsync();
+        var recent = await _dbSet.AsNoTracking().Where(c => c.UserId == userId)
+            .OrderByDescending(c => c.CreatedAt).Take(100).ToListAsync();
+        return recent.OrderBy(c => c.CreatedAt).ThenBy(c => c.Id);
     }
+
+    public async Task<IEnumerable<ChatMessage>> GetBySessionAsync(int userId, int sessionId) =>
+        await _dbSet.AsNoTracking().Where(c => c.UserId == userId && c.ChatSessionId == sessionId)
+            .OrderBy(c => c.CreatedAt).ThenBy(c => c.Id).Take(100).ToListAsync();
+
+}
+
+public interface IChatSessionRepository : IRepository<ChatSession>
+{
+    Task<IEnumerable<ChatSession>> GetByUserIdAsync(int userId);
+    Task<ChatSession?> GetForUserAsync(int sessionId, int userId);
+}
+
+public class ChatSessionRepository : Repository<ChatSession>, IChatSessionRepository
+{
+    public ChatSessionRepository(Data.SoftSyncDbContext context) : base(context) { }
+    public async Task<IEnumerable<ChatSession>> GetByUserIdAsync(int userId) =>
+        await _dbSet.AsNoTracking().Where(x => x.UserId == userId).OrderByDescending(x => x.UpdatedAt).Take(30).ToListAsync();
+    public Task<ChatSession?> GetForUserAsync(int sessionId, int userId) =>
+        _dbSet.FirstOrDefaultAsync(x => x.Id == sessionId && x.UserId == userId);
 }
 
 public interface IMentorRepository : IRepository<Mentor> { }
 public class MentorRepository : Repository<Mentor>, IMentorRepository { public MentorRepository(Data.SoftSyncDbContext context) : base(context) { } }
+
+public interface IMentorSupportRequestRepository : IRepository<MentorSupportRequest> { }
+public class MentorSupportRequestRepository : Repository<MentorSupportRequest>, IMentorSupportRequestRepository
+{
+    public MentorSupportRequestRepository(Data.SoftSyncDbContext context) : base(context) { }
+}

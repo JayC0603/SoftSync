@@ -6,7 +6,7 @@ namespace SoftSync.Presentation.Services;
 
 public interface IGameBankService
 {
-    Task<Game1SessionDto?> CreateSessionAsync(int skillId, int questionCount = 5);
+    Task<Game1SessionDto?> CreateSessionAsync(int skillId, int questionCount = 5, IReadOnlySet<int>? excludedQuestionNumbers = null);
 }
 
 public sealed class GameBankService : IGameBankService
@@ -29,13 +29,19 @@ public sealed class GameBankService : IGameBankService
         _logger = logger;
     }
 
-    public async Task<Game1SessionDto?> CreateSessionAsync(int skillId, int questionCount = 5)
+    public async Task<Game1SessionDto?> CreateSessionAsync(int skillId, int questionCount = 5, IReadOnlySet<int>? excludedQuestionNumbers = null)
     {
         var bank = await GetBankAsync(skillId);
         if (bank.Count == 0)
             return null;
 
-        var selected = bank
+        var available = excludedQuestionNumbers is null
+            ? bank
+            : bank.Where(question => !excludedQuestionNumbers.Contains(question.Number)).ToList();
+        if (available.Count < Math.Min(questionCount, bank.Count))
+            available = bank;
+
+        var selected = available
             .OrderBy(_ => Random.Shared.Next())
             .Take(Math.Min(questionCount, bank.Count))
             .Select(question => question.WithShuffledOptions())

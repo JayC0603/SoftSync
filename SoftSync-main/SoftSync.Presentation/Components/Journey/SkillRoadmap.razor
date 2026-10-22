@@ -1,0 +1,50 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+<section class="journey-roadmap journey-card" style="@Theme.Css" aria-labelledby="journey-map-title">
+    <header><span class="journey-map-kicker">@(Vietnamese ? "HÀNH TRÌNH CỦA BẠN" : "YOUR JOURNEY")</span><h2 id="journey-map-title">@(Vietnamese ? "Bản đồ kỹ năng" : "Skill map") @Category</h2><p>@(Vietnamese ? "Từng bước tiến gần hơn đến phiên bản tốt nhất của bạn." : "One step closer to your best self.")</p></header>
+    <div class="journey-map" style="@($"aspect-ratio:420 / {MapPoint.F(RoadmapGeometry.Height(Checkpoints.Count))};--journey-map-height:{MapPoint.F(RoadmapGeometry.Height(Checkpoints.Count) * .9)}px")">
+        <RoadmapScene Checkpoints="Checkpoints" ThemeKey="Theme.Key" />
+        @for (var i = 0; i < Checkpoints.Count; i++)
+        {
+            var checkpoint = Checkpoints[i];
+            var point = RoadmapGeometry.Point(i, Checkpoints.Count);
+            var state = checkpoint.State.ToString().ToLowerInvariant();
+            <button type="button" @key="checkpoint" class="journey-checkpoint is-@state @(checkpoint.Boss ? "is-boss" : null) @(SelectedItemId == checkpoint.ItemId && !checkpoint.Boss ? "is-selected" : null)" style="@point.Css" aria-current="@(checkpoint.State == JourneyState.Current ? "step" : null)" aria-disabled="@(checkpoint.State == JourneyState.Locked ? "true" : null)" aria-label="@($"{checkpoint.Title}. {StateLabel(checkpoint)}")" @onclick="() => Activate(checkpoint)">
+                <span class="journey-checkpoint-marker" aria-hidden="true">@if (checkpoint.State == JourneyState.Completed) { <i class="bi bi-check-lg"></i> } else if (checkpoint.Boss) { <i class="bi bi-trophy-fill"></i> } else { @checkpoint.Ordinal }</span>
+                <span class="journey-checkpoint-label"><span class="journey-checkpoint-motif" aria-hidden="true"><i class="bi @(checkpoint.Boss ? "bi-stars" : Theme.Icon)"></i></span><span><strong>@if (checkpoint.Boss) { <em>BOSS</em> } @checkpoint.Title</strong><small>@StateLabel(checkpoint)</small></span>@if (checkpoint.State == JourneyState.Locked) { <i class="bi bi-lock-fill" aria-hidden="true"></i> }</span>
+            </button>
+        }
+    </div>
+    <div class="journey-map-feedback" role="status" aria-live="polite">@feedback</div>
+    <footer class="journey-map-legend"><span><i class="is-completed"></i>@(Vietnamese ? "Hoàn thành" : "Completed")</span><span><i class="is-current"></i>@(Vietnamese ? "Đang học" : "Current")</span><span><i class="is-locked"></i>@(Vietnamese ? "Chưa mở" : "Locked")</span></footer>
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
+    [Parameter] public SkillTheme Theme { get; set; } = SkillTheme.For("communication");
+    [Parameter] public string Category { get; set; } = "";
+    [Parameter] public int SelectedItemId { get; set; }
+    [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
+    private string feedback = "";
+    protected override void OnParametersSet() => feedback = "";
+    private string StateLabel(JourneyCheckpoint checkpoint) => checkpoint.State switch
+    {
+        JourneyState.Completed => Vietnamese ? "Đã hoàn thành · Xem lại" : "Completed · Review",
+        JourneyState.Current => Vietnamese ? "Đang học" : "Learning now",
+        JourneyState.Available => Vietnamese ? "Có thể học" : "Available",
+        _ => Vietnamese ? "Chưa mở khóa" : "Locked"
+    };
+    private async Task Activate(JourneyCheckpoint checkpoint)
+    {
+        if (checkpoint.State == JourneyState.Locked)
+        {
+            feedback = checkpoint.Boss
+                ? Vietnamese ? "Hoàn thành các hoạt động trước trong bài cuối để mở phần phản tư và AI feedback." : "Complete the preceding activities in the final lesson to unlock reflection and AI feedback."
+                : Vietnamese ? "Hoàn thành cấp độ hiện tại để mở khóa cấp độ này." : "Complete your current level to unlock this level.";
+            return;
+        }
+        feedback = "";
+        await OnSelect.InvokeAsync(checkpoint);
+    }
+}

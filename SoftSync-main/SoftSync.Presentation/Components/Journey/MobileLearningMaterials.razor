@@ -1,0 +1,31 @@
+@namespace SoftSync.Presentation.Components.Journey
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+
+<div class="lm-materials">
+    @foreach (var material in Materials)
+    {
+        var available = !Locked && JourneyProgress.CanOpen(Item, material.Step);
+        <button class="lm-material" disabled="@(!available)" @onclick="() => OnOpen.InvokeAsync(material.Step)">
+            <img src="@MaterialImage(material.Step)" alt="" loading="lazy" />
+            <span><strong>@(Vietnamese ? material.Vi : material.En)</strong><small>@(Vietnamese ? material.TypeVi : material.TypeEn)@(!available ? Vietnamese ? " · Chưa mở khóa" : " · Locked" : "")</small></span>
+            <span class="lm-arrow" aria-hidden="true">›</span>
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public RoadmapItemDto Item { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<RoadmapItemDto> AllItems { get; set; } = [];
+    [Parameter] public bool Locked { get; set; }
+    [Parameter] public bool Vietnamese { get; set; } = true;
+    [Parameter] public EventCallback<int> OnOpen { get; set; }
+    private IEnumerable<RoadmapActivityDefinition> Materials => RoadmapLearningContent.ActivitiesFor(Item, AllItems)
+        .Where(x => x.Step is 1 or 2 or 3).OrderBy(x => x.Step == 1 ? 4 : x.Step);
+    private static string MaterialImage(int step) => step switch
+    {
+        2 => "/images/home-v3/study-planner.webp",
+        3 => "/images/home-v3/quick-resources.webp",
+        _ => "/images/learn-v3/study-planner.png"
+    };
+}

@@ -1,0 +1,120 @@
+/* One viewport anchor for every route. Page styles must not resize the dock. */
+html body .page {
+  --ss-mobile-dock-height:calc(72px + env(safe-area-inset-bottom,0px));
+  --ss-mobile-dock-bottom:8px;
+}
+html body .page .ss-mobile-bottom-nav {
+  /* Keep the viewport anchor even when a route adds its own shell styles. */
+  position:fixed!important;
+  inset:auto 12px var(--ss-mobile-dock-bottom)!important;
+  box-sizing:border-box;
+  width:auto!important;
+  max-width:none;
+  height:var(--ss-mobile-dock-height)!important;
+  min-height:var(--ss-mobile-dock-height)!important;
+  max-height:var(--ss-mobile-dock-height)!important;
+  margin:0;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:2px!important;
+  z-index:1000;
+  isolation:isolate;
+  overflow:visible;
+  border:1px solid rgb(255 255 255 / 80%)!important;
+  border-radius:22px!important;
+  background:transparent!important;
+  box-shadow:0 8px 28px rgb(35 64 110 / 12%),inset 0 1px 0 rgb(255 255 255 / 65%)!important;
+  transform:none!important;
+  translate:none!important;
+  scale:none!important;
+  animation:none!important;
+  transition:none!important;
+  /* Blur only the background layer, so the More menu stays viewport-fixed. */
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+html body .page .ss-mobile-bottom-nav::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:var(--ss-surface,#fff);
+}
+html body .page .ss-mobile-bottom-link {
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:54px;
+  min-height:0;
+  min-width:0;
+  padding:5px 1px;
+  gap:4px;
+  border-radius:14px;
+  color:var(--ss-text-muted,#64748b);
+  font-size:11px;
+  font-weight:650;
+  line-height:1.2;
+  text-decoration:none;
+  transition:color 160ms ease,background-color 160ms ease;
+}
+html body .page .ss-mobile-bottom-link i {
+  display:grid;
+  place-items:center;
+  flex:0 0 24px;
+  width:24px;
+  height:24px;
+  font-size:22px;
+  line-height:1;
+}
+html body .page .ss-mobile-bottom-link span {
+  display:block;
+  max-width:100%;
+  font-size:11px;
+  line-height:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+html body .page .ss-mobile-bottom-link::after { display:none; }
+html body .page .ss-mobile-bottom-link.active,
+html body .page .ss-mobile-more[open]>.ss-mobile-bottom-link {
+  color:#0875ff;
+  background:rgb(8 117 255 / 8%);
+}
+html body .page .ss-mobile-more { height:54px;min-width:0; }
+html body .page .ss-mobile-bottom-nav:has(a[href='/admin/users']) { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+html[data-mobile-view='true'] body .page .ss-mobile-bottom-nav { max-width:456px;margin-inline:auto; }
+html[data-theme='dark'] body .page .ss-mobile-bottom-nav {
+  border-color:rgb(190 210 255 / 18%)!important;
+  box-shadow:0 8px 28px rgb(0 0 0 / 24%),inset 0 1px 0 rgb(255 255 255 / 8%)!important;
+}
+html[data-theme='dark'] body .page .ss-mobile-bottom-nav::before { background:#161f32; }
+html[data-theme='dark'] body .page .ss-mobile-bottom-link.active,
+html[data-theme='dark'] body .page .ss-mobile-more[open]>.ss-mobile-bottom-link { color:#8abaff;background:rgb(138 186 255 / 12%); }
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  html body .page .ss-mobile-bottom-nav::before {
+    background:linear-gradient(135deg,rgb(255 255 255 / 72%),rgb(245 249 255 / 54%));
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    backdrop-filter:blur(22px) saturate(160%);
+  }
+  html[data-theme='dark'] body .page .ss-mobile-bottom-nav::before { background:rgb(22 31 50 / 76%); }
+}
+@media (prefers-reduced-transparency:reduce) {
+  html body .page .ss-mobile-bottom-nav::before {
+    background:var(--ss-surface,#fff);
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+  html[data-theme='dark'] body .page .ss-mobile-bottom-nav::before { background:#161f32; }
+}
+html[data-soft-keyboard] body .page .ss-mobile-bottom-nav { visibility:hidden;pointer-events:none; }
+@media (max-width:900px) {
+  html body .page .ss-mobile-bottom-nav { display:grid!important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html body .page .ss-mobile-bottom-link { transition:none; }
+}

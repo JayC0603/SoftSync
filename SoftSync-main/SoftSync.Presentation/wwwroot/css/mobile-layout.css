@@ -1,0 +1,194 @@
+/* Shared mobile workspace and menus. Dock geometry and glass live in mobile-dock.css. */
+.ss-mobile-brand { display:none; }
+html body .ss-header-language > .ss-header-control.ss-header-language-trigger { width:44px; min-width:44px; min-height:44px; padding:0; gap:0; }
+html body .ss-header-language-trigger .ss-language-flag { display:block; width:28px; height:20px; object-fit:cover; border-radius:4px; }
+html[data-mobile-view='true'] body .ss-mobile-brand { display:flex; align-items:center; gap:8px; min-width:0; flex:1; color:var(--ss-text); text-decoration:none; font-size:18px; font-weight:750; }
+html[data-mobile-view='true'] body .ss-mobile-brand img { width:36px; height:36px; border-radius:10px; flex-shrink:0; }
+html[data-mobile-view='true'] body .ss-header-actions { width:auto; flex:0 1 auto; gap:2px; }
+html[data-mobile-view='true'] body .ss-header-language > summary { min-width:0; padding:4px; font-size:12px; gap:4px; }
+html[data-mobile-view='true'] body .ss-header-actions > .ss-shell-control { width:36px; height:40px; }
+html[data-mobile-view='true'] body .ss-header-fullscreen { display:none; }
+.ss-mobile-more > summary { list-style:none; cursor:pointer; }
+.ss-mobile-more > summary::-webkit-details-marker { display:none; }
+.ss-mobile-more:not([open]) > :not(summary) { display:none; }
+.ss-mobile-more[open] > summary { background:var(--ss-surface-accent); color:var(--ss-primary); }
+html body .ss-mobile-menu-backdrop { position:fixed; inset:0; width:100%; height:100dvh; border:0; padding:0; background:rgb(10 15 35 / 42%); z-index:1001; }
+html body .ss-mobile-menu-panel { position:fixed; top:auto; bottom:calc(88px + env(safe-area-inset-bottom,0px)); left:12px; right:12px; width:auto; min-width:0; max-width:480px; max-height:65dvh; overflow-y:auto; z-index:1002; border-radius:24px; padding:16px; }
+html body .ss-mobile-menu-panel > header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 4px 12px; border-bottom:1px solid var(--ss-border); }
+html body .ss-mobile-menu-panel > header button { width:44px; padding:10px; }
+html body .ss-mobile-menu-panel > a { min-height:52px; }
+html body .ss-mobile-menu-panel > a > i { font-size:22px; color:var(--ss-primary); }
+html[data-mobile-view='true'] body .ss-mobile-menu-panel { left:50%; right:auto; width:min(456px,calc(100vw - 24px)); transform:translateX(-50%); }
+/* The compact desktop preview must also stack the dashboard's actual grids. */
+html[data-mobile-view='true'] body .dashboard-reference .focus-home-grid,
+html[data-mobile-view='true'] body .dashboard-reference .mentor-items.mentor-cards { display:grid; grid-template-columns:minmax(0,1fr) !important; gap:16px; }
+html[data-mobile-view='true'] body .dashboard-reference :is(.focus-week,.focus-coach,.mentor-items.mentor-cards > article) { width:100%; min-width:0; max-width:100%; }
+html[data-mobile-view='true'] body .dashboard-reference .focus-coach { grid-template-columns:72px minmax(0,1fr) !important; padding:18px; }
+html[data-mobile-view='true'] body .dashboard-reference .dashboard-coach-art { width:72px; height:88px; }
+@media (max-width: 900px) {
+  html body .page { display:block; width:100%; min-width:0; }
+  html body .page > .ss-navbar { display:none !important; }
+  html body .page .ss-workspace { width:100%; min-width:0; margin:0 !important; }
+  html body .page .ss-workspace-topbar {
+    position:sticky; top:0; z-index:950; display:flex; flex-wrap:wrap;
+    align-items:center; justify-content:space-between; gap:8px;
+    min-height:64px; padding:10px 16px; background:var(--ss-surface);
+    border-bottom:1px solid var(--ss-border);
+  }
+  html body .ss-workspace-left { display:none; }
+  html body .ss-mobile-brand { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ss-text); font-size:18px; font-weight:750; flex:1; min-width:0; }
+  html body .ss-mobile-brand img { width:36px; height:36px; border-radius:10px; flex-shrink:0; }
+  html body .ss-workspace-kicker { display:none; }
+  html body .ss-workspace-title strong { font-size:14px; }
+  html body .ss-header-actions { flex:0 1 auto; gap:2px; margin-left:auto; }
+  html body .ss-header-language > summary { min-width:0; padding:4px; font-size:12px; gap:4px; }
+  html body .ss-header-actions > .ss-shell-control { width:36px; height:40px; }
+  html body .ss-header-fullscreen, html body .ss-header-mobile { display:none; }
+  html body .ss-header-user { width:40px; height:40px; min-height:40px; padding:3px; }
+  html body .ss-header-user-info, html body .ss-header-user > .ss-header-chevron { display:none; }
+  html body .ss-header-menu-identity { display:block; }
+  html body .ss-header-dropdown { max-width:calc(100vw - 32px); }
+  html body .page .ss-workspace > .ss-main-content.container {
+    width:100%; max-width:100%; min-width:0; padding:20px 16px 24px !important;
+  }
+  html body .page .ss-workspace { padding-bottom:calc(var(--ss-mobile-dock-height) + var(--ss-mobile-dock-bottom) + 6px); }
+  html body .page .ss-main-content h1 { font-size:28px; line-height:1.25; overflow-wrap:anywhere; }
+  html body .page .ss-main-content h2 { font-size:22px; line-height:1.3; }
+  html body .page .dashboard-reference { width:100%; padding:0 !important; }
+  html body .dashboard-reference .focus-home-header { display:block; margin-bottom:20px; }
+  html body .dashboard-reference .focus-home-header > div { width:100%; max-width:none; }
+  html body .dashboard-reference .focus-home-header h1 { font-size:28px; line-height:1.25; }
+  html body .dashboard-reference .focus-home-header p { font-size:15px; line-height:1.6; }
+  html body .dashboard-reference .focus-next { grid-template-columns:minmax(0,1fr); border-radius:20px; }
+  html body .dashboard-reference .focus-next-copy { padding:22px 20px !important; }
+  html body .dashboard-reference .focus-next h2 { font-size:24px; line-height:1.3; }
+  html body .dashboard-reference .focus-next-copy > p { font-size:15px; }
+  html body .dashboard-reference .ss-learning-companion { display:none; }
+  html body .dashboard-reference .focus-next-actions { display:grid; gap:12px; }
+  html body .dashboard-reference .focus-next-actions > * { width:100%; min-height:44px; text-align:center; }
+  html body .dashboard-reference .focus-chapter-progress { grid-template-columns:1fr; gap:10px; margin:0 16px 16px; padding:14px; }
+  html body .dashboard-reference .ss-overview-grid { grid-template-columns:1fr; gap:10px; margin:16px 0; }
+  html body .dashboard-reference .ss-overview-grid article { display:grid; grid-template-columns:48px minmax(0,1fr); grid-template-rows:auto auto; column-gap:14px; row-gap:4px; padding:16px; }
+  html body .dashboard-reference .ss-overview-grid article > i { grid-column:1; grid-row:1 / 3; width:48px; height:48px; align-self:center; }
+  html body .dashboard-reference .ss-overview-grid article > span { grid-column:2; grid-row:1; font-size:14px; }
+  html body .dashboard-reference .ss-overview-grid article > strong { grid-column:2; grid-row:2; font-size:24px; }
+  html body .dashboard-reference .focus-progress-bottom,
+  html body .dashboard-reference .mentor-cards { grid-template-columns:1fr; }
+  html body .dashboard-reference .focus-home-grid,
+  html body .dashboard-reference .mentor-items.mentor-cards { display:grid; grid-template-columns:minmax(0,1fr) !important; gap:16px; }
+  html body .dashboard-reference :is(.focus-week,.focus-coach,.mentor-items.mentor-cards > article) { width:100%; min-width:0; max-width:100%; padding:20px; }
+  html body .dashboard-reference .focus-section-heading { flex-wrap:wrap; align-items:flex-start; gap:10px; }
+  html body .dashboard-reference .focus-section-heading > div { min-width:0; flex:1 1 160px; }
+  html body .dashboard-reference .focus-section-heading > a { flex:0 0 auto; font-size:13px; }
+  html body .dashboard-reference .ss-next-lessons > a { display:flex; align-items:center; min-width:0; gap:10px; padding:12px; }
+  html body .dashboard-reference .ss-next-lessons > a > div { min-width:0; flex:1; }
+  html body .dashboard-reference .ss-next-lessons :is(strong,small) { white-space:normal; overflow-wrap:break-word; word-break:normal; }
+  html body .dashboard-reference .dashboard-lesson-status { display:none; }
+  html body .dashboard-reference .focus-coach { display:grid; grid-template-columns:72px minmax(0,1fr) !important; gap:12px; }
+  html body .dashboard-reference .dashboard-coach-art { width:72px; height:88px; object-fit:contain; }
+  html body .dashboard-reference .dashboard-coach-copy { min-width:0; }
+  html body .dashboard-reference .focus-coach h2 { font-size:20px; }
+  html body .dashboard-reference .focus-coach p { font-size:14px; }
+  html body .dashboard-reference .mentor-items.mentor-cards > article { display:flex; flex-direction:column; align-items:stretch; }
+  html body .dashboard-reference .mentor-info { min-width:0; width:100%; }
+  html body .dashboard-reference .mentor-info :is(h4,strong,p,em) { white-space:normal; word-break:normal; overflow-wrap:break-word; }
+  html body .dashboard-reference .mentor-tags { display:flex; flex-wrap:wrap; gap:8px; }
+  html body .dashboard-reference .ss-workspace-shortcuts a { min-width:0; gap:8px; padding:12px; font-size:13px; white-space:normal; }
+  html body .dashboard-reference .ss-workspace-shortcuts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html body .ss-cv-heading { flex-direction:column; align-items:flex-start; gap:12px; }
+  html body .ss-cv-heading h1 { font-size:28px; }
+  html body .ss-cv-heading p { font-size:14px; line-height:1.6; }
+  html body .ss-cv-frame-container { min-height:480px; border-radius:14px; }
+  html body .ss-cv-frame-container iframe { width:100%; height:max(480px,calc(100dvh - 180px)); }
+  html body .ss-public-header { padding:12px 16px; gap:10px; min-height:64px; }
+  html body .ss-public-brand { gap:8px; min-width:0; }
+  html body .ss-public-brand img { width:32px; height:32px; }
+  html body .ss-public-brand strong { font-size:19px; }
+  html body .ss-public-actions { gap:6px; margin-left:auto; }
+  html body .ss-public-actions .ss-btn-primary { font-size:12px !important; min-height:40px; padding:8px 10px !important; white-space:normal; text-align:center; }
+  html body .ss-public-actions .ss-public-login { display:none; }
+  html body .ss-public-mobile summary { width:40px; height:40px; }
+  html body .ss-landing { padding-inline:16px; }
+  html body .ss-product-hero { grid-template-columns:minmax(0,1fr); gap:24px; padding:28px 0; }
+  html body .ss-product-copy { min-width:0; }
+  html body .ss-product-copy h1 { font-size:32px; line-height:1.2; margin:16px 0; }
+  html body .ss-product-copy h2 { font-size:18px; line-height:1.5; }
+  html body .ss-product-copy > p { font-size:15px; line-height:1.65; }
+  html body .ss-product-copy .ss-eyebrow { font-size:10px; white-space:normal; }
+  html body .ss-hero-actions { display:grid; grid-template-columns:1fr; gap:10px; }
+  html body .ss-hero-actions > a { width:100%; min-width:0; min-height:48px; padding:12px 16px !important; font-size:15px !important; white-space:normal; text-align:center; }
+  html body .ss-product-preview { width:100%; min-width:0; transform:none; }
+  html body .ss-experience-grid, html body .ss-feature-grid { grid-template-columns:1fr; }
+  html body .ss-main-content img, html body .ss-landing img { max-width:100%; }
+  html body .ss-main-content :is(input,select,textarea) { max-width:100%; font-size:16px; }
+  html body .ss-main-content .table-responsive { width:100%; overflow-x:auto; }
+  html body .ss-main-content :is(.lesson-page,.lesson-content,.assistant-chat-card,.ss-card) { min-width:0; }
+  html body .ss-main-content .tw\:lg\:grid-cols-3 { grid-template-columns:minmax(0,1fr); }
+}
+
+/* Mentor cards stay readable in a swipeable row with a visible next card. */
+.ss-mentor-carousel-tools { display:none; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools { display:flex; align-items:center; gap:8px; margin:12px 0; color:var(--ss-text-muted); font-size:13px; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools span { flex:1; }
+html[data-mobile-view='true'] body .ss-mentor-carousel-tools button { width:44px; height:44px; border:1px solid var(--ss-border); border-radius:12px; background:var(--ss-surface); color:var(--ss-primary); }
+html[data-mobile-view='true'] body :is(.dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel,.ss-main-mentor-grid.ss-mentor-carousel) { display:grid; grid-template-columns:none!important; grid-auto-flow:column; grid-auto-columns:min(320px,88%); align-items:stretch; gap:16px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding:0; padding:8px 0 16px; }
+html[data-mobile-view='true'] body .ss-mentor-carousel > article { scroll-snap-align:start; min-width:0; width:100%; }
+@media(max-width:900px) {
+ html body .ss-mentor-carousel-tools { display:flex; align-items:center; gap:8px; margin:12px 0; color:var(--ss-text-muted); font-size:13px; }
+ html body .ss-mentor-carousel-tools span { flex:1; }
+ html body .ss-mentor-carousel-tools button { width:44px; height:44px; border:1px solid var(--ss-border); border-radius:12px; background:var(--ss-surface); color:var(--ss-primary); }
+ html body :is(.dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel,.ss-main-mentor-grid.ss-mentor-carousel) { display:grid; grid-template-columns:none!important; grid-auto-flow:column; grid-auto-columns:min(320px,88%); align-items:stretch; gap:16px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding:0; padding:8px 0 16px; scrollbar-width:thin; scrollbar-color:var(--ss-primary) transparent; }
+ html body .ss-mentor-carousel > article { scroll-snap-align:start; min-width:0; width:100%; }
+ html body .ss-main-mentor-grid.ss-mentor-carousel > article { display:flex; flex-direction:column; padding:20px; }
+ html body .ss-main-mentor-grid.ss-mentor-carousel .ss-main-mentor-portrait { width:100%; max-width:180px; margin:0 auto 16px; }
+ html body .ss-mentor-carousel:focus-visible { outline:3px solid var(--ss-primary); outline-offset:4px; }
+}
+
+/* Compact mobile rhythm: content-sized cards, readable copy, grouped footer. */
+.eco-footer-socials { display:flex; align-items:center; gap:10px; }
+@media(max-width:900px) {
+ html body .dashboard-reference .focus-home-header h1 { font-size:26px; line-height:1.25; letter-spacing:-.03em; }
+ html body .dashboard-reference .focus-home-header p { margin:8px 0 0; font-size:14px; }
+ html body .dashboard-reference .focus-next-copy { padding:20px 18px!important; }
+ html body .dashboard-reference .focus-next h2 { font-size:22px; line-height:1.35; }
+ html body .dashboard-reference .focus-next-copy>small { font-size:14px; }
+ html body .dashboard-reference .focus-next-copy>p { margin-bottom:14px; font-size:14px; line-height:1.6; }
+ html body .dashboard-reference .focus-next-actions { gap:8px; }
+ html body .dashboard-reference .ss-overview-grid { gap:8px; margin:14px 0; }
+ html body .dashboard-reference .ss-overview-grid article { padding:12px 14px; grid-template-columns:40px minmax(0,1fr); gap:2px 12px; }
+ html body .dashboard-reference .ss-overview-grid article>i { width:40px; height:40px; font-size:21px; border-radius:12px; }
+ html body .dashboard-reference .ss-overview-grid article>span { font-size:13px; }
+ html body .dashboard-reference .ss-overview-grid article>strong { font-size:22px; }
+ html body .dashboard-reference .focus-home-grid { gap:12px; }
+ html body .dashboard-reference .focus-week { padding:18px 16px; }
+ html body .dashboard-reference .focus-section-heading h2 { font-size:20px; margin:0; }
+ html body .dashboard-reference .ss-next-lessons strong { font-size:14px; line-height:1.45; }
+ html body .dashboard-reference .ss-next-lessons small { font-size:12px; line-height:1.5; }
+ html body .dashboard-reference .mentor-bar { padding:16px 12px; margin-top:20px; border-radius:20px; }
+ html body .dashboard-reference .mentor-bar>header { margin-bottom:8px; }
+ html body .dashboard-reference .mentor-bar>header h3 { font-size:19px; line-height:1.4; }
+ html body .dashboard-reference .mentor-bar>header p { font-size:13px; line-height:1.6; margin:6px 0 0; }
+ html body .ss-mentor-carousel-tools { margin:8px 0; font-size:12px; }
+ html body .dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel { grid-auto-columns:min(300px,90%); padding-bottom:10px; }
+ html body .dashboard-reference .mentor-items.mentor-cards.ss-mentor-carousel>article { height:auto; min-height:0; padding:18px 16px; border-radius:18px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-photo { width:88px; height:88px; margin:0 auto 12px; flex:0 0 auto; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-photo img { width:88px; height:88px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info { height:auto; min-height:0; flex:0 0 auto; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>em { padding:5px 8px; font-size:11px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info h4 { margin:10px 0 4px; font-size:18px; line-height:1.35; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>strong { min-height:0; font-size:13px; line-height:1.45; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>p { flex:none; margin:10px 0; font-size:14px; line-height:1.5; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-tags { margin:2px 0 12px; gap:6px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-tags span { font-size:11px; padding:5px 7px; }
+ html body .dashboard-reference .ss-mentor-carousel .mentor-info>button { min-height:44px; padding:10px 12px; font-size:14px; }
+ html body .ss-workspace > .eco-footer { padding-bottom:0; }
+ html body .ss-public-site > .eco-footer { padding-bottom:0; }
+ html body .eco-footer-inner { display:flex; flex-direction:column; align-items:stretch; gap:14px; padding:20px 16px; }
+ html body .eco-footer-brand strong { font-size:16px; }
+ html body .eco-footer-brand span { font-size:13px; line-height:1.5; }
+ html body .eco-footer nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; order:initial; }
+ html body .eco-footer nav a { min-height:36px; display:flex; align-items:center; font-size:13px; }
+ html body .eco-footer-socials { display:flex; gap:10px; }
+ html body .eco-footer .eco-footer-socials a { display:grid; place-items:center; width:44px; height:44px; min-height:44px; margin:0; padding:0; line-height:1; border:1px solid var(--ss-border); border-radius:12px; font-size:20px; }
+ html body .page .ss-workspace { padding-bottom:calc(var(--ss-mobile-dock-height) + var(--ss-mobile-dock-bottom) + 6px); }
+}

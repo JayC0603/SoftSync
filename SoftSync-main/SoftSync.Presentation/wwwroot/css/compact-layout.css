@@ -1,0 +1,143 @@
+/* Shared density settings, loaded after the page and mobile themes. */
+html {
+    font-size: 16px;
+    --ss-font-family: 'Be Vietnam Pro', Inter, 'Segoe UI', Arial, sans-serif;
+    --ss-text-small: .75rem;
+    --ss-text-body: .875rem;
+    --ss-text-title: 1.125rem;
+}
+html body { font-family: var(--ss-font-family) !important; font-size: var(--ss-text-body); line-height: 1.6; }
+html body .page { --ss-sidebar-width: 64px; }
+html[data-sidebar="expanded"] body .page { --ss-sidebar-width: 200px; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) { font-family: var(--ss-font-family); font-size: var(--ss-text-body); line-height: 1.6; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h1, h2, h3, h4, p, button, input, select, textarea) { font-family: inherit !important; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(p, li, label, td, th, input, select, textarea, .form-label, .form-control, .form-select, .text-muted) { font-size: var(--ss-text-body) !important; line-height: 1.6; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) button { font-size: var(--ss-text-body); font-weight: 600; line-height: 1.5; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h1, h2) { font-weight: 700 !important; letter-spacing: -.025em; line-height: 1.3; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h3, h4) { font-weight: 600 !important; letter-spacing: -.015em; line-height: 1.4; }
+html body :is(.ss-main-content, .ss-public-content) h1 { font-size: clamp(1.5rem, 2.3vw, 1.75rem) !important; }
+html body :is(.ss-main-content, .ss-public-content) h2 { font-size: 1.375rem !important; }
+html body :is(.ss-main-content, .ss-public-content) h3 { font-size: 1.125rem !important; }
+html body :is(.ss-main-content, .ss-public-content) h4 { font-size: 1rem !important; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(small, .badge, .form-text, .validation-message) { font-size: var(--ss-text-small) !important; line-height: 1.5; }
+html body .ss-main-content :is(.resource-side, .pg-card, .ss-card, .ss-announcement-card) h2 { font-size: var(--ss-text-title) !important; }
+html body .ss-main-content :is(.pg-label, .pg-kpis em, .pg-radar > span, .pg-path footer, .pg-days, .pg-mini > span, .pg-path-list b, .pg-badges b) { font-size: var(--ss-text-small); line-height: 1.5; }
+html body .resource-page :is(.resource-head > div > span, .resource-featured > div > span, .resource-side section > span, .resource-search > span, .resource-list-head > span) { font-size: var(--ss-text-small); }
+html body :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta, .focus-link, .about-button) { font-size: 0.875rem !important; }
+html body .page :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta) { min-height: 38px; }
+
+/* Keep sidebar width and workspace offset in sync, including the dashboard. */
+@media (min-width: 901px) {
+    html body .page > .ss-navbar { width: var(--ss-sidebar-width); padding: 16px 10px !important; gap: 16px; }
+    html body .page .ss-workspace { margin-left: var(--ss-sidebar-width); }
+    html body .page > .ss-navbar .ss-brand { display: flex; flex-direction: row; justify-content: flex-start; padding: 0 8px 14px; gap: 8px; border-bottom: 0; }
+    html body .page > .ss-navbar .ss-brand-logo { width: 32px; height: 32px; }
+    html body .page > .ss-navbar .ss-brand > span { font-size: 1.125rem; }
+    html body .page > .ss-navbar .ss-navpills { display: flex !important; flex-direction: column; align-self: stretch !important; width: 100%; gap: 4px !important; }
+    html body .page > .ss-navbar .ss-navpill { display: flex; align-items: center; justify-content: flex-start; width: 100%; min-height: 40px !important; padding: 8px 10px !important; gap: 10px; border-radius: 10px !important; font-size: 0.875rem !important; box-shadow: none !important; }
+    html body .page > .ss-navbar .ss-navpill.active { background: var(--ss-surface-accent) !important; color: var(--ss-primary) !important; box-shadow: none !important; }
+    html body .page > .ss-navbar .ss-navpill.active i { color: inherit !important; }
+    html body .page > .ss-navbar .ss-navpill > span { font-size: 0.875rem !important; }
+    html body .page > .ss-navbar .ss-navpill > i { font-size: 1.125rem; flex: 0 0 20px; width: 20px; text-align: center; }
+}
+@media (min-width: 901px) {
+    html body .page .ss-sidebar-toggle { display: inline-grid; width: 36px; height: 36px; font-size: 1.375rem; cursor: pointer; }
+    html body .page .ss-sidebar-toggle:focus-visible { outline: 2px solid var(--ss-primary); outline-offset: 3px; }
+    /* The expanded sidebar must reset the legacy icon-only label styles on every page. */
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-brand > span { display: inline; }
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-navpill > span,
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span {
+        display: inline; position: static; visibility: visible; opacity: 1;
+        transform: none; width: auto; min-width: 0; max-width: none;
+        padding: 0; margin: 0; border: 0; background: transparent;
+        box-shadow: none; pointer-events: auto; color: inherit;
+    }
+    html body .page > .ss-navbar .ss-navpill > span::before { display: none; }
+}
+@media (min-width: 901px) {
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar { width: 64px; overflow: visible; }
+    html:not([data-sidebar="expanded"]) body .page .ss-workspace { margin-left: 64px; }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-brand { justify-content: center; padding: 0 0 12px; }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-brand > span { display: none; }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill { position: relative; justify-content: center; width: 44px; min-height: 44px !important; padding: 8px !important; gap: 0; }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill > span,
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span {
+        display: block; position: absolute; left: calc(100% + 12px); top: 50%;
+        transform: translateY(-50%); width: max-content; padding: 8px 12px;
+        border: 1px solid var(--ss-border); border-radius: 8px;
+        background: var(--ss-surface); color: var(--ss-text);
+        box-shadow: var(--ss-shadow-md); white-space: nowrap;
+        pointer-events: none; visibility: hidden; opacity: 0; z-index: 1100;
+    }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span { visibility: visible; opacity: 1; }
+}
+
+html body .page .ss-workspace-topbar { height: 52px; min-height: 52px; max-height: 52px; padding: 0 24px; gap: 8px; }
+html body .ss-header-actions { gap: 8px; }
+html body .ss-header-control { min-height: 36px; padding: 4px 8px; gap: 7px; font-size: 0.8125rem; }
+html body .ss-header-actions > .ss-shell-control { width: 34px; height: 34px; font-size: 1.125rem; }
+html body .ss-header-language > .ss-header-control.ss-header-language-trigger { width: 36px; min-width: 36px; min-height: 36px; }
+html body .ss-language-flag { width: 24px; height: 17px; }
+html body .page .ss-header-avatar { width: 30px; height: 30px; }
+html body .page .ss-header-avatar img { width: 28px; height: 28px; }
+html body .ss-header-user-info strong, html body .ss-workspace-topbar strong { font-size: 0.8125rem; }
+html body .ss-header-user-info small, html body .ss-workspace-kicker { font-size: 0.6875rem; }
+html body .ss-header-dropdown :is(a, button) { font-size: 0.8125rem; }
+html body .ss-notification-trigger { width: 36px; height: 36px; }
+html body .ss-header-profile-dropdown > a, html body .ss-header-profile-dropdown form button { min-height: 44px; padding: 10px 12px; }
+
+/* Scale the dashboard's fixed-pixel illustration, labels and card spacing too. */
+html body .dashboard-reference { padding: 4px 12px 24px; }
+html body .dashboard-reference .focus-home-header { margin-bottom: 16px; }
+html body .dashboard-reference .focus-home-header h1 { font-size: 1.75rem !important; }
+html body .dashboard-reference .focus-next-copy { padding: 20px 24px; }
+html body .dashboard-reference .focus-kicker { font-size: 0.6875rem; }
+html body .dashboard-reference .focus-next-copy > small { font-size: 0.875rem; }
+html body .dashboard-reference .focus-next h2 { font-size: 1.5rem !important; }
+html body .dashboard-reference .ss-btn-primary { min-height: 38px; padding: 9px 18px; }
+html body .dashboard-reference .focus-next-actions { gap: 16px; }
+html body .dashboard-reference .ss-learning-companion img { width: 210px; height: 200px; }
+html body .dashboard-reference .ss-learning-companion p { max-width: 105px; font-size: 0.9375rem !important; }
+html body .dashboard-reference .focus-chapter-progress { margin: 0 20px 12px; padding: 10px 14px; gap: 14px; }
+html body .dashboard-reference .focus-progress { height: 10px; }
+html body .dashboard-reference .ss-overview-grid article { grid-template-columns: 44px 1fr; column-gap: 14px; padding: 14px 18px; }
+html body .dashboard-reference .ss-overview-grid article > i { width: 44px; height: 44px; font-size: 1.4375rem; border-radius: 13px; }
+html body .dashboard-reference .ss-overview-grid article > span { font-size: 0.8125rem; }
+html body .dashboard-reference .ss-overview-grid strong { font-size: 1.5625rem; }
+html body .dashboard-reference .ss-overview-grid small { font-size: 0.8125rem; }
+html body .dashboard-reference .ss-next-lessons strong { font-size: 0.875rem; }
+html body .dashboard-reference .ss-workspace-shortcuts a { font-size: 0.8125rem; padding: 12px 16px; }
+
+/* Public and account pages share the same smaller body type. */
+html body .ss-public-header { min-height: 64px; padding-block: 10px; }
+html body .ss-public-links { font-size: 0.875rem; }
+html body .ss-public-content .about-hero h1 { font-size: clamp(2.125rem, 4.5vw, 3.5rem) !important; }
+html body .ss-public-content .about-hero-copy > p { font-size: 1rem !important; }
+html body .ss-public-content .about-landing h2 { font-size: clamp(1.5rem, 2.5vw, 2rem) !important; }
+html body .ss-public-content .about-landing p { font-size: 0.875rem !important; }
+html body .neo-login :is(p, .form-control, .login-options, .login-register, .register-login, .form-label) { font-size: 0.875rem; }
+html body .eco-footer-inner, html body .eco-footer a, html body .eco-footer-brand span { font-size: 0.8125rem; }
+html body .eco-footer-inner { padding-block: 8px; gap: 16px; }
+html body .eco-footer-brand strong { font-size: 1rem; line-height: 1.25; }
+html body .eco-footer-brand span { margin-top: 2px; line-height: 1.35; }
+
+@media (max-width: 900px) {
+    html body .eco-footer-inner { gap: 8px; }
+    html body .page .ss-sidebar-toggle { display: none; }
+    html body .page .ss-workspace-topbar { height: 56px; min-height: 56px; max-height: none; padding: 6px 12px; }
+    html body .ss-header-actions { gap: 2px; }
+    html body .ss-header-control, html body .ss-notification-trigger { min-height: 44px; }
+    html body .ss-header-actions > .ss-shell-control { height: 44px; }
+    html body .ss-header-language > .ss-header-control.ss-header-language-trigger { min-height: 44px; }
+    html body .ss-header-user { width: 36px; height: 44px; padding: 3px; }
+    html body .ss-mobile-brand { font-size: 1rem; gap: 6px; }
+    html body .ss-mobile-brand img { width: 28px; height: 28px; }
+    html body .ss-notification-dropdown { top: 60px; }
+    html body .dashboard-reference .focus-home-header h1 { font-size: 1.5rem !important; }
+    html body .dashboard-reference .focus-next-copy { padding: 18px; }
+    html body .dashboard-reference .focus-next h2 { font-size: 1.3125rem !important; }
+    html body .page :is(.ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary, .btn, .ss-secondary-cta) { min-height: 44px; }
+    /* Mobile browsers retain their normal input focus behavior. */
+    html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(input, textarea, select, .form-control, .form-select),
+    html body :is(.ss-main-content, .ss-public-content) .form-select { font-size: max(16px, 1rem) !important; }
+}

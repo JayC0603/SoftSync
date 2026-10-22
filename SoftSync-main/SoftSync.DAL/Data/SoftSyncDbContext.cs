@@ -18,16 +18,65 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<AssessmentOption> AssessmentOptions { get; set; }
     public DbSet<AssessmentResult> AssessmentResults { get; set; }
     public DbSet<RoadmapItem> RoadmapItems { get; set; }
+    public DbSet<RoleplaySession> RoleplaySessions { get; set; }
+    public DbSet<RoleplayTurn> RoleplayTurns { get; set; }
     public DbSet<CaseStudy> CaseStudies { get; set; }
     public DbSet<CaseStudyOption> CaseStudyOptions { get; set; }
     public DbSet<ProgressLog> ProgressLogs { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<Mentor> Mentors { get; set; }
+    public DbSet<MentorSupportRequest> MentorSupportRequests { get; set; }
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    public DbSet<Course> Courses { get; set; }
+    public DbSet<CourseLesson> CourseLessons { get; set; }
+    public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+    public DbSet<CourseLessonProgress> CourseLessonProgress { get; set; }
+    public DbSet<SkillChallenge> SkillChallenges { get; set; }
+    public DbSet<ChallengeQuestion> ChallengeQuestions { get; set; }
+    public DbSet<ChallengeOption> ChallengeOptions { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<QuizAttemptAnswer> QuizAttemptAnswers { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<UserNotification> UserNotifications { get; set; }
+
+    public DbSet<CvDocumentRecord> CvDocuments { get; set; }
+    public DbSet<CvReviewRecord> CvReviews { get; set; }
+    public DbSet<AiProviderSetting> AiProviderSettings { get; set; }
+    public DbSet<AiApiCredential> AiApiCredentials { get; set; }
+    public DbSet<AiOperationRecord> AiOperations { get; set; }
+    public DbSet<SystemMetricMinute> SystemMetricMinutes { get; set; }
+    public DbSet<LearningActivitySession> LearningActivitySessions { get; set; }
+    public DbSet<LearningHeartbeat> LearningHeartbeats { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Announcement>().HasIndex(x => new { x.PublishedAtUtc, x.Id });
+        modelBuilder.Entity<Announcement>().HasOne(x => x.Sender).WithMany()
+            .HasForeignKey(x => x.SenderUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<UserNotification>().HasKey(x => new { x.UserId, x.AnnouncementId });
+        modelBuilder.Entity<UserNotification>().HasIndex(x => new { x.UserId, x.ReadAtUtc });
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.Announcement).WithMany(x => x.Recipients)
+            .HasForeignKey(x => x.AnnouncementId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CvDocumentRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvDocumentRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.Document).WithMany()
+            .HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<AiApiCredential>().HasIndex(x => new { x.Priority, x.Enabled });
+        modelBuilder.Entity<AiOperationRecord>().HasIndex(x => new { x.CreatedAtUtc, x.Task, x.Status });
+        modelBuilder.Entity<SystemMetricMinute>().HasKey(x => new { x.MinuteStartUtc, x.InstanceId });
+        modelBuilder.Entity<LearningActivitySession>().HasIndex(x => new { x.UserId, x.StartedAtUtc });
+        modelBuilder.Entity<LearningHeartbeat>().HasIndex(x => new { x.SessionId, x.Sequence }).IsUnique();
 
         // Many-to-Many: User <-> Skill (Selections)
         modelBuilder.Entity<UserSkillSelection>()
@@ -42,6 +91,29 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
             .HasOne(us => us.Skill)
             .WithMany()
             .HasForeignKey(us => us.SkillId);
+
+        modelBuilder.Entity<RoleplaySession>()
+            .HasMany(session => session.Turns)
+            .WithOne(turn => turn.Session)
+            .HasForeignKey(turn => turn.RoleplaySessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RoleplayTurn>()
+            .HasIndex(turn => new { turn.RoleplaySessionId, turn.Sequence })
+            .IsUnique();
+
+        modelBuilder.Entity<CourseLesson>().HasIndex(x => new { x.CourseId, x.Order }).IsUnique();
+        modelBuilder.Entity<Course>().HasOne(x => x.Creator).WithMany().HasForeignKey(x => x.CreatorUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<CourseEnrollment>().HasIndex(x => new { x.CourseId, x.UserId }).IsUnique();
+        modelBuilder.Entity<CourseLessonProgress>().HasIndex(x => new { x.EnrollmentId, x.LessonId }).IsUnique();
+        modelBuilder.Entity<ChallengeQuestion>().HasIndex(x => new { x.QuizId, x.Order }).IsUnique();
+        modelBuilder.Entity<ChallengeOption>().HasIndex(x => new { x.QuestionId, x.Order }).IsUnique();
+        modelBuilder.Entity<QuizAttempt>().HasIndex(x => new { x.UserId, x.QuizId, x.CompletedAtUtc });
+        modelBuilder.Entity<QuizAttempt>().Property(x => x.ScorePercentage).HasPrecision(5, 2);
+        modelBuilder.Entity<QuizAttemptAnswer>().HasIndex(x => new { x.AttemptId, x.QuestionId }).IsUnique();
+        modelBuilder.Entity<QuizAttemptAnswer>().HasOne(x => x.SelectedOption).WithMany().HasForeignKey(x => x.SelectedOptionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.UserId);
+        modelBuilder.Entity<MentorSupportRequest>().HasIndex(x => x.MentorId);
 
         // Seed Data
         SeedData(modelBuilder);
@@ -83,8 +155,9 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
 
         // 5. Mentors
         modelBuilder.Entity<Mentor>().HasData(
-            new Mentor { Id = 1, Name = "Dr. Katherine", Expertise = "Leadership & Soft Skills", ShortBio = "15 years of experience in corporate training.", AvatarUrl = "https://i.pravatar.cc/150?u=katherine" },
-            new Mentor { Id = 2, Name = "John Smith", Expertise = "Problem Solving", ShortBio = "Former Google engineer, expert in algorithms and thinking.", AvatarUrl = "https://i.pravatar.cc/150?u=john" }
+            new Mentor { Id = 1, Name = "Th.S. Nguyễn Hoàng Vân Anh", Expertise = "Tâm lý và phát triển cá nhân", ShortBio = "Cố vấn chuyên môn của SoftSync, đồng hành cùng người học xây dựng sự tự tin, hiểu bản thân và phát triển thói quen học tập bền vững.", AvatarUrl = "/images/mentor-nguyen-hoang-van-anh.png" },
+            new Mentor { Id = 2, Name = "Th.S. Nguyễn Thuỵ Tố Trâm", Expertise = "Kỹ năng mềm và phát triển cộng đồng", ShortBio = "Cố vấn chính của SoftSync, định hướng chuyên môn và hỗ trợ người học ứng dụng kỹ năng giao tiếp, làm việc nhóm vào các tình huống thực tế.", AvatarUrl = "/images/mentor-nguyen-thuy-to-tram.png" },
+            new Mentor { Id = 3, Name = "Th.S. Nguyễn Xuân", Expertise = "Giáo dục và công nghệ", ShortBio = "Cố vấn chuyên môn của SoftSync, phát triển phương pháp học tập thực tiễn và ứng dụng công nghệ vào trải nghiệm học kỹ năng mềm.", AvatarUrl = "/images/mentor-nguyen-xuan.png" }
         );
     }
 }

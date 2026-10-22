@@ -1,0 +1,24 @@
+<section class="ss-ui-state" role="@(IsError ? "alert" : "status")" aria-live="polite" aria-busy="@Loading">
+    @if (Loading)
+    {
+        <div class="ss-skeleton" aria-hidden="true"></div>
+        <div class="ss-skeleton short" aria-hidden="true"></div>
+    }
+    else
+    {
+        <i class="bi @Icon" aria-hidden="true"></i>
+    }
+    <h2>@Title</h2>
+    @if (!string.IsNullOrWhiteSpace(Description)) { <p>@Description</p> }
+    @if (!string.IsNullOrWhiteSpace(ActionHref)) { <a class="ss-btn-primary" href="@ActionHref">@ActionText</a> }
+</section>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Icon { get; set; } = "bi-inbox";
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool IsError { get; set; }
+    [Parameter] public string? ActionHref { get; set; }
+    [Parameter] public string? ActionText { get; set; }
+}

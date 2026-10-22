@@ -24,16 +24,39 @@ RUN dotnet restore SoftSync.Presentation/SoftSync.Presentation.csproj
 
 # Copy the rest of the source and publish.
 COPY . .
+
+# Build the frontend before dotnet publish so the generated Vite/Tailwind
+# assets exist when ASP.NET collects static web assets. Keep this step
+# fail-fast: deploying without app.css leaves the navigation and responsive
+# layout visibly broken.
+RUN cd SoftSync.Presentation \
+    && npm ci \
+    && npm run build \
+    && touch node_modules/.install-stamp
+
 RUN dotnet publish SoftSync.Presentation/SoftSync.Presentation.csproj \
     -c Release -o /app/publish /p:UseAppHost=false
 
 # ---- Runtime stage: ASP.NET runtime only ----
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
+
+# Npgsql may negotiate PostgreSQL GSS/Kerberos support at runtime. The slim
+# ASP.NET image doesn't include the native GSSAPI library, which causes
+# `libgssapi_krb5.so.2: cannot open shared object file` before EF can connect.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/publish ./
 
 # Render (and most PaaS) inject the port to listen on via $PORT. Bind to it,
 # falling back to 8080 for local `docker run`.
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Render's shared Free instances can exhaust the Linux inotify quota. Production
+# config is immutable, so disable JSON config hot reload and avoid inotify-based
+# file watchers instead of crashing while WebApplication.CreateBuilder starts.
+ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
+ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 EXPOSE 8080
 ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet SoftSync.Presentation.dll"]

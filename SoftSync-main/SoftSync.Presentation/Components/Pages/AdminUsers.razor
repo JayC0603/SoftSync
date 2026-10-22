@@ -1,0 +1,104 @@
+@page "/admin/users"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@using SoftSync.Presentation.Services
+@inject IdentityRoleManagementService RoleManagement
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>@Ui("Teacher management") · SoftSync</PageTitle>
+
+<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+    <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="user-management-title" aria-busy="@busy">
+        <header class="tw:mb-6">
+            <span class="badge bg-primary">@Ui("Admin")</span>
+            <h1 id="user-management-title" class="tw:mt-2 tw:text-3xl tw:font-bold">@Ui("Quản lý tài khoản giảng viên")</h1>
+            <p>@Ui("Quản lý quyền giảng dạy. Kiểm tra tài khoản trước khi cấp hoặc thu hồi quyền giảng viên.")</p>
+        </header>
+
+        <div aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <div class="alert @(error ? "alert-danger" : "alert-success")" role="@(error ? "alert" : "status")">@Ui(message)</div>
+            }
+        </div>
+
+        @if (busy && users.Count == 0)
+        {
+            <p role="status">@Ui("Đang tải danh sách người dùng...")</p>
+        }
+        else
+        {
+            <div class="table-responsive ss-glass tw:rounded-2xl tw:p-4">
+                <table class="table table-hover align-middle">
+                    <caption class="visually-hidden">@Ui("Danh sách người dùng và quyền giảng dạy")</caption>
+                    <thead><tr><th scope="col">@Ui("Người dùng")</th><th scope="col">Email</th><th scope="col">@Ui("Roles")</th><th scope="col">@Ui("Thao tác")</th></tr></thead>
+                    <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <th scope="row">@(string.IsNullOrWhiteSpace(user.DisplayName) ? $"{Ui("User")} #{user.Id}" : user.DisplayName)</th>
+                            <td>@user.Email</td>
+                            <td><span class="visually-hidden">@Ui("Roles:") </span>@RoleText(user)</td>
+                            <td>
+                                @if (user.IsAdmin || user.Id == adminUserId)
+                                {
+                                    <span class="text-muted">@Ui("Được bảo vệ")</span>
+                                }
+                                else if (user.IsTeacher)
+                                {
+                                    <button type="button" class="btn btn-outline-danger btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, false)">@Ui("Thu hồi quyền giảng viên")</button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => ChangeTeacher(user.Id, true)">@Ui("Cấp quyền giảng viên")</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</section>
+
+@code {
+    private int adminUserId;
+    private bool busy = true;
+    private bool error;
+    private string message = string.Empty;
+    private IReadOnlyList<ManagedUserRoleDto> users = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await Auth.GetAuthenticationStateAsync();
+        adminUserId = state.User.GetUserId();
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        busy = true;
+        users = await RoleManagement.GetUsersAsync();
+        busy = false;
+    }
+
+    private async Task ChangeTeacher(int userId, bool assign)
+    {
+        if (busy) return;
+        busy = true;
+        var result = assign
+            ? await RoleManagement.AssignTeacherAsync(userId)
+            : await RoleManagement.RemoveTeacherAsync(userId);
+        error = !result.Succeeded;
+        message = result.Succeeded
+            ? assign ? "Đã cấp quyền giảng viên." : "Đã thu hồi quyền giảng viên; tài khoản vẫn giữ vai trò người dùng."
+            : string.Join(" ", result.Errors.Select(x => x.Description));
+        users = await RoleManagement.GetUsersAsync();
+        busy = false;
+    }
+
+    private string RoleText(ManagedUserRoleDto user) =>
+        string.Join(", ", new[] { user.IsUser ? Ui("User") : null, user.IsTeacher ? Ui("Teacher") : null, user.IsAdmin ? Ui("Admin") : null }.Where(x => x is not null));
+}

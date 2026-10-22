@@ -1,6 +1,7 @@
 // Bundle entry — imports the stylesheet so Vite emits dist/main.css,
 // and wires the cursor-reactive liquid-glass highlight.
 import '../Styles/main.css';
+import './mobile-keyboard.js';
 
 // Liquid Glass — cursor-reactive specular highlight.
 // Elements with `.ss-glass-interactive` get their `--mx`/`--my` custom
@@ -55,6 +56,29 @@ window.ssLang = {
     },
     set(code) {
         try { localStorage.setItem('ss-lang', code); } catch { /* ignore */ }
+        try { document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`; }
+        catch { /* ignore */ }
+        try { document.documentElement.lang = code; } catch { /* ignore */ }
+    }
+};
+
+// Keep AI chat usable across refreshes even when the remote database is
+// temporarily unavailable. PostgreSQL remains the primary history store.
+window.ssChatHistory = {
+    key(userId, sessionId) { return `ss-chat-history-${userId}-${sessionId || 'draft'}`; },
+    load(userId, sessionId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId, sessionId));
+            return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+    },
+    save(userId, sessionId, messages) {
+        try { localStorage.setItem(this.key(userId, sessionId), JSON.stringify(messages)); }
+        catch { /* ignore storage quota/privacy-mode failures */ }
+    },
+    scrollTo(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 };
 
@@ -71,6 +95,74 @@ window.ssWelcome = {
     clear() {
         try { document.cookie = 'ss-welcome=; Max-Age=0; path=/'; } catch { /* ignore */ }
     }
+};
+
+// Preserve an unfinished onboarding wizard across refreshes in this tab.
+window.ssWizard = {
+    key(userId) { return `ss-wizard-${userId}`; },
+    get(userId) {
+        try {
+            const raw = sessionStorage.getItem(this.key(userId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, state) {
+        try { sessionStorage.setItem(this.key(userId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId) {
+        try { sessionStorage.removeItem(this.key(userId)); }
+        catch { /* ignore */ }
+    }
+};
+
+// Keep an unfinished entrance assessment stable across refreshes. The draft is
+// scoped to the signed-in user and contains only question/option ids, never
+// question text or scores.
+window.ssAssessment = {
+    key(userId) { return `ss-assessment-${userId}`; },
+    get(userId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, state) {
+        try { localStorage.setItem(this.key(userId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId) {
+        try { localStorage.removeItem(this.key(userId)); }
+        catch { /* ignore */ }
+    }
+};
+
+// Preserve an in-progress roadmap mini quiz across refreshes. Submitted
+// attempts are still persisted by the server; this only keeps the unfinished
+// five-question attempt in the current browser.
+window.ssRoadmapQuiz = {
+    key(userId, itemId) { return `ss-roadmap-quiz-${userId}-${itemId}`; },
+    get(userId, itemId) {
+        try {
+            const raw = localStorage.getItem(this.key(userId, itemId));
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+    set(userId, itemId, state) {
+        try { localStorage.setItem(this.key(userId, itemId), JSON.stringify(state)); }
+        catch { /* ignore */ }
+    },
+    clear(userId, itemId) {
+        try { localStorage.removeItem(this.key(userId, itemId)); }
+        catch { /* ignore */ }
+    }
+};
+
+// Submit a plain HTML form by id (used to POST the logout form after the
+// Separate key space for unfinished conversations; no tokens are stored here.
+window.ssRoadmapRoleplay = {
+    ...window.ssRoadmapQuiz,
+    key(userId, itemId) { return `ss-roadmap-roleplay-${userId}-${itemId}`; }
 };
 
 // Submit a plain HTML form by id (used to POST the logout form after the
@@ -101,7 +193,7 @@ window.ssTheme = {
     apply(pref, reduceMotion) {
         try {
             const el = document.documentElement;
-            const resolved = this.resolve(pref || 'system');
+            const resolved = this.resolve(pref || 'light');
             el.setAttribute('data-theme', resolved);
             if (reduceMotion) el.setAttribute('data-reduce-motion', '1');
             else el.removeAttribute('data-reduce-motion');
@@ -118,9 +210,9 @@ window.ssTheme = {
     },
     // Re-apply from storage; called on startup by the App.razor bootstrap.
     init() {
-        let pref = 'system', rm = false;
+        let pref = 'light', rm = false;
         try {
-            pref = localStorage.getItem('ss-theme') || 'system';
+            pref = localStorage.getItem('ss-theme') || 'light';
             rm = localStorage.getItem('ss-reduce-motion') === '1';
         } catch { /* ignore */ }
         this.apply(pref, rm);
@@ -128,12 +220,73 @@ window.ssTheme = {
     // Seed the client from the server-stored preference (DB) the first time a
     // browser is used — but never override a choice the user already made here.
     syncFromServer(pref, reduceMotion) {
+        let saved = false;
         try {
-            if (localStorage.getItem('ss-theme')) return;
+            saved = !!localStorage.getItem('ss-theme');
         } catch { /* ignore */ }
-        this.set(pref || 'system', !!reduceMotion);
+        if (!saved) this.set(pref || 'light', !!reduceMotion);
+        return this.get();
+    },
+    get() {
+        let preference = document.documentElement.dataset.theme || 'light';
+        let reduceMotion = document.documentElement.dataset.reduceMotion === '1';
+        try {
+            preference = localStorage.getItem('ss-theme') || preference;
+            const storedMotion = localStorage.getItem('ss-reduce-motion');
+            if (storedMotion !== null) reduceMotion = storedMotion === '1';
+        } catch { /* ignore */ }
+        return { preference, reduceMotion };
     }
 };
 
 // Apply saved theme as early as the bundle runs.
 try { window.ssTheme.init(); } catch { /* ignore */ }
+
+// Accessible text sizing. Stored per browser and applied to the root so all
+// rem-based screens (including Roadmap and Settings) update immediately.
+window.ssFontSize = {
+    apply(scale) {
+        const value = scale === 'small' ? '93.75%' : scale === 'large' ? '112.5%' : '100%';
+        document.documentElement.style.fontSize = value;
+        document.documentElement.setAttribute('data-font-size', scale || 'normal');
+    },
+    set(scale) {
+        try { localStorage.setItem('ss-font-size', scale); } catch { /* ignore */ }
+        this.apply(scale);
+    },
+    init() {
+        let scale = 'normal';
+        try { scale = localStorage.getItem('ss-font-size') || 'normal'; } catch { /* ignore */ }
+        this.apply(scale);
+        return scale;
+    }
+};
+try { window.ssFontSize.init(); } catch { /* ignore */ }
+
+// High-contrast mode is browser-local so it is available before sign-in and
+// does not depend on a profile/database round-trip.
+window.ssContrast = {
+    apply(enabled) {
+        const root = document.documentElement;
+        if (enabled) root.setAttribute('data-high-contrast', '1');
+        else root.removeAttribute('data-high-contrast');
+    },
+    set(enabled) {
+        try { localStorage.setItem('ss-high-contrast', enabled ? '1' : '0'); } catch { /* ignore */ }
+        this.apply(!!enabled);
+    },
+    init() {
+        let enabled = false;
+        try { enabled = localStorage.getItem('ss-high-contrast') === '1'; } catch { /* ignore */ }
+        this.apply(enabled);
+        return enabled;
+    }
+};
+try { window.ssContrast.init(); } catch { /* ignore */ }
+
+// Enhanced navigation patches <html> with server-rendered defaults. Restore
+// browser accessibility choices after that patch, just as we do for the theme.
+document.addEventListener('enhancedload', () => {
+    window.ssFontSize.init();
+    window.ssContrast.init();
+});

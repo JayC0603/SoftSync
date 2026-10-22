@@ -22,12 +22,19 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
 
         var group = endpoints.MapGroup("/Account");
 
-        group.MapPost("/PerformExternalLogin", (
+        group.MapPost("/PerformExternalLogin", async (
             HttpContext context,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider,
-            [FromForm] string returnUrl) =>
+            [FromForm] string? returnUrl,
+            [FromForm] string? intent) =>
         {
+            var schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+            if (!schemes.Any(scheme => scheme.Name == provider))
+                return (IResult)TypedResults.BadRequest("External provider is unavailable.");
+
+            // Accept local paths only; OAuth state carries this destination back.
+            returnUrl = SoftSync.BLL.Auth.LocalReturnUrl.Normalize(returnUrl);
             IEnumerable<KeyValuePair<string, StringValues>> query =
             [
                 new("ReturnUrl", returnUrl),
@@ -40,7 +47,10 @@ public static class IdentityComponentsEndpointRouteBuilderExtensions
                 QueryString.Create(query));
 
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return TypedResults.Challenge(properties, [provider]);
+            // Carry the chosen flow in protected OAuth state, not callback query parameters.
+            properties.Items["SoftSync.AuthIntent"] = intent == "register" ? "register" : "login";
+            properties.Items["SoftSync.ReturnUrl"] = returnUrl;
+            return (IResult)TypedResults.Challenge(properties, [provider]);
         });
 
         group.MapPost("/Logout", async (

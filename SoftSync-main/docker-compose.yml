@@ -14,7 +14,7 @@ services:
     volumes:
       - softsync-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U softsync -d softsync"]
+      test: [ "CMD-SHELL", "pg_isready -U softsync -d softsync" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -43,9 +43,20 @@ services:
 
       # Inside the compose network the DB host is the service name "db".
       ConnectionStrings__SoftSyncDb: "Host=db;Port=5432;Database=softsync;Username=softsync;Password=softsync"
+      # Values come from a local .env or the shell; never hard-code credentials here.
+      BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
+      BootstrapAdmin__Password: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
+      # Google OAuth web credentials. Configure the callback in Google Cloud as
+      # http://localhost:8081/signin-google for this local Compose stack.
+      Authentication__Google__ClientId: "${GOOGLE_CLIENT_ID:-}"
+      Authentication__Google__ClientSecret: "${GOOGLE_CLIENT_SECRET:-}"
+      CvIntegration__FrontendUrl: "${CV_FRONTEND_URL:-}"
+      CvIntegration__ApiBaseUrl: "${CV_API_URL:-}"
+      CvIntegration__SharedSecret: "${SOFTSYNC_SHARED_SECRET:-}"
+      CvIntegration__Issuer: "${SOFTSYNC_ISSUER:-softsync}"
 
     ports:
-      - "8080:8080"
+      - "8081:8080"
 
     depends_on:
       db:

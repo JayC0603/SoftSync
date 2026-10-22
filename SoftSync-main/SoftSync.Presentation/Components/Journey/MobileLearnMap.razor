@@ -1,0 +1,82 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+<div class="lv-roadmap">
+    @if (Checkpoints.Count == 0)
+    {
+        <p class="lv-empty">@(Vietnamese ? "Chưa có chặng học trong hành trình này." : "No stages in this journey yet.")</p>
+    }
+    else
+    {
+        <div class="lv-game-map" style="@($"--map-height:{Height}px")" role="group" aria-label="@(Vietnamese ? "Bản đồ hành trình học tập" : "Learning journey map")">
+            <svg class="lv-game-path" viewBox="@($"0 0 360 {Height}")" preserveAspectRatio="none" aria-hidden="true">
+                @for (var i = 0; i < Checkpoints.Count - 1; i++)
+                {
+                    <path d="@Segment(i)" class="lv-road-shadow" />
+                    <path d="@Segment(i)" class="lv-road-surface" />
+                    <path d="@Segment(i)" class="lv-road-dashes" />
+                }
+                @for (var i = 0; i < Checkpoints.Count; i++)
+                {
+                    var point = Point(i);
+                    <ellipse cx="@F(point.X)" cy="@F(point.Y + 18)" rx="24" ry="9" class="lv-map-platform" />
+                }
+            </svg>
+            @for (var i = 0; i < Checkpoints.Count; i++)
+            {
+                var checkpoint = Checkpoints[i];
+                var point = Point(i);
+                var item = Items.FirstOrDefault(x => x.Id == checkpoint.ItemId);
+                <button type="button" @key="checkpoint" class="lv-map-stop is-@checkpoint.State.ToString().ToLowerInvariant() @(checkpoint.Boss ? "is-boss" : null)"
+                        style="@($"left:{F(point.X / 360 * 100)}%;top:{F(point.Y / Height * 100)}%")"
+                        disabled="@(checkpoint.State == JourneyState.Locked)"
+                        aria-current="@(checkpoint.State == JourneyState.Current ? "step" : null)"
+                        aria-label="@($"{(checkpoint.Boss ? "BOSS: " : "")}{checkpoint.Title}. {StateLabel(checkpoint.State)}")"
+                        @onclick="() => OnSelect.InvokeAsync(checkpoint)">
+                    <span class="lv-map-marker" aria-hidden="true">
+                        @if (checkpoint.Boss) { <i class="bi bi-trophy-fill lv-map-trophy"></i> }
+                        @if (checkpoint.State == JourneyState.Completed) { <i class="bi bi-check-lg"></i> } else { @checkpoint.Ordinal }
+                    </span>
+                    <span class="lv-map-label">
+                        @if (!checkpoint.Boss) { <i class="bi bi-clock lv-map-motif" aria-hidden="true"></i> }
+                        <span><strong>@if (checkpoint.Boss) { <em>BOSS:</em><text> </text> }@checkpoint.Title</strong><small>@StateLabel(checkpoint.State)</small>
+                            @if (!checkpoint.Boss && item is not null)
+                            {
+                                <small class="lv-map-progress">@item.CompletedActivityCount/@item.TotalActivityCount @(Vietnamese ? "hoạt động" : "activities") · @item.ProgressPercent%</small>
+                            }
+                        </span>
+                    </span>
+                </button>
+            }
+        </div>
+    }
+    <div class="lv-legend"><span><i></i>@(Vietnamese ? "Đang học" : "Learning")</span><span><i></i>@(Vietnamese ? "Hoàn thành" : "Completed")</span><span><i></i>@(Vietnamese ? "Chưa mở khóa" : "Locked")</span></div>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
+    [Parameter] public IReadOnlyList<SoftSync.Common.Dtos.RoadmapItemDto> Items { get; set; } = [];
+    [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
+    private int Height => Checkpoints.Count > 3 ? Checkpoints.Count * 100 : Checkpoints.Count == 3 ? 260 : 225;
+    private static string F(double value) => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    private (double X, double Y) Point(int index)
+    {
+        var t = Checkpoints.Count <= 1 ? 0 : (double)index / (Checkpoints.Count - 1);
+        // A single real stage stays at the trailhead; no placeholder stages.
+        return (360 * (.14 + .44 * t), Height * (.82 - .57 * t));
+    }
+    private string Segment(int index)
+    {
+        var from = Point(index);
+        var to = Point(index + 1);
+        var middle = (from.Y + to.Y) / 2;
+        return $"M {F(from.X)} {F(from.Y)} C {F(from.X - 40)} {F(middle)}, {F(to.X + 40)} {F(middle)}, {F(to.X)} {F(to.Y)}";
+    }
+    private string StateLabel(JourneyState state) => state switch
+    {
+        JourneyState.Completed => Vietnamese ? "Hoàn thành" : "Completed",
+        JourneyState.Current => Vietnamese ? "Đang học" : "Learning",
+        JourneyState.Available => Vietnamese ? "Có thể học" : "Available",
+        _ => Vietnamese ? "Chưa mở khóa" : "Locked"
+    };
+}

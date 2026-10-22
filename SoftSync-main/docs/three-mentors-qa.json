@@ -1,0 +1,91 @@
+{
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 320,
+      "overflow": false,
+      "track": 274,
+      "card": 274,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "overflow": false,
+      "track": 329,
+      "card": 184.234375,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "overflow": false,
+      "track": 344,
+      "card": 192.625,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "light",
+      "width": 430,
+      "overflow": false,
+      "track": 384,
+      "card": 215.03125,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "overflow": false,
+      "track": 274,
+      "card": 274,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "overflow": false,
+      "track": 329,
+      "card": 184.234375,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "overflow": false,
+      "track": 344,
+      "card": 192.625,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    },
+    {
+      "theme": "dark",
+      "width": 430,
+      "overflow": false,
+      "track": 384,
+      "card": 215.03125,
+      "height": 116,
+      "image": 46,
+      "scrollable": true
+    }
+  ],
+  "checks": [
+    "Exactly three distinct mentor cards and three images; no repeated copies.",
+    "Three-card list advances automatically.",
+    "Autoplay restarts at first card after last card, without adding copies.",
+    "Touch pauses autoplay."
+  ],
+  "errors": []
+}

@@ -1,0 +1,112 @@
+{
+  "layouts": [
+    {
+      "theme": "light",
+      "width": 320,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 444.625,
+      "cardBottom": 467.4375,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 311.234375,
+      "cardBottom": 334.046875,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 311.65625,
+      "cardBottom": 334.46875,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "light",
+      "width": 430,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 303.46875,
+      "cardBottom": 326.28125,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 444.625,
+      "cardBottom": 467.4375,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 311.234375,
+      "cardBottom": 334.046875,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 311.65625,
+      "cardBottom": 334.46875,
+      "fit": "contain",
+      "href": "/assistant"
+    },
+    {
+      "theme": "dark",
+      "width": 430,
+      "overflow": false,
+      "height": 90,
+      "loaded": true,
+      "imageRight": 95,
+      "textLeft": 105,
+      "textBottom": 303.46875,
+      "cardBottom": 326.28125,
+      "fit": "contain",
+      "href": "/assistant"
+    }
+  ],
+  "checks": [
+    "Official mascot asset renders fully; compact banner opens existing assistant route."
+  ],
+  "errors": []
+}

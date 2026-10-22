@@ -5,6 +5,7 @@ using SoftSync.Common.Enums;
 using SoftSync.DAL.Data;
 using SoftSync.DAL.Entities;
 using SoftSync.DAL.Repositories;
+using System.Text.Json;
 
 namespace SoftSync.BLL.Services;
 
@@ -93,14 +94,17 @@ public class UserService : IUserService
 
     public async Task UpdateSettingsAsync(int userId, UserDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.FullName) || dto.FullName.Trim().Length > 100
+            || (dto.DisplayName?.Length ?? 0) > 60 || dto.Age is < 0 or > 120)
+            throw new ArgumentException("Invalid account profile settings.", nameof(dto));
         var user = await _userRepo.GetByIdAsync(userId);
-        if (user == null) return;
+        if (user == null) throw new InvalidOperationException("User account was not found.");
 
         // Account / display
-        if (!string.IsNullOrWhiteSpace(dto.FullName)) user.FullName = dto.FullName;
+        user.FullName = dto.FullName.Trim();
         user.DisplayName = dto.DisplayName?.Trim() ?? string.Empty;
         user.Gender = dto.Gender;
-        if (dto.Age > 0) user.Age = dto.Age;
+        user.Age = dto.Age;
 
         // Learning personalization
         user.Goal = dto.Goal;
@@ -169,6 +173,7 @@ public class AssessmentService : IAssessmentService
             QuestionText = q.QuestionText,
             QuestionTextVi = q.QuestionTextVi,
             SkillId = q.SkillId,
+            Type = q.Type,
             SkillName = q.Skill?.Name ?? string.Empty,
             SkillNameVi = SkillNameVi(q.SkillId),
             Options = q.Options
@@ -192,11 +197,34 @@ public class AssessmentService : IAssessmentService
 
     public async Task SubmitAssessmentAsync(int userId, List<UserAnswerDto> answers)
     {
+        if (userId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(userId));
+        if (answers is null)
+            throw new ArgumentNullException(nameof(answers));
+
+        var expectedQuestions = (await GetAssessmentQuestionsAsync(userId)).ToList();
+        var expectedQuestionIds = expectedQuestions.Select(q => q.Id).ToHashSet();
         // Score for real: load each chosen option (with its ScoreValue and the
         // owning question's SkillId), then average per skill into a 0–100 percentage.
         var optionIds = answers.Select(a => a.OptionId).Where(id => id > 0).Distinct().ToList();
         var chosen = (await _assessmentRepo.GetAnsweredOptionsAsync(optionIds))
             .ToDictionary(o => o.Id);
+
+        var submittedQuestionIds = answers.Select(a => a.QuestionId).ToList();
+        var hasOneAnswerPerQuestion = submittedQuestionIds.Count == submittedQuestionIds.Distinct().Count();
+        var answersMatchQuestions = answers.All(answer =>
+            chosen.TryGetValue(answer.OptionId, out var option)
+            && option.QuestionId == answer.QuestionId);
+        if (!hasOneAnswerPerQuestion
+            || !expectedQuestionIds.SetEquals(submittedQuestionIds)
+            || !answersMatchQuestions)
+        {
+            throw new ArgumentException(
+                "The assessment submission must contain exactly one valid option for every assigned question.",
+                nameof(answers));
+        }
+
+        var hadPreviousResults = (await _assessmentRepo.GetResultsByUserIdAsync(userId)).Any();
 
         var perSkill = new Dictionary<int, (int sum, int count)>();
         foreach (var ans in answers)
@@ -214,8 +242,24 @@ public class AssessmentService : IAssessmentService
         {
             // Store the raw summed score (8 questions × 1–4 = 8–32) and classify
             // it into a band. See SoftSync.Common.AssessmentScoring.
-            var score = agg.sum;
+            var skillAnswers = answers
+                .Where(answer => chosen.TryGetValue(answer.OptionId, out var option) && option.Question?.SkillId == skillId)
+                .ToList();
+            // Option weights are authoritative. AI can enrich the diagnosis but
+            // cannot alter the deterministic score or its business-rule band.
+            var score = Math.Clamp(agg.sum, AssessmentScoring.MinScore, AssessmentScoring.MaxScore);
             var level = AssessmentScoring.BandFor(score);
+            var fallback = BuildDeterministicDiagnosis(score, agg.count);
+            AssessmentDiagnosisDto diagnosis;
+            try
+            {
+                var aiResult = await _aiService.EvaluateAsync(skillAnswers);
+                diagnosis = NormalizeDiagnosis(aiResult.Diagnosis, fallback);
+            }
+            catch
+            {
+                diagnosis = fallback;
+            }
 
             results.Add(new AssessmentResult
             {
@@ -223,6 +267,7 @@ public class AssessmentService : IAssessmentService
                 SkillId = skillId,
                 Score = score,
                 Level = level,
+                DiagnosisJson = JsonSerializer.Serialize(diagnosis),
                 CreatedAt = now
             });
         }
@@ -231,7 +276,7 @@ public class AssessmentService : IAssessmentService
             await _assessmentRepo.SaveResultsAsync(results);
 
         // Award XP for completing an assessment.
-        var user = await _userRepo.GetByIdAsync(userId);
+        var user = hadPreviousResults ? null : await _userRepo.GetByIdAsync(userId);
         if (user != null)
         {
             user.ExperiencePoints += SoftSync.Common.LevelSystem.AssessmentXp;
@@ -239,27 +284,120 @@ public class AssessmentService : IAssessmentService
         }
     }
 
-    public async Task<IEnumerable<AssessmentResultDto>> GetLatestResultsAsync(int userId)
+    public async Task<IEnumerable<AssessmentResultDto>> GetLatestResultsAsync(int authenticatedUserId, int ownerUserId)
     {
-        // Repo returns rows newest-first. Guard the results screen against:
-        //  - duplicate cards per skill (older attempts still in the table), and
-        //  - skills whose quiz was hidden (QuizSeedData.ActiveSkillIds).
-        // Keep only the most recent result per active skill.
-        var results = await _assessmentRepo.GetResultsByUserIdAsync(userId);
+        EnsureOwner(authenticatedUserId, ownerUserId);
+        var results = await _assessmentRepo.GetResultsByUserIdAsync(ownerUserId);
         return results
             .Where(r => QuizSeedData.ActiveSkillIds.Contains(r.SkillId))
             .GroupBy(r => r.SkillId)
-            .Select(g => g.First()) // First == newest (repo orders by CreatedAt desc)
-            .Select(r => new AssessmentResultDto
+            .Select(g => g.First())
+            .Select(ToDto);
+    }
+
+    public async Task<IReadOnlyList<AssessmentAttemptDto>> GetHistoryAsync(int authenticatedUserId, int ownerUserId)
+    {
+        EnsureOwner(authenticatedUserId, ownerUserId);
+        var results = await _assessmentRepo.GetResultsByUserIdAsync(ownerUserId);
+        return results
+            .Where(r => QuizSeedData.ActiveSkillIds.Contains(r.SkillId))
+            .GroupBy(r => r.CreatedAt)
+            .OrderByDescending(group => group.Key)
+            .Select(group => new AssessmentAttemptDto
             {
-                Id = r.Id,
-                UserId = r.UserId,
-                SkillId = r.SkillId,
-                SkillName = r.Skill.Name,
-                Score = r.Score,
-                Level = r.Level,
-                CreatedAt = r.CreatedAt
-            });
+                CompletedAt = group.Key,
+                Results = group.OrderBy(r => r.SkillId).Select(ToDto).ToList()
+            })
+            .ToList();
+    }
+
+    private static AssessmentResultDto ToDto(AssessmentResult result) => new()
+    {
+        Id = result.Id,
+        UserId = result.UserId,
+        SkillId = result.SkillId,
+        SkillName = result.Skill?.Name ?? string.Empty,
+        Score = result.Score,
+        Level = result.Level,
+        CreatedAt = result.CreatedAt,
+        Diagnosis = ReadDiagnosis(result.DiagnosisJson, result.Score)
+    };
+
+    private static void EnsureOwner(int authenticatedUserId, int ownerUserId)
+    {
+        if (authenticatedUserId <= 0 || authenticatedUserId != ownerUserId)
+            throw new UnauthorizedAccessException("Assessment results can only be read by their owner.");
+    }
+
+    private static AssessmentDiagnosisDto ReadDiagnosis(string? json, int score)
+    {
+        try
+        {
+            var stored = JsonSerializer.Deserialize<AssessmentDiagnosisDto>(json ?? "");
+            return NormalizeDiagnosis(stored, BuildDeterministicDiagnosis(score, AssessmentScoring.QuestionsPerSkill));
+        }
+        catch (JsonException)
+        {
+            return BuildDeterministicDiagnosis(score, AssessmentScoring.QuestionsPerSkill);
+        }
+    }
+
+    private static AssessmentDiagnosisDto NormalizeDiagnosis(AssessmentDiagnosisDto? candidate, AssessmentDiagnosisDto fallback) => new()
+    {
+        English = NormalizeText(candidate?.English, fallback.English),
+        Vietnamese = NormalizeText(candidate?.Vietnamese, fallback.Vietnamese)
+    };
+
+    private static AssessmentDiagnosisTextDto NormalizeText(AssessmentDiagnosisTextDto? candidate, AssessmentDiagnosisTextDto fallback) => new()
+    {
+        Strengths = NormalizeList(candidate?.Strengths, fallback.Strengths),
+        Weaknesses = NormalizeList(candidate?.Weaknesses, fallback.Weaknesses),
+        // Evidence shown to the learner is always generated from validated
+        // scoring inputs; model-authored evidence is not trusted as fact.
+        Evidence = fallback.Evidence,
+        Feedback = Clean(candidate?.Feedback, fallback.Feedback),
+        RecommendedActions = NormalizeList(candidate?.RecommendedActions, fallback.RecommendedActions)
+    };
+
+    private static List<string> NormalizeList(IEnumerable<string>? values, List<string> fallback)
+    {
+        var normalized = values?.Select(value => Clean(value, string.Empty))
+            .Where(value => value.Length > 0)
+            .Distinct(StringComparer.Ordinal)
+            .Take(3)
+            .ToList() ?? [];
+        return normalized.Count > 0 ? normalized : fallback;
+    }
+
+    private static string Clean(string? value, string fallback)
+    {
+        var normalized = value?.Trim() ?? string.Empty;
+        if (normalized.Length == 0) return fallback;
+        return normalized.Length <= 500 ? normalized : normalized[..500];
+    }
+
+    private static AssessmentDiagnosisDto BuildDeterministicDiagnosis(int score, int answerCount)
+    {
+        var high = score >= 21;
+        return new AssessmentDiagnosisDto
+        {
+            English = new AssessmentDiagnosisTextDto
+            {
+                Strengths = [high ? "Your choices show a consistent foundation in this skill." : "You demonstrated some effective behaviors to build on."],
+                Weaknesses = [high ? "Consistency in more demanding situations remains the next growth area." : "Several responses indicate that effective behaviors are not yet consistent."],
+                Evidence = [$"Based on {answerCount} scored responses and a deterministic total of {score}/{AssessmentScoring.MaxScore}."],
+                Feedback = high ? "Keep applying the effective pattern deliberately in real situations." : "Treat this result as a starting point, not a fixed judgment; practice one observable behavior at a time.",
+                RecommendedActions = [high ? "Choose one challenging scenario this week and reflect on the outcome." : "Practice one specific behavior in a low-risk situation this week.", "Review the lower-weight choices and identify a more proactive alternative."]
+            },
+            Vietnamese = new AssessmentDiagnosisTextDto
+            {
+                Strengths = [high ? "Các lựa chọn cho thấy bạn có nền tảng khá ổn định ở kỹ năng này." : "Bạn đã thể hiện một số hành vi hiệu quả để tiếp tục phát triển."],
+                Weaknesses = [high ? "Duy trì sự nhất quán trong tình huống khó hơn là bước phát triển tiếp theo." : "Một số câu trả lời cho thấy hành vi hiệu quả chưa được áp dụng nhất quán."],
+                Evidence = [$"Dựa trên {answerCount} câu trả lời có trọng số và tổng điểm xác định {score}/{AssessmentScoring.MaxScore}."],
+                Feedback = high ? "Hãy chủ động áp dụng khuôn mẫu hiệu quả này vào tình huống thực tế." : "Hãy xem kết quả là điểm xuất phát, không phải phán xét cố định; luyện từng hành vi có thể quan sát được.",
+                RecommendedActions = [high ? "Chọn một tình huống khó trong tuần này và tự phản tư về kết quả." : "Luyện một hành vi cụ thể trong tình huống ít rủi ro trong tuần này.", "Xem lại các lựa chọn có trọng số thấp và xác định một cách phản ứng chủ động hơn."]
+            }
+        };
     }
 }
 
@@ -280,62 +418,247 @@ public class RoadmapService : IRoadmapService
         _skillRepo = skillRepo;
     }
 
-    public async Task<RoadmapDto> GetUserRoadmapAsync(int userId)
+    public async Task<RoadmapDto> GetUserRoadmapAsync(int authenticatedUserId, int ownerUserId)
     {
+        if (authenticatedUserId <= 0 || authenticatedUserId != ownerUserId)
+            throw new UnauthorizedAccessException("Roadmaps can only be read by their owner.");
+
+        var userId = ownerUserId;
         var focusSkills = await GetFocusSkillNamesAsync(userId);
-        var expectedItemCount = focusSkills.Count * 3;
+        var learner = await _userRepo.GetByIdAsync(userId);
+        var assessmentResults = (await _assessmentRepo.GetResultsByUserIdAsync(userId))
+            .Where(result => QuizSeedData.ActiveSkillIds.Contains(result.SkillId))
+            .GroupBy(result => result.SkillId)
+            .Select(group => group.First())
+            .ToList();
 
         var items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
-        if (!items.Any() || NeedsRoadmapRefresh(items, expectedItemCount))
+        // A read operation must never destroy a learner's roadmap. The previous
+        // refresh check regenerated plans containing the very migration titles it
+        // considered stale, so IDs and IsCompleted could be lost on every visit.
+        // Plan regeneration should be an explicit, versioned action in the future.
+        if (!items.Any())
         {
-            foreach (var oldItem in items)
-                _roadmapRepo.Delete(oldItem);
-
-            await _roadmapRepo.SaveChangesAsync();
-
             var freshRoadmap = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
             foreach (var item in freshRoadmap.Items)
             {
-                await _roadmapRepo.AddAsync(new RoadmapItem
-                {
-                    UserId = userId,
-                    WeekNumber = item.WeekNumber,
-                    Title = item.Title,
-                    Description = item.Description
-                });
+                await _roadmapRepo.AddAsync(CreateRoadmapItem(userId, item, assessmentResults, learner?.CurrentLevel ?? LearningLevel.Unspecified));
             }
 
             await _roadmapRepo.SaveChangesAsync();
             items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
         }
 
-        return new RoadmapDto
+        // Content Review Mode needs stable, real item IDs for every active lesson
+        // so editors can open its video, script, summary, and quiz. Add only
+        // missing catalog rows; existing completion data is never overwritten.
+        if (RoadmapReviewMode.Enabled)
         {
-            UserId = userId,
-            Items = items.Select(i => new RoadmapItemDto
+            var allActiveSkills = (await _skillRepo.GetAllAsync())
+                .Where(s => QuizSeedData.ActiveSkillIds.Contains(s.Id))
+                .Select(s => s.Name)
+                .ToList();
+            var completeCatalog = await _aiService.GenerateRoadmapAsync(userId, allActiveSkills);
+            var nextWeek = items.Count == 0 ? 1 : items.Max(x => x.WeekNumber) + 1;
+            var addedMissingItem = false;
+
+            foreach (var catalogItem in completeCatalog.Items)
+            {
+                if (items.Any(x => string.Equals(x.Title, catalogItem.Title, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                catalogItem.WeekNumber = nextWeek++;
+                await _roadmapRepo.AddAsync(CreateRoadmapItem(userId, catalogItem, assessmentResults, learner?.CurrentLevel ?? LearningLevel.Unspecified));
+                addedMissingItem = true;
+            }
+
+            if (addedMissingItem)
+            {
+                await _roadmapRepo.SaveChangesAsync();
+                items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
+            }
+        }
+        else
+        {
+            // Catalog rows may remain in storage after content review. In normal
+            // mode only return the lessons selected by the personalization flow.
+            var personalizedCatalog = await _aiService.GenerateRoadmapAsync(userId, focusSkills);
+            var nextWeek = items.Count == 0 ? 1 : items.Max(x => x.WeekNumber) + 1;
+            var added = false;
+            foreach (var lesson in personalizedCatalog.Items)
+            {
+                if (items.Any(x => string.Equals(x.Title, lesson.Title, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+                lesson.WeekNumber = nextWeek++;
+                await _roadmapRepo.AddAsync(CreateRoadmapItem(userId, lesson, assessmentResults, learner?.CurrentLevel ?? LearningLevel.Unspecified));
+                added = true;
+            }
+            if (added)
+            {
+                await _roadmapRepo.SaveChangesAsync();
+                items = (await _roadmapRepo.GetByUserIdAsync(userId)).ToList();
+            }
+            var allowedTitles = personalizedCatalog.Items
+                .Select(x => x.Title)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            items = items.Where(x => allowedTitles.Contains(x.Title)).ToList();
+        }
+
+        // Old review/catalog runs may have inserted the same lesson more than
+        // once. Present one canonical row per lesson so weeks and videos do not
+        // repeat, while preserving the oldest row and its learning progress.
+        items = items
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .GroupBy(x => x.Title.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+
+        // Once the four-week Communication catalog exists, keep older generic
+        // Communication rows in storage for history but do not count or display
+        // them as extra weeks (which previously made Week 1 appear as Week 5).
+        if (items.Any(x => CommunicationCatalogTitles.Contains(x.Title.Trim())))
+        {
+            items = items
+                .Where(x => !IsCommunicationTitle(x.Title) || CommunicationCatalogTitles.Contains(x.Title.Trim()))
+                .ToList();
+        }
+
+        // Match CanAccessRoadmapItemAsync: a recommendation must be an item
+        // that the same service will actually allow the learner to open/save.
+        items = items.OrderBy(x => RoadmapSkillRank(ResolveRoadmapSkillName(x.Title)))
+            .ThenBy(x => x.WeekNumber).ThenBy(x => x.Id).ToList();
+
+        var itemDtos = items.Select((i, index) => new RoadmapItemDto
             {
                 Id = i.Id,
-                WeekNumber = i.WeekNumber,
+                WeekNumber = index + 1,
+                SkillId = i.SkillId > 0 ? i.SkillId : ResolveRoadmapSkillId(i.Title),
                 SkillName = ResolveRoadmapSkillName(i.Title),
                 Title = i.Title,
                 Description = i.Description,
+                Objective = string.IsNullOrWhiteSpace(i.Objective) ? i.Description : i.Objective,
+                ContentOrigin = i.ContentOrigin,
+                SourceTitle = string.IsNullOrWhiteSpace(i.SourceTitle) ? "SoftSync curated curriculum" : i.SourceTitle,
+                SourceOrganization = string.IsNullOrWhiteSpace(i.SourceOrganization) ? "SoftSync" : i.SourceOrganization,
+                SourceReference = i.SourceReference,
+                SourceReviewStatus = string.IsNullOrWhiteSpace(i.SourceReviewStatus) ? "InternalCurated" : i.SourceReviewStatus,
+                PriorityOrder = index + 1,
+                // Existing completed rows predate granular activity tracking;
+                // treat them as fully complete so their green ticks are preserved.
+                IsVideoCompleted = i.IsCompleted || i.VideoCompletedAtUtc.HasValue,
+                IsPracticeCompleted = i.IsCompleted || i.PracticeCompletedAtUtc.HasValue,
+                IsScenarioCompleted = i.IsCompleted || i.ScenarioCompletedAtUtc.HasValue,
+                IsReflectionCompleted = i.IsCompleted || i.ReflectionCompletedAtUtc.HasValue,
+                VideoCompletedAtUtc = i.VideoCompletedAtUtc,
+                ScriptCompletedAtUtc = i.ScriptCompletedAtUtc,
+                SummaryCompletedAtUtc = i.SummaryCompletedAtUtc,
+                PracticeCompletedAtUtc = i.PracticeCompletedAtUtc,
+                ScenarioCompletedAtUtc = i.ScenarioCompletedAtUtc,
+                ReflectionCompletedAtUtc = i.ReflectionCompletedAtUtc,
+                ReflectionText = i.ReflectionText ?? string.Empty,
+                LastLearningStep = i.LastLearningStep,
+                QuizHistory = DeserializeQuizHistory(i.QuizHistoryJson),
+                RoleplayHistory = DeserializeRoleplayHistory(i.RoleplayHistoryJson),
                 IsCompleted = i.IsCompleted
-            }).ToList()
+            }).ToList();
+
+        foreach (var item in itemDtos)
+        {
+            item.CompletedActivityCount = RoadmapProgressCalculator.CompletedCount(item);
+            item.ProgressPercent = RoadmapProgressCalculator.Percent(item.CompletedActivityCount);
+            item.NextActivity = RoadmapProgressCalculator.NextActivity(item);
+            item.CompletionEvidence = CompletionEvidence(item);
+        }
+
+        var nextItem = itemDtos.FirstOrDefault(item => item.NextActivity.HasValue);
+        if (nextItem is not null)
+            nextItem.IsNextRecommended = true;
+        var completedActivities = itemDtos.Sum(item => item.CompletedActivityCount);
+
+        return new RoadmapDto
+        {
+            UserId = userId,
+            Items = itemDtos,
+            ProgressPercent = RoadmapProgressCalculator.Percent(completedActivities, itemDtos.Count * RoadmapProgressCalculator.RequiredActivityCount),
+            NextRecommendedItemId = nextItem?.Id,
+            NextRecommendedActivity = nextItem?.NextActivity,
+            PrioritySkill = nextItem?.SkillName ?? itemDtos.FirstOrDefault()?.SkillName ?? string.Empty
         };
     }
 
-    private static bool NeedsRoadmapRefresh(List<RoadmapItem> items, int expectedItemCount)
+    private static RoadmapItem CreateRoadmapItem(int userId, RoadmapItemDto item, IReadOnlyList<AssessmentResult> assessments, LearningLevel currentLevel)
     {
-        if (expectedItemCount <= 0)
-            return false;
+        var skillId = item.SkillId > 0 ? item.SkillId : ResolveRoadmapSkillId($"{item.SkillName} {item.Title}");
+        var assessment = assessments.FirstOrDefault(result => result.SkillId == skillId);
+        return new RoadmapItem
+        {
+            UserId = userId,
+            WeekNumber = item.WeekNumber,
+            SkillId = skillId,
+            Title = item.Title,
+            Description = item.Description,
+            Objective = BuildObjective(item, assessment, currentLevel),
+            ContentOrigin = RoadmapContentOrigin.SoftSyncCurated,
+            SourceTitle = "SoftSync curated curriculum",
+            SourceOrganization = "SoftSync",
+            SourceReference = skillId > 0 ? $"internal:skill/{skillId}" : "internal:roadmap",
+            SourceReviewStatus = "InternalCurated"
+        };
+    }
 
-        if (items.Count != expectedItemCount)
-            return true;
+    private static string BuildObjective(RoadmapItemDto item, AssessmentResult? assessment, LearningLevel currentLevel)
+    {
+        var prefix = currentLevel switch
+        {
+            LearningLevel.Beginner => "Build a guided foundation: ",
+            LearningLevel.Intermediate => "Apply consistently: ",
+            LearningLevel.Advanced => "Handle a more complex situation: ",
+            _ => string.Empty
+        };
+        if (assessment is not null && !string.IsNullOrWhiteSpace(assessment.DiagnosisJson))
+        {
+            try
+            {
+                var diagnosis = JsonSerializer.Deserialize<AssessmentDiagnosisDto>(assessment.DiagnosisJson);
+                var action = diagnosis?.English.RecommendedActions.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+                if (!string.IsNullOrWhiteSpace(action))
+                    return prefix + action;
+            }
+            catch (JsonException) { }
+        }
 
-        return items.Any(item =>
-            item.Title.Contains("Khám phá bản thân", StringComparison.OrdinalIgnoreCase) ||
-            item.Title.Contains("Tổng kết", StringComparison.OrdinalIgnoreCase) ||
-            item.Title.Contains("đánh giá lại", StringComparison.OrdinalIgnoreCase));
+        return prefix + (string.IsNullOrWhiteSpace(item.Objective) ? item.Description : item.Objective);
+    }
+
+    private static int ResolveRoadmapSkillId(string value)
+    {
+        var name = ResolveRoadmapSkillName(value);
+        return name switch
+        {
+            "Giao tiếp" or "Communication" => 1,
+            "Quản lý thời gian" or "Time Management" => 3,
+            "Tư duy phản biện" or "Critical Thinking" => 4,
+            _ => 0
+        };
+    }
+
+    private static List<string> CompletionEvidence(RoadmapItemDto item)
+    {
+        var evidence = new List<string>();
+        AddEvidence(evidence, item.VideoCompletedAtUtc, "Video lesson completed");
+        AddEvidence(evidence, item.ScriptCompletedAtUtc, "Lesson script reviewed");
+        AddEvidence(evidence, item.SummaryCompletedAtUtc, "Lesson summary reviewed");
+        AddEvidence(evidence, item.PracticeCompletedAtUtc, "Quiz passed");
+        AddEvidence(evidence, item.ScenarioCompletedAtUtc, "Roleplay completed");
+        AddEvidence(evidence, item.ReflectionCompletedAtUtc, "Reflection submitted");
+        return evidence;
+    }
+
+    private static void AddEvidence(List<string> evidence, DateTime? completedAt, string label)
+    {
+        if (completedAt.HasValue)
+            evidence.Add($"{label} at {completedAt.Value:O}");
     }
 
     private static string ResolveRoadmapSkillName(string title)
@@ -348,6 +671,17 @@ public class RoadmapService : IRoadmapService
 
         return string.Empty;
     }
+
+    private static bool IsCommunicationTitle(string title)
+        => RoadmapSkillAliases[0].Aliases.Any(alias => title.Contains(alias, StringComparison.OrdinalIgnoreCase));
+
+    private static readonly HashSet<string> CommunicationCatalogTitles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Tuần 1 - Nền tảng giao tiếp",
+        "Tuần 2 - Lắng nghe chủ động",
+        "Tuần 3 - Phản hồi xây dựng",
+        "Tuần 4 - Giao tiếp nâng cao"
+    };
 
     private static readonly (string SkillName, string[] Aliases)[] RoadmapSkillAliases =
     {
@@ -375,16 +709,17 @@ public class RoadmapService : IRoadmapService
             .OrderBy(r => r.Score)  // weakest skill first
             .Select(r => r.Skill.Name)
             .ToList();
-        if (byScore.Count > 0) return byScore;
-
-        // 2. Fall back to the skills the user selected (active only).
+        // Explicit selections define the current plan; assessment scores order
+        // those skills instead of permanently overriding a later selection.
         var allSkills = (await _skillRepo.GetAllAsync()).ToList();
         var selectedIds = await _assessmentRepo.GetSelectedSkillIdsAsync(userId);
         var selected = allSkills
             .Where(s => selectedIds.Contains(s.Id) && QuizSeedData.ActiveSkillIds.Contains(s.Id))
             .Select(s => s.Name)
             .ToList();
-        if (selected.Count > 0) return selected;
+        if (selected.Count > 0) return selected.OrderBy(name =>
+            byScore.IndexOf(name) is var index && index >= 0 ? index : int.MaxValue).ToList();
+        if (byScore.Count > 0) return byScore;
 
         // 3. Last resort: every active skill.
         return allSkills
@@ -393,14 +728,270 @@ public class RoadmapService : IRoadmapService
             .ToList();
     }
 
-    public async Task MarkCompleteAsync(int itemId)
+    public Task<bool> MarkVideoCompleteAsync(int itemId, int userId)
+        => MarkActivityCompleteAsync(itemId, userId, isVideo: true);
+
+    /// <summary>
+    /// Marks the knowledge check as passed. The existing storage field is kept
+    /// for data compatibility; the required applied Practice is completed separately.
+    /// </summary>
+    public Task<bool> MarkCompleteAsync(int itemId, int userId)
+        => MarkActivityCompleteAsync(itemId, userId, isVideo: false);
+
+    public Task<bool> MarkPracticeCompleteAsync(int itemId, int userId)
+        => MarkScenarioCompleteAsync(itemId, userId);
+
+    public async Task<bool> MarkScenarioCompleteAsync(int itemId, int userId)
     {
         var item = await _roadmapRepo.GetByIdAsync(itemId);
-        if (item != null && !item.IsCompleted)
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.PracticeCompletedAtUtc.HasValue)
+            return false;
+
+        var changed = false;
+        if (!item.ScenarioCompletedAtUtc.HasValue)
         {
-            item.IsCompleted = true;
+            item.ScenarioCompletedAtUtc = DateTime.UtcNow;
+            changed = true;
+        }
+
+        return await PersistActivityAsync(item, changed);
+    }
+
+    public async Task<bool> SaveReflectionAsync(int itemId, int userId, string reflectionText)
+    {
+        var value = reflectionText?.Trim() ?? string.Empty;
+        if (value.Length == 0 || value.Length > 8000)
+            return false;
+
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.ScenarioCompletedAtUtc.HasValue)
+            return false;
+
+        var changed = !string.Equals(item.ReflectionText, value, StringComparison.Ordinal)
+            || !item.ReflectionCompletedAtUtc.HasValue;
+        item.ReflectionText = value;
+        item.ReflectionCompletedAtUtc ??= DateTime.UtcNow;
+        return await PersistActivityAsync(item, changed);
+    }
+
+    public async Task<bool> SaveReflectionDraftAsync(int itemId, int userId, string reflectionText)
+    {
+        var value = reflectionText?.Trim() ?? string.Empty;
+        if (value.Length == 0 || value.Length > 8000)
+            return false;
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.ScenarioCompletedAtUtc.HasValue || item.ReflectionCompletedAtUtc.HasValue)
+            return false;
+        item.ReflectionText = value;
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> SaveLearningStepAsync(int itemId, int userId, string step)
+    {
+        var normalized = step?.Trim().ToLowerInvariant() ?? string.Empty;
+        var stepIndex = Array.IndexOf(LearningStepOrder, normalized);
+        if (stepIndex < 0)
+            return false;
+
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !CanOpenStep(item, normalized))
+            return false;
+
+        var now = DateTime.UtcNow;
+        var changed = false;
+        if (normalized == "summary" && !item.ScriptCompletedAtUtc.HasValue)
+        {
+            item.ScriptCompletedAtUtc = now;
+            changed = true;
+        }
+        if (normalized == "quiz" && !item.SummaryCompletedAtUtc.HasValue)
+        {
+            item.SummaryCompletedAtUtc = now;
+            changed = true;
+        }
+        if (!string.Equals(item.LastLearningStep, normalized, StringComparison.Ordinal))
+        {
+            item.LastLearningStep = normalized;
+            changed = true;
+        }
+        if (changed)
             await _roadmapRepo.SaveChangesAsync();
 
+        return true;
+    }
+
+    public async Task<bool> SaveQuizAttemptAsync(int itemId, int userId, RoadmapQuizAttemptDto attempt)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.SummaryCompletedAtUtc.HasValue || attempt.Answers.Count == 0
+            || attempt.TotalQuestions <= 0 || attempt.Score < 0 || attempt.Score > attempt.TotalQuestions * 10)
+            return false;
+
+        var history = DeserializeQuizHistory(item.QuizHistoryJson);
+        attempt.AttemptNumber = history.Count + 1;
+        attempt.SubmittedAtUtc = DateTime.UtcNow;
+        history.Add(attempt);
+        item.QuizHistoryJson = JsonSerializer.Serialize(history);
+        if (attempt.Passed && !item.PracticeCompletedAtUtc.HasValue)
+            item.PracticeCompletedAtUtc = attempt.SubmittedAtUtc;
+        item.LastLearningStep = attempt.Passed ? "practice" : "quiz";
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<IReadOnlyList<RoadmapQuizAttemptDto>> GetQuizHistoryAsync(int itemId, int userId)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        return item is null || item.UserId != userId
+            ? Array.Empty<RoadmapQuizAttemptDto>()
+            : DeserializeQuizHistory(item.QuizHistoryJson);
+    }
+
+    private static List<RoadmapQuizAttemptDto> DeserializeQuizHistory(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try { return JsonSerializer.Deserialize<List<RoadmapQuizAttemptDto>>(json) ?? []; }
+        catch (JsonException) { return []; }
+    }
+
+    public async Task<bool> SaveRoleplayAttemptAsync(int itemId, int userId, RoadmapRoleplayAttemptDto attempt)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item)
+            || !item.PracticeCompletedAtUtc.HasValue || attempt.UserMessages.Count != 3
+            || attempt.TotalScore < 0 || attempt.TotalScore > 10)
+            return false;
+        var history = DeserializeRoleplayHistory(item.RoleplayHistoryJson);
+        attempt.AttemptNumber = history.Count + 1;
+        attempt.SubmittedAtUtc = DateTime.UtcNow;
+        history.Add(attempt);
+        item.RoleplayHistoryJson = JsonSerializer.Serialize(history);
+        item.ScenarioCompletedAtUtc ??= attempt.SubmittedAtUtc;
+        item.LastLearningStep = "reflection";
+        await _roadmapRepo.SaveChangesAsync();
+        return true;
+    }
+
+    private static List<RoadmapRoleplayAttemptDto> DeserializeRoleplayHistory(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try { return JsonSerializer.Deserialize<List<RoadmapRoleplayAttemptDto>>(json) ?? []; }
+        catch (JsonException) { return []; }
+    }
+
+    private static readonly string[] LearningStepOrder = ["video", "script", "summary", "quiz", "practice", "reflection"];
+
+    private static bool CanOpenStep(RoadmapItem item, string step) => item.IsCompleted || step switch
+    {
+        "video" => true,
+        "script" => item.VideoCompletedAtUtc.HasValue,
+        "summary" => item.ScriptCompletedAtUtc.HasValue
+            || string.Equals(item.LastLearningStep, "script", StringComparison.OrdinalIgnoreCase),
+        "quiz" => item.SummaryCompletedAtUtc.HasValue
+            || string.Equals(item.LastLearningStep, "summary", StringComparison.OrdinalIgnoreCase),
+        "practice" => item.PracticeCompletedAtUtc.HasValue,
+        "reflection" => item.ScenarioCompletedAtUtc.HasValue,
+        _ => false
+    };
+
+    private async Task<bool> MarkActivityCompleteAsync(int itemId, int userId, bool isVideo)
+    {
+        var item = await _roadmapRepo.GetByIdAsync(itemId);
+        if (item is null || item.UserId != userId || !await IsWeekUnlockedAsync(item))
+            return false;
+
+        if (!isVideo && (!item.VideoCompletedAtUtc.HasValue || !item.SummaryCompletedAtUtc.HasValue))
+            return false;
+
+        var now = DateTime.UtcNow;
+        var activityChanged = false;
+        if (isVideo && !item.VideoCompletedAtUtc.HasValue)
+        {
+            item.VideoCompletedAtUtc = now;
+            activityChanged = true;
+        }
+        else if (!isVideo && item.VideoCompletedAtUtc.HasValue && !item.PracticeCompletedAtUtc.HasValue)
+        {
+            item.PracticeCompletedAtUtc = now;
+            activityChanged = true;
+        }
+
+        return await PersistActivityAsync(item, activityChanged);
+    }
+
+    private async Task<bool> IsWeekUnlockedAsync(RoadmapItem item)
+    {
+        // Content review mode exposes every curriculum item to editors. The
+        // persistence layer must use the same rule as the UI, otherwise an
+        // opened lesson can never save completion or unlock its next step.
+        if (RoadmapReviewMode.Enabled)
+            return true;
+
+        // Use the same personalized, de-duplicated catalog and skill ordering as
+        // the learner-facing Roadmap. Raw WeekNumber order can contain legacy or
+        // review-mode rows that aren't visible in the UI, causing the visible
+        // active week to be rejected when it tries to save progress.
+        var focusSkills = await GetFocusSkillNamesAsync(item.UserId);
+        var personalizedCatalog = await _aiService.GenerateRoadmapAsync(item.UserId, focusSkills);
+        var allowedTitles = personalizedCatalog.Items
+            .Select(x => x.Title)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var orderedItems = (await _roadmapRepo.GetByUserIdAsync(item.UserId))
+            .Where(x => allowedTitles.Contains(x.Title))
+            .OrderBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .GroupBy(x => x.Title.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+
+        if (orderedItems.Any(x => CommunicationCatalogTitles.Contains(x.Title.Trim())))
+            orderedItems = orderedItems
+                .Where(x => !IsCommunicationTitle(x.Title) || CommunicationCatalogTitles.Contains(x.Title.Trim()))
+                .ToList();
+
+        orderedItems = orderedItems
+            .OrderBy(x => RoadmapSkillRank(ResolveRoadmapSkillName(x.Title)))
+            .ThenBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
+
+        var activeItem = orderedItems.FirstOrDefault(x => !x.IsCompleted);
+        // A completed week must always remain reviewable, even when old/imported
+        // roadmap data has an inconsistent previous-week completion flag.
+        return item.IsCompleted || activeItem?.Id == item.Id;
+    }
+
+    private static int RoadmapSkillRank(string skillName) => skillName switch
+    {
+        "Giao tiếp" => 0,
+        "Quản lý thời gian" => 1,
+        "Tư duy phản biện" => 2,
+        _ => 3
+    };
+
+    private async Task<bool> PersistActivityAsync(RoadmapItem item, bool activityChanged)
+    {
+        var becameComplete = !item.IsCompleted
+            && item.VideoCompletedAtUtc.HasValue
+            && item.PracticeCompletedAtUtc.HasValue
+            && item.ScenarioCompletedAtUtc.HasValue
+            && item.ReflectionCompletedAtUtc.HasValue;
+
+        if (becameComplete)
+            item.IsCompleted = true;
+
+        if (activityChanged || becameComplete)
+            await _roadmapRepo.SaveChangesAsync();
+
+        if (becameComplete)
+        {
             // Award XP once, only on the transition to completed.
             var user = await _userRepo.GetByIdAsync(item.UserId);
             if (user != null)
@@ -409,17 +1000,82 @@ public class RoadmapService : IRoadmapService
                 await _userRepo.SaveChangesAsync();
             }
         }
+
+        return true;
     }
 }
 
 public class ProgressService : IProgressService
 {
-    private readonly IProgressRepository _progressRepo;
-    public ProgressService(IProgressRepository progressRepo) => _progressRepo = progressRepo;
+    private readonly IRoadmapRepository _roadmapRepository;
+    public ProgressService(IRoadmapRepository roadmapRepository) => _roadmapRepository = roadmapRepository;
+
     public async Task<IEnumerable<ProgressDto>> GetUserProgressAsync(int userId)
     {
-        var logs = await _progressRepo.GetByUserIdAsync(userId);
-        return logs.Select(l => new ProgressDto { UserId = l.UserId, SkillId = l.SkillId, SkillName = l.Skill.Name, PercentComplete = l.PercentComplete, UpdatedAt = l.UpdatedAt });
+        if (userId <= 0) return [];
+
+        var roadmapItems = await _roadmapRepository.GetByUserIdAsync(userId);
+        return roadmapItems
+            .Select(item => new { Item = item, SkillName = SkillNameFor(item.Title) })
+            .Where(entry => entry.SkillName.Length > 0)
+            .GroupBy(entry => entry.SkillName, StringComparer.OrdinalIgnoreCase)
+            .Select(group =>
+            {
+                var completed = group.Sum(entry => CompletedActivityCount(entry.Item));
+                var total = group.Count() * RoadmapProgressCalculator.RequiredActivityCount;
+                return new ProgressDto
+                {
+                    UserId = userId,
+                    SkillId = SkillIdFor(group.Key),
+                    SkillName = group.Key,
+                    PercentComplete = RoadmapProgressCalculator.Percent(completed, total),
+                    UpdatedAt = group.SelectMany(entry => ActivityTimestamps(entry.Item)).DefaultIfEmpty(DateTime.MinValue).Max()
+                };
+            })
+            .Where(progress => progress.PercentComplete > 0)
+            .OrderBy(progress => progress.SkillId)
+            .ToList();
+    }
+
+    private static int CompletedActivityCount(RoadmapItem item) => RoadmapProgressCalculator.CompletedCount(
+        item.IsCompleted,
+        item.VideoCompletedAtUtc.HasValue,
+        item.ScriptCompletedAtUtc.HasValue,
+        item.SummaryCompletedAtUtc.HasValue,
+        item.PracticeCompletedAtUtc.HasValue,
+        item.ScenarioCompletedAtUtc.HasValue,
+        item.ReflectionCompletedAtUtc.HasValue);
+
+    private static IEnumerable<DateTime> ActivityTimestamps(RoadmapItem item)
+    {
+        if (item.VideoCompletedAtUtc is { } video) yield return video;
+        if (item.ScriptCompletedAtUtc is { } script) yield return script;
+        if (item.SummaryCompletedAtUtc is { } summary) yield return summary;
+        if (item.PracticeCompletedAtUtc is { } practice) yield return practice;
+        if (item.ScenarioCompletedAtUtc is { } scenario) yield return scenario;
+        if (item.ReflectionCompletedAtUtc is { } reflection) yield return reflection;
+    }
+
+    private static int SkillIdFor(string skillName) => skillName switch
+    {
+        "Giao tiếp" or "Communication" => 1,
+        "Quản lý thời gian" or "Time Management" => 3,
+        "Tư duy phản biện" or "Critical Thinking" => 4,
+        _ => 0
+    };
+
+    private static string SkillNameFor(string title)
+    {
+        if (title.Contains("Communication", StringComparison.OrdinalIgnoreCase)
+            || title.Contains("Giao tiếp", StringComparison.OrdinalIgnoreCase))
+            return "Communication";
+        if (title.Contains("Time Management", StringComparison.OrdinalIgnoreCase)
+            || title.Contains("Quản lý thời gian", StringComparison.OrdinalIgnoreCase))
+            return "Time Management";
+        if (title.Contains("Critical Thinking", StringComparison.OrdinalIgnoreCase)
+            || title.Contains("Tư duy phản biện", StringComparison.OrdinalIgnoreCase))
+            return "Critical Thinking";
+        return string.Empty;
     }
 }
 
@@ -450,10 +1106,126 @@ public class CaseStudyService : ICaseStudyService
 public class MentorService : IMentorService
 {
     private readonly IMentorRepository _repo;
-    public MentorService(IMentorRepository repo) => _repo = repo;
+    private readonly IMentorSupportRequestRepository _requests;
+    public MentorService(IMentorRepository repo, IMentorSupportRequestRepository requests)
+    {
+        _repo = repo;
+        _requests = requests;
+    }
     public async Task<IEnumerable<MentorDto>> GetAllAsync()
     {
         var list = await _repo.GetAllAsync();
         return list.Select(m => new MentorDto { Id = m.Id, Name = m.Name, Expertise = m.Expertise, ShortBio = m.ShortBio, AvatarUrl = m.AvatarUrl });
     }
+
+    public async Task<MentorDto?> GetByIdAsync(int mentorId)
+    {
+        var mentor = mentorId > 0 ? await _repo.GetByIdAsync(mentorId) : null;
+        return mentor is null ? null : new MentorDto
+        {
+            Id = mentor.Id, Name = mentor.Name, Expertise = mentor.Expertise,
+            ShortBio = mentor.ShortBio, AvatarUrl = mentor.AvatarUrl
+        };
+    }
+
+    public async Task<bool> SubmitSupportRequestAsync(int userId, MentorSupportRequestDto request)
+    {
+        var goal = request.Goal?.Trim() ?? string.Empty;
+        var skill = request.Skill?.Trim() ?? string.Empty;
+        var context = request.Context?.Trim() ?? string.Empty;
+        var contact = request.PreferredContact?.Trim() ?? string.Empty;
+        if (userId <= 0 || request.MentorId <= 0 || goal.Length is < 3 or > 120
+            || skill.Length > 100 || context.Length is < 20 or > 2000
+            || contact is not ("Email" or "In-app")) return false;
+        if (await _repo.GetByIdAsync(request.MentorId) is null) return false;
+
+        await _requests.AddAsync(new MentorSupportRequest
+        {
+            UserId = userId, MentorId = request.MentorId, Goal = goal, Skill = skill,
+            Context = context, PreferredContact = contact,
+            ShareLearningContext = request.ShareLearningContext
+        });
+        return await _requests.SaveChangesAsync();
+    }
+}
+
+public class ChatHistoryService : IChatHistoryService
+{
+    private readonly IChatRepository _repository;
+    private readonly IChatSessionRepository _sessions;
+    public ChatHistoryService(IChatRepository repository, IChatSessionRepository sessions)
+    {
+        _repository = repository;
+        _sessions = sessions;
+    }
+
+    public async Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(int userId)
+    {
+        if (userId <= 0) return [];
+        var sessions = await _sessions.GetByUserIdAsync(userId);
+        return sessions.Select(x => new ChatSessionDto { Id = x.Id, TitleVi = x.TitleVi, TitleEn = x.TitleEn, UpdatedAt = x.UpdatedAt }).ToList();
+    }
+
+    public async Task<IReadOnlyList<ChatHistoryMessageDto>> GetHistoryAsync(int userId, int sessionId = 0)
+    {
+        if (userId <= 0) return [];
+        try
+        {
+            var messages = sessionId > 0
+                ? await _repository.GetBySessionAsync(userId, sessionId)
+                : await _repository.GetByUserIdAsync(userId);
+            var history = messages.Select(ToDto).ToList();
+            return history;
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    public async Task<int> SaveAsync(int userId, int sessionId, ChatSender sender, string viContent, string enContent)
+    {
+        if (userId <= 0 || string.IsNullOrWhiteSpace(viContent) && string.IsNullOrWhiteSpace(enContent)) return sessionId;
+        try
+        {
+            ChatSession? session = sessionId > 0 ? await _sessions.GetForUserAsync(sessionId, userId) : null;
+            if (session is null)
+            {
+                session = new ChatSession { UserId = userId, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+                await _sessions.AddAsync(session);
+                await _sessions.SaveChangesAsync();
+            }
+            if (sender == ChatSender.User && session.TitleVi == "Cuộc trò chuyện mới")
+            {
+                var title = viContent.Trim();
+                session.TitleVi = title.Length <= 60 ? title : title[..60] + "…";
+                var englishTitle = enContent.Trim();
+                session.TitleEn = englishTitle.Length <= 60 ? englishTitle : englishTitle[..60] + "…";
+            }
+            session.UpdatedAt = DateTime.UtcNow;
+            var payload = JsonSerializer.Serialize(new StoredChatContent(viContent, enContent));
+            await _repository.AddAsync(new ChatMessage { UserId = userId, ChatSessionId = session.Id, Sender = sender, Content = payload, CreatedAt = DateTime.UtcNow });
+            var saved = await _repository.SaveChangesAsync();
+            if (!saved) throw new InvalidOperationException("The chat message insert did not affect any row.");
+            return session.Id;
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    private static ChatHistoryMessageDto ToDto(ChatMessage message)
+    {
+        try
+        {
+            var content = JsonSerializer.Deserialize<StoredChatContent>(message.Content);
+            if (content is not null)
+                return new() { Id = message.Id, Sender = message.Sender, ViContent = content.Vi, EnContent = content.En, CreatedAt = message.CreatedAt };
+        }
+        catch (JsonException) { }
+        return new() { Id = message.Id, Sender = message.Sender, ViContent = message.Content, EnContent = message.Content, CreatedAt = message.CreatedAt };
+    }
+
+    private sealed record StoredChatContent(string Vi, string En);
 }

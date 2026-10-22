@@ -1,0 +1,789 @@
+{
+  "viewports": [
+    {
+      "width": 320,
+      "scroll": 320,
+      "heroTitleBottom": 540.5,
+      "ctaTop": 648.5,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 130
+        },
+        {
+          "name": "sh-goal",
+          "height": 149
+        },
+        {
+          "name": "sh-continue",
+          "height": 255
+        },
+        {
+          "name": "sh-stats",
+          "height": 126
+        },
+        {
+          "name": "sh-journey",
+          "height": 355
+        },
+        {
+          "name": "sh-quick",
+          "height": 334
+        },
+        {
+          "name": "sh-syncy",
+          "height": 147
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 126
+        },
+        {
+          "name": "sh-mentors",
+          "height": 219
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 360,
+      "scroll": 360,
+      "heroTitleBottom": 497.59375,
+      "ctaTop": 584.59375,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 111
+        },
+        {
+          "name": "sh-goal",
+          "height": 118
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 130
+        },
+        {
+          "name": "sh-journey",
+          "height": 358
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 129
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 210
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 375,
+      "scroll": 375,
+      "heroTitleBottom": 490.203125,
+      "ctaTop": 577.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 118
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 112
+        },
+        {
+          "name": "sh-journey",
+          "height": 351
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 129
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 390,
+      "scroll": 390,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 351
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 414,
+      "scroll": 414,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 350
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 105
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 430,
+      "scroll": 430,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 350
+        },
+        {
+          "name": "sh-quick",
+          "height": 187
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 105
+        },
+        {
+          "name": "sh-quote",
+          "height": 104
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "width": 320,
+      "scroll": 320,
+      "heroTitleBottom": 540.5,
+      "ctaTop": 648.5,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 130
+        },
+        {
+          "name": "sh-goal",
+          "height": 149
+        },
+        {
+          "name": "sh-continue",
+          "height": 255
+        },
+        {
+          "name": "sh-stats",
+          "height": 126
+        },
+        {
+          "name": "sh-journey",
+          "height": 355
+        },
+        {
+          "name": "sh-quick",
+          "height": 334
+        },
+        {
+          "name": "sh-syncy",
+          "height": 147
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 126
+        },
+        {
+          "name": "sh-mentors",
+          "height": 219
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "width": 360,
+      "scroll": 360,
+      "heroTitleBottom": 497.59375,
+      "ctaTop": 584.59375,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 111
+        },
+        {
+          "name": "sh-goal",
+          "height": 118
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 130
+        },
+        {
+          "name": "sh-journey",
+          "height": 358
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 129
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 210
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "width": 375,
+      "scroll": 375,
+      "heroTitleBottom": 490.203125,
+      "ctaTop": 577.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 118
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 112
+        },
+        {
+          "name": "sh-journey",
+          "height": 351
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 129
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 166
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "width": 390,
+      "scroll": 390,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 351
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 126
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "width": 414,
+      "scroll": 414,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 350
+        },
+        {
+          "name": "sh-quick",
+          "height": 205
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 105
+        },
+        {
+          "name": "sh-quote",
+          "height": 122
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "width": 430,
+      "scroll": 430,
+      "heroTitleBottom": 472.203125,
+      "ctaTop": 559.203125,
+      "sections": [
+        {
+          "name": "sh-search",
+          "height": 48
+        },
+        {
+          "name": "sh-greeting",
+          "height": 104
+        },
+        {
+          "name": "sh-goal",
+          "height": 100
+        },
+        {
+          "name": "sh-continue",
+          "height": 234
+        },
+        {
+          "name": "sh-stats",
+          "height": 94
+        },
+        {
+          "name": "sh-journey",
+          "height": 350
+        },
+        {
+          "name": "sh-quick",
+          "height": 187
+        },
+        {
+          "name": "sh-syncy",
+          "height": 109
+        },
+        {
+          "name": "sh-recommendation",
+          "height": 105
+        },
+        {
+          "name": "sh-mentors",
+          "height": 177
+        },
+        {
+          "name": "sh-achievements",
+          "height": 105
+        },
+        {
+          "name": "sh-quote",
+          "height": 104
+        },
+        {
+          "name": "sh-footer",
+          "height": 138
+        }
+      ],
+      "theme": "dark"
+    }
+  ],
+  "checks": [
+    "Approved section order; no Home map; four real statistics, four shortcuts and approved SYNCY illustration.",
+    {
+      "footer": {
+        "footer": 749.5625,
+        "nav": 761.015625
+      }
+    },
+    "Live search, no-match, completed filter and reset.",
+    {
+      "continueLesson": "http://localhost:5303/roadmap/lecture/1/1?step=1",
+      "href": "/roadmap/lecture/1/1?step=1"
+    },
+    {
+      "clicked": ".sh-quick a:nth-child(1)",
+      "route": "/progress"
+    },
+    {
+      "clicked": ".sh-quick a:nth-child(2)",
+      "route": "/resources"
+    },
+    {
+      "clicked": ".sh-quick a:nth-child(3)",
+      "route": "/assessment/1"
+    },
+    {
+      "clicked": ".sh-quick a:nth-child(4)",
+      "route": "/community"
+    },
+    {
+      "clicked": ".sh-syncy",
+      "route": "/assistant"
+    },
+    {
+      "clicked": ".sh-mentor-grid>a:first-child",
+      "route": "/mentors/1"
+    },
+    {
+      "clicked": ".sh-footer nav a:first-child",
+      "route": "/about"
+    },
+    "Journey View all opens existing Roadmap with selected skill and interactive map.",
+    {
+      "width": 768,
+      "desktopLayoutPreserved": false
+    },
+    {
+      "width": 1024,
+      "desktopLayoutPreserved": true
+    }
+  ],
+  "errors": [],
+  "missingAssets": []
+}

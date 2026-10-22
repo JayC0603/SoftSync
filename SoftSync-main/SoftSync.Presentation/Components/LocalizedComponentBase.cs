@@ -11,6 +11,11 @@ namespace SoftSync.Presentation.Components;
 public abstract class LocalizedComponentBase : ComponentBase, IDisposable
 {
     [Inject] protected LocalizationService L { get; set; } = default!;
+    protected string Ui(string? text) => L.Ui(text);
+    protected string Ui(string? vietnamese, string? english) => L.Ui(L.Current == AppLanguage.Vi ? vietnamese : english);
+    protected string UiFormat(string text, params object?[] args) => string.Format(
+        System.Globalization.CultureInfo.GetCultureInfo(L.Current == AppLanguage.Vi ? "vi-VN" : "en-US"),
+        Ui(text), args);
 
     protected override void OnInitialized()
     {

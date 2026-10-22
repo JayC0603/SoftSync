@@ -1,0 +1,178 @@
+@namespace SoftSync.Presentation.Components.Journey
+@implements IAsyncDisposable
+@using SoftSync.Common.Dtos
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject ILogger<VietnamAdventureMap> Logger
+@inject IWebHostEnvironment HostEnvironment
+
+<link rel="stylesheet" href="@VersionedAsset("dist/vietnam-map.css")" />
+
+<section class="vn-journey @(Compact ? "vn-compact" : null) @(expanded ? "is-expanded" : null)" @ref="root" aria-label="@T("Bản đồ kỹ năng", "Skill map")">
+    <header class="vn-heading"><h2>@(Compact ? T("Bản đồ hành trình của bạn", "Your journey map") : T("Bản đồ kỹ năng", "Skill map"))</h2>@if (Compact) { <a class="vm-link" href="@FullMapUrl">@T("Xem bản đồ", "Open map") <i class="bi bi-chevron-right" aria-hidden="true"></i></a> } else { <button type="button" class="vm-link" @onclick="ToggleExpanded"><span>@(expanded ? T("Thu gọn", "Close map") : T("Xem bản đồ", "Open map"))</span><i class="bi @(expanded ? "bi-x-lg" : "bi-chevron-right")" aria-hidden="true"></i></button> }</header>
+    @if (!Compact && Groups.Count > 1)
+    {
+        <nav class="vn-courses" aria-label="@T("Chọn tuyến kỹ năng", "Choose a skill route")">
+            @foreach (var group in Groups)
+            {
+                <button type="button" aria-pressed="@(group.Key == selectedKey)" class="@(group.Key == selectedKey ? "is-selected" : null)" @onclick="() => SelectCourse(group.Key)">@(string.IsNullOrWhiteSpace(group.First().SkillName) ? T("Kỹ năng khác", "Other skills") : group.First().SkillName)<small>@group.Count(x => x.IsCompleted)/@group.Count()</small></button>
+            }
+        </nav>
+    }
+    <div class="vn-map-stage">
+        <div class="vn-map-canvas" @ref="canvas" aria-label="@T("Bản đồ Việt Nam. Dùng hai ngón để kéo hoặc phóng to.", "Vietnam map. Use two fingers to pan or zoom.")"></div>
+        <div class="vn-map-hint"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i>@(expanded ? T("Kéo để khám phá", "Drag to explore") : T("Hai ngón để khám phá", "Use two fingers to explore"))</div>
+        <div class="vn-controls" aria-label="@T("Điều khiển bản đồ", "Map controls")"><button @onclick='() => Control("zoomIn")' aria-label="@T("Phóng to", "Zoom in")"><i class="bi bi-plus-lg" aria-hidden="true"></i></button><button @onclick='() => Control("zoomOut")' aria-label="@T("Thu nhỏ", "Zoom out")"><i class="bi bi-dash-lg" aria-hidden="true"></i></button><button @onclick='() => Control("current")' aria-label="@T("Đến mốc hiện tại", "Focus current checkpoint")"><i class="bi bi-crosshair" aria-hidden="true"></i></button><button @onclick='() => Control("reset")' aria-label="@T("Đặt lại bản đồ", "Reset map")"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button></div>
+        @if (!mapReady && !mapError)
+        {
+            <div class="vn-map-state" role="status"><span class="vn-spinner" aria-hidden="true"></span>@T("Đang mở hành trình…", "Opening your journey…")</div>
+        }
+        @if (mapError)
+        {
+            <div class="vn-map-state" role="status"><i class="bi bi-wifi-off" aria-hidden="true"></i><strong>@T("Chưa thể tải bản đồ", "Map is unavailable")</strong><span>@T("Bạn vẫn có thể chọn bài học bên dưới.", "You can still select lessons below.")</span><button class="vm-secondary" @onclick="Retry">@T("Thử lại", "Try again")</button></div>
+        }
+    </div>
+    @if (Compact && CurrentStop is { } currentStop)
+    {
+        <button type="button" class="vn-current-row" @onclick="() => ShowStop(currentStop.Id)"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i><span><strong>@T("Điểm dừng hiện tại", "Current checkpoint"): @LandmarkName(currentStop.LandmarkId)</strong><small>@StopTitle(currentStop)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+    }
+    @if (!Compact) {
+    <div class="vn-legend"><span><i class="current"></i>@T("Đang học", "Current")</span><span><i class="done"></i>@T("Hoàn thành", "Completed")</span><span><i class="locked"></i>@T("Chưa mở khóa", "Locked")</span></div>
+    <p class="vn-route-note">@T("Tuyến thể hiện tiến trình học tập.", "The route represents learning progress.")</p>
+    @if (Stops.Count == 0)
+    {
+        <div class="vn-empty"><i class="bi bi-map" aria-hidden="true"></i><p>@T("Làm bài đánh giá để bắt đầu hành trình của bạn.", "Take an assessment to start your journey.")</p><a class="vm-primary" href="@($"/assessment/{UserId}")">@T("Khám phá kỹ năng", "Explore your skills")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    }
+    else
+    {
+        <details class="vn-stop-list"><summary>@T("Các mốc trong hành trình", "Journey checkpoints")<span>@Stops.Count</span></summary><div>
+            @foreach (var stop in Stops)
+            {
+                <button type="button" @onclick="() => ShowStop(stop.Id)"><span class="vn-list-number @StateClass(stop)">@stop.Order</span><span><strong>@StopTitle(stop)</strong><small>@StateLabel(stop)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+            }
+        </div></details>
+    }
+    }
+    @if (Compact && Stops.Count == 0) { <p class="vn-empty">@T("Lộ trình sẽ xuất hiện sau bài đánh giá kỹ năng.", "Your roadmap will appear after your skills assessment.")</p> }
+    @if (clusterChoices.Count > 0)
+    {
+        <div class="vn-sheet-backdrop" @onclick="CloseDetails"><section class="vn-sheet" role="dialog" aria-modal="true" aria-labelledby="vn-cluster-title" @ref="sheet" @onclick:stopPropagation="true" @onkeydown="SheetKeyDown"><header><h3 id="vn-cluster-title">@T("Các mốc tại địa danh này", "Checkpoints at this place")</h3><button @onclick="CloseDetails" aria-label="@T("Đóng", "Close")"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="vn-cluster-list">@foreach (var choice in clusterChoices) { <button @onclick="() => ShowStop(choice.Id)"><span class="vn-list-number @StateClass(choice)">@choice.Order</span><span><strong>@StopTitle(choice)</strong><small>@StateLabel(choice)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button> }</div></section></div>
+    }
+    @if (selectedStop is { } detail)
+    {
+        <div class="vn-sheet-backdrop" @onclick="CloseDetails"><section class="vn-sheet" role="dialog" aria-modal="true" aria-labelledby="vn-detail-title" @ref="sheet" @onclick:stopPropagation="true" @onkeydown="SheetKeyDown"><div class="vn-sheet-handle" aria-hidden="true"></div><header><span>@(placeDetail ? T("KHÁM PHÁ VIỆT NAM", "EXPLORE VIETNAM") : T("MỐC HỌC TẬP", "LEARNING CHECKPOINT"))</span><button type="button" @onclick="CloseDetails" aria-label="@T("Đóng", "Close")"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><small class="vn-place">@placeName</small><h3 id="vn-detail-title">@StopTitle(detail)</h3><p>@StateLabel(detail)</p><progress value="@detail.Completed" max="@Math.Max(1, detail.Total)" aria-label="@T("Tiến độ bài học", "Lesson progress")"></progress><small>@detail.Completed / @detail.Total @T("hoạt động hoàn thành", "activities completed")</small>
+            @if (detail.Boss) { <p>@T("Suy ngẫm và nhận phản hồi AI trong bài cuối của tuyến này.", "Reflection and AI feedback in the last lesson of this route.")</p> }
+            @if (landmarkSources.TryGetValue(detail.LandmarkId, out var source)) { <a class="vm-secondary" href="@source" target="_blank" rel="noopener noreferrer">@T("Thông tin địa danh", "About this place") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a> }
+            <button class="vm-primary" disabled="@(!VietnamJourney.CanOpen(orderedItems, detail))" @onclick="() => OpenLesson(detail)"><i class="bi @(detail.State == JourneyState.Locked ? "bi-lock" : "bi-play-fill")" aria-hidden="true"></i>@(detail.State == JourneyState.Locked ? T("Chưa mở khóa", "Locked") : detail.State == JourneyState.Completed ? T("Xem lại bài học", "Review lesson") : T("Tiếp tục học", "Continue learning"))<i class="bi bi-chevron-right" aria-hidden="true"></i></button></section></div>
+    }
+    @if (placeDetail && selectedStop is null)
+    {
+        <div class="vn-sheet-backdrop" @onclick="CloseDetails"><section class="vn-sheet" role="dialog" aria-modal="true" aria-labelledby="vn-place-title" @ref="sheet" @onclick:stopPropagation="true" @onkeydown="SheetKeyDown"><header><span>@T("KHÁM PHÁ VIỆT NAM", "EXPLORE VIETNAM")</span><button @onclick="CloseDetails" aria-label="@T("Đóng", "Close")"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><h3 id="vn-place-title">@placeName</h3><p>@T("Địa danh trên hành trình khám phá Việt Nam.", "A place on your Vietnam adventure.")</p><a class="vm-secondary" href="@placeSource" target="_blank" rel="noopener noreferrer">@T("Thông tin địa danh", "About this place")<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></section></div>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<RoadmapItemDto> Items { get; set; } = [];
+    [Parameter] public int UserId { get; set; }
+    [Parameter] public bool Vietnamese { get; set; } = true;
+    [Parameter] public string? SelectedSkill { get; set; }
+    [Parameter] public EventCallback<string> SelectedSkillChanged { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    private string FullMapUrl => $"/roadmap?skill={Uri.EscapeDataString(selectedKey)}&map=full";
+    private VietnamJourneyStop? CurrentStop => Stops.FirstOrDefault(x => x.State == JourneyState.Current) ?? Stops.FirstOrDefault(x => x.State != JourneyState.Locked) ?? Stops.FirstOrDefault();
+    private ElementReference root, canvas, sheet;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<VietnamAdventureMap>? callback;
+    private IReadOnlyList<RoadmapItemDto> orderedItems = [];
+    private List<IGrouping<string, RoadmapItemDto>> Groups => orderedItems.GroupBy(SkillTheme.KeyFor).ToList();
+    private IReadOnlyList<VietnamJourneyStop> Stops => VietnamJourney.Stops(orderedItems, selectedKey);
+    private string selectedKey = "";
+    private bool expanded, mapReady, mapError, disposed, needsUpdate = true, focusSheet;
+    private bool initialViewApplied;
+    private VietnamJourneyStop? selectedStop;
+    private IReadOnlyList<VietnamJourneyStop> clusterChoices = [];
+    private bool placeDetail;
+    private string placeName = "", placeSource = "";
+    private readonly Dictionary<string, (string Vi, string En)> landmarkNames = [];
+    private readonly Dictionary<string, string> landmarkSources = [];
+    protected override void OnInitialized()
+    {
+        var file = HostEnvironment.WebRootFileProvider.GetFileInfo("data/vietnam-landmarks.json");
+        if (!file.Exists) return;
+        using var stream = file.CreateReadStream();
+        using var geography = System.Text.Json.JsonDocument.Parse(stream);
+        foreach (var feature in geography.RootElement.GetProperty("features").EnumerateArray())
+        {
+            var properties = feature.GetProperty("properties");
+            var id = properties.GetProperty("id").GetString();
+            if (id is not null) {
+                landmarkNames[id] = (properties.GetProperty("name").GetString() ?? "", properties.GetProperty("nameEn").GetString() ?? "");
+                var source = properties.GetProperty("source").GetString();
+                if (source?.StartsWith("https://www.wikidata.org/wiki/", StringComparison.Ordinal) == true) landmarkSources[id] = source;
+            }
+        }
+    }
+    private string LandmarkName(string id) => landmarkNames.TryGetValue(id, out var place) ? Vietnamese ? place.Vi : place.En : "";
+    private string T(string vi, string en) => Vietnamese ? vi : en;
+    protected override void OnParametersSet()
+    {
+        if (!initialViewApplied)
+        {
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Nav.Uri).Query);
+            expanded = !Compact && query.TryGetValue("map", out var mode) && mode == "full";
+            initialViewApplied = true;
+        }
+        orderedItems = VietnamJourney.Order(Items);
+        if (SelectedSkill is not null && Groups.Any(x => x.Key == SelectedSkill)) selectedKey = SelectedSkill;
+        else if (!Groups.Any(x => x.Key == selectedKey)) selectedKey = orderedItems.FirstOrDefault(x => !x.IsCompleted) is { } current ? SkillTheme.KeyFor(current) : Groups.FirstOrDefault()?.Key ?? "";
+        needsUpdate = true;
+    }
+    private object Payload => new { userId = UserId, selectedKey, vietnamese = Vietnamese, stops = Stops.Select(x => new { x.Id, x.ItemId, x.CourseKey, x.LandmarkId, x.Order, title = StopTitle(x), state = StateClass(x), status = StateLabel(x), x.Boss }) };
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (disposed) return;
+        try
+        {
+            module ??= await JS.InvokeAsync<IJSObjectReference>("import", VersionedAsset("dist/vietnam-map.js"));
+            if (firstRender) { callback = DotNetObjectReference.Create(this); await module.InvokeVoidAsync("mount", root, canvas, Payload, callback); if (expanded) await module.InvokeVoidAsync("expand", root, true); needsUpdate = false; }
+            else if (needsUpdate) { needsUpdate = false; await module.InvokeVoidAsync("update", root, Payload); }
+            if (focusSheet) { focusSheet = false; await module.InvokeVoidAsync("focusSheet", root, sheet); }
+        }
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException or TaskCanceledException)
+        { if (!disposed && !mapError) { Logger.LogWarning(ex, "Could not initialize Vietnam journey map"); mapError = true; await InvokeAsync(StateHasChanged); } }
+    }
+    private async Task SelectCourse(string key)
+    {
+        if (!Groups.Any(x => x.Key == key)) return;
+        selectedKey = key; selectedStop = null; clusterChoices = []; placeDetail = false; needsUpdate = true;
+        await SelectedSkillChanged.InvokeAsync(key);
+    }
+    [JSInvokable] public Task SelectSavedCourse(string key) => InvokeAsync(() => SelectCourse(key));
+    [JSInvokable] public Task MapStatus(bool ready) => InvokeAsync(() => { mapReady = ready; mapError = !ready; StateHasChanged(); });
+    [JSInvokable] public Task ShowStop(string id) => InvokeAsync(() => { clusterChoices = []; selectedStop = Stops.FirstOrDefault(x => x.Id == id); placeDetail = false; focusSheet = selectedStop is not null; StateHasChanged(); });
+    [JSInvokable] public Task ShowCluster(string[] ids) => InvokeAsync(() => { selectedStop = null; placeDetail = false; clusterChoices = Stops.Where(x => ids.Contains(x.Id)).ToList(); focusSheet = true; StateHasChanged(); });
+    [JSInvokable] public async Task ExitExpanded() { expanded = false; await InvokeAsync(StateHasChanged); if (module is not null) await module.InvokeVoidAsync("expand", root); }
+    [JSInvokable] public Task ShowPlace(string name, string source) => InvokeAsync(() => { selectedStop = null; placeDetail = true; placeName = name; placeSource = source.StartsWith("https://www.wikidata.org/wiki/", StringComparison.Ordinal) ? source : "https://www.wikidata.org"; focusSheet = true; StateHasChanged(); });
+    private async Task CloseDetails() { selectedStop = null; clusterChoices = []; placeDetail = false; if (module is not null) await module.InvokeVoidAsync("restoreFocus", root); }
+    private async Task SheetKeyDown(KeyboardEventArgs e) { if (e.Key == "Escape") await CloseDetails(); }
+    private string StopTitle(VietnamJourneyStop stop) => stop.Boss ? T("BOSS: Suy ngẫm & phản hồi AI", "BOSS: Reflection & AI feedback") : stop.Title;
+    private static string StateClass(VietnamJourneyStop x) => x.State == JourneyState.Completed ? "completed" : x.State == JourneyState.Locked ? "locked" : "current";
+    private string StateLabel(VietnamJourneyStop x) => x.State == JourneyState.Completed ? T("Hoàn thành", "Completed") : x.State == JourneyState.Locked ? T("Chưa mở khóa", "Locked") : T("Đang học", "Learning");
+    private void OpenLesson(VietnamJourneyStop stop) { if (VietnamJourney.CanOpen(orderedItems, stop)) Nav.NavigateTo($"/roadmap/lecture/{UserId}/{stop.ItemId}?step={stop.Step}"); }
+    private async Task ToggleExpanded() { expanded = !expanded; if (module is not null) await module.InvokeVoidAsync("expand", root, expanded); }
+    private async Task Control(string action) { if (module is not null) await module.InvokeVoidAsync("control", root, action); }
+    private async Task Retry() { if (module is null) { Nav.NavigateTo(Nav.Uri, true); return; } mapError = false; mapReady = false; await module.InvokeVoidAsync("retry", root); }
+    private string VersionedAsset(string path)
+    {
+        var asset = HostEnvironment.WebRootFileProvider.GetFileInfo(path);
+        if (!asset.Exists) return "/" + path;
+        using var stream = asset.CreateReadStream();
+        return $"/{path}?v={Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream))[..16]}";
+    }
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        if (module is not null) { try { await module.InvokeVoidAsync("dispose", root); await module.DisposeAsync(); } catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException) { } }
+        callback?.Dispose();
+    }
+}

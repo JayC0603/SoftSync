@@ -1,0 +1,24 @@
+﻿/* Shared footer: logo, four links and Facebook remain on one row. */
+html body .eco-footer { font-family: 'Segoe UI', Arial, sans-serif; }
+html body .eco-footer .ss-footer-row { display:flex; flex-wrap:nowrap; align-items:center; gap:clamp(6px,2vw,24px); width:min(1280px,100%); margin-inline:auto; padding:16px 24px; box-sizing:border-box; }
+html body .eco-footer .ss-footer-row a { font-family:inherit; text-decoration:none; }
+html body .eco-footer :is(.ss-footer-logo,.ss-footer-facebook) { display:inline-flex; flex:0 0 44px; align-items:center; justify-content:center; width:44px; min-height:44px; }
+html body .eco-footer .ss-footer-logo img { display:block; width:40px; height:40px; object-fit:contain; border-radius:10px; }
+html body .eco-footer nav.ss-footer-links { display:flex; flex:1; min-width:0; flex-wrap:nowrap; align-items:center; justify-content:space-evenly; gap:clamp(6px,2vw,24px); margin:0; padding:0; }
+html body .eco-footer nav.ss-footer-links a { display:inline-flex; align-items:center; justify-content:center; min-height:44px; white-space:nowrap; font-size:14px; font-weight:500; line-height:1.4; color:var(--mh-muted,var(--ss-text-muted,#657493)); }
+html body .eco-footer .ss-footer-facebook { color:#1877f2; font-size:28px; border-radius:50%; }
+html body .eco-footer .ss-footer-row a:hover { color:var(--ss-primary,#2168dc); }
+html body .eco-footer .ss-footer-row a:focus-visible { outline:2px solid var(--ss-primary,#2168dc); outline-offset:3px; }
+html body .page:has(.mh-v3) .eco-footer { width:calc(100% - 64px); max-width:1056px; margin:12px 32px 32px; padding:8px 12px; border:1px solid var(--mh-border); border-radius:22px; background:var(--mh-surface); }
+html body .page:has(.mh-v3) .eco-footer .ss-footer-row { padding:4px 0; }
+@media(max-width:900px) {
+ html body .page:has(.mh-v3) .eco-footer { width:calc(100% - 32px); margin:20px 16px; padding:8px; }
+}
+@media(max-width:480px) {
+ html body .eco-footer .ss-footer-row { gap:4px; padding:8px 4px; }
+ html body .eco-footer :is(.ss-footer-logo,.ss-footer-facebook) { flex-basis:30px; width:30px; }
+ html body .eco-footer .ss-footer-logo img { width:28px; height:28px; border-radius:8px; }
+ html body .eco-footer nav.ss-footer-links { gap:5px; }
+ html body .eco-footer nav.ss-footer-links a { font-size:clamp(10px,2.9vw,13px); }
+ html body .eco-footer .ss-footer-facebook { font-size:24px; }
+}

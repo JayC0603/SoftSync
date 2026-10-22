@@ -1,0 +1,244 @@
+﻿@inherits LocalizedComponentBase
+@implements IAsyncDisposable
+@inject CvReviewService Review
+@using SoftSync.BLL.Services
+@using System.Text.Json
+@inject IServiceScopeFactory Scopes
+@inject ILogger<CvCareerWorkspace> Logger
+@inject AuthenticationStateProvider Authentication
+
+<HeadContent><link rel="stylesheet" href="css/cv-career.css?v=20261022-compact4" /></HeadContent>
+<div class="career-cv">
+@if (screen == "home")
+{
+    <header class="career-hero"><div><span>SOFTSYNC CAREER</span><h1>Smart CV</h1><p>@T("Quản lý hồ sơ và đánh giá mức độ phù hợp với công việc, nhận gợi ý cải thiện.", "Manage your CVs, explore job fit and get practical feedback.")</p></div><div class="career-illustration" aria-hidden="true"><div><b>CV</b><i></i><i></i><i></i><i></i><i></i></div><span class="bi bi-search"></span></div></header>
+    <div class="career-menu">
+    @foreach (var item in Menu)
+    {
+        <button class="career-menu-card @(item.Id == "review" ? "featured" : "")" @onclick="() => Go(item.Id)"><span class="career-icon @item.Id"><i class="bi @item.Icon"></i></span><span><strong>@item.Title</strong><small>@item.Description</small></span><i class="bi bi-chevron-right"></i></button>
+    }
+    </div>
+    <aside class="career-tip"><i class="bi bi-info-circle-fill"></i><div><strong>@T("Mẹo nhỏ", "Quick tip")</strong><p>@T("Hãy mô tả công việc (JD) càng chi tiết để kết quả đánh giá chính xác hơn.", "Add a detailed job description for a more useful assessment.")</p></div></aside>
+}
+else
+{
+    <header class="career-top"><button aria-label="@T("Quay lại", "Back")" @onclick='() => Go("home")'><i class="bi bi-chevron-left"></i></button><h1>@ScreenTitle</h1>@if(screen == "library") { <label class="career-primary career-upload" for="career-upload">@T("Tải lên CV", "Upload CV")</label> } else if(screen == "result") { <button class="career-outline" disabled="@(saved || busy)" @onclick="Save">@(saved ? T("Đã lưu", "Saved") : T("Lưu", "Save"))</button> }</header>
+    <div class="career-file-input"><InputFile id="career-upload" OnChange="Upload" accept=".pdf,.txt" disabled="@busy" /></div>
+    @if(screen == "library")
+    {
+        <div class="career-tabs">@foreach(var type in new[]{"all","pdf","txt"}) { <button class="@(filter == type ? "active" : "")" @onclick="() => filter = type">@(type == "all" ? T("Tất cả", "All") : type.ToUpperInvariant()) (@Documents.Count(x => type == "all" || x.Extension == type))</button> }</div>
+        <div class="career-search"><i class="bi bi-search"></i><input aria-label="@T("Tìm kiếm CV", "Search CVs")" placeholder="@T("Tìm kiếm CV…", "Search CVs…")" @bind="query" @bind:event="oninput" /></div>
+        <div class="career-sort"><select aria-label="@T("Sắp xếp", "Sort")" @bind="sort"><option value="new">@T("Mới nhất", "Newest")</option><option value="old">@T("Cũ nhất", "Oldest")</option></select><span>@T("PDF hoặc TXT · Tối đa 10 MB", "PDF or TXT · Up to 10 MB")</span></div>
+        <div class="career-list">@foreach(var doc in VisibleDocuments) { <article class="career-document"><button class="career-doc-main" @onclick="() => Select(doc)"><span class="career-paper"><b>CV</b><i></i><i></i><i></i><i></i></span><span><strong>@doc.Name</strong><small>@T("Hồ sơ ứng tuyển", "Application document")</small><span class="career-meta"><em class="@doc.Extension">@doc.Extension.ToUpperInvariant()</em> @doc.At.ToString("dd/MM/yyyy") · @(doc.Size / 1024) KB</span></span></button><button class="career-delete" aria-label="@T("Xem nội dung CV", "Preview CV text")" @onclick="() => preview = doc"><i class="bi bi-eye"></i></button><a class="career-delete" href="@($"/api/cv/documents/{doc.Id}/download")" aria-label="@T("Tải CV gốc", "Download original CV")"><i class="bi bi-download"></i></a><button class="career-delete" disabled="@busy" aria-label="@T("Xóa CV", "Delete CV")" @onclick="() => Remove(doc)"><i class="bi bi-trash3"></i></button></article> }</div>
+        @if(preview is not null) { <section class="career-card career-preview"><header><h2>@preview.Name</h2><button class="career-outline" @onclick="() => preview = null">@T("Đóng", "Close")</button></header><small>@T("Văn bản trích xuất từ CV", "Text extracted from your CV")</small><pre>@preview.Text</pre></section> }
+        @if(!VisibleDocuments.Any()) { <div class="career-empty"><i class="bi bi-file-earmark-plus"></i><h2>@T("Kho CV của bạn", "Your CV library")</h2><p>@T("Chưa có CV phù hợp. Tải PDF hoặc TXT lên để bắt đầu.", "No matching CVs. Upload a PDF or TXT to get started.")</p><label class="career-primary" for="career-upload">@T("Tải lên CV", "Upload CV")</label></div> }
+    }
+    else if(screen == "review")
+    {
+        <div class="career-steps"><span class="active"><b>1</b>@T("Chọn CV", "Choose CV")</span><span class="@(selected is not null ? "active" : "")"><b>2</b>@T("Nhập mô tả công việc", "Add job description")</span><span><b>3</b>@T("Phân tích", "Analyze")</span></div>
+        <h2 class="career-step-title"><b>1</b>@T("Chọn CV từ kho", "Choose a CV")</h2>
+        <div class="career-card career-selection"><span class="career-paper"><b>CV</b><i></i><i></i><i></i></span><div><strong>@(selected?.Name ?? T("Chưa chọn CV", "No CV selected"))</strong><small>@(selected is null ? T("Tải lên hoặc chọn từ kho của bạn", "Upload or choose from your library") : $"{selected.Size / 1024} KB · {selected.At:dd/MM/yyyy}")</small></div><button class="career-outline" disabled="@busy" @onclick='() => Go("library")'>@T("Thay đổi", "Choose")</button></div>
+        <h2 class="career-step-title"><b>2</b>@T("Nhập mô tả công việc (JD)", "Add job description (JD)")</h2>
+        <div class="career-card career-jd"><div class="career-tabs"><button class="@(!jdFileMode ? "active" : "")" disabled="@busy" @onclick="() => jdFileMode = false">@T("Dán văn bản", "Paste text")</button><button class="@(jdFileMode ? "active" : "")" disabled="@busy" @onclick="() => jdFileMode = true">@T("Tải file", "Upload file")</button></div>
+        @if(jdFileMode) { <InputFile OnChange="UploadJd" accept=".pdf,.txt" disabled="@busy" /><small>@jdFileName</small> } else { <textarea maxlength="5000" @bind="jd" @bind:event="oninput" disabled="@busy" aria-label="@T("Mô tả công việc", "Job description")" placeholder="@T("Dán mô tả công việc tại đây…", "Paste the job description here…")"></textarea><small class="career-count">@jd.Length/5000</small> }
+        <p>@T("Hoặc chọn mẫu JD phổ biến", "Or start with a job template")</p><div class="career-templates">@foreach(var role in Roles) { <button disabled="@busy" @onclick="() => UseTemplate(role)">@role</button> }</div></div>
+        <button class="career-primary career-analyze" disabled="@(busy || selected is null)" @onclick="Analyze"><i class="bi @(busy ? "bi-hourglass-split" : "bi-stars")"></i>@(busy ? T("Đang phân tích…", "Analyzing…") : T("Phân tích ngay", "Analyze now"))</button>
+        @if(busy) { <button class="career-outline" @onclick="Cancel">@T("Hủy", "Cancel")</button> }
+    }
+    else if(screen == "result" && result is not null)
+    {
+        <div class="career-result-person"><span class="career-paper"><b>CV</b><i></i><i></i><i></i></span><div><strong>@resultName</strong><small>@resultRole</small><small>@T("Phân tích ngày", "Reviewed on") @resultAt.ToString("dd/MM/yyyy")</small></div></div>
+        <div class="career-scores"><article class="career-card"><h2>@T("Chất lượng CV", "CV quality")</h2><div class="career-ring" style="--score:@result.QualityScore"><strong>@result.QualityScore<small>/100</small></strong></div><p>@Text(result.Summary)</p></article><article class="career-card"><h2>@T("Mức phù hợp với JD", "Job fit")</h2><div class="career-ring" style="--score:@(result.JobMatch?.Score ?? 0)"><strong>@(result.JobMatch?.Score?.ToString() ?? "—")<small>/100</small></strong></div><p>@(result.JobMatch is {} match ? Text(match.Summary) : T("Thêm JD để đánh giá mức phù hợp.", "Add a JD to assess job fit."))</p></article></div>
+        <div class="career-tabs career-result-tabs">@foreach(var tab in new[]{"overview","details","suggestions"}) { <button class="@(resultTab == tab ? "active" : "")" @onclick="() => resultTab = tab">@(tab == "overview" ? T("Tổng quan", "Overview") : tab == "details" ? T("Chi tiết tiêu chí", "Criteria") : T("Gợi ý chỉnh sửa", "Suggestions"))</button> }</div>
+        @if(resultTab != "suggestions") { <section class="career-card career-criteria"><h2>@T("Điểm theo tiêu chí", "Scores by criterion")</h2>@foreach(var item in result.Criteria) { <div class="career-criterion"><span>@Criterion(item.Id)</span><progress value="@(item.Score ?? 0)" max="100"></progress><b>@item.Score</b></div>@if(resultTab == "details") { <p>@Text(item.Feedback)</p> } }</section> }
+        @if(resultTab == "overview") { <div class="career-feedback"><section class="positive"><h2><i class="bi bi-check-circle-fill"></i>@T("Điểm mạnh", "Strengths")</h2><ul>@foreach(var item in result.Strengths) { <li>@Text(item)</li> }</ul></section><section class="improve"><h2><i class="bi bi-exclamation-circle-fill"></i>@T("Điểm cần cải thiện", "To improve")</h2><ul>@foreach(var item in result.Improvements) { <li>@Text(item)</li> }</ul></section></div> }
+        @if(resultTab != "details") { <section class="career-suggestions"><h2><i class="bi bi-stars"></i>@T("Gợi ý chỉnh sửa cụ thể", "Suggested improvements")</h2>@for(var i=0;i<result.Improvements.Count;i++) { <article><b>@(i+1)</b><p>@Text(result.Improvements[i])</p></article> }@if(resultTab == "suggestions") { @foreach(var rewrite in result.Rewrites) { <article class="career-rewrite"><blockquote>@rewrite.Original</blockquote><p>@Text(rewrite.Suggested)</p><small>@Text(rewrite.Reason)</small></article> } }</section> }
+        <p class="career-footnote">@T("Điểm tham khảo dựa trên văn bản trong CV, không đánh giá hình thức trình bày.", "Scores assess readable CV text and do not evaluate visual design.")</p>
+    }
+    else if(screen == "history")
+    {
+        <div class="career-tabs career-history-filters">@foreach(var role in new[]{"all"}.Concat(History.Select(x => x.Role).Distinct())) { <button class="@(historyFilter == role ? "active" : "")" @onclick="() => historyFilter = role">@(role == "all" ? T("Tất cả", "All") : role) (@History.Count(x => role == "all" || x.Role == role))</button> }</div>
+        <div class="career-list">@foreach(var entry in History.Where(x => historyFilter == "all" || x.Role == historyFilter).OrderByDescending(x => x.At)) { <button class="career-history career-card" @onclick="() => Open(entry)"><span class="career-paper"><b>CV</b><i></i><i></i><i></i></span><span><strong>@entry.Name</strong><small>@entry.Role · @entry.At.ToString("dd/MM/yyyy")</small><span class="career-badges"><em>CV <b>@entry.Result.QualityScore</b></em>@if(entry.Result.JobMatch?.Score is {} score) { <em>JD <b>@score</b></em> }</span></span><i class="bi bi-chevron-right"></i></button> }</div>
+        @if(History.Count == 0) { <div class="career-empty"><i class="bi bi-clock-history"></i><h2>@T("Chưa có đánh giá đã lưu", "No saved reviews")</h2><p>@T("Phân tích CV và nhấn Lưu để xem lại tại đây.", "Analyze a CV and save the result to find it here.")</p><button class="career-primary" @onclick='() => Go("review")'>@T("Đánh giá CV", "Review CV")</button></div> }
+    }
+}
+@if(error is not null) { <p class="career-error" role="alert">@error</p> }
+</div>
+
+@code {
+    private string historyFilter = "all", screen = "home", filter = "all", query = "", sort = "new";
+    private string jd = "", jdFileName = "", resultTab = "overview", resultName = "", resultRole = "";
+    private bool busy, jdFileMode, saved;
+    private int userId;
+    private Guid resultId, resultDocumentId;
+    private string resultJd = "";
+    private string? error;
+    private CvDocument? selected, preview;
+    private CvReviewResult? result;
+    private DateTime resultAt;
+    private CancellationTokenSource? cancellation;
+    private List<CvDocument> Documents = [];
+    private List<ReviewEntry> History = [];
+    private static readonly string[] Roles = ["Frontend Developer", "Backend Developer", "Data Analyst", "Product Manager", "UI/UX Designer"];
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private string Text(CvReviewText text) => T(text.Vi, text.En);
+    private (string Id, string Icon, string Title, string Description)[] Menu => [
+        ("library", "bi-file-earmark-text-fill", T("Kho CV", "CV library"), T("Lưu trữ, xem trước và quản lý các hồ sơ của bạn.", "Store and manage your application documents.")),
+        ("review", "bi-bar-chart-fill", T("Đánh giá CV", "Review CV"), T("So khớp với mô tả công việc, chấm điểm và nhận gợi ý cải thiện.", "Explore job fit, scores and ways to improve.")),
+        ("history", "bi-clock-history", T("Lịch sử", "History"), T("Xem lại các lần đánh giá trước đây.", "Revisit your saved reviews."))];
+    private string ScreenTitle => screen switch { "library" => T("Kho CV", "CV library"), "review" => T("Đánh giá CV", "Review CV"), "result" => T("Kết quả đánh giá", "Review results"), _ => T("Lịch sử đánh giá", "Review history") };
+    private IEnumerable<CvDocument> VisibleDocuments
+    {
+        get
+        {
+            var docs = Documents.Where(x => (filter == "all" || x.Extension == filter) && x.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+            return sort == "old" ? docs.OrderBy(x => x.At) : docs.OrderByDescending(x => x.At);
+        }
+    }
+    // Use a short-lived context per operation, rather than sharing a context across the Blazor circuit.
+    private async Task<TValue> Store<TValue>(Func<CvWorkspaceService, Task<TValue>> operation)
+    {
+        await using var scope = Scopes.CreateAsyncScope();
+        return await operation(scope.ServiceProvider.GetRequiredService<CvWorkspaceService>());
+    }
+    private async Task Store(Func<CvWorkspaceService, Task> operation)
+    {
+        await using var scope = Scopes.CreateAsyncScope();
+        await operation(scope.ServiceProvider.GetRequiredService<CvWorkspaceService>());
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await Authentication.GetAuthenticationStateAsync();
+        if (!int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out userId)) return;
+        busy = true;
+        try
+        {
+            Documents = (await Store(s => s.ListDocumentsAsync(userId))).Select(ToDocument).ToList();
+            var reviews = await Store(s => s.ListReviewsAsync(userId));
+            foreach (var review in reviews)
+            {
+                try
+                {
+                    if (JsonSerializer.Deserialize<CvReviewResult>(review.ResultJson) is { } parsed)
+                        History.Add(new(review.Id, review.Name, review.Role, review.CreatedAtUtc.AddHours(7), parsed));
+                }
+                catch (JsonException) { Logger.LogWarning("Could not read saved CV review {ReviewId}", review.Id); }
+            }
+        }
+        catch (Exception ex) { Failed(ex, T("Không thể tải kho CV. Hãy tải lại trang để thử lại.", "Unable to load your CV library. Reload the page to retry.")); }
+        finally { busy = false; }
+    }
+    private static CvDocument ToDocument(SavedCv doc) => new(doc.Id, doc.Name, doc.Extension, doc.Size, doc.CreatedAtUtc.AddHours(7), doc.Text);
+    private void Failed(Exception ex, string message) { Logger.LogWarning("CV workspace operation failed ({FailureType})", ex.GetType().Name); error = message; }
+    private void Go(string target) { if (busy) return; screen = target; error = null; }
+    private void Select(CvDocument doc) { if (busy) return; selected = doc; Go("review"); }
+    private async Task Remove(CvDocument doc)
+    {
+        if (busy) return;
+        busy = true; error = null;
+        try
+        {
+            await Store(s => s.DeleteDocumentAsync(userId, doc.Id));
+            Documents.Remove(doc);
+            if (preview?.Id == doc.Id) preview = null;
+            if (selected?.Id == doc.Id) selected = null;
+        }
+        catch (Exception ex) { Failed(ex, T("Không thể xóa CV. Vui lòng thử lại.", "Unable to delete the CV. Please retry.")); }
+        finally { busy = false; }
+    }
+    private async Task<string> Read(IBrowserFile file)
+    {
+        await using var stream = file.OpenReadStream(CvReviewDocumentReader.MaxFileBytes);
+        return await CvReviewDocumentReader.ReadAsync(stream, file.Name, CancellationToken.None);
+    }
+    private async Task Upload(InputFileChangeEventArgs e)
+    {
+        if (busy) return;
+        busy = true; error = null;
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(CvReviewDocumentReader.MaxFileBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            buffer.Position = 0;
+            var text = await CvReviewDocumentReader.ReadAsync(buffer, file.Name);
+            var stored = await Store(s => s.AddDocumentAsync(userId, file.Name, Path.GetExtension(file.Name).TrimStart('.').ToLowerInvariant(), text, buffer.ToArray()));
+            var doc = ToDocument(stored);
+            Documents.Insert(0, doc); selected = doc;
+        }
+        catch (CvReviewException ex) { error = Text(ex.Feedback); }
+        catch (Exception ex) { Failed(ex, T("Không thể lưu CV. Chọn PDF/TXT có văn bản, tối đa 10 MB và 40.000 ký tự, rồi thử lại.", "Unable to save your CV. Choose a text-readable PDF/TXT, up to 10 MB and 40,000 characters, and retry.")); }
+        finally { busy = false; }
+    }
+    private async Task UploadJd(InputFileChangeEventArgs e)
+    {
+        if (busy) return;
+        busy = true; error = null;
+        try
+        {
+            var text = await Read(e.File);
+            if (text.Length > 5000) { error = T("JD tối đa 5.000 ký tự.", "JD must be at most 5,000 characters."); return; }
+            jd = text; jdFileName = e.File.Name;
+        }
+        catch (CvReviewException ex) { error = Text(ex.Feedback); }
+        catch (Exception ex) { Failed(ex, T("Không thể đọc JD.", "Cannot read the JD.")); }
+        finally { busy = false; }
+    }
+    private void UseTemplate(string role)
+    {
+        resultRole = role;
+        jd = role switch
+        {
+            "Frontend Developer" => "Frontend Developer: Build responsive web interfaces with HTML, CSS, JavaScript, React and TypeScript. Collaborate with designers, integrate REST APIs, use Git, and write maintainable, accessible code.",
+            "Backend Developer" => "Backend Developer: Design and maintain REST APIs, relational databases and secure authentication. Use C# or Python, SQL, Git, automated tests and collaborate with frontend developers.",
+            "Data Analyst" => "Data Analyst: Analyze business data with SQL, Excel and Python. Build dashboards, clean datasets, communicate findings and collaborate with stakeholders to define useful metrics.",
+            "Product Manager" => "Product Manager: Research user needs, define product requirements, prioritize a roadmap and coordinate design and engineering. Analyze product metrics and communicate clearly with stakeholders.",
+            _ => "UI/UX Designer: Research user needs, design wireframes and prototypes in Figma, conduct usability tests, create accessible interfaces and collaborate with product and engineering teams."
+        };
+        jdFileMode = false;
+    }
+    private async Task Analyze()
+    {
+        if (selected is null || busy) return;
+        busy = true; error = null; saved = false;
+        using var token = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+        cancellation = token;
+        try
+        {
+            result = await Review.ReviewAsync(new(selected.Text, jd), token.Token);
+            resultName = selected.Name;
+            resultDocumentId = selected.Id; resultId = Guid.NewGuid(); resultJd = jd;
+            resultRole = string.IsNullOrWhiteSpace(jd) ? T("Đánh giá CV", "CV review") : Roles.FirstOrDefault(x => jd.StartsWith(x, StringComparison.OrdinalIgnoreCase)) ?? T("JD tùy chỉnh", "Custom JD");
+            resultAt = DateTime.UtcNow.AddHours(7); resultTab = "overview"; screen = "result";
+        }
+        catch (CvReviewException ex) { error = Text(ex.Feedback); }
+        catch (OperationCanceledException) { error = T("Đã dừng phân tích. Bạn có thể thử lại.", "Analysis stopped. You can try again."); }
+        catch (Exception ex) { Failed(ex, T("Chưa thể đánh giá CV. Vui lòng thử lại sau.", "Unable to review this CV. Please try again later.")); }
+        finally { busy = false; cancellation = null; }
+    }
+    private void Cancel() => cancellation?.Cancel();
+    private async Task Save()
+    {
+        if (result is null || saved || busy) return;
+        busy = true; error = null;
+        try
+        {
+            await Store(s => s.SaveReviewAsync(userId, new(resultId, resultDocumentId, resultName, resultRole, resultJd, JsonSerializer.Serialize(result), resultAt.AddHours(-7))));
+            History.Insert(0, new(resultId, resultName, resultRole, resultAt, result));
+            saved = true;
+        }
+        catch (Exception ex) { Failed(ex, T("Chưa lưu được kết quả. Hãy thử lại; CV gốc cần còn trong kho.", "Unable to save the result. Retry; the original CV must still be in your library.")); }
+        finally { busy = false; }
+    }
+    private void Open(ReviewEntry entry)
+    {
+        if (busy) return;
+        result = entry.Result; resultId = entry.Id; resultName = entry.Name; resultRole = entry.Role;
+        resultAt = entry.At; resultTab = "overview"; saved = true; Go("result");
+    }
+    private string Criterion(string id) => id switch { "content" => T("Nội dung & kinh nghiệm", "Content & experience"), "clarity" => T("Diễn đạt rõ ràng", "Clarity"), "achievements" => T("Thành tích & minh chứng", "Achievements"), _ => T("Cấu trúc nội dung", "Text structure") };
+    public ValueTask DisposeAsync() { cancellation?.Cancel(); base.Dispose(); return ValueTask.CompletedTask; }
+    public sealed record CvDocument(Guid Id, string Name, string Extension, long Size, DateTime At, string Text);
+    public sealed record ReviewEntry(Guid Id, string Name, string Role, DateTime At, CvReviewResult Result);
+}

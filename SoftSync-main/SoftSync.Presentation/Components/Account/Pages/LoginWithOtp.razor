@@ -56,8 +56,10 @@ else
     private string? message;
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-    [SupplyParameterFromForm(FormName = "otp-request")] private RequestModel RequestInput { get; set; } = new();
-    [SupplyParameterFromForm(FormName = "otp-verify")] private VerifyModel VerifyInput { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "otp-request")] private RequestModel? SuppliedRequestInput { get; set; }
+    [SupplyParameterFromForm(FormName = "otp-verify")] private VerifyModel? SuppliedVerifyInput { get; set; }
+    private RequestModel RequestInput => SuppliedRequestInput ??= new();
+    private VerifyModel VerifyInput => SuppliedVerifyInput ??= new();
 
     private async Task SendCode()
     {
@@ -71,7 +73,7 @@ else
         try
         {
             await CodeService.IssueAsync(VerificationPurpose.PhoneLoginOtp, RequestInput.PhoneNumber, user.Id);
-            VerifyInput = new VerifyModel { PhoneNumber = RequestInput.PhoneNumber };
+            SuppliedVerifyInput = new VerifyModel { PhoneNumber = RequestInput.PhoneNumber };
             codeSent = true;
             message = L["auth.codeSent"];
         }

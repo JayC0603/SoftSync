@@ -1,0 +1,13 @@
+@page "/Account/AccessDenied"
+@inherits LocalizedComponentBase
+@layout AccountLayout
+
+<PageTitle>@Ui("Access denied") · SoftSync</PageTitle>
+
+<main class="container tw:py-16">
+    <section class="alert alert-warning tw:mx-auto tw:max-w-2xl" role="alert" aria-labelledby="access-denied-title">
+        <h1 id="access-denied-title" class="tw:text-2xl tw:font-bold">@Ui("You do not have permission to access this page")</h1>
+        <p>@Ui("Your account does not have permission to use this area.")</p>
+        <a class="btn btn-primary" href="/">@Ui("Back to home")</a>
+    </section>
+</main>

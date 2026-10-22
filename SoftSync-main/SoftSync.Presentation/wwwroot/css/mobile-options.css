@@ -1,0 +1,290 @@
+/* More and Settings share the same lightweight, translucent mobile surfaces. */
+.ss-settings-mobile-title, .ss-settings-direct-footer { display: none; }
+.ss-inline-password form { display: grid; gap: 8px; }
+.ss-inline-password button { margin-top: 8px; min-height: 44px; }
+@media (min-width: 901px) {
+    .ss-settings-direct .ss-settings-section:not(.active) { display: none; }
+}
+.ss-settings-overview, .ss-settings-detail-back { display: none; }
+.ss-more-page {
+    --option-ink: #11164d;
+    --option-muted: #65739c;
+    --option-line: rgb(158 181 229 / 22%);
+    --option-surface: rgb(255 255 255 / 83%);
+    color: var(--option-ink);
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 6px 0 28px;
+}
+html body .page .ss-more-page h1 { margin: 0; font-size: 42px !important; font-weight: 750; line-height: 1.25; letter-spacing: -.04em; }
+html body .page .ss-more-page > header p { margin: 4px 0 0; font-size: 16px !important; color: var(--option-muted); line-height: 1.5; }
+.ss-more-page > header { margin-bottom: 38px; padding-inline: 4px; }
+.ss-more-features { display: grid; gap: 20px; }
+.ss-more-feature {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 108px;
+    padding: 20px 18px;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid rgb(255 255 255 / 60%);
+    border-radius: 20px;
+    background: var(--option-surface);
+}
+.ss-more-icon { display: grid; place-items: center; flex: 0 0 62px; width: 62px; height: 62px; border-radius: 18px; background: linear-gradient(145deg, #e9e8ff, #f0edff); color: #5035f4; font-size: 34px; }
+.ss-more-copy { flex: 1; min-width: 0; }
+.ss-more-copy strong { display: block; font-size: 18px; font-weight: 700; line-height: 1.4; }
+html body .page .ss-main-content .ss-more-copy small { display: block; margin-top: 4px; font-size: 14px !important; line-height: 1.5; color: var(--option-muted); }
+.ss-more-feature > .bi-chevron-right { flex-shrink: 0; font-size: 16px; }
+.ss-more-settings { margin: 20px 2px 0; padding: 14px 0 22px; border-block: 1px solid var(--option-line); }
+.ss-more-settings .ss-more-icon { color: #1763ff; background: #eaf0ff; }
+.ss-more-feature:hover { color: #255de2; border-color: rgb(111 154 238 / 40%); }
+.ss-option-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 58px;
+    padding: 14px 2px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    text-align: start;
+    cursor: pointer;
+    list-style: none;
+}
+.ss-option-row::-webkit-details-marker { display: none; }
+.ss-option-row > i:first-child { flex: 0 0 27px; width: 27px; text-align: center; font-size: 24px; line-height: 1; }
+.ss-option-row > span:not(.ss-settings-person-avatar) { flex: 1; min-width: 0; }
+.ss-option-row > .bi-chevron-right { margin-left: auto; flex: 0 0 auto; font-size: 14px; }
+html body .page .ss-option-row > small { color: var(--option-muted); font-size: 14px !important; white-space: nowrap; }
+.ss-support-options > :not(:last-child) { border-bottom: 1px solid var(--option-line); }
+.ss-more-page > .ss-support-options { padding: 8px 14px; }
+.ss-more-page > .ss-support-options .ss-option-row { min-height: 70px; }
+.ss-support-note { padding: 0 8px 16px 46px; color: var(--option-muted); }
+.ss-support-note p { margin: 0 0 8px; }
+.ss-support-options details[open] > summary > .bi-chevron-right { rotate: 90deg; }
+.ss-option-row:hover { color: #255de2; }
+:is(.ss-more-feature, .ss-option-row, .ss-options-title a, .ss-settings-detail-back):focus-visible { outline: 3px solid #337cff; outline-offset: 3px; border-radius: 10px; }
+html[data-theme='dark'] body .ss-more-page {
+    --option-ink: #edf2ff; --option-muted: #aabbda; --option-line: rgb(158 181 229 / 18%); --option-surface: rgb(26 38 61 / 94%);
+}
+html[data-theme='dark'] .ss-more-icon { background: #2a2d54; color: #b6a9ff; }
+@media (min-width: 901px) {
+    .ss-more-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ss-more-feature { gap: 16px; }
+    .ss-more-copy strong { font-size: 16px; }
+}
+@media (max-width: 900px) {
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) {
+        --option-ink: #11164d; --option-muted: #65739c; --option-line: rgb(158 181 229 / 22%); --option-surface: rgb(255 255 255 / 83%);
+    }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-workspace {
+        background: radial-gradient(ellipse at 110% 30%, #e8f3ff80, transparent 60%), linear-gradient(125deg, #f9fbff, #eef8ff 55%, #f8faff) !important;
+    }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-main-content.container { padding: 22px 16px 30px !important; background: transparent !important; }
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-site-footer-shell { display: none; }
+    .ss-more-page { min-height: calc(100svh - 200px); }
+    .ss-settings-shell { color: var(--option-ink); }
+    .ss-settings-overview { display: grid; gap: 20px; }
+    .ss-settings-show-overview > fieldset,
+    .ss-settings-show-overview > .ss-page-header,
+    .ss-settings-show-overview > :is(header, .ui-page-header) { display: none; }
+    /* The existing editor remains available after selecting a settings row. */
+    .ss-settings-show-detail > .ss-settings-overview { display: none; }
+    .ss-settings-show-detail > .ss-settings-detail-back { display: flex; align-items: center; gap: 12px; min-height: 44px; margin-bottom: 16px; padding: 0 4px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 18px; cursor: pointer; }
+    .ss-options-title { display: flex; align-items: center; gap: 18px; min-height: 44px; margin: -4px 0 2px; }
+    .ss-options-title a { display: grid; place-items: center; width: 36px; height: 44px; color: inherit; text-decoration: none; font-size: 24px; }
+    html body .page .ss-settings-overview .ss-options-title h1 { margin: 0; font-size: 26px !important; line-height: 1.3; font-weight: 750; }
+    .ss-options-group { min-width: 0; padding: 0 16px 4px; border: 1px solid rgb(255 255 255 / 60%); border-radius: 20px; background: var(--option-surface); }
+    html body .page .ss-settings-overview .ss-options-group h2 { display: flex; align-items: center; gap: 16px; min-height: 56px; margin: 0; padding: 12px 2px; border-bottom: 1px solid var(--option-line); color: inherit; font-size: 18px !important; line-height: 1.4; font-weight: 700; }
+    .ss-options-group h2 i { flex: 0 0 27px; font-size: 24px; text-align: center; }
+    .ss-options-group > .ss-option-row:not(:last-child) { border-bottom: 1px solid var(--option-line); }
+    html body .page .ss-main-content .ss-settings-overview .ss-option-row { font-size: 15px !important; font-weight: 400; }
+    html body .page .ss-main-content .ss-settings-overview button.ss-option-row { font-weight: 400; }
+    .ss-settings-person { min-height: 82px; }
+    .ss-settings-person-avatar { display: grid; place-items: center; flex: 0 0 58px; width: 58px; height: 58px; border-radius: 50%; overflow: hidden; background: linear-gradient(130deg, #6360d4, #423ab5); color: #fff; font-size: 28px; }
+    .ss-settings-person-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .ss-settings-person strong { display: block; font-size: 18px; font-weight: 650; }
+    html body .page .ss-settings-person small { display: block; margin-top: 3px; font-size: 14px !important; color: var(--option-muted); }
+    .ss-options-logout { margin: 12px 4px 18px; }
+    .ss-options-logout button { display: flex; justify-content: center; align-items: center; gap: 16px; width: 100%; min-height: 58px; padding: 14px; border: 1px solid #e83958; border-radius: 12px; background: linear-gradient(120deg, #fa4c67, #ec405f); color: #fff; font: inherit; font-size: 19px; font-weight: 600; cursor: pointer; }
+    .ss-options-logout button i { font-size: 25px; }
+    .ss-options-logout button:focus-visible { outline: 3px solid #a51e3a; outline-offset: 3px; }
+    html body .page:has(.ss-settings-shell) .ss-mobile-bottom-link[href='/more'] { color: #0875ff; background: rgb(8 117 255 / 8%); }
+    html[data-theme='dark'] body .page:has(:is(.ss-more-page, .ss-settings-shell)) { --option-ink: #edf2ff; --option-muted: #aabbda; --option-line: rgb(158 181 229 / 18%); --option-surface: rgb(26 38 61 / 94%); }
+    html[data-theme='dark'] body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-workspace { background: linear-gradient(125deg, #0d1629, #101e32) !important; }
+    html[data-theme='dark'] body .page .ss-options-group { border-color: rgb(158 181 229 / 12%); }
+}
+@media (max-width: 360px) {
+    .ss-more-feature { gap: 14px; padding-inline: 14px; }
+    .ss-more-icon { flex-basis: 52px; width: 52px; height: 56px; font-size: 30px; }
+    .ss-more-copy strong { font-size: 16px; }
+    .ss-option-row { gap: 12px; }
+    html body .page .ss-option-row > small { font-size: 12px !important; }
+}
+
+/* Match the home page's type scale across overview and detail settings. */
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell),
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) :is(h1, h2, h3, h4, p, a, span, strong, small, label, button, input, select, textarea, summary) {
+    font-family: var(--ss-font-family, 'Segoe UI', Arial, sans-serif) !important;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) {
+    font-size: .875rem;
+    line-height: 1.5;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) h1 {
+    font-size: 1.3125rem !important;
+    line-height: 1.35;
+    font-weight: 750;
+    letter-spacing: -.04em;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) h2 {
+    font-size: 1.125rem !important;
+    line-height: 1.4;
+}
+html body .page .ss-main-content .ss-settings-shell :is(h3, h4, .ss-panel-title, .ss-hero-name) {
+    font-size: 1rem !important;
+    line-height: 1.4;
+}
+html body .page .ss-main-content .ss-more-page > header p,
+html body .page .ss-main-content .ss-more-page .ss-option-row,
+html body .page .ss-main-content .ss-settings-overview .ss-option-row,
+html body .page .ss-main-content .ss-settings-shell :is(p, label, .ss-field-label, .ss-settings-nav button, .ss-account-password, .ss-account-save) {
+    font-size: .875rem !important;
+    line-height: 1.5;
+}
+html body .page .ss-main-content .ss-more-copy strong,
+html body .page .ss-main-content .ss-settings-person strong {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 650;
+}
+html body .page .ss-main-content .ss-more-copy small,
+html body .page .ss-main-content .ss-settings-overview :is(small, .ss-option-row > small),
+html body .page .ss-main-content .ss-settings-shell :is(.ss-field-hint, .ss-linked-state, .ss-account-security) {
+    font-size: .75rem !important;
+    line-height: 1.5;
+}
+html body .page .ss-main-content .ss-settings-shell .ss-options-logout button,
+html body .page .ss-main-content .ss-settings-shell .ss-settings-detail-back {
+    font-size: 1rem !important;
+    line-height: 1.5;
+}
+.ss-more-page > header { margin-bottom: 24px; }
+
+/* Compact mobile lists: shared surfaces keep related actions together. */
+@media (max-width: 900px) {
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-main-content.container {
+        padding: 16px 14px 20px !important;
+    }
+    .ss-more-page { padding-top: 0; }
+    .ss-more-page > header { margin-bottom: 16px; }
+    .ss-more-features {
+        gap: 0;
+        padding: 0 12px;
+        background: var(--option-surface);
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+    }
+    .ss-more-page .ss-more-feature {
+        min-height: 72px;
+        padding: 12px 0;
+        gap: 12px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+    .ss-more-features .ss-more-feature + .ss-more-feature { border-top: 1px solid var(--option-line); }
+    .ss-more-page .ss-more-icon {
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 24px;
+    }
+    html body .page .ss-main-content .ss-more-copy strong { font-size: .875rem; line-height: 1.4; }
+    html body .page .ss-main-content .ss-more-copy small { margin-top: 2px; line-height: 1.4; }
+    .ss-more-feature > .bi-chevron-right { font-size: 12px; }
+    .ss-more-settings {
+        margin: 10px 0;
+        padding: 0 12px;
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+        background: var(--option-surface);
+    }
+    .ss-more-page > .ss-support-options {
+        padding: 0 12px;
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+        background: var(--option-surface);
+    }
+    .ss-more-page > .ss-support-options .ss-option-row { min-height: 48px; padding: 10px 0; gap: 12px; }
+    .ss-option-row > i:first-child { flex-basis: 22px; width: 22px; font-size: 20px; }
+    .ss-option-row > .bi-chevron-right { font-size: 12px; }
+    .ss-settings-overview { gap: 12px; }
+    .ss-options-title { gap: 10px; margin-bottom: 0; }
+    .ss-options-group { padding-inline: 12px; border-radius: 16px; }
+    html body .page .ss-main-content .ss-settings-overview .ss-options-group h2 {
+        min-height: 46px;
+        padding: 10px 0;
+        gap: 12px;
+        font-size: 1rem !important;
+    }
+    .ss-options-group h2 i { flex-basis: 22px; font-size: 20px; }
+    .ss-settings-overview .ss-option-row { min-height: 48px; padding: 10px 0; gap: 12px; }
+    .ss-settings-overview .ss-settings-person { min-height: 66px; }
+    .ss-settings-person-avatar { flex-basis: 44px; width: 44px; height: 44px; font-size: 22px; }
+    html body .page .ss-main-content .ss-settings-person strong { font-size: .875rem; }
+    .ss-options-logout { margin: 4px 0 10px; }
+    .ss-options-logout button { min-height: 48px; padding: 10px 14px; gap: 10px; }
+    .ss-options-logout button i { font-size: 20px; }
+}
+
+/* Edit the actual account model directly in each mobile settings group. */
+@media (max-width: 900px) {
+    .ss-settings-direct > .ss-page-header { display: none; }
+    .ss-settings-direct .ss-settings-mobile-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ss-settings-mobile-title a { display: grid; place-items: center; width: 36px; height: 44px; color: inherit; text-decoration: none; }
+    .ss-settings-mobile-title h1 { margin: 0; }
+    html body .ss-settings-direct .ss-settings-grid { display: block; }
+    .ss-settings-direct .ss-side { display: none; }
+    .ss-settings-direct .ss-main, .ss-settings-direct .ss-settings-panels { display: grid; gap: 12px; min-width: 0; }
+    .ss-settings-direct .ss-settings-section { display: block; min-width: 0; scroll-margin-top: 84px; }
+    .ss-settings-direct .ss-settings-direct-footer { display: grid; gap: 12px; }
+    html body .ss-settings-direct .ss-settings-section > .ss-card {
+        margin: 0 0 12px !important;
+        padding: 16px !important;
+        border: 1px solid var(--option-line) !important;
+        border-radius: 16px !important;
+        background: var(--option-surface) !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    html body .ss-settings-direct .ss-settings-section > .ss-account-panel { padding: 0 !important; }
+    .ss-settings-direct .ss-account-heading { padding: 14px; gap: 12px; background: transparent; }
+    .ss-settings-direct .ss-account-heading-icon { width: 32px; height: 32px; flex-basis: 32px; font-size: 18px; border-radius: 10px; }
+    .ss-settings-direct .ss-account-heading p { display: none; }
+    .ss-settings-direct .ss-account-password { width: auto; min-height: 44px; padding: 8px 10px; }
+    .ss-settings-direct .ss-account-fields { padding: 14px; gap: 14px; }
+    .ss-settings-direct .ss-account-connections { margin-inline: 14px; padding-block: 14px; }
+    .ss-settings-direct .ss-account-actions { padding: 14px; gap: 12px; }
+    .ss-settings-direct .ss-account-security { display: none; }
+    html body .ss-settings-direct .ss-linked { min-height: 66px; padding: 10px; gap: 10px; border-radius: 12px; }
+    html body .ss-settings-direct .ss-linked-grid { gap: 8px; }
+    .ss-settings-direct .ss-hero { margin: 0; padding: 14px; border-radius: 16px; background: var(--option-surface); box-shadow: none; }
+    .ss-settings-direct .ss-hero-inner { display: flex; align-items: center; flex-wrap: nowrap; gap: 14px; padding: 0; }
+    .ss-settings-direct .ss-hero-avatar { width: 52px; height: 52px; flex: 0 0 52px; }
+    .ss-settings-direct .ss-hero-id { min-width: 0; }
+    .ss-settings-direct .ss-hero-name-row { flex-wrap: wrap; gap: 6px; }
+    .ss-settings-direct .ss-hero-quote, .ss-settings-direct .ss-hero-stats { display: none; }
+    .ss-settings-direct .ss-seg { display: flex; flex-wrap: wrap; gap: 6px; background: transparent; }
+    .ss-settings-direct :is(.ss-seg button, .ss-seg-1) { min-height: 44px; padding: 8px 12px; white-space: normal; }
+    html body .ss-settings-direct .ss-settings-section :is(h4, h5) { margin-top: 0; font-size: 1rem !important; }
+}

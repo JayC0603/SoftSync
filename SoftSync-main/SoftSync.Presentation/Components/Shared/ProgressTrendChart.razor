@@ -1,0 +1,63 @@
+@inherits ProgressLocalizedComponentBase
+@using System.Globalization
+
+<div class="pg-chart" role="img" aria-label="@Description">
+    @if (Combined)
+    {
+        <div class="pg-chart-caption"><span>@T("Thời gian (phút)")</span><span>@T("Số hoạt động")</span></div>
+    }
+    <svg viewBox="0 0 360 176" aria-hidden="true">
+        <defs><linearGradient id="pg-bar-blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#83baff" /><stop offset="100%" stop-color="#a6d1ff" /></linearGradient><linearGradient id="pg-bar-current" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#209fff" /><stop offset="100%" stop-color="#0075ff" /></linearGradient></defs>
+        @for (var tick = 0; tick <= 4; tick++)
+        {
+            var y = 144 - tick * 32;
+            <g><line x1="29" x2="339" y1="@y" y2="@y" class="pg-grid-line" /><text x="21" y="@(y + 4)" text-anchor="end" class="pg-axis">@(Maximum * tick / 4)</text>
+            @if (Combined) { <g><text x="349" y="@(y + 4)" text-anchor="middle" class="pg-axis">@(CountMaximum * tick / 4)</text></g> }</g>
+        }
+        @for (var i = 0; i < Points.Count; i++)
+        {
+            var index = i;
+            var point = Points[i];
+            var x = X(i);
+            var height = point.Minutes * 128d / Maximum;
+            <g class="pg-chart-point" tabindex="0" role="button" aria-label="@TextFormat("{0}: {1} phút, {2} hoạt động", point.Label, point.Minutes, point.Count)" @onclick="() => selected = index" @onfocus="() => selected = index" @onkeydown="e => SelectWithKey(e, index)">
+                <title>@point.Label: @point.Minutes @T("phút") · @point.Count @T("hoạt động")</title>
+                <rect x="@F(x - 13)" y="@F(144 - height)" width="26" height="@F(Math.Max(height, 1))" rx="4" fill="@(i == Highlight ? "url(#pg-bar-current)" : "url(#pg-bar-blue)")" />
+                @if (!Combined) { <g><text x="@F(x)" y="@F(137 - height)" text-anchor="middle" class="pg-bar-label">@point.Minutes</text></g> }
+                <text x="@F(x)" y="164" text-anchor="middle" class="pg-axis">@point.Label</text>
+            </g>
+        }
+        @if (Combined)
+        {
+            <polyline points="@LinePoints" fill="none" stroke="#9364ff" stroke-width="1.8" />
+            @for (var i = 0; i < Points.Count; i++)
+            {
+                <circle cx="@F(X(i))" cy="@F(144 - Points[i].Count * 128d / CountMaximum)" r="3.5" fill="#9364ff" />
+            }
+            @if (Points.Count > 0)
+            {
+                var point = Points[Selected];
+                var x = Math.Clamp(X(Selected), 60, 302);
+                var y = Math.Max(3, 144 - point.Minutes * 128d / Maximum - 44);
+                <g class="pg-chart-tooltip"><rect x="@F(x - 41)" y="@F(y)" width="82" height="38" rx="7" /><text x="@F(x - 31)" y="@F(y + 15)" class="pg-tooltip-title">@point.Minutes @T("phút")</text><text x="@F(x - 31)" y="@F(y + 28)" class="pg-axis">@point.Count @T("hoạt động")</text></g>
+            }
+        }
+    </svg>
+    @if (Combined) { <div class="pg-chart-legend"><span><i class="pg-dot blue"></i>@T("Thời gian học (phút)")</span><span><i class="pg-dot purple"></i>@T("Số hoạt động")</span></div> }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<Point> Points { get; set; } = [];
+    [Parameter] public bool Combined { get; set; }
+    private int selected = -1;
+    private int Highlight => Points.Count == 0 ? 0 : Points.ToList().FindIndex(x => x.Minutes == Points.Max(p => p.Minutes));
+    private int Selected => selected < 0 || selected >= Points.Count ? Highlight : selected;
+    private int Maximum => Math.Max(120, (int)Math.Ceiling(Points.Select(x => x.Minutes).DefaultIfEmpty(0).Max() / 40d) * 40);
+    private int CountMaximum => Math.Max(8, (int)Math.Ceiling(Points.Select(x => x.Count).DefaultIfEmpty(0).Max() / 4d) * 4);
+    private double X(int index) => 29 + (index + .5) * 310d / Math.Max(1, Points.Count);
+    private string LinePoints => string.Join(" ", Points.Select((p, i) => $"{F(X(i))},{F(144 - p.Count * 128d / CountMaximum)}"));
+    private string Description => string.Join("; ", Points.Select(p => TextFormat("{0}: {1} phút, {2} hoạt động", p.Label, p.Minutes, p.Count)));
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    private void SelectWithKey(KeyboardEventArgs e, int index) { if (e.Key is "Enter" or " ") selected = index; }
+    public sealed record Point(string Label, int Minutes, int Count);
+}

@@ -4,29 +4,55 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-@if (externalLogins.Length == 0)
+@if (externalLogins.Length > 0)
 {
-    <div class="tw:text-center text-muted tw:text-sm tw:mt-2">
-        @L["auth.googleNotConfigured"]
-    </div>
-}
-else
-{
-    <form class="tw:mt-2" action="Account/PerformExternalLogin" method="post">
+    <form class="external-login-form" action="Account/PerformExternalLogin" method="post">
         <AntiforgeryToken />
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        <input type="hidden" name="intent" value="@(IsRegistration ? "register" : "login")" />
         @foreach (var provider in externalLogins)
         {
-            <button type="submit" class="btn btn-outline-secondary tw:w-full tw:py-2 tw:flex tw:items-center tw:justify-center tw:gap-2"
+            <button type="submit" class="external-google tw:w-full tw:flex tw:items-center tw:justify-center tw:gap-2"
                     name="provider" value="@provider.Name" title="@provider.DisplayName">
-                <i class="bi bi-google"></i> @L["auth.googleSignIn"]
+                <span class="google-mark" aria-hidden="true">G</span>
+                <span>@GoogleButtonLabel</span>
             </button>
         }
     </form>
+    @if (IsRegistration)
+    {
+        <p class="external-help">@L["auth.googleSignUp.help"]</p>
+    }
+    <div class="external-divider"><span>@L["auth.or"]</span></div>
 }
+
+else
+{
+    <div class="external-login-form">
+        <button type="button" class="external-google" disabled aria-describedby="google-unavailable">
+            <span class="google-mark" aria-hidden="true">G</span>
+            <span>@GoogleButtonLabel</span>
+        </button>
+        <p id="google-unavailable" class="external-help">@L["auth.googleNotConfigured"]</p>
+    </div>
+    <div class="external-divider"><span>@L["auth.or"]</span></div>
+}
+
+<style>
+    .external-login-form { margin: 0; }
+    .external-help { margin: 10px 0 0; color: #9ba7c5; font-size: .82rem; text-align: center; }
+    .external-google:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+    .external-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #7783a2; font-size: .76rem; text-transform: uppercase; letter-spacing: .07em; }
+    .external-divider::before, .external-divider::after { content: ""; height: 1px; flex: 1; background: rgba(143,162,255,.16); }
+    .external-google { min-height: 52px; padding: 11px 16px; border: 1px solid rgba(255,255,255,.9); border-radius: 13px; color: #202124; background: #fff; font-weight: 750; box-shadow: 0 10px 26px rgba(0,0,0,.16); transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .external-google:hover { border-color: #c7ccff; color: #111827; background: #f8faff; box-shadow: 0 14px 30px rgba(0,0,0,.22); transform: translateY(-1px); }
+    .google-mark { width: 24px; height: 24px; display: grid; place-items: center; font-family: Arial,sans-serif; font-size: 1.12rem; font-weight: 800; background: conic-gradient(from -45deg,#4285f4 0 25%,#34a853 0 45%,#fbbc05 0 65%,#ea4335 0 82%,#4285f4 0); background-clip: text; -webkit-background-clip: text; color: transparent; }
+</style>
 
 @code {
     private AuthenticationScheme[] externalLogins = [];
+    [Parameter] public bool IsRegistration { get; set; }
+    private string GoogleButtonLabel => L[IsRegistration ? "auth.googleSignUp" : "auth.googleSignIn"];
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     [Inject] private LocalizationService L { get; set; } = default!;

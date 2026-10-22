@@ -1,0 +1,163 @@
+@namespace SoftSync.Presentation.Components.Journey
+
+                <section class="ad-map-panel @(!string.IsNullOrWhiteSpace(BackgroundImage) ? "ad-map-illustrated" : null)">
+                    <div class="ad-map-title">
+                        <h2>@Tx("Your skill roadmap", "Bản đồ kỹ năng")</h2>
+                        <p>@Tx("Follow the path to the final summit.", "Đi theo con đường đến đỉnh thử thách.")</p>
+                    </div>
+                    <div class="ad-map-scene" style="@($"aspect-ratio:500 / {MapHeight}")">
+                        <svg class="ad-map-svg" viewBox="@($"0 0 500 {MapHeight}")" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                            <defs>
+                                <radialGradient id="@(mapId)-sky">
+                                    <stop offset="0" stop-color="#6156c5" stop-opacity=".6" />
+                                    <stop offset="1" stop-color="#131d45" stop-opacity="0" />
+                                </radialGradient>
+                                <linearGradient id="@(mapId)-road" x1="0" y1="1" x2="1" y2="0">
+                                    <stop offset="0" stop-color="#57dbc0" />
+                                    <stop offset=".55" stop-color="#9888ff" />
+                                    <stop offset="1" stop-color="#ffcb74" />
+                                </linearGradient>
+                                <filter id="@(mapId)-glow" x="-80%" y="-80%" width="260%" height="260%">
+                                    <feGaussianBlur stdDeviation="7" />
+                                </filter>
+                            </defs>
+                            @if (!string.IsNullOrWhiteSpace(BackgroundImage))
+                            {
+                                <image class="@(!string.IsNullOrWhiteSpace(LightBackgroundImage) ? "ad-background-dark" : null)" href="@BackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                                @if (!string.IsNullOrWhiteSpace(LightBackgroundImage))
+                                {
+                                    <image class="ad-background-light" href="@LightBackgroundImage" x="0" y="0" width="500" height="@MapHeight" preserveAspectRatio="xMidYMid slice" />
+                                }
+                            }
+                            else
+                            {
+                            <circle cx="250" cy="170" r="280" fill="url(#@(mapId)-sky)" />
+                            <path d="M0 290 65 205 125 270 215 165 315 275 397 174 500 260V760H0Z" fill="#252b62" />
+                            <path d="M0 393 75 306 150 365 265 248 343 340 440 254 500 310V760H0Z" fill="#27386f" opacity=".85" />
+                            <path d="M0 484Q91 389 185 442T352 430T500 390V760H0Z" fill="#263966" />
+                            <path d="M0 591Q85 535 155 584T340 553T500 542V760H0Z" fill="#203658" />
+                            <path d="M0 700Q128 635 250 688T500 659V760H0Z" fill="#1b3455" />
+                            @foreach (var tree in Trees)
+                            {
+                                <g transform="translate(@tree.X @tree.Y) scale(@tree.Size)">
+                                    <path d="M0 0-18 32h8l-12 22h11l-8 18h38l-8-18h11L10 32h8Z" fill="#28506b" />
+                                    <rect x="-3" y="72" width="6" height="13" fill="#685d8a" />
+                                </g>
+                            }
+                            }
+                            @if (Illustrated)
+                            {
+                                <path class="ad-trail-shadow" d="@MapPath" fill="none" stroke-width="8" stroke-linecap="round" />
+                                <path class="ad-trail-pending" d="@MapPath" fill="none" stroke-width="3" stroke-dasharray="4 8" stroke-linecap="round" />
+                            }
+                            else
+                            {
+                                <path d="@MapPath" fill="none" stroke="#131c42" stroke-width="30" stroke-linecap="round" />
+                                <path d="@MapPath" fill="none" stroke="#6973bb" stroke-opacity=".56" stroke-width="21" stroke-linecap="round" />
+                                <path d="@MapPath" fill="none" stroke="#aaa3ff" stroke-opacity=".5" stroke-dasharray="2 15" stroke-width="3" stroke-linecap="round" />
+                            }
+                            <path d="@MapPath" pathLength="1000" fill="none" stroke="url(#@(mapId)-road)"
+                                  stroke-dasharray="@RoadDash" stroke-width="14" stroke-linecap="round" opacity=".65" filter="url(#@(mapId)-glow)" />
+                            <path d="@MapPath" pathLength="1000" fill="none" stroke="url(#@(mapId)-road)"
+                                  stroke-dasharray="@RoadDash" stroke-width="5" stroke-linecap="round" />
+                            @if (!string.IsNullOrWhiteSpace(BackgroundImage) && Checkpoints.Count > 0)
+                            {
+                                <path d="@SummitPath" fill="none" stroke="#ffcf85" stroke-opacity=".7" stroke-width="3" stroke-dasharray="5 9" stroke-linecap="round" />
+                            }
+                            @if (Illustrated)
+                            {
+                                <g transform="@($"translate(350 {SummitY})")">
+                                    <circle cy="-15" r="30" fill="#ffd38a" fill-opacity=".12" />
+                                    <path d="M0 0V-43M0-43 25-34 0-25" stroke="#ffcf85" stroke-width="3" fill="#f3bd68" stroke-linejoin="round" />
+                                </g>
+                            }
+                            else
+                            {
+                            <g transform="translate(250 90)">
+                                <ellipse cy="25" rx="78" ry="24" fill="#4a3f86" />
+                                <path d="M-38 14V-7h76v21" fill="#8063a3" />
+                                <path d="M-26-7 0-48 26-7Z" fill="#eab66f" />
+                                <path d="M0-48v-22m0 0 25 9-25 9Z" stroke="#ffe3a6" fill="#b58eff" stroke-width="2" />
+                                <circle cy="-10" r="26" fill="#ffc471" fill-opacity=".18" />
+                            </g>
+                            }
+                            <g fill="#d7dcff" opacity=".55">
+                                <circle cx="32" cy="112" r="2"/><circle cx="94" cy="181" r="1.5"/>
+                                <circle cx="420" cy="118" r="2"/><circle cx="458" cy="319" r="1.5"/>
+                                <circle cx="62" cy="513" r="2"/><circle cx="450" cy="612" r="2"/>
+                                <circle cx="301" cy="51" r="1.5"/><circle cx="179" cy="311" r="1.5"/>
+                            </g>
+                        </svg>
+                        <div class="ad-summit-label"><i class="bi bi-trophy-fill"></i><span>@Tx("Finish", "Đích đến")</span></div>
+                        @foreach (var entry in Checkpoints.Select((item, index) => new { Item = item, Index = index }))
+                        {
+                            var isCompleted = entry.Item.State == JourneyState.Completed;
+                            var isCurrent = entry.Item.ItemId == SelectedItemId;
+                            var isLocked = entry.Item.State == JourneyState.Locked;
+                            var ordinal = entry.Index + 1;
+                            <button type="button" class="ad-map-node @(isCompleted ? "completed" : isLocked ? "locked" : "available") @(isCurrent ? "selected" : "")"
+                                    style="@NodeStyle(entry.Index)"
+                                    aria-label="@(Tx("Level", "Cấp độ") + " " + ordinal + ": " + entry.Item.Title)"
+                                    title="@(isLocked ? Tx("Complete earlier levels to unlock", "Hoàn thành cấp trước để mở khóa") : entry.Item.Title)"
+                                    disabled="@isLocked" @onclick="() => OnSelect.InvokeAsync(entry.Item)">
+                                <span class="ad-node-number">
+                                    @if (!string.IsNullOrWhiteSpace(BackgroundImage))
+                                    {
+                                        <span>@ordinal</span>
+                                        @if (isCompleted || isLocked)
+                                        {
+                                            <i class="ad-node-badge bi @(isCompleted ? "bi-check-lg" : "bi-lock-fill")" aria-hidden="true"></i>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <i class="bi @(isCompleted ? "bi-check-lg" : isLocked ? "bi-lock-fill" : "bi-stars")"></i>
+                                    }
+                                </span>
+                                <span class="ad-node-label"><small>@Tx("Level", "Cấp") @ordinal.ToString("00")</small><strong>@entry.Item.Title</strong></span>
+                            </button>
+                        }
+                    </div>
+                    <div class="ad-map-legend">
+                        <span><i class="bi bi-check-circle-fill"></i>@Tx("Completed", "Hoàn thành")</span>
+                        <span><i class="bi bi-circle-fill"></i>@Tx("Available", "Đang mở")</span>
+                        <span><i class="bi bi-lock-fill"></i>@Tx("Locked", "Chưa mở")</span>
+                    </div>
+                </section>
+@code {
+    private readonly string mapId = "ad-map-" + Guid.NewGuid().ToString("N");
+    [Parameter] public IReadOnlyList<JourneyCheckpoint> Checkpoints { get; set; } = [];
+    [Parameter] public int SelectedItemId { get; set; }
+    [Parameter] public bool Vietnamese { get; set; }
+    [Parameter] public string? BackgroundImage { get; set; }
+    [Parameter] public string? LightBackgroundImage { get; set; }
+    [Parameter] public EventCallback<JourneyCheckpoint> OnSelect { get; set; }
+    private string Tx(string en, string vi) => Vietnamese ? vi : en;
+    private bool Illustrated => !string.IsNullOrWhiteSpace(BackgroundImage);
+    private int MapHeight => Illustrated ? Math.Max(540, Checkpoints.Count * 125 + 170) : Math.Max(760, Checkpoints.Count * 150);
+    private static readonly (int X, int Y, double Size)[] Trees =
+    [(35,420,.85),(455,365,.9),(85,315,.64),(402,294,.74),(42,615,1.13),(425,584,.9),(155,191,.7),(392,172,.7),(82,697,.9),(355,682,.77),(10,228,.65)];
+    private int NodeX(int index) => Illustrated ? index % 2 == 0 ? 100 : 250 : index % 2 == 0 ? 170 : 330;
+    private int NodeY(int index) => Illustrated
+        ? Checkpoints.Count <= 1 ? MapHeight - 110 : (int)Math.Round(MapHeight - 90 - (double)index * (MapHeight - 90 - Math.Max(190, SummitY + 75)) / (Checkpoints.Count - 1))
+        : Checkpoints.Count <= 1 ? 430 : (int)Math.Round(MapHeight - 107 - (double)index * (MapHeight - 270) / (Checkpoints.Count - 1));
+    private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    private string NodeStyle(int index) => $"left:{F(NodeX(index) / 5.0)}%;top:{F(NodeY(index) / (double)MapHeight * 100)}%";
+    private int SummitY => (int)Math.Round(MapHeight * .24);
+    private string SummitPath => $"M {NodeX(Checkpoints.Count - 1)} {NodeY(Checkpoints.Count - 1)} Q 350 {SummitY + 65} 350 {SummitY}";
+    private string MapPath {
+        get {
+            if(Checkpoints.Count == 0) return "";
+            var path=$"M {NodeX(0)} {NodeY(0)}";
+            for(var i=1;i<Checkpoints.Count;i++) { var middle=(NodeY(i-1)+NodeY(i))/2; path += $" C {NodeX(i-1)} {middle} {NodeX(i)} {middle} {NodeX(i)} {NodeY(i)}"; }
+            return path;
+        }
+    }
+    private string RoadDash {
+        get {
+            if(Checkpoints.Count<=1) return "0 1000";
+            var last=Checkpoints.ToList().FindLastIndex(x=>x.State!=JourneyState.Locked);
+            return $"{F(Math.Clamp((double)last/(Checkpoints.Count-1)*1000,0,1000))} 1000";
+        }
+    }
+}

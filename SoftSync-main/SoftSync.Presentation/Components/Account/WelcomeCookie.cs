@@ -9,9 +9,10 @@ public static class WelcomeCookie
 {
     public const string Name = "ss-welcome";
 
-    public static void Set(HttpContext context, string? displayName)
+    public static void Set(HttpContext context, string? displayName, bool isFirstLogin = false)
     {
-        var value = string.IsNullOrWhiteSpace(displayName) ? " " : displayName;
+        var name = string.IsNullOrWhiteSpace(displayName) ? " " : displayName;
+        var value = $"{(isFirstLogin ? "first" : "returning")}|{name}";
         context.Response.Cookies.Append(Name, value, new CookieOptions
         {
             MaxAge = TimeSpan.FromSeconds(15),

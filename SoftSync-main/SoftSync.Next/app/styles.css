@@ -1,0 +1,1627 @@
+
+
+:root {
+  --ss-ink: #172033;
+  --ss-muted: #64748b;
+  --ss-accent: #5146d8;
+  --ss-border: #e5e9f2;
+  --ss-bg: #f8fafd
+}
+
+* {
+  box-sizing: border-box
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI",Arial,sans-serif;
+  -webkit-font-smoothing: antialiased
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 30px
+}
+
+.marketing {
+  overflow-x: clip;
+  background: var(--ss-bg);
+  color: var(--ss-ink);
+  line-height: 1.5;
+  min-height: 100vh
+}
+
+.marketing p,.marketing h1,.marketing h2,.marketing h3 {
+  margin-top: 0
+}
+
+.marketing a {
+  color: inherit;
+  text-decoration: none
+}
+
+.marketing a:focus-visible,.marketing summary:focus-visible {
+  outline: 3px solid var(--ss-accent);
+  outline-offset: 5px
+}
+
+.marketing .shell {
+  width: min(1440px,100%);
+  margin: auto;
+  padding: 0 48px
+}
+
+.marketing .nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  min-height: 90px;
+  position: relative;
+  z-index: 3
+}
+
+.marketing .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -1px
+}
+
+.marketing .brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 38px;
+  color: var(--ss-accent)
+}
+
+.marketing .brand-mark svg {
+  width: 32px;
+  height: 32px
+}
+
+.marketing .project-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.marketing .preview-sidebar .project-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.marketing .footer .project-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+
+.marketing .desktop-links {
+  display: flex;
+  gap: 30px;
+  margin-left: 22px;
+  font-size: 16px;
+  font-weight: 600
+}
+
+.marketing .desktop-links a:hover,.marketing .login-link:hover,.marketing .footer>a:hover {
+  color: var(--ss-accent)
+}
+
+.marketing .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: auto;
+  font-size: 16px
+}
+
+.marketing .primary,.marketing .secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 13px;
+  padding: 15px 22px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  transition: transform .2s,box-shadow .2s;
+  background: var(--ss-accent);
+  color: white;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px #5146d81a
+}
+
+.marketing .secondary {
+  background: white;
+  border-color: #dfdaf3;
+  color: var(--ss-ink);
+  box-shadow: 0 6px 16px #30206008
+}
+
+.marketing .primary:hover,.marketing .secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px #5146d828
+}
+
+.marketing .nav .primary {
+  padding: 11px 20px
+}
+
+.marketing .mobile-menu {
+  display: none
+}
+
+.marketing .skip-link {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  padding: 12px;
+  background: white;
+  z-index: 20
+}
+
+.marketing .skip-link:focus {
+  top: 12px
+}
+
+.marketing .hero {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: 32px;
+  padding: 64px 0 80px;
+  position: relative
+}
+
+.marketing .eyebrow {
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 3px;
+  color: var(--ss-accent);
+  margin-bottom: 22px
+}
+
+.marketing .hero h1 {
+  font-size: clamp(38px,3.75vw,60px);
+  letter-spacing: -2.6px;
+  line-height: 1.15;
+  font-weight: 800;
+  margin-bottom: 24px
+}
+
+.marketing .hero h1 span {
+  color: var(--ss-accent)
+}
+
+.marketing .intro {
+  color: var(--ss-muted);
+  font-size: 17px;
+  line-height: 1.75;
+  max-width: 510px
+}
+
+.marketing .actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 28px 0 36px
+}
+
+.marketing .benefits {
+  display: flex;
+  gap: 18px
+}
+
+.marketing .benefits>div {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex: 1
+}
+
+.marketing .benefits b {
+  font-size: 14px;
+  display: block
+}
+
+.marketing .benefits small {
+  font-size: 14px;
+  color: var(--ss-muted);
+  display: block;
+  margin-top: 4px
+}
+
+.marketing .benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e9e3ff;
+  color: var(--ss-accent);
+  flex-shrink: 0
+}
+
+.marketing .benefit-icon.chart {
+  background: #ddf8eb;
+  color: #25a782
+}
+
+.marketing .benefit-icon.file {
+  background: #fff0e3;
+  color: #d88e44
+}
+
+.marketing .product-scene {
+  position: relative;
+  padding: 16px 40px 32px 0;
+  min-width: 0
+}
+
+.marketing .product-scene:before {
+  content: "";
+  position: absolute;
+  inset: -70px -35px -30px -50px;
+  background: radial-gradient(ellipse,#ded2ff99,transparent 70%);
+  pointer-events: none
+}
+
+.marketing .preview-window {
+  position: relative;
+  display: flex;
+  min-height: 385px;
+  background: #ffffffd9;
+  border: 1px solid white;
+  border-radius: 22px;
+  box-shadow: 0 18px 55px #53409820;
+  overflow: hidden;
+  transform: rotate(-1deg)
+}
+
+.marketing .preview-sidebar {
+  width: 130px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ss-border);
+  padding: 22px 10px;
+  background: #ffffff9c
+}
+
+.marketing .preview-sidebar>b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  margin-bottom: 26px
+}
+
+.marketing .preview-sidebar>b svg {
+  color: var(--ss-accent)
+}
+
+.marketing .preview-sidebar>span {
+  font-size: 9px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 10px 7px;
+  margin: 4px 0;
+  border-radius: 6px;
+  color: var(--ss-muted)
+}
+
+.marketing .preview-sidebar>span svg {
+  width: 12px;
+  height: 12px
+}
+
+.marketing .preview-sidebar .selected {
+  background: #eee9ff;
+  color: var(--ss-accent);
+  font-weight: 700
+}
+
+.marketing .sidebar-note {
+  font-size: 10px;
+  color: #8b80b3;
+  line-height: 1.8;
+  margin: 38px 8px 0
+}
+
+.marketing .preview-content {
+  padding: 18px;
+  flex: 1;
+  min-width: 0
+}
+
+.marketing .preview-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8px;
+  color: var(--ss-muted);
+  margin-bottom: 24px
+}
+
+.marketing .avatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: white;
+  background: #8e7aee
+}
+
+.marketing .preview-content h2 {
+  font-size: 20px;
+  letter-spacing: -.6px;
+  margin-bottom: 3px
+}
+
+.marketing .preview-content h2 span {
+  color: #edb958
+}
+
+.marketing .preview-content>p {
+  font-size: 9px;
+  color: var(--ss-muted);
+  margin-bottom: 18px
+}
+
+.marketing .roadmap-panel,.marketing .skills-panel,.marketing .activity-panel {
+  border-radius: 10px;
+  background: white;
+  padding: 15px;
+  border: 1px solid #f0eef7
+}
+
+.marketing .panel-title {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 10px;
+  flex-wrap: wrap
+}
+
+.marketing .pill {
+  display: inline-block;
+  border-radius: 5px;
+  background: #dcf9eb;
+  color: #217960;
+  font-size: 8px;
+  padding: 3px 7px;
+  font-weight: 650
+}
+
+.marketing .progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: var(--ss-muted);
+  margin: 9px 0 5px
+}
+
+.marketing .progress-track {
+  height: 5px;
+  border-radius: 20px;
+  background: #eeeaf7;
+  overflow: hidden
+}
+
+.marketing .progress-track i {
+  display: block;
+  height: 100%;
+  background: #8061fa;
+  border-radius: 20px
+}
+
+.marketing .roadmap-nodes {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 20px;
+  gap: 4px
+}
+
+.marketing .roadmap-nodes:before {
+  content: "";
+  height: 2px;
+  background: #e7e0fc;
+  position: absolute;
+  top: 12px;
+  left: 10%;
+  right: 10%
+}
+
+.marketing .roadmap-nodes>div {
+  position: relative;
+  text-align: center;
+  flex: 1
+}
+
+.marketing .roadmap-nodes span {
+  display: grid;
+  place-items: center;
+  background: white;
+  color: #aaa3c9;
+  border: 2px solid #e6dff9;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  margin: auto;
+  font-size: 10px
+}
+
+.marketing .roadmap-nodes small {
+  display: block;
+  font-size: 7px;
+  margin-top: 9px
+}
+
+.marketing .roadmap-nodes .complete span {
+  background: #30c593;
+  border-color: #30c593;
+  color: white
+}
+
+.marketing .roadmap-nodes .current span {
+  background: #7550f8;
+  border-color: #7550f8;
+  color: white;
+  box-shadow: 0 0 0 4px #eee7ff
+}
+
+.marketing .preview-bottom {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 10px;
+  margin-top: 12px
+}
+
+.marketing .preview-bottom b {
+  font-size: 10px
+}
+
+.marketing .skill-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 8px;
+  margin-top: 13px
+}
+
+.marketing .skill-row>span {
+  width: 58px
+}
+
+.marketing .skill-row .progress-track {
+  flex: 1
+}
+
+.marketing .skill-row small {
+  font-size: 7px;
+  color: var(--ss-muted)
+}
+
+.marketing .activity-panel p {
+  font-size: 8px;
+  color: var(--ss-muted);
+  margin: 12px 0 0
+}
+
+.marketing .cv-float {
+  position: absolute;
+  right: -10px;
+  top: 83px;
+  transform: rotate(6deg);
+  width: 153px;
+  background: white;
+  box-shadow: 0 14px 35px #6047b62b;
+  border: 1px solid #ede7ff;
+  border-radius: 16px;
+  padding: 16px 12px;
+  font-size: 9px
+}
+
+.marketing .cv-float>b {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 11px
+}
+
+.marketing .cv-float>b svg {
+  color: var(--ss-accent);
+  width: 16px
+}
+
+.marketing .score-ring {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  margin: 17px auto 9px;
+  background: conic-gradient(#45ceb3 0 86%,#e6f8f3 86%);
+  display: grid;
+  place-items: center
+}
+
+.marketing .score-ring strong {
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  font-size: 27px
+}
+
+.marketing .score-ring small {
+  font-size: 14px
+}
+
+.marketing .cv-float>span {
+  display: block;
+  text-align: center;
+  margin: 6px auto
+}
+
+.marketing .cv-float>.pill {
+  width: max-content
+}
+
+.marketing .cv-float p {
+  margin: 11px 0;
+  color: #25856a;
+  font-size: 8px
+}
+
+.marketing .cv-float .improve {
+  color: #bb8a35
+}
+
+.marketing .cv-float a {
+  display: block;
+  color: white;
+  background: #7853f6;
+  border-radius: 6px;
+  padding: 9px 7px;
+  font-size: 8px;
+  margin-top: 14px;
+  text-align: center
+}
+
+.marketing .sample-label {
+  position: absolute;
+  bottom: 0;
+  right: 15px;
+  font-size: 10px;
+  color: var(--ss-muted)
+}
+
+.marketing .feature-section {
+  padding: 12px 0 0
+}
+
+.marketing .section-heading {
+  text-align: center;
+  margin-bottom: 30px
+}
+
+.marketing .section-heading .eyebrow {
+  margin-bottom: 10px;
+  font-size: 14px
+}
+
+.marketing .section-heading h2 {
+  font-size: clamp(25px,2.5vw,37px);
+  line-height: 1.25;
+  letter-spacing: -1.3px;
+  margin-bottom: 12px
+}
+
+.marketing .section-heading p {
+  font-size: 16px;
+  color: var(--ss-muted)
+}
+
+.marketing .bento-grid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr 1fr;
+  gap: 18px
+}
+
+.marketing .feature-card {
+  background: white;
+  border: 1px solid var(--ss-border);
+  border-radius: 20px;
+  padding: 26px 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s,box-shadow .2s
+}
+
+.marketing .feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px #3923700b
+}
+
+.marketing .feature-icon {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  background: #eee9ff;
+  color: var(--ss-accent);
+  border-radius: 13px;
+  margin-bottom: 16px
+}
+
+.marketing .feature-icon svg {
+  width: 25px;
+  height: 25px
+}
+
+.marketing .feature-card h3 {
+  font-size: 21px;
+  letter-spacing: -.6px;
+  margin-bottom: 10px
+}
+
+.marketing .feature-card p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ss-muted);
+  margin-bottom: 13px
+}
+
+.marketing .feature-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 2.2
+}
+
+.marketing .feature-card li:before {
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #27ac80;
+  background: #e5f9f0;
+  width: 14px;
+  height: 14px;
+  margin-right: 7px;
+  font-size: 14px
+}
+
+.marketing .journey-card {
+  background: #211e54;
+  color: white;
+  min-height: 365px
+}
+
+.marketing .journey-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 270px
+}
+
+.marketing .journey-copy p {
+  color: #d2d0e9
+}
+
+.marketing .journey-copy .feature-icon {
+  background: #6651df;
+  color: white
+}
+
+.marketing .journey-copy .secondary {
+  margin-top: 12px;
+  font-size: 14px;
+  padding: 13px 15px
+}
+
+.marketing .journey-copy li:before {
+  background: #7468bd;
+  color: white
+}
+
+.marketing .journey-art {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  opacity: .95
+}
+
+.marketing .trail-caption {
+  position: absolute;
+  bottom: 43px;
+  right: 28px;
+  color: #b5f6db;
+  font-size: 14px;
+  z-index: 1
+}
+
+.marketing .course-mini {
+  display: flex;
+  gap: 10px;
+  background: #f4f1ff;
+  border: 1px solid #e8e2ff;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: auto;
+  transform: rotate(-3deg);
+  font-size: 9px;
+  align-items: center;
+  min-height: 85px
+}
+
+.marketing .video-tile {
+  display: grid;
+  place-items: center;
+  width: 59px;
+  height: 59px;
+  background: linear-gradient(135deg,#292261,#9676ee);
+  border-radius: 9px;
+  color: white;
+  font-size: 32px;
+  flex-shrink: 0
+}
+
+.marketing .course-mini b {
+  display: block;
+  margin-bottom: 5px
+}
+
+.marketing .mini-lines i {
+  height: 4px;
+  width: 90%;
+  display: block;
+  background: #dcd5f8;
+  margin-top: 6px;
+  border-radius: 6px
+}
+
+.marketing .mini-lines i:last-child {
+  width: 65%;
+  background: #a18bdc
+}
+
+.marketing .text-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--ss-accent)!important;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 24px
+}
+
+.marketing .text-link:hover {
+  color: #4015bc!important
+}
+
+.marketing .cv-mini {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  height: 85px
+}
+
+.marketing .document-mini {
+  width: 130px;
+  border: 1px solid #e6dff8;
+  background: #faf8ff;
+  transform: rotate(-7deg);
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 8px
+}
+
+.marketing .document-mini svg {
+  color: #7956f1;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 5px
+}
+
+.marketing .document-mini b {
+  font-size: 8px
+}
+
+.marketing .document-mini i {
+  display: block;
+  height: 4px;
+  margin-top: 8px;
+  background: #ded6f6;
+  border-radius: 4px
+}
+
+.marketing .document-mini i:last-child {
+  width: 60%
+}
+
+.marketing .suggestion {
+  position: relative;
+  font-size: 8px;
+  display: grid;
+  gap: 6px;
+  margin-left: -8px
+}
+
+.marketing .suggestion span {
+  white-space: nowrap;
+  padding: 6px;
+  background: #dff7ed;
+  border-radius: 5px;
+  color: #23795f
+}
+
+.marketing .steps-section {
+  padding: 55px 0 40px
+}
+
+.marketing .steps-section h2 {
+  font-size: 27px
+}
+
+.marketing .steps {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 45px
+}
+
+.marketing .step {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  position: relative
+}
+
+.marketing .step:not(:last-child):after {
+  content: "→";
+  position: absolute;
+  right: -32px;
+  top: 12px;
+  color: #b9b0d0;
+  font-size: 24px
+}
+
+.marketing .step>span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #ebe3ff;
+  color: var(--ss-accent);
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0
+}
+
+.marketing .step h3 {
+  font-size: 14px;
+  margin: 2px 0 5px
+}
+
+.marketing .step p {
+  font-size: 14px;
+  color: var(--ss-muted);
+  margin-bottom: 0
+}
+
+.marketing .bottom-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 32px;
+  border-radius: 20px;
+  background: #eee8ff;
+  margin: 15px 0 40px
+}
+
+.marketing .bottom-cta .eyebrow {
+  font-size: 14px;
+  margin-bottom: 10px
+}
+
+.marketing .bottom-cta h2 {
+  font-size: 24px;
+  letter-spacing: -.6px;
+  margin-bottom: 0
+}
+
+.marketing .footer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--ss-border);
+  padding: 25px 0;
+  font-size: 14px
+}
+
+.marketing .footer .brand {
+  font-size: 20px
+}
+
+.marketing .footer p {
+  margin: 0 auto 0 0;
+  color: var(--ss-muted)
+}
+
+.marketing .page-heading {
+  padding: 65px 0 35px
+}
+
+.marketing .page-heading h1 {
+  font-size: clamp(34px,5vw,60px);
+  letter-spacing: -2px;
+  line-height: 1.15;
+  margin-bottom: 20px
+}
+
+.marketing .course-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 22px;
+  padding-bottom: 60px
+}
+
+.marketing .course-card {
+  padding: 25px;
+  border: 1px solid var(--ss-border);
+  background: white;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start
+}
+
+.marketing .course-card h2 {
+  font-size: 21px;
+  margin-bottom: 14px;
+  overflow-wrap: anywhere
+}
+
+.marketing .course-card p {
+  color: var(--ss-muted);
+  font-size: 16px;
+  line-height: 1.7
+}
+
+.marketing .course-card .primary {
+  margin-top: auto
+}
+
+.marketing .course-status {
+  color: var(--ss-accent)!important;
+  font-size: 14px!important;
+  font-weight: 700
+}
+
+.marketing .notice,.marketing .empty {
+  padding: 28px;
+  border: 1px solid var(--ss-border);
+  background: white;
+  border-radius: 16px;
+  line-height: 1.7;
+  margin-bottom: 35px;
+  color: var(--ss-muted)
+}
+
+.marketing .notice a,.marketing .empty a {
+  color: var(--ss-accent);
+  text-decoration: underline
+}
+
+.marketing .course-detail {
+  max-width: 800px;
+  padding-bottom: 60px
+}
+
+.marketing .course-detail .description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+  color: var(--ss-muted)
+}
+@media(max-width:1100px){
+
+.marketing .shell {
+  padding: 0 28px
+}
+
+.marketing .desktop-links {
+  gap: 17px;
+  margin-left: 0
+}
+
+.marketing .nav {
+  gap: 22px
+}
+
+.marketing .nav-actions {
+  gap: 15px
+}
+
+.marketing .hero {
+  gap: 20px
+}
+
+.marketing .hero h1 {
+  font-size: 42px
+}
+
+.marketing .benefits {
+  gap: 10px
+}
+
+.marketing .benefits small {
+  display: none
+}
+
+.marketing .preview-sidebar {
+  width: 92px;
+  padding: 20px 6px
+}
+
+.marketing .preview-sidebar>b {
+  font-size: 11px
+}
+
+.marketing .preview-sidebar>span {
+  font-size: 8px;
+  gap: 4px
+}
+
+.marketing .preview-content {
+  padding: 14px
+}
+
+.marketing .preview-bottom {
+  grid-template-columns: 1fr
+}
+
+.marketing .activity-panel {
+  display: none
+}
+
+.marketing .cv-float {
+  width: 130px;
+  padding: 13px 10px
+}
+
+.marketing .product-scene {
+  padding-right: 25px
+}
+
+.marketing .bento-grid {
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px
+}
+
+.marketing .feature-card {
+  padding: 23px 19px
+}
+
+.marketing .journey-copy {
+  max-width: 235px
+}
+
+.marketing .trail-caption {
+  display: none
+}
+
+.marketing .suggestion {
+  font-size: 7px
+}}
+@media(max-width:850px){
+
+.marketing .hero {
+  grid-template-columns: 1fr;
+  padding: 45px 0
+}
+
+.marketing .hero-copy {
+  text-align: center
+}
+
+.marketing .hero h1 {
+  font-size: clamp(38px,6.8vw,58px)
+}
+
+.marketing .intro {
+  margin-left: auto;
+  margin-right: auto
+}
+
+.marketing .actions,.marketing .benefits {
+  justify-content: center
+}
+
+.marketing .benefits {
+  max-width: 530px;
+  margin: auto
+}
+
+.marketing .benefits>div {
+  flex: none;
+  text-align: left
+}
+
+.marketing .benefits small {
+  display: block
+}
+
+.marketing .product-scene {
+  max-width: 640px;
+  width: 100%;
+  margin: 20px auto 0;
+  padding-right: 55px
+}
+
+.marketing .preview-sidebar {
+  width: 125px
+}
+
+.marketing .preview-window {
+  min-height: 370px
+}
+
+.marketing .preview-content {
+  padding: 22px
+}
+
+.marketing .preview-bottom {
+  grid-template-columns: 1.1fr 1fr
+}
+
+.marketing .activity-panel {
+  display: block
+}
+
+.marketing .cv-float {
+  width: 160px;
+  right: 0
+}
+
+.marketing .bento-grid {
+  grid-template-columns: 1fr 1fr
+}
+
+.marketing .journey-card {
+  grid-column: 1/-1;
+  min-height: 310px
+}
+
+.marketing .journey-copy {
+  max-width: 340px
+}
+
+.marketing .journey-art {
+  width: 65%;
+  left: auto
+}
+
+.marketing .trail-caption {
+  display: block
+}
+
+.marketing .nav-actions .login-link {
+  display: none
+}
+
+.marketing .desktop-links {
+  font-size: 14px
+}
+
+.marketing .bottom-cta h2 {
+  font-size: 20px
+}
+
+.marketing .course-grid {
+  grid-template-columns: repeat(2,1fr)
+}}
+@media(max-width:600px){
+
+.marketing .shell {
+  padding: 0 20px
+}
+
+.marketing .nav {
+  min-height: 75px;
+  gap: 12px
+}
+
+.marketing .brand {
+  font-size: 23px
+}
+
+.marketing .desktop-links,.marketing .nav-actions {
+  display: none
+}
+
+.marketing .mobile-menu {
+  display: block;
+  margin-left: auto
+}
+
+.marketing .mobile-menu summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 25px;
+  padding: 5px 10px
+}
+
+.marketing .mobile-menu summary::-webkit-details-marker {
+  display: none
+}
+
+.marketing .mobile-menu nav {
+  position: absolute;
+  right: 0;
+  top: 66px;
+  background: white;
+  box-shadow: 0 12px 30px #27124e22;
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 240px;
+  display: grid;
+  gap: 4px
+}
+
+.marketing .mobile-menu nav a {
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px
+}
+
+.marketing .mobile-menu nav a:hover {
+  background: #f3efff
+}
+
+.marketing .hero {
+  padding: 30px 0 40px;
+  gap: 14px
+}
+
+.marketing .hero h1 {
+  font-size: clamp(32px,8.1vw,46px);
+  letter-spacing: -1.8px
+}
+
+.marketing .eyebrow {
+  font-size: 14px;
+  letter-spacing: 2.6px;
+  margin-bottom: 18px
+}
+
+.marketing .intro {
+  font-size: 16px
+}
+
+.marketing .actions {
+  gap: 10px;
+  margin: 24px 0
+}
+
+.marketing .actions>a {
+  font-size: 14px;
+  padding: 13px 14px
+}
+
+.marketing .benefits {
+  gap: 13px;
+  flex-wrap: wrap
+}
+
+.marketing .benefits>div {
+  gap: 6px
+}
+
+.marketing .benefits b {
+  font-size: 14px
+}
+
+.marketing .benefits small {
+  display: none
+}
+
+.marketing .benefit-icon {
+  width: 28px;
+  height: 28px
+}
+
+.marketing .benefit-icon svg {
+  width: 16px
+}
+
+.marketing .product-scene {
+  padding: 12px 30px 28px 0;
+  margin-top: 10px
+}
+
+.marketing .product-scene:before {
+  inset: -30px -15px
+}
+
+.marketing .preview-window {
+  min-height: 290px;
+  border-radius: 15px
+}
+
+.marketing .preview-sidebar {
+  width: 72px;
+  padding: 15px 5px
+}
+
+.marketing .preview-sidebar>b {
+  font-size: 8px;
+  gap: 2px
+}
+
+.marketing .preview-sidebar>b svg {
+  width: 12px
+}
+
+.marketing .preview-sidebar>span {
+  font-size: 6px;
+  padding: 8px 4px;
+  gap: 4px
+}
+
+.marketing .preview-sidebar>span svg {
+  width: 9px
+}
+
+.marketing .sidebar-note {
+  font-size: 7px;
+  margin: 20px 4px
+}
+
+.marketing .preview-content {
+  padding: 12px 9px
+}
+
+.marketing .preview-top {
+  font-size: 6px;
+  margin-bottom: 12px
+}
+
+.marketing .preview-content h2 {
+  font-size: 15px
+}
+
+.marketing .preview-content>p {
+  font-size: 7px
+}
+
+.marketing .roadmap-panel {
+  padding: 10px 7px
+}
+
+.marketing .panel-title {
+  font-size: 7px;
+  gap: 3px
+}
+
+.marketing .panel-title .pill {
+  font-size: 6px
+}
+
+.marketing .roadmap-nodes small {
+  font-size: 5px
+}
+
+.marketing .roadmap-nodes span {
+  width: 21px;
+  height: 21px;
+  font-size: 7px
+}
+
+.marketing .roadmap-nodes:before {
+  top: 10px
+}
+
+.marketing .preview-bottom {
+  grid-template-columns: 1fr
+}
+
+.marketing .activity-panel {
+  display: none
+}
+
+.marketing .skills-panel {
+  padding: 10px
+}
+
+.marketing .preview-bottom b {
+  font-size: 8px
+}
+
+.marketing .skill-row {
+  font-size: 6px;
+  margin-top: 8px
+}
+
+.marketing .skill-row>span {
+  width: 46px
+}
+
+.marketing .cv-float {
+  width: 105px;
+  top: 67px;
+  right: -2px;
+  padding: 12px 8px;
+  border-radius: 12px
+}
+
+.marketing .cv-float>b {
+  font-size: 8px;
+  gap: 3px
+}
+
+.marketing .cv-float>b svg {
+  width: 12px
+}
+
+.marketing .score-ring {
+  width: 61px;
+  height: 61px;
+  margin: 12px auto 8px
+}
+
+.marketing .score-ring strong {
+  width: 48px;
+  height: 48px;
+  font-size: 20px
+}
+
+.marketing .score-ring small {
+  font-size: 10px
+}
+
+.marketing .cv-float>span {
+  font-size: 7px
+}
+
+.marketing .cv-float p {
+  font-size: 6px;
+  margin: 8px 0
+}
+
+.marketing .cv-float a {
+  font-size: 6px;
+  padding: 8px 5px
+}
+
+.marketing .sample-label {
+  font-size: 8px
+}
+
+.marketing .section-heading h2 {
+  font-size: 27px
+}
+
+.marketing .section-heading p {
+  font-size: 14px
+}
+
+.marketing .bento-grid {
+  grid-template-columns: 1fr;
+  gap: 16px
+}
+
+.marketing .journey-card {
+  grid-column: auto;
+  min-height: 350px
+}
+
+.marketing .journey-copy {
+  max-width: 245px
+}
+
+.marketing .journey-art {
+  width: 100%;
+  opacity: .7
+}
+
+.marketing .trail-caption {
+  display: none
+}
+
+.marketing .feature-card {
+  padding: 24px
+}
+
+.marketing .feature-card h3 {
+  font-size: 22px
+}
+
+.marketing .course-mini,.marketing .cv-mini {
+  max-width: 320px
+}
+
+.marketing .steps-section {
+  padding: 38px 0 25px
+}
+
+.marketing .steps {
+  grid-template-columns: 1fr;
+  gap: 22px;
+  max-width: 350px;
+  margin: auto
+}
+
+.marketing .step:not(:last-child):after {
+  display: none
+}
+
+.marketing .bottom-cta {
+  flex-direction: column;
+  text-align: center;
+  padding: 28px 22px;
+  margin: 12px 0 30px
+}
+
+.marketing .bottom-cta h2 {
+  font-size: 23px
+}
+
+.marketing .footer {
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 23px 0
+}
+
+.marketing .footer p {
+  width: 100%;
+  order: 3;
+  font-size: 14px
+}
+
+.marketing .footer .brand {
+  margin-right: auto
+}
+
+.marketing .course-grid {
+  grid-template-columns: 1fr
+}
+
+.marketing .page-heading {
+  padding: 35px 0 20px
+}}
+@media(prefers-reduced-motion:reduce){
+
+html {
+  scroll-behavior: auto
+}
+
+.marketing *,.marketing *:before {
+  transition: none!important;
+  animation: none!important
+}}
+.marketing .intro { font-size:18px; }
+.marketing .feature-card p, .marketing .feature-card ul { font-size:16px; line-height:1.65; }
+.marketing .benefits { flex-wrap:wrap; }
+.marketing .benefits > div { min-width:160px; }
+.marketing .steps .step p { font-size:16px; }
+.marketing .steps .step h3 { font-size:17px; }

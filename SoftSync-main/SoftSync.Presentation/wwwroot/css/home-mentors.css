@@ -1,0 +1,65 @@
+html body .ss-public-site .ss-landing .ss-home-mentor-carousel {
+    display: grid;
+    grid-template-columns: none !important;
+    grid-auto-flow: column;
+    grid-auto-columns: min(480px, 82%);
+    align-items: stretch;
+    gap: 20px;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 4px;
+    padding: 8px 4px 18px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ss-primary, #6366f1) transparent;
+    cursor: grab;
+}
+html body .ss-public-site .ss-home-mentor-carousel > article {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    order: initial;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+}
+html body .ss-public-site .ss-home-mentor-carousel .ss-main-mentor-portrait {
+    width: min(180px, 100%);
+    margin: 0 auto 16px;
+}
+html body .ss-public-site .ss-home-mentor-carousel .ss-main-mentor-content { flex: 1; }
+html body .ss-public-site .ss-home-mentor-carousel.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+}
+html body .ss-public-site .ss-mentor-carousel-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+    color: var(--ss-text-muted);
+    font-size: 13px;
+}
+html body .ss-public-site .ss-mentor-carousel-tools span { flex: 1; }
+html body .ss-public-site .ss-mentor-carousel-tools button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--ss-border);
+    border-radius: 12px;
+    background: var(--ss-surface);
+    color: var(--ss-primary);
+}
+html body .ss-public-site .ss-mentor-carousel-tools .ss-mentor-rotation { width: auto; padding-inline: 12px; }
+html body .ss-public-site .ss-home-mentor-carousel:focus-visible {
+    outline: 2px solid var(--ss-primary, #6366f1);
+    outline-offset: 4px;
+}
+@media (max-width: 600px) {
+    html body .ss-public-site .ss-landing .ss-home-mentor-carousel { grid-auto-columns: 88%; gap: 16px; }
+    html body .ss-public-site .ss-mentor-carousel-tools { flex-wrap: wrap; }
+    html body .ss-public-site .ss-mentor-carousel-tools span { font-size: 11px; }
+}

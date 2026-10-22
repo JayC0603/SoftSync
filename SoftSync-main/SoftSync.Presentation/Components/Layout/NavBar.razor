@@ -1,94 +1,77 @@
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @implements IDisposable
-@using SoftSync.BLL.Interfaces
-@using SoftSync.Common.Dtos
-@using SoftSync.Common.Enums
 @using SoftSync.Presentation.Services
 @inject LocalizationService L
-@inject IJSRuntime JS
-@inject NavigationManager Nav
-@inject IServiceScopeFactory ScopeFactory
 @inject AuthenticationStateProvider AuthProvider
-@inject UserProfileState UserProfileState
 
-@* Top navigation. Interactive so the language toggle (@onclick + JS interop)
-   works — the surrounding MainLayout renders as static SSR. *@
+@* Sidebar navigation shares localization with HeaderActions. MainLayout remains static SSR. *@
 
-<nav class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center">
+<nav id="ss-main-sidebar" class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center" aria-label="@(L.Current == AppLanguage.Vi ? "Điều hướng chính" : "Main navigation")">
     <!-- Brand -->
-    <div class="tw:flex tw:items-center tw:gap-2 cursor-pointer" @onclick='() => Nav.NavigateTo(HomeHref)'>
+    <a class="ss-brand tw:flex tw:items-center tw:gap-2 cursor-pointer" href="@HomeHref" aria-label="SoftSync - @L["nav.home"]">
         <div class="ss-brand-logo tw:flex tw:items-center tw:justify-center">
             <img src="images/logo.png" alt="S" class="tw:w-full tw:h-full tw:object-cover" />
         </div>
         <span class="tw:text-xl tw:font-bold ss-gradient-text">SoftSync</span>
-    </div>
+    </a>
 
     <!-- Center: nav pills -->
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
-        <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All">
+        @if (isAdmin)
+        {
+            <NavLink class="ss-navpill" href="/admin/dashboard"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Tổng quan" : "Overview")</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/learners"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Học viên" : "Learners")</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/ai/settings"><i class="bi bi-stars" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Gemini" : "Gemini")</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/mentor-requests"><i class="bi bi-person-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Yêu cầu Mentor" : "Mentor requests")</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/users" aria-label="@L["layout.manageUsers"]"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+            <NavLink class="ss-navpill" href="/admin/notifications" aria-label="@L["nav.notifications"]"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
+            <NavLink class="ss-navpill" href="/teacher" aria-label="@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></NavLink>
+        }
+        else
+        {
+        <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All" aria-label="@L["nav.home"]">
             <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/assistant">
-            <i class="bi bi-robot"></i> <span>@L["nav.assistant"]</span>
+        <NavLink class="ss-navpill" href="/roadmap" aria-label="@L["nav.learn"]">
+            <i class="bi bi-book"></i> <span>@L["nav.learn"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/roadmap">
-            <i class="bi bi-mortarboard"></i> <span>@L["nav.roadmap"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/progress">
+        <NavLink class="ss-navpill" href="/progress" aria-label="@L["nav.progress"]">
             <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
         </NavLink>
-        <NavLink class="ss-navpill" href="/community">
-            <i class="bi bi-people"></i> <span>@L["nav.community"]</span>
+        <NavLink class="ss-navpill" href="/resources" aria-label="@L["nav.resources"]">
+            <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
         </NavLink>
+        <NavLink class="ss-navpill" href="/game" aria-label="@L.Ui("Mini Game")">
+            <i class="bi bi-controller"></i> <span>@L.Ui("Mini Game")</span>
+        </NavLink>
+        <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
+        <NavLink class="ss-navpill" href="/cv" aria-label="@L.Ui("Smart CV")"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
+        }
     </div>
 
-    <!-- Right: actions -->
-    <div class="tw:flex tw:items-center tw:gap-3">
-        <button class="ss-icon-btn ss-lang-btn" @onclick="ToggleLanguage" title="@LanguageSwitchTitle">
-            <i class="bi bi-translate"></i>
-            <span class="ss-lang-code">@CurrentLanguageCode</span>
-            <span class="ss-lang-name">@TargetLanguageName</span>
-        </button>
+</nav>
 
-        <AuthorizeView>
-            <Authorized>
-                <button class="ss-icon-btn" title="@L["nav.search"]">
-                    <i class="bi bi-search"></i>
-                </button>
-                <button class="ss-icon-btn ss-bell" title="@L["nav.notifications"]">
-                    <i class="bi bi-bell"></i>
-                    <span class="ss-bell-badge">3</span>
-                </button>
-
-                <div class="ss-userchip" @onclick='() => Nav.NavigateTo("/settings")' title="@L["nav.settings"]">
-                    <div class="ss-avatar tw:flex tw:items-center tw:justify-center">
-                        @if (!string.IsNullOrEmpty(profile?.AvatarUrl))
-                        {
-                            <img src="@profile.AvatarUrl" alt="avatar" class="ss-avatar-img" />
-                        }
-                        else
-                        {
-                            <img src="@Mascot.ImageFor(profile?.Gender ?? Gender.Unspecified)"
-                                 alt="avatar"
-                                 class="ss-avatar-img"
-                                 onerror="this.style.display='none';this.parentElement.querySelector('.ss-avatar-fallback').style.display='flex'" />
-                            <i class="bi bi-person-fill ss-avatar-fallback"></i>
-                        }
-                    </div>
-                    <div class="tw:flex tw:flex-col tw:leading-tight">
-                        <span class="tw:font-semibold tw:text-sm">@(profile?.PublicName ?? context.User.Identity?.Name)</span>
-                        <span class="ss-userchip-sub">@L["nav.level"] @(profile?.Level ?? 1)</span>
-                    </div>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="ss-auth-actions">
-                    <a href="Account/Login" class="ss-login-link">@L["nav.login"]</a>
-                    <a href="Account/Register" class="ss-register-link">@L["auth.register"]</a>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
+<nav class="ss-mobile-bottom-nav" aria-label="@L.Ui("Mobile navigation")">
+    @if (isAdmin)
+    {
+        <NavLink class="ss-mobile-bottom-link" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
+        <NavLink class="ss-mobile-bottom-link" href="/admin/notifications"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
+        <NavLink class="ss-mobile-bottom-link" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></NavLink>
+    }
+    else
+    {
+    <NavLink class="ss-mobile-bottom-link" href="@HomeHref" Match="NavLinkMatch.All">
+        <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/roadmap">
+        <i class="bi bi-book"></i><span>@L["nav.learn"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/progress">
+        <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
+    </NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/cv"><i class="bi bi-file-earmark-person"></i><span>CV</span></NavLink>
+    <NavLink class="ss-mobile-bottom-link" href="/more"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></NavLink>
+    }
 </nav>
 
 <style>
@@ -100,6 +83,7 @@
         backdrop-filter: blur(var(--glass-blur));
         -webkit-backdrop-filter: blur(var(--glass-blur));
         border-bottom: 1px solid var(--glass-border);
+        min-height: 88px;
     }
     .ss-brand-logo {
         width: 38px; height: 38px;
@@ -108,6 +92,7 @@
         overflow: hidden;
     }
     .cursor-pointer { cursor: pointer; }
+    .ss-brand { color: inherit; text-decoration: none; }
 
     /* Center nav pills */
     .ss-navpill {
@@ -155,9 +140,12 @@
     .ss-icon-btn i { font-size: 1.05rem; }
     .ss-lang-btn {
         gap: 0.4rem;
-        min-width: auto;
+        width: 106px;
         padding: 0 0.75rem;
+        border: 1px solid rgba(101, 91, 183, 0.14);
+        box-shadow: 0 5px 14px rgba(58, 49, 129, 0.06);
     }
+    .ss-lang-chevron { margin-left: auto; font-size: 0.72rem !important; }
     .ss-lang-code {
         font-size: 0.78rem;
         font-weight: 800;
@@ -203,6 +191,10 @@
         border-radius: 999px;
         cursor: pointer;
         transition: background 0.18s ease;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
     }
     .ss-userchip:hover { background: rgba(255, 255, 255, 0.6); }
     .ss-avatar {
@@ -250,6 +242,9 @@
         background: var(--gradient);
         box-shadow: 0 10px 24px rgba(99, 102, 241, 0.24);
     }
+    .ss-search-btn { display: none; }
+    .ss-user-chevron { margin-left: 0.25rem; color: #26345f; font-size: 0.72rem; }
+    .ss-mobile-bottom-nav { display: none; }
 
     @@media (max-width: 900px) {
         .ss-navpill span { display: none; }
@@ -264,8 +259,117 @@
         .ss-navpills { gap: 0; }
         .ss-navpill { padding: 0.5rem 0.55rem; }
         .ss-icon-btn { min-width: 36px; height: 36px; padding: 0 0.4rem; }
+        .ss-lang-btn { width: 36px; }
         .ss-lang-name,
         .ss-lang-code::after { display: none; }
+    }
+
+    /* Mobile app shell: compact header plus thumb-friendly bottom navigation. */
+    @@media (max-width: 760px) {
+        .ss-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            min-height: 58px;
+            padding: 0.55rem 0.75rem !important;
+            gap: 0.5rem;
+        }
+        .ss-brand { flex: 1; min-width: 0; }
+        .ss-brand-logo { width: 38px; height: 38px; }
+        .ss-nav-actions { gap: 0.45rem !important; }
+        .ss-nav-actions > .ss-icon-btn:not(.ss-lang-btn),
+        .ss-bell { display: none; }
+        .ss-lang-btn {
+            width: auto;
+            min-width: 58px;
+            height: 38px;
+            padding-inline: 0.55rem;
+        }
+        .ss-lang-name, .ss-lang-code::after { display: none; }
+        .ss-userchip { padding: 2px; border-radius: 50%; }
+        .ss-avatar { width: 38px; height: 38px; }
+
+        .ss-navpills { display: none !important; }
+
+        .ss-mobile-bottom-nav {
+            position: fixed;
+            left: 0.65rem;
+            right: 0.65rem;
+            bottom: max(0.65rem, env(safe-area-inset-bottom));
+            z-index: 1000;
+            display: grid !important;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 0.2rem !important;
+            min-height: 64px;
+            padding: 0.4rem;
+            border: 1px solid rgba(139, 92, 246, 0.22);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 45px rgba(49, 46, 129, 0.24);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            backdrop-filter: blur(18px) saturate(160%);
+        }
+        .ss-mobile-bottom-link {
+            position: relative;
+            display: flex;
+            min-width: 0;
+            min-height: 52px;
+            padding: 0.35rem 0.15rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.1rem;
+            border-radius: 15px;
+            color: #64748b;
+            line-height: 1.05;
+            text-decoration: none;
+        }
+        .ss-mobile-bottom-link i { font-size: 1.1rem; }
+        .ss-mobile-bottom-link span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ss-mobile-bottom-link.active {
+            color: #6847eb;
+            background: rgba(104, 71, 235, 0.08);
+        }
+        .ss-mobile-bottom-link.active::after {
+            content: "";
+            position: absolute;
+            left: 22%;
+            right: 22%;
+            bottom: 0;
+            height: 3px;
+            border-radius: 999px;
+            background: #6847eb;
+        }
+        html[data-theme="dark"] .ss-mobile-bottom-nav {
+            background: rgba(28, 24, 57, 0.94);
+            border-color: rgba(167, 139, 250, 0.25);
+        }
+        html[data-theme="dark"] .ss-mobile-bottom-link { color: #cbd5e1; }
+        html[data-theme="dark"] .ss-mobile-bottom-link.active {
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.18);
+        }
+    }
+
+    @@media (max-width: 390px) {
+        .ss-brand > span { display: inline; font-size: 0.95rem; }
+        .ss-brand-logo { width: 34px; height: 34px; }
+        .ss-auth-actions .ss-register-link { display: none; }
+        .ss-auth-actions .ss-login-link {
+            display: inline-flex;
+            min-height: 38px;
+            padding-inline: 0.55rem;
+            background: transparent;
+            font-size: 0.75rem;
+        }
     }
 
     /* Dark theme: lighten nav text/icons so they read on the deep canvas. */
@@ -305,97 +409,16 @@
 </style>
 
 @code {
-    private UserDto? profile;
-    private string HomeHref => profile is null ? "/" : "/dashboard";
-
-    protected override void OnInitialized()
+    private bool authenticated;
+    private bool isAdmin;
+    private string HomeHref => isAdmin ? "/admin/dashboard" : authenticated ? "/dashboard" : "/";
+    protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
+    protected override async Task OnInitializedAsync()
     {
-        L.OnChanged += StateHasChangedSafe;
-        UserProfileState.AvatarChanged += OnAvatarChanged;
-        UserProfileState.DisplayNameChanged += OnDisplayNameChanged;
-        Nav.LocationChanged += OnLocationChanged;
+        var principal = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        authenticated = principal.Identity?.IsAuthenticated == true;
+        isAdmin = principal.IsInRole("Admin");
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Restore the saved language after the circuit is interactive.
-            var saved = await JS.InvokeAsync<string?>("ssLang.get");
-            var lang = LocalizationService.Parse(saved);
-            if (lang != L.Current)
-            {
-                L.SetLanguage(lang);
-            }
-
-            // Load the user's profile (avatar + level) in its own DI scope so we
-            // don't share the page's scoped DbContext (avoids a concurrent-query
-            // crash when a page also queries the DB during its own init).
-            await LoadProfileAsync();
-        }
-    }
-
-    private async Task ToggleLanguage()
-    {
-        L.Toggle();
-        await JS.InvokeVoidAsync("ssLang.set", L.Code);
-    }
-
-    private string CurrentLanguageCode => L.Current == AppLanguage.Vi ? "VI" : "EN";
-    private string TargetLanguageName => L.Current == AppLanguage.Vi ? "English" : "Vietnamese";
-    private string LanguageSwitchTitle => L.Current == AppLanguage.Vi
-        ? "Switch to English"
-        : "Chuyển sang tiếng Việt";
-
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
-
-    private void OnAvatarChanged(string avatarUrl)
-    {
-        if (profile is not null)
-        {
-            profile.AvatarUrl = avatarUrl;
-            _ = InvokeAsync(StateHasChanged);
-        }
-        else
-        {
-            _ = LoadProfileAsync();
-        }
-    }
-
-    private void OnDisplayNameChanged(string displayName)
-    {
-        if (profile is not null)
-        {
-            profile.DisplayName = displayName;
-            _ = InvokeAsync(StateHasChanged);
-        }
-        else
-        {
-            _ = LoadProfileAsync();
-        }
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        _ = LoadProfileAsync();
-    }
-
-    private async Task LoadProfileAsync()
-    {
-        var userId = await AuthProvider.GetUserIdAsync();
-        if (userId <= 0) return;
-
-        await using var scope = ScopeFactory.CreateAsyncScope();
-        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        profile = await userService.GetUserByIdAsync(userId);
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        L.OnChanged -= StateHasChangedSafe;
-        UserProfileState.AvatarChanged -= OnAvatarChanged;
-        UserProfileState.DisplayNameChanged -= OnDisplayNameChanged;
-        Nav.LocationChanged -= OnLocationChanged;
-    }
+    public void Dispose() => L.OnChanged -= StateHasChangedSafe;
 }

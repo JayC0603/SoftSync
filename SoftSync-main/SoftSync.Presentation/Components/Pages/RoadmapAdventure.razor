@@ -1,0 +1,297 @@
+@page "/roadmap/adventure"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inherits LocalizedComponentBase
+@using SoftSync.BLL.Interfaces
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+@using SoftSync.Presentation.Services
+@using SoftSync.Presentation.Components.Journey
+@inject IRoadmapService RoadmapService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<HeadContent><link rel="stylesheet" href="css/adventure-map.css?v=20261020" /></HeadContent>
+
+<PageTitle>@Tx("Skill Adventure", "Hành trình kỹ năng") · SoftSync</PageTitle>
+
+<section class="ss-adventure" style="@($"--ad-accent:{SkillAccent(SelectedSkill)}")">
+    @if (loading)
+    {
+        <div class="ad-state" role="status"><i class="bi bi-stars"></i>@Tx("Preparing your journey...", "Đang chuẩn bị hành trình của bạn...")</div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="ad-state">
+            <i class="bi bi-map"></i>
+            <h1>@Tx("Your learning path is being prepared", "Lộ trình học tập đang được chuẩn bị")</h1>
+            <p>@Tx("Complete your assessment to unlock a personalized path.", "Hoàn thành bài đánh giá để nhận lộ trình phù hợp.")</p>
+            <a href="/assessment">@Tx("Go to assessment", "Đến bài đánh giá")</a>
+        </div>
+    }
+    else
+    {
+        <div class="vn-full-map">
+            <VietnamAdventureMap Items="items" UserId="userId" Vietnamese="@(L.Current == AppLanguage.Vi)" SelectedSkill="@selectedSkill" SelectedSkillChanged="PickSkill" />
+            <JourneyContinueCard Items="items" UserId="userId" Vietnamese="@(L.Current == AppLanguage.Vi)" SelectedSkill="@selectedSkill" />
+        </div>
+        <header class="ad-page-head">
+            <div>
+                <span class="ad-kicker">@Ui("SOFTSYNC · LEVEL JOURNEY")</span>
+                <h1>@Tx("Your learning adventure", "Hành trình kỹ năng của bạn")</h1>
+                <p>@Tx("One lesson at a time. A new milestone with every achievement.", "Từng bài học nhỏ, từng cấp độ được chinh phục.")</p>
+            </div>
+            <a class="ad-classic-link" href="/roadmap"><i class="bi bi-grid"></i>@Tx("Classic view", "Giao diện cũ")</a>
+        </header>
+
+        <nav class="ad-skill-tabs" aria-label="@Tx("Choose a skill", "Chọn kỹ năng")">
+            @foreach (var group in SkillGroups)
+            {
+                var key = group.Key;
+                <button type="button" class="ad-skill-tab @(SelectedSkill == key ? "selected" : "")"
+                        aria-pressed="@(SelectedSkill == key)" @onclick="() => PickSkill(key)">
+                    <i class="@SkillIcon(key)"></i>@SkillName(key)
+                    <small>@group.Count()</small>
+                </button>
+            }
+        </nav>
+
+        <div class="ad-grid">
+            <div class="ad-primary-column">
+                <article class="ad-hero">
+                    <div class="ad-hero-aurora" aria-hidden="true"></div>
+                    <div class="ad-hero-art" aria-hidden="true">
+                        <div class="ad-speech ad-speech-one"><i class="bi bi-chat-dots-fill"></i></div>
+                        <div class="ad-speech ad-speech-two"><i class="@SkillIcon(SelectedSkill)"></i></div>
+                        <div class="ad-holo-circle"></div>
+                        <img src="/images/syncy-robot.png" alt="" loading="lazy" />
+                    </div>
+                    <div class="ad-hero-content">
+                        <span class="ad-chapter">@SkillName(SelectedSkill) · @Tx("Chapter", "Chương") 1</span>
+                        <span class="ad-level-text">@Tx("Level", "Cấp độ") @SelectedOrdinal.ToString("00")</span>
+                        <h2>@SkillHeading(SelectedSkill)</h2>
+                        <h3>@SelectedTitle</h3>
+                        <p>@SelectedDescription</p>
+                        <div class="ad-progress-label">
+                            <span>@Tx("Current progress", "Tiến trình")</span>
+                            <strong>@SelectedCompleted / @SelectedRequired</strong>
+                        </div>
+                        <div class="ad-progress-track" role="progressbar"
+                             aria-label="@Tx("Learning activity completion", "Tiến độ hoàn thành hoạt động")"
+                             aria-valuemin="0" aria-valuemax="100" aria-valuenow="@SelectedPercent">
+                            <span style="width:@SelectedPercent%"></span>
+                        </div>
+                        <div class="ad-hero-metrics">
+                            <div><i class="bi bi-check2-circle"></i><span><small>@Tx("Completed", "Đã hoàn thành")</small><strong>@SelectedCompleted / @SelectedRequired</strong></span></div>
+                            <div><i class="bi bi-journal-bookmark"></i><span><small>@Tx("This skill", "Kỹ năng này")</small><strong>@CompletedInSkill / @SkillWeeks.Count @Tx("levels", "cấp")</strong></span></div>
+                        </div>
+                        <button type="button" class="ad-main-cta" disabled="@(!CanOpen(SelectedItem))" @onclick="OpenCurrentLesson">
+                            @(CanOpen(SelectedItem) ? (SelectedItem.IsCompleted ? Tx("Review level", "Xem lại cấp độ") : Tx("Continue learning", "Tiếp tục học")) : Tx("Not yet unlocked", "Chưa mở khóa"))
+                            <i class="bi @(CanOpen(SelectedItem) ? "bi-arrow-right" : "bi-lock-fill")"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <section class="ad-lesson-panel">
+                    <div class="ad-panel-head">
+                        <div>
+                            <h2>@Tx("Lessons in this level", "Bài học trong cấp độ này")</h2>
+                            <p>@Tx("Complete each activity to light up the path ahead.", "Hoàn thành từng hoạt động để thắp sáng con đường phía trước.")</p>
+                        </div>
+                        <strong>@SelectedCompleted / @SelectedRequired</strong>
+                    </div>
+                    <div class="ad-lesson-list">
+                        @foreach (var activity in Activities)
+                        {
+                            var step = activity.Step;
+                            var isDone = step <= SelectedCompleted;
+                            var isAvailable = CanOpen(SelectedItem) && (step <= SelectedCompleted + 1 || RoadmapReviewMode.Enabled);
+                            <div class="ad-lesson @(isDone ? "done" : isAvailable && step == SelectedCompleted + 1 ? "current" : "locked")">
+                                <div class="ad-lesson-state"><i class="bi @(isDone ? "bi-check-lg" : isAvailable ? activity.Icon : "bi-lock-fill")"></i></div>
+                                <span class="ad-lesson-number">@Tx("Lesson", "Bài") @step</span>
+                                <div class="ad-lesson-copy"><strong>@Tx(activity.En, activity.Vi)</strong><small>@Tx(activity.HintEn, activity.HintVi)</small></div>
+                                <button type="button" disabled="@(!isAvailable)" @onclick="() => OpenStep(step)">
+                                    @(isDone ? Tx("Review", "Xem lại") : isAvailable ? Tx("Continue", "Tiếp tục") : Tx("Locked", "Chưa mở"))
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <div class="ad-side-column">
+                <SoftSync.Presentation.Components.Journey.AdventureMap Checkpoints="AdventureCheckpoints" SelectedItemId="SelectedItem.Id" Vietnamese="@(L.Current == AppLanguage.Vi)" OnSelect="ChooseCheckpoint" />
+
+                <section class="ad-preview">
+                    <span class="ad-kicker">@Tx("NEXT DESTINATION", "ĐIỂM ĐẾN TIẾP THEO")</span>
+                    @if (NextWeek is null)
+                    {
+                        <h3><i class="bi bi-trophy-fill"></i> @Tx("Journey completed!", "Đã chinh phục hành trình!")</h3>
+                        <p>@Tx("Keep practicing to strengthen your skills.", "Hãy tiếp tục luyện tập để phát triển kỹ năng.")</p>
+                    }
+                    else
+                    {
+                        <h3>@WeekTitle(NextWeek, SkillWeeks.IndexOf(NextWeek) + 1)</h3>
+                        <p>@Tx("Keep learning to unlock the next part of your path.", "Tiếp tục học để mở khóa chặng tiếp theo.")</p>
+                    }
+                </section>
+            </div>
+        </div>
+    }
+</section>
+
+<style>
+    /* Let this immersive workspace use the width of the existing Blazor shell. */
+    .ss-main-content:has(> .ss-adventure) { width: 100%; max-width: none; padding: 0 !important; }
+</style>
+
+@code {
+    private IReadOnlyList<SoftSync.Presentation.Components.Journey.JourneyCheckpoint> AdventureCheckpoints =>
+        SoftSync.Presentation.Components.Journey.JourneyProgress.LevelCheckpoints(items, SoftSync.Presentation.Components.Journey.SkillTheme.KeyFor(SelectedItem), WeekTitle, RoadmapReviewMode.Enabled);
+    private void ChooseCheckpoint(SoftSync.Presentation.Components.Journey.JourneyCheckpoint checkpoint) {
+        var item = items.FirstOrDefault(x => x.Id == checkpoint.ItemId);
+        if (item is not null) ChooseWeek(item);
+    }
+    private int userId;
+    private bool loading = true;
+    private List<RoadmapItemDto> items = [];
+    private string selectedSkill = "communication";
+    private string SelectedSkill => selectedSkill;
+    private int selectedItemId;
+    private static readonly (int Step, string En, string Vi, string HintEn, string HintVi, string Icon)[] Activities =
+    [
+        (1, "Video", "Video", "Watch the core lesson", "Xem video bài học", "bi bi-play-fill"),
+        (2, "Script", "Nội dung bài học", "Review the lesson script", "Ôn nội dung lý thuyết", "bi bi-file-text"),
+        (3, "Summary", "Tóm tắt", "Reinforce key takeaways", "Củng cố các ý chính", "bi bi-lightbulb"),
+        (4, "Quiz", "Kiểm tra", "Check your understanding", "Đánh giá kiến thức", "bi bi-ui-checks"),
+        (5, "Practice", "Thực hành", "Apply the skill in a scenario", "Áp dụng kỹ năng vào tình huống", "bi bi-chat-dots"),
+        (6, "Reflection", "Phản tư", "Reflect and receive feedback", "Phản tư và nhận phản hồi", "bi bi-stars")
+    ];
+
+    private RoadmapItemDto SelectedItem => items.FirstOrDefault(x => x.Id == selectedItemId) ?? items[0];
+    private List<RoadmapItemDto> SkillWeeks => items.Where(x => SkillKey(x) == selectedSkill).ToList();
+    private IEnumerable<IGrouping<string, RoadmapItemDto>> SkillGroups =>
+        items.GroupBy(SkillKey).OrderBy(x => SkillRank(x.Key));
+    private int ActiveIndex
+    {
+        get
+        {
+            var index = items.FindIndex(x => !x.IsCompleted);
+            return index < 0 ? items.Count - 1 : index;
+        }
+    }
+    private int SelectedOrdinal => Math.Max(1, SkillWeeks.FindIndex(x => x.Id == SelectedItem.Id) + 1);
+    private int SelectedCompleted => Math.Clamp(SelectedItem.CompletedActivityCount, 0, SelectedRequired);
+    private int SelectedRequired => Math.Max(1, SelectedItem.TotalActivityCount);
+    private int SelectedPercent => Math.Clamp(SelectedItem.ProgressPercent, 0, 100);
+    private int CompletedInSkill => SkillWeeks.Count(x => x.IsCompleted);
+    private string SelectedTitle => WeekTitle(SelectedItem, SelectedOrdinal);
+    private string SelectedDescription => string.IsNullOrWhiteSpace(SelectedItem.Objective)
+        ? (string.IsNullOrWhiteSpace(SelectedItem.Description) ? Tx("Practice this skill through real learning activities.", "Rèn luyện kỹ năng thông qua các hoạt động thực tế.") : SelectedItem.Description)
+        : SelectedItem.Objective;
+    private RoadmapItemDto? NextWeek
+    {
+        get
+        {
+            var index = SkillWeeks.FindIndex(x => !x.IsCompleted);
+            return index < 0 ? null : SkillWeeks.Skip(index + 1).FirstOrDefault();
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        userId = await AuthProvider.GetUserIdAsync();
+        if (userId <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(userId, userId);
+        items = roadmap.Items.Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
+            .OrderBy(x => x.PriorityOrder)
+            .ThenBy(x => x.WeekNumber)
+            .ThenBy(x => x.Id)
+            .ToList();
+        if (items.Count > 0)
+        {
+            selectedItemId = items[Math.Max(0, ActiveIndex)].Id;
+            selectedSkill = SkillKey(SelectedItem);
+        }
+        loading = false;
+    }
+
+    private bool CanOpen(RoadmapItemDto item)
+    {
+        if (RoadmapReviewMode.Enabled) return true;
+        var index = items.FindIndex(x => x.Id == item.Id);
+        return index >= 0 && (item.IsCompleted || index <= ActiveIndex);
+    }
+
+    private void PickSkill(string key)
+    {
+        selectedSkill = key;
+        var firstAvailable = SkillWeeks.LastOrDefault(CanOpen);
+        selectedItemId = (firstAvailable ?? SkillWeeks.First()).Id;
+    }
+
+    private void ChooseWeek(RoadmapItemDto item)
+    {
+        if (CanOpen(item)) selectedItemId = item.Id;
+    }
+
+    private void OpenCurrentLesson() => OpenStep(Math.Clamp(SelectedCompleted + 1, 1, 6));
+
+    private void OpenStep(int step)
+    {
+        if (!CanOpen(SelectedItem)) return;
+        if (step > SelectedCompleted + 1 && !RoadmapReviewMode.Enabled) return;
+        Nav.NavigateTo($"/roadmap/lecture/{userId}/{SelectedItem.Id}?step={step}");
+    }
+
+    private static string SkillKey(RoadmapItemDto item)
+    {
+        var text = $"{item.SkillName} {item.Title}".ToLowerInvariant();
+        if (text.Contains("giao tiếp") || text.Contains("communication")) return "communication";
+        if (text.Contains("quản lý thời gian") || text.Contains("time management")) return "time";
+        if (text.Contains("tư duy phản biện") || text.Contains("critical")) return "critical";
+        if (text.Contains("làm việc nhóm") || text.Contains("teamwork")) return "teamwork";
+        return "other";
+    }
+    private static int SkillRank(string key) => key switch
+    {
+        "communication" => 0, "time" => 1, "critical" => 2, "teamwork" => 3, _ => 4
+    };
+    private string SkillName(string key) => key switch
+    {
+        "communication" => Tx("Communication", "Giao tiếp"),
+        "time" => Tx("Time management", "Quản lý thời gian"),
+        "critical" => Tx("Critical thinking", "Tư duy phản biện"),
+        "teamwork" => Tx("Teamwork", "Làm việc nhóm"),
+        _ => Tx("Other skills", "Kỹ năng khác")
+    };
+    private string SkillHeading(string key) => key switch
+    {
+        "communication" => Tx("Communication skills", "Kỹ năng giao tiếp"),
+        "time" => Tx("Time management", "Quản lý thời gian"),
+        "critical" => Tx("Critical thinking", "Tư duy phản biện"),
+        "teamwork" => Tx("Teamwork", "Kỹ năng làm việc nhóm"),
+        _ => Tx("Soft skills", "Kỹ năng mềm")
+    };
+    private static string SkillIcon(string key) => key switch
+    {
+        "communication" => "bi bi-chat-dots-fill",
+        "time" => "bi bi-clock-fill",
+        "critical" => "bi bi-lightbulb-fill",
+        "teamwork" => "bi bi-people-fill",
+        _ => "bi bi-stars"
+    };
+    private static string SkillAccent(string key) => key switch
+    {
+        "communication" => "#a48bff",
+        "time" => "#f5bc7e",
+        "critical" => "#71caff",
+        "teamwork" => "#62dfc6",
+        _ => "#a48bff"
+    };
+    private string WeekTitle(RoadmapItemDto item, int ordinal)
+        => string.IsNullOrWhiteSpace(item.Title)
+            ? Tx($"Week {ordinal}", $"Tuần {ordinal}")
+            : System.Text.RegularExpressions.Regex.Replace(item.Title, @"^Tu\u1ea7n\s+\d+\s*[-–:]\s*", "").Trim();
+    private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+}

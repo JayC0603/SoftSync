@@ -1,0 +1,47 @@
+@page "/admin/dashboard"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@implements IAsyncDisposable
+@inject AdminAnalyticsService Analytics
+
+<PageTitle>@Ui("Tổng quan quản trị", "Admin overview") · SoftSync</PageTitle>
+<main class="admin-dashboard ss-admin-studio" data-admin-section="operations">
+    <header><div><span>SOFTSYNC · ADMIN</span><h1>@Ui("Tổng quan hệ thống", "System overview")</h1><p>@Ui("Số liệu vận hành và hoạt động trong 24 giờ gần nhất.", "Operational and learning activity for the last 24 hours.")</p></div>
+        <nav><a class="btn btn-outline-primary" href="/admin/ai/settings">@Ui("Cấu hình Gemini", "Gemini settings")</a><a class="btn btn-outline-primary" href="/admin/learners">@Ui("Chất lượng học viên", "Learner quality")</a><a class="btn btn-outline-secondary" href="/admin/users">@Ui("Người dùng", "Users")</a></nav></header>
+    @if (overview is null) { <p>@Ui("Đang tải dữ liệu…", "Loading data…")</p> }
+    else {
+        <p class="updated">@Ui("Cập nhật", "Updated") @overview.CollectedAtUtc?.ToLocalTime().ToString("HH:mm:ss") · @overview.MetricSource</p>
+        <section class="cards">
+            <article><span>@Ui("Request HTTP / phút", "HTTP requests / minute")</span><strong>@overview.RequestsLastMinute</strong><small>@Ui("Lỗi máy chủ", "Server errors") @overview.ErrorsLastMinute</small></article>
+            <article><span>@Ui("CPU tiến trình", "Process CPU")</span><strong>@(overview.CpuPercent is null ? "N/A" : $"{overview.CpuPercent:0.0}%")</strong><small>@Ui("Chuẩn hóa theo logical CPU", "Normalized by logical CPU")</small></article>
+            <article><span>@Ui("RAM tiến trình", "Process memory")</span><strong>@(overview.WorkingSetBytes is null ? "N/A" : $"{overview.WorkingSetBytes.Value / 1024d / 1024d:0} MB")</strong><small>@Ui("Working set của server", "Server process working set")</small></article>
+            <article><span>@Ui("Học viên hoạt động 24h", "Active learners · 24h")</span><strong>@overview.ActiveLearners</strong><small>@Ui("Có phiên học đo được", "With measured learning time")</small></article>
+            <article><span>@Ui("Đánh giá đầu vào", "Assessments")</span><strong>@overview.Evaluations</strong><small>@Ui("Trong 24 giờ", "In the last 24 hours")</small></article>
+            <article><span>@Ui("Đánh giá CV", "CV reviews")</span><strong>@overview.CvReviews</strong><small>@Ui("Trong 24 giờ", "In the last 24 hours")</small></article>
+            <article><span>@Ui("Thao tác AI", "AI operations")</span><strong>@overview.AiRequests</strong><small><a href="/admin/ai/settings">@Ui("Xem key và model", "View keys and models")</a></small></article>
+        </section>
+        <section class="charts">
+            <article><h2>@Ui("CPU tiến trình · 6 giờ", "Process CPU · 6 hours")</h2><p>@Ui("Phần trăm trung bình theo phút từ các mẫu đã lưu.", "Minute averages from stored samples.")</p><svg viewBox="0 0 640 160" role="img" aria-label="CPU trend"><polyline points="@CpuPoints" fill="none" stroke="#7357df" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" /></svg></article>
+            <article><h2>@Ui("Request HTTP · 6 giờ", "HTTP requests · 6 hours")</h2><p>@Ui("Số request mỗi phút; health check và tài nguyên tĩnh được loại trừ.", "Requests per minute; health checks and static assets are excluded.")</p><svg viewBox="0 0 640 160" role="img" aria-label="HTTP requests trend"><polyline points="@RequestPoints" fill="none" stroke="#2da982" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" /></svg></article>
+        </section>
+        <section class="note"><h2>@Ui("Đo thời gian học", "Measured learning time")</h2><p>@Ui("Thời gian chỉ được cộng từ heartbeat của phiên học đang hoạt động. Dashboard không dùng số phút ước tính từ tiến độ hoàn thành.", "Time is credited from active learning session heartbeats. The dashboard does not infer minutes from completed steps.")</p></section>
+    }
+</main>
+
+<style>
+ .admin-dashboard{max-width:1320px;margin:auto;padding:28px 24px 48px;color:var(--ss-text,#24213a)}.admin-dashboard header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}.admin-dashboard header span{font-size:.75rem;letter-spacing:.1em;color:#745cdf;font-weight:800}.admin-dashboard h1{font-size:clamp(1.8rem,3vw,2.4rem);margin:.4rem 0}.admin-dashboard p{color:var(--ss-text-muted,#746f84)}.admin-dashboard nav{display:flex;gap:10px;flex-wrap:wrap}.updated{font-size:.85rem}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.cards article,.note,.charts article{border:1px solid var(--ss-border,#e6e4f2);background:var(--ss-surface,#fff);border-radius:16px;padding:20px;box-shadow:0 6px 20px #21164a0a}.cards article{display:grid;gap:8px;min-height:142px}.cards span{font-size:.85rem;color:var(--ss-text-muted,#746f84)}.cards strong{font-size:2rem}.cards small{color:var(--ss-text-muted,#746f84)}.note{margin-top:18px}.note h2,.charts h2{font-size:1.15rem}.note p,.charts p{margin:0}.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.charts svg{width:100%;height:160px;margin-top:16px;background:linear-gradient(to bottom,transparent 32%,var(--ss-border,#e6e4f2) 33%,transparent 34%,transparent 65%,var(--ss-border,#e6e4f2) 66%,transparent 67%)}@@media(max-width:900px){.admin-dashboard{padding:20px 14px 36px}.admin-dashboard header{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.charts{grid-template-columns:1fr}}@@media(max-width:520px){.cards{grid-template-columns:1fr}}
+</style>
+@code {
+    private SystemOverview? overview;
+    private IReadOnlyList<SoftSync.DAL.Entities.SystemMetricMinute> history = [];
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cancellation;
+    protected override async Task OnInitializedAsync() { await RefreshAsync(); cancellation = new(); timer = new(TimeSpan.FromSeconds(15)); _ = PollAsync(cancellation.Token); }
+    private async Task PollAsync(CancellationToken token) { try { while (await timer!.WaitForNextTickAsync(token)) { await RefreshAsync(token); await InvokeAsync(StateHasChanged); } } catch (OperationCanceledException) { } }
+    private async Task RefreshAsync(CancellationToken token = default) { try { overview = await Analytics.GetOverviewAsync(token); history = await Analytics.GetHistoryAsync(DateTime.UtcNow.AddHours(-6), DateTime.UtcNow, token); } catch { overview = null; history = []; } }
+    private string CpuPoints { get { var values = history.OrderBy(x => x.MinuteStartUtc).GroupBy(x => x.MinuteStartUtc).Select(g => g.Average(x => x.AverageCpuPercent ?? 0)); return Points(values, 100); } }
+    private string RequestPoints { get { var values = history.OrderBy(x => x.MinuteStartUtc).GroupBy(x => x.MinuteStartUtc).Select(g => g.Sum(x => (double)x.RequestCount)).ToList(); return Points(values, Math.Max(1, values.DefaultIfEmpty(1).Max())); } }
+    private static string Points(IEnumerable<double> values, double maximum) { var points = values.ToList(); if (points.Count < 2) return ""; return string.Join(" ", points.Select((value, i) => string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{i * 640d / (points.Count - 1):0.0},{150 - Math.Clamp(value / maximum, 0, 1) * 140:0.0}"))); }
+    public ValueTask DisposeAsync() { cancellation?.Cancel(); cancellation?.Dispose(); timer?.Dispose(); return ValueTask.CompletedTask; }
+}

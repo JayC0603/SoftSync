@@ -1,18 +1,73 @@
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IWebHostEnvironment HostEnvironment
 <!DOCTYPE html>
-<html lang="en" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
+<html lang="@ServerLanguage" data-theme="@ServerTheme" data-reduce-motion="@ReduceMotionAttr">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual" />
+    <meta name="theme-color" content="@BrowserThemeColor" />
     <base href="/" />
+    <style>
+        /* Critical first-paint canvas. This is intentionally inline and appears
+           before external styles so refresh never exposes the purple fallback
+           while Blazor/CSS is still loading. */
+        html, body { min-height: 100%; margin: 0; background: #050917; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background: #050917; }
+        html[data-theme="light"], html[data-theme="light"] body { background: #f7f8fa; }
+    </style>
+    <script>
+        // Migrate the old localStorage-only preference before the first paint.
+        // Once the cookie exists, the server renders the selected language
+        // directly and this block becomes a no-op on every later visit.
+        (function () {
+            try {
+                var saved = localStorage.getItem('ss-lang');
+                if (saved !== 'vi' && saved !== 'en') return;
+                var match = document.cookie.match(/(?:^|; )ss-lang=([^;]*)/);
+                var cookie = match ? decodeURIComponent(match[1]) : null;
+                if (cookie === saved) {
+                    sessionStorage.removeItem('ss-lang-cookie-migration');
+                    return;
+                }
+                // Avoid a reload loop if this browser blocks cookies.
+                if (sessionStorage.getItem('ss-lang-cookie-migration') === saved) return;
+                sessionStorage.setItem('ss-lang-cookie-migration', saved);
+                document.cookie = 'ss-lang=' + saved + '; path=/; max-age=31536000; samesite=lax';
+                location.replace(location.href);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="dist/app.css" />
+    <link rel="stylesheet" href="@VersionedAsset("dist/app.css")" />
     <link rel="stylesheet" href="css/liquid-glass.css" />
+    <link rel="stylesheet" href="css/focus-journey.css" />
+    <link rel="stylesheet" href="css/ecosystem.css" />
+    <link rel="stylesheet" href="@VersionedAsset("css/design-system.css")" />
+    <script src="@VersionedAsset("js/design-system.js")"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
+    <link rel="stylesheet" href="@VersionedAsset("css/admin-studio.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/vivid-theme.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/about-landing.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/dashboard-reference.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/mobile-layout.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/glass-buttons.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/account-menu.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/notifications.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/compact-layout.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/settings-account.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/mobile-home.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/brand-images.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/strict-mobile-home.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/mobile-dock.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/mobile-site-footer.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/navigation-glass.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/mobile-options.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/desktop-workspace.css")" media="(min-width: 901px)" />
+    <link rel="stylesheet" href="@VersionedAsset("css/learner-studio.css")" media="(min-width: 901px)" />
     <script>
         // The server already renders data-theme on <html> from the ss-theme
         // cookie, so there's no flash and no revert on Blazor enhanced navigation.
@@ -27,7 +82,7 @@
             }
             function apply() {
                 try {
-                    var pref = localStorage.getItem('ss-theme') || 'system';
+                    var pref = localStorage.getItem('ss-theme') || 'light';
                     var rm = localStorage.getItem('ss-reduce-motion') === '1';
                     var resolved = (pref === 'light' || pref === 'dark') ? pref
                         : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -45,7 +100,7 @@
             // If the user chose "system", follow OS theme changes.
             try {
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                    if ((localStorage.getItem('ss-theme') || 'system') === 'system') apply();
+                    if (localStorage.getItem('ss-theme') === 'system') apply();
                 });
             } catch (e) { /* older browsers */ }
         })();
@@ -55,17 +110,40 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
-    <script src="dist/app.js"></script>
+    <script src="@VersionedAsset("js/learning-activity.js")"></script>
+    <script src="@VersionedAsset("dist/app.js")"></script>
 </body>
 
 </html>
 
 @code {
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string,
+        (DateTimeOffset Modified, long Length, string Url)> AssetVersions = new();
+
+    private string VersionedAsset(string path)
+    {
+        var asset = HostEnvironment.WebRootFileProvider.GetFileInfo(path);
+        if (!asset.Exists) return path;
+        var cacheKey = $"{HostEnvironment.WebRootPath}|{path}";
+        if (AssetVersions.TryGetValue(cacheKey, out var cached)
+            && cached.Modified == asset.LastModified && cached.Length == asset.Length)
+            return cached.Url;
+        using var stream = asset.CreateReadStream();
+        var version = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream))[..16];
+        var url = $"{path}?v={version}";
+        AssetVersions[cacheKey] = (asset.LastModified, asset.Length, url);
+        return url;
+    }
     // Read the resolved theme the browser last persisted to the ss-theme cookie
     // and paint it straight onto <html> during SSR / enhanced navigation. This is
     // what stops the theme from flashing to light and reverting between pages.
     private string ServerTheme =>
         HttpContextAccessor.HttpContext?.Request.Cookies["ss-theme"] is "dark" ? "dark" : "light";
+
+    private string BrowserThemeColor => ServerTheme == "dark" ? "#100d24" : "#f7f6fc";
+
+    private string ServerLanguage =>
+        HttpContextAccessor.HttpContext?.Request.Cookies["ss-lang"] is "en" ? "en" : "vi";
 
     // Returns "1" or null — Blazor omits the attribute entirely when it's null,
     // so we never emit a broken/empty data-reduce-motion.
