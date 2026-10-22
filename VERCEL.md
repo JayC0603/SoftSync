@@ -59,6 +59,12 @@ npx --yes vercel@65.0.0 login
 The script links the project, provisions and connects the database and Blob
 store to production, checks the required environment variable names, and
 deploys production. Select the desired plan in the integration setup prompts.
+Before deployment, it uploads the bundled lesson videos to public Blob storage
+using multipart uploads. Large MP4 files are excluded from both the deployment
+upload and container image. A generated video manifest preserves `/videos/*`
+URLs through redirects. Upload progress is cached under `.vercel/`; retrying the
+script reuses completed uploads. This first upload transfers about 1.9 GB, so
+check the selected Blob plan's storage allowance.
 Provisioning switches create new resources; omit them for subsequent deploys:
 
 ```powershell

@@ -305,6 +305,22 @@ else if (!demoMode)
 }
 
 app.UseStaticFiles();
+
+// Deployment uploads exclude large lesson media. Preserve the existing lesson
+// URLs by redirecting them to the public Blob URLs generated before deploy.
+var videoManifestPath = Path.Combine(app.Environment.WebRootPath, "video-manifest.json");
+var lessonVideos = File.Exists(videoManifestPath)
+    ? System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(videoManifestPath)) ?? new()
+    : new Dictionary<string, string>();
+app.MapGet("/videos/{fileName}", (string fileName) =>
+{
+    if (lessonVideos.TryGetValue(fileName, out var url)
+        && Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        && uri.Scheme == "https"
+        && uri.Host.EndsWith(".public.blob.vercel-storage.com", StringComparison.OrdinalIgnoreCase))
+        return Results.Redirect(url);
+    return Results.NotFound();
+});
 app.UseMiddleware<SystemMetricsMiddleware>();
 
 app.UseCors("Frontend");

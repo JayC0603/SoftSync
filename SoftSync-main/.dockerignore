@@ -33,3 +33,4 @@ tmp
 docs
 
 .vercel-validation
+**/wwwroot/videos
