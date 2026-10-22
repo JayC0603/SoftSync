@@ -1,200 +1,49 @@
 @page "/progress"
 @page "/progress/{UserId:int}"
 @rendermode InteractiveServer
-@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@attribute [Authorize]
 @attribute [StreamRendering]
-@inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
-@using SoftSync.Common
 @using SoftSync.Common.Dtos
 @inject IRoadmapService RoadmapService
-@inject IUserService UserService
+@inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
-
 @inject ILogger<Progress> Logger
 
-<PageTitle>@Tx("Your progress", "Tiến độ của bạn") · SoftSync</PageTitle>
-<HeadContent><link rel="stylesheet" href="css/progress-overview.css?v=20261020-v1" /></HeadContent>
+<PageTitle>Tiến độ · SoftSync</PageTitle>
+<HeadContent><link rel="stylesheet" href="css/progress-reference.css?v=20261022-v1" /></HeadContent>
 
-<section class="sp-page" aria-labelledby="sp-title">
-    <header class="sp-heading">
-        <div><span class="sp-eyebrow">SOFTSYNC · @Tx("YOUR GROWTH", "HÀNH TRÌNH TIẾN BỘ")</span><h1 id="sp-title">@Tx("Every step counts.", "Mỗi bước đều đáng giá.")</h1><p>@Tx("Look back at your progress. Find your next step.", "Nhìn lại chặng đường đã qua. Sẵn sàng cho bước tiếp theo.")</p></div>
-        <div class="sp-calendar"><button class="sp-range" @onclick="() => calendarOpen = !calendarOpen" aria-expanded="@calendarOpen" aria-controls="sp-date-panel"><i class="bi bi-calendar3" aria-hidden="true"></i>@DateRange<i class="bi bi-chevron-down" aria-hidden="true"></i></button>
-            @if (calendarOpen)
-            {
-                <section id="sp-date-panel" class="sp-date-panel" aria-label="@Tx("Choose a date range", "Chọn khoảng thời gian")"><header><strong>@Tx("Learning period", "Khoảng thời gian học")</strong><button @onclick="() => calendarOpen = false" aria-label="@Tx("Close", "Đóng")"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><label>@Tx("From", "Từ ngày")<input type="date" @bind="draftStart" /></label><label>@Tx("To", "Đến ngày")<input type="date" @bind="draftEnd" /></label><p><i class="bi bi-check2-circle" aria-hidden="true"></i><strong>@DraftActivityCount</strong> @Tx("activities completed", "hoạt động đã hoàn thành")</p><footer><button class="sp-text-button" @onclick="SetCurrentWeek">@Tx("Last 7 days", "7 ngày gần đây")</button><button class="sp-primary" @onclick="ApplyDateRange">@Tx("Apply", "Áp dụng")</button></footer></section>
-            }
-        </div>
-    </header>
+<section class="pg-page" aria-label="Tiến độ học tập">
     @if (loading)
     {
-        <div class="sp-state" role="status"><span class="sp-spinner" aria-hidden="true"></span><h2>@Tx("Gathering your progress…", "Đang tổng hợp tiến độ của bạn…")</h2></div>
+        <div class="pg-state" role="status"><span class="pg-spinner" aria-hidden="true"></span><h1>Đang tổng hợp tiến độ của bạn…</h1></div>
     }
     else if (loadError)
     {
-        <div class="sp-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h2>@Tx("We could not load your progress", "Chưa thể tải tiến độ")</h2><p>@Tx("Please try again to see your saved learning progress.", "Vui lòng thử lại để xem tiến độ học đã lưu.")</p><button class="sp-primary" @onclick="LoadProgress">@Tx("Try again", "Thử lại")</button></div>
+        <div class="pg-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>Chưa thể tải tiến độ</h1><p>Vui lòng thử lại để xem tiến độ học đã lưu.</p><button type="button" class="pg-primary" @onclick="LoadProgress">Thử lại</button></div>
     }
     else
     {
-        <section class="sp-overview" aria-label="@Tx("Overall roadmap progress", "Tiến độ toàn bộ lộ trình")">
-            <div class="sp-overview-copy"><span class="sp-eyebrow">@Tx("YOUR LEARNING JOURNEY", "CHẶNG ĐƯỜNG HỌC TẬP")</span><h2>@(Overall == 100 && TotalActivities > 0 ? Tx("You made it. Keep growing!", "Bạn đã hoàn thành. Tiếp tục vươn xa!") : CompletedActivities > 0 ? Tx("A little further, every day.", "Mỗi ngày, tiến xa thêm một chút.") : Tx("Your next chapter starts here.", "Chặng đường mới bắt đầu từ đây."))</h2><p>@CompletedActivities / @TotalActivities @Tx("activities completed across your roadmap.", "hoạt động đã hoàn thành trong lộ trình của bạn.")</p><a class="sp-primary" href="/roadmap">@Tx("Continue learning", "Tiếp tục học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
-            <div class="sp-overview-art" aria-hidden="true"><span></span><span></span><i class="bi bi-stars"></i></div>
-            <div class="sp-ring" style="@($"--sp-percent:{Overall}%")" role="progressbar" aria-label="@Tx("Overall completion", "Tiến độ tổng thể")" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Overall"><div><strong>@Overall<small>%</small></strong><span>@Tx("completed", "hoàn thành")</span></div></div>
-        </section>
-        <section class="sp-metrics" aria-label="@Tx("Learning statistics", "Thống kê học tập")">
-            <article><i class="bi bi-check2-circle sp-purple" aria-hidden="true"></i><div><span>@Tx("Activities completed", "Hoạt động hoàn thành")</span><strong>@CompletedInRange</strong><small>@Tx("In the selected period", "Trong khoảng ngày đã chọn")</small></div></article>
-            <article><i class="bi bi-clock sp-blue" aria-hidden="true"></i><div><span>@Tx("Estimated study time", "Thời gian học ước tính")</span><strong>@StudyTimeInRange</strong><small>@Tx("Based on completed activities", "Theo các hoạt động đã hoàn thành")</small></div></article>
-            <article><i class="bi bi-fire sp-orange" aria-hidden="true"></i><div><span>@Tx("Current streak", "Chuỗi học hiện tại")</span><strong>@ActiveDays <em>@Tx("days", "ngày")</em></strong><small>@Tx("Consecutive days through today or yesterday", "Ngày liên tiếp đến hôm nay hoặc hôm qua")</small></div></article>
-            <article><i class="bi bi-lightning-charge sp-green" aria-hidden="true"></i><div><span>@Tx("Total experience", "Tổng kinh nghiệm")</span><strong>@(user?.ExperiencePoints ?? 0) <em>XP</em></strong><small>@Tx("Accumulated from learning", "Tích lũy từ học tập")</small></div></article>
-        </section>
-        <div class="sp-insights">
-            <section class="sp-card sp-activity" aria-labelledby="sp-activity-title"><header class="sp-section-head"><div><span class="sp-eyebrow">@Tx("YOUR LEARNING RHYTHM", "NHỊP HỌC CỦA BẠN")</span><h2 id="sp-activity-title">@Tx("Learning activity", "Hoạt động học tập")</h2></div><span class="sp-count">@CompletedInRange @Tx("completed", "hoàn thành")</span></header>
-                <p class="sp-description">@Tx("Completed activities in the selected period.", "Số hoạt động hoàn thành trong khoảng ngày đã chọn.")</p>
-                <div class="sp-chart" role="img" aria-label="@ChartDescription">
-                    @foreach (var bucket in ActivityBuckets)
-                    {
-                        <div class="sp-chart-column"><span class="sp-chart-value">@bucket.Count</span><div class="sp-chart-track"><div class="sp-chart-bar @(bucket.Count == 0 ? "is-empty" : null)" style="height:@(bucket.Count * 100 / ChartMaximum)%"></div></div><span class="sp-chart-label">@BucketLabel(bucket)</span></div>
-                    }
-                </div>
-                <footer class="sp-chart-footer"><span><i aria-hidden="true"></i>@Tx("Completed activities", "Hoạt động hoàn thành")</span><small>@Tx("Time zone: Vietnam (UTC+7)", "Múi giờ Việt Nam (UTC+7)")</small></footer>
-                @if (CompletedInRange == 0) { <p class="sp-chart-empty">@Tx("No completed activity in this period yet. Your next step is waiting.", "Chưa có hoạt động hoàn thành trong khoảng này. Bước tiếp theo đang chờ bạn.")</p> }
-            </section>
-            <section class="sp-card sp-skills" aria-labelledby="sp-skills-title"><header class="sp-section-head"><div><span class="sp-eyebrow">@Tx("ONE SKILL AT A TIME", "TỪNG KỸ NĂNG MỘT")</span><h2 id="sp-skills-title">@Tx("Skill progress", "Tiến độ kỹ năng")</h2></div><i class="bi bi-bar-chart" aria-hidden="true"></i></header><p class="sp-description">@Tx("Activity completion across your full roadmap.", "Mức hoàn thành hoạt động trong toàn bộ lộ trình.")</p>
-                <div class="sp-skill-list">
-                    @foreach (var track in Tracks)
-                    {
-                        var percent = TrackProgress(track);
-                        <article><div class="sp-skill-heading"><span class="sp-skill-icon"><i class="bi @track.Icon" aria-hidden="true"></i></span><strong>@TrackName(track)</strong><b>@percent%</b></div><progress value="@percent" max="100" aria-label="@TrackName(track)">@percent%</progress><small>@TrackCompletionLabel(track)</small></article>
-                    }
-                </div><a class="sp-assessment" href="@($"/assessment/{UserId}")">@Tx("View your skills assessment", "Xem đánh giá kỹ năng")<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
-            </section>
-        </div>
-        <section class="sp-card sp-lessons" aria-labelledby="sp-lessons-title"><header class="sp-section-head"><div><span class="sp-eyebrow">@Tx("KEEP MOVING FORWARD", "TIẾP NỐI HÀNH TRÌNH")</span><h2 id="sp-lessons-title">@Tx("Your learning journey", "Hành trình học tập")</h2></div><a class="sp-text-button" href="/roadmap">@Tx("View roadmap", "Xem lộ trình")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></header>
-            @if (roadmapItems.Count == 0)
-            {
-                <div class="sp-empty"><i class="bi bi-signpost-split" aria-hidden="true"></i><h3>@Tx("Every journey starts with a first step", "Hành trình nào cũng bắt đầu từ bước đầu tiên")</h3><p>@Tx("Open your roadmap to get started.", "Mở lộ trình để bắt đầu hành trình của bạn.")</p><a class="sp-primary" href="/roadmap">@Tx("Open roadmap", "Mở lộ trình")</a></div>
-            }
-            else
-            {
-                <div class="sp-lesson-list">
-                    @foreach (var item in roadmapItems.Take(5))
-                    {
-                        <article class="sp-lesson"><div class="sp-lesson-heading"><span class="sp-skill-icon"><i class="bi @SkillIcon(item)" aria-hidden="true"></i></span><div><small>@LocalizedSkillName(item.SkillName) · @Tx("Week", "Tuần") @item.WeekNumber</small><h3>@item.Title</h3></div><span class="sp-status @(item.IsCompleted ? "is-done" : "")">@(item.IsCompleted ? Tx("Completed", "Hoàn thành") : CompletedStepCount(item) > 0 ? Tx("In progress", "Đang học") : Tx("Not started", "Chưa bắt đầu"))</span></div>
-                            <div class="sp-lesson-details"><div class="sp-steps" aria-label="@Tx("Learning activities", "Các hoạt động học")">
-                                @foreach (var step in Pipeline)
-                                {
-                                    var state = StepState(item, step.Id);
-                                    <span class="@state" title="@Tx(step.En, step.Vi)"><i class="bi @(state == "done" ? "bi-check-lg" : state == "current" ? "bi-play-fill" : "bi-lock")" aria-hidden="true"></i><span>@Tx(step.En, step.Vi)</span><span class="sp-sr">: @(state == "done" ? Tx("Completed", "Đã hoàn thành") : state == "current" ? Tx("Available", "Có thể học") : Tx("Locked", "Chưa mở khóa"))</span></span>
-                                }
-                            </div><span class="sp-lesson-count">@CompletedStepCount(item) / @item.TotalActivityCount</span></div>
-                        </article>
-                    }
-                </div>
-            }
-        </section>
-        <aside class="sp-next"><div class="sp-next-icon"><i class="bi bi-compass" aria-hidden="true"></i></div><div><span class="sp-eyebrow">@Tx("YOUR NEXT SMALL WIN", "BƯỚC TIẾN NHỎ TIẾP THEO")</span><h2>@Tx("Keep the momentum going.", "Giữ nhịp học, tiếp đà tiến bộ.")</h2><p>@Tx("Return to your roadmap to continue from your saved progress.", "Quay lại lộ trình và tiếp tục từ tiến độ đã lưu của bạn.")</p></div><a class="sp-primary" href="/roadmap">@Tx("Continue learning", "Tiếp tục học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></aside>
+        <ProgressDashboard Items="@roadmapItems" UserId="@UserId" />
     }
 </section>
 
-
-@code{
- [Parameter]public int UserId{get;set;} [Inject]AuthenticationStateProvider AuthProvider{get;set;}=default!; private UserDto? user;private List<RoadmapItemDto> roadmapItems=[];private bool loading = true; private bool loadError;private bool calendarOpen;private DateTime rangeStart=StudyToday.AddDays(-6),rangeEnd=StudyToday,draftStart=StudyToday.AddDays(-6),draftEnd=StudyToday;
- private int TotalActivities=>roadmapItems.Sum(item=>item.TotalActivityCount);private int CompletedActivities=>roadmapItems.Sum(CompletedStepCount);private int Overall=>RoadmapProgressCalculator.Percent(CompletedActivities,TotalActivities);
- private IEnumerable<DateTime> ActivityDates=>roadmapItems.SelectMany(ActivityTimestamps).Select(VietnamTime);
- private int ActiveDays=>ConsecutiveActiveDays(ActivityDates.Select(x=>x.Date));
- private int CompletedInRange=>ActivityDates.Count(x=>InRange(x,rangeStart,rangeEnd));
- private string StudyTimeInRange=>FormatMinutes(roadmapItems.Sum(x=>StepMinutesInRange(x,rangeStart,rangeEnd)));
- private string DateRange=>$"{rangeStart:dd/MM/yyyy} - {rangeEnd:dd/MM/yyyy}";
- private List<DateTime> DraftStudyDates=>ActivityDates.Where(x=>InRange(x,draftStart,draftEnd)).Select(x=>x.Date).Distinct().OrderBy(x=>x).ToList();
- private int DraftActivityCount=>ActivityDates.Count(x=>InRange(x,draftStart,draftEnd));
- private int TrackProgress(LearningTrack track){var matches=TrackItems(track).ToList();return RoadmapProgressCalculator.Percent(matches.Sum(CompletedStepCount),matches.Sum(x=>x.TotalActivityCount));}
- private static readonly (int Id,string En,string Vi)[] Pipeline=[(1,"Video","Video"),(2,"Script","Nội dung"),(3,"Summary","Tóm tắt"),(4,"Quiz","Quiz"),(5,"Practice","Thực hành"),(6,"Reflection","Suy ngẫm")];
- private static string SkillIcon(RoadmapItemDto item){var value=$"{item.SkillName} {item.Title}".ToLowerInvariant();return value.Contains("time")||value.Contains("thời gian")?"bi-clock-history":value.Contains("critical")||value.Contains("phản biện")?"bi-lightbulb":"bi-chat-dots";}
- private static string StepState(RoadmapItemDto item,int step){var done=step switch{1=>item.IsVideoCompleted||item.VideoCompletedAtUtc.HasValue,2=>item.ScriptCompletedAtUtc.HasValue,3=>item.SummaryCompletedAtUtc.HasValue,4=>item.IsPracticeCompleted||item.PracticeCompletedAtUtc.HasValue,5=>item.IsScenarioCompleted||item.ScenarioCompletedAtUtc.HasValue,6=>item.IsReflectionCompleted||item.ReflectionCompletedAtUtc.HasValue,_=>false};if(done)return "done";var accessible=step==1||step==2&&(item.IsVideoCompleted||item.VideoCompletedAtUtc.HasValue)||step==3&&item.ScriptCompletedAtUtc.HasValue||step==4&&item.SummaryCompletedAtUtc.HasValue||step==5&&(item.IsPracticeCompleted||item.PracticeCompletedAtUtc.HasValue)||step==6&&(item.IsScenarioCompleted||item.ScenarioCompletedAtUtc.HasValue);return accessible?"current":"locked";}
- private static int CompletedStepCount(RoadmapItemDto item)=>item.CompletedActivityCount;
- private static IEnumerable<DateTime> ActivityTimestamps(RoadmapItemDto item)
- {
-  if(item.VideoCompletedAtUtc is { } video)yield return video;
-  if(item.ScriptCompletedAtUtc is { } script)yield return script;
-  if(item.SummaryCompletedAtUtc is { } summary)yield return summary;
-  if(item.PracticeCompletedAtUtc is { } practice)yield return practice;
-  if(item.ScenarioCompletedAtUtc is { } scenario)yield return scenario;
-  if(item.ReflectionCompletedAtUtc is { } reflection)yield return reflection;
- }
- private static DateTime StudyToday => DateTime.UtcNow.AddHours(7).Date;
- private static DateTime VietnamTime(DateTime utc) => utc.AddHours(7);
- private static int ConsecutiveActiveDays(IEnumerable<DateTime> dates)
- {
-  var days=dates.Distinct().OrderByDescending(x=>x).ToHashSet();
-  var cursor=days.Contains(StudyToday)?StudyToday:StudyToday.AddDays(-1);
-  var streak=0;
-  while(days.Contains(cursor)){streak++;cursor=cursor.AddDays(-1);}
-  return streak;
- }
- private static bool InRange(DateTime value,DateTime start,DateTime end)=>value.Date>=start.Date&&value.Date<=end.Date;
- private static int StepMinutesInRange(RoadmapItemDto item,DateTime start,DateTime end)
- {
-  var stamps=new[]{item.VideoCompletedAtUtc,item.ScriptCompletedAtUtc,item.SummaryCompletedAtUtc,item.PracticeCompletedAtUtc,item.ScenarioCompletedAtUtc,item.ReflectionCompletedAtUtc};
-  var minutes=new[]{9,9,5,4,10,5};
-  return stamps.Select((stamp,index)=>(stamp,index)).Where(x=>x.stamp.HasValue&&InRange(VietnamTime(x.stamp.Value),start,end)).Sum(x=>minutes[x.index]);
- }
- private string FormatMinutes(int minutes)=>minutes>=60?$"{minutes/60}h {minutes%60:D2}m":$"{minutes} {Tx("min", "phút")}";
- private string LocalizedSkillName(string name)
- {
-  if(L.Current==AppLanguage.Vi)return name.Replace("Time Management","Quản lý thời gian",StringComparison.OrdinalIgnoreCase).Replace("Critical Thinking","Tư duy phản biện",StringComparison.OrdinalIgnoreCase).Replace("Communication","Giao tiếp",StringComparison.OrdinalIgnoreCase);
-  return name.Replace("Quản lý thời gian","Time Management",StringComparison.OrdinalIgnoreCase).Replace("Tư duy phản biện","Critical Thinking",StringComparison.OrdinalIgnoreCase).Replace("Giao tiếp","Communication",StringComparison.OrdinalIgnoreCase);
- }
- private string TrackName(LearningTrack x)=>Tx(x.NameEn,x.NameVi);
- protected override Task OnInitializedAsync() => LoadProgress();
- private async Task LoadProgress()
- {
-  loading = true; loadError = false;
-  try
-  {
-   UserId = await AuthProvider.GetUserIdAsync();
-   if (UserId <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
-   user = await UserService.GetUserByIdAsync(UserId);
-   roadmapItems = (await RoadmapService.GetUserRoadmapAsync(UserId, UserId)).Items.OrderBy(x => x.PriorityOrder).ThenBy(x => x.WeekNumber).ToList();
-  }
-  catch (Exception ex) { Logger.LogError(ex, "Could not load learning progress"); loadError = true; }
-  finally { loading = false; }
- }
- private sealed record ActivityBucket(DateTime Start, DateTime End, int Count);
- private IReadOnlyList<ActivityBucket> ActivityBuckets
- {
-  get
-  {
-   var days = Math.Max(1, (rangeEnd - rangeStart).Days + 1);
-   var bucketDays = (int)Math.Ceiling(days / 7d);
-   var dates = ActivityDates.ToList();
-   var buckets = new List<ActivityBucket>();
-   for (var offset = 0; offset < days; offset += bucketDays)
-   {
-    var start = rangeStart.AddDays(offset);
-    var end = start.AddDays(Math.Min(bucketDays - 1, (rangeEnd - start).Days));
-    buckets.Add(new(start, end, dates.Count(x => InRange(x, start, end))));
-   }
-   return buckets;
-  }
- }
- private int ChartMaximum => Math.Max(1, ActivityBuckets.Max(x => x.Count));
- private string BucketLabel(ActivityBucket bucket) => bucket.Start == bucket.End ? bucket.Start.ToString("dd/MM") : $"{bucket.Start:dd/MM}–{bucket.End:dd/MM}";
- private string ChartDescription => string.Join("; ", ActivityBuckets.Select(x => $"{BucketLabel(x)}: {x.Count} {Tx("completed activities", "hoạt động hoàn thành")}"));
- private string TrackCompletionLabel(LearningTrack track)
- {
-  var matches = TrackItems(track).ToList();
-  return matches.Count == 0 ? Tx("No lessons in your roadmap yet", "Chưa có bài học trong lộ trình") : $"{matches.Sum(CompletedStepCount)} / {matches.Sum(x => x.TotalActivityCount)} {Tx("activities completed", "hoạt động hoàn thành")}";
- }
- private IEnumerable<RoadmapItemDto> TrackItems(LearningTrack track) => roadmapItems.Where(x => track.Keys.Any(k => $"{x.SkillName} {x.Title}".Contains(k, StringComparison.OrdinalIgnoreCase)));
-
- private void ApplyDateRange(){if(draftStart>draftEnd)(draftStart,draftEnd)=(draftEnd,draftStart);rangeStart=draftStart.Date;rangeEnd=draftEnd.Date;calendarOpen=false;}
- private void SetCurrentWeek(){draftStart=StudyToday.AddDays(-6);draftEnd=StudyToday;ApplyDateRange();}
- private string Tx(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
- private sealed record LearningTrack(string NameEn,string NameVi,string Icon,string[] Keys);
- private static readonly List<LearningTrack> Tracks =
- [
-  new("Communication", "Giao tiếp", "bi-chat-dots", ["communication", "giao tiếp"]),
-  new("Time management", "Quản lý thời gian", "bi-clock-history", ["time", "thời gian"]),
-  new("Critical thinking", "Tư duy phản biện", "bi-lightbulb", ["critical", "phản biện"])
- ];
+@code {
+    [Parameter] public int UserId { get; set; }
+    private List<RoadmapItemDto> roadmapItems = [];
+    private bool loading = true, loadError;
+    protected override Task OnInitializedAsync() => LoadProgress();
+    private async Task LoadProgress()
+    {
+        loading = true;
+        loadError = false;
+        try
+        {
+            UserId = await AuthProvider.GetUserIdAsync();
+            if (UserId <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+            roadmapItems = (await RoadmapService.GetUserRoadmapAsync(UserId, UserId)).Items.OrderBy(x => x.PriorityOrder).ThenBy(x => x.WeekNumber).ToList();
+        }
+        catch (Exception ex) { Logger.LogError(ex, "Could not load learning progress"); loadError = true; }
+        finally { loading = false; }
+    }
 }
