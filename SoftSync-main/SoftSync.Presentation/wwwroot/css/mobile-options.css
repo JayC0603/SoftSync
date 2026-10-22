@@ -1,4 +1,10 @@
 /* More and Settings share the same lightweight, translucent mobile surfaces. */
+.ss-settings-mobile-title, .ss-settings-direct-footer { display: none; }
+.ss-inline-password form { display: grid; gap: 8px; }
+.ss-inline-password button { margin-top: 8px; min-height: 44px; }
+@media (min-width: 901px) {
+    .ss-settings-direct .ss-settings-section:not(.active) { display: none; }
+}
 .ss-settings-overview, .ss-settings-detail-back { display: none; }
 .ss-more-page {
     --option-ink: #11164d;
@@ -238,4 +244,47 @@ html body .page .ss-main-content .ss-settings-shell .ss-settings-detail-back {
     .ss-options-logout { margin: 4px 0 10px; }
     .ss-options-logout button { min-height: 48px; padding: 10px 14px; gap: 10px; }
     .ss-options-logout button i { font-size: 20px; }
+}
+
+/* Edit the actual account model directly in each mobile settings group. */
+@media (max-width: 900px) {
+    .ss-settings-direct > .ss-page-header { display: none; }
+    .ss-settings-direct .ss-settings-mobile-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ss-settings-mobile-title a { display: grid; place-items: center; width: 36px; height: 44px; color: inherit; text-decoration: none; }
+    .ss-settings-mobile-title h1 { margin: 0; }
+    html body .ss-settings-direct .ss-settings-grid { display: block; }
+    .ss-settings-direct .ss-side { display: none; }
+    .ss-settings-direct .ss-main, .ss-settings-direct .ss-settings-panels { display: grid; gap: 12px; min-width: 0; }
+    .ss-settings-direct .ss-settings-section { display: block; min-width: 0; scroll-margin-top: 84px; }
+    .ss-settings-direct .ss-settings-direct-footer { display: grid; gap: 12px; }
+    html body .ss-settings-direct .ss-settings-section > .ss-card {
+        margin: 0 0 12px !important;
+        padding: 16px !important;
+        border: 1px solid var(--option-line) !important;
+        border-radius: 16px !important;
+        background: var(--option-surface) !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    html body .ss-settings-direct .ss-settings-section > .ss-account-panel { padding: 0 !important; }
+    .ss-settings-direct .ss-account-heading { padding: 14px; gap: 12px; background: transparent; }
+    .ss-settings-direct .ss-account-heading-icon { width: 32px; height: 32px; flex-basis: 32px; font-size: 18px; border-radius: 10px; }
+    .ss-settings-direct .ss-account-heading p { display: none; }
+    .ss-settings-direct .ss-account-password { width: auto; min-height: 44px; padding: 8px 10px; }
+    .ss-settings-direct .ss-account-fields { padding: 14px; gap: 14px; }
+    .ss-settings-direct .ss-account-connections { margin-inline: 14px; padding-block: 14px; }
+    .ss-settings-direct .ss-account-actions { padding: 14px; gap: 12px; }
+    .ss-settings-direct .ss-account-security { display: none; }
+    html body .ss-settings-direct .ss-linked { min-height: 66px; padding: 10px; gap: 10px; border-radius: 12px; }
+    html body .ss-settings-direct .ss-linked-grid { gap: 8px; }
+    .ss-settings-direct .ss-hero { margin: 0; padding: 14px; border-radius: 16px; background: var(--option-surface); box-shadow: none; }
+    .ss-settings-direct .ss-hero-inner { display: flex; align-items: center; flex-wrap: nowrap; gap: 14px; padding: 0; }
+    .ss-settings-direct .ss-hero-avatar { width: 52px; height: 52px; flex: 0 0 52px; }
+    .ss-settings-direct .ss-hero-id { min-width: 0; }
+    .ss-settings-direct .ss-hero-name-row { flex-wrap: wrap; gap: 6px; }
+    .ss-settings-direct .ss-hero-quote, .ss-settings-direct .ss-hero-stats { display: none; }
+    .ss-settings-direct .ss-seg { display: flex; flex-wrap: wrap; gap: 6px; background: transparent; }
+    .ss-settings-direct :is(.ss-seg button, .ss-seg-1) { min-height: 44px; padding: 8px 12px; white-space: normal; }
+    html body .ss-settings-direct .ss-settings-section :is(h4, h5) { margin-top: 0; font-size: 1rem !important; }
 }
