@@ -1,3 +1,4 @@
+@inherits ProgressLocalizedComponentBase
 @page "/progress"
 @page "/progress/{UserId:int}"
 @rendermode InteractiveServer
@@ -10,17 +11,17 @@
 @inject NavigationManager Nav
 @inject ILogger<Progress> Logger
 
-<PageTitle>Tiến độ · SoftSync</PageTitle>
+<PageTitle>@T("Tiến độ") · SoftSync</PageTitle>
 <HeadContent><link rel="stylesheet" href="css/progress-reference.css?v=20261022-v1" /></HeadContent>
 
-<section class="pg-page" aria-label="Tiến độ học tập">
+<section class="pg-page" aria-label="@T("Tiến độ học tập")">
     @if (loading)
     {
-        <div class="pg-state" role="status"><span class="pg-spinner" aria-hidden="true"></span><h1>Đang tổng hợp tiến độ của bạn…</h1></div>
+        <div class="pg-state" role="status"><span class="pg-spinner" aria-hidden="true"></span><h1>@T("Đang tổng hợp tiến độ của bạn…")</h1></div>
     }
     else if (loadError)
     {
-        <div class="pg-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>Chưa thể tải tiến độ</h1><p>Vui lòng thử lại để xem tiến độ học đã lưu.</p><button type="button" class="pg-primary" @onclick="LoadProgress">Thử lại</button></div>
+        <div class="pg-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>@T("Chưa thể tải tiến độ")</h1><p>@T("Vui lòng thử lại để xem tiến độ học đã lưu.")</p><button type="button" class="pg-primary" @onclick="LoadProgress">@T("Thử lại")</button></div>
     }
     else
     {

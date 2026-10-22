@@ -1,103 +1,104 @@
+@inherits ProgressLocalizedComponentBase
 @inject IJSRuntime JS
 
 <div class="pg-dashboard @(detail ? "pg-detail" : "pg-overview")">
     @if (!detail)
     {
-        <header class="pg-heading"><h1>Tiến độ</h1><p>Theo dõi hành trình học tập của bạn.</p></header>
-        <div class="pg-periods" aria-label="Khoảng thời gian">
-            @foreach (var period in new[] { 7, 30, 90 }) { <button type="button" class="@(days == period ? "is-active" : null)" aria-pressed="@(days == period)" @onclick="() => SetDays(period)">@period ngày</button> }
+        <header class="pg-heading"><h1>@T("Tiến độ")</h1><p>@T("Theo dõi hành trình học tập của bạn.")</p></header>
+        <div class="pg-periods" aria-label="@T("Khoảng thời gian")">
+            @foreach (var period in new[] { 7, 30, 90 }) { <button type="button" class="@(days == period ? "is-active" : null)" aria-pressed="@(days == period)" @onclick="() => SetDays(period)">@period @T("ngày")</button> }
         </div>
     }
     else
     {
-        <header class="pg-detail-heading"><button type="button" class="pg-back" aria-label="Quay lại tổng quan" @onclick="BackToOverview"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><h1>Chi tiết tiến độ</h1><button type="button" class="pg-select pg-date" @onclick="OpenDates" aria-expanded="@dateOpen"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@start.ToString("dd/MM/yyyy") - @end.ToString("dd/MM/yyyy")</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button></header>
+        <header class="pg-detail-heading"><button type="button" class="pg-back" aria-label="@T("Quay lại tổng quan")" @onclick="BackToOverview"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><h1>@T("Chi tiết tiến độ")</h1><button type="button" class="pg-select pg-date" @onclick="OpenDates" aria-expanded="@dateOpen"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@start.ToString("dd/MM/yyyy") - @end.ToString("dd/MM/yyyy")</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button></header>
         @if (dateOpen)
         {
             <form class="pg-date-panel" @onsubmit="ApplyDates" @onsubmit:preventDefault>
-                <label>Từ ngày<input type="date" @bind="draftStart" required /></label><label>Đến ngày<input type="date" @bind="draftEnd" required /></label><button type="submit" class="pg-primary">Áp dụng</button>
+                <label>@T("Từ ngày")<input type="date" @bind="draftStart" required /></label><label>@T("Đến ngày")<input type="date" @bind="draftEnd" required /></label><button type="submit" class="pg-primary">@T("Áp dụng")</button>
             </form>
         }
-        <nav class="pg-detail-tabs" aria-label="Chi tiết tiến độ">
+        <nav class="pg-detail-tabs" aria-label="@T("Chi tiết tiến độ")">
             @foreach (var tab in new[] { ("overview", "Tổng quan"), ("skills", "Kỹ năng"), ("activities", "Hoạt động"), ("time", "Thời gian") })
-            { <button type="button" class="@(detailTab == tab.Item1 ? "is-active" : null)" aria-pressed="@(detailTab == tab.Item1)" @onclick="() => detailTab = tab.Item1">@tab.Item2</button> }
+            { <button type="button" class="@(detailTab == tab.Item1 ? "is-active" : null)" aria-pressed="@(detailTab == tab.Item1)" @onclick="() => detailTab = tab.Item1">@T(tab.Item2)</button> }
         </nav>
     }
 
     @if (!detail)
     {
-        <section class="pg-card pg-summary"><h2>Tổng quan tiến độ</h2><div class="pg-summary-grid">
-            <div class="pg-completion-ring" role="progressbar" aria-label="Tiến độ hoàn thành" aria-valuenow="@Overall" aria-valuemin="0" aria-valuemax="100">
-                <svg viewBox="0 0 160 160" aria-hidden="true"><circle class="pg-ring-track" cx="80" cy="80" r="66" /><circle class="pg-ring-value" cx="80" cy="80" r="66" pathLength="100" stroke-dasharray="@($"{Overall} 100")" opacity="@(Overall == 0 ? "0" : "1")" /></svg><div><strong>@Overall%</strong><span>Hoàn thành</span></div>
+        <section class="pg-card pg-summary"><h2>@T("Tổng quan tiến độ")</h2><div class="pg-summary-grid">
+            <div class="pg-completion-ring" role="progressbar" aria-label="@T("Tiến độ hoàn thành")" aria-valuenow="@Overall" aria-valuemin="0" aria-valuemax="100">
+                <svg viewBox="0 0 160 160" aria-hidden="true"><circle class="pg-ring-track" cx="80" cy="80" r="66" /><circle class="pg-ring-value" cx="80" cy="80" r="66" pathLength="100" stroke-dasharray="@($"{Overall} 100")" opacity="@(Overall == 0 ? "0" : "1")" /></svg><div><strong>@Overall%</strong><span>@T("Hoàn thành")</span></div>
             </div>
             <div class="pg-metric-grid">
-                <article class="blue"><i class="bi bi-book" aria-hidden="true"></i><div><span>Khóa đang học</span><strong>@ActiveCourses</strong><small>/ @CourseCount khóa</small></div></article>
-                <article class="green"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><div><span>Hoạt động đã xong</span><strong>@Completed</strong><small>@Total hoạt động</small></div></article>
-                <article class="purple" title="Ước tính từ các hoạt động đã hoàn thành"><i class="bi bi-clock" aria-hidden="true"></i><div><span>Thời gian học</span><strong>@Hours <em>giờ</em></strong></div></article>
-                <article class="orange"><i class="bi bi-book" aria-hidden="true"></i><div><span>Chuỗi học liên tiếp</span><strong>@Streak <em>ngày</em></strong></div></article>
+                <article class="blue"><i class="bi bi-book" aria-hidden="true"></i><div><span>@T("Khóa đang học")</span><strong>@ActiveCourses</strong><small>/ @CourseCount @T("khóa")</small></div></article>
+                <article class="green"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><div><span>@T("Hoạt động đã xong")</span><strong>@Completed</strong><small>@Total @T("hoạt động")</small></div></article>
+                <article class="purple" title="@T("Ước tính từ các hoạt động đã hoàn thành")"><i class="bi bi-clock" aria-hidden="true"></i><div><span>@T("Thời gian học")</span><strong>@Hours <em>@T("giờ")</em></strong></div></article>
+                <article class="orange"><i class="bi bi-book" aria-hidden="true"></i><div><span>@T("Chuỗi học liên tiếp")</span><strong>@Streak <em>@T("ngày")</em></strong></div></article>
             </div>
         </div></section>
     }
 
     @if (!detail || detailTab is "overview" or "time")
     {
-        <section class="pg-card pg-trends"><header><h2>@(detail ? "Xu hướng học tập" : "Nhịp học trong tuần")</h2>@if (!detail) { <small>Thời gian học (phút)</small> }</header><ProgressTrendChart Points="@ChartPoints" Combined="@detail" />
-            @if (RangeEvents.Count == 0) { <p class="pg-empty">Chưa có hoạt động trong khoảng thời gian này.</p> }
+        <section class="pg-card pg-trends"><header><h2>@(detail ? T("Xu hướng học tập") : T("Nhịp học trong tuần"))</h2>@if (!detail) { <small>@T("Thời gian học (phút)")</small> }</header><ProgressTrendChart Points="@ChartPoints" Combined="@detail" />
+            @if (RangeEvents.Count == 0) { <p class="pg-empty">@T("Chưa có hoạt động trong khoảng thời gian này.")</p> }
         </section>
     }
 
     @if (detail && detailTab is "overview" or "time")
     {
-        <section class="pg-card pg-comparison"><header><h2>So sánh tiến độ</h2><select class="pg-select" aria-label="Khoảng thời gian so sánh" @bind="compareDays"><option value="7">7 ngày gần đây</option><option value="30">30 ngày gần đây</option><option value="90">90 ngày gần đây</option></select></header>
+        <section class="pg-card pg-comparison"><header><h2>@T("So sánh tiến độ")</h2><select class="pg-select" aria-label="@T("Khoảng thời gian so sánh")" @bind="compareDays"><option value="7">@T("7 ngày gần đây")</option><option value="30">@T("30 ngày gần đây")</option><option value="90">@T("90 ngày gần đây")</option></select></header>
             @foreach (var time in new[] { true, false })
             {
                 var color = time ? "blue" : "purple";
-                <article class="pg-compare-row"><div><strong>@(time ? "Thời gian học" : "Hoạt động hoàn thành")</strong><b>@CompareValue(time)</b><progress class="@color" value="@ComparePercent(time)" max="100" aria-label="@(time ? "So sánh thời gian học" : "So sánh hoạt động hoàn thành")"></progress></div><aside><span class="pg-change @(Compare(time).Current < Compare(time).Previous ? "is-down" : null)">@Change(time)</span><small>So với @compareDays ngày trước</small></aside></article>
+                <article class="pg-compare-row"><div><strong>@(time ? T("Thời gian học") : T("Hoạt động hoàn thành"))</strong><b>@CompareValue(time)</b><progress class="@color" value="@ComparePercent(time)" max="100" aria-label="@(time ? T("So sánh thời gian học") : T("So sánh hoạt động hoàn thành"))"></progress></div><aside><span class="pg-change @(Compare(time).Current < Compare(time).Previous ? "is-down" : null)">@Change(time)</span><small>@TextFormat("So với {0} ngày trước", compareDays)</small></aside></article>
             }
         </section>
     }
 
     @if (!detail || detailTab is "overview" or "skills")
     {
-        <section class="pg-card pg-skills"><header><h2>@(detail ? "Chi tiết theo kỹ năng" : "Tiến độ theo kỹ năng")</h2>
-            @if (detail) { <select class="pg-select" aria-label="Lọc kỹ năng" @bind="skillFilter"><option value="all">Tất cả kỹ năng</option>@foreach (var skill in Skills) { <option value="@skill.Key">@skill.Name</option> }</select> }
-            else { <button type="button" class="pg-link" @onclick="() => OpenDetail()">Xem chi tiết <i class="bi bi-chevron-right" aria-hidden="true"></i></button> }
+        <section class="pg-card pg-skills"><header><h2>@(detail ? T("Chi tiết theo kỹ năng") : T("Tiến độ theo kỹ năng"))</h2>
+            @if (detail) { <select class="pg-select" aria-label="@T("Lọc kỹ năng")" @bind="skillFilter"><option value="all">@T("Tất cả kỹ năng")</option>@foreach (var skill in Skills) { <option value="@skill.Key">@T(skill.Name)</option> }</select> }
+            else { <button type="button" class="pg-link" @onclick="() => OpenDetail()">@T("Xem chi tiết") <i class="bi bi-chevron-right" aria-hidden="true"></i></button> }
         </header><div class="pg-skill-list">
             @foreach (var skill in detail ? VisibleSkills : Skills)
             {
-                <a class="pg-skill @skill.Color" href="@SkillUrl(skill)"><span class="pg-icon @skill.Color"><i class="bi @skill.Icon" aria-hidden="true"></i></span><div class="pg-skill-content"><strong>@skill.Name</strong><span class="pg-skill-count">@SkillDone(skill) / @SkillTotal(skill) hoạt động</span><progress class="@skill.Color" value="@SkillPercent(skill)" max="100" aria-label="@skill.Name"></progress></div><b>@SkillPercent(skill)%</b>@if (detail) { <i class="bi bi-chevron-right pg-skill-arrow" aria-hidden="true"></i> }</a>
+                <a class="pg-skill @skill.Color" href="@SkillUrl(skill)"><span class="pg-icon @skill.Color"><i class="bi @skill.Icon" aria-hidden="true"></i></span><div class="pg-skill-content"><strong>@T(skill.Name)</strong><span class="pg-skill-count">@SkillDone(skill) / @SkillTotal(skill) @T("hoạt động")</span><progress class="@skill.Color" value="@SkillPercent(skill)" max="100" aria-label="@T(skill.Name)"></progress></div><b>@SkillPercent(skill)%</b>@if (detail) { <i class="bi bi-chevron-right pg-skill-arrow" aria-hidden="true"></i> }</a>
             }
         </div></section>
     }
 
     @if (!detail)
     {
-        <section class="pg-card pg-distribution"><h2>Phân bổ hoạt động</h2><div class="pg-distribution-grid"><div class="pg-donut" style="background:@Distribution" role="img" aria-label="@($"{RangeEvents.Count} hoạt động trong khoảng đã chọn")"><div><strong>@RangeEvents.Count</strong><span>hoạt động</span></div></div><div class="pg-distribution-legend">
-            @foreach (var kind in Kinds) { <div><i class="pg-dot @kind.Color"></i><span>@kind.Name</span><b>@KindPercent(kind)%</b><small>@KindCount(kind) hoạt động</small></div> }
+        <section class="pg-card pg-distribution"><h2>@T("Phân bổ hoạt động")</h2><div class="pg-distribution-grid"><div class="pg-donut" style="background:@Distribution" role="img" aria-label="@TextFormat("{0} hoạt động trong khoảng đã chọn", RangeEvents.Count)"><div><strong>@RangeEvents.Count</strong><span>@T("hoạt động")</span></div></div><div class="pg-distribution-legend">
+            @foreach (var kind in Kinds) { <div><i class="pg-dot @kind.Color"></i><span>@T(kind.Name)</span><b>@KindPercent(kind)%</b><small>@KindCount(kind) @T("hoạt động")</small></div> }
         </div></div></section>
-        <section class="pg-card pg-milestones"><header><h2>Cột mốc gần đây</h2><button type="button" class="pg-link" @onclick="() => allMilestones = !allMilestones">@(allMilestones ? "Thu gọn" : "Xem tất cả") <i class="bi bi-chevron-right" aria-hidden="true"></i></button></header>
+        <section class="pg-card pg-milestones"><header><h2>@T("Cột mốc gần đây")</h2><button type="button" class="pg-link" @onclick="() => allMilestones = !allMilestones">@(allMilestones ? T("Thu gọn") : T("Xem tất cả")) <i class="bi bi-chevron-right" aria-hidden="true"></i></button></header>
             @foreach (var milestone in Milestones)
             {
-                <a class="pg-milestone" href="@LessonUrl(milestone)"><time datetime="@milestone.At.ToString("yyyy-MM-dd")">@milestone.At.ToString("dd/MM")</time><span class="pg-timeline-dot @(Kinds.First(k => k.Steps.Contains(milestone.Step)).Color)"></span><div><strong>Hoàn thành: @StepNames[milestone.Step - 1]</strong><small>@milestone.Item.Title · @Minutes[milestone.Step - 1] phút</small></div></a>
+                <a class="pg-milestone" href="@LessonUrl(milestone)"><time datetime="@milestone.At.ToString("yyyy-MM-dd")">@milestone.At.ToString("dd/MM")</time><span class="pg-timeline-dot @(Kinds.First(k => k.Steps.Contains(milestone.Step)).Color)"></span><div><strong>@T("Hoàn thành:") @T(StepNames[milestone.Step - 1])</strong><small>@Ui(milestone.Item.Title) · @Minutes[milestone.Step - 1] @T("phút")</small></div></a>
             }
-            @if (!Milestones.Any()) { <p class="pg-empty">Hoàn thành bài học để ghi lại cột mốc đầu tiên của bạn.</p> }
+            @if (!Milestones.Any()) { <p class="pg-empty">@T("Hoàn thành bài học để ghi lại cột mốc đầu tiên của bạn.")</p> }
         </section>
-        <aside class="pg-motivation"><div><strong>Bạn đang đi đúng hướng!</strong><p>Mỗi nỗ lực hôm nay đều giúp bạn tiến gần hơn đến phiên bản tốt hơn của chính mình.</p></div></aside>
+        <aside class="pg-motivation"><div><strong>@T("Bạn đang đi đúng hướng!")</strong><p>@T("Mỗi nỗ lực hôm nay đều giúp bạn tiến gần hơn đến phiên bản tốt hơn của chính mình.")</p></div></aside>
     }
     else
     {
         @if (detailTab is "overview" or "activities")
         {
-            <section class="pg-card pg-activity-types"><header><h2>Tiến độ theo dạng hoạt động</h2><select class="pg-select" aria-label="Khoảng thời gian hoạt động" @bind="activityDays"><option value="7">7 ngày gần đây</option><option value="30">30 ngày gần đây</option><option value="90">90 ngày gần đây</option></select></header>
+            <section class="pg-card pg-activity-types"><header><h2>@T("Tiến độ theo dạng hoạt động")</h2><select class="pg-select" aria-label="@T("Khoảng thời gian hoạt động")" @bind="activityDays"><option value="7">@T("7 ngày gần đây")</option><option value="30">@T("30 ngày gần đây")</option><option value="90">@T("90 ngày gần đây")</option></select></header>
                 @foreach (var kind in Kinds)
                 {
-                    <div class="pg-activity-row"><span class="pg-icon @kind.Color"><i class="bi @kind.Icon" aria-hidden="true"></i></span><div><strong>@kind.Name</strong><small>@KindCount(kind, true) hoạt động</small></div><b>@KindPercent(kind, true)%</b><progress class="@kind.Color" value="@KindPercent(kind, true)" max="100" aria-label="@kind.Name"></progress></div>
+                    <div class="pg-activity-row"><span class="pg-icon @kind.Color"><i class="bi @kind.Icon" aria-hidden="true"></i></span><div><strong>@T(kind.Name)</strong><small>@KindCount(kind, true) @T("hoạt động")</small></div><b>@KindPercent(kind, true)%</b><progress class="@kind.Color" value="@KindPercent(kind, true)" max="100" aria-label="@T(kind.Name)"></progress></div>
                 }
             </section>
         }
-        <section class="pg-card pg-report"><div><h2>Báo cáo chi tiết</h2><p>Tải báo cáo tiến độ học tập của bạn dưới dạng PDF để lưu trữ hoặc chia sẻ.</p></div><div class="pg-report-action"><span class="pg-report-art" aria-hidden="true"><i class="bi bi-file-earmark-bar-graph"></i></span><button type="button" class="pg-report-button" @onclick="() => reportOpen = !reportOpen" aria-expanded="@reportOpen">@(reportOpen ? "Đóng báo cáo" : "Xem báo cáo") <i class="bi bi-chevron-right" aria-hidden="true"></i></button></div></section>
+        <section class="pg-card pg-report"><div><h2>@T("Báo cáo chi tiết")</h2><p>@T("Tải báo cáo tiến độ học tập của bạn dưới dạng PDF để lưu trữ hoặc chia sẻ.")</p></div><div class="pg-report-action"><span class="pg-report-art" aria-hidden="true"><i class="bi bi-file-earmark-bar-graph"></i></span><button type="button" class="pg-report-button" @onclick="() => reportOpen = !reportOpen" aria-expanded="@reportOpen">@(reportOpen ? T("Đóng báo cáo") : T("Xem báo cáo")) <i class="bi bi-chevron-right" aria-hidden="true"></i></button></div></section>
         @if (reportOpen)
         {
-            <section class="pg-card pg-report-preview"><header><h2>Báo cáo tiến độ · SoftSync</h2><button type="button" class="pg-primary" onclick="window.print()"><i class="bi bi-download" aria-hidden="true"></i> Lưu PDF / In</button></header><p>@start.ToString("dd/MM/yyyy") – @end.ToString("dd/MM/yyyy")</p><p>@Overall% hoàn thành · @RangeEvents.Count hoạt động trong kỳ · @Hours giờ học ước tính</p><table><thead><tr><th>Kỹ năng</th><th>Hoạt động</th><th>Tiến độ</th></tr></thead><tbody>@foreach (var skill in Skills) { <tr><td>@skill.Name</td><td>@SkillDone(skill) / @SkillTotal(skill)</td><td>@SkillPercent(skill)%</td></tr> }</tbody></table><small>Thời gian học được ước tính từ các hoạt động đã hoàn thành. Bạn có thể chọn “Lưu dưới dạng PDF” trong hộp thoại in.</small></section>
+            <section class="pg-card pg-report-preview"><header><h2>@T("Báo cáo tiến độ · SoftSync")</h2><button type="button" class="pg-primary" onclick="window.print()"><i class="bi bi-download" aria-hidden="true"></i> @T("Lưu PDF / In")</button></header><p>@start.ToString("dd/MM/yyyy") – @end.ToString("dd/MM/yyyy")</p><p>@TextFormat("{0}% hoàn thành · {1} hoạt động trong kỳ · {2} giờ học ước tính", Overall, RangeEvents.Count, Hours)</p><table><thead><tr><th>@T("Kỹ năng")</th><th>@T("Hoạt động")</th><th>@T("Tiến độ")</th></tr></thead><tbody>@foreach (var skill in Skills) { <tr><td>@T(skill.Name)</td><td>@SkillDone(skill) / @SkillTotal(skill)</td><td>@SkillPercent(skill)%</td></tr> }</tbody></table><small>@T("Thời gian học được ước tính từ các hoạt động đã hoàn thành. Bạn có thể chọn “Lưu dưới dạng PDF” trong hộp thoại in.")</small></section>
         }
     }
     <MobileSiteFooter />

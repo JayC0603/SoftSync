@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PresentationOutput Condition="'$(PresentationOutput)' == ''">../../SoftSync.Presentation/bin/Debug/net10.0</PresentationOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Reference Include="SoftSync.Presentation"><HintPath>$(PresentationOutput)/SoftSync.Presentation.dll</HintPath></Reference>
+    <Reference Include="SoftSync.Common"><HintPath>../../SoftSync.Common/bin/Debug/net10.0/SoftSync.Common.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

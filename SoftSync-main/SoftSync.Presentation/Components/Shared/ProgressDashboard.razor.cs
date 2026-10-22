@@ -17,7 +17,7 @@ public partial class ProgressDashboard
     private DateTime start = Today.AddDays(-6), end = Today;
     private DateTime draftStart = Today.AddDays(-6), draftEnd = Today;
     private static DateTime Today => DateTime.UtcNow.AddHours(7).Date;
-    private static readonly CultureInfo Vi = CultureInfo.GetCultureInfo("vi-VN");
+
     private static readonly int[] Minutes = [9, 9, 5, 4, 10, 5];
     private static readonly string[] StepNames = ["Video", "Nội dung", "Tóm tắt", "Quiz", "Thực hành", "Phản tư"];
     private static readonly Skill[] Skills =
@@ -35,7 +35,7 @@ public partial class ProgressDashboard
     private int Completed => Items.Sum(x => x.CompletedActivityCount);
     private int Overall => RoadmapProgressCalculator.Percent(Completed, Total);
     private int RangeMinutes => RangeEvents.Sum(x => Minutes[x.Step - 1]);
-    private string Hours => (RangeMinutes / 60d).ToString("0.#", Vi);
+    private string Hours => (RangeMinutes / 60d).ToString("0.#", ProgressCulture);
     private int CourseCount => Items.Select(SkillTheme.KeyFor).Distinct().Count();
     private int ActiveCourses => Items.GroupBy(SkillTheme.KeyFor).Count(g => g.Any(x => x.CompletedActivityCount > 0) && g.Any(x => !x.IsCompleted));
     private int Streak
@@ -124,10 +124,10 @@ public partial class ProgressDashboard
     private string Change(bool time)
     {
         var (current, previous) = Compare(time);
-        return previous == 0 ? current == 0 ? "0%" : "Mới" : $"{(current >= previous ? "+" : "")}{Math.Round((current - previous) * 100d / previous)}%";
+        return previous == 0 ? current == 0 ? "0%" : T("Mới") : $"{(current >= previous ? "+" : "")}{Math.Round((current - previous) * 100d / previous)}%";
     }
     private int ComparePercent(bool time) { var (a, b) = Compare(time); return Math.Max(a, b) == 0 ? 0 : (int)(a * 100d / Math.Max(a, b)); }
-    private string CompareValue(bool time) => time ? $"{(Compare(true).Current / 60d).ToString("0.#", Vi)} giờ" : $"{Compare(false).Current} hoạt động";
+    private string CompareValue(bool time) => time ? TextFormat("{0} giờ", (Compare(true).Current / 60d).ToString("0.#", ProgressCulture)) : TextFormat("{0} hoạt động", Compare(false).Current);
     private static string Css(double number) => number.ToString("0.##", CultureInfo.InvariantCulture);
     private sealed record StudyEvent(RoadmapItemDto Item, int Step, DateTime At);
     private sealed record Skill(string Key, string Name, string Icon, string Color, string[] Keys);
