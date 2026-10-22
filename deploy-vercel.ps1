@@ -25,6 +25,28 @@ function Read-VercelOutput {
     return @{ ExitCode = $LASTEXITCODE; Text = ($commandOutput -join "`n") }
 }
 
+function Get-BlobUploadToken {
+    param([string]$TargetEnvironment, [string]$ProjectRoot = $PSScriptRoot)
+    $temporaryEnv = Join-Path $ProjectRoot ('.vercel/blob-auth-' + [Guid]::NewGuid().ToString('N') + '.env')
+    try {
+        $pull = Read-VercelOutput -CliArguments @('env', 'pull', $temporaryEnv, '--environment', $TargetEnvironment, '--yes')
+        if ($pull.ExitCode -ne 0) { throw 'Unable to retrieve Blob credentials from Vercel.' }
+        $line = Get-Content -LiteralPath $temporaryEnv | Where-Object { $_ -match '^BLOB_READ_WRITE_TOKEN=' } | Select-Object -First 1
+        if ([string]::IsNullOrWhiteSpace($line)) { throw "BLOB_READ_WRITE_TOKEN is missing from the $TargetEnvironment environment." }
+        $value = $line.Substring('BLOB_READ_WRITE_TOKEN='.Length).Trim()
+        if ($value.StartsWith('"')) {
+            $value = ConvertFrom-Json -InputObject $value
+        } elseif ($value.StartsWith("'")) {
+            $value = $value.Trim([char]39)
+        }
+        if ($value -notmatch '^vercel_blob_rw_[A-Za-z0-9_-]+$') { throw 'Vercel returned an invalid Blob read-write token.' }
+        return $value
+    }
+    finally {
+        if (Test-Path -LiteralPath $temporaryEnv) { Remove-Item -LiteralPath $temporaryEnv -Force }
+    }
+}
+
 Push-Location $PSScriptRoot
 try {
     $identity = Read-VercelOutput -CliArguments @('whoami')
@@ -54,6 +76,7 @@ try {
     if ($environmentNames -notmatch '\bBLOB_READ_WRITE_TOKEN\b') {
         throw "Connect a public Blob store exposing BLOB_READ_WRITE_TOKEN to the $target environment before deploying."
     }
+    $blobUploadToken = Get-BlobUploadToken -TargetEnvironment $target
 
     # Large lesson videos use Blob's multipart upload instead of the deployment
     # upload API. Keep a local hash cache so retrying a deploy can resume.
@@ -74,8 +97,8 @@ try {
                 Write-Host "Uploading lesson video to Blob: $($video.Name)"
                 # Hash-based names allow safe retries without overwriting media.
                 $pathname = "videos/$($hash.ToLowerInvariant())/$($video.Name)"
-                $upload = Read-VercelOutput -CliArguments @('blob', 'put', $video.FullName, '--pathname', $pathname, '--content-type', 'video/mp4', '--access', 'public', '--allow-overwrite', 'true', '--multipart', 'true', '--no-color')
-                if ($upload.ExitCode -ne 0) { throw "Blob upload failed for $($video.Name): $($upload.Text)" }
+                $upload = Read-VercelOutput -CliArguments @('blob', 'put', $video.FullName, '--pathname', $pathname, '--content-type', 'video/mp4', '--access', 'public', '--allow-overwrite', 'true', '--multipart', 'true', '--rw-token', $blobUploadToken, '--no-color')
+                if ($upload.ExitCode -ne 0) { throw "Blob upload failed for $($video.Name): $($upload.Text.Replace($blobUploadToken, '[REDACTED]'))" }
                 $url = [regex]::Match($upload.Text, 'https://[a-zA-Z0-9-]+\.public\.blob\.vercel-storage\.com/[^\s"<>]+').Value
                 if ([string]::IsNullOrEmpty($url)) { throw "No public Blob URL returned for $($video.Name)." }
                 $entry = @{ Hash = $hash; Url = $url }
@@ -93,5 +116,6 @@ try {
     Invoke-Vercel -CliArguments $deployArguments
 }
 finally {
+    $blobUploadToken = $null
     Pop-Location
 }
