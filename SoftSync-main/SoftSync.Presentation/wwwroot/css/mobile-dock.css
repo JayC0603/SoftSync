@@ -19,6 +19,10 @@ html body .page .ss-mobile-bottom-nav {
   gap:2px!important;
   z-index:1000;
   isolation:isolate;
+  transform:none!important;
+  translate:none!important;
+  animation:none!important;
+  transition:none!important;
   overflow:visible;
   border:1px solid rgb(255 255 255 / 80%)!important;
   border-radius:22px!important;
@@ -60,6 +64,7 @@ html body .page .ss-mobile-bottom-link {
   line-height:1.2;
   text-decoration:none;
   transition:color 160ms ease,background-color 160ms ease;
+  -webkit-tap-highlight-color:transparent;
 }
 html body .page .ss-mobile-bottom-link i {
   display:grid;

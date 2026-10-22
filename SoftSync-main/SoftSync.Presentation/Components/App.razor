@@ -63,6 +63,13 @@
     <link rel="stylesheet" href="@VersionedAsset("css/strict-mobile-home.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-dock.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-site-footer.css")" />
+    @* Route CSS must be ready before enhanced navigation patches page content.
+       Keep shared navigation overrides last so route styles cannot move the shell. *@
+    <link rel="stylesheet" href="@VersionedAsset("css/adventure-map.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/learning-journey.css")" media="(min-width: 901px)" />
+    <link rel="stylesheet" href="@VersionedAsset("css/learn-v3.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/learn-mobile-reference.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/progress-reference.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/navigation-glass.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-options.css")" />
     <script>
