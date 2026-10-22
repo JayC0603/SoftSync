@@ -171,3 +171,71 @@ html body .page .ss-main-content .ss-settings-shell .ss-settings-detail-back {
     line-height: 1.5;
 }
 .ss-more-page > header { margin-bottom: 24px; }
+
+/* Compact mobile lists: shared surfaces keep related actions together. */
+@media (max-width: 900px) {
+    html body .page:has(:is(.ss-more-page, .ss-settings-shell)) .ss-main-content.container {
+        padding: 16px 14px 20px !important;
+    }
+    .ss-more-page { padding-top: 0; }
+    .ss-more-page > header { margin-bottom: 16px; }
+    .ss-more-features {
+        gap: 0;
+        padding: 0 12px;
+        background: var(--option-surface);
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+    }
+    .ss-more-page .ss-more-feature {
+        min-height: 72px;
+        padding: 12px 0;
+        gap: 12px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+    .ss-more-features .ss-more-feature + .ss-more-feature { border-top: 1px solid var(--option-line); }
+    .ss-more-page .ss-more-icon {
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 24px;
+    }
+    html body .page .ss-main-content .ss-more-copy strong { font-size: .875rem; line-height: 1.4; }
+    html body .page .ss-main-content .ss-more-copy small { margin-top: 2px; line-height: 1.4; }
+    .ss-more-feature > .bi-chevron-right { font-size: 12px; }
+    .ss-more-settings {
+        margin: 10px 0;
+        padding: 0 12px;
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+        background: var(--option-surface);
+    }
+    .ss-more-page > .ss-support-options {
+        padding: 0 12px;
+        border: 1px solid var(--option-line);
+        border-radius: 16px;
+        background: var(--option-surface);
+    }
+    .ss-more-page > .ss-support-options .ss-option-row { min-height: 48px; padding: 10px 0; gap: 12px; }
+    .ss-option-row > i:first-child { flex-basis: 22px; width: 22px; font-size: 20px; }
+    .ss-option-row > .bi-chevron-right { font-size: 12px; }
+    .ss-settings-overview { gap: 12px; }
+    .ss-options-title { gap: 10px; margin-bottom: 0; }
+    .ss-options-group { padding-inline: 12px; border-radius: 16px; }
+    html body .page .ss-main-content .ss-settings-overview .ss-options-group h2 {
+        min-height: 46px;
+        padding: 10px 0;
+        gap: 12px;
+        font-size: 1rem !important;
+    }
+    .ss-options-group h2 i { flex-basis: 22px; font-size: 20px; }
+    .ss-settings-overview .ss-option-row { min-height: 48px; padding: 10px 0; gap: 12px; }
+    .ss-settings-overview .ss-settings-person { min-height: 66px; }
+    .ss-settings-person-avatar { flex-basis: 44px; width: 44px; height: 44px; font-size: 22px; }
+    html body .page .ss-main-content .ss-settings-person strong { font-size: .875rem; }
+    .ss-options-logout { margin: 4px 0 10px; }
+    .ss-options-logout button { min-height: 48px; padding: 10px 14px; gap: 10px; }
+    .ss-options-logout button i { font-size: 20px; }
+}
