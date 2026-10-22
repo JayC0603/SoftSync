@@ -11,6 +11,12 @@
 
 
 /* Scan Razor + JS so class usage there is picked up by the JIT. */
+.ss-desktop-integration { display: none !important; }
+@media (min-width: 901px) {
+    .ss-desktop-integration { display: revert !important; }
+    .ss-navpill.ss-desktop-integration { display: flex !important; }
+}
+
 @source "../Components/**/*.razor";
 @source "../Scripts/**/*.js";
 

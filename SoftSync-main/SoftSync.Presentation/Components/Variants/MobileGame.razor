@@ -19,7 +19,7 @@
             <header class="tw:mb-8">
                 <span class="badge bg-primary">@Ui("Inclusive Skill Challenge")</span>
                 <h1 id="game-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Mini Game")</h1>
-                <p>@Tx("Practice soft skills through published 10-question challenges.", "Luyện kỹ năng mềm qua các thử thách 10 câu hỏi đã xuất bản.")</p>
+                <p>@Tx("Practice soft skills through published challenges. Question counts vary by quiz.", "Luyện kỹ năng mềm qua các thử thách đã xuất bản. Số câu hỏi tùy theo từng bài.")</p>
                 <a class="btn btn-outline-primary tw:mt-3" href="/game/history">@Tx("Attempt history", "Lịch sử làm bài")</a>
             </header>
 
@@ -50,7 +50,7 @@
                     @Tx("Score", "Điểm"): <strong>@result.CorrectAnswers / @result.TotalQuestions</strong>
                 </p>
                 <dl><dt>@Tx("Result", "Kết quả")</dt><dd>@(result.Passed ? Ui("PASS") : Ui("NOT PASS"))</dd><dt>@Tx("Correct answers", "Câu trả lời đúng")</dt><dd>@result.CorrectAnswers</dd><dt>@Tx("Incorrect answers", "Câu trả lời sai")</dt><dd>@(result.TotalQuestions - result.CorrectAnswers)</dd></dl>
-                <p>@(result.Passed ? Tx("You passed this challenge.", "Bạn đã vượt qua thử thách.") : Tx("You need at least 5 correct answers to pass.", "Bạn cần ít nhất 5 câu đúng để đạt."))</p>
+                <p>@(result.Passed ? Tx("You passed this challenge.", "Bạn đã vượt qua thử thách.") : Tx("You need at least half the answers correct to pass.", "Bạn cần trả lời đúng ít nhất một nửa số câu để đạt."))</p>
                 <button type="button" class="btn btn-primary" @onclick="BackToList">@Tx("Back to quizzes", "Về danh sách")</button>
             </article>
         }
@@ -60,9 +60,9 @@
             <header class="tw:mb-6">
                 <button type="button" class="btn btn-link tw:px-0" @onclick="BackToList">← @Tx("Quiz list", "Danh sách")</button>
                 <h1 id="game-title" class="tw:text-3xl tw:font-bold">@quiz.Title</h1>
-                <p id="quiz-progress-text">@Tx($"Question {currentIndex + 1} of 10. {(currentIndex + 1) * 10} percent complete.", $"Câu {currentIndex + 1} / 10. Đã hoàn thành {(currentIndex + 1) * 10} phần trăm.")</p>
-                <div class="progress" role="progressbar" aria-labelledby="quiz-progress-text" aria-valuenow="@(currentIndex + 1)" aria-valuemin="1" aria-valuemax="10" aria-valuetext="@((currentIndex + 1) * 10) percent complete">
-                    <div class="progress-bar" style="width: @((currentIndex + 1) * 10)%"></div>
+                <p id="quiz-progress-text">@Tx($"Question {currentIndex + 1} of {quiz.Questions.Count}. {(currentIndex + 1) * 100 / quiz.Questions.Count} percent complete.", $"Câu {currentIndex + 1} / {quiz.Questions.Count}. Đã hoàn thành {(currentIndex + 1) * 100 / quiz.Questions.Count} phần trăm.")</p>
+                <div class="progress" role="progressbar" aria-labelledby="quiz-progress-text" aria-valuenow="@(currentIndex + 1)" aria-valuemin="1" aria-valuemax="@quiz.Questions.Count" aria-valuetext="@((currentIndex + 1) * 100 / quiz.Questions.Count) percent complete">
+                    <div class="progress-bar" style="width: @((currentIndex + 1) * 100 / quiz.Questions.Count)%"></div>
                 </div>
             </header>
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using SoftSync.BLL.Interfaces;
 using SoftSync.Common.Dtos;
 using SoftSync.Presentation.Components;
-using SoftSync.Presentation.Components.Pages;
+using Game = SoftSync.Presentation.Components.Variants.DesktopGame;
 using SoftSync.Presentation.Services;
 using Xunit;
 
@@ -43,13 +43,17 @@ public class GameInteractionTests
     }
 
     [Theory]
-    [InlineData(19, false)]
-    [InlineData(19, true)]
-    [InlineData(20, true)]
-    [InlineData(30, true)]
-    public async Task Variable_length_quiz_progress_and_submit_use_actual_question_count(int count, bool complete)
+    [InlineData(19, false, false)]
+    [InlineData(19, true, false)]
+    [InlineData(20, true, false)]
+    [InlineData(30, true, false)]
+    [InlineData(19, false, true)]
+    [InlineData(19, true, true)]
+    [InlineData(20, true, true)]
+    [InlineData(30, true, true)]
+    public async Task Variable_length_quiz_progress_and_submit_use_actual_question_count(int count, bool complete, bool mobile)
     {
-        var html = await RenderQuestion(new() { [nameof(QuestionHarness.QuestionCount)] = count, [nameof(QuestionHarness.AnswerAll)] = complete, [nameof(QuestionHarness.LastQuestion)] = true });
+        var html = await RenderQuestion(new() { [nameof(QuestionHarness.QuestionCount)] = count, [nameof(QuestionHarness.AnswerAll)] = complete, [nameof(QuestionHarness.LastQuestion)] = true, [nameof(QuestionHarness.Mobile)] = mobile });
         Assert.Contains($"Question {count} of {count}", html);
         Assert.Contains($"Answered {(complete ? count : 1)} of {count}", html);
         Assert.Contains($"aria-valuemax=\"{count}\"", html);
@@ -80,12 +84,14 @@ public class GameInteractionTests
         [Parameter] public int QuestionCount { get; set; } = 10;
         [Parameter] public bool AnswerAll { get; set; }
         [Parameter] public bool LastQuestion { get; set; }
+        [Parameter] public bool Mobile { get; set; }
         [Inject] public LocalizationService Localization { get; set; } = null!;
         protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
-            var game = new Game();
+            var gameType = Mobile ? typeof(SoftSync.Presentation.Components.Variants.MobileGame) : typeof(Game);
+            var game = Activator.CreateInstance(gameType)!;
             typeof(LocalizedComponentBase).GetProperty("L", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(game, Localization);
-            typeof(Game).GetProperty("Ui", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(game, Localization);
+            gameType.GetProperty("DesktopText", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(game, Localization);
             SetField(game, "loading", false);
             SetField(game, "submitting", Submitting);
             SetField(game, "quiz", new StudentQuizDto { Title = "Communication", Questions = Enumerable.Range(1, QuestionCount).Select(id => new StudentQuizQuestionDto {
@@ -95,7 +101,7 @@ public class GameInteractionTests
             Field<Dictionary<int, int>>(game, "answers")[1] = 2;
             if(AnswerAll) for(var id = 1; id <= QuestionCount; id++) Field<Dictionary<int, int>>(game, "answers")[id] = 2;
             if(LastQuestion) SetField(game, "currentIndex", QuestionCount - 1);
-            typeof(Game).GetMethod("BuildRenderTree", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(game, [builder]);
+            gameType.GetMethod("BuildRenderTree", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(game, [builder]);
         }
     }
 
@@ -176,8 +182,8 @@ public class GameInteractionTests
         return game;
     }
     private static Task Invoke(Game game, string method, params object[] arguments) => (Task)typeof(Game).GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(game, arguments)!;
-    private static T Field<T>(Game game, string name) => (T)typeof(Game).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(game)!;
-    private static void SetField(Game game, string name, object value) => typeof(Game).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(game, value);
+    private static T Field<T>(object game, string name) => (T)game.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(game)!;
+    private static void SetField(object game, string name, object value) => game.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(game, value);
 
     public class ChallengeProxy : DispatchProxy
     {

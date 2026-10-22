@@ -7,6 +7,8 @@ using SoftSync.Presentation.Services;
 using Xunit;
 
 namespace SoftSync.Tests;
+using CvReviewService = SoftSync.BLL.Services.CvReviewService;
+using CvReviewException = SoftSync.BLL.Interfaces.CvReviewException;
 
 public sealed class CvHttpAcceptanceFact : FactAttribute
 {
