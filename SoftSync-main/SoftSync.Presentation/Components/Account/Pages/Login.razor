@@ -19,6 +19,7 @@
     <p>@L["auth.login.subtitle"]</p>
 </div>
 
+<div class="login-card">
 @if (Suspended == 1)
 {
     <div class="alert alert-warning tw:text-sm" role="alert">@L["settings.suspend.done"]</div>
@@ -50,7 +51,7 @@
         <label for="login-password" class="form-label tw:font-medium">@L["auth.password"]</label>
         <div class="login-input-wrap">
             <i class="bi bi-lock"></i>
-            <InputText id="login-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" />
+            <InputText id="login-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" placeholder="••••••••••" />
             <button type="button" class="ss-password-visibility" onclick="window.ssDesign.togglePassword(this)" aria-controls="login-password" aria-label="@L["redesign.passwordToggle"]" aria-pressed="false"><i class="bi bi-eye" aria-hidden="true"></i></button>
         </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
@@ -70,6 +71,7 @@
 
 <div class="login-register">
     @L["auth.noAccount"] <a href="Account/Register">@L["auth.register"]</a>
+</div>
 </div>
 
 <style>
