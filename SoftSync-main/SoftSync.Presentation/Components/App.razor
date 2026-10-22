@@ -112,13 +112,22 @@
 </html>
 
 @code {
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string,
+        (DateTimeOffset Modified, long Length, string Url)> AssetVersions = new();
+
     private string VersionedAsset(string path)
     {
         var asset = HostEnvironment.WebRootFileProvider.GetFileInfo(path);
         if (!asset.Exists) return path;
+        var cacheKey = $"{HostEnvironment.WebRootPath}|{path}";
+        if (AssetVersions.TryGetValue(cacheKey, out var cached)
+            && cached.Modified == asset.LastModified && cached.Length == asset.Length)
+            return cached.Url;
         using var stream = asset.CreateReadStream();
         var version = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream))[..16];
-        return $"{path}?v={version}";
+        var url = $"{path}?v={version}";
+        AssetVersions[cacheKey] = (asset.LastModified, asset.Length, url);
+        return url;
     }
     // Read the resolved theme the browser last persisted to the ss-theme cookie
     // and paint it straight onto <html> during SSR / enhanced navigation. This is

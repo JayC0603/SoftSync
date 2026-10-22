@@ -1,5 +1,16 @@
 (() => {
+    // Enhanced navigation must never install another set of observers/timers.
+    if (window.__ssDesignBound) return;
+    window.__ssDesignBound = true;
     const root = document.documentElement;
+    const oncePerFrame = callback => {
+        let pending = false;
+        return () => {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(() => { pending = false; callback(); });
+        };
+    };
     let sidebarExpanded = false;
     const syncSidebar = () => {
         const expanded = sidebarExpanded;
@@ -127,7 +138,13 @@
     document.addEventListener('DOMContentLoaded', () => {
         syncSidebar();
         observeMentors();
-        new MutationObserver(observeMentors).observe(document.body, { childList: true, subtree: true });
+        const refreshMentors = oncePerFrame(observeMentors);
+        new MutationObserver(records => {
+            // Text updates, counters and chat streaming don't add carousels.
+            if (records.some(record => [...record.addedNodes].some(node =>
+                node instanceof Element && (node.matches('.ss-mentor-carousel') || node.querySelector('.ss-mentor-carousel')))))
+                refreshMentors();
+        }).observe(document.body, { childList: true, subtree: true });
     });
     document.addEventListener('enhancedload', observeMentors);
     document.addEventListener('enhancedload', syncSidebar);
@@ -201,7 +218,7 @@
                 returnFocus = null;
             }
         };
-        new MutationObserver(observeDialog).observe(document.body, { childList: true, subtree: true });
+        new MutationObserver(oncePerFrame(observeDialog)).observe(document.body, { childList: true, subtree: true });
         observeDialog();
         document.addEventListener('cancel', event => {
             if (!event.target.matches?.('dialog.mentor-modal-backdrop, dialog.ss-mentor-modal-backdrop')) return;

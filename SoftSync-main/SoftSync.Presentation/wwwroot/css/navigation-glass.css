@@ -1,5 +1,13 @@
 /* Shared shell: route-specific home themes must not move navigation. */
 html { scrollbar-gutter: stable; }
+/* Route swaps must not animate shell dimensions or smooth-scroll to focus. */
+html, html body { scroll-behavior: auto !important; }
+html body .page > .ss-navbar,
+html body .page > .ss-workspace,
+html body .page .ss-workspace-topbar {
+    transition: none !important;
+    animation: none !important;
+}
 html body .page {
     --ss-nav-glass: #f4f8ff;
     --ss-nav-edge: rgb(255 255 255 / 80%);
