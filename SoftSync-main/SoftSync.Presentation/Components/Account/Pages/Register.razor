@@ -14,7 +14,7 @@
 <PageTitle>@L["auth.register.title"]</PageTitle>
 
 <div class="register-heading">
-    <span class="register-kicker"><i class="bi bi-person-plus"></i> SoftSync Account</span>
+    <span class="register-kicker">SoftSync Secure</span>
     <h2>@L["auth.register.title"]</h2>
     <p>@L["auth.register.subtitle"]</p>
 </div>
@@ -25,32 +25,32 @@
     <DataAnnotationsValidator />
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
 
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-fullname" class="form-label tw:font-medium">@L["profile.fullName"]</label>
-        <InputText id="register-fullname" @bind-Value="Input.FullName" class="form-control form-control-lg" placeholder="@L["profile.fullName.placeholder"]" />
+        <div class="login-input-wrap"><i class="bi bi-person" aria-hidden="true"></i><InputText id="register-fullname" @bind-Value="Input.FullName" class="form-control form-control-lg" autocomplete="name" placeholder="@L["profile.fullName.placeholder"]" /></div>
         <ValidationMessage For="() => Input.FullName" class="text-danger" />
     </div>
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-email" class="form-label tw:font-medium">@L["auth.email"]</label>
-        <InputText id="register-email" @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" />
+        <div class="login-input-wrap"><i class="bi bi-envelope" aria-hidden="true"></i><InputText id="register-email" type="email" @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" placeholder="you@example.com" /></div>
         <ValidationMessage For="() => Input.Email" class="text-danger" />
     </div>
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-password" class="form-label tw:font-medium">@L["auth.password"]</label>
-        <div class="input-group">
+        <div class="login-input-wrap"><i class="bi bi-lock" aria-hidden="true"></i>
             <InputText id="register-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-password" aria-pressed="false"
+            <button type="button" class="ss-password-visibility" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-password" aria-pressed="false"
                     onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
         </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
-    <div class="tw:mb-4">
+    <div class="login-field tw:mb-4">
         <label for="register-confirmpassword" class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
-        <div class="input-group">
+        <div class="login-input-wrap"><i class="bi bi-lock" aria-hidden="true"></i>
             <InputText id="register-confirmpassword" type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
+            <button type="button" class="ss-password-visibility" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
                     onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
@@ -58,10 +58,10 @@
         <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
     </div>
 
-    <button type="submit" class="ss-btn-primary register-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.register.submit"]</span><i class="bi bi-arrow-right"></i></button>
+    <button type="submit" class="ss-btn-primary login-submit register-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.register.submit"]</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
 </EditForm>
 
-<div class="neo-social"><ExternalLoginPicker IsRegistration="true" /></div>
+<div class="neo-social"><ExternalLoginPicker IsRegistration="true" ButtonLabel="@(L.Current == AppLanguage.Vi ? "Tiếp tục với Google" : "Continue with Google")" /></div>
 
 <div class="register-login tw:text-center tw:mt-4 tw:text-sm">
     @L["auth.haveAccount"] <a href="Account/Login">@L["auth.login.title"]</a>

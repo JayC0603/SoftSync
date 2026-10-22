@@ -16,7 +16,7 @@
 <div class="login-heading">
     <span class="login-kicker"><i class="bi bi-shield-check"></i> SoftSync Secure</span>
     <h2>@L["auth.login.title"]</h2>
-    <p>@L["auth.login.subtitle"]</p>
+    <p>@(L.Current == AppLanguage.Vi ? "Chào mừng bạn quay lại SoftSync." : "Welcome back to SoftSync.")</p>
 </div>
 
 <div class="login-card">
@@ -51,7 +51,7 @@
         <label for="login-password" class="form-label tw:font-medium">@L["auth.password"]</label>
         <div class="login-input-wrap">
             <i class="bi bi-lock"></i>
-            <InputText id="login-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" placeholder="••••••••••" />
+            <InputText id="login-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="current-password" placeholder="@(L.Current == AppLanguage.Vi ? "Nhập mật khẩu của bạn" : "Enter your password")" />
             <button type="button" class="ss-password-visibility" onclick="window.ssDesign.togglePassword(this)" aria-controls="login-password" aria-label="@L["redesign.passwordToggle"]" aria-pressed="false"><i class="bi bi-eye" aria-hidden="true"></i></button>
         </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
@@ -67,10 +67,10 @@
     <button type="submit" class="ss-btn-primary login-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.login.submit"]</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
 </EditForm>
 
-<div class="neo-social"><ExternalLoginPicker /></div>
+<div class="neo-social"><ExternalLoginPicker ButtonLabel="@(L.Current == AppLanguage.Vi ? "Tiếp tục với Google" : "Continue with Google")" /></div>
 
 <div class="login-register">
-    @L["auth.noAccount"] <a href="Account/Register">@L["auth.register"]</a>
+    @L["auth.noAccount"] <a href="Account/Register">@(L.Current == AppLanguage.Vi ? "Đăng ký" : "Sign up")</a>
 </div>
 </div>
 

@@ -52,7 +52,8 @@ else
 @code {
     private AuthenticationScheme[] externalLogins = [];
     [Parameter] public bool IsRegistration { get; set; }
-    private string GoogleButtonLabel => L[IsRegistration ? "auth.googleSignUp" : "auth.googleSignIn"];
+    [Parameter] public string? ButtonLabel { get; set; }
+    private string GoogleButtonLabel => ButtonLabel ?? L[IsRegistration ? "auth.googleSignUp" : "auth.googleSignIn"];
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     [Inject] private LocalizationService L { get; set; } = default!;

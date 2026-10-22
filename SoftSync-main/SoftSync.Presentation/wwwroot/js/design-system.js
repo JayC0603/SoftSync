@@ -74,6 +74,13 @@
             const icon = button.querySelector('i');
             if (icon) icon.className = visible ? 'bi bi-eye-slash' : 'bi bi-eye';
         },
+        setAccountLanguage(code) {
+            if (code !== 'vi' && code !== 'en') return;
+            try { localStorage.setItem('ss-lang', code); } catch {}
+            document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`;
+            // Account forms use static SSR; reload to translate labels and validation.
+            window.location.reload();
+        },
         toggleTheme() {
             const theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
             root.dataset.theme = theme;
