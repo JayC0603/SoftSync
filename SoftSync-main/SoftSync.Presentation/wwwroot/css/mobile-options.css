@@ -118,7 +118,56 @@ html[data-theme='dark'] .ss-more-icon { background: #2a2d54; color: #b6a9ff; }
 @media (max-width: 360px) {
     .ss-more-feature { gap: 14px; padding-inline: 14px; }
     .ss-more-icon { flex-basis: 52px; width: 52px; height: 56px; font-size: 30px; }
-    .ss-more-copy strong { font-size: 17px; }
+    .ss-more-copy strong { font-size: 16px; }
     .ss-option-row { gap: 12px; }
     html body .page .ss-option-row > small { font-size: 12px !important; }
 }
+
+/* Match the home page's type scale across overview and detail settings. */
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell),
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) :is(h1, h2, h3, h4, p, a, span, strong, small, label, button, input, select, textarea, summary) {
+    font-family: var(--ss-font-family, 'Segoe UI', Arial, sans-serif) !important;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) {
+    font-size: .875rem;
+    line-height: 1.5;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) h1 {
+    font-size: 1.3125rem !important;
+    line-height: 1.35;
+    font-weight: 750;
+    letter-spacing: -.04em;
+}
+html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) h2 {
+    font-size: 1.125rem !important;
+    line-height: 1.4;
+}
+html body .page .ss-main-content .ss-settings-shell :is(h3, h4, .ss-panel-title, .ss-hero-name) {
+    font-size: 1rem !important;
+    line-height: 1.4;
+}
+html body .page .ss-main-content .ss-more-page > header p,
+html body .page .ss-main-content .ss-more-page .ss-option-row,
+html body .page .ss-main-content .ss-settings-overview .ss-option-row,
+html body .page .ss-main-content .ss-settings-shell :is(p, label, .ss-field-label, .ss-settings-nav button, .ss-account-password, .ss-account-save) {
+    font-size: .875rem !important;
+    line-height: 1.5;
+}
+html body .page .ss-main-content .ss-more-copy strong,
+html body .page .ss-main-content .ss-settings-person strong {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 650;
+}
+html body .page .ss-main-content .ss-more-copy small,
+html body .page .ss-main-content .ss-settings-overview :is(small, .ss-option-row > small),
+html body .page .ss-main-content .ss-settings-shell :is(.ss-field-hint, .ss-linked-state, .ss-account-security) {
+    font-size: .75rem !important;
+    line-height: 1.5;
+}
+html body .page .ss-main-content .ss-settings-shell .ss-options-logout button,
+html body .page .ss-main-content .ss-settings-shell .ss-settings-detail-back {
+    font-size: 1rem !important;
+    line-height: 1.5;
+}
+.ss-more-page > header { margin-bottom: 24px; }
