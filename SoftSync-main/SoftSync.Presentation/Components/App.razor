@@ -15,6 +15,9 @@
         html, body { min-height: 100%; margin: 0; background: #050917; }
         html[data-theme="dark"], html[data-theme="dark"] body { background: #050917; }
         html[data-theme="light"], html[data-theme="light"] body { background: #f7f8fa; }
+        /* Hide the alternate Learn layout before any route CSS arrives. */
+        @@media (max-width: 900px) { .learn-desktop { display: none !important; } }
+        @@media (min-width: 901px) { .learn-v3 { display: none !important; } }
     </style>
     <script>
         // Migrate the old localStorage-only preference before the first paint.
@@ -39,6 +42,7 @@
         })();
     </script>
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="preload" href="bootstrap-icons/fonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="@VersionedAsset("dist/app.css")" />
