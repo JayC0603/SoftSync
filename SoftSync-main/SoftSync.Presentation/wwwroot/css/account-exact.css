@@ -1,0 +1,94 @@
+/* Reference artwork is 941px wide. All dimensions share that coordinate system.
+   This stylesheet is independent of previous account themes; footer is outside. */
+html body main#ss-auth-page.auth-reference {
+ --u:min(.10627vw,1px); --ink:#0b1242; --muted:#4e608b; --blue:#2057ff; --field:#ffffffdf; --line:#c9dcf6;
+ position:relative; isolation:isolate; overflow:hidden; box-sizing:border-box; margin:0; min-height:0;
+ padding:calc(161 * var(--u)) 0 calc(40 * var(--u)); color:var(--ink);
+ font-family:'Segoe UI',Arial,sans-serif; background:radial-gradient(ellipse at 47% 43%,#f7fcff 10%,#eaf5ff 63%,#f8fcff 100%);
+}
+html body main#ss-auth-page.auth-reference *,html body main#ss-auth-page.auth-reference *::before,html body main#ss-auth-page.auth-reference *::after { box-sizing:border-box; }
+html body main#ss-auth-page.auth-reference .neo-content { position:relative; width:min(87.57%,824px); margin-inline:auto; z-index:1; }
+html body main#ss-auth-page.auth-reference .neo-decoration { position:absolute; z-index:-1; pointer-events:none; border-radius:50%; }
+html body main#ss-auth-page.auth-reference .neo-decoration-one { width:calc(840 * var(--u)); height:calc(790 * var(--u)); top:calc(-499 * var(--u)); left:calc(-430 * var(--u)); background:linear-gradient(140deg,#fff,#ffffff85); }
+html body main#ss-auth-page.auth-reference .neo-decoration-two { width:calc(620 * var(--u)); height:calc(1120 * var(--u)); top:calc(80 * var(--u)); right:calc(-517 * var(--u)); transform:rotate(27deg); background:linear-gradient(170deg,#c8e1ff88,#d5e9ff33); }
+html body main#ss-auth-page.auth-reference .neo-decoration-three { width:calc(1120 * var(--u)); height:calc(810 * var(--u)); bottom:calc(-741 * var(--u)); right:calc(-673 * var(--u)); background:#ffffffb3; transform:rotate(-28deg); }
+html body main#ss-auth-page.auth-reference::after { content:''; position:absolute; z-index:-1; width:calc(900 * var(--u)); height:calc(720 * var(--u)); bottom:calc(-531 * var(--u)); left:calc(-758 * var(--u)); border:2px solid #ffffffa0; border-radius:50%; background:#ffffff70; transform:rotate(-35deg); }
+html body main#ss-auth-page.auth-reference .neo-home { position:absolute; top:calc(53 * var(--u)); left:calc(51 * var(--u)); display:flex; align-items:center; gap:calc(19 * var(--u)); min-height:32px; color:#35476e; font-size:max(13px,calc(31 * var(--u))); font-weight:600; line-height:1.25; text-decoration:none; z-index:2; }
+html body main#ss-auth-page.auth-reference .neo-home i { font-size:max(23px,calc(40 * var(--u))); line-height:1; }
+html body main#ss-auth-page.auth-reference .auth-toolbar { position:absolute; top:calc(43 * var(--u)); right:calc(38 * var(--u)); display:flex; align-items:center; gap:calc(57 * var(--u)); z-index:2; }
+html body main#ss-auth-page.auth-reference .auth-language { display:flex; padding:calc(4 * var(--u)); border:1px solid #e0edfc; border-radius:999px; background:#ffffff55; box-shadow:0 10px 24px #b2cdec29; }
+html body main#ss-auth-page.auth-reference .auth-language button { display:grid; place-items:center; width:calc(86 * var(--u)); min-width:34px; height:calc(52 * var(--u)); min-height:30px; padding:0; border:0; border-radius:999px; background:transparent; color:#293b68; font:inherit; font-size:max(12px,calc(24 * var(--u))); font-weight:650; cursor:pointer; }
+html body main#ss-auth-page.auth-reference .auth-language button[aria-pressed='true'] { background:#d7ecff; color:#1453ff; }
+html body main#ss-auth-page.auth-reference .neo-theme { position:relative; display:grid; place-items:center; width:calc(80 * var(--u)); min-width:36px; height:calc(63 * var(--u)); min-height:32px; padding:0; border:2px solid #fff; border-radius:999px; background:#ffffff50; color:#07103e; box-shadow:0 12px 24px #a2c0e428; cursor:pointer; }
+html body main#ss-auth-page.auth-reference .neo-theme::before { content:''; position:absolute; left:calc(-30 * var(--u)); width:1px; height:calc(38 * var(--u)); background:#aec7e9; }
+html body main#ss-auth-page.auth-reference .neo-theme i { font-size:max(22px,calc(39 * var(--u))); line-height:1; }
+html body main#ss-auth-page.auth-reference .neo-sun { display:none; }
+html body main#ss-auth-page.auth-reference .neo-logo { display:grid; place-items:center; width:calc(169 * var(--u)); height:calc(169 * var(--u)); padding:calc(10 * var(--u)); margin:0 auto calc(19 * var(--u)); border:2px solid #fff; border-radius:calc(45 * var(--u)); background:linear-gradient(135deg,#fff,#dfedff); box-shadow:0 calc(19 * var(--u)) calc(35 * var(--u)) #9ab8df40; }
+html body main#ss-auth-page.auth-reference .neo-logo img { display:block; width:100%; height:100%; object-fit:cover; border-radius:calc(34 * var(--u)); }
+html body main#ss-auth-page.auth-reference :is(.login-heading,.register-heading) { margin:0 0 calc(42 * var(--u)); text-align:center; }
+html body main#ss-auth-page.auth-reference :is(.login-kicker,.register-kicker) { display:block; margin:0 0 calc(13 * var(--u)); color:#465984; font-size:max(10px,calc(23 * var(--u))); font-weight:650; line-height:1.5; letter-spacing:.29em; text-transform:uppercase; }
+html body main#ss-auth-page.auth-reference .login-kicker i { display:none; }
+html body main#ss-auth-page.auth-reference :is(.login-heading h2,.register-heading h2) { margin:0 0 calc(7 * var(--u)); color:var(--ink); font-size:calc(76 * var(--u)); font-weight:800; line-height:1.2; letter-spacing:-.035em; }
+html body main#ss-auth-page.auth-reference :is(.login-heading p,.register-heading p) { margin:0; color:var(--muted); font-size:calc(35 * var(--u)); font-weight:400; line-height:1.5; letter-spacing:-.015em; }
+html body main#ss-auth-page.auth-reference .login-card { padding:0; border:0; background:none; box-shadow:none; }
+html body main#ss-auth-page.auth-reference .login-field { margin:0 0 calc(29 * var(--u)) !important; }
+html body main#ss-auth-page.auth-reference .login-field label { display:block; margin:0 0 calc(13 * var(--u)) calc(4 * var(--u)); color:#40527b !important; font-size:max(13px,calc(30 * var(--u))); font-weight:650; line-height:1.4; }
+html body main#ss-auth-page.auth-reference .login-input-wrap { position:relative; }
+html body main#ss-auth-page.auth-reference .login-input-wrap > i { position:absolute; left:calc(35 * var(--u)); top:50%; transform:translateY(-50%); color:#7386ad; font-size:max(20px,calc(39 * var(--u))); line-height:1; pointer-events:none; z-index:1; }
+html body main#ss-auth-page.auth-reference .login-input-wrap .form-control { display:block; width:100%; height:max(44px,calc(101 * var(--u))); min-height:0; margin:0; padding:0 calc(79 * var(--u)) 0 calc(113 * var(--u)); border:1px solid var(--line) !important; border-radius:calc(29 * var(--u)) !important; background:var(--field) !important; color:var(--ink) !important; font-family:inherit; font-size:max(16px,calc(31 * var(--u))); font-weight:400; line-height:1.4; box-shadow:0 calc(16 * var(--u)) calc(30 * var(--u)) #adcee92e !important; }
+html body main#ss-auth-page.auth-reference .login-input-wrap input::placeholder { color:#8d9fc3; opacity:1; }
+html body main#ss-auth-page.auth-reference .login-input-wrap .form-control:focus { outline:0; border-color:#619aff !important; box-shadow:0 0 0 3px #619aff26 !important; }
+html body main#ss-auth-page.auth-reference .ss-password-visibility { position:absolute; top:50%; right:calc(25 * var(--u)); display:grid; place-items:center; transform:translateY(-50%); width:max(36px,calc(48 * var(--u))); height:max(36px,calc(48 * var(--u))); padding:0; border:0; border-radius:12px; background:none; color:#7386ad; font-size:max(21px,calc(36 * var(--u))); cursor:pointer; }
+html body main#ss-auth-page.auth-reference .login-options { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:calc(3 * var(--u)) 0 calc(38 * var(--u)); color:var(--muted); font-size:max(12px,calc(29 * var(--u))); line-height:1.5; }
+html body main#ss-auth-page.auth-reference .form-check { display:flex; align-items:center; gap:calc(17 * var(--u)); min-height:0; padding:0; margin:0; }
+html body main#ss-auth-page.auth-reference .form-check-input { flex:0 0 auto; float:none; width:max(18px,calc(41 * var(--u))); height:max(18px,calc(41 * var(--u))); margin:0; border:1px solid #98baf0; border-radius:calc(9 * var(--u)); accent-color:#2458ff; background-color:#fff; box-shadow:none; cursor:pointer; }
+html body main#ss-auth-page.auth-reference .form-check-input:checked { background-color:#2458ff; border-color:#2458ff; }
+html body main#ss-auth-page.auth-reference :is(.login-options a,.login-register a,.register-login a) { color:var(--blue); font-weight:650; text-decoration:none; }
+html body main#ss-auth-page.auth-reference .login-submit { position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:max(48px,calc(115 * var(--u))); min-height:0; padding:0 calc(90 * var(--u)) !important; border:1px solid #6196ff !important; border-radius:calc(43 * var(--u)) !important; color:#fff !important; background:linear-gradient(115deg,#568eff,#2a5bef 73%,#3165f5) !important; font-family:inherit; font-size:max(18px,calc(43 * var(--u))) !important; font-weight:750 !important; line-height:1.2; box-shadow:0 calc(17 * var(--u)) calc(28 * var(--u)) #3d6bea2e,inset 0 1px 1px #ffffffb0 !important; cursor:pointer; transform:none !important; }
+html body main#ss-auth-page.auth-reference .login-submit > i { position:absolute; right:calc(31 * var(--u)); top:0; bottom:0; display:grid; place-items:center; width:calc(76 * var(--u)); height:calc(76 * var(--u)); margin-block:auto; border-radius:50%; background:#ffffff20; color:#fff; font-size:calc(43 * var(--u)); transform:none !important; }
+html body main#ss-auth-page.auth-reference .neo-social { display:flex; flex-direction:column; gap:calc(21 * var(--u)); margin-top:calc(30 * var(--u)); }
+html body main#ss-auth-page.auth-reference .external-divider { display:flex; align-items:center; gap:calc(28 * var(--u)); order:-1; margin:0 calc(5 * var(--u)); color:#4b608c; font-size:max(10px,calc(22 * var(--u))); line-height:1.5; letter-spacing:.2em; text-transform:uppercase; }
+html body main#ss-auth-page.auth-reference .external-divider::before,html body main#ss-auth-page.auth-reference .external-divider::after { content:''; flex:1; height:1px; background:#aec6e9; }
+html body main#ss-auth-page.auth-reference .external-login-form { margin:0; }
+html body main#ss-auth-page.auth-reference .external-google { display:flex; align-items:center; justify-content:center; gap:calc(27 * var(--u)); width:100%; height:max(44px,calc(104 * var(--u))); min-height:0; padding:0 12px !important; border:1px solid #afc9ee !important; border-radius:calc(35 * var(--u)) !important; background:var(--field) !important; color:var(--ink) !important; font-family:inherit; font-size:max(17px,calc(34 * var(--u))) !important; font-weight:650; line-height:1.2; box-shadow:0 calc(15 * var(--u)) calc(27 * var(--u)) #9fc2e52b !important; transform:none !important; }
+html body main#ss-auth-page.auth-reference .auth-google-icon { flex:0 0 auto; width:calc(51 * var(--u)); height:calc(51 * var(--u)); }
+html body main#ss-auth-page.auth-reference .external-google:disabled { opacity:1; cursor:not-allowed; }
+html body main#ss-auth-page.auth-reference .external-help { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+html body main#ss-auth-page.auth-reference :is(.login-register,.register-login) { margin:calc(35 * var(--u)) 0 0 !important; padding:0; border:0; color:var(--muted); text-align:center; font-size:max(12px,calc(29 * var(--u))); line-height:1.5; }
+html body main#ss-auth-page.auth-reference .register-consent { display:flex; align-items:center; gap:calc(17 * var(--u)); margin:calc(-3 * var(--u)) 0 calc(23 * var(--u)); color:#344a78; font-size:max(12px,calc(27 * var(--u))); line-height:1.5; }
+html body main#ss-auth-page.auth-reference .register-consent label { display:inline; cursor:pointer; }
+html body main#ss-auth-page.auth-reference .auth-legal-link { display:inline; padding:0; min-height:0; border:0; background:none; color:var(--blue); font:inherit; font-weight:650; text-decoration:underline; cursor:pointer; }
+html body main#ss-auth-page.auth-register { padding-top:calc(153 * var(--u)); }
+html body main#ss-auth-page.auth-register .register-heading { margin-bottom:calc(19 * var(--u)); }
+html body main#ss-auth-page.auth-register .login-input-wrap .form-control { height:max(44px,calc(82 * var(--u))); }
+html body main#ss-auth-page.auth-register .login-field { margin-bottom:calc(16 * var(--u)) !important; }
+html body main#ss-auth-page.auth-register .login-field label { margin-bottom:calc(9 * var(--u)); }
+html body main#ss-auth-page.auth-register .login-submit { height:max(48px,calc(99 * var(--u))); }
+html body main#ss-auth-page.auth-register .neo-social { margin-top:calc(20 * var(--u)); gap:calc(13 * var(--u)); }
+html body main#ss-auth-page.auth-register .external-google { height:max(44px,calc(82 * var(--u))); }
+html body main#ss-auth-page.auth-register .register-login { margin-top:calc(18 * var(--u)) !important; }
+html body main#ss-auth-page.auth-reference .auth-legal-dialog { width:min(440px,calc(100% - 32px)); padding:24px; border:1px solid var(--line); border-radius:20px; background:#f0f7ff; color:var(--ink); }
+html body main#ss-auth-page.auth-reference .auth-legal-dialog::backdrop { background:#0b17496b; }
+html body main#ss-auth-page.auth-reference .auth-legal-dialog button { min-height:44px; padding:8px 22px; border:0; border-radius:12px; background:#2860ef; color:white; }
+html body main#ss-auth-page.auth-reference :is(a,button,input):focus-visible { outline:3px solid #5c9fff; outline-offset:3px; }
+html body main#ss-auth-page.auth-reference :is(.text-danger,.validation-message) { font-size:max(12px,calc(20 * var(--u))); }
+html body main#ss-auth-page.auth-reference .validation-summary-valid { display:none; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference { --ink:#eef5ff; --muted:#b4c8e7; --blue:#8cbbff; --field:#203752; --line:#47658b; background:radial-gradient(ellipse at 50% 35%,#203b5d,#111f35); }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference :is(.neo-home,.login-kicker,.register-kicker,.login-field label,.register-consent,.external-divider) { color:var(--muted); }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .neo-decoration { opacity:.1; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference :is(.neo-logo,.neo-theme,.auth-language,.auth-legal-dialog) { background:#203752; border-color:#47658b; color:#edf4ff; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .auth-language button { color:#b4c8e7; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .auth-language button[aria-pressed='true'] { background:#345582; color:#a8d0ff; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .neo-moon { display:none; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .neo-sun { display:block; }
+@media(max-width:600px) {
+ html body main#ss-auth-page.auth-reference { padding-top:78px; }
+ html body main#ss-auth-page.auth-reference .neo-home { top:19px; }
+ html body main#ss-auth-page.auth-reference .auth-toolbar { top:19px; gap:20px; }
+ html body main#ss-auth-page.auth-reference .neo-theme::before { left:-11px; }
+ html body main#ss-auth-page.auth-reference .register-consent { align-items:flex-start; }
+}
+@media(prefers-reduced-motion:reduce) { html body main#ss-auth-page.auth-reference * { transition:none !important; animation:none !important; } }
+
+html body main#ss-auth-page.auth-register .neo-logo { margin-bottom:calc(12 * var(--u)); }
+html body main#ss-auth-page.auth-register .register-kicker { margin-bottom:calc(6 * var(--u)); }
