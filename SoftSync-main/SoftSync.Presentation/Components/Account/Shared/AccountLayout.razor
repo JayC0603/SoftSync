@@ -1,8 +1,7 @@
 @inherits LayoutComponentBase
 @inject LocalizationService L
 
-@* Static layout for Account pages. No JS interop or language toggle so it is
-   safe under static SSR (where auth cookies can be written). *@
+@* Keep account forms under static SSR so authentication cookies can be written. *@
 
 @inject NavigationManager Navigation
 
@@ -11,24 +10,22 @@
      accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
     <HeadContent><link rel="stylesheet" href="css/neo-login.css?v=3" /></HeadContent>
-    @if (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
-    {
-        <HeadContent><link rel="stylesheet" href="css/login-reference.css?v=1" /></HeadContent>
-    }
-    <main class="neo-login @(accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) ? "neo-login-compact" : "")">
+    <HeadContent><link rel="stylesheet" href="css/login-reference.css?v=2" /><link rel="stylesheet" href="css/account-reference.css?v=1" /></HeadContent>
+    <main class="neo-login neo-login-compact auth-reference">
         <div class="neo-decoration neo-decoration-one" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-two" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-three" aria-hidden="true"></div>
         <a href="/" class="neo-home" aria-label="@L["auth.backHome"]"><i class="bi bi-arrow-left" aria-hidden="true"></i> @L["auth.backHome"]</a>
-        <button type="button" class="neo-theme" onclick="window.ssDesign.toggleTheme()" aria-label="Đổi giao diện sáng / tối"><i class="bi bi-moon-fill neo-moon" aria-hidden="true"></i><i class="bi bi-sun-fill neo-sun" aria-hidden="true"></i></button>
+        <div class="auth-toolbar">
+            <div class="auth-language" role="group" aria-label="@L["layout.languageMenu"]">
+                <button type="button" aria-pressed="@(L.Current == AppLanguage.Vi ? "true" : "false")" onclick="window.ssDesign.setAccountLanguage('vi')">VI</button>
+                <button type="button" aria-pressed="@(L.Current == AppLanguage.En ? "true" : "false")" onclick="window.ssDesign.setAccountLanguage('en')">EN</button>
+            </div>
+            <button type="button" class="neo-theme" onclick="window.ssDesign.toggleTheme()" aria-label="@(L.Current == AppLanguage.Vi ? "Đổi giao diện sáng / tối" : "Toggle light / dark theme")"><i class="bi bi-moon-fill neo-moon" aria-hidden="true"></i><i class="bi bi-sun-fill neo-sun" aria-hidden="true"></i></button>
+        </div>
         <section class="neo-content" aria-label="SoftSync">
             <a href="/" class="neo-logo" aria-label="SoftSync — Trang chủ"><img src="/images/logo.png" width="112" height="112" alt="Logo nhóm SoftSync" /></a>
             <div class="neo-form-content">@Body</div>
-            <p class="neo-tagline">LEARN · BUILD · GROW TOGETHER</p>
-            @if (accountPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
-            {
-                <p class="login-brand-caption">@(L.Current == AppLanguage.Vi ? "Học kỹ năng mềm cùng AI." : "Learn soft skills with AI.")</p>
-            }
         </section>
     </main>
 }
