@@ -92,7 +92,6 @@
         @if(Achievements.Count > 1) { <button class="sh-show-more" aria-expanded="@achievementsExpanded.ToString().ToLowerInvariant()" aria-controls="sh-achievement-list" @onclick="() => achievementsExpanded = !achievementsExpanded">@(achievementsExpanded ? T("Thu gọn", "Show less") : T($"Xem thêm ({Achievements.Count - 1})", $"Show more ({Achievements.Count - 1})")) <i class="bi @(achievementsExpanded ? "bi-chevron-up" : "bi-chevron-down")" aria-hidden="true"></i></button> }
     </section>
     <section class="sh-quote sh-card"><i class="bi bi-quote" aria-hidden="true"></i><blockquote><p>@T("Mỗi bước nhỏ hôm nay đều tạo nên phiên bản tốt hơn của bạn ngày mai.", "Every small step today builds a better version of you tomorrow.")</p><cite>— SYNCY</cite></blockquote><img src="/images/home-approved/quote_landscape.webp" alt="" /></section>
-    <MobileSiteFooter />
 </div>
 
 @code {

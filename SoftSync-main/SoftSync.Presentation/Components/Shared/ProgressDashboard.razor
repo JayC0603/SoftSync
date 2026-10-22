@@ -101,5 +101,4 @@
             <section class="pg-card pg-report-preview"><header><h2>@T("Báo cáo tiến độ · SoftSync")</h2><button type="button" class="pg-primary" onclick="window.print()"><i class="bi bi-download" aria-hidden="true"></i> @T("Lưu PDF / In")</button></header><p>@start.ToString("dd/MM/yyyy") – @end.ToString("dd/MM/yyyy")</p><p>@TextFormat("{0}% hoàn thành · {1} hoạt động trong kỳ · {2} giờ học ước tính", Overall, RangeEvents.Count, Hours)</p><table><thead><tr><th>@T("Kỹ năng")</th><th>@T("Hoạt động")</th><th>@T("Tiến độ")</th></tr></thead><tbody>@foreach (var skill in Skills) { <tr><td>@T(skill.Name)</td><td>@SkillDone(skill) / @SkillTotal(skill)</td><td>@SkillPercent(skill)%</td></tr> }</tbody></table><small>@T("Thời gian học được ước tính từ các hoạt động đã hoàn thành. Bạn có thể chọn “Lưu dưới dạng PDF” trong hộp thoại in.")</small></section>
         }
     }
-    <MobileSiteFooter />
 </div>

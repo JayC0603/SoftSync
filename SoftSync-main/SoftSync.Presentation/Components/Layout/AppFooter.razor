@@ -1,22 +1,5 @@
-@rendermode InteractiveServer
-@inherits LocalizedComponentBase
-@using SoftSync.Common.Enums
+﻿@rendermode InteractiveServer
 
-<footer class="eco-footer">
-    <div class="ss-footer-row">
-        <a class="ss-footer-logo" href="/" aria-label="@Tx("SoftSync home", "Trang chủ SoftSync")">
-            <img src="/images/logo.png" alt="SoftSync" width="44" height="44" />
-        </a>
-        <nav class="ss-footer-links" aria-label="@Tx("About SoftSync", "Thông tin SoftSync")">
-            <a href="/about">@Tx("About us", "Về chúng tôi")</a>
-            <a href="/mentors">Mentor</a>
-            <a href="/community">@Tx("Community", "Cộng đồng")</a>
-            <a href="/resources">@Tx("Resources", "Tài nguyên")</a>
-        </nav>
-        <a class="ss-footer-facebook" href="https://www.facebook.com/SoftSyncSpace" target="_blank" rel="noopener noreferrer" title="@Tx("Facebook page", "Trang Facebook")" aria-label="@Tx("Open SoftSync Facebook page in a new tab", "Mở trang Facebook SoftSync trong thẻ mới")">
-            <i class="bi bi-facebook" aria-hidden="true"></i>
-        </a>
-    </div>
-</footer>
-
-@code { private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en; }
+<div class="ss-site-footer-shell">
+    <MobileSiteFooter />
+</div>
