@@ -49,6 +49,18 @@ CvIntegration__SharedSecret=<random-secret-at-least-32-UTF8-bytes>
 CvIntegration__Issuer=softsync
 ```
 
+The repository `render.yaml` provisions the CV frontend (`softsync-cv`), CV
+backend (`softsync-cv-api`), AI service (`softsync-cv-ai`), and a separate CV
+database. Render derives the public service URLs automatically. Set
+`CvIntegration__SharedSecret` on `softsync` and `SOFTSYNC_SHARED_SECRET` on
+`softsync-cv-api` to the same randomly generated value (at least 32 UTF-8
+bytes); these values are intentionally `sync: false` and are never generated
+in the repository.
+
+The existing `softsync` service and database remain unchanged. If the CV
+services are not configured, the existing `/cv` tab shows a connection state
+and all other SoftSync routes continue to work normally.
+
 Next.js / Vercel (server-side variables):
 
 ```text

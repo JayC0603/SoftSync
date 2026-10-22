@@ -19,6 +19,10 @@
 *.p12
 **/appsettings.*.local.json
 **/wwwroot/uploads/
+SoftSync-main/CvBackend/**/__pycache__/
+SoftSync-main/CvAi/**/__pycache__/
+SoftSync-main/CvBackend/**/*.py[cod]
+SoftSync-main/CvAi/**/*.py[cod]
 
 # OS
 Thumbs.db
