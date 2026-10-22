@@ -406,8 +406,9 @@
 </style>
 
 @code {
-    private bool authenticated;
-    private bool isAdmin;
+    // Keep SSR destinations during hydration instead of briefly resetting Home to '/'.
+    [PersistentState] public bool authenticated { get; set; }
+    [PersistentState] public bool isAdmin { get; set; }
     private string HomeHref => isAdmin ? "/admin/users" : authenticated ? "/dashboard" : "/";
     protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
     protected override async Task OnInitializedAsync()

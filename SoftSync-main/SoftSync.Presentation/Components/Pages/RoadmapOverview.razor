@@ -15,10 +15,7 @@
 @inject ILogger<RoadmapOverview> Logger
 
 <PageTitle>@Tx("Learn", "Học tập") · SoftSync</PageTitle>
-@* Keep page styles attached during enhanced navigation from the interactive dashboard. *@
-    <link rel="stylesheet" href="css/adventure-map.css?v=20261020-mobile-trail-v2" />
-    <link rel="stylesheet" href="css/learning-journey.css?v=20261019-light" media="(min-width: 901px)" />
-    <link rel="stylesheet" href="css/learn-v3.css?v=20261019-v4-mobile" />
+@* Styles load in App.razor before the first paint, including enhanced navigation. *@
 
 <section class="learning-journey learn-desktop" style="@Theme.Css">
     @if (loading)
@@ -61,7 +58,6 @@
     }
 </section>
 
-<link rel="stylesheet" href="css/learn-mobile-reference.css?v=20261022-cards" />
 <section class="learn-v3 @(CourseDetail ? "lm-detail" : "lm-overview")">
     @if (loading)
     {
