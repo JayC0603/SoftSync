@@ -56,3 +56,23 @@ html body .page .ss-main-content .career-cv :is(.career-scores,.career-feedback,
     html body .page .ss-main-content .career-cv .career-tabs button { font-size:12px; }
     html body .page .ss-main-content .career-cv :is(.career-scores,.career-feedback) h2 { font-size:14px!important; }
 }
+
+/* Compact entry cards: keep descriptions lighter than their action titles. */
+.career-cv .career-menu { gap:12px; }
+.career-cv .career-menu-card { min-height:112px; padding:16px; gap:12px; border-radius:16px; }
+.career-cv .career-menu-card .career-icon { flex-basis:44px; height:48px; border-radius:13px; font-size:25px; }
+html body .page .ss-main-content .career-cv .career-menu-card strong { font-size:16px; margin-bottom:4px; }
+html body .page .ss-main-content .career-cv .career-menu-card small { font-size:12px!important; font-weight:400; line-height:1.5; }
+@media(max-width:900px) {
+ .career-cv .career-menu { grid-template-columns:1fr; gap:10px; }
+ .career-cv .career-menu-card { min-height:88px; padding:13px 14px; gap:12px; border-radius:15px; }
+ .career-cv .career-menu-card .career-icon { flex-basis:42px; height:46px; font-size:24px; border-radius:12px; }
+ html body .page .ss-main-content .career-cv .career-menu-card strong { font-size:15px; line-height:1.4; margin-bottom:3px; }
+ .career-cv .career-tip { margin-top:24px; margin-bottom:16px; padding:16px 14px; }
+}
+
+/* Keep the quick tip secondary to the three CV actions. */
+html body .page .ss-main-content .career-cv .career-tip { gap:9px; padding:12px 14px; margin:18px 0 0; border-radius:13px; }
+html body .page .ss-main-content .career-cv .career-tip>i { font-size:17px; line-height:1.5; }
+html body .page .ss-main-content .career-cv .career-tip strong { font-size:13px; font-weight:650; line-height:1.4; }
+html body .page .ss-main-content .career-cv .career-tip p { font-size:12px!important; font-weight:400; line-height:1.5; margin:3px 0 0; }

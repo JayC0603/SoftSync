@@ -7,7 +7,7 @@
 @inject ILogger<CvCareerWorkspace> Logger
 @inject AuthenticationStateProvider Authentication
 
-<HeadContent><link rel="stylesheet" href="css/cv-career.css?v=20261022-type2" /></HeadContent>
+<HeadContent><link rel="stylesheet" href="css/cv-career.css?v=20261022-compact4" /></HeadContent>
 <div class="career-cv">
 @if (screen == "home")
 {
@@ -63,7 +63,6 @@ else
     }
 }
 @if(error is not null) { <p class="career-error" role="alert">@error</p> }
-<p class="career-storage-note">@T("CV và lịch sử đã lưu được giữ trong tài khoản của bạn.", "Your CVs and saved reviews are stored in your account.")</p>
 </div>
 
 @code {
