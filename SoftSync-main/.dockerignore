@@ -12,3 +12,24 @@
 docker-compose.yml
 **/Dockerfile
 README.md
+
+# Private configuration and unrelated frontend/review output must not enter images.
+**/.env
+**/.env.*
+!**/.env.example
+**/appsettings.*.local.json
+**/*.pfx
+**/*.key
+**/.git
+**/.next
+**/.vercel
+**/wwwroot/uploads
+SoftSync.Next
+SoftSync.Tests
+.ui-qa
+.review-*
+.preview-*
+tmp
+docs
+
+.vercel-validation

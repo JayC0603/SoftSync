@@ -23,3 +23,7 @@ Thumbs.db
 
 # Local browser QA dependencies and screenshots
 .ui-qa/
+
+**/.next/
+**/.vercel/
+.vercel-validation/

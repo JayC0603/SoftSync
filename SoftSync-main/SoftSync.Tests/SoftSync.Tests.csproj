@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\SoftSync.BLL\SoftSync.BLL.csproj" />
     <Compile Include="..\SoftSync.Presentation\Components\Journey\JourneyModels.cs" Link="JourneyModels.cs" />
     <Compile Include="..\SoftSync.Presentation\Components\Journey\RoadmapLearningContent.cs" Link="RoadmapLearningContent.cs" />

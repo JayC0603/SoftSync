@@ -24,6 +24,22 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Generate an idempotent schema from the checked-in EF migrations without
+// connecting to a database or starting the web server.
+var schemaArgument = args.FirstOrDefault(argument => argument.StartsWith("--export-database-schema=", StringComparison.Ordinal));
+if (schemaArgument is not null)
+{
+    var outputPath = Path.GetFullPath(schemaArgument.Split('=', 2)[1]);
+    await using var schemaDb = new SoftSyncDbContext(new DbContextOptionsBuilder<SoftSyncDbContext>()
+        .UseNpgsql("Host=localhost;Database=softsync;Username=softsync").Options);
+    var migrator = Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions.GetService<Microsoft.EntityFrameworkCore.Migrations.IMigrator>(schemaDb);
+    var sql = migrator.GenerateScript(options: Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions.Idempotent);
+    Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+    await File.WriteAllTextAsync(outputPath, sql);
+    Console.WriteLine($"Database schema written to {outputPath}");
+    return;
+}
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options =>
@@ -57,6 +73,7 @@ builder.Services.AddScoped<NotificationInbox>();
 builder.Services.AddScoped<MentorRequestWorkflow>();
 builder.Services.AddScoped<MentorRequests>();
 builder.Services.AddScoped<CourseUploadService>();
+builder.Services.AddHttpClient("CourseBlob", client => client.Timeout = TimeSpan.FromMinutes(10));
 builder.Services.Configure<CvIntegrationOptions>(builder.Configuration.GetSection("CvIntegration"));
 builder.Services.AddHttpClient<CvIntegrationService>(client => client.Timeout = TimeSpan.FromSeconds(20));
 
@@ -72,11 +89,11 @@ if (demoMode)
     builder.Logging.AddConsole();
 }
 
-// Prefer Render's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
+// Prefer Vercel's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
 // cannot override the managed database's current internal connection URL.
 // Local/other environments can still use ConnectionStrings:SoftSyncDb.
 // IConfiguration includes environment variables and Development User Secrets,
-// allowing the same DATABASE_URL key to work on Render and on a local machine.
+// allowing the same DATABASE_URL key to work on Vercel and on a local machine.
 if (demoMode)
 {
     builder.Services.AddDbContext<SoftSyncDbContext>(options =>
@@ -84,17 +101,7 @@ if (demoMode)
 }
 else
 {
-    var databaseUrl = builder.Configuration["DATABASE_URL"];
-    var connectionString = !string.IsNullOrWhiteSpace(databaseUrl)
-        ? BuildNpgsqlConnectionString(databaseUrl)
-        : builder.Configuration.GetConnectionString("SoftSyncDb");
-
-    if (string.IsNullOrWhiteSpace(connectionString))
-    {
-        throw new InvalidOperationException(
-            "PostgreSQL is not configured. Set DATABASE_URL on Render or " +
-            "ConnectionStrings__SoftSyncDb for another environment, or enable SoftSync:DemoMode.");
-    }
+    var connectionString = PostgresConnection.Resolve(builder.Configuration);
     builder.Services.AddDbContext<SoftSyncDbContext>(options =>
         options.UseNpgsql(connectionString));
 }
@@ -271,11 +278,11 @@ builder.Services.AddHttpClient<RecruitmentAiClient>(client =>
 
 var app = builder.Build();
 
-// Behind Render's reverse proxy TLS terminates at the edge, so trust the
+// Behind Vercel's reverse proxy TLS terminates at the edge, so trust the
 // X-Forwarded-Proto/For headers — otherwise the app thinks requests are HTTP,
 // which breaks Secure cookies and the Blazor Server WebSocket. Must run before
 // authentication. KnownNetworks/Proxies are cleared because the proxy hop isn't
-// on a known private subnet in Render's network.
+// on a known private subnet in Vercel's network.
 var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -292,7 +299,7 @@ if (!app.Environment.IsDevelopment())
 }
 else if (!demoMode)
 {
-    // In the Render container TLS is handled by the proxy; redirecting inside the
+    // In the Vercel container TLS is handled by the proxy; redirecting inside the
     // container just breaks. Only redirect to HTTPS during local development.
     app.UseHttpsRedirection();
 }
@@ -338,7 +345,7 @@ if (app.Environment.IsDevelopment())
         "text/html; charset=utf-8"));
 }
 
-// Render uses this lightweight endpoint to check that the web process is
+// Deployment monitoring uses this lightweight endpoint to check that the web process is
 // accepting requests. Keep it independent from page rendering and user state.
 app.MapGet("/health", () => Results.Ok(new
     {
@@ -368,20 +375,11 @@ app.MapAdditionalIdentityEndpoints();
 // Apply migrations at startup; never provision the known demo account outside Development.
 await DbInitializer.SeedAsync(app.Services, seedDemoAccount: app.Environment.IsDevelopment() || demoMode);
 
-app.Run();
-
-// Converts a postgres://user:password@host:port/database URI (the format Render
-// exposes via DATABASE_URL) into an Npgsql keyword connection string, enabling
-// SSL which managed Postgres requires.
-static string BuildNpgsqlConnectionString(string databaseUrl)
+if (args.Contains("--initialize-database"))
 {
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':', 2);
-    var username = Uri.UnescapeDataString(userInfo[0]);
-    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
-    var database = uri.AbsolutePath.TrimStart('/');
-    var port = uri.Port > 0 ? uri.Port : 5432;
-
-    return $"Host={uri.Host};Port={port};Database={database};Username={username};" +
-           $"Password={password};SSL Mode=Require;Trust Server Certificate=true";
+    Console.WriteLine("Database migrations and application seed completed.");
+    await app.DisposeAsync();
+    return;
 }
+
+app.Run();

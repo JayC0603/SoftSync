@@ -109,7 +109,18 @@
 
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.web.js" autostart="false"></script>
+    <script>
+        Blazor.start({
+            circuit: {
+                configureSignalR: function (builder) {
+                    // Keep negotiation and the circuit on the same connection
+                    // when the hosting platform runs multiple instances.
+                    builder.withUrl('/_blazor', { transport: 1, skipNegotiation: true });
+                }
+            }
+        });
+    </script>
     <script src="@VersionedAsset("js/learning-activity.js")"></script>
     <script src="@VersionedAsset("dist/app.js")"></script>
 </body>

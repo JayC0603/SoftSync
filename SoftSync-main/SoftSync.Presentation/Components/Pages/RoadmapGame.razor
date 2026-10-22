@@ -8,6 +8,8 @@
 @inject IRoadmapService RoadmapService
 @inject IGameBankService GameBankService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+@attribute [Authorize]
 
 <div class="game-page mx-auto">
     <div class="tw:mb-4">
@@ -230,7 +232,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId);
+        var signedIn = await AuthProvider.GetUserIdAsync();
+        if (signedIn <= 0) { Nav.NavigateTo("/Account/Login", true); return; }
+        UserId = signedIn;
+        var roadmap = await RoadmapService.GetUserRoadmapAsync(UserId, UserId);
         item = roadmap.Items.FirstOrDefault(i => i.Id == ItemId);
         if (item is null)
         {
@@ -366,7 +371,7 @@
         }
 
         submitted = true;
-        await RoadmapService.MarkCompleteAsync(ItemId);
+        await RoadmapService.MarkCompleteAsync(ItemId, UserId);
     }
 
     private async Task RestartAsync()

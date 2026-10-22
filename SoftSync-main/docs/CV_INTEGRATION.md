@@ -40,7 +40,7 @@ static/Cloudinary document links retain their existing sharing behavior.
 
 ## Configuration
 
-ASP.NET / Render:
+ASP.NET / Vercel:
 
 ```text
 CvIntegration__FrontendUrl=https://your-next-frontend.vercel.app
