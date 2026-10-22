@@ -2,3 +2,57 @@
 @media(max-width:700px){.career-menu{grid-template-columns:1fr;gap:15px}.career-menu-card{min-height:112px;padding:20px 14px;border-radius:18px}.career-menu-card strong{font-size:18px}.career-menu-card small{font-size:13px}.career-hero{padding:25px 4px 36px;min-height:220px;gap:4px}.career-hero>div:first-child{max-width:70%}.career-cv .career-hero h1{font-size:39px!important;margin:9px 0 22px}.career-hero p{font-size:13px}.career-illustration{flex-basis:110px;height:140px;margin-right:-4px}.career-illustration>div{inset:10px 12px 3px;padding:6px}.career-illustration>span{font-size:50px}.career-tip{margin:50px 0 25px;padding:20px 15px}.career-list{grid-template-columns:1fr;gap:12px}.career-top{margin-bottom:22px;gap:8px}.career-top h1{font-size:19px!important}.career-document{padding:14px 10px}.career-sort>span{font-size:10px}.career-cv{padding:0 0 20px}.career-scores{gap:9px}.career-scores article{padding:14px 9px}.career-cv .career-scores h2{font-size:13px!important}.career-scores p{font-size:12px}.career-ring{width:94px;height:94px}.career-ring strong{font-size:27px}.career-feedback{gap:8px}.career-feedback>section{padding:12px 9px}.career-cv .career-feedback h2{font-size:13px!important}.career-feedback ul{font-size:12px;padding-left:13px}.career-selection{gap:10px;padding:13px}.career-selection strong{font-size:14px}.career-selection .career-outline{font-size:11px;padding:7px}.career-step-title{font-size:17px!important}.career-criterion{font-size:12px;gap:9px}.career-cv .career-suggestions h2{font-size:15px!important}.career-jd textarea{min-height:170px}.career-analyze{margin-top:50px}.career-cv .career-footnote{font-size:11px!important}}
 @media(prefers-reduced-motion:reduce){.career-menu-card{transition:none}}
 .career-preview{margin-top:18px}.career-preview header{display:flex;align-items:center;justify-content:space-between;gap:15px}.career-preview h2{font-size:16px;overflow-wrap:anywhere;margin:0}.career-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;font-family:inherit;font-size:13px;line-height:1.8;color:var(--cv-muted);margin:15px 0 0}.career-history-filters{overflow-x:auto}.career-history-filters button{flex:0 0 auto;white-space:nowrap;min-width:95px}
+
+/* Match the homepage typography and prevent shell rules from enlarging CV text. */
+html body .page .ss-main-content .career-cv {
+    font-family:var(--ss-font-family,'Be Vietnam Pro',Inter,'Segoe UI',Arial,sans-serif);
+    font-size:14px;
+    line-height:1.5;
+}
+html body .page .ss-main-content .career-cv :is(h1,h2,h3,h4,p,a,strong,small,span,input,button,textarea,select,label,time,em,blockquote,pre) {
+    font-family:inherit;
+}
+html body .page .ss-main-content .career-cv h1 {
+    font-size:clamp(26px,3vw,36px)!important;
+    font-weight:800;
+    line-height:1.25;
+    letter-spacing:-.04em;
+}
+html body .page .ss-main-content .career-cv h2 {
+    font-size:21px!important;
+    font-weight:750;
+    line-height:1.35;
+    letter-spacing:-.025em;
+}
+html body .page .ss-main-content .career-cv :is(p,li,label,input,textarea,select) {
+    font-size:14px!important;
+    line-height:1.5;
+}
+html body .page .ss-main-content .career-cv :is(button,.career-primary) {
+    font-size:14px;
+    font-weight:650;
+    line-height:1.5;
+}
+html body .page .ss-main-content .career-cv small,
+html body .page .ss-main-content .career-cv :is(.career-meta,.career-footnote,.career-storage-note) {
+    font-size:12px!important;
+    line-height:1.5;
+}
+html body .page .ss-main-content .career-cv .career-menu-card strong {
+    font-size:17px;
+    font-weight:700;
+    line-height:1.4;
+}
+html body .page .ss-main-content .career-cv :is(.career-scores,.career-feedback,.career-suggestions,.career-preview) h2 {
+    font-size:16px!important;
+    font-weight:700;
+    line-height:1.4;
+    letter-spacing:normal;
+}
+@media(max-width:900px) {
+    html body .page .ss-main-content .career-cv h1 { font-size:24px!important; font-weight:750; line-height:1.35; }
+    html body .page .ss-main-content .career-cv h2 { font-size:18px!important; font-weight:700; line-height:1.4; letter-spacing:normal; }
+    html body .page .ss-main-content .career-cv .career-top h1 { font-size:18px!important; letter-spacing:normal; }
+    html body .page .ss-main-content .career-cv .career-tabs button { font-size:12px; }
+    html body .page .ss-main-content .career-cv :is(.career-scores,.career-feedback) h2 { font-size:14px!important; }
+}
