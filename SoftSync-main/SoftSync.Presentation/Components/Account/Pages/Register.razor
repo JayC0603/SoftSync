@@ -47,7 +47,7 @@
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
     <div class="login-field tw:mb-4">
-        <label for="register-confirmpassword" class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
+        <label for="register-confirmpassword" class="form-label tw:font-medium">@(L.Current == AppLanguage.Vi ? "Xác nhận mật khẩu" : "Confirm password")</label>
         <div class="login-input-wrap"><i class="bi bi-lock" aria-hidden="true"></i>
             <InputText id="register-confirmpassword" type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" placeholder="@(L.Current == AppLanguage.Vi ? "Nhập lại mật khẩu" : "Confirm your password")" />
             <button type="button" class="ss-password-visibility" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
@@ -82,23 +82,6 @@
     @L["auth.haveAccount"] <a href="Account/Login">@L["auth.login.title"]</a>
 </div>
 
-<style>
-    .register-heading { margin-bottom: 26px; text-align: left; }
-    .register-kicker { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 15px; color: #9a93ff; font-size: .7rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
-    .register-heading h2 { margin: 0 0 8px; color: #f8fbff; font-size: clamp(1.9rem,4vw,2.35rem); font-weight: 820; letter-spacing: -.04em; }
-    .register-heading p { margin: 0; color: #9ba7c5; line-height: 1.55; }
-    .register-submit { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 13px; background: linear-gradient(90deg,#7267ff,#8d7dff 45%,#6f65ff); box-shadow: 0 14px 30px rgba(95,94,255,.25); }
-    .register-submit i { transition: transform .18s ease; }
-    .register-submit:hover i { transform: translateX(4px); }
-    .register-login { padding-top: 20px; color: #939fbc; border-top: 1px solid rgba(143,162,255,.16); }
-    .register-login a { color: #9a93ff; font-weight: 700; text-decoration: none; }
-    .register-login a:hover { text-decoration: underline; }
-    .form-label { color: #dce2f2; font-size: .82rem; font-weight: 700; }
-    .form-control { min-height: 50px; color: #f8fbff; border-color: rgba(126,146,255,.22); background: rgba(7,11,24,.56); }
-    .form-control:focus { color: #fff; border-color: #8d8cff; background: rgba(9,14,29,.78); box-shadow: 0 0 0 4px rgba(129,140,248,.13); }
-    .password-toggle { color: #aab5d4; border-color: rgba(126,146,255,.22); background: rgba(7,11,24,.56); }
-    .password-toggle:hover { color: #fff; background: rgba(61,72,117,.3); }
-</style>
 
 @code {
     private string? errorMessage;

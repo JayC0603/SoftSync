@@ -43,7 +43,7 @@
         <label for="login-identifier" class="form-label tw:font-medium">@L["auth.identifier"]</label>
         <div class="login-input-wrap">
             <i class="bi bi-person"></i>
-            <InputText id="login-identifier" @bind-Value="Input.Identifier" class="form-control form-control-lg" autocomplete="username" placeholder="@L["auth.identifier.placeholder"]" />
+            <InputText id="login-identifier" @bind-Value="Input.Identifier" class="form-control form-control-lg" autocomplete="username" placeholder="@(L.Current == AppLanguage.Vi ? "you@example.com hoặc +84" : "you@example.com or +84")" />
         </div>
         <ValidationMessage For="() => Input.Identifier" class="text-danger" />
     </div>
@@ -74,27 +74,6 @@
 </div>
 </div>
 
-<style>
-    .login-heading { margin-bottom: 30px; }
-    .login-kicker { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 17px; color: #9a93ff; font-size: .7rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
-    .login-heading h2 { margin: 0 0 9px; color: #f8fbff; font-size: clamp(2rem, 4vw, 2.45rem); font-weight: 820; letter-spacing: -.04em; }
-    .login-heading p { margin: 0; color: #9ba7c5; line-height: 1.6; }
-    .login-field label { margin-bottom: 8px; color: #dce2f2; font-size: .82rem; font-weight: 700; }
-    .login-input-wrap { position: relative; }
-    .login-input-wrap > i { position: absolute; z-index: 1; left: 15px; top: 50%; color: #8792b1; transform: translateY(-50%); pointer-events: none; }
-    .login-options { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0 24px; color: #aab5d4; font-size: .86rem; }
-    .login-options a, .login-register a { color: #9a93ff; font-weight: 700; text-decoration: none; }
-    .login-options a:hover, .login-register a:hover { text-decoration: underline; }
-    .login-submit { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(196,201,255,.2); border-radius: 13px; background: linear-gradient(90deg,#7267ff,#8d7dff 45%,#6f65ff); box-shadow: 0 14px 30px rgba(95,94,255,.25), inset 0 1px 0 rgba(255,255,255,.25); }
-    .login-submit i { transition: transform .18s ease; }
-    .login-register { margin-top: 25px; padding-top: 21px; border-top: 1px solid rgba(143,162,255,.16); text-align: center; color: #939fbc; font-size: .9rem; }
-    .form-control { min-height: 52px; padding-left: 44px; color: #f8fbff; border-radius: 12px; border-color: rgba(126,146,255,.22); background: rgba(7,11,24,.56); }
-    .form-control::placeholder { color: #707c9b; }
-    .form-control:focus { color: #fff; border-color: #8d8cff; background: rgba(9,14,29,.78); box-shadow: 0 0 0 4px rgba(129,140,248,.13); }
-    .form-check-input { border-color: rgba(143,162,255,.36); background-color: rgba(7,11,24,.56); }
-    .form-check-input:checked { border-color: #7c72ff; background-color: #7469ff; }
-    @@media (max-width: 420px) { .login-options { align-items: flex-start; flex-direction: column; gap: 10px; } }
-</style>
 
 @code {
     private string? errorMessage;
