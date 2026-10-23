@@ -23,6 +23,8 @@
         })) reconcile();
     }).observe(document.body, { attributes: true, attributeFilter: ['data-page-route', 'class'], childList: true, subtree: true });
     syncLinks();
+    // BFCache can restore the DOM while a previous navigation was pending.
+    window.addEventListener('pageshow', clear);
 
     function clear() {
         pending = null;
@@ -56,25 +58,15 @@
         var request = { path: url.pathname };
         pending = request;
         main.setAttribute('aria-busy', 'true');
-        main.inert = true;
         link.setAttribute('data-navigation-pending', 'true');
-        var status = document.getElementById('ss-navigation-status');
-        if (status) {
-            var english = document.documentElement.lang === 'en';
-            // Fast navigations do not need a flashing loading banner.
-            setTimeout(function () {
-                if (pending === request && status.isConnected) status.hidden = false;
-            }, 180);
-            status.dataset.loading = 'true';
-            status.querySelector('span').textContent = (english ? 'Opening ' : 'Đang mở ') + link.textContent.trim() + '…';
-            status.querySelector('a').hidden = true;
-        }
+        // Keep the shell usable. Normal route changes need no blocking banner.
         setTimeout(function () {
             if (pending !== request) return;
             // Leave a native escape route if a request stalls or the network drops.
             if (main.isConnected) { main.inert = false; main.removeAttribute('aria-busy'); }
             var current = document.getElementById('ss-navigation-status');
             if (!current) return;
+            current.hidden = false;
             current.dataset.loading = 'false';
             var english = document.documentElement.lang === 'en';
             current.querySelector('span').textContent = english ? 'This page is taking longer to load.' : 'Trang đang tải lâu hơn bình thường.';

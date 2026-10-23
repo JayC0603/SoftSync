@@ -43,6 +43,12 @@ builder.Services.AddRazorComponents()
 // Needed so App.razor and scoped UI services can read browser preferences during
 // SSR / enhanced navigation and render the first frame without flashing.
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    // Compress static text assets; leave authenticated HTML outside compression.
+    options.MimeTypes = ["text/css", "text/javascript", "application/javascript", "image/svg+xml"];
+});
 
 var frontendOrigins = (builder.Configuration["FRONTEND_ORIGINS"] ?? "http://localhost:3000")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -331,6 +337,7 @@ else if (!demoMode)
     app.UseHttpsRedirection();
 }
 
+app.UseResponseCompression();
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>

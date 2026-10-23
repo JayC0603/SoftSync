@@ -19,7 +19,7 @@
             <HeaderActions />
         </header>
 
-        <div id="ss-navigation-status" class="ss-navigation-status" role="status" aria-live="polite" hidden><span></span><a hidden></a></div>
+        <div id="ss-navigation-status" class="ss-navigation-status" role="status" aria-live="polite" hidden><span></span><a hidden onclick="location.assign(this.href); return false;"></a></div>
         <main id="main-content" data-page-route="@CurrentPath" tabindex="-1" class="container tw:py-12 ss-main-content">
             @Body
         </main>

@@ -11,7 +11,6 @@ let id = 0;
 const pending = new Map();
 const requests = [];
 const errors = [];
-let intercept;
 ws.onmessage = event => {
     const message = JSON.parse(event.data);
     if (message.id) {
@@ -19,7 +18,6 @@ ws.onmessage = event => {
         pending.delete(message.id);
         message.error ? promise.reject(Error(JSON.stringify(message.error))) : promise.resolve(message.result);
     } else if (message.method === 'Network.requestWillBeSent') requests.push(message.params);
-    else if (message.method === 'Fetch.requestPaused') intercept?.(message.params);
     else if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails);
 };
 const call = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
@@ -79,6 +77,7 @@ try {
     await wait(`document.querySelector('main[data-page-route="/more"]') && document.querySelector('.ss-header-language button:not(:disabled)')`);
     await pause(1000);
     const headerFrames = await evaluate('window.__headerFrames');
+    assert.equal(await evaluate(`document.querySelector('#ss-navigation-status').hidden`), true, 'Reload must not show Opening');
     assert.ok(headerFrames.length > 0);
     assert.ok(headerFrames.every(frame => frame.name === identity), JSON.stringify(headerFrames));
     assert.equal(new Set(headerFrames.map(frame => JSON.stringify(frame))).size, 1, 'Avatar geometry and identity must survive hydration');
@@ -89,9 +88,8 @@ try {
     await pause(250);
     assert.equal(requests.slice(sameRouteRequests).filter(request => new URL(request.request.url).pathname === '/more').length, 0, 'Current tab must not reload');
     assert.equal(await evaluate(`!!document.head.querySelector('link[href*="cv-career.css"]')`), true);
-    let release;
-    intercept = paused => { release = () => send('Fetch.continueRequest', { requestId: paused.requestId }); };
-    await send('Fetch.enable', { patterns: [{ urlPattern: `${app}/cv`, requestStage: 'Request' }] });
+    const routeRequestStart = requests.length;
+    await evaluate(`void (window.__originalHeader = document.querySelector('.ss-header-actions'))`);
     await evaluate(`(() => {
         window.__routeFrames = [];
         const until = performance.now() + 2500;
@@ -109,22 +107,15 @@ try {
         sample();
         document.querySelector('.ss-mobile-bottom-nav a[href="/cv"]').click();
     })()`);
-    for (let n = 0; n < 100 && !release; n++) await pause(50);
-    assert.ok(release, 'CV navigation request should be intercepted');
-    await pause(500);
-    const pendingState = await evaluate(`({ route:document.querySelector('#main-content').dataset.pageRoute, active:document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href'), busy:document.querySelector('#main-content').getAttribute('aria-busy'), statusHidden:document.querySelector('#ss-navigation-status').hidden })`);
-    assert.deepEqual(pendingState, { route: '/more', active: '/more', busy: 'true', statusHidden: false });
-    assert.equal(await evaluate(`getComputedStyle(document.querySelector('#main-content')).opacity`), '1', 'Pending navigation must not flash the page');
-    await release();
-    await send('Fetch.disable');
     await wait(`document.querySelector('main[data-page-route="/cv"] .career-menu-card') && document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href') === '/cv'`);
-    await pause(1800);
+    await pause(2600);
     const frames = await evaluate('window.__routeFrames');
     const mismatches = frames.filter(frame => frame.active !== frame.rendered || !frame.cvStyled);
     assert.equal(mismatches.length, 0, JSON.stringify(mismatches.slice(0, 5)));
     assert.ok(frames.every(frame => frame.name === identity), 'Identity must remain visible during navigation');
     assert.equal(new Set(frames.map(frame => JSON.stringify(frame.avatar))).size, 1, 'Avatar must not move during navigation');
     assert.equal(await evaluate(`document.querySelector('#ss-navigation-status').hidden`), true);
+    assert.equal(await evaluate(`window.__originalHeader === document.querySelector('.ss-header-actions')`), true, 'Router must preserve the actual header DOM');
     const sizes = [];
     for (const width of [375, 390, 430, 1440]) {
         await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 500 });
@@ -148,12 +139,29 @@ try {
     await mkdir(new URL('../../.integration-tools/navigation-cv/', import.meta.url), { recursive:true });
     const screenshot = await send('Page.captureScreenshot', { format:'png' });
     await writeFile(new URL('../../.integration-tools/navigation-cv/cv-after.png', import.meta.url), Buffer.from(screenshot.data,'base64'));
+    const routeTimings = [];
     for (const path of ['/progress','/roadmap','/dashboard','/cv','/more']) {
+        const started = performance.now();
         await evaluate(`document.querySelector('.ss-mobile-bottom-nav a[href="${path}"]').click()`);
         await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '${path}' && document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href') === '${path}'`);
+        routeTimings.push({ path, elapsedMs:Math.round(performance.now() - started) });
     }
+    await send('Page.navigateToHistoryEntry', { entryId:(await send('Page.getNavigationHistory')).entries.at(-2).id });
+    await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '/cv'`);
+    await evaluate(`(() => {
+        document.querySelector('.ss-mobile-bottom-nav a[href="/progress"]').click();
+        document.querySelector('.ss-mobile-bottom-nav a[href="/more"]').click();
+    })()`);
+    await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '/more' && !document.querySelector('#main-content').hasAttribute('aria-busy')`);
+    const documentRequests = requests.slice(routeRequestStart).filter(request => request.type === 'Document');
+    assert.equal(documentRequests.length, 0, 'Tab changes must not request another HTML document');
+    assert.equal(await evaluate(`window.__originalHeader === document.querySelector('.ss-header-actions')`), true);
+    assert.equal(await evaluate(`document.querySelector('#main-content').inert`), false);
+    // Account pages must still execute under static SSR for authentication cookies.
+    await evaluate(`document.querySelector('form[action="/Account/Logout"]').requestSubmit()`);
+    await wait(`!!document.querySelector('#login-identifier')`);
     assert.equal(errors.length, 0, JSON.stringify(errors));
-    console.log(JSON.stringify({ passed:true, reloadHeaderFrames:headerFrames.length, cssCache, delayedNavigation:pendingState, frames:frames.length, mismatches:mismatches.length, sizes }));
+    console.log(JSON.stringify({ passed:true, reloadHeaderFrames:headerFrames.length, cssCache, routeDocumentRequests:documentRequests.length, routeTimings, frames:frames.length, mismatches:mismatches.length, sizes }));
 } finally {
     await call('Target.disposeBrowserContext', { browserContextId });
     ws.close();

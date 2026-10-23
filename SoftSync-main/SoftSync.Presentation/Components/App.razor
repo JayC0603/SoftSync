@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="@VersionedAsset("css/design-system.css")" />
     <script src="@VersionedAsset("js/design-system.js")"></script>
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="PageRenderMode" />
     <link rel="stylesheet" href="@VersionedAsset("css/vivid-theme.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/about-landing.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/dashboard-reference.css")" />
@@ -123,7 +123,7 @@
         <p></p>
         <button type="button" onclick="location.reload()">@(ServerLanguage == "en" ? "Reload page" : "Tải lại trang")</button>
     </div>
-    <Routes />
+    <Routes @rendermode="PageRenderMode" />
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script src="@VersionedAsset("js/page-navigation.js")"></script>
     <script src="@VersionedAsset("js/blazor-start.js")"></script>
@@ -133,6 +133,12 @@
 </html>
 
 @code {
+    // Keep the router and layout alive between application pages. Account
+    // endpoints retain static SSR so sign-in/out can write response cookies.
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    private IComponentRenderMode? PageRenderMode =>
+        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string,
         (DateTimeOffset Modified, long Length, string Url)> AssetVersions = new();
 

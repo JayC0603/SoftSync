@@ -4,7 +4,7 @@
 @inject LocalizationService L
 @inject AuthenticationStateProvider AuthProvider
 
-@* Sidebar navigation shares localization with HeaderActions. MainLayout remains static SSR. *@
+@* Sidebar navigation shares localization with HeaderActions and stays mounted while the router changes pages. *@
 
 <nav id="ss-main-sidebar" class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center" aria-label="@(L.Current == AppLanguage.Vi ? "Điều hướng chính" : "Main navigation")">
     <!-- Brand -->
