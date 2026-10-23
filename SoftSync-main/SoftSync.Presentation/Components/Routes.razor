@@ -1,5 +1,8 @@
 @using SoftSync.Presentation.Components.Layout
 @using Microsoft.AspNetCore.Components.Authorization
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject ViewportState Viewport
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
@@ -10,3 +13,38 @@
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>
+
+@code {
+    private DotNetObjectReference<Routes>? viewportReference;
+    private int? viewportSubscription;
+    private bool disposed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Observe even on routes without DesktopVariant, so a resize on More,
+        // Settings or a public page cannot leave the next route with stale state.
+        viewportReference = DotNetObjectReference.Create(this);
+        viewportSubscription = await JS.InvokeAsync<int>("ssDesktopVariant.subscribe", viewportReference, Viewport.IsDesktop);
+        if (disposed && viewportSubscription is int id)
+            await JS.InvokeVoidAsync("ssDesktopVariant.unsubscribe", id);
+    }
+
+    [JSInvokable]
+    public void SetDesktop(bool desktop)
+    {
+        if (!disposed) Viewport.IsDesktop = desktop;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (viewportSubscription is int id)
+                await JS.InvokeVoidAsync("ssDesktopVariant.unsubscribe", id);
+        }
+        catch (JSDisconnectedException) { }
+        viewportReference?.Dispose();
+    }
+}

@@ -142,9 +142,15 @@ try {
     const routeTimings = [];
     for (const path of ['/progress','/roadmap','/dashboard','/cv','/more']) {
         const started = performance.now();
-        await evaluate(`document.querySelector('.ss-mobile-bottom-nav a[href="${path}"]').click()`);
+        const feedback = await evaluate(`(() => {
+            const started = performance.now();
+            document.querySelector('.ss-mobile-bottom-nav a[href="${path}"]').click();
+            return { elapsedMs:performance.now()-started, pending:document.documentElement.hasAttribute('data-navigation-pending') };
+        })()`);
+        assert.equal(feedback.pending, true, 'Click must receive feedback before waiting for the server');
         await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '${path}' && document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href') === '${path}'`);
-        routeTimings.push({ path, elapsedMs:Math.round(performance.now() - started) });
+        assert.equal(await evaluate(`document.documentElement.hasAttribute('data-navigation-pending')`), false);
+        routeTimings.push({ path, elapsedMs:Math.round(performance.now() - started), feedbackMs:feedback.elapsedMs });
     }
     await send('Page.navigateToHistoryEntry', { entryId:(await send('Page.getNavigationHistory')).entries.at(-2).id });
     await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '/cv'`);
@@ -157,11 +163,39 @@ try {
     assert.equal(documentRequests.length, 0, 'Tab changes must not request another HTML document');
     assert.equal(await evaluate(`window.__originalHeader === document.querySelector('.ss-header-actions')`), true);
     assert.equal(await evaluate(`document.querySelector('#main-content').inert`), false);
+    // Returning to Home on desktop must not initialize the mobile dashboard first.
+    await send('Emulation.setDeviceMetricsOverride', { width:1440,height:900,deviceScaleFactor:1,mobile:false });
+    await pause(300);
+    await evaluate(`(() => {
+        window.__mobileDashboardMounts = 0;
+        window.__dashboardObserver = new MutationObserver(records => {
+            for (const record of records) for (const node of record.addedNodes) {
+                if (node.nodeType === 1 && (node.matches('.mobile-home') || node.querySelector('.mobile-home')))
+                    window.__mobileDashboardMounts++;
+            }
+        });
+        __dashboardObserver.observe(document.querySelector('#main-content'), {childList:true,subtree:true});
+        document.querySelector('.ss-mobile-bottom-nav a[href="/dashboard"]').click();
+    })()`);
+    await wait(`!!document.querySelector('.home-v2 .continue-card')`);
+    const desktopMobileMounts = await evaluate(`window.__mobileDashboardMounts`);
+    assert.equal(desktopMobileMounts, 0, 'Desktop navigation must not mount/query the mobile dashboard');
+    await evaluate(`window.__dashboardObserver.disconnect()`);
     // Account pages must still execute under static SSR for authentication cookies.
     await evaluate(`document.querySelector('form[action="/Account/Logout"]').requestSubmit()`);
     await wait(`!!document.querySelector('#login-identifier')`);
+    await send('Page.navigate', {url:`${app}/`});
+    await wait(`document.readyState === 'complete' && !!document.querySelector('.lp-landing')`);
+    await pause(500);
+    const publicFeedback = await evaluate(`(() => {
+        document.querySelector('.ss-public-links a[href="/mentors"]').click();
+        return document.documentElement.hasAttribute('data-navigation-pending');
+    })()`);
+    assert.equal(publicFeedback, true);
+    await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '/mentors' && !!document.querySelector('.mentor-list')`);
+    assert.equal(await evaluate(`document.documentElement.hasAttribute('data-navigation-pending')`), false, 'Public route feedback must also clear');
     assert.equal(errors.length, 0, JSON.stringify(errors));
-    console.log(JSON.stringify({ passed:true, reloadHeaderFrames:headerFrames.length, cssCache, routeDocumentRequests:documentRequests.length, routeTimings, frames:frames.length, mismatches:mismatches.length, sizes }));
+    console.log(JSON.stringify({ passed:true, reloadHeaderFrames:headerFrames.length, cssCache, routeDocumentRequests:documentRequests.length, routeTimings, desktopMobileMounts, frames:frames.length, mismatches:mismatches.length, sizes }));
 } finally {
     await call('Target.disposeBrowserContext', { browserContextId });
     ws.close();

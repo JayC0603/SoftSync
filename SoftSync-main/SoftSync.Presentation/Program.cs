@@ -62,6 +62,8 @@ builder.Services.AddCors(options =>
 
 // UI localization (EN/VI). Seed each circuit from the cookie so SSR and the
 // interactive render always use the same language.
+builder.Services.AddScoped<ViewportState>(services => new(
+    services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request.Cookies["ss-viewport"] == "desktop"));
 builder.Services.AddScoped<LocalizationService>(services =>
 {
     var request = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request;

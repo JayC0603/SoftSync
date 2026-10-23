@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject NavigationManager Navigation
 
 @if (IsLanding)
 {
@@ -20,7 +21,7 @@ else
     private RenderFragment PublicContent => @<div class="ss-public-site @(IsLanding ? "ss-reference-home" : null)">
     <a class="ss-skip-link" href="#main-content"><LocalizedText Text="Skip to main content" /></a>
     <PublicNavigation />
-    <main id="main-content" tabindex="-1" class="ss-public-content">
+    <main id="main-content" data-page-route="@(new Uri(Navigation.Uri).AbsolutePath)" tabindex="-1" class="ss-public-content">
         @Body
     </main>
     <AppFooter />

@@ -2,11 +2,12 @@
     if (window.ssPageNavigationBound) return;
     window.ssPageNavigationBound = true;
     var pending = null;
+    var stalledTimer = null;
     var links = '.ss-mobile-bottom-nav a, .ss-navpills a';
     function syncLinks() {
         var main = document.getElementById('main-content');
         if (!main) return;
-        var path = main.dataset.pageRoute;
+        var path = main.dataset.pageRoute || location.pathname;
         document.querySelectorAll(links).forEach(function (link) {
             var href = new URL(link.href, location.href).pathname;
             var current = path === href || (href !== '/' && path.startsWith(href.replace(/\/$/, '') + '/'));
@@ -27,7 +28,10 @@
     window.addEventListener('pageshow', clear);
 
     function clear() {
+        clearTimeout(stalledTimer);
+        stalledTimer = null;
         pending = null;
+        document.documentElement.removeAttribute('data-navigation-pending');
         var main = document.getElementById('main-content');
         if (main) { main.removeAttribute('aria-busy'); main.inert = false; }
         var status = document.getElementById('ss-navigation-status');
@@ -44,11 +48,15 @@
     }
     document.addEventListener('click', function (event) {
         if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        var link = event.target.closest('.ss-mobile-bottom-nav a, .ss-navpills a');
+        var link = event.target.closest('a[href]');
         if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+        if (link.closest('[data-enhance-nav="false"]')) return;
         var url = new URL(link.href, location.href);
         var main = document.getElementById('main-content');
-        if (!main || url.origin !== location.origin) return;
+        if (!main || url.origin !== location.origin || !/^https?:$/.test(url.protocol)) return;
+        if (url.pathname === location.pathname && url.search === location.search && url.hash) return;
+        // Preserve native authentication, downloads and non-page endpoints.
+        if (/^\/(Account|api|_framework|_blazor)(\/|$)/i.test(url.pathname)) return;
         // Re-selecting the current tab should not fetch and rebuild the page.
         if (url.pathname === main.dataset.pageRoute && url.search === location.search && !url.hash) {
             event.preventDefault();
@@ -57,10 +65,11 @@
         clear();
         var request = { path: url.pathname };
         pending = request;
+        document.documentElement.setAttribute('data-navigation-pending', 'true');
         main.setAttribute('aria-busy', 'true');
         link.setAttribute('data-navigation-pending', 'true');
         // Keep the shell usable. Normal route changes need no blocking banner.
-        setTimeout(function () {
+        stalledTimer = setTimeout(function () {
             if (pending !== request) return;
             // Leave a native escape route if a request stalls or the network drops.
             if (main.isConnected) { main.inert = false; main.removeAttribute('aria-busy'); }

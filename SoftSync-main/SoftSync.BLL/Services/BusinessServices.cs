@@ -430,9 +430,10 @@ public class RoadmapService : IRoadmapService
             throw new UnauthorizedAccessException("Roadmaps can only be read by their owner.");
 
         var userId = ownerUserId;
-        var focusSkills = await GetFocusSkillNamesAsync(userId);
+        var storedAssessments = (await _assessmentRepo.GetResultsByUserIdAsync(userId)).ToList();
+        var focusSkills = await GetFocusSkillNamesAsync(userId, storedAssessments);
         var learner = await _userRepo.GetByIdAsync(userId);
-        var assessmentResults = (await _assessmentRepo.GetResultsByUserIdAsync(userId))
+        var assessmentResults = storedAssessments
             .Where(result => QuizSeedData.ActiveSkillIds.Contains(result.SkillId))
             .GroupBy(result => result.SkillId)
             .Select(group => group.First())
@@ -704,10 +705,10 @@ public class RoadmapService : IRoadmapService
     ///  3. All active skills, as a last resort.
     /// Only real skill names from the DB are returned — no external data.
     /// </summary>
-    private async Task<List<string>> GetFocusSkillNamesAsync(int userId)
+    private async Task<List<string>> GetFocusSkillNamesAsync(int userId, IEnumerable<AssessmentResult>? storedAssessments = null)
     {
         // 1. From assessment results (active skills only), weakest first.
-        var results = await _assessmentRepo.GetResultsByUserIdAsync(userId);
+        var results = storedAssessments ?? await _assessmentRepo.GetResultsByUserIdAsync(userId);
         var byScore = results
             .Where(r => QuizSeedData.ActiveSkillIds.Contains(r.SkillId))
             .GroupBy(r => r.SkillId)

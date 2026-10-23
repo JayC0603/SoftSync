@@ -1,5 +1,6 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject ViewportState Viewport
 
 @if (desktop)
 {
@@ -16,17 +17,24 @@ else
     private bool desktop;
     private int? subscription;
     private DotNetObjectReference<DesktopVariant>? reference;
+    private bool disposed;
+
+    protected override void OnInitialized() => desktop = Viewport.IsDesktop;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
         reference = DotNetObjectReference.Create(this);
-        subscription = await JS.InvokeAsync<int>("ssDesktopVariant.subscribe", reference);
+        subscription = await JS.InvokeAsync<int>("ssDesktopVariant.subscribe", reference, desktop);
+        if (disposed && subscription is int id)
+            await JS.InvokeVoidAsync("ssDesktopVariant.unsubscribe", id);
     }
 
     [JSInvokable]
     public Task SetDesktop(bool value)
     {
+        if (disposed) return Task.CompletedTask;
+        Viewport.IsDesktop = value;
         if (desktop == value) return Task.CompletedTask;
         desktop = value;
         return InvokeAsync(StateHasChanged);
@@ -34,6 +42,7 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        disposed = true;
         try
         {
             if (subscription is int id) await JS.InvokeVoidAsync("ssDesktopVariant.unsubscribe", id);
