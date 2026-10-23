@@ -1,0 +1,122 @@
+/* Mentor content only; the shared navigation and footer keep their own styles. */
+html body .ss-public-content:has(> .mentor-reference) { background: linear-gradient(155deg, #fcfdff, #f1f8ff); }
+.mentor-reference {
+    --mentor-ink: #0b164d;
+    --mentor-muted: #63749a;
+    --mentor-blue: #0878ff;
+    --mentor-line: #d6e7ff;
+    --mentor-surface: #fff;
+    --mentor-soft: #e8f3ff;
+    width: min(1080px, 100%);
+    padding: 26px 24px 48px;
+    color: var(--mentor-ink);
+}
+.mentor-reference, .mentor-reference * { box-sizing: border-box; }
+.mentor-reference .eco-page-head { max-width: 720px; padding: 0 0 18px; }
+.mentor-reference .eco-page-head h1 { margin: 0 0 7px; color: var(--mentor-ink); font-size: clamp(1.9rem, 4.3vw, 2.6rem); font-weight: 800; line-height: 1.2; letter-spacing: -.035em; }
+.mentor-reference .eco-page-head p { margin: 0; color: var(--mentor-muted); font-size: 1.05rem; line-height: 1.55; }
+.mentor-reference .eco-search { display: flex; gap: 14px; margin: 0 0 16px; padding: 0 16px; min-height: 50px; border: 1px solid var(--mentor-line); border-radius: 16px; background: var(--mentor-surface); box-shadow: 0 3px 9px #367dcb08; }
+.mentor-reference .eco-search > i { color: #28467e; font-size: 20px; }
+.mentor-reference .eco-search input { width: 100%; min-width: 0; min-height: 48px; padding: 0; color: var(--mentor-ink); font: inherit; font-size: .95rem; }
+.mentor-reference .eco-search input::placeholder { color: #919bb1; opacity: 1; }
+.mentor-reference .eco-search:focus-within { border-color: var(--mentor-blue); box-shadow: 0 0 0 3px #0878ff18; }
+.mentor-reference .mentor-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mentor-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.mentor-filters button { flex: 0 0 auto; min-height: 36px; padding: 7px 15px; border: 1px solid var(--mentor-line); border-radius: 999px; background: #eff7ff; color: #405b8b; font: inherit; font-size: .85rem; line-height: 1.3; cursor: pointer; }
+.mentor-filters button.is-active { border-color: transparent; background: linear-gradient(150deg, #409cff, #0065e6); color: #fff; font-weight: 700; box-shadow: 0 3px 8px #0878ff18; }
+.mentor-filters button:hover { border-color: var(--mentor-blue); }
+.mentor-reference :is(a, button, input, textarea, select):focus-visible { outline: 3px solid #1684ff; outline-offset: 3px; }
+.mentor-reference .mentor-list { display: grid; gap: 14px; overflow: visible; border: 0; border-radius: 0; background: transparent; }
+.mentor-reference .mentor-row { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: start; gap: 9px 14px; padding: 14px; border: 1px solid #eaf3ff; border-radius: 20px; background: var(--mentor-surface); box-shadow: 0 5px 22px #3181df0a; }
+.mentor-reference .mentor-row:last-child { border: 1px solid #eaf3ff; }
+.mentor-reference .mentor-row img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; background: #d5ebff; }
+.mentor-reference .mentor-row > div { min-width: 0; }
+.mentor-reference .mentor-row h2 { margin: 2px 0 5px; color: var(--mentor-ink); font-size: 1.15rem; font-weight: 750; line-height: 1.3; letter-spacing: -.025em; text-wrap: balance; }
+.mentor-reference .mentor-row strong, .mentor-reference .mentor-profile-main header strong { display: inline-block; max-width: 100%; margin: 0; padding: 4px 12px; border-radius: 999px; background: #e2efff; color: #0070f4; font-size: .79rem; font-weight: 600; line-height: 1.25; }
+.mentor-reference .mentor-row p { margin: 7px 0 0; color: var(--mentor-muted); font-size: .85rem; line-height: 1.45; }
+.mentor-reference .mentor-row > a { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; min-height: 34px; padding: 6px 12px; border-radius: 11px; background: #e4f1ff; color: #0070f4; font-size: .85rem; font-weight: 700; text-decoration: none; }
+.mentor-reference .mentor-row > a:hover { background: #d3e8ff; }
+.mentor-reference .eco-back { display: inline-flex; align-items: center; gap: 10px; min-height: 36px; margin: 0 0 12px; color: var(--mentor-muted); font-size: .95rem; font-weight: 650; text-decoration: none; }
+.mentor-reference .mentor-back i { color: var(--mentor-ink); }
+.mentor-reference .mentor-profile-grid { gap: 20px; grid-template-columns: minmax(0, 1fr) 350px; }
+.mentor-reference .mentor-profile-grid.mentor-profile-readonly { grid-template-columns: minmax(0, 1fr); }
+.mentor-reference .mentor-profile-main header { align-items: center; gap: 20px; padding: 12px 14px; border: 0; border-radius: 16px; background: linear-gradient(115deg, var(--mentor-soft), #eef6ff); }
+.mentor-reference .mentor-profile-main header img { flex: 0 0 auto; width: 104px; height: 104px; border-radius: 50%; object-fit: cover; background: #cde7ff; }
+.mentor-reference .mentor-profile-main header > div { min-width: 0; }
+.mentor-reference .mentor-profile-main header span { color: var(--mentor-blue); font-size: .72rem; font-weight: 750; letter-spacing: .075em; }
+.mentor-reference .mentor-profile-main h1 { margin: 9px 0 7px; color: var(--mentor-ink); font-size: clamp(1.35rem, 2.5vw, 1.8rem); font-weight: 800; line-height: 1.25; letter-spacing: -.025em; }
+.mentor-reference .mentor-profile-main section { padding: 17px 0 14px; border-bottom: 1px solid var(--mentor-line); }
+.mentor-reference .mentor-profile-main section h2, .mentor-reference .mentor-request h2 { margin: 0 0 7px; color: var(--mentor-ink); font-size: 1.3rem; font-weight: 750; line-height: 1.3; letter-spacing: -.025em; }
+.mentor-reference .mentor-profile-main section p { margin: 0 0 12px; color: var(--mentor-muted); font-size: .98rem; line-height: 1.5; }
+.mentor-reference .mentor-profile-main section p:last-child { margin-bottom: 0; }
+.mentor-reference .mentor-profile-main .mentor-process { padding: 13px 0 0; border-bottom: 0; }
+.mentor-reference .mentor-process ol { gap: 0; margin: 7px 0 0; }
+.mentor-reference .mentor-process li { position: relative; align-items: flex-start; gap: 16px; min-height: 58px; padding: 0 0 13px; }
+.mentor-reference .mentor-process li:not(:last-child)::before { content: ''; position: absolute; top: 37px; bottom: 0; left: 20px; width: 3px; background: var(--mentor-line); }
+.mentor-reference .mentor-process li > span { width: 42px; height: 42px; border: 0; background: linear-gradient(145deg, #e7f3ff, #cfe5ff); color: var(--mentor-blue); font-size: 1.2rem; }
+.mentor-reference .mentor-process h3 { margin: 2px 0 3px; color: var(--mentor-ink); font-size: .92rem; font-weight: 750; line-height: 1.4; }
+.mentor-reference .mentor-process li p { margin: 0; font-size: .84rem; line-height: 1.45; }
+.mentor-reference .mentor-request { top: 96px; padding: 16px; border: 1px solid var(--mentor-line); border-radius: 16px; background: linear-gradient(135deg, #e9f4ff, #e2efff); box-shadow: 0 4px 14px #2678d50a; }
+.mentor-reference .mentor-request > p { margin: 0 0 8px; color: var(--mentor-muted); font-size: .85rem; line-height: 1.5; }
+.mentor-reference .eco-inline-note { align-items: center; gap: 10px; margin: 7px 0; padding: 6px 12px; border: 1px solid var(--mentor-line); border-radius: 11px; background: #ffffffc9; color: var(--mentor-muted); font-size: .82rem; }
+.mentor-reference .eco-inline-note i { color: #24497e; }
+.mentor-reference .eco-primary { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 10px 18px; border: 1px solid #1684ff; border-radius: 999px; background: linear-gradient(165deg, #328fff, #0062d8); color: #fff; font: inherit; font-size: .9rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px #147ee91a; cursor: pointer; }
+.mentor-reference .eco-primary:disabled { opacity: .65; cursor: wait; }
+.mentor-reference .eco-field :is(input, textarea, select) { background: var(--mentor-surface); color: var(--mentor-ink); border-color: var(--mentor-line); }
+.mentor-reference .eco-field small, .mentor-reference .eco-check { color: var(--mentor-muted); }
+.mentor-reference .eco-state { border-color: var(--mentor-line); background: var(--mentor-surface); color: var(--mentor-ink); }
+/* The shared theme uses important rules; override them only inside these pages. */
+html body .ss-public-content .mentor-reference .mentor-list { border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+html body .ss-public-content .mentor-reference .eco-search { border: 1px solid var(--mentor-line) !important; border-radius: 16px !important; background: var(--mentor-surface) !important; box-shadow: 0 3px 9px #367dcb08 !important; }
+html body .ss-public-content .mentor-reference .mentor-request { border: 1px solid var(--mentor-line) !important; border-radius: 16px !important; background: linear-gradient(135deg, var(--mentor-soft), var(--mentor-surface)) !important; box-shadow: 0 4px 14px #2678d50a !important; }
+html body .ss-public-content .mentor-reference .eco-primary { border-color: #1684ff !important; border-radius: 999px !important; background: linear-gradient(165deg, #328fff, #0062d8) !important; }
+html body .ss-public-content .mentor-reference .eco-primary:hover { background: #0062d8 !important; }
+html body .ss-public-content .mentor-reference .eco-page-head h1 { font-size: clamp(1.9rem, 4.3vw, 2.6rem) !important; font-weight: 800 !important; }
+html body .ss-public-content .mentor-reference .eco-page-head p { font-size: 1.05rem !important; line-height: 1.55; }
+html body .ss-public-content .mentor-reference .mentor-row h2 { font-size: 1.15rem !important; font-weight: 750 !important; }
+html body .ss-public-content .mentor-reference .mentor-row p { font-size: .85rem !important; line-height: 1.45; }
+html body .ss-public-content .mentor-reference .mentor-profile-main h1 { font-size: clamp(1.35rem, 2.5vw, 1.8rem) !important; font-weight: 800 !important; }
+html body .ss-public-content .mentor-reference :is(.mentor-profile-main section h2, .mentor-request h2) { font-size: 1.3rem !important; font-weight: 750 !important; }
+html body .ss-public-content .mentor-reference .mentor-profile-main section p { font-size: .98rem !important; line-height: 1.5; }
+html body .ss-public-content .mentor-reference .mentor-process h3 { font-size: .92rem !important; font-weight: 750 !important; }
+html body .ss-public-content .mentor-reference .mentor-process li p, html body .ss-public-content .mentor-reference .mentor-request > p { font-size: .85rem !important; line-height: 1.5; }
+html body .ss-public-content .mentor-reference .mentor-filters button { font-size: .85rem; line-height: 1.3; }
+html[data-theme='dark'] .mentor-reference { --mentor-ink: #e6efff; --mentor-muted: #aebfda; --mentor-line: #29415f; --mentor-surface: #142238; --mentor-soft: #192f4b; }
+html[data-theme='dark'] body .ss-public-content:has(> .mentor-reference) { background: #101c2e; }
+html[data-theme='dark'] .mentor-reference .mentor-list { background: transparent; }
+html[data-theme='dark'] .mentor-reference :is(.mentor-row, .mentor-row:last-child) { border-color: var(--mentor-line); }
+html[data-theme='dark'] .mentor-reference :is(.mentor-profile-main header, .mentor-request) { background: linear-gradient(135deg, #192f4b, #142238); }
+html[data-theme='dark'] .mentor-reference :is(.mentor-filters button:not(.is-active), .mentor-row strong, .mentor-profile-main header strong, .mentor-row > a, .mentor-process li > span, .eco-inline-note) { background: #203c5d; color: #9acbff; }
+html[data-theme='dark'] .mentor-reference .eco-search > i { color: #9acbff; }
+@media (min-width: 901px) {
+    .mentor-directory .mentor-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mentor-directory .mentor-row { grid-template-columns: 1fr; gap: 14px; padding: 22px; }
+    .mentor-directory .mentor-row > a { align-self: end; margin-top: 4px; }
+    .mentor-directory .mentor-row h2 { font-size: 1.2rem; }
+    .mentor-directory .mentor-row p { font-size: .94rem; }
+}
+@media (max-width: 900px) {
+    .mentor-reference .mentor-profile-grid { grid-template-columns: 1fr; gap: 0; }
+    .mentor-reference .mentor-request { position: static; margin-top: 1px; }
+}
+@media (max-width: 600px) {
+    .mentor-reference { padding: 0 0 4px; }
+    html body .ss-public-content .mentor-reference .eco-page-head h1 { font-size: clamp(1.65rem, 7.6vw, 2.1rem) !important; }
+    html body .ss-public-content .mentor-reference .mentor-filters button { font-size: .77rem; line-height: 1.3; }
+    .mentor-reference .eco-page-head h1 { font-size: clamp(1.65rem, 7.6vw, 2.1rem); }
+    .mentor-reference .eco-page-head p { font-size: 1rem; }
+    .mentor-filters { flex-wrap: wrap; gap: 5px; }
+    .mentor-filters button { padding: 7px; font-size: .77rem; }
+    .mentor-reference .mentor-row { gap: 8px 13px; padding: 12px 14px; }
+    .mentor-reference .mentor-row h2 { font-size: 1.13rem; }
+    .mentor-reference .mentor-profile-main header { gap: 18px; }
+    .mentor-reference .mentor-profile-main header img { width: 100px; height: 100px; }
+    .mentor-reference .mentor-profile-main h1 { font-size: 1.4rem; }
+}
+@media (max-width: 374px) {
+    .mentor-filters { flex-wrap: wrap; }
+    .mentor-reference .mentor-row { grid-template-columns: 72px minmax(0, 1fr); gap: 9px; }
+    .mentor-reference .mentor-row img { width: 72px; height: 72px; }
+    .mentor-reference .mentor-profile-main header { gap: 12px; }
+    .mentor-reference .mentor-profile-main header img { width: 80px; height: 80px; }
+}
