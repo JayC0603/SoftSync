@@ -11,6 +11,11 @@
         document.querySelectorAll(links).forEach(function (link) {
             var href = new URL(link.href, location.href).pathname;
             var current = path === href || (href !== '/' && path.startsWith(href.replace(/\/$/, '') + '/'));
+            if (!current && link.dataset.routeRoots) {
+                current = link.dataset.routeRoots.split(' ').some(function (root) {
+                    return path === root || path.startsWith(root + '/');
+                });
+            }
             if (link.classList.contains('active') !== current) link.classList.toggle('active', current);
             if (current && link.getAttribute('aria-current') !== 'page') link.setAttribute('aria-current', 'page');
             else if (!current && link.hasAttribute('aria-current')) link.removeAttribute('aria-current');

@@ -1,5 +1,7 @@
 @page "/game"
-@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
 @rendermode InteractiveServer
 @using SoftSync.Presentation.Components.Variants
+<AuthorizeView Policy="@SoftSync.BLL.Auth.CourseAuthorization.UserPolicy"><Authorized>
 <DesktopVariant><Desktop><DesktopGame  /></Desktop><Mobile><MobileGame  /></Mobile></DesktopVariant>
+
+</Authorized><NotAuthorized><MiniGameDirectory /></NotAuthorized></AuthorizeView>

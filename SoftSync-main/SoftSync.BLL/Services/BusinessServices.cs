@@ -431,8 +431,11 @@ public class RoadmapService : IRoadmapService
 
         var userId = ownerUserId;
         var storedAssessments = (await _assessmentRepo.GetResultsByUserIdAsync(userId)).ToList();
-        var focusSkills = await GetFocusSkillNamesAsync(userId, storedAssessments);
         var learner = await _userRepo.GetByIdAsync(userId);
+        if (learner?.Role == UserRole.Student
+            && !storedAssessments.Any(result => QuizSeedData.ActiveSkillIds.Contains(result.SkillId)))
+            throw new UnauthorizedAccessException("Complete the initial assessment before accessing a personalized roadmap.");
+        var focusSkills = await GetFocusSkillNamesAsync(userId, storedAssessments);
         var assessmentResults = storedAssessments
             .Where(result => QuizSeedData.ActiveSkillIds.Contains(result.SkillId))
             .GroupBy(result => result.SkillId)

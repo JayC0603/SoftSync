@@ -1,80 +1,46 @@
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @inject IJSRuntime JS
-@inject NavigationManager Navigation
 
-<header class="ss-public-header">
+<header class="ss-public-header ss-unified-public-header">
     <a class="ss-public-brand" href="/" aria-label="SoftSync"><img src="/images/logo.png" alt="" width="36" height="36" /><strong>SoftSync</strong></a>
     <nav class="ss-public-links" aria-label="@Tx("Main navigation", "Điều hướng chính")">
-        <NavLink href="/" Match="NavLinkMatch.All">@L["nav.home"]</NavLink>
-        <NavLink href="/about">@Tx("About", "Giới thiệu")</NavLink>
-        <NavLink href="/mentors">@Ui("Mentors")</NavLink>
-        <NavLink href="/community">@Tx("Community", "Cộng đồng")</NavLink>
-        <NavLink href="/cv">@Tx("Smart CV", "CV thông minh")</NavLink>
+        <NavLink href="/" Match="NavLinkMatch.All">@L["nav.home"]</NavLink><NavLink href="/about">@Tx("About", "Giới thiệu")</NavLink><NavLink href="/mentors">Mentor</NavLink><NavLink href="/community">@Tx("Community", "Cộng đồng")</NavLink>
     </nav>
     <div class="ss-public-actions">
-        @if (IsLanding)
-        {
-            <div class="ss-public-language-switch" role="group" aria-label="@L["layout.languageMenu"]"><button type="button" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguage(AppLanguage.Vi)">VI</button><span aria-hidden="true">|</span><button type="button" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguage(AppLanguage.En)">EN</button></div>
-        }
-        else
-        {
-            <button type="button" class="ss-shell-control ss-public-language" @onclick="ToggleLanguage" aria-label="@Tx("Switch to Vietnamese", "Chuyển sang tiếng Anh")">@(L.Current == AppLanguage.Vi ? "VI" : "EN")</button>
-        }
+        <details class="ss-header-language ss-header-menu">
+            <summary class="ss-header-control ss-header-language-trigger" aria-label="@L["layout.languageMenu"]">
+                <img class="ss-language-flag" src="@(L.Current == AppLanguage.Vi ? "/images/flags/vi.svg" : "/images/flags/en.svg")" width="28" height="20" alt="@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")" />
+            </summary>
+            <div class="ss-header-dropdown">
+                <button type="button" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguage(AppLanguage.Vi)"><img src="/images/flags/vi.svg" width="28" height="20" alt="" />Tiếng Việt</button>
+                <button type="button" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguage(AppLanguage.En)"><img src="/images/flags/en.svg" width="28" height="20" alt="" />English</button>
+            </div>
+        </details>
         <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
-        <AuthorizeView><NotAuthorized><a class="ss-public-start" href="/Account/Register"><span>@Tx("Start for free", "Bắt đầu miễn phí")</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></NotAuthorized></AuthorizeView>
-        <AuthorizeView>
-            <Authorized>
-                <NotificationBell />
-                <details class="ss-header-profile ss-header-menu">
-                    <summary class="ss-header-control ss-public-account" aria-label="@L["layout.profileMenu"]"><i class="bi bi-person-circle" aria-hidden="true"></i><span>@L["settings.tab.account"]</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
-                    <div class="ss-header-dropdown ss-header-profile-dropdown">
-                        <div class="ss-header-menu-identity"><strong>@context.User.Identity?.Name</strong></div>
-                        <a href="/profile"><i class="bi bi-person-circle" aria-hidden="true"></i><span>@L["settings.tab.account"]</span><i class="bi bi-chevron-right ss-account-caret" aria-hidden="true"></i></a>
-                        <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i><span>@L["nav.settings"]</span><i class="bi bi-chevron-right ss-account-caret" aria-hidden="true"></i></a>
-                        <form action="/Account/Logout" method="post"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="Account/Login" /><button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>@L["nav.logout"]</button></form>
-                    </div>
-                </details>
-            </Authorized>
-            <NotAuthorized>
-                <details class="ss-header-profile ss-header-menu">
-                    <summary class="ss-header-control ss-public-account" aria-label="@L["layout.profileMenu"]"><i class="bi bi-person-circle" aria-hidden="true"></i><span>@L["nav.login"]</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
-                    <div class="ss-header-dropdown ss-header-profile-dropdown">
-                        <div class="ss-account-signin"><a href="/Account/Login">@Tx("Register / Sign in", "Đăng ký / Đăng nhập")</a></div>
-                        <a href="/profile"><i class="bi bi-person-circle" aria-hidden="true"></i><span>@L["settings.tab.account"]</span><i class="bi bi-chevron-right ss-account-caret" aria-hidden="true"></i></a>
-                        <a href="/settings"><i class="bi bi-gear" aria-hidden="true"></i><span>@L["nav.settings"]</span><i class="bi bi-chevron-right ss-account-caret" aria-hidden="true"></i></a>
-                    </div>
-                </details>
-            </NotAuthorized>
-        </AuthorizeView>
+        <a class="ss-public-start" href="/Account/Register"><span>@Tx("Start for free", "Bắt đầu miễn phí")</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        <button type="button" class="ss-shell-control ss-public-drawer-trigger" onclick="document.getElementById('ss-public-drawer').showModal()" aria-haspopup="dialog" aria-controls="ss-public-drawer" aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></button>
     </div>
-    @if (IsLanding)
-    {
-        <button type="button" class="ss-public-menu-placeholder" aria-label="Menu" aria-disabled="true"><i class="bi bi-list" aria-hidden="true"></i></button>
-    }
-    else
-    {
-    <details class="ss-public-mobile">
-        <summary aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></summary>
-        <nav aria-label="@Tx("Mobile navigation", "Điều hướng điện thoại")">
-            <a href="/">@L["nav.home"]</a><a href="/about">@Tx("About", "Giới thiệu")</a><a href="/mentors">@Ui("Mentors")</a><a href="/community">@Tx("Community", "Cộng đồng")</a><a href="/assistant">SYNCY</a>
-            <a href="/cv">@Tx("Smart CV", "CV thông minh")</a>
-            <a href="/Account/Login">@L["nav.login"]</a>
-            <button type="button" class="ss-public-language-menu" @onclick="ToggleLanguage">@Tx("Tiếng Việt", "English")</button>
-            <button type="button" onclick="window.ssDesign.toggleTheme()"><i class="bi bi-circle-half" aria-hidden="true"></i> @Tx("Light / dark mode", "Giao diện sáng / tối")</button>
-        </nav>
-    </details>
-    }
 </header>
+<dialog id="ss-public-drawer" class="ss-public-drawer" aria-labelledby="ss-public-drawer-title" onclick="if(event.target===this)this.close()">
+    <div class="ss-public-drawer-content">
+        <form method="dialog" class="ss-public-drawer-heading"><strong id="ss-public-drawer-title">SoftSync</strong><button class="ss-shell-control" aria-label="@Tx("Close navigation", "Đóng điều hướng")"><i class="bi bi-x-lg" aria-hidden="true"></i></button></form>
+        <nav aria-label="@Tx("Explore SoftSync", "Khám phá SoftSync")" onclick="if(event.target.closest('a'))document.getElementById('ss-public-drawer').close()">
+            <a href="/about">@Tx("About SoftSync", "Về SoftSync")</a>
+            <a href="/#learning-journey">@Tx("Growth journey", "Hành trình phát triển")</a>
+            <a href="/#features">@Tx("Key features", "Tính năng nổi bật")</a>
+            <a href="/mentors">@Tx("Mentors & community", "Mentor & Cộng đồng")</a>
+            <a href="/resources">@Tx("Learning resources", "Tài nguyên học tập")</a>
+            <span aria-disabled="true" title="TBD — URL">@Tx("Help", "Trợ giúp")</span>
+            <span aria-disabled="true" title="TBD — URL">@Tx("Contact", "Liên hệ")</span>
+            <span aria-disabled="true" title="TBD — URL">@Tx("Privacy policy", "Chính sách bảo mật")</span>
+        </nav>
+        <div class="ss-public-drawer-auth"><a href="/Account/Login">@L["nav.login"]</a><a href="/Account/Register">@Tx("Register", "Đăng ký")</a></div>
+    </div>
+</dialog>
 
 @code {
-    private bool IsLanding => new Uri(Navigation.Uri).AbsolutePath == "/";
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
-    private async Task ToggleLanguage()
-    {
-        var next = L.Current == AppLanguage.Vi ? AppLanguage.En : AppLanguage.Vi;
-        await SetLanguage(next);
-    }
     private async Task SetLanguage(AppLanguage next)
     {
         await JS.InvokeVoidAsync("ssLang.set", next == AppLanguage.Vi ? "vi" : "en");

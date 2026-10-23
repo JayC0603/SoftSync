@@ -1,0 +1,46 @@
+@inject LearnerAccessState Access
+@inject NavigationManager Navigation
+@inject LocalizationService L
+
+@if (!requiresAssessment || allowed)
+{
+    @ChildContent
+}
+else if (guest)
+{
+    <RedirectToLogin />
+}
+else if (Access.Status == AssessmentAccessStatus.Failed)
+{
+    <LayoutView Layout="@typeof(SoftSync.Presentation.Components.Layout.MainLayout)">
+        <div class="alert alert-warning" role="alert">
+            <h1>@(L.Current == AppLanguage.Vi ? "Chưa thể xác minh trạng thái học tập" : "Unable to verify learning access")</h1>
+            <p>@(L.Current == AppLanguage.Vi ? "Vui lòng tải lại để thử lại. Kết quả đã lưu của bạn không bị thay đổi." : "Please reload to retry. Your saved results have not changed.")</p>
+            <a href="@Navigation.Uri" data-enhance-nav="false">@(L.Current == AppLanguage.Vi ? "Thử lại" : "Retry")</a>
+        </div>
+    </LayoutView>
+}
+else
+{
+    <p role="status">@(L.Current == AppLanguage.Vi ? "Đang xác minh quyền truy cập…" : "Verifying access…")</p>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Path { get; set; } = "/";
+    private bool requiresAssessment, allowed, guest;
+    protected override async Task OnParametersSetAsync()
+    {
+        requiresAssessment = NavigationAccessRules.RequiresAssessment(Path);
+        allowed = false;
+        guest = false;
+        if (!requiresAssessment) return;
+        var requestedPath = Path;
+        await Access.LoadAsync();
+        if (!string.Equals(requestedPath, Path, StringComparison.OrdinalIgnoreCase)) return;
+        guest = !Access.IsAuthenticated;
+        allowed = Access.IsAuthenticated && (Access.IsStaff || Access.Status == AssessmentAccessStatus.Complete);
+        if (!guest && !allowed && Access.Status == AssessmentAccessStatus.Incomplete)
+            Navigation.NavigateTo(Access.ProfileComplete ? $"/assessment/{Access.UserId}" : "/profile-setup", replace: true);
+    }
+}

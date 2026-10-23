@@ -3,6 +3,7 @@
 @using SoftSync.Presentation.Services
 @inject LocalizationService L
 @inject AuthenticationStateProvider AuthProvider
+@inject LearnerAccessState Access
 
 @* Sidebar navigation shares localization with HeaderActions and stays mounted while the router changes pages. *@
 
@@ -52,6 +53,8 @@
 
 </nav>
 
+@if (NavigationAccessRules.ShowBottomNavigation(RenderedPath, Access.IsAuthenticated, Access.IsStaff, DockStatus))
+{
 <nav class="ss-mobile-bottom-nav" aria-label="@L.Ui("Mobile navigation")">
     @if (isAdmin)
     {
@@ -71,9 +74,10 @@
         <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
     </a>
     <a class="@LinkClass("ss-mobile-bottom-link", "/cv")" href="/cv" aria-current="@CurrentLink("/cv")"><i class="bi bi-file-earmark-person"></i><span>CV</span></a>
-    <a class="@LinkClass("ss-mobile-bottom-link", "/more")" href="/more" aria-current="@CurrentLink("/more")"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></a>
+    <a class="@LinkClass("ss-mobile-bottom-link", "/more")" href="/more" data-route-roots="@NavigationAccessRules.MoreRoutes" aria-current="@CurrentLink("/more")"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></a>
     }
 </nav>
+}
 
 <style>
     .ss-navbar {
@@ -413,7 +417,7 @@
     // Follow the page rendered by SSR, not the URL that changes before its
     // enhanced-navigation response arrives.
     [Parameter] public string RenderedPath { get; set; } = "/";
-    private bool IsCurrent(string href) => RenderedPath.Equals(href, StringComparison.OrdinalIgnoreCase)
+    private bool IsCurrent(string href) => (href == "/more" && NavigationAccessRules.IsMoreRoute(RenderedPath)) || RenderedPath.Equals(href, StringComparison.OrdinalIgnoreCase)
         || (href != "/" && RenderedPath.StartsWith(href.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase));
     private string LinkClass(string css, string href) => IsCurrent(href) ? css + " active" : css;
     private string? CurrentLink(string href) => IsCurrent(href) ? "page" : null;
@@ -421,14 +425,24 @@
     // Keep SSR destinations during hydration instead of briefly resetting Home to '/'.
     [PersistentState] public bool authenticated { get; set; }
     [PersistentState] public bool isAdmin { get; set; }
+    // Reuse this request's server-verified result while the same identity
+    // hydrates. Unknown/error/logout states never reuse an older account's UI.
+    [PersistentState] public int? VerifiedCompletedUser { get; set; }
+    private AssessmentAccessStatus DockStatus => Access.Status == AssessmentAccessStatus.Loading
+        && VerifiedCompletedUser == Access.UserId ? AssessmentAccessStatus.Complete : Access.Status;
     private string HomeHref => isAdmin ? "/admin/users" : authenticated ? "/dashboard" : "/";
-    protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
+    protected override void OnInitialized() { L.OnChanged += StateHasChangedSafe; Access.Changed += StateHasChangedSafe; }
     protected override async Task OnInitializedAsync()
     {
         var principal = (await AuthProvider.GetAuthenticationStateAsync()).User;
         authenticated = principal.Identity?.IsAuthenticated == true;
         isAdmin = principal.IsInRole("Admin");
     }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Access.LoadAsync();
+        VerifiedCompletedUser = Access.Status == AssessmentAccessStatus.Complete ? Access.UserId : null;
+    }
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
-    public void Dispose() => L.OnChanged -= StateHasChangedSafe;
+    public void Dispose() { L.OnChanged -= StateHasChangedSafe; Access.Changed -= StateHasChangedSafe; }
 }

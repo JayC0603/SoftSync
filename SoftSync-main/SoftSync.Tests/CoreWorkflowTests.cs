@@ -1,4 +1,4 @@
-using SoftSync.BLL.Interfaces;
+﻿using SoftSync.BLL.Interfaces;
 using SoftSync.BLL.Auth;
 using SoftSync.BLL.Services;
 using SoftSync.Common;
@@ -709,7 +709,9 @@ public sealed class CoreWorkflowTests
     {
         var roadmaps = new RoadmapRepositoryStub { Item = new RoadmapItem { Id = 10, UserId = 1, WeekNumber = 1, SkillId = 1, Title = "Communication foundations" } };
         var ai = new RoadmapAiStub { Items = [new RoadmapItemDto { WeekNumber = 1, SkillId = 1, SkillName = "Communication", Title = "Communication foundations" }] };
-        var service = new RoadmapService(roadmaps, ai, new UserRepositoryStub(), AssessmentData.Create(1).Repository, new SkillRepositoryStub());
+        var assessments = AssessmentData.Create(1).Repository;
+        assessments.Results.Add(new AssessmentResult { UserId = 1, SkillId = 1, Skill = new Skill { Id = 1, Name = "Communication" }, Score = 20 });
+        var service = new RoadmapService(roadmaps, ai, new UserRepositoryStub(), assessments, new SkillRepositoryStub());
 
         var initial = await service.GetUserRoadmapAsync(1, 1);
         Assert.Equal(RoadmapActivityType.VideoLesson, initial.NextRecommendedActivity);

@@ -1,3 +1,4 @@
+@inject NavigationManager Navigation
 @using SoftSync.Presentation.Components.Layout
 @using Microsoft.AspNetCore.Components.Authorization
 @implements IAsyncDisposable
@@ -5,11 +6,13 @@
 @inject ViewportState Viewport
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
+        <LearnerRouteGate Path="@(new Uri(Navigation.Uri).AbsolutePath)">
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
             <NotAuthorized>
                 <RedirectToLogin />
             </NotAuthorized>
         </AuthorizeRouteView>
+        </LearnerRouteGate>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>

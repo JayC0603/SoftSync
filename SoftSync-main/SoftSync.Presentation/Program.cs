@@ -311,6 +311,7 @@ builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IGameBankService, GameBankService>();
 builder.Services.AddScoped<IdentityRoleManagementService>();
+builder.Services.AddScoped<LearnerAccessState>();
 
 // 5. HttpClient for future AI integration
 // Credentials are per-request headers, never defaults/URL. Reject redirects to other hosts.
