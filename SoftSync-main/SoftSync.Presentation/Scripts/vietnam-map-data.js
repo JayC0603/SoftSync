@@ -47,7 +47,7 @@ export function routeData(data) {
 export function baseStyle(dark) {
     return {
         version: 8,
-        sources: { landscape: { type: 'image', url: '/images/journey/vietnam-adventure-coast-v1.png',
+        sources: { landscape: { type: 'image', url: '/images/journey/vietnam-adventure-coast-v1.webp',
             coordinates: [[0,8],[12,8],[12,0],[0,0]] } },
         layers: [
             { id: 'land', type: 'background', paint: { 'background-color': dark ? '#162f40' : '#b6dced' } },
