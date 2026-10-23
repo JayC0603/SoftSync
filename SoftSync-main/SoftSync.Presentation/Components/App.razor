@@ -76,6 +76,7 @@
     <link rel="stylesheet" href="@VersionedAsset("css/progress-reference.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/navigation-glass.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-options.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/connection-notice.css")" />
     <script>
         // The server already renders data-theme on <html> from the ss-theme
         // cookie, so there's no flash and no revert on Blazor enhanced navigation.
@@ -116,6 +117,10 @@
 </head>
 
 <body>
+    <div id="ss-connection-notice" class="ss-connection-notice" role="status" aria-live="polite" hidden>
+        <p></p>
+        <button type="button" onclick="location.reload()">@(ServerLanguage == "en" ? "Reload page" : "Tải lại trang")</button>
+    </div>
     <Routes />
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script src="@VersionedAsset("js/blazor-start.js")"></script>

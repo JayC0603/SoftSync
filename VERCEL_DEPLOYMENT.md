@@ -39,8 +39,13 @@ Vercel closes WebSockets when a Function reaches its maximum duration. A new
 connection can reach a different instance; in-memory Blazor circuits cannot
 survive instance replacement or redeployment. These settings reduce negotiation
 failures and premature timeouts, but cannot remove that platform limit. A
-discarded circuit requires reloading; the application does not automatically
-reload and discard unsaved form input.
+discarded circuit requires a fresh page. The reconnect handler first tries to
+resume the old circuit. When a healthy server rejects it, read-only pages reload
+automatically once, with a one-minute guard against reload loops. Pages with
+edited fields or autofilled credentials keep their input and show a native
+reload button instead. Offline retries stop after three attempts, so the user
+is never trapped behind a permanent reconnect spinner. Returning to a visible
+tab or restoring the network retries a previously failed recovery.
 
 Validate the startup configuration with `node --test tests/blazor-start.test.mjs`.
 On a deployed page, the browser Network panel should show a WebSocket request
