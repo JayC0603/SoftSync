@@ -8,7 +8,7 @@
 @inject ILogger<CvCareerWorkspace> Logger
 @inject AuthenticationStateProvider Authentication
 
-<HeadContent><link rel="stylesheet" href="css/cv-career.css?v=20261022-compact4" /></HeadContent>
+@* Route styles load in App.razor before enhanced navigation inserts this content. *@
 <div class="career-cv">
 @if (screen == "home")
 {

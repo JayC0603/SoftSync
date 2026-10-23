@@ -1,11 +1,12 @@
 @inherits LayoutComponentBase
 @attribute [StreamRendering]
 @inject LocalizationService L
+@inject NavigationManager Navigation
 
 <div class="ss-desktop-integration"><AnimatedSoftSyncBackground /></div>
 <div class="page">
     <a class="ss-skip-link" href="#main-content"><LocalizedText Text="Skip to main content" /></a>
-    <NavBar />
+    <NavBar RenderedPath="@CurrentPath" />
     <WelcomeToast />
 
     <div class="ss-workspace">
@@ -18,7 +19,8 @@
             <HeaderActions />
         </header>
 
-        <main id="main-content" tabindex="-1" class="container tw:py-12 ss-main-content">
+        <div id="ss-navigation-status" class="ss-navigation-status" role="status" aria-live="polite" hidden><span></span><a hidden></a></div>
+        <main id="main-content" data-page-route="@CurrentPath" tabindex="-1" class="container tw:py-12 ss-main-content">
             @Body
         </main>
         <AppFooter />
@@ -26,3 +28,7 @@
 </div>
 
 <AppErrorNotice />
+
+@code {
+    private string CurrentPath => new Uri(Navigation.Uri).AbsolutePath;
+}

@@ -119,6 +119,9 @@
                 onConnectionUp: connectionUp
             }
         }
+    }).then(function () {
+        // Enhanced-navigation events are available after Blazor has started.
+        if (window.ssBindPageNavigation) window.ssBindPageNavigation();
     }).catch(function (error) {
         console.error('SoftSync could not start its interactive connection.', error);
         // Keep server-rendered links available and expose the existing retry UI.
