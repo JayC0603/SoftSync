@@ -40,7 +40,7 @@ try {
     };
     const wait = async expression => {
         for (let n = 0; n < 150; n++) {
-            if (await evaluate(expression)) return;
+            if (await evaluate(`Boolean(${expression})`)) return;
             await pause(100);
         }
         throw Error(`Timed out: ${expression}`);
@@ -58,6 +58,36 @@ try {
     })()`);
     await wait(`document.querySelector('main[data-page-route="/more"]') && !!document.querySelector('.ss-mobile-bottom-nav a.active')`);
     await pause(500);
+    const identity = await evaluate(`document.querySelector('.ss-header-user-info strong').textContent`);
+    // Sample the identity from first paint through hydration after a real reload.
+    await send('Page.addScriptToEvaluateOnNewDocument', { source: `
+        window.__headerFrames = [];
+        const until = performance.now() + 5000;
+        function sampleHeader() {
+            const avatar = document.querySelector('.ss-header-avatar');
+            if (avatar) {
+                const rect = avatar.getBoundingClientRect();
+                window.__headerFrames.push({ x:rect.x, y:rect.y, width:rect.width, height:rect.height,
+                    name:document.querySelector('.ss-header-user-info strong')?.textContent,
+                    image:avatar.querySelector('img')?.getAttribute('src') || null });
+            }
+            if (performance.now() < until) requestAnimationFrame(sampleHeader);
+        }
+        requestAnimationFrame(sampleHeader);
+    ` });
+    await send('Page.reload');
+    await wait(`document.querySelector('main[data-page-route="/more"]') && document.querySelector('.ss-header-language button:not(:disabled)')`);
+    await pause(1000);
+    const headerFrames = await evaluate('window.__headerFrames');
+    assert.ok(headerFrames.length > 0);
+    assert.ok(headerFrames.every(frame => frame.name === identity), JSON.stringify(headerFrames));
+    assert.equal(new Set(headerFrames.map(frame => JSON.stringify(frame))).size, 1, 'Avatar geometry and identity must survive hydration');
+    const cssCache = await evaluate(`fetch(document.querySelector('link[href*="page-navigation.css"]').href).then(response => response.headers.get('cache-control'))`);
+    assert.ok(cssCache.includes('immutable'), cssCache);
+    const sameRouteRequests = requests.length;
+    await evaluate(`document.querySelector('.ss-mobile-bottom-nav a[href="/more"]').click()`);
+    await pause(250);
+    assert.equal(requests.slice(sameRouteRequests).filter(request => new URL(request.request.url).pathname === '/more').length, 0, 'Current tab must not reload');
     assert.equal(await evaluate(`!!document.head.querySelector('link[href*="cv-career.css"]')`), true);
     let release;
     intercept = paused => { release = () => send('Fetch.continueRequest', { requestId: paused.requestId }); };
@@ -69,7 +99,11 @@ try {
             const main = document.querySelector('#main-content');
             const active = document.querySelector('.ss-mobile-bottom-nav a.active');
             const menu = document.querySelector('.career-menu');
-            window.__routeFrames.push({ rendered: main?.dataset.pageRoute, active: active?.getAttribute('href'), cvStyled: !menu || getComputedStyle(menu).display === 'grid' });
+            const avatar = document.querySelector('.ss-header-avatar');
+            const rect = avatar?.getBoundingClientRect();
+            window.__routeFrames.push({ rendered: main?.dataset.pageRoute, active: active?.getAttribute('href'), cvStyled: !menu || getComputedStyle(menu).display === 'grid',
+                avatar:rect ? {x:rect.x,y:rect.y,width:rect.width,height:rect.height} : null,
+                name:document.querySelector('.ss-header-user-info strong')?.textContent });
             if (performance.now() < until) requestAnimationFrame(sample);
         };
         sample();
@@ -80,6 +114,7 @@ try {
     await pause(500);
     const pendingState = await evaluate(`({ route:document.querySelector('#main-content').dataset.pageRoute, active:document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href'), busy:document.querySelector('#main-content').getAttribute('aria-busy'), statusHidden:document.querySelector('#ss-navigation-status').hidden })`);
     assert.deepEqual(pendingState, { route: '/more', active: '/more', busy: 'true', statusHidden: false });
+    assert.equal(await evaluate(`getComputedStyle(document.querySelector('#main-content')).opacity`), '1', 'Pending navigation must not flash the page');
     await release();
     await send('Fetch.disable');
     await wait(`document.querySelector('main[data-page-route="/cv"] .career-menu-card') && document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href') === '/cv'`);
@@ -87,6 +122,8 @@ try {
     const frames = await evaluate('window.__routeFrames');
     const mismatches = frames.filter(frame => frame.active !== frame.rendered || !frame.cvStyled);
     assert.equal(mismatches.length, 0, JSON.stringify(mismatches.slice(0, 5)));
+    assert.ok(frames.every(frame => frame.name === identity), 'Identity must remain visible during navigation');
+    assert.equal(new Set(frames.map(frame => JSON.stringify(frame.avatar))).size, 1, 'Avatar must not move during navigation');
     assert.equal(await evaluate(`document.querySelector('#ss-navigation-status').hidden`), true);
     const sizes = [];
     for (const width of [375, 390, 430, 1440]) {
@@ -116,7 +153,7 @@ try {
         await wait(`document.querySelector('#main-content')?.dataset.pageRoute === '${path}' && document.querySelector('.ss-mobile-bottom-nav a.active')?.getAttribute('href') === '${path}'`);
     }
     assert.equal(errors.length, 0, JSON.stringify(errors));
-    console.log(JSON.stringify({ passed:true, delayedNavigation:pendingState, frames:frames.length, mismatches:mismatches.length, sizes }));
+    console.log(JSON.stringify({ passed:true, reloadHeaderFrames:headerFrames.length, cssCache, delayedNavigation:pendingState, frames:frames.length, mismatches:mismatches.length, sizes }));
 } finally {
     await call('Target.disposeBrowserContext', { browserContextId });
     ws.close();

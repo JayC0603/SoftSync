@@ -30,7 +30,6 @@
 .ss-navigation-status span { flex:1; }
 .ss-navigation-status a { color:var(--ss-primary,#2169d9); }
 .ss-navigation-status a[hidden] { display:none; }
-.ss-main-content[aria-busy='true'] { opacity:.55; }
 .ss-mobile-bottom-link[data-navigation-pending], .ss-navpill[data-navigation-pending] { cursor:progress; }
 @keyframes ss-navigation-spin { to { transform:rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .ss-navigation-status::before { animation:none!important; } }

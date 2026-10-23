@@ -46,7 +46,12 @@
         if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
         var url = new URL(link.href, location.href);
         var main = document.getElementById('main-content');
-        if (!main || url.origin !== location.origin || url.pathname === main.dataset.pageRoute) return;
+        if (!main || url.origin !== location.origin) return;
+        // Re-selecting the current tab should not fetch and rebuild the page.
+        if (url.pathname === main.dataset.pageRoute && url.search === location.search && !url.hash) {
+            event.preventDefault();
+            return;
+        }
         clear();
         var request = { path: url.pathname };
         pending = request;
@@ -56,7 +61,10 @@
         var status = document.getElementById('ss-navigation-status');
         if (status) {
             var english = document.documentElement.lang === 'en';
-            status.hidden = false;
+            // Fast navigations do not need a flashing loading banner.
+            setTimeout(function () {
+                if (pending === request && status.isConnected) status.hidden = false;
+            }, 180);
             status.dataset.loading = 'true';
             status.querySelector('span').textContent = (english ? 'Opening ' : 'Đang mở ') + link.textContent.trim() + '…';
             status.querySelector('a').hidden = true;

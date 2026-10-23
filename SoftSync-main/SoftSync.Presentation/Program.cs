@@ -331,7 +331,18 @@ else if (!demoMode)
     app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        // App.razor fingerprints these files by content. A normal refresh can
+        // reuse them without revalidating dozens of stylesheets and scripts.
+        if (context.Context.Request.Query.TryGetValue("v", out var version)
+            && version.Count == 1 && version[0] is { Length: 16 } hash
+            && hash.All(Uri.IsHexDigit))
+            context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+    }
+});
 
 app.UseCors("Frontend");
 app.UseAuthentication();
