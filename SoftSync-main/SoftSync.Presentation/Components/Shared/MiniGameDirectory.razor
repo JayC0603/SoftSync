@@ -1,0 +1,21 @@
+@inherits LocalizedComponentBase
+
+<div class="mg-directory">
+    <header class="mg-hero"><div><span class="mg-kicker">@T("Inclusive Skill Challenge", "Thử thách kỹ năng")</span><h1 id="game-title">Mini Game</h1><p>@T("Practice soft skills through short interactive challenges. Choose a game and start training.", "Luyện kỹ năng mềm qua những thử thách tương tác ngắn. Chọn trò chơi và bắt đầu luyện tập.")</p></div><i class="bi bi-controller mg-controller" aria-hidden="true"></i></header>
+    <nav class="mg-tabs" aria-label="@T("Game navigation", "Điều hướng trò chơi")"><span aria-current="page"><i class="bi bi-grid-fill"></i>@T("Challenges", "Thử thách")</span><a href="/game/history"><i class="bi bi-clock-history"></i>@T("Attempt history", "Lịch sử làm bài")</a></nav>
+    <div class="mg-games">
+        @foreach(var game in Games)
+        {
+            <article class="mg-card @game.Key"><div class="mg-icon" aria-hidden="true"><i class="bi @game.Icon"></i></div><div class="mg-copy"><h2>@game.Name</h2><p>@T(game.En,game.Vi)</p><span class="mg-meta"><i class="bi bi-lightning-charge"></i>@T("Interactive challenge", "Thử thách tương tác")</span></div><a href="/games/@game.Key/index.html" aria-label="@(T("Play ", "Chơi ")+game.Name)">@T("Play now", "Chơi ngay") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+        }
+    </div>
+    <aside class="mg-note"><i class="bi bi-info-circle-fill" aria-hidden="true"></i><div><h2>@T("Challenge status", "Trạng thái thử thách")</h2><p>@T("Explore the games above. Published quizzes and your attempt history are available below.", "Khám phá các trò chơi phía trên. Bài kiểm tra đã xuất bản và lịch sử làm bài luôn sẵn sàng để bạn tiếp tục luyện tập.")</p></div></aside>
+</div>
+
+@code {
+    private string T(string en,string vi)=>L.Current==AppLanguage.Vi?vi:en;
+    private static readonly (string Key,string Name,string Icon,string En,string Vi)[] Games = [
+        ("eisenhower","Eisenhower Matrix","bi-grid-fill","Prioritize tasks by urgency and importance.","Ưu tiên công việc theo mức độ khẩn cấp và quan trọng."),
+        ("focus-fortress","Focus Fortress","bi-shield-fill-check","Protect your focus by identifying distractions.","Bảo vệ sự tập trung bằng cách nhận diện những yếu tố gây xao nhãng."),
+        ("inbox-rush","Inbox Rush","bi-envelope-fill","Sort urgent messages and plan your next move.","Sắp xếp tin nhắn khẩn cấp và lên kế hoạch cho bước tiếp theo.")];
+}

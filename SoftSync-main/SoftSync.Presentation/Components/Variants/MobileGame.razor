@@ -16,15 +16,7 @@
         }
         else if (quiz is null)
         {
-            <header class="tw:mb-8">
-                <span class="badge bg-primary">@Ui("Inclusive Skill Challenge")</span>
-                <h1 id="game-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Mini Game")</h1>
-                <p>@Tx("Practice soft skills through published challenges. Question counts vary by quiz.", "Luyện kỹ năng mềm qua các thử thách đã xuất bản. Số câu hỏi tùy theo từng bài.")</p>
-                <a class="btn btn-outline-primary tw:mt-3" href="/game/history">@Tx("Attempt history", "Lịch sử làm bài")</a>
-                <a class="btn btn-primary tw:mt-3 tw:ml-2" href="/games/eisenhower/index.html"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i> @Tx("Play Eisenhower Matrix", "Chơi Ma trận Eisenhower")</a>
-                <a class="btn btn-outline-primary tw:mt-3 tw:ml-2" href="/games/focus-fortress/index.html"><i class="bi bi-shield-fill-check" aria-hidden="true"></i> @Tx("Play Focus Fortress", "Chơi Pháo đài tập trung")</a>
-                <a class="btn btn-outline-primary tw:mt-3 tw:ml-2" href="/games/inbox-rush/index.html"><i class="bi bi-calendar2-week" aria-hidden="true"></i> @Tx("Play Inbox Rush", "Chơi Inbox Rush")</a>
-            </header>
+            <MiniGameDirectory />
 
             @if (items.Count == 0)
             {
