@@ -23,14 +23,17 @@ else
 }
 
 @code {
-    private UserDto? user;
-    private bool loadFailed;
-    private List<RoadmapItemDto> roadmapItems = [];
+    // Reuse the prerendered data when the page becomes interactive.
+    [PersistentState] public UserDto? user { get; set; }
+    [PersistentState] public bool loadFailed { get; set; }
+    private List<RoadmapItemDto> dashboardItems = [];
+    [PersistentState] public List<RoadmapItemDto> roadmapItems { get => dashboardItems; set => dashboardItems = value ?? []; }
     private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        if (user is not null || loadFailed) return;
         try { await LoadDashboardAsync(); }
         catch (Exception ex)
         {

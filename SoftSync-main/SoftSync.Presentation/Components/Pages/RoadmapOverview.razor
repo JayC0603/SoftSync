@@ -1,6 +1,7 @@
 @page "/roadmap"
 @page "/roadmap/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [StreamRendering]
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
@@ -172,7 +173,8 @@
 @code {
     [Parameter] public int UserId { get; set; }
     [SupplyParameterFromQuery(Name = "skill")] public string? RequestedSkill { get; set; }
-    private List<RoadmapItemDto> items = [];
+    private List<RoadmapItemDto> roadmapItems = [];
+    [PersistentState] public List<RoadmapItemDto> items { get => roadmapItems; set => roadmapItems = value ?? []; }
     private string learnQuery = string.Empty;
     private bool discover;
     [SupplyParameterFromQuery(Name = "course")] public string? Course { get; set; }
@@ -221,9 +223,12 @@
     }
     private string ActivityAction(JourneyLesson lesson) => lesson.Completed ? Tx("Review", "Xem lại") : lesson.Available ? Tx("Continue", "Tiếp tục") : Tx("Locked", "Chưa mở khóa");
 
-    private RoadmapItemDto? selected;
-    private bool loading = true;
-    private bool loadError;
+    // Restore selection by ID so it points at an item in the restored list.
+    [PersistentState] public int? SelectedItemId { get; set; }
+    private RoadmapItemDto? selected { get => items.FirstOrDefault(x => x.Id == SelectedItemId); set => SelectedItemId = value?.Id; }
+    [PersistentState] public bool DataLoaded { get; set; }
+    private bool loading { get => !DataLoaded; set => DataLoaded = !value; }
+    [PersistentState] public bool loadError { get; set; }
     private bool Vietnamese => L.Current == AppLanguage.Vi;
     private RoadmapItemDto SelectedItem => selected ?? items[0];
     private string SelectedKey => SkillKey(SelectedItem);
@@ -237,7 +242,11 @@
     private string SelectedDescription => !string.IsNullOrWhiteSpace(SelectedItem.Objective) ? SelectedItem.Objective : !string.IsNullOrWhiteSpace(SelectedItem.Description) ? SelectedItem.Description : WeekDescription(SelectedItem);
     private JourneyState StateOf(RoadmapItemDto item) => JourneyProgress.State(item, items.IndexOf(item), ActiveIndex, RoadmapReviewMode.Enabled);
 
-    protected override Task OnInitializedAsync() => LoadRoadmap();
+    protected override async Task OnInitializedAsync()
+    {
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (loading) await LoadRoadmap();
+    }
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))
