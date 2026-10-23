@@ -44,7 +44,8 @@ public static class LoginLanguageContent
     ];
 
     // Default JSON escaping keeps the embedded non-executable script safe.
-    public static string Json { get; } = JsonSerializer.Serialize(
+    internal static IEnumerable<string[]> Pairs =>
         Keys.Select(key => new[] { Translations.Get(key, AppLanguage.Vi), Translations.Get(key, AppLanguage.En) })
-            .Concat(Phrases));
+            .Concat(Phrases);
+    public static string Json { get; } = JsonSerializer.Serialize(Pairs);
 }

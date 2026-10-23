@@ -15,6 +15,10 @@
         {
             <script type="application/json" data-account-translations>@((MarkupString)LoginLanguageContent.Json)</script>
         }
+        else
+        {
+            <script type="application/json" data-account-translations data-title-vi="@Translations.Get("auth.register.title", AppLanguage.Vi)" data-title-en="@Translations.Get("auth.register.title", AppLanguage.En)">@((MarkupString)RegisterLanguageContent.Json)</script>
+        }
         <div class="neo-decoration neo-decoration-one" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-two" aria-hidden="true"></div>
         <div class="neo-decoration neo-decoration-three" aria-hidden="true"></div>
@@ -78,9 +82,10 @@ else
 
 }
 
-@if (new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/').Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+@if (new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/') is var footerPath &&
+    (footerPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) || footerPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
-    @* Login translates locally; a static footer cannot hydrate back to the old language. *@
+    @* Account forms translate locally; keep the footer in the same static render. *@
     <div class="ss-site-footer-shell"><MobileSiteFooter /></div>
 }
 else

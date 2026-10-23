@@ -79,7 +79,7 @@
             try { localStorage.setItem('ss-lang', code); } catch {}
             try { document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`; } catch {}
             if (root.lang === code) return;
-            const page = document.querySelector('#ss-auth-page.auth-login');
+            const page = document.querySelector('#ss-auth-page:is(.auth-login, .auth-register)');
             const content = page?.querySelector('[data-account-translations]');
             if (content) {
                 const translations = new Map();
@@ -108,7 +108,7 @@
                     }
                 }
                 root.lang = code;
-                document.title = translate(document.title);
+                document.title = content.getAttribute(`data-title-${code}`) || translate(document.title);
                 page.querySelectorAll('[data-account-language]').forEach(button =>
                     button.setAttribute('aria-pressed', String(button.dataset.accountLanguage === code)));
                 return;

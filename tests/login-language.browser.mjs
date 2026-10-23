@@ -46,6 +46,56 @@ try {
     await send('Runtime.enable');
     await send('Network.enable');
     const results = [];
+    const registrationSwitches = [];
+    for (const width of [390, 1440]) {
+        await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 500 });
+        await send('Page.navigate', { url: `${app}/Account/Register` });
+        await wait(`!!document.querySelector('#register-fullname') && document.readyState === 'complete'`);
+        await evaluate(`window.ssDesign.setAccountLanguage('vi')`);
+        await evaluate(`(() => {
+            document.querySelector('#register-fullname').value = 'Draft learner';
+            document.querySelector('#register-email').value = 'draft@example.com';
+            document.querySelector('#register-password').value = 'Draft@12345';
+            document.querySelector('#register-confirmpassword').value = 'Draft@12345';
+            document.querySelector('#register-consent').checked = true;
+            window.ssDesign.togglePassword(document.querySelector('[aria-controls="register-password"]'));
+            window.registrationForm = document.querySelector('form[method="post"]');
+            window.registrationToken = registrationForm.querySelector('[name="__RequestVerificationToken"]').value;
+        })()`);
+        await pause(300);
+        const before = requests.length;
+        await send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+        for (const code of ['en', 'vi', 'en', 'en', 'vi', 'en']) {
+            const result = await evaluate(`(() => {
+                const start = performance.now();
+                document.querySelector('[data-account-language="${code}"]').click();
+                return {
+                    ms: performance.now() - start, lang: document.documentElement.lang,
+                    title: document.title, heading: document.querySelector('.register-heading h2').textContent,
+                    fields: ['fullname','email','password','confirmpassword'].map(id => document.querySelector('#register-'+id).value),
+                    sameForm: registrationForm === document.querySelector('form[method="post"]'),
+                    sameToken: registrationToken === registrationForm.querySelector('[name="__RequestVerificationToken"]').value,
+                    consent: document.querySelector('#register-consent').checked,
+                    visible: document.querySelector('#register-password').type === 'text',
+                    placeholder: document.querySelector('#register-confirmpassword').placeholder,
+                    legal: [...document.querySelectorAll('.register-consent .auth-legal-link')].map(e=>e.textContent),
+                    footer: document.querySelector('.sh-footer-brand small').textContent
+                };
+            })()`);
+            assert.equal(result.lang, code);
+            assert.equal(result.heading, code === 'vi' ? 'Đăng ký' : 'Sign up');
+            assert.equal(result.title, code === 'vi' ? 'Tạo tài khoản' : 'Create your account');
+            assert.deepEqual(result.fields, ['Draft learner','draft@example.com','Draft@12345','Draft@12345']);
+            assert.equal(result.sameForm && result.sameToken && result.consent && result.visible, true);
+            assert.equal(result.placeholder, code === 'vi' ? 'Nhập lại mật khẩu' : 'Confirm your password');
+            assert.deepEqual(result.legal, code === 'vi' ? ['Điều khoản','Chính sách bảo mật'] : ['Terms','Privacy policy']);
+            assert.equal(result.footer, code === 'vi' ? 'Học kỹ năng mềm cùng AI.' : 'Learn soft skills with AI.');
+            registrationSwitches.push({ width, code, ms: result.ms });
+        }
+        await pause(200);
+        assert.equal(requests.length, before, 'register language switching must not request or reload: ' + JSON.stringify(requests.slice(before).map(x=>({url:x.request.url,type:x.type}))));
+        await send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+    }
     for (const width of [390, 1440]) {
         await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 500 });
         await send('Page.navigate', { url: `${app}/Account/Login?ReturnUrl=%2Fdashboard` });
@@ -113,8 +163,23 @@ try {
     })()`);
     await wait(`location.pathname === '/dashboard' && !!document.querySelector('.ss-mobile-bottom-nav')`);
     assert.equal(await evaluate(`document.documentElement.lang`), 'en', 'server must respect the selected language after login');
+    const dashboardTitles = [];
+    for (const width of [390, 1440]) {
+        await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 500 });
+        await send('Page.navigate', { url: `${app}/dashboard` });
+        await wait(`!!document.querySelector('.ss-header-language button:not([disabled])') && !!document.querySelector('${width < 500 ? '.mobile-home' : '.home-v2'}')`);
+        for (const code of ['vi','en','vi','en']) {
+            await evaluate(`document.querySelectorAll('.ss-header-language button')[${code === 'vi' ? 0 : 1}].click()`);
+            await wait(`document.documentElement.lang === '${code}'`);
+            await pause(250);
+            const text = await evaluate(`document.querySelector('${width < 500 ? '.mobile-home' : '.home-v2'}').innerText`);
+            assert.ok(text.includes(code === 'vi' ? 'Tuần 1 - Nền tảng giao tiếp' : 'Week 1 - Communication foundations'), 'current lesson must translate on dashboard');
+            if (code === 'en') assert.ok(!text.includes('Tuần 1 -') && !text.includes('Tuần 2 -') && !text.includes('Nền tảng Kỹ năng'), 'English dashboard must not retain built-in Vietnamese lesson titles');
+            dashboardTitles.push({width, code});
+        }
+    }
     assert.equal(errors.length, 0, JSON.stringify(errors));
-    console.log(JSON.stringify({ passed: true, switches: results, loginAfterSwitch: true }));
+    console.log(JSON.stringify({ passed: true, registrationSwitches, switches: results, dashboardTitles, loginAfterSwitch: true }));
 } finally {
     await call('Target.disposeBrowserContext', { browserContextId });
     ws.close();

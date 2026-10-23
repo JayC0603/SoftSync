@@ -51,7 +51,7 @@ else
                             var current = !item.IsCompleted && index == CurrentStep;
                             <button class="roadmap-row @(item.IsCompleted ? "done" : current ? "current" : "locked")" disabled="@(!item.IsCompleted && !current)" @onclick='() => Nav.NavigateTo("/roadmap")'>
                                 <i class="bi @(item.IsCompleted ? "bi-check-lg" : current ? "bi-stars" : "bi-lock-fill")"></i>
-                                <span><strong>@DisplayTitle(item, index)</strong><small>@item.Description</small></span>
+                                <span><strong>@DisplayTitle(item, index)</strong><small>@L.Ui(item.Description)</small></span>
                                 <em>@(item.IsCompleted ? T("Đã hoàn thành", "Completed") : current ? T("Đang học", "Learning") : T("Bị khóa", "Locked"))</em>
                             </button>
                         }
@@ -68,7 +68,7 @@ else
                     <div class="skill-rings">
                         @foreach (var item in SkillCards)
                         {
-                            <div><div class="ring" style="--value:@item.PercentComplete;--ring:@RingColor(item.PercentComplete)"><span>@item.PercentComplete%</span></div><small>@item.SkillName</small></div>
+                            <div><div class="ring" style="--value:@item.PercentComplete;--ring:@RingColor(item.PercentComplete)"><span>@item.PercentComplete%</span></div><small>@L.Ui(item.SkillName)</small></div>
                         }
                     </div>
                 </section>
@@ -110,7 +110,7 @@ else
     private string T(string vi, string en) => Vi ? vi : en;
     private int CurrentStep => Math.Max(1, roadmapItems.FindIndex(x => !x.IsCompleted) + 1);
     private RoadmapItemDto? CurrentItem => roadmapItems.FirstOrDefault(x => !x.IsCompleted) ?? roadmapItems.LastOrDefault();
-    private string CurrentTitle => CurrentItem?.Title ?? T("Ưu tiên công việc", "Prioritizing tasks");
+    private string CurrentTitle => CurrentItem is {} item ? L.Ui(item.Title) : T("Ưu tiên công việc", "Prioritizing tasks");
     private int CurrentPercent => progress.Count == 0 ? 0 : Math.Clamp(progress.Max(x => x.PercentComplete), 0, 100);
     private int CompletionPercent => totalItems == 0 ? 0 : completedItems * 100 / totalItems;
     private IEnumerable<RoadmapItemDto> VisibleRoadmap => roadmapItems.Take(5);
@@ -143,11 +143,11 @@ else
     {
         var defaults = new[] { T("Quản lý thời gian", "Time management"), T("Giao tiếp", "Communication"), T("Tư duy phản biện", "Critical thinking"), T("Làm việc nhóm", "Teamwork") };
         foreach (var (name, index) in defaults.Select((name, index) => (name, index)))
-            if (!progress.Any(x => string.Equals(x.SkillName, name, StringComparison.OrdinalIgnoreCase)))
+            if (!progress.Any(x => string.Equals(L.Ui(x.SkillName), name, StringComparison.OrdinalIgnoreCase)))
                 yield return new ProgressDto { SkillName = name, PercentComplete = index == 0 ? CompletionPercent : 0 };
     }
 
-    private string DisplayTitle(RoadmapItemDto item, int index) => index == 1 ? $"{T("Video giới thiệu", "Introduction video")}" : $"{T("Bài", "Lesson")} {index - 1}: {item.Title}";
+    private string DisplayTitle(RoadmapItemDto item, int index) => index == 1 ? $"{T("Video giới thiệu", "Introduction video")}" : $"{T("Bài", "Lesson")} {index - 1}: {L.Ui(item.Title)}";
     private static string RingColor(int value) => value >= 60 ? "#7657f6" : value >= 40 ? "#2698ec" : value >= 30 ? "#35ad66" : "#ff841c";
     private static string FirstName(string value) => value.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? value;
 }
