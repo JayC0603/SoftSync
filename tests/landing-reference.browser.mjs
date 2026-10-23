@@ -51,9 +51,9 @@ try {
     const output = new URL('../../.integration-tools/landing-reference/', import.meta.url);
     await mkdir(output, {recursive:true});
     await send('Page.navigate', { url: app });
-    await wait(`!!document.querySelector('.lp-hero') && !!document.querySelector('.ss-public-language')`);
+    await wait(`!!document.querySelector('.lp-hero') && !!document.querySelector('.ss-public-language-switch button:last-child')`);
     await pause(800);
-    for (const width of [360, 390, 840, 1440]) {
+    for (const width of [360, 390, 640, 840, 1440]) {
         await send('Emulation.setDeviceMetricsOverride', { width, height:1000, deviceScaleFactor:1, mobile:width < 500 });
         await evaluate(`document.documentElement.dataset.theme='light'`);
         await pause(200);
@@ -67,9 +67,11 @@ try {
                 clippedControls:[...document.querySelectorAll('.ss-public-header a,.ss-public-header button,.ss-public-header summary')].filter(element=>{
                     if(element.closest('details:not([open])') && !element.matches('summary')) return false; const r=element.getBoundingClientRect();return r.width>0 && r.height>0 && (r.x<0 || r.right>innerWidth);
                 }).map(element=>element.outerHTML),
-                header:{left:header.left,right:header.right}, title:document.querySelector('h1').textContent };
+                columns:['.lp-hero','.lp-benefits','.lp-journey','.lp-feature-grid','.lp-mentor-grid'].map(selector=>getComputedStyle(document.querySelector(selector)).gridTemplateColumns.split(' ').length), statistics:[...document.querySelectorAll('.lp-highlights strong')].map(element=>element.textContent), header:{left:header.left,right:header.right}, title:document.querySelector('h1').textContent };
         })()`);
         assert.ok(layout.scrollWidth <= width, JSON.stringify(layout));
+        assert.deepEqual(layout.columns,[2,2,2,4,3],'Reference column layout must not change');
+        assert.deepEqual(layout.statistics,['10.000+','500+','95%']);
         assert.equal(layout.footerCount,1);
         assert.equal(layout.footer,true);
         assert.equal(layout.brokenImages.length,0,JSON.stringify(layout));
@@ -79,21 +81,35 @@ try {
         await writeFile(new URL(`landing-${width}.png`,output),Buffer.from(screenshot.data,'base64'));
         results.push(layout);
     }
-    await evaluate(`document.querySelector('.ss-public-language').click()`);
+    await evaluate(`document.querySelector('.ss-public-language-switch button:last-child').click()`);
     await wait(`document.querySelector('h1').textContent.includes('Grow your')`);
     assert.equal(await evaluate(`document.querySelectorAll('footer').length`),1);
     await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
-    await evaluate(`document.querySelector('.ss-public-mobile summary').click()`);
-    assert.equal(await evaluate(`document.querySelector('.ss-public-mobile').open`),true);
-    await evaluate(`document.querySelector('.ss-public-mobile summary').click()`);
+    await evaluate(`document.querySelector('.ss-public-menu-placeholder').click()`);
+    assert.equal(await evaluate(`document.querySelector('.ss-public-menu-placeholder').getAttribute('aria-disabled')`),'true');
+    assert.equal(await evaluate(`document.querySelector('.ss-public-mobile') === null`),true,'Hamburger content is reserved for a later design');
     await evaluate(`document.querySelector('.ss-public-actions button[onclick]').click()`);
     assert.equal(await evaluate(`document.documentElement.dataset.theme`),'dark');
     const dark = await send('Page.captureScreenshot',{format:'png'});
     await writeFile(new URL('landing-dark-390.png',output),Buffer.from(dark.data,'base64'));
     await evaluate(`document.querySelector('.lp-feature-card[href="/progress"]').click()`);
     await wait(`!!document.querySelector('#login-identifier')`);
+    await evaluate(`(() => {
+        document.querySelector('#login-identifier').value='demo@softsync.local';
+        document.querySelector('#login-password').value='Demo@12345';
+        document.querySelector('.login-submit').click();
+    })()`);
+    await wait(`location.pathname === '/progress' && !!document.querySelector('.ss-mobile-bottom-nav')`);
+    const taskbarLinks=await evaluate(`[...document.querySelectorAll('.ss-mobile-bottom-nav a')].map(link=>link.getAttribute('href'))`);
+    await send('Page.navigate',{url:app});
+    await wait(`!!document.querySelector('.ss-authenticated-landing .lp-hero') && !!document.querySelector('.ss-header-language button:not(:disabled)')`);
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('.ss-mobile-bottom-nav a')].map(link=>link.getAttribute('href'))`),taskbarLinks);
+    assert.equal(await evaluate(`document.querySelectorAll('footer').length`),1);
+    assert.equal(await evaluate(`!!document.querySelector('.ss-public-header')`),false,'Signed-in landing must use the project taskbar');
+    const authenticated=await send('Page.captureScreenshot',{format:'png'});
+    await writeFile(new URL('landing-authenticated-390.png',output),Buffer.from(authenticated.data,'base64'));
     assert.equal(errors.length,0,JSON.stringify(errors));
-    console.log(JSON.stringify({passed:true, results, languageSwitch:true, menu:true, darkMode:true, protectedFeatureRedirect:true}));
+    console.log(JSON.stringify({passed:true, results, languageSwitch:true, reservedMenu:true, authenticatedTaskbar:true, darkMode:true, protectedFeatureRedirect:true}));
 } finally {
     await call('Target.disposeBrowserContext',{browserContextId});
     ws.close();

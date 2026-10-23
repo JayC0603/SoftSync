@@ -1,6 +1,7 @@
 @rendermode InteractiveServer
 @inherits LocalizedComponentBase
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <header class="ss-public-header">
     <a class="ss-public-brand" href="/" aria-label="SoftSync"><img src="/images/logo.png" alt="" width="36" height="36" /><strong>SoftSync</strong></a>
@@ -12,7 +13,14 @@
         <NavLink href="/cv">@Tx("Smart CV", "CV thông minh")</NavLink>
     </nav>
     <div class="ss-public-actions">
-        <button type="button" class="ss-shell-control ss-public-language" @onclick="ToggleLanguage" aria-label="@Tx("Switch to Vietnamese", "Chuyển sang tiếng Anh")">@(L.Current == AppLanguage.Vi ? "VI" : "EN")</button>
+        @if (IsLanding)
+        {
+            <div class="ss-public-language-switch" role="group" aria-label="@L["layout.languageMenu"]"><button type="button" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguage(AppLanguage.Vi)">VI</button><span aria-hidden="true">|</span><button type="button" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguage(AppLanguage.En)">EN</button></div>
+        }
+        else
+        {
+            <button type="button" class="ss-shell-control ss-public-language" @onclick="ToggleLanguage" aria-label="@Tx("Switch to Vietnamese", "Chuyển sang tiếng Anh")">@(L.Current == AppLanguage.Vi ? "VI" : "EN")</button>
+        }
         <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
         <AuthorizeView><NotAuthorized><a class="ss-public-start" href="/Account/Register"><span>@Tx("Start for free", "Bắt đầu miễn phí")</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></NotAuthorized></AuthorizeView>
         <AuthorizeView>
@@ -40,6 +48,12 @@
             </NotAuthorized>
         </AuthorizeView>
     </div>
+    @if (IsLanding)
+    {
+        <button type="button" class="ss-public-menu-placeholder" aria-label="Menu" aria-disabled="true"><i class="bi bi-list" aria-hidden="true"></i></button>
+    }
+    else
+    {
     <details class="ss-public-mobile">
         <summary aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></summary>
         <nav aria-label="@Tx("Mobile navigation", "Điều hướng điện thoại")">
@@ -50,13 +64,19 @@
             <button type="button" onclick="window.ssDesign.toggleTheme()"><i class="bi bi-circle-half" aria-hidden="true"></i> @Tx("Light / dark mode", "Giao diện sáng / tối")</button>
         </nav>
     </details>
+    }
 </header>
 
 @code {
+    private bool IsLanding => new Uri(Navigation.Uri).AbsolutePath == "/";
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
     private async Task ToggleLanguage()
     {
         var next = L.Current == AppLanguage.Vi ? AppLanguage.En : AppLanguage.Vi;
+        await SetLanguage(next);
+    }
+    private async Task SetLanguage(AppLanguage next)
+    {
         await JS.InvokeVoidAsync("ssLang.set", next == AppLanguage.Vi ? "vi" : "en");
         L.SetLanguage(next);
     }
