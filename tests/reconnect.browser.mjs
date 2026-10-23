@@ -67,15 +67,15 @@ try {
     await wait(`location.pathname === '/more' && window.__testSocket?.readyState === 1 && !!document.querySelector('.ss-header-language button:not(:disabled)')`);
     const initialLoad = await evaluate('window.__loadId');
     await evaluate(`window.__oldSocket = window.__testSocket; window.__testSocket.close()`);
-    await wait(`window.__testSocket !== window.__oldSocket && window.__testSocket.readyState === 1 && document.querySelector('#ss-connection-notice').hidden`);
+    await wait(`window.__testSocket !== window.__oldSocket && window.__testSocket.readyState === 1 && !document.querySelector('#ss-connection-notice')`);
     assert.equal(await evaluate('window.__loadId'), initialLoad, 'a brief socket drop should resume without a page reload');
-    assert.equal(await evaluate(`getComputedStyle(document.querySelector('#blazor-error-ui')).display`), 'none');
+    assert.equal(await evaluate(`!!document.querySelector('#blazor-error-ui')`), false);
 
     await evaluate(`Blazor.reconnect = async () => false; window.__testSocket.close()`);
     await wait(`window.__loadId !== ${initialLoad} && location.pathname === '/more' && window.__testSocket?.readyState === 1 && !!document.querySelector('.ss-header-language button:not(:disabled)')`);
     const recoveredLoad = await evaluate('window.__loadId');
-    assert.equal(await evaluate(`document.querySelector('#ss-connection-notice').hidden`), true);
-    assert.equal(await evaluate(`getComputedStyle(document.querySelector('#blazor-error-ui')).display`), 'none');
+    assert.equal(await evaluate(`!document.querySelector('#ss-connection-notice')`), true);
+    assert.equal(await evaluate(`!!document.querySelector('#blazor-error-ui')`), false);
     assert.equal(await evaluate(`!!document.querySelector('#components-reconnect-modal') && getComputedStyle(document.querySelector('#components-reconnect-modal')).display !== 'none'`), false);
 
     await evaluate(`(() => {
@@ -84,13 +84,15 @@ try {
         document.querySelector('main').appendChild(draft);
         draft.value = 'Keep my unsaved learning notes';
         draft.dispatchEvent(new Event('input', { bubbles: true }));
-        Blazor.reconnect = async () => false;
+        window.__draftReconnectAttempted = false;
+        Blazor.reconnect = async () => { window.__draftReconnectAttempted = true; return false; };
         window.__testSocket.close();
     })()`);
-    await wait(`!document.querySelector('#ss-connection-notice').hidden && document.querySelector('#ss-connection-notice p').textContent.includes('unsaved')`);
+    await wait(`window.__draftReconnectAttempted === true`);
+    await pause(500);
     assert.equal(await evaluate('window.__loadId'), recoveredLoad);
     assert.equal(await evaluate(`document.querySelector('#recovery-test-draft').value`), 'Keep my unsaved learning notes');
-    assert.equal(await evaluate(`document.querySelector('#ss-connection-notice button').hidden`), false);
+    assert.equal(await evaluate(`!!document.querySelector('#ss-connection-notice')`), false);
     assert.equal(errors.length, 0, JSON.stringify(errors));
     console.log(JSON.stringify({ passed: true, transientResume: true, expiredSessionReload: true, draftPreserved: true }));
 } finally {

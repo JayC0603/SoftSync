@@ -78,8 +78,8 @@ test('unsaved input prevents automatic reload after the server discarded a circu
     await h.settle();
     assert.equal(h.counts.reloads, 0);
     assert.equal(h.counts.health, 0);
-    assert.match(h.message.textContent, /Your unsaved input/);
-    assert.equal(h.button.hidden, false);
+    assert.equal(h.notice.hidden, true);
+    assert.equal(h.button.hidden, true);
 });
 
 test('password-manager values are protected even without an input event', async () => {
@@ -87,18 +87,18 @@ test('password-manager values are protected even without an input event', async 
     h.configuration.circuit.reconnectionHandler.onConnectionDown();
     await h.settle();
     assert.equal(h.counts.reloads, 0);
-    assert.match(h.message.textContent, /Your unsaved input/);
+    assert.equal(h.notice.hidden, true);
 });
 
-test('an offline server ends retries and offers a working native reload action', async () => {
+test('an offline server ends retries silently without a reload banner', async () => {
     const h = harness({ reconnect: async () => { throw Error('offline'); } });
     h.configuration.circuit.reconnectionHandler.onConnectionDown();
     await h.settle();
     assert.equal(h.counts.reconnects, 3);
     assert.equal(h.counts.reloads, 0);
-    assert.equal(h.notice.hidden, false);
-    assert.equal(h.button.hidden, false);
-    assert.match(h.message.textContent, /Check your network/);
+    assert.equal(h.notice.hidden, true);
+    assert.equal(h.button.hidden, true);
+    assert.equal(h.message.textContent, '');
 });
 
 test('a failing health check never triggers an automatic reload', async () => {
@@ -107,7 +107,7 @@ test('a failing health check never triggers an automatic reload', async () => {
     await h.settle();
     assert.equal(h.counts.health, 1);
     assert.equal(h.counts.reloads, 0);
-    assert.equal(h.button.hidden, false);
+    assert.equal(h.button.hidden, true);
 });
 
 test('a recent automatic reload prevents a reload loop', async () => {
@@ -116,7 +116,7 @@ test('a recent automatic reload prevents a reload loop', async () => {
     await h.settle();
     assert.equal(h.counts.reloads, 0);
     assert.equal(h.counts.health, 0);
-    assert.equal(h.button.hidden, false);
+    assert.equal(h.button.hidden, true);
 });
 
 test('a background tab waits until visible before opening a fresh session', async () => {
@@ -142,14 +142,14 @@ test('connection recovery cancels an in-flight reconnect attempt', async () => {
     assert.equal(h.notice.hidden, true);
 });
 
-test('startup errors expose the existing reload action without discarding forms', async () => {
+test('startup errors stay in the console without showing a reload action or discarding forms', async () => {
     const h = harness();
     // Use a new window to simulate a fresh startup that fails.
     h.context.window.ssBlazorStarted = false;
     h.context.Blazor.start = () => Promise.reject(Error('offline'));
     vm.runInContext(source, h.context);
     await h.settle();
-    assert.equal(h.errorNotice.style.display, 'block');
+    assert.equal(h.errorNotice.style.display, undefined);
     assert.equal(h.counts.reloads, 0);
     assert.equal(h.counts.errors, 1);
 });

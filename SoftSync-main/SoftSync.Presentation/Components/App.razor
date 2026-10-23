@@ -78,7 +78,6 @@
     <link rel="stylesheet" href="@VersionedAsset("css/page-navigation.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/navigation-glass.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-options.css")" />
-    <link rel="stylesheet" href="@VersionedAsset("css/connection-notice.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/reference-landing.css")" />
     <script>
         // The server already renders data-theme on <html> from the ss-theme
@@ -120,10 +119,6 @@
 </head>
 
 <body>
-    <div id="ss-connection-notice" class="ss-connection-notice" role="status" aria-live="polite" hidden>
-        <p></p>
-        <button type="button" onclick="location.reload()">@(ServerLanguage == "en" ? "Reload page" : "Tải lại trang")</button>
-    </div>
     <Routes @rendermode="PageRenderMode" />
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script src="@VersionedAsset("js/page-navigation.js")"></script>
