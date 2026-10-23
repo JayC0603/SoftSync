@@ -14,6 +14,7 @@
     <div class="ss-public-actions">
         <button type="button" class="ss-shell-control ss-public-language" @onclick="ToggleLanguage" aria-label="@Tx("Switch to Vietnamese", "Chuyển sang tiếng Anh")">@(L.Current == AppLanguage.Vi ? "VI" : "EN")</button>
         <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
+        <AuthorizeView><NotAuthorized><a class="ss-public-start" href="/Account/Register"><span>@Tx("Start for free", "Bắt đầu miễn phí")</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></NotAuthorized></AuthorizeView>
         <AuthorizeView>
             <Authorized>
                 <NotificationBell />
@@ -44,6 +45,7 @@
         <nav aria-label="@Tx("Mobile navigation", "Điều hướng điện thoại")">
             <a href="/">@L["nav.home"]</a><a href="/about">@Tx("About", "Giới thiệu")</a><a href="/mentors">@Ui("Mentors")</a><a href="/community">@Tx("Community", "Cộng đồng")</a><a href="/assistant">SYNCY</a>
             <a href="/cv">@Tx("Smart CV", "CV thông minh")</a>
+            <a href="/Account/Login">@L["nav.login"]</a>
             <button type="button" class="ss-public-language-menu" @onclick="ToggleLanguage">@Tx("Tiếng Việt", "English")</button>
             <button type="button" onclick="window.ssDesign.toggleTheme()"><i class="bi bi-circle-half" aria-hidden="true"></i> @Tx("Light / dark mode", "Giao diện sáng / tối")</button>
         </nav>

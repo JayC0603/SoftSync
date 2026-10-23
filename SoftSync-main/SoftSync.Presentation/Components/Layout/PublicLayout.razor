@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
-<div class="ss-public-site">
+<div class="ss-public-site @(new Uri(Navigation.Uri).AbsolutePath == "/" ? "ss-reference-home" : null)">
     <a class="ss-skip-link" href="#main-content"><LocalizedText Text="Skip to main content" /></a>
     <PublicNavigation />
     <main id="main-content" tabindex="-1" class="ss-public-content">
