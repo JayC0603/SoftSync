@@ -25,7 +25,7 @@
     <div class="mg-games">
         @foreach (var game in Games)
         {
-            <article class="mg-card @game.Key">
+            <article class="mg-card mg-game-@game.Key">
                 <div class="mg-icon" aria-hidden="true">
                     @if (game.Key == "eisenhower")
                     {
