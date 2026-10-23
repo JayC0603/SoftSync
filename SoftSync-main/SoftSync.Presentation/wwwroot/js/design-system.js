@@ -77,8 +77,43 @@
         setAccountLanguage(code) {
             if (code !== 'vi' && code !== 'en') return;
             try { localStorage.setItem('ss-lang', code); } catch {}
-            document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`;
-            // Account forms use static SSR; reload to translate labels and validation.
+            try { document.cookie = `ss-lang=${code}; path=/; max-age=31536000; samesite=lax`; } catch {}
+            if (root.lang === code) return;
+            const page = document.querySelector('#ss-auth-page.auth-login');
+            const content = page?.querySelector('[data-account-translations]');
+            if (content) {
+                const translations = new Map();
+                for (const pair of JSON.parse(content.textContent)) {
+                    translations.set(pair[0], pair[code === 'vi' ? 0 : 1]);
+                    translations.set(pair[1], pair[code === 'vi' ? 0 : 1]);
+                }
+                const translate = value => {
+                    const text = value.trim();
+                    const next = translations.get(text);
+                    return next === undefined ? value : value.replace(text, next);
+                };
+                for (const scope of [page, document.querySelector('.ss-site-footer-shell')]) {
+                    if (!scope) continue;
+                    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+                    while (walker.nextNode()) {
+                        const node = walker.currentNode;
+                        if (!node.parentElement.closest('script, style, textarea'))
+                            node.nodeValue = translate(node.nodeValue);
+                    }
+                    for (const element of scope.querySelectorAll('[placeholder], [aria-label], [title], [alt]')) {
+                        for (const name of ['placeholder', 'aria-label', 'title', 'alt']) {
+                            if (element.hasAttribute(name))
+                                element.setAttribute(name, translate(element.getAttribute(name)));
+                        }
+                    }
+                }
+                root.lang = code;
+                document.title = translate(document.title);
+                page.querySelectorAll('[data-account-language]').forEach(button =>
+                    button.setAttribute('aria-pressed', String(button.dataset.accountLanguage === code)));
+                return;
+            }
+            // Other static account forms still request their server-rendered language.
             window.location.reload();
         },
         toggleTheme() {
