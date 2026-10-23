@@ -1,0 +1,68 @@
+// Ngân hàng tên task (Lớp A). Mã chữ cái dùng trong SETS.
+const NAMES = {
+ a:"Ôn tập cho bài kiểm tra 15 phút", b:"Làm bài tập Toán về nhà", c:"Viết bài luận Văn",
+ d:"Bạn thân nhờ giúp giải bài gấp", e:"Học từ vựng tiếng Anh", f:"Họp câu lạc bộ",
+ g:"Nộp báo cáo thí nghiệm", h:"Tập văn nghệ cho lễ hội trường", i:"Giáo viên đổi lịch kiểm tra sớm hơn",
+ j:"Ôn tập chương 3 môn Hoá", k:"Hoàn thành bài tập nhóm môn Lý", l:"Bố mẹ nhờ việc nhà gấp",
+ m:"Luyện đề thi thử", n:"Nhóm trưởng nhắn cần chỉnh sửa bài gấp trước giờ nộp", o:"Tham gia buổi tình nguyện",
+ p:"Nộp bài thuyết trình PowerPoint", q:"Hoàn thiện đồ án môn học"
+};
+// Tên "bẫy" (Không quan trọng) – chọn ngẫu nhiên theo seed
+const POOL = {
+ S:["Xem video giải trí bạn gửi","Trả lời tin nhắn nhóm lớp","Xem thông báo mạng xã hội","Kiểm tra email lớp","Kiểm tra nhóm chat","Nhắn tin trả lời bạn về việc không quan trọng"],
+ P:["Bạn rủ đi chơi game","Bạn rủ đi ăn vặt","Bạn rủ đi cà phê","Bạn rủ đi chơi"],
+ T:["Dọn lại góc học tập","Xếp lại tủ sách","Sắp xếp lại bàn học","Xếp sách vở","Sắp xếp phòng ký túc xá"]
+};
+// Mỗi mục: mã tên + U + I + D. Việc phát sinh gấp: i, l, n (và d khi U=5).
+const SETS = [
+"a441 b242 c232 d511 e231 f411 g552 S411 h322 i551 j342 T122 k332 S411 l512",
+"m352 b532 P411 j242 n541 o222 c332 S411 e231 T111 k442 i551 f321 d411 h322",
+"g552 a341 l512 e231 S411 b242 i541 o222 c332 T111 k442 d411 f321 j352 S411",
+"m452 n541 h222 e231 P311 b342 l512 a431 c232 S411 g552 T111 j342 f421 k332",
+"i551 e231 d411 j352 S411 c242 g542 o222 l512 T111 b442 f321 m342 S411 h222",
+"a441 n541 P311 e231 S411 k342 l512 j242 c332 T111 g552 d411 f321 b432 o222",
+"m452 i551 e231 S411 c342 h222 l512 j342 d411 T111 g542 b332 f421 o222 k342",
+"a541 d411 e231 n541 S411 c232 l512 j352 o222 T111 g552 b342 f421 h222 k332",
+"m452 i551 P311 e231 d411 c342 l512 j242 S411 T111 g542 b332 f321 o222 k442",
+"a441 n541 e231 S411 d411 j352 l512 c242 o222 T111 g552 b332 f321 h222 k442",
+"q453 p542 d411 e231 i551 o222 g342 S411 f321 n541 m242 S411 j232 T111 l512",
+"p552 q353 n541 e231 P311 g442 i551 o222 m342 T111 S411 j232 f421 d411 l512",
+"q453 i551 e231 S411 p442 o222 l512 g342 d411 T111 m242 f321 j332 n541 S411",
+"g542 n541 e231 P311 q353 l512 o222 p442 S411 T111 m242 d411 f321 j332 i551",
+"q453 e231 d411 p542 S411 g342 l512 o222 T111 m242 i551 f321 j332 n541 S411",
+"p552 n541 e231 P311 q453 o222 l512 g342 T111 S411 m242 d411 f321 j232 i551",
+"q453 i551 e231 S411 p442 o222 d411 g342 T111 l512 m242 f321 j332 n541 S411",
+"g542 n541 e231 P311 q353 o222 l512 p442 S411 T111 m242 d411 f321 j332 i551",
+"q453 e231 d411 p542 S411 g342 l512 o222 T111 m242 i551 f321 j332 n541 S411",
+"p552 n541 e231 P311 q453 o222 l512 g342 T111 S411 m242 d411 f321 j232 i551",
+"j252 a551 f321 h122 d411 k542 c342 e331 q343 i551 m332 S411 l521 b542 S411",
+"T111 j342 a241 p552 c342 P311 S411 S311 i551 m552 q453 k242 l521 b332 n541",
+"T111 e341 k452 a241 b332 c342 l521 P311 S311 p542 m232 f321 n541 i551 d311",
+"q553 S311 e231 b232 T111 l521 c332 a541 k342 m352 i541 o322 f321 n541 P411",
+"f121 c252 S311 g552 T111 n541 S411 k342 i551 p452 P311 j352 m342 a331 l521",
+"a351 b552 d311 f321 o122 i541 P411 h122 T111 j232 e331 l521 c242 m442 q253",
+"b332 m332 c252 a551 n541 f321 o222 i541 T111 T111 S311 e351 k442 j342 g552",
+"e331 f421 h122 o222 c352 l521 b552 j242 k252 S411 q543 i551 d311 a341 n541",
+"o122 k252 l521 T111 S311 h122 b232 q353 a551 S311 e331 n541 i551 c352 m552",
+"T111 l521 o322 S411 e241 g552 n541 p552 q343 f321 a441 c352 k232 i541 b342",
+"j332 m442 T111 o322 i551 f321 P311 T111 q233 k332 c242 b542 a241 p442 n541",
+"h122 d311 i541 q543 m542 e241 P411 a341 o222 f121 k342 j232 l521 n541 c252",
+"a351 d311 q253 h222 m242 i541 p452 g452 k542 n541 S411 l521 j242 S311 c232",
+"p452 j352 P411 T111 h322 f121 S411 i551 T111 l521 k332 a331 b252 g442 m232",
+"m452 e351 p452 S411 j352 h122 i541 n541 T111 b332 c252 q443 f321 k352 S311",
+"e331 q253 c352 m552 f221 l521 S411 S411 i541 g552 a251 n541 k552 j232 d311",
+"h222 p542 q243 f421 j342 b242 o122 a231 c242 n541 k552 S311 i551 l521 m452",
+"T111 i551 o322 n541 m242 e241 S411 l521 a551 h322 S311 k242 j352 q333 b452",
+"e351 i551 q443 a341 o322 f121 l521 j352 P411 d311 k552 m352 c242 h322 n541",
+"o322 h222 T111 d311 l521 k242 i551 e231 T111 j342 p542 q443 S411 c352 b252",
+"T111 l521 f321 k242 e351 j332 n541 a231 P411 c342 o222 h322 q543 p452 i541",
+"k452 f221 o122 b352 l521 q333 c252 d411 m352 P311 S311 T111 a341 g552 n541",
+"b452 k332 c232 q453 P411 e241 m242 n541 i541 d411 a551 j342 S311 h222 l521",
+"q553 a441 e241 i551 k542 n541 d311 c232 m252 l521 T111 S311 j352 h222 b232",
+"c252 j332 g452 d311 b452 f121 T111 a231 m342 n541 S411 q233 l521 o222 i541",
+"o222 i551 q553 c352 T111 f321 S411 a251 g452 j342 l521 e241 k452 b332 n541",
+"q233 f321 p542 c242 m342 S411 T111 k232 T111 o222 j252 h222 b542 i541 l521",
+"j242 e231 n541 h222 o322 b232 k232 S311 T111 p452 c242 m442 i551 f321 S411",
+"k242 n541 j252 l521 b552 o222 p452 c342 i541 m242 a331 f421 T111 q453 P411",
+"j232 o122 d411 q553 p552 S311 b332 g452 i541 a231 k342 n541 l521 e251 S411"
+];

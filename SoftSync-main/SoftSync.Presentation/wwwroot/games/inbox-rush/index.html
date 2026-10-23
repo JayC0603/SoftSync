@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8fc">
+  <title>Inbox Rush · SoftSync</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/games/history-sync.css">
+</head>
+<body>
+<a class="back-link" href="/game"><span aria-hidden="true">←</span> Quay lại Mini Game</a>
+<main id="start" class="panel lobby">
+  <span class="eyebrow">SOFT SKILLS · QUẢN LÝ THỜI GIAN</span>
+  <h1>Inbox Rush</h1>
+  <p class="intro">Một ngày học có tám khung giờ. Việc mới liên tục xuất hiện — hãy sắp xếp chúng vào lịch trước hạn.</p>
+  <section class="how-card" aria-labelledby="how-title">
+    <h2 id="how-title">Cách chơi</h2>
+    <ol class="how">
+      <li>Chọn hoặc kéo một việc vào khung giờ. Việc kéo dài 2–3 tiết cần các khung liên tiếp.</li>
+      <li><b>Khẩn</b> là việc gần hạn. <b>Quan trọng</b> là việc ảnh hưởng đến kết quả học tập. Có thể từ chối việc gấp nhưng ít quan trọng.</li>
+      <li>Việc viền đỏ là phát sinh bất ngờ. Xếp vào lịch để đẩy việc khác ra khay, hoặc bỏ qua.</li>
+      <li>Với việc thường, hãy ước lượng thời gian cần thiết. Phím 1, 2, 3 chọn số tiết; Esc để hủy.</li>
+    </ol>
+  </section>
+  <div class="setup-row">
+    <label>Bộ tình huống<select id="setSel" aria-label="Chọn bộ tình huống"></select></label>
+    <label>Seed (tùy chọn)<input id="seedIn" placeholder="Ngẫu nhiên" maxlength="20" autocomplete="off"></label>
+  </div>
+  <p class="seed-note">Cùng bộ tình huống và cùng seed sẽ tạo ra cùng một chuỗi nhiệm vụ.</p>
+  <div class="lobby-actions"><button id="startBtn" class="big" type="button">Bắt đầu</button></div>
+</main>
+
+<main id="game" class="game-screen" hidden>
+  <header class="game-header"><span id="clock" aria-live="off">0:00</span><span id="progress"></span></header>
+  <p id="log" class="log" role="status" aria-live="polite">&nbsp;</p>
+  <p id="hint" class="hint" aria-live="polite"></p>
+  <section class="game-section"><h2>Khay việc</h2><div id="tray"></div></section>
+  <section class="game-section"><h2>Thời khóa biểu trong ngày</h2><p class="section-note">Chọn một việc rồi chọn tiết bắt đầu. Việc dài sẽ chiếm các tiết liên tiếp.</p><div id="slots"></div></section>
+</main>
+
+<div id="estimate" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="estQ">
+  <div class="modal-panel">
+    <span class="eyebrow">ƯỚC LƯỢNG THỜI GIAN</span>
+    <p id="estQ"></p>
+    <div id="estBtns"><button type="button" data-v="1">1 tiết</button><button type="button" data-v="2">2 tiết</button><button type="button" data-v="3">3 tiết</button><button type="button" data-c="1">Hủy (Esc)</button></div>
+    <p class="small">Thời gian trong game sẽ tạm dừng khi bạn chọn.</p>
+  </div>
+</div>
+
+<main id="report" class="panel report" hidden></main>
+<section id="game-history"></section>
+<script src="data.js"></script>
+<script src="/games/history-sync.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
