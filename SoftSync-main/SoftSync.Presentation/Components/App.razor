@@ -117,7 +117,8 @@
 
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.web.js" autostart="false"></script>
+    <script src="@VersionedAsset("js/blazor-start.js")"></script>
     <script src="@VersionedAsset("dist/app.js")"></script>
 </body>
 

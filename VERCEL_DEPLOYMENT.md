@@ -19,3 +19,32 @@ environment variables and domain configuration. No database or storage store
 needs to be recreated for this configuration fix.
 
 Reference: https://vercel.com/kb/guide/vercel-services
+
+## Blazor connections
+
+`softsync-tech.vercel.app` is an alias of the `softsync` Services project.
+The separate `softsync-next` project has its own deployment status and is not
+the Blazor application. Check the deployment linked to the domain before
+changing hosting settings.
+
+Blazor starts through `wwwroot/js/blazor-start.js` with a direct WebSocket to
+`/_blazor`. Skipping the separate negotiation request prevents a connection ID
+created on one Vercel instance from being used on another. Client and server
+use a 60-second timeout and a 15-second keep-alive interval. Short disconnects
+are retried with bounded delays; inactive circuits remain available for up to
+five minutes on their original instance. Startup failures expose the existing
+reload action rather than silently disabling interactive controls.
+
+Vercel closes WebSockets when a Function reaches its maximum duration. A new
+connection can reach a different instance; in-memory Blazor circuits cannot
+survive instance replacement or redeployment. These settings reduce negotiation
+failures and premature timeouts, but cannot remove that platform limit. A
+discarded circuit requires reloading; the application does not automatically
+reload and discard unsaved form input.
+
+Validate the startup configuration with `node --test tests/blazor-start.test.mjs`.
+On a deployed page, the browser Network panel should show a WebSocket request
+to `/_blazor` with status `101`, without a `/_blazor/negotiate` request.
+
+References: [Vercel WebSockets](https://vercel.com/docs/functions/websockets),
+[Blazor SignalR configuration](https://learn.microsoft.com/aspnet/core/blazor/fundamentals/signalr?view=aspnetcore-10.0).

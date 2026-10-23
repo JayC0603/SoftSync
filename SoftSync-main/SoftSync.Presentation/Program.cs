@@ -27,7 +27,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options =>
-        options.DetailedErrors = builder.Environment.IsDevelopment());
+    {
+        options.DetailedErrors = builder.Environment.IsDevelopment();
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(5);
+    })
+    .AddHubOptions(options =>
+    {
+        // Allow brief mobile network stalls without discarding a healthy circuit.
+        // Keep these intervals aligned with blazor-start.js.
+        options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    });
 
 // Needed so App.razor and scoped UI services can read browser preferences during
 // SSR / enhanced navigation and render the first frame without flashing.
