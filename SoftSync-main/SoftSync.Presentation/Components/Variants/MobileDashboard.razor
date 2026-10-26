@@ -1,3 +1,6 @@
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
@@ -7,7 +10,7 @@
 @inject IAssessmentService AssessmentService
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Nav
-@inject ILogger<SoftSync.Presentation.Components.Pages.Dashboard> Logger
+@inject ILogger<MobileDashboard> Logger
 
 @if (loadFailed)
 {
@@ -23,7 +26,8 @@ else
 }
 
 @code {
-    // Reuse the prerendered data when the page becomes interactive.
+    // Carry the prerendered result into the interactive instance instead of
+    // clearing the page and issuing the same database queries a second time.
     [PersistentState] public UserDto? user { get; set; }
     [PersistentState] public bool loadFailed { get; set; }
     private List<RoadmapItemDto> dashboardItems = [];

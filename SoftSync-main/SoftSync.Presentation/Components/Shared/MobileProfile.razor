@@ -1,0 +1,92 @@
+@inherits LocalizedComponentBase
+@using SoftSync.Common
+@using SoftSync.Common.Dtos
+@using SoftSync.Common.Enums
+
+<section class="ss-profile-mobile" aria-labelledby="mobile-profile-title">
+    <header class="mp-heading">
+        <h1 id="mobile-profile-title">@L["nav.profile"]</h1>
+        <p>@L["redesign.profile.description"]</p>
+    </header>
+
+    <section class="mp-card mp-identity" aria-label="@User.PublicName">
+        <div class="mp-avatar">
+            @if (!string.IsNullOrWhiteSpace(User.AvatarUrl))
+            {
+                <img src="@User.AvatarUrl" alt="@User.PublicName" />
+            }
+            else
+            {
+                <span aria-hidden="true">@Initial</span>
+            }
+            <label class="mp-camera" title="@L["profile.avatar.change"]">
+                <i class="bi bi-camera-fill" aria-hidden="true"></i>
+                <InputFile OnChange="OnAvatarSelected" accept="image/*" aria-label="@L["profile.avatar.change"]" />
+            </label>
+        </div>
+        <div class="mp-person">
+            <h2>@User.PublicName</h2>
+            <div class="mp-level-row">
+                <span class="mp-level"><i class="bi bi-star-fill" aria-hidden="true"></i> @L["nav.level"] @User.Level</span>
+                <span class="mp-xp">@User.ExperiencePoints XP</span>
+            </div>
+            <div class="mp-progress" role="progressbar" aria-label="@L["profile.mobile.levelProgress"]" aria-valuenow="@User.LevelProgressPercent" aria-valuemin="0" aria-valuemax="100">
+                <span style="width: @(User.LevelProgressPercent)%"></span>
+            </div>
+            <p class="mp-next-level">@string.Format(L["profile.mobile.remainingXp"], RemainingXp, User.Level + 1)</p>
+        </div>
+        @if (!string.IsNullOrEmpty(AvatarError)) { <p class="mp-upload-error" role="alert">@AvatarError</p> }
+    </section>
+
+    <div class="mp-stats">
+        <article class="mp-card mp-stat"><i class="bi bi-file-earmark-text" aria-hidden="true"></i><div><strong>@AssessmentCount</strong><p>@L["profile.stat.assessments"]</p></div></article>
+        <article class="mp-card mp-stat"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><div><strong>@SkillsTracked</strong><p>@L["profile.stat.skillsTracked"]</p></div></article>
+        <article class="mp-card mp-stat"><i class="bi bi-award" aria-hidden="true"></i><div><strong>@User.Level</strong><p>@L["profile.stat.currentLevel"]</p></div></article>
+    </div>
+
+    <section class="mp-card mp-details" aria-labelledby="mp-details-title">
+        <h2 id="mp-details-title">@L["profile.details"]</h2>
+        <dl>
+            <div><i class="bi bi-envelope" aria-hidden="true"></i><dt>@L["auth.email"]</dt><dd>@(string.IsNullOrWhiteSpace(Email) ? "—" : Email)</dd></div>
+            <div><i class="bi bi-people" aria-hidden="true"></i><dt>@L["profile.mobile.ageGroup"]</dt><dd>@(ProfileAgeGroups.LabelKey(User.Age) is { Length: > 0 } key ? L[key] : "—")</dd></div>
+            <div><i class="bi bi-bullseye" aria-hidden="true"></i><dt>@L["profile.mobile.goal"]</dt><dd>@(string.IsNullOrWhiteSpace(User.Goal) ? "—" : L[User.Goal])</dd></div>
+        </dl>
+    </section>
+
+    <section class="mp-card mp-direction" aria-labelledby="mp-direction-title">
+        <h2 id="mp-direction-title">@L["profile.mobile.direction"]</h2>
+        <div class="mp-chips">
+            @foreach (var skill in SelectedSkills)
+            {
+                <span class="mp-chip"><i class="bi @(string.IsNullOrWhiteSpace(skill.IconName) ? "bi-book" : skill.IconName)" aria-hidden="true"></i>@L.Ui(skill.Name)</span>
+            }
+            @if (User.CurrentLevel != LearningLevel.Unspecified)
+            {
+                <span class="mp-chip mp-chip-level"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i>@L[$"settings.level.{User.CurrentLevel.ToString().ToLowerInvariant()}"]</span>
+            }
+            @if (SelectedSkills.Count == 0 && User.CurrentLevel == LearningLevel.Unspecified)
+            {
+                <p class="mp-empty">@L["profile.mobile.noDirection"]</p>
+            }
+        </div>
+    </section>
+
+    <div class="mp-actions">
+        <a class="mp-edit" href="/settings"><i class="bi bi-pencil" aria-hidden="true"></i>@L["profile.edit"]</a>
+        <button type="button" class="mp-roadmap" @onclick="OnJourney"><i class="bi bi-compass" aria-hidden="true"></i>@JourneyLabel</button>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public UserDto User { get; set; } = default!;
+    [Parameter] public string? Email { get; set; }
+    [Parameter] public int AssessmentCount { get; set; }
+    [Parameter] public int SkillsTracked { get; set; }
+    [Parameter] public IReadOnlyList<SkillDto> SelectedSkills { get; set; } = [];
+    [Parameter] public string? AvatarError { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnAvatarSelected { get; set; }
+    [Parameter] public EventCallback OnJourney { get; set; }
+    [Parameter] public string JourneyLabel { get; set; } = "";
+    private string Initial => string.IsNullOrWhiteSpace(User.PublicName) ? "?" : System.Globalization.StringInfo.GetNextTextElement(User.PublicName.Trim()).ToUpperInvariant();
+    private int RemainingXp => Math.Max(0, LevelSystem.XpForNextLevel(User.ExperiencePoints) - LevelSystem.XpIntoCurrentLevel(User.ExperiencePoints));
+}

@@ -1,9 +1,6 @@
-name: Keep SoftSync awake
+name: SoftSync health check
 
 on:
-  schedule:
-    # UTC: every 10 minutes, offset from the busy start of the hour.
-    - cron: "3,13,23,33,43,53 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,7 +21,7 @@ jobs:
           set -euo pipefail
           response_file=$(mktemp)
           trap 'rm -f "$response_file"' EXIT
-          # A sleeping Render instance can return a loading page before the app is ready.
+          # Retry transient cold starts before reporting an unhealthy deployment.
           for attempt in 1 2 3 4; do
             echo "Health request ${attempt}/4 at $(date -u +%FT%TZ)"
             if curl --fail --silent --show-error --location \
@@ -40,5 +37,5 @@ jobs:
             fi
             if [ "$attempt" -lt 4 ]; then sleep 15; fi
           done
-          echo "::error::SoftSync did not return a healthy JSON response. Check Render logs."
+          echo "::error::SoftSync did not return a healthy JSON response. Check Vercel logs."
           exit 1

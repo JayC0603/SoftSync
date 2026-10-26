@@ -8,7 +8,8 @@
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>@Ui("Quiz History") · SoftSync</PageTitle>
-<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10">
+<HeadContent><link rel="stylesheet" href="css/quiz-history.css?v=1" /></HeadContent>
+<section class="qh-history">
     <section class="tw:mx-auto tw:max-w-5xl" aria-labelledby="history-title" aria-busy="@loading">
         <a href="/game" class="btn btn-link tw:px-0">← @Ui("Mini Game")</a>
         <h1 id="history-title" class="tw:text-3xl tw:font-bold">@Ui("Lịch sử làm bài")</h1>
@@ -30,8 +31,8 @@
                     @foreach (var attempt in attempts)
                     {
                         <tr>
-                            <td>@attempt.QuizTitle</td>
-                            <td>@attempt.CompletedAtUtc.ToLocalTime().ToString("g")</td>
+                            <td>@Ui(attempt.QuizTitle)</td>
+                            <td>@attempt.CompletedAtUtc.ToLocalTime().ToString("g", L.Culture)</td>
                             <td>@attempt.CorrectAnswers / @attempt.TotalQuestions (@attempt.ScorePercentage.ToString("0")%)</td>
                             <td><span class="badge @(attempt.Passed ? "bg-success" : "bg-danger")">@(attempt.Passed ? Ui("PASS") : Ui("NOT PASS"))</span></td>
                             <td><a class="btn btn-sm btn-outline-primary" href="/game/result/@attempt.AttemptId">@Ui("Xem kết quả")</a></td>

@@ -1,3 +1,5 @@
+> Production hosting: Vercel Container Runtime, Neon PostgreSQL through Vercel Marketplace, and Vercel Blob. See [deployment setup](../VERCEL.md).
+
 <div align="center">
 
 <img src="SoftSync.Presentation/wwwroot/images/logo.png" alt="SoftSync" width="112" />
@@ -14,7 +16,7 @@ trợ lý AI, thực hành tình huống và bộ công cụ nghề nghiệp tro
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-[![Keepalive](https://img.shields.io/github/actions/workflow/status/JayC0603/SoftSync/keep-softsync-awake.yml?label=Keepalive&logo=githubactions)](https://github.com/JayC0603/SoftSync/actions/workflows/keep-softsync-awake.yml)
+[![Health](https://img.shields.io/github/actions/workflow/status/JayC0603/SoftSync/keep-softsync-awake.yml?label=Health&logo=githubactions)](https://github.com/JayC0603/SoftSync/actions/workflows/keep-softsync-awake.yml)
 [![License](https://img.shields.io/badge/license-private-lightgrey)](#-license)
 
 **[Trải nghiệm SoftSync](https://softsync.id.vn/)** ·

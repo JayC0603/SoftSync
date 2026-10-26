@@ -1,58 +1,79 @@
+@layout PublicLayout
 @inherits LocalizedComponentBase
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 
-<section class="ss-landing">
-    <div class="ss-hero-grid">
-        <div class="ss-hero-copy">
-            <div class="ss-eyebrow">@L["home.tagline"]</div>
-            <h1>
-                @L["home.heroTitlePrefix"]<span>@L["home.heroTitleHighlight"]</span>.
-            </h1>
-            <p>@L["home.heroDesc"]</p>
+<PageTitle>@SeoTitle</PageTitle>
+<HeadContent>
+    <link rel="stylesheet" href="css/home-mentors.css" />
+    <meta name="description" content="@SeoDescription" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://softsync.id.vn/" />
 
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SoftSync Space" />
+    <meta property="og:title" content="@SeoTitle" />
+    <meta property="og:description" content="@SeoDescription" />
+    <meta property="og:url" content="https://softsync.id.vn/" />
+    <meta property="og:image" content="https://softsync.id.vn/images/syncy-robot.png" />
+    <meta property="og:image:alt" content="SoftSync Space - Nền tảng học kỹ năng mềm bằng AI" />
+    <meta property="og:locale" content="@(L.Current == AppLanguage.Vi ? "vi_VN" : "en_US")" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@SeoTitle" />
+    <meta name="twitter:description" content="@SeoDescription" />
+    <meta name="twitter:image" content="https://softsync.id.vn/images/syncy-robot.png" />
+
+    <script type="application/ld+json">@((MarkupString)StructuredData)</script>
+</HeadContent>
+
+<section class="ss-landing">
+    <div class="ss-product-hero">
+        <div class="ss-product-copy">
+            <span class="ss-eyebrow">@L["redesign.hero.label"]</span>
+            <h1>@L["redesign.hero.title"]</h1>
+            <h2>@L["redesign.hero.support"]</h2>
+            <p>@L["redesign.hero.description"]</p>
             <div class="ss-hero-actions">
                 <AuthorizeView>
-                    <Authorized>
-                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("/profile-setup")'>
-                            @L["home.startJourney"] <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </Authorized>
-                    <NotAuthorized>
-                        <button class="ss-primary-cta" @onclick='() => Nav.NavigateTo("Account/Register")'>
-                            @L["auth.register"] <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </NotAuthorized>
+                    <Authorized><a class="ss-btn-primary" href="/dashboard">@L["redesign.hero.start"] <i class="bi bi-arrow-right" aria-hidden="true"></i></a></Authorized>
+                    <NotAuthorized><a class="ss-btn-primary" href="/Account/Register">@L["redesign.hero.start"] <i class="bi bi-arrow-right" aria-hidden="true"></i></a></NotAuthorized>
                 </AuthorizeView>
-                <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/assistant")'>
-                    <i class="bi bi-play-circle-fill"></i> @L["home.learnMore"]
-                </button>
+                <a class="ss-secondary-cta" href="/about">@L["redesign.hero.explore"]</a>
             </div>
         </div>
-
-        <div class="ss-orbit-stage" aria-hidden="true">
-            <div class="ss-orbit ss-orbit-one"></div>
-            <div class="ss-orbit ss-orbit-two"></div>
-            <div class="ss-galaxy-core"></div>
-            <div class="ss-planet ss-planet-a"></div>
-            <div class="ss-planet ss-planet-b"></div>
-            <div class="ss-ai-orb">
-                <img src="/images/syncy-fish.png" alt="" />
-            </div>
-            <div class="ss-feature-chip ss-chip-practice ss-glass ss-glass-interactive">
-                <i class="bi bi-controller"></i>
-                <div><strong>@L["home.orbit.practice.title"]</strong><span>@L["home.orbit.practice.desc"]</span></div>
-            </div>
-            <div class="ss-feature-chip ss-chip-assess ss-glass ss-glass-interactive">
-                <i class="bi bi-graph-up-arrow"></i>
-                <div><strong>@L["home.orbit.assess.title"]</strong><span>@L["home.orbit.assess.desc"]</span></div>
-            </div>
-            <div class="ss-feature-chip ss-chip-grow ss-glass ss-glass-interactive">
-                <i class="bi bi-leaf"></i>
-                <div><strong>@L["home.orbit.grow.title"]</strong><span>@L["home.orbit.grow.desc"]</span></div>
+        <div class="ss-product-preview" aria-label="@L["redesign.preview.label"]">
+            <header><span class="ss-preview-dot"></span><strong>SoftSync · @L["layout.workspace"]</strong></header>
+            <div class="ss-preview-body">
+                <div class="ss-preview-mascot"><img src="/images/syncy-robot.png" alt="SYNCY" width="180" height="180" /></div>
+                <span class="ss-preview-badge">@L["redesign.preview.label"]</span>
+                <h3>@L["redesign.preview.title"]</h3>
+                <p>@L["redesign.preview.description"]</p>
+                <div class="ss-preview-steps"><span><i class="bi bi-clipboard-check"></i>@L["redesign.step.assess"]</span><span><i class="bi bi-map"></i>@L["redesign.step.learn"]</span><span><i class="bi bi-chat-heart"></i>@L["redesign.step.practice"]</span></div>
             </div>
         </div>
     </div>
+
+    <BrandImage ImageName="softsync-vietnam.jpg"
+                Alt="@(L.Current == AppLanguage.Vi ? "SoftSync — sách, hoa sen và những địa danh Việt Nam trong ánh bình minh" : "SoftSync — books, lotus flowers and Vietnamese landmarks at sunrise")"
+                Caption="@(L.Current == AppLanguage.Vi ? "Đồng hành cùng người trẻ Việt phát triển kỹ năng." : "Helping young people in Vietnam grow their skills.")" />
+    <section class="ss-product-section" aria-labelledby="product-intro">
+        <div class="ss-section-heading"><span>@L["redesign.intro.label"]</span><h2 id="product-intro">@L["redesign.intro.title"]</h2><p>@L["redesign.intro.description"]</p></div>
+        <div class="ss-experience-grid">
+            <a href="/Account/Register"><i class="bi bi-clipboard-check"></i><h3>@L["redesign.step.assess"]</h3><p>@L["redesign.assess.description"]</p></a>
+            <a href="/roadmap"><i class="bi bi-map"></i><h3>@L["redesign.step.learn"]</h3><p>@L["redesign.learn.description"]</p></a>
+            <a href="/case-studies"><i class="bi bi-chat-heart"></i><h3>@L["redesign.step.practice"]</h3><p>@L["redesign.practice.description"]</p></a>
+            <a href="/progress"><i class="bi bi-graph-up-arrow"></i><h3>@L["redesign.step.reflect"]</h3><p>@L["redesign.reflect.description"]</p></a>
+        </div>
+    </section>
+    <section class="ss-product-section ss-learning-method" aria-labelledby="learning-method">
+        <div class="ss-section-heading"><span>@L["redesign.method.label"]</span><h2 id="learning-method">@L["redesign.method.title"]</h2></div>
+        <ol><li><b>01</b><strong>@L["redesign.step.assess"]</strong></li><li><b>02</b><strong>@L["redesign.step.learn"]</strong></li><li><b>03</b><strong>@L["redesign.step.practice"]</strong></li><li><b>04</b><strong>@L["redesign.step.reflect"]</strong></li></ol>
+    </section>
+    <section class="ss-ai-example" aria-labelledby="ai-example-title">
+        <div><span class="ss-eyebrow">@L["redesign.preview.label"]</span><h2 id="ai-example-title">@L["redesign.ai.title"]</h2><p>@L["redesign.ai.description"]</p><a class="ss-btn-primary" href="/assistant">@L["redesign.ai.action"] <i class="bi bi-arrow-right"></i></a></div>
+        <div class="ss-example-conversation"><p class="ss-example-user">@L["redesign.ai.user"]</p><p class="ss-example-assistant"><strong>SYNCY</strong>@L["redesign.ai.reply"]</p><small>@L["redesign.ai.disclaimer"]</small></div>
+    </section>
 
     <section class="ss-mentor-panel ss-glass ss-glass-interactive">
         <div class="ss-panel-head ss-glass">
@@ -62,7 +83,8 @@
             </div>
         </div>
 
-        <div class="ss-main-mentor-grid">
+        <div class="ss-mentor-carousel-tools"><button type="button" class="ss-mentor-rotation" onclick="window.ssDesign.toggleMentorRotation(this)" aria-pressed="false" data-pause-label="@(L.Current == AppLanguage.Vi ? "Tạm dừng" : "Pause")" data-resume-label="@(L.Current == AppLanguage.Vi ? "Tự chuyển" : "Play")">@(L.Current == AppLanguage.Vi ? "Tạm dừng" : "Pause")</button><span>@(L.Current == AppLanguage.Vi ? "Vuốt để xem thêm cố vấn" : "Swipe to meet more mentors")</span><button type="button" onclick="window.ssDesign.scrollMentors(this,-1)" aria-label="@(L.Current == AppLanguage.Vi ? "Cố vấn trước" : "Previous mentor")"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" onclick="window.ssDesign.scrollMentors(this,1)" aria-label="@(L.Current == AppLanguage.Vi ? "Cố vấn tiếp theo" : "Next mentor")"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div>
+        <div class="ss-main-mentor-grid ss-mentor-carousel ss-home-mentor-carousel" tabindex="0" aria-label="@(L.Current == AppLanguage.Vi ? "Danh sách cố vấn, vuốt để xem thêm" : "Mentors, swipe to see more")">
             <article class="ss-main-mentor ss-advisor-card ss-glass ss-glass-interactive">
                 <div class="ss-main-mentor-portrait">
                     <div class="ss-main-mentor-orbit" aria-hidden="true"></div>
@@ -133,7 +155,7 @@
 
         @if (xuanDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => xuanDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => xuanDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="xuan-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => xuanDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -158,12 +180,12 @@
                         <p>@L["mentor.advisor.xuan.bio"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
 
         @if (advisorDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => advisorDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => advisorDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="advisor-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => advisorDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -182,18 +204,20 @@
                         <li><i class="bi bi-stars"></i>@L["mentor.advisor.highlight3"]</li>
                         <li><i class="bi bi-stars"></i>@L["mentor.advisor.highlight4"]</li>
                         <li><i class="bi bi-stars"></i>@L["mentor.advisor.highlight5"]</li>
+                        <li><i class="bi bi-stars"></i>@L["mentor.advisor.highlight6"]</li>
                     </ul>
                     <div class="ss-mentor-modal-bio">
                         <h3>@L["mentor.main.about"]</h3>
-                        <p>@L["mentor.advisor.bio"]</p>
+                        <p>@L["mentor.advisor.bio1"]</p>
+                        <p>@L["mentor.advisor.bio2"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
 
         @if (mentorDetailsOpen)
         {
-            <div class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => mentorDetailsOpen = false">
+            <dialog class="ss-mentor-modal-backdrop" role="presentation" @onclick="() => mentorDetailsOpen = false">
                 <section class="ss-mentor-modal ss-glass" role="dialog" aria-modal="true" aria-labelledby="mentor-detail-title" @onclick:stopPropagation="true">
                     <button type="button" class="ss-mentor-modal-close" @onclick="() => mentorDetailsOpen = false" aria-label="@L["mentor.main.close"]">
                         <i class="bi bi-x-lg"></i>
@@ -219,145 +243,11 @@
                         <p>@L["mentor.main.bio3"]</p>
                     </div>
                 </section>
-            </div>
+            </dialog>
         }
     </section>
 
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-about-hero-grid">
-            <div class="ss-about-visual" aria-hidden="true">
-                <div class="ss-about-glow"></div>
-                <img src="/images/syncy-fish.png" alt="" />
-            </div>
-            <div class="ss-about-copy">
-                <div class="ss-eyebrow"><i class="bi bi-water"></i> @L["home.about.eyebrow"]</div>
-                <h2>@L["home.about.heading"]</h2>
-                <p>@L["home.about.intro1"]</p>
-                <p>@L["home.about.intro2"]</p>
-                <button class="ss-secondary-cta" @onclick='() => Nav.NavigateTo("/community")'>
-                    <i class="bi bi-people-fill"></i> @L["home.about.cta"]
-                </button>
-            </div>
-        </div>
-        <p class="ss-about-text" style="margin-top:1.5rem;">@L["home.about.intro3"]</p>
-    </section>
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-question-circle-fill"></i> @L["home.why.heading"]</div>
-            </div>
-        </div>
-        <div class="ss-about-row ss-about-row-4">
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-cpu-fill"></i><p>@L["home.why.p1"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-emoji-frown"></i><p>@L["home.why.p2"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-universal-access"></i><p>@L["home.why.p3"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><p>@L["home.why.p4"]</p></article>
-        </div>
-    </section>
-
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-stars"></i> @L["home.meaning.heading"]</div>
-                <p>@L["home.meaning.headingDesc"]</p>
-            </div>
-        </div>
-
-        <div class="ss-about-row">
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-heart-fill"></i> @L["home.about.soft.title"]</span>
-                <p>@L["home.about.soft.desc"]</p>
-            </article>
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-link-45deg"></i> @L["home.about.sync.title"]</span>
-                <p>@L["home.about.sync.desc"]</p>
-            </article>
-            <article class="ss-about-card ss-glass ss-glass-interactive">
-                <span class="ss-main-mentor-kicker"><i class="bi bi-globe2"></i> @L["home.about.space.title"]</span>
-                <p>@L["home.about.space.desc"]</p>
-            </article>
-        </div>
-        <p class="ss-about-caption">@L["home.meaning.closing"]</p>
-    </section>
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-head ss-glass">
-            <div>
-                <div class="ss-panel-title"><i class="bi bi-rocket-takeoff-fill"></i> @L["home.how.heading"]</div>
-                <p>@L["home.how.headingDesc"]</p>
-            </div>
-        </div>
-
-        <div class="ss-steps-track">
-            <article class="ss-step">
-                <div class="ss-step-badge">1</div>
-                <div class="ss-step-card ss-glass ss-glass-interactive">
-                    <span class="ss-main-mentor-kicker"><i class="bi bi-clipboard-check"></i> @L["home.how.step1.title"]</span>
-                    <p>@L["home.how.step1.desc"]</p>
-                </div>
-            </article>
-            <article class="ss-step">
-                <div class="ss-step-badge">2</div>
-                <div class="ss-step-card ss-glass ss-glass-interactive">
-                    <span class="ss-main-mentor-kicker"><i class="bi bi-people-fill"></i> @L["home.how.step2.title"]</span>
-                    <p>@L["home.how.step2.desc"]</p>
-                </div>
-            </article>
-            <article class="ss-step">
-                <div class="ss-step-badge">3</div>
-                <div class="ss-step-card ss-glass ss-glass-interactive">
-                    <span class="ss-main-mentor-kicker"><i class="bi bi-person-video3"></i> @L["home.how.step3.title"]</span>
-                    <p>@L["home.how.step3.desc"]</p>
-                </div>
-            </article>
-        </div>
-        <p class="ss-about-caption">@L["home.how.closing"]</p>
-    </section>
-
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-panel-title"><i class="bi bi-lightning-charge-fill"></i> @L["home.diff.heading"]</div>
-        <p style="color:var(--ss-home-muted); margin: 0.35rem 0 1.25rem;">@L["home.diff.headingDesc"]</p>
-        <div class="ss-about-row ss-about-row-5">
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-cpu-fill"></i><p>@L["home.diff.item1"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><p>@L["home.diff.item2"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-person-video3"></i><p>@L["home.diff.item3"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-controller"></i><p>@L["home.diff.item4"]</p></article>
-            <article class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-universal-access"></i><p>@L["home.diff.item5"]</p></article>
-        </div>
-    </section>
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive">
-        <div class="ss-about-hero-grid ss-about-hero-grid-reverse">
-            <div class="ss-about-visual ss-about-visual-alt" aria-hidden="true">
-                <div class="ss-about-glow ss-about-glow-alt"></div>
-                <img src="/images/syncy-fish.png" alt="" />
-            </div>
-            <div class="ss-about-copy">
-                <div class="ss-eyebrow"><i class="bi bi-heart-fill"></i> @L["home.mission.heading"]</div>
-                <h2>@L["home.mission.p1"]</h2>
-                <p>@L["home.mission.p2"]</p>
-                <div class="ss-eyebrow" style="margin-top:0.6rem;"><i class="bi bi-globe-americas"></i> @L["home.vision.heading"]</div>
-                <p>@L["home.vision.desc"]</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="ss-mentor-panel ss-glass ss-glass-interactive" style="text-align:center;">
-        <p style="font-size:1.15rem; font-weight:600; color:var(--ss-home-text); margin:0 0 0.6rem;">
-            "@L["home.mission.quote"]"
-        </p>
-        <p style="color:var(--ss-home-muted); max-width:640px; margin:0 auto;">@L["home.mission.quote2"]</p>
-    </section>
-
-    <section class="ss-landing-stats">
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-people-fill"></i><strong>7+</strong><span>@L["home.stat.coreSkills"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-pie-chart-fill"></i><strong>AI</strong><span>@L["home.stat.assessment"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-headset"></i><strong>24/7</strong><span>@L["home.stat.support"]</span></div>
-        <div class="ss-glass ss-glass-interactive"><i class="bi bi-star-fill"></i><strong>10K+</strong><span>@L["home.stat.learners"]</span></div>
-    </section>
+    <section class="ss-final-cta"><div><span>SOFTSYNC</span><h2>@L["redesign.final.title"]</h2><p>@L["redesign.hero.description"]</p></div><a class="ss-btn-primary" href="/Account/Register">@L["auth.register"] <i class="bi bi-arrow-right"></i></a></section>
 
     <aside class="ss-chat-widget @(chatbotOpen ? "open" : "") @((mentorDetailsOpen || advisorDetailsOpen || xuanDetailsOpen) ? "hidden-by-modal" : "")" aria-label="SoftSync assistant preview">
         @if (chatbotOpen)
@@ -365,10 +255,10 @@
             <div class="ss-chat-panel ss-glass">
                 <div class="ss-chat-panel-head">
                     <div class="ss-chat-avatar">
-                        <img src="/images/syncy-fish.png" alt="" />
+                        <img src="/images/syncy-robot.png" alt="" />
                     </div>
                     <div>
-                        <strong>SYNCY AI</strong>
+                        <strong>@L["redesign.guide"]</strong>
                         <span>@L["chatbot.tagline"]</span>
                     </div>
                     <button type="button" class="ss-chat-close" title="Thu về hình tròn" @onclick="() => chatbotOpen = false">
@@ -405,7 +295,7 @@
                 <div class="ss-chat-actions ss-chat-actions--choices">
                     @if (chatView == "welcome")
                     {
-                        <button type="button" @onclick='() => Nav.NavigateTo("/assessments")'>📋 @L["chatbot.action.assess"]</button>
+                        <button type="button" @onclick="NavigateToAssessmentAsync">📋 @L["chatbot.action.assess"]</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/roadmap")'>🎯 @L["chatbot.action.roadmap"]</button>
                         <button type="button" @onclick='() => chatView = "mentor"'>👥 @L["chatbot.action.mentor"]</button>
                         <button type="button" @onclick='() => Nav.NavigateTo("/progress")'>📈 @L["chatbot.action.progress"]</button>
@@ -425,48 +315,22 @@
                     }
                     else
                     {
-                        <button type="button" @onclick='() => Nav.NavigateTo(chatView == "mentor" ? "/community" : "/assessments")'>@L["chatbot.action.continue"]</button>
+                        <button type="button" @onclick="ContinueChatActionAsync">@L["chatbot.action.continue"]</button>
                         <button type="button" class="secondary" @onclick='() => chatView = "welcome"'>← @L["chatbot.action.back"]</button>
                     }
                 </div>
 
-                <div class="ss-chat-composer">
-                    <button type="button" class="ss-chat-attach" title="Đính kèm tệp" aria-label="Đính kèm tệp">
-                        <i class="bi bi-paperclip"></i>
-                    </button>
-                    <input type="text" placeholder='@L["assistant.inputPlaceholder"]' aria-label='@L["assistant.inputPlaceholder"]' />
-                    <button type="button" class="ss-chat-send" title="Gửi tin nhắn" aria-label="Gửi tin nhắn" @onclick='() => Nav.NavigateTo("/assistant")'>
-                        <i class="bi bi-send-fill"></i>
-                    </button>
-                </div>
+                <div class="ss-chat-composer"><a class="ss-btn-primary" href="/assistant">@L["redesign.ai.action"]</a></div>
             </div>
         }
         else
         {
             <button type="button" class="ss-chat-fab" title="Mở SoftSync AI" @onclick="() => chatbotOpen = true">
-                <img src="/images/syncy-fish.png" alt="" />
+                <img src="/images/syncy-robot.png" alt="" />
                 <span class="ss-chat-pulse"></span>
             </button>
         }
     </aside>
-</section>
-
-
-<section class="ss-mentor-panel ss-glass ss-glass-interactive">
-    <div class="ss-panel-head ss-glass">
-        <div>
-            <div class="ss-panel-title"><i class="bi bi-chat-dots-fill"></i> @L["home.contact.heading"]</div>
-            <p>@L["home.contact.desc"]</p>
-        </div>
-    </div>
-    <div class="ss-about-row ss-about-row-6">
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-envelope-fill"></i><strong>@L["home.contact.email"]</strong><span>softsync.system@gmail.com</span></div>
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-telephone-fill"></i><strong>@L["home.contact.hotline"]</strong><span>0775 184 816</span></div>
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-facebook"></i><strong>@L["home.contact.facebook"]</strong><span>SoftSync Space</span></div>
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-geo-alt-fill"></i><strong>@L["home.contact.address"]</strong><span>600 Nguyễn Văn Cừ, Ninh Kiều, Cần Thơ</span></div>
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-person-badge-fill"></i><strong>@L["home.contact.mentor"]</strong><span>Nguyễn Thụy Tố Trâm</span></div>
-        <div class="ss-about-card ss-glass ss-glass-interactive"><i class="bi bi-flag-fill"></i><strong>@L["home.contact.lead"]</strong><span>Phạm Kim Ngân</span></div>
-    </div>
 </section>
 
 <style>
@@ -502,7 +366,7 @@
         --ss-home-border: rgba(255, 255, 255, 0.16);
         --ss-home-shadow: rgba(2, 6, 23, 0.28);
         color: var(--ss-home-text);
-        padding: clamp(2.5rem, 5vw, 5rem) clamp(1rem, 4vw, 4.5rem) 2.5rem;
+        padding: 1rem 0 2.5rem;
         min-height: calc(100vh - 72px);
         overflow: hidden;
     }
@@ -574,11 +438,12 @@
 
     .ss-hero-grid {
         display: grid;
-        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.35fr);
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr);
         align-items: center;
-        gap: clamp(2rem, 5vw, 5rem);
+        gap: clamp(1.5rem, 3vw, 3rem);
         max-width: 1360px;
         margin: 0 auto;
+        min-height: 560px;
     }
     .ss-hero-copy { max-width: 520px; }
     .ss-eyebrow {
@@ -591,15 +456,36 @@
         margin-bottom: 1.4rem;
     }
     .ss-hero-copy h1 {
-        font-size: clamp(3rem, 5vw, 4.75rem);
-        line-height: 1.08;
-        font-weight: 850;
-        letter-spacing: 0;
+        position: relative;
+        width: fit-content;
+        max-width: 9.5ch;
+        padding-bottom: .28rem;
+        font-family: 'Inter', 'Arial Rounded MT Bold', system-ui, sans-serif;
+        font-size: clamp(2.6rem, 4vw, 4rem);
+        line-height: .98;
+        font-weight: 900;
+        letter-spacing: -.055em;
         margin: 0 0 1.4rem;
     }
     .ss-hero-copy h1 span {
+        display: block;
         color: #6ea8ff;
-        text-shadow: 0 0 30px rgba(99, 102, 241, 0.55);
+        background: linear-gradient(100deg, #50a7ff 2%, #6c7cff 48%, #b94cff 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 12px 36px rgba(99, 102, 241, 0.18);
+    }
+    .ss-hero-copy h1::after {
+        content: '';
+        position: absolute;
+        left: .08em;
+        bottom: -.08em;
+        width: 3.15em;
+        height: .12em;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #386bff, #8b5cf6 60%, transparent);
+        transform: rotate(-3deg);
     }
     .ss-hero-copy p {
         color: var(--ss-home-muted);
@@ -639,7 +525,7 @@
     }
 
     .ss-orbit-stage {
-        min-height: 470px;
+        min-height: 590px;
         position: relative;
     }
     .ss-galaxy-core {
@@ -670,10 +556,10 @@
     .ss-orbit-two { inset: 22% 2% auto auto; width: min(38vw, 520px); opacity: 0.55; }
     .ss-ai-orb {
         position: absolute;
-        left: 8%;
-        top: 12%;
-        width: 200px;
-        height: 200px;
+        left: 18%;
+        top: 19%;
+        width: 310px;
+        height: 310px;
         border-radius: 999px;
         padding: 20px;
         background:
@@ -870,7 +756,7 @@
         display: flex;
         gap: 0.9rem;
         align-items: center;
-        width: 190px;
+        width: 255px;
         padding: 1rem;
         border: 1px solid var(--ss-home-border);
         border-radius: 14px;
@@ -889,10 +775,28 @@
     }
     .ss-feature-chip strong,
     .ss-feature-chip span { display: block; }
+    .ss-feature-chip > div { min-width: 0; flex: 1; }
     .ss-feature-chip span { color: var(--ss-home-soft); font-size: 0.9rem; }
-    .ss-chip-practice { right: 11%; top: 3%; }
-    .ss-chip-assess { right: 0; top: 43%; }
-    .ss-chip-grow { right: 28%; top: 66%; }
+    .ss-feature-chip .ss-chip-arrow {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 999px;
+        color: #6366f1;
+        background: rgba(255,255,255,.52);
+    }
+    .ss-feature-chip .ss-chip-arrow i {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        color: inherit;
+        background: transparent;
+        font-size: .95rem;
+    }
+    .ss-chip-practice { right: 7%; top: 3%; }
+    .ss-chip-assess { right: 0; top: 45%; }
+    .ss-chip-grow { right: 26%; top: 73%; }
     .ss-chip-assess i { background: linear-gradient(135deg, #38bdf8, #2563eb); }
     .ss-chip-grow i { background: linear-gradient(135deg, #34d399, #0f766e); }
     .ss-planet { position: absolute; border-radius: 999px; box-shadow: inset -14px -16px 24px rgba(2,6,23,0.34), 0 0 22px rgba(139,92,246,0.28); }
@@ -1181,6 +1085,7 @@
     @@media (max-width: 1024px) {
         .ss-hero-grid { grid-template-columns: 1fr; }
         .ss-orbit-stage { min-height: 520px; }
+        .ss-ai-orb { width: 240px; height: 240px; }
         .ss-mentor-grid { grid-template-columns: 1fr; }
         .ss-mentor-card { grid-template-columns: 130px 1fr; }
         .ss-main-mentor-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1298,6 +1203,7 @@
         }
         .ss-feature-chip strong { font-size: 0.88rem; line-height: 1.15; }
         .ss-feature-chip span { font-size: 0.73rem; line-height: 1.2; }
+        .ss-feature-chip .ss-chip-arrow { display: none; }
         .ss-chip-practice { left: 0; right: auto; top: 36px; }
         .ss-chip-practice::after { right: -8px; bottom: 7px; }
         .ss-chip-assess { left: auto; right: 0; top: 162px; }
@@ -1517,324 +1423,72 @@
         .ss-main-mentor-grid .ss-main-mentor,
         .ss-main-mentor-grid .ss-advisor-card { flex-basis: 86vw; }
     }
-
-    /* ===== About section (Soft/Sync/Space, How it works, Diff, Contact) ===== */
-    .ss-about-text {
-        color: var(--ss-home-muted);
-        line-height: 1.65;
-        margin: 0 0 0.9rem;
-    }
-
-        .ss-about-text:last-child {
-            margin-bottom: 0;
-        }
-
-    .ss-about-row {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem;
-    }
-
-    .ss-about-row-5 {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-
-    .ss-about-row-6 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .ss-about-card {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 1.1rem;
-        border-radius: 18px;
-        text-align: left;
-    }
-
-        .ss-about-card .ss-main-mentor-kicker {
-            align-self: flex-start;
-        }
-
-        .ss-about-card > i {
-            font-size: 1.35rem;
-            color: #a78bfa;
-        }
-
-        .ss-about-card p {
-            margin: 0;
-            color: var(--ss-home-muted);
-            font-size: 0.85rem;
-            line-height: 1.55;
-        }
-
-        .ss-about-card strong {
-            color: var(--ss-home-text);
-            font-size: 0.95rem;
-        }
-
-        .ss-about-card span {
-            color: var(--ss-home-soft);
-            font-size: 0.82rem;
-        }
-
-    /* Force a single horizontal (scrollable) row instead of wrapping to a
-           new line, on any viewport where the columns would otherwise get too
-           narrow. Mirrors the existing .ss-main-mentor-grid mobile pattern. */
-    @@media (max-width: 900px) {
-        .ss-about-row,
-        .ss-about-row-5,
-        .ss-about-row-6 {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            margin-inline: -0.15rem;
-            padding: 0.15rem 0.15rem 0.8rem;
-        }
-
-            .ss-about-row::-webkit-scrollbar,
-            .ss-about-row-5::-webkit-scrollbar,
-            .ss-about-row-6::-webkit-scrollbar {
-                display: none;
-            }
-
-            .ss-about-row .ss-about-card,
-            .ss-about-row-5 .ss-about-card,
-            .ss-about-row-6 .ss-about-card {
-                flex: 0 0 min(78vw, 300px);
-                scroll-snap-align: center;
-            }
-    }
-
-    /* ===== About hero (image + text, GlowTech-style intro) ===== */
-    .ss-about-hero-grid {
-        display: grid;
-        grid-template-columns: minmax(200px, 0.7fr) minmax(0, 1.3fr);
-        align-items: center;
-        gap: clamp(1.5rem, 4vw, 3rem);
-    }
-
-    .ss-about-visual {
-        position: relative;
-        aspect-ratio: 1;
-        max-width: 280px;
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .ss-about-glow {
-        position: absolute;
-        inset: 6%;
-        border-radius: 999px;
-        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.75), transparent 23%), linear-gradient(135deg, rgba(168, 85, 247, 0.92), rgba(37, 99, 235, 0.9));
-        box-shadow: 0 0 0 16px rgba(124, 58, 237, 0.16), 0 0 55px rgba(96, 165, 250, 0.46);
-    }
-
-    .ss-about-visual img {
-        position: relative;
-        width: 62%;
-        height: 62%;
-        object-fit: contain;
-        filter: drop-shadow(0 18px 24px rgba(15,23,42,0.28));
-    }
-
-    .ss-about-copy h2 {
-        font-size: clamp(1.6rem, 2.6vw, 2.1rem);
-        font-weight: 800;
-        line-height: 1.25;
-        margin: 0 0 1rem;
-        color: var(--ss-home-text);
-    }
-
-    .ss-about-copy p {
-        color: var(--ss-home-muted);
-        line-height: 1.7;
-        margin: 0 0 1rem;
-    }
-
-    .ss-about-row-4 {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    @@media (max-width: 900px) {
-        .ss-about-hero-grid {
-            grid-template-columns: 1fr;
-            text-align: center;
-        }
-
-        .ss-about-visual {
-            max-width: 200px;
-        }
-
-        .ss-about-copy .ss-eyebrow {
-            margin-inline: auto;
-        }
-    }
-
-    /* ===== Compact captions (replaces bulky closing paragraphs) ===== */
-    .ss-about-caption {
-        margin: 1.1rem 0 0;
-        text-align: center;
-        font-size: 0.88rem;
-        font-style: italic;
-        color: var(--ss-home-soft);
-        max-width: 640px;
-        margin-inline: auto;
-    }
-
-    /* ===== Mission/Vision hero (reversed image side + alt color) ===== */
-    .ss-about-hero-grid-reverse {
-        grid-template-columns: minmax(0, 1.3fr) minmax(200px, 0.7fr);
-    }
-
-        .ss-about-hero-grid-reverse .ss-about-visual {
-            order: 2;
-        }
-
-    .ss-about-visual-alt img {
-        transform: scaleX(-1);
-    }
-
-    .ss-about-glow-alt {
-        background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.75), transparent 23%), linear-gradient(135deg, rgba(236, 72, 153, 0.92), rgba(59, 130, 246, 0.9));
-        box-shadow: 0 0 0 16px rgba(236, 72, 153, 0.16), 0 0 55px rgba(139, 92, 246, 0.46);
-    }
-
-    .ss-about-copy h2 {
-        font-size: clamp(1.35rem, 2.2vw, 1.65rem);
-    }
-
-    @@media (max-width: 900px) {
-        .ss-about-hero-grid-reverse {
-            grid-template-columns: 1fr;
-        }
-
-            .ss-about-hero-grid-reverse .ss-about-visual {
-                order: -1;
-            }
-    }
-
-    /* ===== Step connector (How it works) ===== */
-    .ss-steps-track {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1.25rem;
-    }
-
-        .ss-steps-track::before {
-            content: "";
-            position: absolute;
-            top: 24px;
-            left: calc(100% / 6);
-            right: calc(100% / 6);
-            height: 2px;
-            background: repeating-linear-gradient( 90deg, rgba(139, 92, 246, 0.55) 0 10px, transparent 10px 20px );
-            z-index: 0;
-        }
-
-    .ss-step {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .ss-step-badge {
-        width: 48px;
-        height: 48px;
-        flex-shrink: 0;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 0.9rem;
-        color: #fff;
-        font-weight: 800;
-        font-size: 1.1rem;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        box-shadow: 0 10px 26px rgba(99, 102, 241, 0.4), 0 0 0 6px rgba(10, 16, 45, 0.55);
-    }
-
-    html[data-theme="light"] .ss-step-badge {
-        box-shadow: 0 10px 26px rgba(99, 102, 241, 0.3), 0 0 0 6px rgba(245, 241, 255, 0.9);
-    }
-
-    .ss-step-card {
-        width: 100%;
-        padding: 1.1rem;
-        border-radius: 18px;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: center;
-        text-align: center;
-    }
-
-        .ss-step-card .ss-main-mentor-kicker {
-            align-self: center;
-        }
-
-        .ss-step-card p {
-            margin: 0;
-            color: var(--ss-home-muted);
-            font-size: 0.85rem;
-            line-height: 1.55;
-        }
-
-    @@media (max-width: 900px) {
-        .ss-steps-track {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-            .ss-steps-track::before {
-                top: 0;
-                bottom: 0;
-                left: 23px;
-                right: auto;
-                width: 2px;
-                height: auto;
-                background: repeating-linear-gradient( 180deg, rgba(139, 92, 246, 0.55) 0 10px, transparent 10px 20px );
-            }
-
-        .ss-step {
-            flex-direction: row;
-            align-items: flex-start;
-            text-align: left;
-            gap: 1rem;
-        }
-
-        .ss-step-badge {
-            margin-bottom: 0;
-        }
-
-        .ss-step-card {
-            align-items: flex-start;
-            text-align: left;
-        }
-
-            .ss-step-card .ss-main-mentor-kicker {
-                align-self: flex-start;
-            }
-    }
-
 </style>
 
 @code {
+    private string SeoTitle => L.Current == AppLanguage.Vi
+        ? "SoftSync Space - Học và phát triển kỹ năng mềm bằng AI"
+        : "SoftSync Space - AI-Powered Soft Skills Learning";
+
+    private string SeoDescription => L.Current == AppLanguage.Vi
+        ? "SoftSync Space giúp học sinh, sinh viên đánh giá, luyện tập và phát triển kỹ năng giao tiếp, quản lý thời gian và tư duy phản biện bằng AI."
+        : "SoftSync Space helps students assess, practice, and develop communication, time management, and critical-thinking skills with AI.";
+
+    private const string StructuredData = """
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://softsync.id.vn/#organization",
+          "name": "SoftSync Space",
+          "alternateName": "SoftSync",
+          "url": "https://softsync.id.vn/",
+          "logo": "https://softsync.id.vn/images/logo.png",
+          "description": "Nền tảng ứng dụng AI giúp học sinh, sinh viên đánh giá và phát triển kỹ năng mềm."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://softsync.id.vn/#website",
+          "url": "https://softsync.id.vn/",
+          "name": "SoftSync Space",
+          "inLanguage": ["vi", "en"],
+          "publisher": { "@id": "https://softsync.id.vn/#organization" }
+        },
+        {
+          "@type": "EducationalOrganization",
+          "@id": "https://softsync.id.vn/#education",
+          "name": "SoftSync Space",
+          "url": "https://softsync.id.vn/",
+          "description": "Ứng dụng học kỹ năng mềm bằng AI với bài đánh giá, tình huống thực tế và lộ trình cá nhân hóa.",
+          "parentOrganization": { "@id": "https://softsync.id.vn/#organization" }
+        }
+      ]
+    }
+    """;
+
     private bool chatbotOpen;
     private bool mentorDetailsOpen;
     private bool advisorDetailsOpen;
     private bool xuanDetailsOpen;
     private string chatView = "welcome";
+
+    private async Task NavigateToAssessmentAsync()
+    {
+        var userId = await AuthProvider.GetUserIdAsync();
+        Nav.NavigateTo(userId > 0 ? $"/assessment/{userId}" : "/Account/Login");
+    }
+
+    private async Task ContinueChatActionAsync()
+    {
+        if (chatView == "mentor")
+        {
+            Nav.NavigateTo("/community");
+            return;
+        }
+
+        await NavigateToAssessmentAsync();
+    }
 
     protected override async Task OnInitializedAsync()
     {

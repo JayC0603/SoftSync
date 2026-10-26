@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 #nullable disable
 
 namespace SoftSync.DAL.Migrations
@@ -12,7 +12,7 @@ namespace SoftSync.DAL.Migrations
             // No-op migration: the DataProtectionKeys table is already created by
             // 20260710001000_AddDataProtectionKeys. This migration syncs the EF
             // target model snapshot after the dev merge so startup MigrateAsync
-            // no longer throws PendingModelChangesWarning on Render.
+            // no longer throws PendingModelChangesWarning in production.
         }
 
         /// <inheritdoc />

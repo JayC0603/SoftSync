@@ -1,4 +1,4 @@
-﻿@page "/profile"
+@page "/profile"
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
@@ -9,13 +9,15 @@
 @inject IUserService UserService
 @inject IProgressService ProgressService
 @inject IAssessmentService AssessmentService
+@inject ISkillService SkillService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 @inject UserProfileState UserProfileState
 
 <PageTitle>@L["nav.profile"] · SoftSync</PageTitle>
 <HeadContent><link rel="stylesheet" href="css/profile-reference.css?v=1" /></HeadContent>
-<div class="pr-profile">
+<HeadContent><link rel="stylesheet" href="css/mobile-profile.css" /></HeadContent>
+<div class="ss-profile-page"><div class="pr-profile ss-profile-desktop">
     <header class="pr-heading"><h1>@L["nav.profile"]</h1><p>@L["redesign.profile.description"]</p></header>
     @if (user is null)
     {
@@ -59,6 +61,17 @@
             <a href="/progress"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>@T("Learning progress", "Tiến độ học tập")</span><strong>@progressPercent%</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
         </section>
     }
+    </div>
+    @if (user is not null)
+    {
+        <MobileProfile User="user" Email="@email" AssessmentCount="assessmentHistoryCount" SkillsTracked="completedSkills"
+                       SelectedSkills="selectedSkillDetails" AvatarError="@avatarError" OnAvatarSelected="OnAvatarSelected"
+                       OnJourney="GoJourney" JourneyLabel="@(profileComplete && hasAssessment ? L["profile.mobile.roadmap"] : journeyButtonText)" />
+    }
+    else
+    {
+        <div class="ss-profile-mobile" role="status">@L["dashboard.loading"]</div>
+    }
 </div>
 
 @code {
@@ -73,12 +86,14 @@
     private string? email;
     private string? avatarError;
     private int assessmentCount;
+    private int assessmentHistoryCount;
     private int completedSkills;
     private int xpIntoLevel;
     private int xpForNext;
     private bool hasAssessment;
     private bool profileComplete;
     private string journeyButtonText = "";
+    private IReadOnlyList<SkillDto> selectedSkillDetails = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,6 +111,7 @@
 
         var results = await AssessmentService.GetLatestResultsAsync(userId, userId);
         assessmentCount = (await AssessmentService.GetHistoryAsync(userId, userId)).Count;
+        assessmentHistoryCount = assessmentCount;
         hasAssessment = results.Any();
         var progress = (await ProgressService.GetUserProgressAsync(userId)).ToList();
         learningSkill = progress.FirstOrDefault(x => x.PercentComplete < 100)?.SkillName ?? "";
@@ -103,6 +119,8 @@
         progressPercent = progress.Count > 0 ? (int)progress.Average(x => x.PercentComplete) : 0;
         completedSkills = progress.Count();
         var selectedSkills = await UserService.GetSelectedSkillIdsAsync(userId);
+        var selectedIds = selectedSkills.ToHashSet();
+        selectedSkillDetails = (await SkillService.GetAllSkillsAsync()).Where(skill => selectedIds.Contains(skill.Id)).ToList();
         profileComplete = user is not null
             && !string.IsNullOrWhiteSpace(user.FullName)
             && user.Age > 0

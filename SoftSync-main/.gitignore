@@ -35,3 +35,12 @@ Thumbs.db
 **/.next/
 **/.vercel/
 .vercel-validation/
+
+.vercel-validation/
+
+# Local preview builds and diagnostics
+.review-*/
+.preview-*/
+tmp/
+build_error.txt
+TestResults/

@@ -51,7 +51,7 @@
                 <AdventureMap Checkpoints="SharedCheckpoints" SelectedItemId="SelectedItem.Id" Vietnamese="Vietnamese" OnSelect="OpenCheckpoint" />
                 @if (NextItem is { } next)
                 {
-                    <aside class="journey-next journey-card"><div><span><i class="bi bi-lock" aria-hidden="true"></i>@Tx("NEXT LEVEL", "CẤP ĐỘ TIẾP THEO")</span><h3>@WeekTitle(next, WeekOrdinal(next))</h3><p>@(string.IsNullOrWhiteSpace(next.Objective) ? Tx("Complete this level to continue your journey.", "Hoàn thành cấp độ này để tiếp tục hành trình.") : next.Objective)</p></div><i class="bi @Theme.Icon journey-next-art" aria-hidden="true"></i></aside>
+                    <aside class="journey-next journey-card"><div><span><i class="bi bi-lock" aria-hidden="true"></i>@Tx("NEXT LEVEL", "CẤP ĐỘ TIẾP THEO")</span><h3>@WeekTitle(next, WeekOrdinal(next))</h3><p>@(string.IsNullOrWhiteSpace(next.Objective) ? Tx("Complete this level to continue your journey.", "Hoàn thành cấp độ này để tiếp tục hành trình.") : L.Ui(next.Objective))</p></div><i class="bi @Theme.Icon journey-next-art" aria-hidden="true"></i></aside>
                 }
             </div>
             <CurrentLevelLessons Lessons="CurrentLessons" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" />
@@ -239,7 +239,7 @@
     private IEnumerable<IGrouping<string, RoadmapItemDto>> SkillGroups => items.GroupBy(SkillKey);
     private List<RoadmapItemDto> SelectedItems => RoadmapLearningContent.Levels(SelectedItem, items).ToList();
     private RoadmapItemDto? NextItem => SelectedItems.SkipWhile(x => x.Id != SelectedItem.Id).Skip(1).FirstOrDefault();
-    private string SelectedDescription => !string.IsNullOrWhiteSpace(SelectedItem.Objective) ? SelectedItem.Objective : !string.IsNullOrWhiteSpace(SelectedItem.Description) ? SelectedItem.Description : WeekDescription(SelectedItem);
+    private string SelectedDescription => L.Ui(!string.IsNullOrWhiteSpace(SelectedItem.Objective) ? SelectedItem.Objective : !string.IsNullOrWhiteSpace(SelectedItem.Description) ? SelectedItem.Description : WeekDescription(SelectedItem));
     private JourneyState StateOf(RoadmapItemDto item) => JourneyProgress.State(item, items.IndexOf(item), ActiveIndex, RoadmapReviewMode.Enabled);
 
     protected override async Task OnInitializedAsync()
@@ -309,9 +309,9 @@
     private IReadOnlyList<RoadmapActivityDefinition> Activities => RoadmapLearningContent.ActivitiesFor(SelectedItem, items);
     private static string SkillKey(RoadmapItemDto item) => SkillTheme.KeyFor(item);
     private int WeekOrdinal(RoadmapItemDto item) => RoadmapLearningContent.Ordinal(item, items);
-    private string CategoryName(RoadmapItemDto item) => item.SkillName;
+    private string CategoryName(RoadmapItemDto item) => L.Ui(item.SkillName);
     private string Tx(string en, string vi) => Vietnamese ? vi : en;
-    private string WeekTitle(RoadmapItemDto item, int _) => item.Title;
+    private string WeekTitle(RoadmapItemDto item, int _) => L.Ui(item.Title);
     private string WeekDescription(RoadmapItemDto item) =>
-        !string.IsNullOrWhiteSpace(item.Description) ? item.Description : item.Objective;
+        L.Ui(!string.IsNullOrWhiteSpace(item.Description) ? item.Description : item.Objective);
 }

@@ -1,6 +1,5 @@
 @inherits LocalizedComponentBase
 @rendermode InteractiveServer
-@inherits LocalizedComponentBase
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
 @using SoftSync.BLL.Interfaces
 @using SoftSync.Common.Dtos
@@ -8,6 +7,7 @@
 @using SoftSync.Presentation.Services
 @inject ICourseService CoursesService
 @inject AuthenticationStateProvider Auth
+@inject NavigationManager Nav
 
 <PageTitle>@Ui("Khóa học của bạn", "Your courses") · SoftSync</PageTitle>
 <main class="course-learning-page">
@@ -50,11 +50,7 @@
                     <div class="course-learning-actions"><button type="button" class="btn btn-primary" @onclick="()=>Enroll(course.Id)">@(course.IsCompleted ? Ui("Xem lại khóa học", "Review course") : course.CompletedLessons > 0 ? Ui("Tiếp tục học", "Continue learning") : Ui("Bắt đầu khóa học", "Start course")) <span aria-hidden="true">→</span></button>
                         @if(course.FinalQuizId is int finalQuizId){<a class="course-learning-quiz" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? Ui("Thử lại bài kiểm tra", "Retry quiz") : Ui("Mở bài kiểm tra", "Open quiz"))</a>}
                     </div>
-                    <details class="course-learning-content"><summary>@Ui("Xem nội dung khóa học", "View course content") <span>(@course.TotalLessons)</span></summary><ol>@foreach(var lesson in course.Lessons){<li><div class="course-lesson-heading"><span>@lesson.Title</span><small>@(lesson.IsCompleted ? Ui("Hoàn thành", "Complete") : Ui("Bài học", "Lesson"))</small></div>
-                        @if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video controls preload="metadata" aria-label="@UiFormat("Video lesson: {0}", lesson.Title)"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="@Ui("Phụ đề tiếng Việt", "Vietnamese captions")" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p>@Ui("Video này chưa có phụ đề.", "Captions are not available for this video.")</p>}}
-                        @if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details class="course-lesson-transcript"><summary>@UiFormat("Transcript for {0}", lesson.Title)</summary><div>@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p>@Ui("Bài học này chưa có bản chép lời.", "A transcript is not available for this video.")</p>}
-                        <button type="button" class="btn btn-sm btn-outline-success" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? Ui("Đã hoàn thành", "Lesson completed") : Ui("Đánh dấu đã hoàn thành", "Mark lesson completed"))</button>
-                    </li>}</ol></details>
+                    <a class="course-learning-content" href="/courses/@course.Id">@Ui("Xem n?i dung kh?a h?c", "View course content") (@course.TotalLessons)</a>
                 </div>
             </article>
         }</div>
@@ -65,6 +61,6 @@
     private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
     protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
     private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
-    private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
+    private async Task Enroll(int id){if(await CoursesService.EnrollAsync(id,userId)){Nav.NavigateTo($"/courses/{id}");return;}message="Could not enroll.";await Reload();}
     private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Progress saved.":"Enroll before completing a lesson.";await Reload();}
 }

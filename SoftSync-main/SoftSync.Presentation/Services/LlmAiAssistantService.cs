@@ -42,7 +42,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
         if (!requestCache.TryGetValue(cacheKey, out var reply))
         {
             reply = await AskModelAsync(plainMessage, userId);
-            requestCache[cacheKey] = reply;
+            if (reply.FromModel) requestCache[cacheKey] = reply;
         }
         return english ? reply.AnswerEn : reply.AnswerVi;
     }
@@ -95,6 +95,8 @@ public sealed class LlmAiAssistantService : IAiAssistantService
 
     private sealed class BilingualReply
     {
+        [System.Text.Json.Serialization.JsonIgnore]
+        public bool FromModel { get; set; }
         public string AnswerVi { get; set; } = string.Empty;
         public string AnswerEn { get; set; } = string.Empty;
         public string Route { get; set; } = string.Empty;

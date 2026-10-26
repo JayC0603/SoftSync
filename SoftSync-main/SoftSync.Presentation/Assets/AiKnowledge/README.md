@@ -43,3 +43,43 @@ Docker/Render use the same names: `AiApi__Enabled`, `AiApi__ApiKey`, `AiApi__Bas
 ## Moving to an external LLM or vector store
 
 Each JSON object is already a retrieval document. Embed `titleEn/titleVi`, `keywords`, `tags`, and the answers; retain `id`, `category`, and `route` as metadata. The `IAiAssistantService` interface can remain unchanged, so the UI does not need to be rewritten.
+
+## Automatic failover
+
+The Assistant tries the existing `AiApi` endpoint first, then each configured
+`AiApi:Fallbacks` entry in order. Each entry has its own `ApiKey`, `BaseUrl`,
+`Model`, optional `Enabled` (default true), and `TimeoutSeconds` (default 20,
+clamped to 1?60 seconds). Base URLs must precede `v1/chat/completions`.
+HTTP errors (including quota/rate limits), timeouts and invalid answers advance
+to the next endpoint. Local knowledge is used only after all endpoints fail.
+Local fallback answers are not cached, allowing the next question to retry APIs.
+
+Example environment variables for a separately provisioned backup endpoint:
+
+```powershell
+$env:AiApi__Fallbacks__0__ApiKey="your-backup-api-key"
+$env:AiApi__Fallbacks__0__BaseUrl="https://router.huggingface.co/"
+$env:AiApi__Fallbacks__0__Model="your-backup-model-id"
+$env:AiApi__Fallbacks__0__TimeoutSeconds="15"
+```
+
+Add entries numbered `1`, `2`, etc. for further backups. A different model with
+the same account/key may share the same quota; use independently funded providers
+or accounts for quota resilience. Set variables in the server process or hosting
+configuration and restart the app. A local `.env` file is not loaded automatically
+by ASP.NET Core. Logs include HTTP status and model, never API keys or response bodies.
+
+### Gemini backup
+
+Create a Gemini API key in Google AI Studio. Use a model available to your project:
+
+```powershell
+$env:AiApi__Fallbacks__0__ApiKey="your-gemini-key"
+$env:AiApi__Fallbacks__0__BaseUrl="https://generativelanguage.googleapis.com/"
+$env:AiApi__Fallbacks__0__ChatCompletionsPath="v1beta/openai/chat/completions"
+$env:AiApi__Fallbacks__0__Model="gemini-3.5-flash-lite"
+$env:AiApi__Fallbacks__0__TimeoutSeconds="30"
+```
+
+`ChatCompletionsPath` defaults to `v1/chat/completions` for existing endpoints.
+Gemini free-tier availability and quotas depend on the project and model.
