@@ -51,6 +51,8 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<LearningHeartbeat> LearningHeartbeats { get; set; }
     public DbSet<ScheduleTask> ScheduleTasks { get; set; }
     public DbSet<GameHistoryRecord> GameHistoryRecords { get; set; }
+    public DbSet<WebsiteVisit> WebsiteVisits { get; set; }
+    public DbSet<WebsiteActivityMinute> WebsiteActivityMinutes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +90,13 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
             .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.Document).WithMany()
             .HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<WebsiteVisit>().HasIndex(x => x.StartedAtUtc);
+        modelBuilder.Entity<WebsiteVisit>().HasIndex(x => x.LastSeenAtUtc);
+        modelBuilder.Entity<WebsiteVisit>().HasIndex(x => x.EndedAtUtc);
+        modelBuilder.Entity<WebsiteActivityMinute>().HasKey(x => new { x.VisitId, x.MinuteUtc });
+        modelBuilder.Entity<WebsiteActivityMinute>().HasIndex(x => x.MinuteUtc);
+        modelBuilder.Entity<WebsiteActivityMinute>().HasOne<WebsiteVisit>().WithMany()
+            .HasForeignKey(x => x.VisitId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Announcement>().HasIndex(x => new { x.PublishedAtUtc, x.Id });
         modelBuilder.Entity<Announcement>().HasOne(x => x.Sender).WithMany()

@@ -4830,6 +4830,65 @@ namespace SoftSync.DAL.Migrations
 
                     b.ToTable("SystemMetricMinutes");
                 });
+            modelBuilder.Entity("SoftSync.DAL.Entities.WebsiteActivityMinute", b =>
+                {
+                    b.Property<Guid>("VisitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("MinuteUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<double>("ActiveSeconds")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("VisitId", "MinuteUtc");
+
+                    b.HasIndex("MinuteUtc");
+
+                    b.ToTable("WebsiteActivityMinutes");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.WebsiteVisit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("EndedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastSeenAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("Sequence")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndedAtUtc");
+
+                    b.HasIndex("LastSeenAtUtc");
+
+                    b.HasIndex("StartedAtUtc");
+
+                    b.ToTable("WebsiteVisits");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.WebsiteActivityMinute", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.WebsiteVisit", null)
+                        .WithMany()
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 #pragma warning restore 612, 618
         }
     }

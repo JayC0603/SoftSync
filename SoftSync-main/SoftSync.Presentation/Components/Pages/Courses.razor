@@ -4,7 +4,7 @@
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.UserPolicy)]
 @rendermode InteractiveServer
 @using SoftSync.Presentation.Components.Variants
-<DesktopVariant><Desktop><DesktopCourses CourseId="@CourseId" LessonId="@LessonId" /></Desktop><Mobile><MobileCourses  /></Mobile></DesktopVariant>
+<DesktopVariant><Desktop>@if (CourseId is null) { <CourseCatalog /> } else { <DesktopCourses CourseId="@CourseId" LessonId="@LessonId" /> }</Desktop><Mobile><MobileCourses  /></Mobile></DesktopVariant>
 @code {
     [Parameter] public int? CourseId { get; set; }
     [Parameter] public int? LessonId { get; set; }

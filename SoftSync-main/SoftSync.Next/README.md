@@ -15,7 +15,18 @@ npm run dev
 
 ## Vercel
 
-Import `SoftSync.Next` as the Vercel project root. Vercel detects Next.js and
+For this repository layout, set **Root Directory** to
+`SoftSync-main/SoftSync.Next` in Vercel Settings > Build and Deployment.
+Do not select `SoftSync.Presentation` (Blazor Server) or the repository root.
+If you import the inner `SoftSync-main` directory as its own repository instead,
+the Root Directory is `SoftSync.Next`.
+
+Keep **Framework Preset: Next.js**, leave **Output Directory** at its default,
+and use Node.js **22.x**. Do not set the output directory to `wwwroot`, `dist`,
+or `.next/standalone`; Vercel packages Next.js itself. `vercel.json` pins
+`npm ci` and `npm run build` for this frontend.
+
+Vercel detects Next.js and
 runs `npm run build` automatically. Set this server-side environment variable:
 
 ```text
@@ -35,6 +46,45 @@ FRONTEND_ORIGINS=https://your-project.vercel.app
 Use a comma-separated list if both the production domain and another frontend
 origin are required. After changing an environment variable, redeploy the
 corresponding project.
+
+The Docker Compose stack is for local verification. This deployment setup uses
+Vercel for Next.js and Render (Docker) for ASP.NET Core; it does not deploy
+`docker-compose.yml` to Vercel. The Next.js shell does not replace the full
+Blazor Server interface: learning, accounts and the integrated CV workspace
+still need the running ASP.NET host.
+
+### Verify locally with Docker
+
+From the parent `SoftSync-main` directory:
+
+```powershell
+Copy-Item .env.example .env
+docker compose config --quiet
+docker compose up --build
+```
+
+Open `http://localhost:3000` for Next.js, `http://localhost:8081` for the full
+ASP.NET application, and `http://localhost:3000/api/health` to check the backend
+connection. Compose uses `http://web:8080` for server requests and
+`SOFTSYNC_APP_URL=http://localhost:8081` for browser links. A CV backend must
+also be configured through `CV_API_URL` to use CV processing.
+
+### Deploy order and troubleshooting
+
+1. Deploy the ASP.NET Docker service using the repository's `render.yaml`.
+   Check that `https://<backend>/health` returns HTTP 200.
+2. In Vercel, set `BACKEND_URL` and `SOFTSYNC_APP_URL` to the public HTTPS
+   ASP.NET URL. Configure `CV_API_URL` if using CV processing.
+3. On the ASP.NET host, set `FRONTEND_ORIGINS` and
+   `CvIntegration__FrontendUrl` to the public Vercel URL. Configure the CV
+   shared secret and API on that host as described in the integration guide.
+4. Redeploy both services after changing their environment variables.
+   Verify `/`, `/courses`, `/cv`, and `/api/health` on the deployed frontend.
+
+If Vercel reports a missing `package.json` or cannot detect Next.js, check the
+Root Directory. If the homepage loads but `/api/health` returns 503, check
+`BACKEND_URL` and the backend logs. Never use `localhost`, `web:8080`, a database
+URL, or the Vercel frontend URL as the production `BACKEND_URL`.
 
 ## Complete CV dashboard
 
