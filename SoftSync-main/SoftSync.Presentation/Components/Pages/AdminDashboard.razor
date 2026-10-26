@@ -9,7 +9,8 @@
 <main class="admin-dashboard ss-admin-studio" data-admin-section="operations">
     <header><div><span>SOFTSYNC · ADMIN</span><h1>@Ui("Tổng quan hệ thống", "System overview")</h1><p>@Ui("Số liệu vận hành và hoạt động trong 24 giờ gần nhất.", "Operational and learning activity for the last 24 hours.")</p></div>
         <nav><a class="btn btn-outline-primary" href="/admin/ai/settings">@Ui("Cấu hình Gemini", "Gemini settings")</a><a class="btn btn-outline-primary" href="/admin/learners">@Ui("Chất lượng học viên", "Learner quality")</a><a class="btn btn-outline-secondary" href="/admin/users">@Ui("Người dùng", "Users")</a></nav></header>
-    @if (overview is null) { <p>@Ui("Đang tải dữ liệu…", "Loading data…")</p> }
+    <VisitAnalytics />
+    @if (overview is null) { <p>@Ui("Chưa tải được số liệu vận hành. Đang thử lại…", "Operational metrics unavailable. Retrying…")</p> }
     else {
         <p class="updated">@Ui("Cập nhật", "Updated") @overview.CollectedAtUtc?.ToLocalTime().ToString("HH:mm:ss") · @overview.MetricSource</p>
         <section class="cards">

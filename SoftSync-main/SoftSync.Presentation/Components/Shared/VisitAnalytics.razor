@@ -1,0 +1,123 @@
+@using SoftSync.BLL.Services
+@using System.Globalization
+@inherits LocalizedComponentBase
+@implements IAsyncDisposable
+@inject IServiceScopeFactory ScopeFactory
+
+<section class="visit-analytics" aria-labelledby="visits-title" aria-busy="@busy.ToString().ToLowerInvariant()">
+    <div class="visits-heading">
+        <div><span class="visits-eyebrow">SOFTSYNC ANALYTICS</span><h2 id="visits-title">@Ui("Truy cập & thời gian hoạt động", "Visits & active time")</h2><p>@Ui("Theo dõi phiên truy cập thực tế trên website · giờ Việt Nam (UTC+7).", "Measured website visits · Vietnam time (UTC+7).")</p></div>
+        <button class="btn btn-outline-primary" @onclick="ReloadAsync" disabled="@busy">@Ui("Làm mới", "Refresh")</button>
+    </div>
+    <div class="visits-toolbar">
+        <div class="visits-period" role="group" aria-label="@Ui("Chế độ thống kê", "Report period")">
+            @foreach (var option in Enum.GetValues<VisitPeriod>())
+            {
+                <button type="button" class="@(period == option ? "selected" : "")" aria-pressed="@((period == option).ToString().ToLowerInvariant())" disabled="@busy" @onclick="() => ChangePeriodAsync(option)">@PeriodLabel(option)</button>
+            }
+        </div>
+        <label class="visits-date">@Ui("Chọn ngày trong kỳ", "Date in period")<input type="date" @bind="anchor" @bind:after="ReloadAsync" max="@Today.ToString("yyyy-MM-dd")" disabled="@busy" /></label>
+        <div class="visits-navigation">
+            <button class="btn btn-outline-secondary" aria-label="@Ui("Kỳ trước", "Previous period")" disabled="@busy" @onclick="() => MoveAsync(-1)">←</button>
+            <button class="btn btn-outline-secondary" disabled="@(busy || IsCurrent)" @onclick="TodayAsync">@Ui("Hiện tại", "Current")</button>
+            <button class="btn btn-outline-secondary" aria-label="@Ui("Kỳ sau", "Next period")" disabled="@(busy || IsCurrent)" @onclick="() => MoveAsync(1)">→</button>
+        </div>
+    </div>
+    @if (error)
+    {
+        <p class="visits-error" role="alert">@Ui("Chưa tải được thống kê. Nếu có, số liệu bên dưới là lần tải trước; chọn Làm mới để thử lại.", "Statistics could not be loaded. Any figures below are from the previous refresh. Try Refresh again.")</p>
+    }
+    @if (report is null && !error)
+    {
+        <p role="status">@Ui("Đang tải thống kê truy cập…", "Loading visit statistics…")</p>
+    }
+    @if (report is not null)
+    {
+        <p class="visits-range" role="status">@report.LocalStart.ToString("dd/MM/yyyy") – @report.LocalEnd.AddDays(-1).ToString("dd/MM/yyyy") · @Ui("Cập nhật", "Updated") @updated.ToString("HH:mm:ss") (UTC+7)</p>
+        <div class="visits-cards">
+            <article><span>@Ui("Lượt vào", "Entries")</span><strong>@report.Entries.ToString("N0")</strong><small>@Ui("Phiên bắt đầu trong kỳ", "Visits started in period")</small></article>
+            <article><span>@Ui("Lượt ra", "Exits")</span><strong>@report.Exits.ToString("N0")</strong><small>@Ui("Đóng trang hoặc hết phiên", "Closed or timed-out visits")</small></article>
+            <article><span>@Ui("Tổng thời gian hoạt động", "Total active time")</span><strong class="duration">@Duration(report.ActiveSeconds)</strong><small>@Ui("Cộng dồn thời gian của các phiên", "Activity summed across visits")</small></article>
+            <article><span>@Ui("Đang truy cập", "Online now")</span><strong>@report.Online.ToString("N0")</strong><small>@Ui("Hiện tại · không phụ thuộc kỳ đã chọn", "Live · independent of selected period")</small></article>
+        </div>
+        @if (report.Entries == 0 && report.Exits == 0 && report.ActiveSeconds == 0)
+        {
+            <p class="visits-empty">@Ui("Chưa có dữ liệu trong kỳ này. Website bắt đầu ghi nhận từ khi tính năng được bật; dữ liệu cũ không được tạo giả.", "No activity in this period. Tracking starts when this feature is enabled; historical visits are not fabricated.")</p>
+        }
+        <div class="visits-chart-grid">
+            <article class="visits-chart">
+                <h3>@Ui("Lượt vào và lượt ra", "Entries and exits")</h3>
+                <div class="visits-legend"><span><i class="entry"></i>@Ui("Lượt vào", "Entries")</span><span><i class="exit"></i>@Ui("Lượt ra", "Exits")</span></div>
+                <p class="visits-scale">@Ui("Trục dọc: số phiên", "Vertical axis: visits") · 0 – @VisitMaximum</p>
+                <div class="visits-chart-scroll"><div class="visits-plot" role="img" aria-label="@Ui("Biểu đồ lượt vào và ra; số liệu đầy đủ trong bảng chi tiết bên dưới.", "Entry and exit chart; exact figures are available in the details table below.")">
+                    @foreach (var bucket in report.Buckets)
+                    {
+                        <div class="visits-column" title="@BucketTitle(bucket)"><div class="visits-bars"><i class="entry" style="height:@Percent(bucket.Entries, VisitMaximum)"></i><i class="exit" style="height:@Percent(bucket.Exits, VisitMaximum)"></i></div><span>@BucketLabel(bucket)</span></div>
+                    }
+                </div></div>
+            </article>
+            <article class="visits-chart">
+                <h3>@Ui("Thời gian hoạt động", "Active time")</h3>
+                <div class="visits-legend"><span><i class="activity"></i>@Ui("Thời gian có tương tác", "Measured activity")</span></div>
+                <p class="visits-scale">@Ui("Trục dọc: phút", "Vertical axis: minutes") · 0 – @((TimeMaximum / 60).ToString("0.#"))</p>
+                <div class="visits-chart-scroll"><div class="visits-plot" role="img" aria-label="@Ui("Biểu đồ thời gian hoạt động; số liệu đầy đủ trong bảng chi tiết bên dưới.", "Active time chart; exact figures are available in the details table below.")">
+                    @foreach (var bucket in report.Buckets)
+                    {
+                        <div class="visits-column" title="@BucketTitle(bucket)"><div class="visits-bars"><i class="activity" style="height:@Percent(bucket.ActiveSeconds, TimeMaximum)"></i></div><span>@BucketLabel(bucket)</span></div>
+                    }
+                </div></div>
+            </article>
+        </div>
+        <details class="visits-details"><summary>@Ui("Xem bảng số liệu chi tiết", "Show detailed figures")</summary><div class="visits-table-scroll"><table><caption>@Ui("Lượt vào, lượt ra và thời gian hoạt động theo từng mốc trong kỳ đã chọn (UTC+7).", "Entries, exits and active time by time bucket (UTC+7).")</caption><thead><tr><th scope="col">@Ui("Thời điểm", "Time")</th><th scope="col">@Ui("Lượt vào", "Entries")</th><th scope="col">@Ui("Lượt ra", "Exits")</th><th scope="col">@Ui("Hoạt động", "Active time")</th></tr></thead><tbody>
+            @foreach (var bucket in report.Buckets)
+            {
+                <tr><th scope="row">@bucket.LocalStart.ToString(period == VisitPeriod.Day ? "dd/MM HH:mm" : "dd/MM/yyyy")</th><td>@bucket.Entries</td><td>@bucket.Exits</td><td>@Duration(bucket.ActiveSeconds)</td></tr>
+            }
+        </tbody></table></div></details>
+    }
+    <p class="visits-method">@Ui("Một phiên tương ứng một trang/tab đang mở, gồm cả khách chưa đăng nhập. Lượt ra được ghi khi đóng trang hoặc sau 90 giây mất kết nối. Thời gian chỉ cộng khi tab hiển thị và có tương tác trong 60 giây gần nhất; tuần bắt đầu từ thứ Hai. Số liệu dựa trên trình duyệt có bật JavaScript.", "A visit represents an open page/tab, including anonymous guests. Exits are recorded on page close or after 90 seconds without a heartbeat. Time is credited for visible tabs with interaction in the last 60 seconds. Weeks begin on Monday. Tracking requires JavaScript.")</p>
+</section>
+
+@code {
+    private VisitReport? report;
+    private VisitPeriod period = VisitPeriod.Day;
+    private DateTime anchor = Today;
+    private DateTime updated;
+    private bool busy, error;
+    private readonly CancellationTokenSource cancellation = new();
+    private Task? polling;
+    private static DateTime Today => (DateTime.UtcNow + WebsiteAnalyticsService.VietnamOffset).Date;
+    private bool IsCurrent => WebsiteAnalyticsService.LocalRange(period, anchor).Start == WebsiteAnalyticsService.LocalRange(period, Today).Start;
+    private int VisitMaximum => Math.Max(1, report?.Buckets.Max(x => Math.Max(x.Entries, x.Exits)) ?? 1);
+    private double TimeMaximum => Math.Max(60, report?.Buckets.Max(x => x.ActiveSeconds) ?? 60);
+    protected override async Task OnInitializedAsync() { await ReloadAsync(); polling = PollAsync(); }
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
+        try { while (await timer.WaitForNextTickAsync(cancellation.Token)) await InvokeAsync(async () => { await ReloadAsync(); StateHasChanged(); }); }
+        catch (OperationCanceledException) { }
+    }
+    private async Task ReloadAsync()
+    {
+        if (busy || cancellation.IsCancellationRequested) return;
+        busy = true;
+        try { using var scope = ScopeFactory.CreateScope(); report = await scope.ServiceProvider.GetRequiredService<WebsiteAnalyticsService>().GetReportAsync(period, anchor, cancellation.Token); updated = DateTime.UtcNow + WebsiteAnalyticsService.VietnamOffset; error = false; }
+        catch (OperationCanceledException) { }
+        catch { error = true; }
+        finally { busy = false; }
+    }
+    private async Task ChangePeriodAsync(VisitPeriod value) { period = value; await ReloadAsync(); }
+    private async Task TodayAsync() { anchor = Today; await ReloadAsync(); }
+    private async Task MoveAsync(int direction)
+    {
+        var start = WebsiteAnalyticsService.LocalRange(period, anchor).Start;
+        anchor = period switch { VisitPeriod.Month => start.AddMonths(direction), VisitPeriod.Week => start.AddDays(direction * 7), _ => start.AddDays(direction) };
+        await ReloadAsync();
+    }
+    private string PeriodLabel(VisitPeriod value) => value switch { VisitPeriod.Week => Ui("Theo tuần", "Week"), VisitPeriod.Month => Ui("Theo tháng", "Month"), _ => Ui("Theo ngày", "Day") };
+    private string BucketLabel(VisitBucket value) => value.LocalStart.ToString(period == VisitPeriod.Day ? "HH" : "dd/MM");
+    private string BucketTitle(VisitBucket value) => $"{value.LocalStart:dd/MM HH:mm}: {value.Entries} {Ui("vào", "entries")}, {value.Exits} {Ui("ra", "exits")}, {Duration(value.ActiveSeconds)}";
+    private static string Percent(double value, double maximum) => (value / maximum * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+    private static string Duration(double seconds) { var time = TimeSpan.FromSeconds(Math.Max(0, Math.Floor(seconds))); return $"{(int)time.TotalHours}h {time.Minutes:00}m {time.Seconds:00}s"; }
+    public async ValueTask DisposeAsync() { cancellation.Cancel(); if (polling is not null) await polling; cancellation.Dispose(); }
+}

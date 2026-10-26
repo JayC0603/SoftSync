@@ -1,0 +1,34 @@
+:root { --ease-out: cubic-bezier(.23, 1, .32, 1); }
+/* The image frames the workspace; reading surfaces remain opaque. */
+html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header {
+    background: linear-gradient(100deg, #202444 0%, #28264beF 45%, #38305a40 100%), url('/images/backgrounds/softsync-learning-atrium.webp') center right / cover;
+    border: 1px solid #ffffff24;
+    border-radius: 24px;
+    padding: clamp(24px, 4vw, 44px);
+    color: #fff;
+}
+html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header h1 { color: #fff; }
+html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header p { color: #e4e3f6; max-width: 64ch; }
+html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header span { color: #cfcbff; }
+html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header .btn-outline-secondary { color: #fff; border-color: #ffffff80; background: #ffffff18; }
+.marketing .hero {
+    background: linear-gradient(90deg, #f8fafd 0%, #f8fafdeb 40%, #f8fafd35 100%), url('/images/backgrounds/softsync-learning-atrium.webp') center right / cover;
+    border-radius: 28px;
+}
+html body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary) {
+    transition: transform 160ms var(--ease-out), opacity 160ms ease !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    html:not([data-reduce-motion="1"]):not([data-motion-input="keyboard"]) body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary):not(:disabled):not([aria-disabled="true"]):hover { transform: translateY(-2px); }
+}
+html:not([data-reduce-motion="1"]):not([data-motion-input="keyboard"]) body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary):not(:disabled):not([aria-disabled="true"]):active { transform: scale(.97); }
+html[data-motion-input="keyboard"] body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary),
+html[data-reduce-motion="1"] body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary) { transform: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+    html body :is(.btn, .ss-btn-primary, .login-submit, .register-submit, .visits-period button, .visits-date button, .marketing .primary, .marketing .secondary) { transform: none !important; transition: none !important; }
+}
+@media (max-width: 600px) {
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header { border-radius: 18px; background-position: 65% center; }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header h1 { font-size: 28px; line-height: 1.2; }
+    .marketing .hero { background-image: linear-gradient(180deg, #f8fafdf5 10%, #f8fafdc9 100%), url('/images/backgrounds/softsync-learning-atrium.webp'); }
+}

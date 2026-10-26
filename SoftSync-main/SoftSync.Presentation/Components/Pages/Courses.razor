@@ -9,28 +9,62 @@
 @inject ICourseService CoursesService
 @inject AuthenticationStateProvider Auth
 
-<PageTitle>@Ui("Courses") · SoftSync</PageTitle>
-<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
-<header class="tw:mb-8"><span class="badge bg-primary">@Ui("Inclusive Learning")</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Courses")</h1><p>@Ui("Video, caption, transcript and persistent learning progress.")</p></header>
-@if(loading){<p role="status">@Ui("Loading courses...")</p>}
-@if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@Ui(message)</div>}
-<div class="tw:grid tw:gap-6 tw:lg:grid-cols-2">@foreach(var course in courses){<article class="ss-glass tw:rounded-2xl tw:p-6" aria-labelledby="course-title-@course.Id">
-@if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText" class="tw:mb-4 tw:h-48 tw:w-full tw:rounded-xl tw:object-cover"/>}
-<h2 id="course-title-@course.Id" class="tw:text-xl tw:font-bold">@course.Title</h2><p>@course.Description</p><div class="progress" role="progressbar" aria-label="@UiFormat("Course progress for {0}", course.Title)" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="@UiFormat("{0} percent complete", course.ProgressPercentage)"><div class="progress-bar" style="width:@course.ProgressPercentage%">@course.ProgressPercentage%</div></div>
-<dl class="tw:mt-3"><dt>@Ui("Lessons completed")</dt><dd>@course.CompletedLessons / @course.TotalLessons</dd><dt>@Ui("Final Quiz")</dt><dd>@(course.FinalQuizId is null ? Ui("Not required") : course.FinalQuizResult is null ? Ui("Not Started") : course.FinalQuizResult == QuizAttemptResult.Pass ? Ui("Pass") : Ui("Not Pass"))</dd><dt>@Ui("Course Status")</dt><dd>@(course.IsCompleted ? Ui("Completed") : Ui("In Progress"))</dd></dl>
-@if(course.IsCompleted){<div class="alert alert-success" role="status"><strong>@Ui("Course Completed")</strong></div>}
-else if(course.FinalQuizResult == QuizAttemptResult.NotPass){<div class="alert alert-warning" role="status">@Ui("Final quiz not passed yet. You may retry.")</div>}
-else if(course.FinalQuizId is not null){<p>@Ui("Complete all required lessons and pass the final quiz.")</p>}
-else {<p>@Ui("Complete all required lessons to finish this course.")</p>}
-<button type="button" class="btn btn-primary tw:my-3" @onclick="()=>Enroll(course.Id)">@Ui("Enroll / Continue")</button>
-<ol>@foreach(var lesson in course.Lessons){<li class="tw:mb-4"><h3 class="tw:text-lg tw:font-semibold">@lesson.Title</h3>@if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video class="tw:w-full" controls preload="metadata" aria-label="@UiFormat("Video lesson: {0}", lesson.Title)"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="@Ui("Vietnamese captions")" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p class="tw:text-sm tw:text-slate-700">@Ui("Captions are not available for this video.")</p>}}@if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details><summary>@UiFormat("Transcript for {0}", lesson.Title)</summary><div class="tw:whitespace-pre-wrap">@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p class="tw:text-sm tw:text-slate-700">@Ui("A transcript is not available for this video.")</p>}<button type="button" class="btn btn-sm btn-outline-success tw:mt-2" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? Ui("Lesson completed") : Ui("Mark lesson completed"))</button></li>}</ol>
-@if(course.FinalQuizId is int finalQuizId){<a class="btn btn-outline-primary" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? Ui("Retry Final Quiz") : Ui("Open Final Quiz"))</a>}
-</article>}</div>
-</section></section>
+<PageTitle>@Ui("Khóa học của bạn", "Your courses") · SoftSync</PageTitle>
+<main class="course-learning-page">
+    <section class="course-learning-hero" aria-labelledby="courses-title" aria-busy="@loading">
+        <div class="course-learning-hero-copy">
+            <span class="course-learning-eyebrow">SOFTSYNC ACADEMY <i>·</i> MY LEARNING</span>
+            <h1 id="courses-title">@Ui("Mỗi bước học, thêm một bước tiến.", "Every lesson moves you forward.")</h1>
+            <p>@Ui("Tiếp tục khóa học của bạn. Theo dõi tiến độ và tập trung vào bước kế tiếp.", "Pick up where you left off. Track your progress and focus on your next step.")</p>
+            <a class="course-learning-start" href="#my-learning-list">@Ui("Tiếp tục học", "Continue learning") <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="course-learning-hero-art" role="img" aria-label="@Ui("Lộ trình học tập", "A learning path")"></div>
+        <div class="course-learning-summary" aria-label="@Ui("Tổng quan khóa học", "Course overview")">
+            <div><strong>@courses.Count</strong><span>@Ui("Khóa học", "Courses")</span></div>
+            <i></i>
+            <div><strong>@courses.Count(x => !x.IsCompleted)</strong><span>@Ui("Đang học", "In progress")</span></div>
+            <i></i>
+            <div><strong>@courses.Count(x => x.IsCompleted)</strong><span>@Ui("Hoàn thành", "Completed")</span></div>
+        </div>
+    </section>
+
+    <section class="course-learning-section" id="my-learning-list" aria-label="@Ui("Các khóa học của bạn", "Your learning paths")" aria-busy="@loading">
+        <header class="course-learning-section-heading"><div><span>@Ui("LEARNING PATHS", "LEARNING PATHS")</span><h2>@Ui("Khóa học của bạn", "Your courses")</h2></div><p>@Ui("Một hành trình tốt được tạo nên từ những bước nhỏ, đều đặn.", "A good learning journey is built one steady step at a time.")</p></header>
+        @if(loading){<p class="course-learning-state" role="status">@Ui("Đang tải khóa học…", "Loading courses…")</p>}
+        @if(!string.IsNullOrWhiteSpace(message)){<div class="course-learning-message" role="status">@Ui(message)</div>}
+        @if(!loading && courses.Count == 0){<div class="course-learning-state"><span>✳</span><div><h3>@Ui("Khóa học đang được chuẩn bị", "Courses are being prepared")</h3><p>@Ui("Các khóa học đã xuất bản sẽ xuất hiện tại đây.", "Your published courses will appear here.")</p></div></div>}
+        <div class="course-learning-grid">@foreach(var course in courses){
+            <article class="course-learning-card" aria-labelledby="course-title-@course.Id">
+                <div class="course-learning-cover">
+                    @if(!string.IsNullOrWhiteSpace(course.ThumbnailUrl)){<img src="@course.ThumbnailUrl" alt="@course.ThumbnailAltText"/>}
+                    else{<div class="course-learning-cover-fallback"><span>SOFTSYNC ACADEMY</span><strong>@course.Title</strong><i aria-hidden="true">↗</i></div>}
+                    <span class="course-learning-status @(course.IsCompleted ? "is-complete" : "")">@(course.IsCompleted ? Ui("Đã hoàn thành", "Completed") : Ui("Đang phát triển", "In progress"))</span>
+                </div>
+                <div class="course-learning-card-body">
+                    <h3 id="course-title-@course.Id">@course.Title</h3><p class="course-learning-description">@course.Description</p>
+                    <div class="course-progress-heading"><span>@Ui("Tiến độ khóa học", "Course progress")</span><strong>@course.ProgressPercentage%</strong></div>
+                    <div class="course-learning-progress" role="progressbar" aria-label="@UiFormat("Course progress for {0}", course.Title)" aria-valuenow="@course.ProgressPercentage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="@UiFormat("{0} percent complete", course.ProgressPercentage)"><span style="width:@course.ProgressPercentage%"></span></div>
+                    <div class="course-learning-facts"><div><span>@Ui("Bài học", "Lessons")</span><strong>@course.CompletedLessons / @course.TotalLessons</strong></div><div><span>@Ui("Bài kiểm tra cuối khóa", "Final quiz")</span><strong>@(course.FinalQuizId is null ? Ui("Không yêu cầu", "Not required") : course.FinalQuizResult is null ? Ui("Chưa bắt đầu", "Not started") : course.FinalQuizResult == QuizAttemptResult.Pass ? Ui("Đạt", "Passed") : Ui("Cần làm lại", "Retry needed"))</strong></div></div>
+                    @if(course.IsCompleted){<div class="course-learning-alert is-success" role="status"><strong>@Ui("Bạn đã hoàn thành khóa học này", "You completed this course")</strong></div>}
+                    else if(course.FinalQuizResult == QuizAttemptResult.NotPass){<div class="course-learning-alert" role="status">@Ui("Bạn có thể thử lại bài kiểm tra cuối khóa.", "You can retry the final quiz.")</div>}
+                    <div class="course-learning-actions"><button type="button" class="btn btn-primary" @onclick="()=>Enroll(course.Id)">@(course.IsCompleted ? Ui("Xem lại khóa học", "Review course") : course.CompletedLessons > 0 ? Ui("Tiếp tục học", "Continue learning") : Ui("Bắt đầu khóa học", "Start course")) <span aria-hidden="true">→</span></button>
+                        @if(course.FinalQuizId is int finalQuizId){<a class="course-learning-quiz" href="/game?quizId=@finalQuizId">@(course.FinalQuizResult == QuizAttemptResult.NotPass ? Ui("Thử lại bài kiểm tra", "Retry quiz") : Ui("Mở bài kiểm tra", "Open quiz"))</a>}
+                    </div>
+                    <details class="course-learning-content"><summary>@Ui("Xem nội dung khóa học", "View course content") <span>(@course.TotalLessons)</span></summary><ol>@foreach(var lesson in course.Lessons){<li><div class="course-lesson-heading"><span>@lesson.Title</span><small>@(lesson.IsCompleted ? Ui("Hoàn thành", "Complete") : Ui("Bài học", "Lesson"))</small></div>
+                        @if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<video controls preload="metadata" aria-label="@UiFormat("Video lesson: {0}", lesson.Title)"><source src="@lesson.VideoUrl"/>@if(!string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<track kind="captions" src="@lesson.CaptionUrl" srclang="vi" label="@Ui("Phụ đề tiếng Việt", "Vietnamese captions")" default/>}</video>@if(string.IsNullOrWhiteSpace(lesson.CaptionUrl)){<p>@Ui("Video này chưa có phụ đề.", "Captions are not available for this video.")</p>}}
+                        @if(!string.IsNullOrWhiteSpace(lesson.Transcript)){<details class="course-lesson-transcript"><summary>@UiFormat("Transcript for {0}", lesson.Title)</summary><div>@lesson.Transcript</div></details>}else if(!string.IsNullOrWhiteSpace(lesson.VideoUrl)){<p>@Ui("Bài học này chưa có bản chép lời.", "A transcript is not available for this video.")</p>}
+                        <button type="button" class="btn btn-sm btn-outline-success" disabled="@lesson.IsCompleted" @onclick="()=>Complete(lesson.Id)">@(lesson.IsCompleted ? Ui("Đã hoàn thành", "Lesson completed") : Ui("Đánh dấu đã hoàn thành", "Mark lesson completed"))</button>
+                    </li>}</ol></details>
+                </div>
+            </article>
+        }</div>
+    </section>
+</main>
+
 @code{
-private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
-protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
-private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
-private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
-private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Lesson progress saved.":"Enroll before completing a lesson.";await Reload();}
+    private int userId;private IReadOnlyList<CourseDto> courses=[];private string? message;private bool loading=true;
+    protected override async Task OnInitializedAsync(){var state=await Auth.GetAuthenticationStateAsync();userId=int.TryParse(state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,out var id)?id:0;await Reload();loading=false;}
+    private async Task Reload()=>courses=await CoursesService.GetPublishedAsync(userId);
+    private async Task Enroll(int id){message=await CoursesService.EnrollAsync(id,userId)?"Enrollment saved.":"Could not enroll.";await Reload();}
+    private async Task Complete(int id){message=await CoursesService.CompleteLessonAsync(id,userId)?"Progress saved.":"Enroll before completing a lesson.";await Reload();}
 }

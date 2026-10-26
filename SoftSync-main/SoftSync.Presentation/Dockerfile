@@ -7,10 +7,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Node 20 is needed so the csproj NpmInstall/ViteBuild targets can emit wwwroot/dist.
+# Node 22 builds the Vite/Tailwind assets required by the published UI.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
@@ -59,4 +59,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
 ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 EXPOSE 8080
-ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-8080} dotnet SoftSync.Presentation.dll"]
+ENTRYPOINT ["/bin/sh", "-c", "export ASPNETCORE_URLS=http://+:${PORT:-8080}; exec dotnet SoftSync.Presentation.dll"]

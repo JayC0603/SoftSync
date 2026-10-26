@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Authentication;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<WebsiteAnalyticsService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -307,6 +309,7 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
 app.MapCvReviewEndpoints();
+app.MapWebsiteAnalytics();
 
 var learningApi = app.MapGroup("/api/learning/sessions").RequireAuthorization();
 learningApi.MapPost("/", async (StartLearningActivityRequest request, System.Security.Claims.ClaimsPrincipal user,

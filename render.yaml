@@ -6,7 +6,7 @@ services:
     region: singapore
     dockerfilePath: ./SoftSync-main/SoftSync.Presentation/Dockerfile
     dockerContext: ./SoftSync-main
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
@@ -14,6 +14,12 @@ services:
         fromDatabase:
           name: softsync-db
           property: connectionString
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: BootstrapAdmin__Email
+        sync: false
+      - key: BootstrapAdmin__Password
+        sync: false
 
 databases:
   - name: softsync-db
