@@ -19,7 +19,7 @@ Import `SoftSync.Next` as the Vercel project root. Vercel detects Next.js and
 runs `npm run build` automatically. Set this server-side environment variable:
 
 ```text
-BACKEND_URL=https://your-backend-service.onrender.com
+BACKEND_URL=https://your-softsync-project.vercel.app
 ```
 
 `BACKEND_URL` is the public ASP.NET Core API URL, not the frontend's

@@ -26,7 +26,14 @@ public static class DbInitializer
         if (db.Database.IsInMemory())
             await db.Database.EnsureCreatedAsync();
         else
-            await db.Database.MigrateAsync();
+        {
+            // Neon exposes a direct URL for migrations in addition to its
+            // pooled application URL. Keep schema changes off the pooler.
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            await using var migrationDb = new SoftSyncDbContext(new DbContextOptionsBuilder<SoftSyncDbContext>()
+                .UseNpgsql(PostgresConnection.Resolve(configuration, direct: true)).Options);
+            await migrationDb.Database.MigrateAsync();
+        }
 
         var roleManager = sp.GetRequiredService<RoleManager<IdentityRole<int>>>();
         foreach (var roleName in CourseAuthorization.Roles)

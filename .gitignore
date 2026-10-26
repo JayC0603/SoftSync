@@ -1,0 +1,9 @@
+.vercel/
+.env
+.env.*
+!.env.example
+!.env.vercel.example
+.vercel
+.env*
+!**/.env.vercel.example
+SoftSync-main/SoftSync.Presentation/wwwroot/video-manifest.json

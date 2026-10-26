@@ -29,11 +29,14 @@ SoftSync — nền tảng học kỹ năng mềm bằng AI. **Blazor Server (.NE
 - Migration: `dotnet ef migrations add <Name> -p SoftSync.DAL -s SoftSync.Presentation` (khi tạo migration, phải **dừng app đang chạy** vì nó khóa DLL). `DbInitializer.SeedAsync` tự `MigrateAsync()` lúc boot → không cần `database update` tay.
 - **DB: PostgreSQL** (Npgsql). Dev local qua Docker: `docker compose up -d db` (Postgres 16, db/user/pass = `softsync`). Conn string dev trong `appsettings.Development.json`; prod đọc env `DATABASE_URL` (URI `postgres://…` → `Program.cs` convert sang keyword string, bật SSL) hoặc `ConnectionStrings__SoftSyncDb`.
 
-## Deploy (Render.com + Docker)
-- Blazor Server **không chạy trên Vercel** (serverless, không .NET). Deploy lên host có .NET runtime.
-- `SoftSync.Presentation/Dockerfile` multi-stage (SDK 10 + Node 20 build → aspnet 10 runtime), bind `$PORT` (fallback 8080). `.dockerignore` + `docker-compose.yml` ở gốc repo.
-- `Program.cs`: `UseForwardedHeaders` (proxy TLS) chạy trước Auth; `UseHttpsRedirection` **chỉ ở Development**. `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` để ghi `DateTime` non-UTC không lỗi.
-- Next.js frontend deploys to `https://<project>.vercel.app`; set the ASP.NET Core host's `FRONTEND_ORIGINS` to that exact origin. The ASP.NET Core backend still requires a .NET-capable host and uses `DATABASE_URL` + `ASPNETCORE_ENVIRONMENT=Production`. Google OAuth redirect remains on the backend host: `https://<backend-host>/signin-google`.
+## Deploy (Vercel + Neon PostgreSQL + Blob)
+- Full application: Vercel Container Runtime using `Dockerfile.vercel` and `vercel.json`.
+- PostgreSQL: Neon provisioned through Vercel Marketplace. `DATABASE_URL` is used by the app; `DATABASE_URL_UNPOOLED` is used for migrations.
+- `DbInitializer.SeedAsync` applies existing migrations and seed data when the app starts. `--initialize-database` initializes the database and exits.
+- `--export-database-schema=<path>` exports idempotent migration SQL without connecting to PostgreSQL.
+- Course media persists in a public Vercel Blob store via `BLOB_READ_WRITE_TOKEN`.
+- See `../VERCEL.md` and `../deploy-vercel.ps1` for provisioning and deployment.
+- TLS terminates at the Vercel edge; forwarded headers run before authentication. OAuth callback: `https://<deployment-domain>/signin-google`.
 
 ## Tài khoản demo
 Seed runtime trong `DbInitializer`: `demo@softsync.local` / `Demo@12345`.
