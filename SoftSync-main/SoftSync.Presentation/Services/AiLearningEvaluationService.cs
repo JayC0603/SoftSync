@@ -13,7 +13,7 @@ public sealed class HuggingFaceJsonClient(
     IHttpClientFactory clients,
     IConfiguration configuration,
     ILogger<HuggingFaceJsonClient> logger,
-    IAiProviderConfigurationResolver? resolver = null)
+    IAiProviderConfigurationResolver? resolver = null, AiProviderService? gemini = null)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -29,6 +29,12 @@ public sealed class HuggingFaceJsonClient(
     {
         try
         {
+            if (gemini is not null && (await gemini.GetSettingsAsync(cancellationToken)).Enabled)
+            {
+                var operation = task.Contains("cv", StringComparison.OrdinalIgnoreCase) ? "cv-review" : task == "assistant" ? "chat" : "evaluation";
+                var response = await gemini.GenerateJsonAsync(operation, systemPrompt, input, cancellationToken);
+                return string.IsNullOrWhiteSpace(response?.Text) ? default : StructuredAiJson.Parse<T>(response.Text);
+            }
             var settings = resolved ?? await ResolveAsync(task, cancellationToken);
             if (settings is null) return default;
             var model = settings.Model;

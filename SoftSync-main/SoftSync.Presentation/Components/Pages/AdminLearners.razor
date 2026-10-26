@@ -1,0 +1,26 @@
+@page "/admin/learners"
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
+@inject AdminAnalyticsService Analytics
+
+<PageTitle>@Ui("Chất lượng học tập", "Learner quality") · SoftSync</PageTitle>
+<main class="admin-learners ss-admin-studio" data-admin-section="learners">
+    <header><div><span>SOFTSYNC · ADMIN</span><h1>@Ui("Tiến độ và chất lượng học viên", "Learner progress and quality")</h1><p>@Ui("Thời gian đo từ phiên hoạt động; chất lượng được thể hiện bằng kết quả học, không gộp thành một điểm phán xét.", "Time comes from active sessions; learning quality is shown through results rather than one judgment score.")</p></div><a class="btn btn-outline-secondary" href="/admin/dashboard">@Ui("Dashboard", "Overview")</a></header>
+    @if (rows is null) { <p>@Ui("Đang tải…", "Loading…")</p> }
+    else if (rows.Count == 0) { <p>@Ui("Chưa có học viên.", "No learners yet.")</p> }
+    else {
+        <div class="table-wrap"><table><thead><tr><th>@Ui("Học viên", "Learner")</th><th>@Ui("Thời gian học đo được", "Measured study time")</th><th>@Ui("Phiên học", "Sessions")</th><th>@Ui("Quiz trung bình", "Quiz average")</th><th>@Ui("Đánh giá đầu vào", "Assessment average")</th><th>@Ui("Lượt đánh giá CV", "CV reviews")</th></tr></thead><tbody>
+            @foreach (var row in rows) { <tr><td><strong>@(string.IsNullOrWhiteSpace(row.Name) ? row.Email : row.Name)</strong><small>@row.Email · #@row.UserId</small></td><td>@FormatTime(row.MeasuredSeconds)</td><td>@row.LearningSessions</td><td>@FormatScore(row.QuizAverage)</td><td>@FormatScore(row.AssessmentAverage)</td><td>@row.CvReviews</td></tr> }
+        </tbody></table></div>
+    }
+</main>
+<style>
+.admin-learners{max-width:1320px;margin:auto;padding:28px 24px 48px;color:var(--ss-text,#24213a)}.admin-learners header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}.admin-learners header span{font-size:.75rem;letter-spacing:.1em;color:#745cdf;font-weight:800}.admin-learners h1{font-size:clamp(1.8rem,3vw,2.4rem);margin:.4rem 0}.admin-learners p{color:var(--ss-text-muted,#746f84)}.table-wrap{overflow:auto;border:1px solid var(--ss-border,#e6e4f2);border-radius:16px;background:var(--ss-surface,#fff)}table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--ss-border,#e6e4f2)}th{font-size:.8rem;color:var(--ss-text-muted,#746f84);background:rgba(116,92,223,.045)}td:first-child{min-width:220px}td strong,td small{display:block}td small{margin-top:3px;color:var(--ss-text-muted,#746f84);font-size:.78rem}tbody tr:last-child td{border-bottom:0}@@media(max-width:900px){.admin-learners{padding:20px 14px 36px}.admin-learners header{align-items:flex-start}}
+</style>
+@code {
+    private List<AdminAnalyticsService.LearnerQualityRow>? rows;
+    protected override async Task OnInitializedAsync() => rows = await Analytics.GetLearnerQualityAsync();
+    private static string FormatTime(int seconds) => seconds < 60 ? $"{seconds}s" : seconds < 3600 ? $"{seconds / 60}m" : $"{seconds / 3600}h {(seconds % 3600) / 60}m";
+    private static string FormatScore(double? score) => score is null ? "—" : $"{score:0.#}%";
+}

@@ -43,6 +43,12 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
 
     public DbSet<CvDocumentRecord> CvDocuments { get; set; }
     public DbSet<CvReviewRecord> CvReviews { get; set; }
+    public DbSet<AiProviderSetting> AiProviderSettings { get; set; }
+    public DbSet<AiApiCredential> AiApiCredentials { get; set; }
+    public DbSet<AiOperationRecord> AiOperations { get; set; }
+    public DbSet<SystemMetricMinute> SystemMetricMinutes { get; set; }
+    public DbSet<LearningActivitySession> LearningActivitySessions { get; set; }
+    public DbSet<LearningHeartbeat> LearningHeartbeats { get; set; }
     public DbSet<ScheduleTask> ScheduleTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -81,6 +87,31 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
             .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.Document).WithMany()
             .HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Announcement>().HasIndex(x => new { x.PublishedAtUtc, x.Id });
+        modelBuilder.Entity<Announcement>().HasOne(x => x.Sender).WithMany()
+            .HasForeignKey(x => x.SenderUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<UserNotification>().HasKey(x => new { x.UserId, x.AnnouncementId });
+        modelBuilder.Entity<UserNotification>().HasIndex(x => new { x.UserId, x.ReadAtUtc });
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UserNotification>().HasOne(x => x.Announcement).WithMany(x => x.Recipients)
+            .HasForeignKey(x => x.AnnouncementId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CvDocumentRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvDocumentRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.User).WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CvReviewRecord>().HasOne(x => x.Document).WithMany()
+            .HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<AiApiCredential>().HasIndex(x => new { x.Priority, x.Enabled });
+        modelBuilder.Entity<AiOperationRecord>().HasIndex(x => new { x.CreatedAtUtc, x.Task, x.Status });
+        modelBuilder.Entity<SystemMetricMinute>().HasKey(x => new { x.MinuteStartUtc, x.InstanceId });
+        modelBuilder.Entity<LearningActivitySession>().HasIndex(x => new { x.UserId, x.StartedAtUtc });
+        modelBuilder.Entity<LearningHeartbeat>().HasIndex(x => new { x.SessionId, x.Sequence }).IsUnique();
 
         // Many-to-Many: User <-> Skill (Selections)
         modelBuilder.Entity<UserSkillSelection>()

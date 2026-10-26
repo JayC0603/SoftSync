@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace SoftSync.Presentation.Services;
 
-public sealed class CvReviewService(HuggingFaceJsonClient ai, IConfiguration configuration)
+public sealed class CvReviewService(HuggingFaceJsonClient ai, IConfiguration configuration, AiProviderService gemini)
 {
     public const int MaxCvCharacters = 40_000;
     public const int MaxJdCharacters = 20_000;
@@ -17,7 +17,8 @@ public sealed class CvReviewService(HuggingFaceJsonClient ai, IConfiguration con
         if (!string.IsNullOrEmpty(jd) && jd.Length < 40) throw new CvReviewException("jd_too_short", "Hãy bổ sung yêu cầu công việc vào JD để đánh giá độ phù hợp.", "Add the job requirements to the JD so its fit can be assessed.");
         if (jd?.Length > MaxJdCharacters) throw new CvReviewException("jd_too_long", "Nội dung JD vượt quá 20.000 ký tự.", "JD text exceeds 20,000 characters.");
         cancellationToken.ThrowIfCancellationRequested();
-        if (!configuration.GetValue("AiApi:Enabled", false) || string.IsNullOrWhiteSpace(configuration["AiApi:ApiKey"]))
+        var geminiSettings = await gemini.GetSettingsAsync(cancellationToken);
+        if (!geminiSettings.Enabled && (!configuration.GetValue("AiApi:Enabled", false) || string.IsNullOrWhiteSpace(configuration["AiApi:ApiKey"])))
             throw Unavailable();
 
         var hasJd = !string.IsNullOrWhiteSpace(jd);

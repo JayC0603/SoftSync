@@ -1,0 +1,915 @@
+/* Desktop workspace shell and learner dashboard.
+   This file is also loaded with a desktop-only media attribute in App.razor. */
+@media (min-width: 901px) {
+    html body .page {
+        --ss-sidebar-width: 80px;
+        --ss-desktop-gutter: 24px;
+    }
+
+    html[data-sidebar="expanded"] body .page { --ss-sidebar-width: 200px; }
+
+    html body .page {
+        min-height: 100vh;
+        background: var(--ss-canvas);
+    }
+
+    /* The existing vertical navigation becomes a fixed desktop rail. */
+    html body .page > .ss-navbar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 28px;
+        width: var(--ss-sidebar-width);
+        height: 100vh;
+        min-height: 100vh;
+        padding: 20px 12px !important;
+        overflow-x: visible;
+        overflow-y: auto;
+        border: 0;
+        border-right: 1px solid var(--ss-border);
+        border-radius: 0;
+        background: var(--ss-surface) !important;
+        box-shadow: none !important;
+        transition: width 180ms ease;
+    }
+
+    html body .page > .ss-navbar .ss-brand {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        min-height: 44px;
+        padding: 0 8px 18px;
+        border-bottom: 1px solid var(--ss-border);
+        white-space: nowrap;
+    }
+
+    html body .page > .ss-navbar .ss-brand-logo {
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    html body .page > .ss-navbar .ss-brand > span {
+        display: none;
+        color: var(--ss-text) !important;
+        font-size: 18px;
+        font-weight: 750;
+    }
+
+    html body .page > .ss-navbar .ss-navpills {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        width: 100%;
+    }
+
+    html body .page > .ss-navbar .ss-navpill {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        min-width: 0;
+        min-height: 46px !important;
+        padding: 10px !important;
+        border: 1px solid transparent !important;
+        border-radius: 11px !important;
+        color: var(--ss-text-muted) !important;
+        background: transparent !important;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: left;
+        text-decoration: none;
+        transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+    }
+
+    html body .page > .ss-navbar .ss-navpill > i {
+        flex: 0 0 22px;
+        width: 22px;
+        margin: 0;
+        color: inherit !important;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    html body .page > .ss-navbar .ss-navpill > span {
+        display: none;
+        min-width: 0;
+        overflow: hidden;
+        color: inherit;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    html body .page > .ss-navbar .ss-navpill:hover,
+    html body .page > .ss-navbar .ss-navpill:focus-visible {
+        color: var(--ss-text) !important;
+        background: var(--ss-surface-soft) !important;
+    }
+
+    html body .page > .ss-navbar .ss-navpill.active {
+        color: var(--ss-primary) !important;
+        background: var(--ss-surface-accent) !important;
+        font-weight: 700;
+    }
+
+    html body .page > .ss-navbar .ss-navpill:focus-visible,
+    html body .page .ss-sidebar-toggle:focus-visible,
+    html body .page .ss-main-content :is(a, button, input, select, summary):focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--ss-primary) 72%, white);
+        outline-offset: 3px;
+    }
+
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill > span {
+        position: absolute;
+        z-index: 1100;
+        inset: 50% auto auto calc(100% + 12px);
+        display: block;
+        width: max-content;
+        max-width: min(280px, calc(100vw - var(--ss-sidebar-width) - 32px));
+        padding: 8px 12px;
+        transform: translateY(-50%);
+        visibility: hidden;
+        border: 1px solid var(--ss-border);
+        border-radius: 9px;
+        background: var(--ss-surface);
+        color: var(--ss-text);
+        box-shadow: var(--ss-shadow-md);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    html:not([data-sidebar="expanded"]) body .page { --ss-sidebar-width: 80px; }
+
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar { width: var(--ss-sidebar-width); }
+
+    html:not([data-sidebar="expanded"]) body .page .ss-workspace { margin-left: var(--ss-sidebar-width); }
+
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-brand > span {
+        display: none;
+    }
+
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-brand > span,
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-navpill > span {
+        display: inline;
+    }
+
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-navpill {
+        justify-content: flex-start;
+        padding-inline: 12px !important;
+    }
+
+    html[data-sidebar="expanded"] body .page > .ss-navbar .ss-navpill > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    html body .page .ss-workspace {
+        flex: 1 1 auto;
+        min-width: 0;
+        min-height: 100vh;
+        margin-left: var(--ss-sidebar-width);
+        background: var(--ss-canvas);
+        transition: margin-left 180ms ease;
+    }
+
+    html body .page .ss-workspace-topbar {
+        position: sticky;
+        z-index: 80;
+        top: 0;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 64px;
+        min-height: 64px;
+        max-height: 64px;
+        padding: 0 var(--ss-desktop-gutter);
+        border: 0;
+        border-bottom: 1px solid var(--ss-border);
+        border-radius: 0;
+        background: color-mix(in srgb, var(--ss-surface) 94%, transparent) !important;
+        box-shadow: none;
+    }
+
+    html body .page .ss-sidebar-toggle {
+        display: inline-grid;
+        width: 40px;
+        height: 40px;
+        margin-right: 14px;
+        border-radius: 10px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    html body .page .ss-mobile-brand {
+        display: none !important;
+    }
+
+    html body .page .ss-workspace-left {
+        display: flex;
+        align-items: center;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    html body .page .ss-workspace-title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    html body .page .ss-workspace-kicker {
+        color: var(--ss-text-muted);
+        font-size: 12px;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    html body .page .ss-workspace-title > strong {
+        overflow: hidden;
+        color: var(--ss-text);
+        font-size: 15px;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    html body .page .ss-header-actions {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+        gap: 8px;
+    }
+
+    html body .page .ss-header-actions :is(.ss-header-control, .ss-shell-control, .ss-notification-trigger) {
+        min-height: 40px;
+        border-radius: 10px;
+    }
+
+    html body .page .ss-header-actions > .ss-shell-control {
+        width: 40px;
+        height: 40px;
+    }
+
+    html body .page .ss-mobile-bottom-nav {
+        display: none !important;
+    }
+
+    html body .ss-workspace > .ss-main-content.container {
+        width: 100%;
+        max-width: 1600px;
+        min-width: 0;
+        margin-inline: auto;
+        padding: 28px var(--ss-desktop-gutter) 36px !important;
+    }
+
+    html body .page .ss-workspace .eco-footer {
+        width: 100%;
+        max-width: 1600px;
+        margin-inline: auto;
+        padding-inline: var(--ss-desktop-gutter);
+        border-top: 1px solid var(--ss-border);
+        background: transparent;
+    }
+
+    /* Recompose the existing learner dashboard. Its search, buttons, labels,
+       responsive mobile branch and all user data continue using the same DOM. */
+    html body .page .ss-main-content > .mobile-home.mh-v3 {
+        --desktop-dashboard-gap: 20px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(240px, .95fr);
+        grid-template-areas:
+            "search search"
+            "welcome welcome"
+            "hero goal"
+            "stats stats"
+            "roadmap quick"
+            "recommendations syncy"
+            "mentors achievements"
+            "motivation motivation";
+        align-items: start;
+        gap: var(--desktop-dashboard-gap);
+        width: 100%;
+        max-width: 1440px;
+        margin-inline: auto;
+        color: var(--mh-ink, var(--ss-text));
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 > * {
+        min-width: 0;
+        margin: 0;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search { grid-area: search; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome { grid-area: welcome; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero { grid-area: hero; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-goal { grid-area: goal; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats { grid-area: stats; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-roadmap { grid-area: roadmap; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick { grid-area: quick; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendations { grid-area: recommendations; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy { grid-area: syncy; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentors { grid-area: mentors; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievements { grid-area: achievements; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation { grid-area: motivation; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search {
+        z-index: 30;
+        max-width: 720px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search-input {
+        min-height: 44px;
+        border-radius: 11px;
+        background: var(--ss-surface);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search-input input {
+        min-height: 42px;
+        font-size: 14px !important;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search-filter { flex-basis: 44px; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-search-filter summary {
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        font-size: 18px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome {
+        min-height: 78px;
+        gap: 24px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome h1 {
+        max-width: 900px;
+        margin: 0;
+        color: var(--ss-text);
+        font-size: clamp(26px, 2.4vw, 34px) !important;
+        font-weight: 750;
+        letter-spacing: -.04em;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome p {
+        margin: 7px 0 0;
+        color: var(--ss-text-muted);
+        font-size: 15px !important;
+        line-height: 1.55;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome-art {
+        flex-basis: 190px;
+        width: 190px;
+        height: 74px;
+        object-fit: contain;
+        opacity: .9;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(150px, 31%);
+        grid-template-rows: minmax(0, 1fr) auto auto;
+        gap: 14px 12px;
+        min-height: 285px;
+        padding: 24px;
+        border-color: color-mix(in srgb, var(--ss-primary) 18%, var(--mh-border));
+        border-radius: 18px;
+        background: linear-gradient(125deg, var(--ss-surface-accent), var(--ss-surface));
+        box-shadow: var(--ss-shadow-sm);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-badge {
+        color: var(--ss-primary);
+        font-size: 12px;
+        letter-spacing: .045em;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-badge i { font-size: 16px; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero h2 {
+        max-width: 650px;
+        margin-top: 10px;
+        color: var(--ss-text);
+        font-size: clamp(22px, 2vw, 30px) !important;
+        font-weight: 750;
+        line-height: 1.22;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero-copy p {
+        max-width: 590px;
+        margin-top: 10px;
+        color: var(--ss-text-muted);
+        font-size: 14px !important;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero-art {
+        display: grid;
+        min-width: 0;
+        place-items: center;
+        overflow: hidden;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero-art img {
+        width: min(100%, 240px);
+        max-height: 190px;
+        object-fit: contain;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress {
+        align-self: end;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress > div,
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress > div > span {
+        color: var(--ss-text-muted);
+        font-size: 13px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress strong { color: var(--ss-text); }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress progress {
+        height: 8px;
+        accent-color: var(--ss-primary);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress progress::-webkit-progress-value { background: var(--ss-primary); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-progress progress::-moz-progress-bar { background: var(--ss-primary); }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-primary {
+        min-height: 44px;
+        border: 1px solid var(--ss-primary);
+        border-radius: 10px;
+        background: var(--ss-primary);
+        font-size: 14px !important;
+        font-weight: 650;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-primary:hover {
+        background: var(--ss-primary-hover);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats a {
+        min-height: 84px;
+        gap: 12px;
+        padding: 14px;
+        border-color: var(--ss-border);
+        border-radius: 13px;
+        background: var(--ss-surface);
+        box-shadow: var(--ss-shadow-sm);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats a > i {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        color: var(--ss-primary);
+        background: var(--ss-surface-accent);
+        font-size: 21px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats strong {
+        color: var(--ss-text);
+        font-size: 21px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats small {
+        color: var(--ss-text-muted);
+        font-size: 12px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-roadmap, .mh-quick, .mh-recommendations, .mh-mentors, .mh-achievements, .mh-goal, .mh-syncy, .mh-motivation) {
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid var(--ss-border);
+        border-radius: 14px;
+        background: var(--ss-surface);
+        box-shadow: var(--ss-shadow-sm);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-section-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-section-heading h2 {
+        min-width: 0;
+        color: var(--ss-text);
+        font-size: 17px !important;
+        font-weight: 700;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-section-heading h2 > i {
+        margin-right: 7px;
+        color: var(--ss-primary);
+        font-size: 15px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-section-heading > a {
+        flex: 0 0 auto;
+        min-height: 36px;
+        color: var(--ss-primary);
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-roadmap::before { opacity: .045; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-skill-timeline {
+        grid-auto-columns: minmax(110px, 1fr);
+        overflow-x: auto;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid a {
+        align-items: flex-start;
+        min-height: 110px;
+        gap: 5px;
+        padding: 12px;
+        border: 1px solid var(--ss-border);
+        border-radius: 11px;
+        background: var(--ss-surface-soft);
+        text-align: left;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid img {
+        width: 34px;
+        height: 34px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid strong {
+        color: var(--ss-text);
+        font-size: 13px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid span {
+        color: var(--ss-text-muted);
+        font-size: 11px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick-grid a > i { display: none; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        padding: 14px;
+        background: var(--ss-surface-accent);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy > img {
+        flex-basis: 48px;
+        width: 48px;
+        height: 48px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy > span { flex: 1 1 140px; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy strong {
+        margin: 0;
+        color: var(--ss-text);
+        font-size: 15px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy small {
+        display: block;
+        margin-top: 2px;
+        color: var(--ss-text-muted);
+        font-size: 11px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy p {
+        margin: 7px 0 0;
+        color: var(--ss-text-muted);
+        font-size: 12px !important;
+        line-height: 1.45;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy > i { display: none; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation-grid {
+        grid-auto-columns: minmax(200px, 1fr);
+        grid-auto-flow: row;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        overflow: visible;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation {
+        min-width: 0;
+        padding: 8px;
+        border-color: var(--ss-border);
+        border-radius: 10px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation > img,
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-lesson-icon {
+        flex-basis: 48px;
+        width: 48px;
+        height: 46px;
+        border-radius: 8px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation :is(small, strong, em) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation small { font-size: 11px; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation strong {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        font-size: 13px;
+        line-height: 1.35;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendation em {
+        color: var(--ss-text-muted);
+        font-size: 11px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track {
+        grid-auto-columns: minmax(230px, 1fr);
+        gap: 10px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track article {
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 8px;
+        padding: 10px;
+        border-color: var(--ss-border);
+        border-radius: 11px;
+        background: var(--ss-surface);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track article > img {
+        width: 52px;
+        height: 58px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track h3 {
+        color: var(--ss-text);
+        font-size: 12px !important;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track article p,
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-track article small {
+        color: var(--ss-text-muted);
+        font-size: 11px !important;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentor-detail {
+        min-height: 34px;
+        color: var(--ss-primary);
+        font-size: 12px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-card {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 4px 10px;
+        padding: 9px 0;
+        border-bottom-color: var(--ss-border);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-symbol {
+        grid-row: 1 / span 2;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-copy > strong {
+        min-width: 0;
+        color: var(--ss-text);
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-copy > p {
+        min-width: 0;
+        margin: 3px 0 0;
+        color: var(--ss-text-muted);
+        font-size: 11px !important;
+        line-height: 1.4;
+        white-space: normal;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px 8px;
+        margin-top: 5px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-meta > :is(span, time) {
+        color: var(--ss-text-muted);
+        font-size: 10px;
+        white-space: normal;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-status {
+        grid-column: 2;
+        justify-self: start;
+        margin-top: 2px;
+        color: var(--ss-success);
+        font-size: 11px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-arrow { display: none; }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievement-toggle {
+        min-height: 40px;
+        color: var(--ss-primary);
+        font-size: 13px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-empty {
+        color: var(--ss-text-muted);
+        font-size: 13px !important;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        min-height: 94px;
+        padding: 16px 20px;
+        overflow: hidden;
+        background: var(--ss-surface-accent);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation blockquote {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        width: min(720px, 74%);
+        margin: 0;
+        color: var(--ss-text);
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation blockquote > i {
+        flex: 0 0 auto;
+        color: var(--ss-primary);
+        font-size: 22px;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation p {
+        color: var(--ss-text);
+        font-size: 13px !important;
+        line-height: 1.5;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation cite {
+        display: block;
+        margin-top: 5px;
+        color: var(--ss-text-muted);
+        font-size: 11px;
+        font-style: normal;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation > img {
+        width: min(28%, 190px);
+        height: 60px;
+        object-fit: contain;
+        opacity: .7;
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation > .mh-motivation-trail { display: none; }
+
+    html[data-theme="dark"] body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-hero, .mh-goal, .mh-roadmap, .mh-quick, .mh-recommendations, .mh-syncy, .mh-mentors, .mh-achievements, .mh-motivation) {
+        border-color: var(--ss-border);
+        background-color: var(--ss-surface);
+    }
+
+    html[data-theme="dark"] body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-hero, .mh-syncy, .mh-motivation) {
+        background: linear-gradient(125deg, var(--ss-surface-accent), var(--ss-surface));
+    }
+
+    html body .page .ss-main-content > .mobile-home.mh-v3 :is(a, button, input, select, summary):focus-visible {
+        outline-color: var(--ss-primary);
+    }
+
+    @media (max-width: 1199.98px) {
+        html body .page { --ss-desktop-gutter: 20px; }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 {
+            --desktop-dashboard-gap: 16px;
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-areas:
+                "search"
+                "welcome"
+                "hero"
+                "goal"
+                "stats"
+                "roadmap"
+                "quick"
+                "recommendations"
+                "syncy"
+                "mentors"
+                "achievements"
+                "motivation";
+        }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero {
+            grid-template-columns: minmax(0, 1fr) minmax(110px, 28%);
+            min-height: 250px;
+            padding: 18px;
+        }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero-art img { max-height: 150px; }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-roadmap, .mh-quick, .mh-recommendations, .mh-mentors, .mh-achievements, .mh-goal, .mh-syncy) {
+            padding: 14px;
+        }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats { gap: 8px; }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats a {
+            gap: 8px;
+            padding: 10px;
+        }
+
+        html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats a > i {
+            width: 34px;
+            height: 34px;
+            font-size: 18px;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        html[data-sidebar="expanded"] body .page { --ss-sidebar-width: 224px; }
+
+        html body .page .ss-workspace .ss-main-content {
+            --ss-desktop-gutter: 28px;
+        }
+
+        html body .page .ss-workspace .ss-main-content > .mobile-home.mh-v3 {
+            --desktop-dashboard-gap: 22px;
+        }
+
+        html body .page .ss-workspace .ss-main-content > .mobile-home.mh-v3 .mh-hero {
+            min-height: 305px;
+            padding: 28px;
+        }
+    }
+
+    @media (min-width: 1440px) {
+        html[data-sidebar="expanded"] body .page { --ss-sidebar-width: 240px; }
+        html body .page .ss-workspace .ss-main-content { --ss-desktop-gutter: 32px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html body .page > .ss-navbar,
+        html body .page .ss-workspace { transition: none; }
+    }
+}

@@ -251,6 +251,11 @@ builder.Services.AddScoped<IAiAdminAccess, IdentityAiAdminAccess>();
 builder.Services.AddScoped<IAiProviderConfigurationResolver, AiProviderConfigurationResolver>();
 builder.Services.AddScoped<IAiProviderConnectionTester, AiProviderConnectionTester>();
 builder.Services.AddScoped<IAiProviderManagementService, AiProviderManagementService>();
+builder.Services.AddScoped<AiProviderService>();
+builder.Services.AddSingleton<SystemTelemetry>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<SystemTelemetry>());
+builder.Services.AddScoped<AdminAnalyticsService>();
+builder.Services.AddScoped<LearningActivityService>();
 builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
 builder.Services.AddScoped<IAiQuizService, AiQuizService>();
 builder.Services.AddScoped<IRoleplayAiService, HuggingFaceRoleplayAiService>();
@@ -281,6 +286,11 @@ builder.Services.AddHttpClient("AiRuntime", client => client.Timeout = Timeout.I
 builder.Services.AddHttpClient("AiApi", client =>
 {
     AiApiConfiguration.Configure(client, builder.Configuration);
+});
+builder.Services.AddHttpClient("Gemini", client =>
+{
+    client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+    client.Timeout = TimeSpan.FromSeconds(45);
 });
 
 // CV/JD matching runs as an internal Python service. Authentication remains in
@@ -321,6 +331,7 @@ else if (!demoMode)
 }
 
 app.UseStaticFiles();
+app.UseMiddleware<SystemMetricsMiddleware>();
 
 app.UseCors("Frontend");
 app.UseAuthentication();
@@ -329,6 +340,29 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
 app.MapCvReviewEndpoints();
+
+var learningApi = app.MapGroup("/api/learning/sessions").RequireAuthorization();
+learningApi.MapPost("/", async (StartLearningActivityRequest request, System.Security.Claims.ClaimsPrincipal user,
+    LearningActivityService activities, CancellationToken ct) =>
+{
+    if (!LearningActivityService.TryGetUserId(user, out var userId)) return Results.Unauthorized();
+    try { return Results.Ok(await activities.StartAsync(userId, request, ct)); }
+    catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); }
+});
+learningApi.MapPost("/{sessionId:guid}/heartbeat", async (Guid sessionId, LearningHeartbeatRequest request,
+    System.Security.Claims.ClaimsPrincipal user, LearningActivityService activities, CancellationToken ct) =>
+{
+    if (!LearningActivityService.TryGetUserId(user, out var userId)) return Results.Unauthorized();
+    if (request.SessionId != sessionId) return Results.BadRequest();
+    return await activities.HeartbeatAsync(userId, request, ct) ? Results.Ok() : Results.NotFound();
+});
+learningApi.MapPost("/{sessionId:guid}/end", async (Guid sessionId, System.Security.Claims.ClaimsPrincipal user,
+    LearningActivityService activities, CancellationToken ct) =>
+{
+    if (!LearningActivityService.TryGetUserId(user, out var userId)) return Results.Unauthorized();
+    await activities.EndAsync(userId, sessionId, ct);
+    return Results.NoContent();
+});
 
 if (app.Environment.IsDevelopment())
 {

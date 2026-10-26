@@ -1,0 +1,235 @@
+/* SoftSync Admin: desktop-only visual layer; mobile keeps its existing layout. */
+@media (min-width: 901px) {
+    html body .ss-main-content .ss-admin-studio {
+        --studio-accent: #5845c7;
+        --studio-tint: #f1eeff;
+        --studio-border: #dedfea;
+        --studio-ink: #20263b;
+        --studio-muted: #5d667c;
+        --studio-paper: #fff;
+        max-width: 1400px;
+        padding: 24px 28px 48px;
+        border-radius: 24px;
+        color: var(--studio-ink);
+        background: linear-gradient(180deg, var(--studio-tint), transparent 620px);
+    }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] {
+        --studio-accent: #355e9c;
+        --studio-tint: #edf2f9;
+    }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="learners"] {
+        --studio-accent: #14715d;
+        --studio-tint: #eaf5f0;
+    }
+    html body .ss-main-content .ss-admin-studio > header {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 24px;
+        padding: 30px 32px;
+        margin-bottom: 24px;
+        border: 1px solid var(--studio-border);
+        border-radius: 20px;
+        background: var(--studio-paper);
+    }
+    html body .ss-main-content .ss-admin-studio > header > * { position: relative; z-index: 1; }
+    html body .ss-main-content .ss-admin-studio > header > div { flex: 1 1 480px; }
+    html body .ss-main-content .ss-admin-studio > header h1 {
+        font-size: clamp(25px, 2.3vw, 36px);
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -.035em;
+        margin: 10px 0 12px;
+        max-width: 24ch;
+    }
+    html body .ss-main-content .ss-admin-studio > header p {
+        max-width: 66ch;
+        font-size: 14px;
+        line-height: 1.65;
+    }
+    html body .ss-main-content .ss-admin-studio > header span {
+        font-size: 11px;
+        color: var(--studio-accent);
+        letter-spacing: .12em;
+    }
+    /* Operations: a quiet engineering grid, confined to the header. */
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header {
+        background-color: #172b48;
+        border-color: #213a5e;
+        background-image: linear-gradient(100deg, #172b48 32%, transparent),
+            linear-gradient(#9cc5ff12 1px, transparent 1px), linear-gradient(90deg, #9cc5ff12 1px, transparent 1px);
+        background-size: auto, 28px 28px, 28px 28px;
+    }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header h1 { color: #fff; }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header p { color: #cedbeb; }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header span { color: #acccff; }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header .btn {
+        color: #f3f7ff;
+        border-color: #7c9bb970;
+        background: #ffffff0c;
+    }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="operations"] > header .btn:hover { background: #ffffff20; }
+    /* Learners: contour lines evoke a learning journey rather than server metrics. */
+    html body .ss-main-content .ss-admin-studio[data-admin-section="learners"] > header {
+        background-image: linear-gradient(100deg, var(--studio-paper) 45%, transparent),
+            repeating-radial-gradient(ellipse at 100% 180%, transparent 0 22px, #15977913 23px 24px, transparent 25px 44px);
+    }
+    /* AI: an orbit motif and the existing SYNCY mascot keep this recognizably SoftSync. */
+    html body .ss-main-content .ss-admin-studio[data-admin-section="ai"] > header {
+        padding-right: 170px;
+        background-image: linear-gradient(100deg, var(--studio-paper) 40%, transparent),
+            repeating-radial-gradient(circle at 100% 50%, transparent 0 36px, #7856da12 37px 38px, transparent 39px 72px);
+    }
+    html body .ss-main-content .ss-admin-studio[data-admin-section="ai"] > header::after {
+        content: "";
+        position: absolute;
+        right: 18px;
+        bottom: 8px;
+        width: 135px;
+        height: 145px;
+        background: url('/images/syncy-robot.png') center / contain no-repeat;
+        pointer-events: none;
+        z-index: 0;
+    }
+    html body .ss-main-content .ss-admin-studio :is(p, small, .updated, .ss-ai-key-meta) { color: var(--studio-muted); }
+    html body .ss-main-content .ss-admin-studio .btn {
+        min-height: 42px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 1.4;
+        box-shadow: none;
+    }
+    html body .ss-main-content .ss-admin-studio :is(a, button, input):focus-visible {
+        outline: 3px solid var(--studio-accent);
+        outline-offset: 3px;
+    }
+    html body .ss-main-content .ss-admin-studio .updated {
+        padding: 0 4px 12px;
+        font-variant-numeric: tabular-nums;
+        font-size: 12px;
+    }
+    html body .ss-main-content .ss-admin-studio .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    html body .ss-main-content .ss-admin-studio .cards article {
+        position: relative;
+        min-height: 150px;
+        gap: 10px;
+        border: 1px solid var(--studio-border);
+        border-top: 3px solid #7c8da8;
+        border-radius: 12px;
+        background: var(--studio-paper);
+        box-shadow: 0 3px 8px #15233804;
+    }
+    html body .ss-main-content .ss-admin-studio .cards article:nth-child(n+4) { border-top-color: #5a9a85; }
+    html body .ss-main-content .ss-admin-studio .cards article:last-child {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 88px;
+        border-top-width: 1px;
+        border-left: 3px solid #7861d5;
+        background: linear-gradient(100deg, var(--studio-paper), var(--studio-tint));
+    }
+    html body .ss-main-content .ss-admin-studio .cards strong {
+        color: var(--studio-ink);
+        font-size: 34px;
+        line-height: 1.15;
+        font-weight: 720;
+        letter-spacing: -.045em;
+        font-variant-numeric: tabular-nums;
+    }
+    html body .ss-main-content .ss-admin-studio .cards span { color: var(--studio-muted); font-size: 13px; }
+    html body .ss-main-content .ss-admin-studio .charts article {
+        padding: 24px;
+        border-color: var(--studio-border);
+        background: var(--studio-paper);
+        border-radius: 14px;
+        box-shadow: none;
+    }
+    html body .ss-main-content .ss-admin-studio .charts h2 { margin: 0 0 8px; font-size: 17px; }
+    html body .ss-main-content .ss-admin-studio .charts p { font-size: 13px; min-height: 42px; }
+    html body .ss-main-content .ss-admin-studio .note {
+        border-radius: 12px;
+        border: 1px solid var(--studio-border);
+        border-left: 3px solid #4c977e;
+        background: var(--studio-paper);
+        box-shadow: none;
+    }
+    html body .ss-main-content .ss-admin-studio .table-wrap {
+        border-color: var(--studio-border);
+        border-radius: 14px;
+        background: var(--studio-paper);
+    }
+    html body .ss-main-content .ss-admin-studio :is(th, td) { padding: 20px 18px; }
+    html body .ss-main-content .ss-admin-studio th { background: var(--studio-tint); color: var(--studio-accent); font-size: 12px; }
+    html body .ss-main-content .ss-admin-studio td { font-variant-numeric: tabular-nums; }
+    html body .ss-main-content .ss-admin-studio tbody tr:hover { background: var(--studio-tint); }
+    html body .ss-main-content .ss-admin-studio .ss-admin-panel {
+        padding: 28px;
+        border: 1px solid var(--studio-border);
+        border-radius: 16px;
+        background: var(--studio-paper);
+        box-shadow: none;
+    }
+    html body .ss-main-content .ss-admin-studio .ss-admin-panel:has(#models-title) {
+        border-top: 3px solid #7d65d1;
+        background-image: linear-gradient(180deg, var(--studio-tint), transparent 110px);
+    }
+    html body .ss-main-content .ss-admin-studio .ss-admin-panel:has(#keys-title) { border-top: 3px solid #4c977e; }
+    html body .ss-main-content .ss-admin-studio .ss-admin-panel-heading p { max-width: 80ch; font-size: 13px; }
+    html body .ss-main-content .ss-admin-studio .ss-admin-toggle {
+        padding: 14px 16px;
+        background: var(--studio-tint);
+        border-radius: 10px;
+        margin-bottom: 24px;
+    }
+    html body .ss-main-content .ss-admin-studio input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6d50ce; }
+    html body .ss-main-content .ss-admin-studio .form-control {
+        min-height: 46px;
+        padding: 10px 13px;
+        border: 1px solid var(--studio-border);
+        border-radius: 9px;
+        background: var(--studio-paper);
+        color: var(--studio-ink);
+        font-size: 14px;
+    }
+    html body .ss-main-content .ss-admin-studio .form-control::placeholder { color: var(--studio-muted); opacity: 1; }
+    html body .ss-main-content .ss-admin-studio .ss-ai-key-row {
+        padding: 20px;
+        margin-top: 16px;
+        border: 1px solid var(--studio-border);
+        border-radius: 12px;
+    }
+    html body .ss-main-content .ss-admin-studio .ss-ai-key-priority > span { width: 32px; height: 32px; border-radius: 8px; }
+    html body .ss-main-content .ss-admin-studio .ss-admin-empty { padding: 32px 24px; border: 1px dashed var(--studio-border); background: var(--studio-tint); }
+    html body .ss-main-content .ss-admin-studio .ss-admin-savebar {
+        padding: 14px 20px;
+        border-color: var(--studio-border);
+        background: var(--studio-paper);
+        box-shadow: 0 8px 24px #13172f12;
+    }
+    html[data-theme="dark"] body .ss-main-content .ss-admin-studio {
+        --studio-ink: #eef1fc;
+        --studio-muted: #b2bdd2;
+        --studio-paper: #182039;
+        --studio-border: #34425d;
+        --studio-accent: #b4a5ff;
+        --studio-tint: #252441;
+    }
+    html[data-theme="dark"] body .ss-main-content .ss-admin-studio[data-admin-section="operations"] { --studio-tint: #182b42; --studio-accent: #a9caff; }
+    html[data-theme="dark"] body .ss-main-content .ss-admin-studio[data-admin-section="learners"] { --studio-tint: #183430; --studio-accent: #90d7bf; }
+    html[data-theme="dark"] body .ss-main-content .ss-admin-studio :is(h1, h2) { color: var(--studio-ink); }
+    html[data-theme="dark"] body .ss-main-content .ss-admin-studio .btn-light { background: #29334c; border-color: #40516d; color: #eef1fc; }
+}
+@media (min-width: 901px) and (max-width: 1150px) {
+    html body .ss-main-content .ss-admin-studio { padding: 20px 16px 40px; }
+    html body .ss-main-content .ss-admin-studio > header { padding: 24px; }
+    html body .ss-main-content .ss-admin-studio .charts { grid-template-columns: 1fr; }
+    html body .ss-main-content .ss-admin-studio .ss-ai-key-fields { grid-template-columns: 1fr 1fr; }
+    html body .ss-main-content .ss-admin-studio .ss-ai-key-secret { grid-column: 1 / -1; }
+}

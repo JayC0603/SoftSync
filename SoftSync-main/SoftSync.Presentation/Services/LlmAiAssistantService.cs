@@ -11,6 +11,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
     private readonly KnowledgeBasedAiAssistantService fallback;
     private readonly PdfDocumentKnowledge pdfKnowledge;
     private readonly ILogger<LlmAiAssistantService> logger;
+    private readonly Dictionary<string, BilingualReply> requestCache = new(StringComparer.Ordinal);
 
     public LlmAiAssistantService(
         IHttpClientFactory clients,
@@ -36,7 +37,13 @@ public sealed class LlmAiAssistantService : IAiAssistantService
         var plainMessage = userMessage.StartsWith("[en]", StringComparison.OrdinalIgnoreCase) || userMessage.StartsWith("[vi]", StringComparison.OrdinalIgnoreCase)
             ? userMessage[4..].Trim()
             : userMessage.Trim();
-        var reply = await AskModelAsync(plainMessage, userId);
+        var cacheKey = $"{userId}:{plainMessage}";
+
+        if (!requestCache.TryGetValue(cacheKey, out var reply))
+        {
+            reply = await AskModelAsync(plainMessage, userId);
+            requestCache[cacheKey] = reply;
+        }
         return english ? reply.AnswerEn : reply.AnswerVi;
     }
 

@@ -131,7 +131,7 @@
             Logger.LogInformation("User logged in.");
             WelcomeCookie.Set(HttpContext, user.FullName);
             var isAdmin = await UserManager.IsInRoleAsync(user, SoftSync.BLL.Auth.CourseAuthorization.AdminRole);
-            RedirectManager.RedirectTo(isAdmin ? "/admin/users" : SoftSync.BLL.Auth.LocalReturnUrl.Normalize(ReturnUrl));
+            RedirectManager.RedirectTo(isAdmin ? "/admin/dashboard" : SoftSync.BLL.Auth.LocalReturnUrl.Normalize(ReturnUrl));
         }
         else if (result.IsLockedOut)
         {

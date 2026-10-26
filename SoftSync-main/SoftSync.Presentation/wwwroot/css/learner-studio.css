@@ -1,0 +1,190 @@
+/* Learner desktop: a quiet study space with backgrounds tied to each task.
+   Keep this guard as well as the link media attribute to protect mobile. */
+@media (min-width: 901px) {
+    html body .page .ss-main-content {
+        --study-paper: var(--ss-surface);
+        --study-violet: #f0ebfc;
+        --study-mint: #eaf5f0;
+        --study-sky: #edf3fc;
+        --study-sand: #faf2e5;
+        --study-line: color-mix(in srgb, var(--ss-primary) 12%, var(--ss-border));
+    }
+    html[data-theme="dark"] body .page .ss-main-content {
+        --study-violet: #26213e;
+        --study-mint: #162f30;
+        --study-sky: #1b2942;
+        --study-sand: #322d26;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 {
+        gap: 24px;
+        padding: 8px 0 24px;
+        background: transparent;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome {
+        min-height: 150px;
+        padding: 26px 30px;
+        border-radius: 20px;
+        background: var(--study-violet);
+        border: 1px solid var(--study-line);
+        overflow: hidden;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome h1 {
+        font-size: clamp(24px, 2.3vw, 34px);
+        line-height: 1.25;
+        letter-spacing: -.035em;
+        max-width: 26ch;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome p { max-width: 58ch; line-height: 1.65; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome-art { width: 30%; max-width: 300px; object-fit: contain; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero {
+        background: var(--study-violet);
+        border: 1px solid var(--study-line);
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgb(60 38 110 / 5%);
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-roadmap, .mh-quick, .mh-recommendations, .mh-mentors, .mh-achievements, .mh-goal, .mh-syncy, .mh-motivation) {
+        border-radius: 18px;
+        border: 1px solid var(--study-line);
+        box-shadow: none;
+        padding: 24px;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-goal {
+        background: var(--study-sand);
+        min-height: 144px;
+        align-items: center;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-roadmap { background: var(--study-mint); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick { background: var(--study-sky); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy { background: var(--study-violet); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievements { background: var(--study-sand); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentors { background: var(--study-sky); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-recommendations { background: var(--study-paper); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation { background: var(--study-mint); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats a {
+        border-radius: 14px;
+        background: var(--study-paper);
+        box-shadow: none;
+        border-bottom: 3px solid color-mix(in srgb, var(--ss-primary) 35%, var(--ss-border));
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-stats strong { font-variant-numeric: tabular-nums; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-section-heading h2 { font-size: 19px; letter-spacing: -.02em; }
+    /* Progress uses a mint header; plotting surfaces stay plain for legibility. */
+    html body .page .ss-main-content .pg-page { background: transparent; }
+    html body .page .ss-main-content .pg-page .pg-heading {
+        padding: 28px 32px;
+        border-radius: 20px;
+        border: 1px solid var(--study-line);
+        background: repeating-radial-gradient(ellipse at 110% 100%, transparent 0 28px, rgb(69 139 116 / 7%) 29px 30px, transparent 31px 56px), var(--study-mint);
+    }
+    html body .page .ss-main-content .pg-page .pg-heading h1 { font-size: 32px; letter-spacing: -.035em; }
+    html body .page .ss-main-content .pg-page .pg-card { border-radius: 18px; border-color: var(--study-line); box-shadow: none; }
+    html body .page .ss-main-content .pg-page .pg-summary { background: var(--study-paper); border-top: 3px solid #74b49b; }
+    /* Learning: contour lines suggest a journey without competing with its map. */
+    html body .page .ss-main-content .learning-journey.learn-desktop .journey-heading {
+        padding: 28px;
+        border-radius: 20px;
+        background: repeating-radial-gradient(ellipse at 110% 110%, transparent 0 38px, rgb(69 139 116 / 8%) 39px 40px, transparent 41px 76px), var(--study-mint);
+        border: 1px solid var(--study-line);
+        gap: 24px;
+    }
+    html body .page .ss-main-content .learning-journey.learn-desktop .journey-heading h2 { font-size: clamp(24px, 2.2vw, 32px); letter-spacing: -.035em; }
+    html body .page .ss-main-content .learning-journey.learn-desktop .journey-card { border-radius: 18px; box-shadow: none; }
+    /* AI: a violet workspace, with neutral message and input surfaces. */
+    html body .page .ss-main-content .assistant-layout { border-radius: 22px; border: 1px solid var(--study-line); overflow: hidden; background: var(--study-paper); }
+    html body .page .ss-main-content .assistant-layout .assistant-side { background: var(--study-violet); }
+    html body .page .ss-main-content .assistant-layout .assistant-side-brand strong { color: var(--ss-text); }
+    html body .page .ss-main-content .assistant-layout .assistant-hero {
+        padding: 28px;
+        border-radius: 18px;
+        background: radial-gradient(ellipse at 100% 0, rgb(129 104 215 / 12%), transparent 65%), var(--study-violet);
+    }
+    html body .page .ss-main-content .assistant-layout .assistant-hero h1 { letter-spacing: -.035em; }
+    html body .page .ss-main-content .assistant-layout .assistant-chat-card { background: var(--study-paper); box-shadow: none; }
+    html body .page .ss-main-content .assistant-layout .assistant-prompts button { background: var(--study-sky); border: 1px solid var(--study-line); border-radius: 14px; }
+    /* Career: blue stationery, with the existing CV illustration as the anchor. */
+    html body .page .ss-main-content .ss-cv-workspace .career-cv { max-width: 1160px; margin-inline: auto; }
+    html body .page .ss-main-content .ss-cv-workspace .career-hero {
+        padding: 36px;
+        margin-bottom: 24px;
+        min-height: 230px;
+        background: var(--study-sky);
+        border: 1px solid var(--study-line);
+        border-radius: 22px;
+    }
+    html body .page .ss-main-content .ss-cv-workspace .career-hero h1 { font-size: 38px; letter-spacing: -.04em; }
+    html body .page .ss-main-content .ss-cv-workspace .career-hero p { max-width: 56ch; line-height: 1.7; }
+    html body .page .ss-main-content .ss-cv-workspace .career-menu { gap: 20px; }
+    html body .page .ss-main-content .ss-cv-workspace .career-menu-card { padding: 26px; min-height: 120px; border: 1px solid var(--study-line); border-radius: 18px; background: var(--study-paper); box-shadow: none; }
+    html body .page .ss-main-content .ss-cv-workspace .career-menu-card.featured { background: var(--study-violet); }
+    html body .page .ss-main-content .ss-cv-workspace .career-tip { background: var(--study-sand); border-radius: 14px; }
+    html body .page .ss-main-content :is(.mobile-home.mh-v3, .pg-page, .learning-journey.learn-desktop, .assistant-layout, .ss-cv-workspace) :is(a, button, input, select, textarea):focus-visible {
+        outline: 3px solid var(--ss-primary);
+        outline-offset: 3px;
+    }
+}
+
+/* Illustrated section backgrounds. Text sits on an opaque reading area;
+   illustrations remain visible on the right in both color themes. */
+@media (min-width: 901px) {
+    html body .page .ss-main-content {
+        --scene-paper: #f1edfc;
+        --scene-mint: #eaf5f0;
+        --scene-blue: #edf3fc;
+        --scene-warm: #faf2e5;
+    }
+    html[data-theme="dark"] body .page .ss-main-content {
+        --scene-paper: #26213e;
+        --scene-mint: #162f30;
+        --scene-blue: #1b2942;
+        --scene-warm: #322d26;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 :is(.mh-welcome, .mh-hero, .mh-goal, .mh-roadmap, .mh-quick, .mh-syncy, .mh-mentors, .mh-achievements, .mh-motivation) {
+        --scene-color: var(--scene-paper);
+        background-image: linear-gradient(90deg, var(--scene-color) 0%, var(--scene-color) 42%, color-mix(in srgb, var(--scene-color) 82%, transparent) 67%, color-mix(in srgb, var(--scene-color) 18%, transparent) 100%), var(--scene-image) !important;
+        background-size: cover, auto 100% !important;
+        background-position: center, right center !important;
+        background-repeat: no-repeat !important;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome {
+        --scene-image: url('../images/home-v3/welcome-landscape.webp');
+        min-height: 180px;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome > div { position: relative; max-width: 68%; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-welcome-art { display: none; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-hero { --scene-image: url('../images/home-v3/roadmap-mountain.webp'); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-goal {
+        --scene-color: var(--scene-warm);
+        --scene-image: url('../images/home-v3/study-planner.webp');
+        min-height: 170px;
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-goal > span { max-width: 60%; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-roadmap {
+        --scene-color: var(--scene-mint);
+        --scene-image: url('../images/home-v3/roadmap-landscape.webp');
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-roadmap::before { display: none; }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-quick {
+        --scene-color: var(--scene-blue);
+        --scene-image: url('../images/home-v3/study-planner.webp');
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-syncy { --scene-image: url('../images/home-v3/welcome-landscape.webp'); }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-mentors {
+        --scene-color: var(--scene-blue);
+        --scene-image: url('../images/home-v3/teamwork.webp');
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-achievements {
+        --scene-color: var(--scene-warm);
+        --scene-image: url('../images/home-v3/roadmap-mountain.webp');
+    }
+    html body .page .ss-main-content > .mobile-home.mh-v3 .mh-motivation {
+        --scene-color: var(--scene-mint);
+        --scene-image: url('../images/home-v3/quote-landscape.webp');
+    }
+    html body .page .ss-main-content :is(.pg-page .pg-heading, .learning-journey.learn-desktop .journey-heading) {
+        background: linear-gradient(90deg, var(--scene-mint) 35%, color-mix(in srgb, var(--scene-mint) 85%, transparent) 65%, transparent), url('../images/home-v3/roadmap-landscape.webp') right center / auto 100% no-repeat, var(--scene-mint);
+    }
+    html body .page .ss-main-content .ss-cv-workspace .career-hero {
+        background: linear-gradient(90deg, var(--scene-blue) 40%, color-mix(in srgb, var(--scene-blue) 70%, transparent) 75%, transparent), url('../images/home-v3/study-planner.webp') right center / auto 100% no-repeat, var(--scene-blue);
+    }
+    html body .page .ss-main-content .ss-cv-workspace .career-illustration { visibility: hidden; }
+}
