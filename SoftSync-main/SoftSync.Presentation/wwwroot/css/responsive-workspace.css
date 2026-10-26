@@ -2,10 +2,31 @@
 .shared-course-details { min-width: 0; color: var(--ss-text); }
 .ss-admin-content { width: 100%; min-width: 0; }
 
+/* The signed-in home page sits inside the workspace but remains edge to edge. */
+html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss-workspace > main#main-content.ss-main-content.container {
+    max-width: none !important;
+    padding: 0 !important;
+}
+
+.ss-authenticated-landing .lp-landing { container-type: inline-size; }
+
+@media (min-width: 901px) {
+    .ss-authenticated-landing .lp-hero::before {
+        inset-inline: calc((100% - 100cqw) / 2);
+    }
+}
+
 @media (min-width: 901px) {
     html body .page[data-responsive-layout="shared"] {
         --ss-accent: #0877f9;
         --ss-accent-soft: #edf4ff;
+    }
+
+    html body .page[data-responsive-layout="shared"] > .ss-workspace {
+        width: calc(100% - var(--ss-sidebar-width));
+        max-width: none;
+        margin-right: 0;
+        padding: 0;
     }
 
     html body .page[data-responsive-layout="shared"] .ss-workspace > main#main-content.ss-main-content.container {
@@ -140,13 +161,6 @@
 
 /* Admin pages use the available workspace beside the collapsible sidebar. */
 @media (min-width: 901px) {
-    html body .page[data-workspace-area="admin"] > .ss-workspace {
-        width: calc(100% - var(--ss-sidebar-width));
-        max-width: none;
-        margin-right: 0;
-        padding: 0;
-    }
-
     html body .page[data-responsive-layout="shared"][data-workspace-area="admin"] > .ss-workspace > main#main-content.ss-main-content.container {
         max-width: none !important;
         padding: 28px var(--ss-desktop-gutter) 40px !important;
