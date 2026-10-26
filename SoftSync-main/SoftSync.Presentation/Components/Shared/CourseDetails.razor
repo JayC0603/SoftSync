@@ -6,7 +6,7 @@
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>@DesktopText.Text("Courses · SoftSync")</PageTitle>
-<main class="ss-workspace" aria-busy="@(loading || busy)">
+<main class="shared-course-details" aria-busy="@(loading || busy)">
 @if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@DesktopText.Text(message)</div>}
 @if(loading){<LoadingState Text="@DesktopText.Text("Loading courses...")" />}
 else if(CourseId is null){

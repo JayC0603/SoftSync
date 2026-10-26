@@ -1,6 +1,6 @@
-/* Learn V4 is mobile only. Desktop keeps the original learning journey. */
+/* Shared learning experience; responsive desktop layout is in responsive-workspace.css. */
 .learn-v3 { display:none; }
-@media (max-width:900px) {
+@media all {
   .learn-desktop { display:none; }
   html body .page:has(.learn-v3) {
     --lv-bg:#f3f8ff; --lv-surface:#fff; --lv-soft:#edf3ff;
@@ -22,7 +22,7 @@
     gap:4px; flex-wrap:nowrap; border:0; border-radius:0;
     background:color-mix(in srgb,var(--lv-surface) 94%,transparent)!important;
   }
-  html body .page:has(.learn-v3) .ss-sidebar-toggle { display:none; }
+  @media (max-width:900px) { html body .page:has(.learn-v3) .ss-sidebar-toggle { display:none; } }
   html body .page:has(.learn-v3) .ss-mobile-brand { color:var(--lv-text); font-size:19px; gap:7px; }
   html body .page:has(.learn-v3) .ss-mobile-brand img { width:30px; height:30px; }
   html body .page:has(.learn-v3) .ss-header-actions { gap:0; flex:0 0 auto; }

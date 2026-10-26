@@ -131,7 +131,7 @@ function layoutLabels(state) {
 }
 export async function mount(root, canvas, payload, callback) {
     if (instances.has(root)) return update(root, payload);
-    const state = { root, canvas, payload, callback, media: matchMedia('(max-width:900px)'), disposed: false };
+    const state = { root, canvas, payload, callback, media: matchMedia('(min-width:0px)'), disposed: false };
     instances.set(root, state);
     state.onResize = () => { if (!state.map) start(state); else if(state.loaded)fit(state); else state.map.resize(); };
     state.resizeObserver = new ResizeObserver(state.onResize); state.resizeObserver.observe(canvas);

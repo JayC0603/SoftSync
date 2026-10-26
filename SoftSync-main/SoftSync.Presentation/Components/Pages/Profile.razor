@@ -14,54 +14,9 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject UserProfileState UserProfileState
 
-<PageTitle>@L["nav.profile"] · SoftSync</PageTitle>
-<HeadContent><link rel="stylesheet" href="css/profile-reference.css?v=1" /></HeadContent>
+<PageTitle>@L["nav.profile"] ? SoftSync</PageTitle>
 <HeadContent><link rel="stylesheet" href="css/mobile-profile.css" /></HeadContent>
-<div class="ss-profile-page"><div class="pr-profile ss-profile-desktop">
-    <header class="pr-heading"><h1>@L["nav.profile"]</h1><p>@L["redesign.profile.description"]</p></header>
-    @if (user is null)
-    {
-        <div class="pr-card" role="status"><span class="spinner-border text-primary" aria-hidden="true"></span> @T("Loading profile…", "Đang tải hồ sơ…")</div>
-    }
-    else
-    {
-        <section class="pr-card pr-identity" aria-label="@user.PublicName">
-            <div class="pr-person">
-                <div class="pr-avatar">
-                    @if (!string.IsNullOrWhiteSpace(user.AvatarUrl)) { <img src="@user.AvatarUrl" alt="@user.PublicName" /> }
-                    else { <span aria-hidden="true">@Initial</span> }
-                    <label class="pr-camera" title="@L["profile.avatar.change"]"><i class="bi bi-camera-fill" aria-hidden="true"></i><InputFile OnChange="OnAvatarSelected" accept="image/*" aria-label="@L["profile.avatar.change"]" /></label>
-                </div>
-                <div class="pr-person-info"><h2>@user.PublicName</h2>
-                    <div class="pr-level-row"><span class="pr-level"><i class="bi bi-star-fill" aria-hidden="true"></i>@L["nav.level"] @user.Level</span><span>@user.ExperiencePoints XP</span></div>
-                    <div class="pr-progress" role="progressbar" aria-label="@T("Level progress", "Tiến độ cấp độ")" aria-valuenow="@user.LevelProgressPercent" aria-valuemin="0" aria-valuemax="100"><span style="width: @(user.LevelProgressPercent)%"></span></div>
-                    <p>@(L.Current == AppLanguage.Vi ? $"Còn {Math.Max(0, xpForNext - xpIntoLevel)} XP để lên Cấp {user.Level + 1}" : $"{Math.Max(0, xpForNext - xpIntoLevel)} XP to Level {user.Level + 1}")</p>
-                </div>
-            </div>
-            @if (!string.IsNullOrEmpty(avatarError)) { <p class="text-danger" role="alert">@avatarError</p> }
-            <div class="pr-stats">
-                <div><i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i><strong>@assessmentCount</strong><span>@L["profile.stat.assessments"]</span></div>
-                <div><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><strong>@completedSkills</strong><span>@L["profile.stat.skillsTracked"]</span></div>
-                <div><i class="bi bi-award-fill" aria-hidden="true"></i><strong>@user.Level</strong><span>@L["profile.stat.currentLevel"]</span></div>
-            </div>
-        </section>
-        <section class="pr-card pr-details" aria-labelledby="pr-details-title">
-            <h2 id="pr-details-title">@T("Account information", "Thông tin tài khoản")</h2>
-            <dl>
-                <div><i class="bi bi-envelope" aria-hidden="true"></i><dt>@L["auth.email"]</dt><dd>@email</dd></div>
-                <div><i class="bi bi-people" aria-hidden="true"></i><dt>@L["wizard.about.ageGroup"]</dt><dd>@(ProfileAgeGroups.LabelKey(user.Age) is { Length: > 0 } ageLabel ? L[ageLabel] : "—")</dd></div>
-                <div><i class="bi bi-bullseye" aria-hidden="true"></i><dt>@L["profile.goal"]</dt><dd>@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</dd></div>
-            </dl>
-            <div class="pr-actions"><a href="/settings"><i class="bi bi-pencil" aria-hidden="true"></i>@L["profile.edit"]</a><button type="button" @onclick="GoJourney"><i class="bi bi-compass" aria-hidden="true"></i>@(profileComplete && hasAssessment ? T("Open Roadmap", "Mở Roadmap") : ResolveJourneyButtonText())</button></div>
-        </section>
-        <section class="pr-card pr-summary" aria-labelledby="pr-summary-title">
-            <h2 id="pr-summary-title">@T("Quick summary", "Tóm tắt nhanh")</h2>
-            <a href="/roadmap"><i class="bi bi-book" aria-hidden="true"></i><span>@T("Current skill", "Kỹ năng đang học")</span><strong>@(string.IsNullOrWhiteSpace(learningSkill) ? T("Not started", "Chưa bắt đầu") : L.Ui(learningSkill))</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-            <a href="/progress"><i class="bi bi-play-circle" aria-hidden="true"></i><span>@T("Latest skill activity", "Kỹ năng luyện gần nhất")</span><strong>@(string.IsNullOrWhiteSpace(latestSkill) ? T("No activity yet", "Chưa có hoạt động") : L.Ui(latestSkill))</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-            <a href="/progress"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>@T("Learning progress", "Tiến độ học tập")</span><strong>@progressPercent%</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-        </section>
-    }
-    </div>
+<div class="ss-profile-page">
     @if (user is not null)
     {
         <MobileProfile User="user" Email="@email" AssessmentCount="assessmentHistoryCount" SkillsTracked="completedSkills"

@@ -1,4 +1,4 @@
-/* New journey UI is opt-in and mobile-only; the laptop layout and controls remain unchanged. */
+/* Shared journey map and controls for mobile and desktop. */
 /* Scenic checkpoint markers contain only location labels; details open on click. */
 .vn-adventure-stop { display:flex;align-items:center;gap:6px;min-height:44px;padding:4px 10px 4px 5px;border:2px solid #fff;border-radius:24px;background:#fff;color:#17254b;box-shadow:0 2px 8px #14274b35;font-size:12px;font-weight:650;white-space:nowrap;cursor:pointer; }
 .vn-stop-dot { display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#7453ef;color:#fff;font-size:13px; }
@@ -12,7 +12,7 @@
 .vn-adventure-stop:focus-visible { outline:3px solid #2876ef;outline-offset:3px; }
 .vn-map-stage .maplibregl-ctrl-attrib { max-width:100%;font-size:9px; }
 .vn-journey,.mh-vietnam,.vm-continue,.vn-full-map,.vm-suggestions { display:none; }
-@media(max-width:900px) {
+@media all {
     .vn-journey,.vm-continue,.mh-vietnam,.vm-suggestions { --vm-ink:#101338; --vm-muted:#7883a6; --vm-surface:#fff; --vm-line:#e6eafb; --vm-purple:#7853ff; --vm-soft:#f3f0ff; color:var(--vm-ink); }
     html[data-theme="dark"] :is(.vn-journey,.vm-continue,.mh-vietnam,.vm-suggestions) { --vm-ink:#f2f0ff; --vm-muted:#b0b9d8; --vm-surface:#19233c; --vm-line:#34415d; --vm-soft:#292943; }
     .vn-journey { position:relative; display:block; width:100%; min-width:0; padding:12px 9px 8px; border:1px solid var(--vm-line); border-radius:20px; background:var(--vm-surface); box-shadow:0 8px 25px #72a2cd0b; }
@@ -74,7 +74,7 @@
     @media(max-width:359px) { .vn-heading { gap:6px; }html body .page .vn-journey .vn-heading h2 { font-size:16px!important; }.vn-heading .vm-link { font-size:11px!important; }.vn-legend { gap:8px; font-size:9px; }.vm-continue { padding:15px 12px; grid-template-columns:32px minmax(0,1fr); gap:10px; }.vm-level { width:32px; height:32px; font-size:19px; }.vm-continue-progress { flex-wrap:wrap; }.vm-continue-progress > span { margin-left:auto; } }
     @media(prefers-reduced-motion:reduce) { .vn-spinner { animation:none; } }
 }
-@media(max-width:900px) {
+@media all {
     .vn-journey .vn-controls { display:flex; }
     .vn-journey .vn-controls button { border-bottom:0;border-right:1px solid #edf0f8; }
     .vn-journey .vn-controls button:last-child { border-right:0; }

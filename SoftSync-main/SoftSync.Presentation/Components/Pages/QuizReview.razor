@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 @using SoftSync.Presentation.Components.Variants
-<DesktopVariant><Desktop><DesktopQuizReview AttemptId="@AttemptId" /></Desktop><Mobile><MobileQuizReview AttemptId="@AttemptId" /></Mobile></DesktopVariant>
+<MobileQuizReview AttemptId="@AttemptId" />
 @code {
     [Parameter] public int AttemptId { get; set; }
 }

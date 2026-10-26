@@ -16,8 +16,7 @@
         html[data-theme="dark"], html[data-theme="dark"] body { background: #050917; }
         html[data-theme="light"], html[data-theme="light"] body { background: #f7f8fa; }
         /* Hide the alternate Learn layout before any route CSS arrives. */
-        @@media (max-width: 900px) { .learn-desktop { display: none !important; } }
-        @@media (min-width: 901px) { .learn-v3 { display: none !important; } }
+        .learn-desktop { display: none !important; }
     </style>
     <script>
         // Migrate the old localStorage-only preference before the first paint.
@@ -81,7 +80,6 @@
     <link rel="stylesheet" href="@VersionedAsset("css/navigation-glass.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mobile-options.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/desktop-workspace.css")" media="(min-width: 901px)" />
-    <link rel="stylesheet" href="@VersionedAsset("css/learner-studio.css")" media="(min-width: 901px)" />
     <link rel="stylesheet" href="@VersionedAsset("css/reference-landing.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/mentor-reference.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/minigame-directory.css")" />
@@ -89,6 +87,7 @@
     <link rel="stylesheet" href="@VersionedAsset("css/softsync-motion.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/admin-dashboard-lower.css")" />
     <link rel="stylesheet" href="@VersionedAsset("css/course-experience.css")" />
+    <link rel="stylesheet" href="@VersionedAsset("css/responsive-workspace.css")" />
     <script>
         // The server already renders data-theme on <html> from the ss-theme
         // cookie, so there's no flash and no revert on Blazor enhanced navigation.

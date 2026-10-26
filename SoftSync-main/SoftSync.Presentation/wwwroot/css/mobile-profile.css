@@ -1,6 +1,6 @@
 .ss-profile-mobile { display: none; }
 
-@media (max-width: 900px) {
+@media all {
     html body .page:has(.ss-profile-page) .ss-workspace > .ss-main-content.container { padding: 12px clamp(16px, 9vw, 40px) 10px !important; }
     .ss-profile-page { max-width: 720px; }
     .ss-profile-desktop { display: none; }
@@ -70,17 +70,19 @@
     html body .page .ss-main-content .ss-profile-mobile .mp-stat p { font-size: 10px !important; }
     html body .page .ss-main-content .ss-profile-mobile .mp-next-level { font-size: 11px !important; }
     html body .page .ss-main-content .ss-profile-mobile .mp-actions :is(a, button) { font-size: 14px !important; }
-    html body .page:has(.ss-profile-page) .ss-site-footer-shell { margin-top: auto; }
-    html body .page:has(.ss-profile-page) .shared-mobile-footer { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px 24px 94px !important; }
-    html body .page:has(.ss-profile-page) .sh-footer-top { display: contents; }
-    html body .page:has(.ss-profile-page) .sh-footer-brand { display: flex; align-items: center; gap: 4px; grid-column: 1; grid-row: 1; }
-    html body .page:has(.ss-profile-page) .sh-footer-brand img { width: 20px; height: 20px; }
-    html body .page:has(.ss-profile-page) .sh-footer-brand strong { font-size: 10px !important; }
-    html body .page:has(.ss-profile-page) :is(.sh-footer-brand small, .sh-copyright, .shared-mobile-footer > nav + nav) { display: none !important; }
-    html body .page:has(.ss-profile-page) .shared-mobile-footer > nav:first-of-type { display: flex; justify-content: center; flex-wrap: wrap; gap: 3px 5px; grid-column: 2; grid-row: 1; }
-    html body .page:has(.ss-profile-page) .shared-mobile-footer > nav:first-of-type a { font-size: 8px !important; padding: 0; }
-    html body .page:has(.ss-profile-page) .sh-footer-socials { display: flex; align-items: center; gap: 7px; grid-column: 3; grid-row: 1; margin: 0; }
-    html body .page:has(.ss-profile-page) .sh-footer-socials :is(a, span) { width: 14px; height: 20px; min-height: 0; font-size: 14px !important; padding: 0; }
+    @media (max-width: 900px) {
+        html body .page:has(.ss-profile-page) .ss-site-footer-shell { margin-top: auto; }
+        html body .page:has(.ss-profile-page) .shared-mobile-footer { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px 24px 94px !important; }
+        html body .page:has(.ss-profile-page) .sh-footer-top { display: contents; }
+        html body .page:has(.ss-profile-page) .sh-footer-brand { display: flex; align-items: center; gap: 4px; grid-column: 1; grid-row: 1; }
+        html body .page:has(.ss-profile-page) .sh-footer-brand img { width: 20px; height: 20px; }
+        html body .page:has(.ss-profile-page) .sh-footer-brand strong { font-size: 10px !important; }
+        html body .page:has(.ss-profile-page) :is(.sh-footer-brand small, .sh-copyright, .shared-mobile-footer > nav + nav) { display: none !important; }
+        html body .page:has(.ss-profile-page) .shared-mobile-footer > nav:first-of-type { display: flex; justify-content: center; flex-wrap: wrap; gap: 3px 5px; grid-column: 2; grid-row: 1; }
+        html body .page:has(.ss-profile-page) .shared-mobile-footer > nav:first-of-type a { font-size: 8px !important; padding: 0; }
+        html body .page:has(.ss-profile-page) .sh-footer-socials { display: flex; align-items: center; gap: 7px; grid-column: 3; grid-row: 1; margin: 0; }
+        html body .page:has(.ss-profile-page) .sh-footer-socials :is(a, span) { width: 14px; height: 20px; min-height: 0; font-size: 14px !important; padding: 0; }
+    }
 }
 
 @media (max-width: 360px) {

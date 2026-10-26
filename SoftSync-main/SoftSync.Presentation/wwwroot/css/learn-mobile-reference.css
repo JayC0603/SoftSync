@@ -1,5 +1,5 @@
 /* Mobile Learn: overview and course detail share the existing workspace shell. */
-@media (max-width:900px) {
+@media all {
   html body .page:has(.learn-v3) { --lm-blue:#0075ff; --lm-ink:var(--lv-text,#111435); --lm-muted:var(--lv-muted,#68749d); --lm-surface:var(--lv-surface,#fff); --lm-line:var(--lv-line,#e5edfa); --lm-soft:var(--lv-soft,#edf5ff); }
   html body .page:has(.learn-v3) .ss-workspace { background:radial-gradient(ellipse at 85% 2%,#dceaff80,transparent 44%),var(--lv-bg,#f3f8ff)!important; }
   html body .page:has(.learn-v3) .ss-workspace-topbar { background:color-mix(in srgb,var(--lm-surface) 58%,var(--lv-bg))!important; backdrop-filter:blur(16px); }
@@ -135,7 +135,7 @@
 }
 
 /* Lesson cards: content icons, completion badges and a prominent resume action. */
-@media(max-width:900px) {
+@media all {
  .lm-level-body { gap:8px; margin:12px 0 6px; padding:0; border:0; }
  .lm-lesson { gap:12px; padding:10px 12px; min-height:70px; border:1px solid var(--lm-line); border-radius:16px; background:var(--lm-surface); box-shadow:0 2px 3px #174c9c05; transition:border-color 160ms ease,box-shadow 160ms ease; }
  .lm-lesson strong { font-size:14px; line-height:1.4; font-weight:700; }

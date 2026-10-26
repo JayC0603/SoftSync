@@ -18,46 +18,7 @@
 <PageTitle>@Tx("Learn", "Học tập") · SoftSync</PageTitle>
 @* Styles load in App.razor before the first paint, including enhanced navigation. *@
 
-<section class="learning-journey learn-desktop" style="@Theme.Css">
-    @if (loading)
-    {
-        <div class="journey-state" role="status"><span class="journey-spinner" aria-hidden="true"></span><h1>@Tx("Preparing your journey…", "Đang chuẩn bị hành trình của bạn…")</h1></div>
-    }
-    else if (loadError)
-    {
-        <div class="journey-state" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h1>@Tx("We could not load your roadmap", "Chưa thể tải lộ trình")</h1><p>@Tx("Your saved progress is safe. Please try again.", "Tiến độ đã lưu vẫn được giữ. Vui lòng thử lại.")</p><button class="journey-primary" @onclick="LoadRoadmap">@Tx("Try again", "Thử lại")</button></div>
-    }
-    else if (items.Count == 0)
-    {
-        <div class="journey-state"><i class="bi bi-map" aria-hidden="true"></i><h1>@Tx("Your journey starts here", "Hành trình của bạn bắt đầu từ đây")</h1><p>@Tx("Complete your skills assessment to receive your personal learning roadmap.", "Hoàn thành đánh giá kỹ năng để nhận lộ trình học dành riêng cho bạn.")</p><a class="journey-primary" href="@($"/assessment/{UserId}")">@Tx("Take assessment", "Đánh giá kỹ năng") <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
-    }
-    else
-    {
-        <header class="journey-heading"><div><span>SOFTSYNC · @Tx("LEARN", "HỌC TẬP")</span><h2>@Tx("A little better, every day.", "Mỗi ngày, một bước tiến mới.")</h2></div><span class="journey-overall"><i class="bi bi-compass" aria-hidden="true"></i>@items.Count(x => x.IsCompleted) / @items.Count @Tx("levels completed", "cấp độ hoàn thành")</span></header>
-        @if (RoadmapReviewMode.Enabled)
-        {
-            <p class="journey-review-note" role="status">@Tx("Content review mode: the existing curriculum is available for inspection. Completion still uses saved learning evidence.", "Chế độ kiểm duyệt nội dung: có thể xem các bài trong chương trình. Trạng thái hoàn thành vẫn dựa trên tiến độ đã lưu.")</p>
-        }
-        <nav class="journey-skills" aria-label="@Tx("Skill journeys", "Hành trình kỹ năng")">
-            @foreach (var group in SkillGroups)
-            {
-                var key = group.Key;
-                <button class="@(key == SelectedKey ? "is-active" : null)" aria-pressed="@(key == SelectedKey ? "true" : "false")" @onclick="() => SelectSkill(key)"><i class="bi @SkillTheme.For(key).Icon" aria-hidden="true"></i>@CategoryName(group.First())<small>@group.Count(x => x.IsCompleted)/@group.Count()</small></button>
-            }
-        </nav>
-        <div class="journey-grid">
-            <CurrentLevelHero Theme="Theme" Category="@CategoryName(SelectedItem)" Title="@WeekTitle(SelectedItem, SelectedOrdinal)" Description="@SelectedDescription" Ordinal="SelectedOrdinal" Completed="SelectedItem.CompletedActivityCount" Total="SelectedItem.TotalActivityCount" Locked="@(SelectedState == JourneyState.Locked)" Vietnamese="Vietnamese" OnContinue="ContinueDesktopLearning" />
-            <div class="journey-right">
-                <AdventureMap Checkpoints="SharedCheckpoints" SelectedItemId="SelectedItem.Id" Vietnamese="Vietnamese" OnSelect="OpenCheckpoint" />
-                @if (NextItem is { } next)
-                {
-                    <aside class="journey-next journey-card"><div><span><i class="bi bi-lock" aria-hidden="true"></i>@Tx("NEXT LEVEL", "CẤP ĐỘ TIẾP THEO")</span><h3>@WeekTitle(next, WeekOrdinal(next))</h3><p>@(string.IsNullOrWhiteSpace(next.Objective) ? Tx("Complete this level to continue your journey.", "Hoàn thành cấp độ này để tiếp tục hành trình.") : L.Ui(next.Objective))</p></div><i class="bi @Theme.Icon journey-next-art" aria-hidden="true"></i></aside>
-                }
-            </div>
-            <CurrentLevelLessons Lessons="CurrentLessons" Vietnamese="Vietnamese" OnOpen="OpenSelectedStep" />
-        </div>
-    }
-</section>
+
 
 <section class="learn-v3 @(CourseDetail ? "lm-detail" : "lm-overview")">
     @if (loading)
