@@ -1,5 +1,6 @@
 /* Shared mobile components grow into desktop layouts without changing content. */
 .shared-course-details { min-width: 0; color: var(--ss-text); }
+.ss-admin-content { width: 100%; min-width: 0; }
 
 @media (min-width: 901px) {
     html body .page[data-responsive-layout="shared"] {
@@ -135,4 +136,30 @@
     .page[data-responsive-layout="shared"] .sh-home > :is(.sh-journey, .sh-recommendation, .sh-achievements) { grid-column: span 7; }
     .page[data-responsive-layout="shared"] .sh-home > :is(.sh-quick, .sh-mentors, .sh-quote) { grid-column: span 5; }
     .page[data-responsive-layout="shared"] .lm-discover { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Admin pages use the available workspace beside the collapsible sidebar. */
+@media (min-width: 901px) {
+    html body .page[data-workspace-area="admin"] > .ss-workspace {
+        width: calc(100% - var(--ss-sidebar-width));
+        max-width: none;
+        margin-right: 0;
+        padding: 0;
+    }
+
+    html body .page[data-responsive-layout="shared"][data-workspace-area="admin"] > .ss-workspace > main#main-content.ss-main-content.container {
+        max-width: none !important;
+        padding: 28px var(--ss-desktop-gutter) 40px !important;
+    }
+
+    html body .page[data-workspace-area="admin"] .ss-main-content :is(.ss-admin-studio, .ss-announcements-page) {
+        width: 100%;
+        max-width: none;
+        margin-inline: 0;
+    }
+
+    html body .page[data-workspace-area="admin"] .shared-mobile-footer {
+        width: 100%;
+        max-width: none;
+    }
 }

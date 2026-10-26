@@ -5,7 +5,7 @@
 
 <AuthorizeView Context="shellAuth">
 <Authorized>
-<div class="page" data-responsive-layout="shared">
+<div class="page" data-responsive-layout="shared" data-workspace-area="@WorkspaceArea">
     <a class="ss-skip-link" href="#main-content"><LocalizedText Text="Skip to main content" /></a>
     <NavBar RenderedPath="@CurrentPath" />
     <WelcomeToast />
@@ -35,4 +35,5 @@
 
 @code {
     private string CurrentPath => new Uri(Navigation.Uri).AbsolutePath;
+    private string WorkspaceArea => CurrentPath.StartsWith("/admin/", StringComparison.OrdinalIgnoreCase) ? "admin" : "learner";
 }

@@ -8,8 +8,8 @@
 @implements IDisposable
 
 <PageTitle>@Tx("AI Configuration · SoftSync", "Cấu hình AI · SoftSync")</PageTitle>
-<main class="ss-workspace">
-    <section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="ai-config-title" aria-busy="@busy">
+<main class="ss-admin-ai-configuration">
+    <section class="ss-admin-content" aria-labelledby="ai-config-title" aria-busy="@busy">
         <header><h1 id="ai-config-title">@Tx("AI Configuration", "Cấu hình AI")</h1>
             <p>@Tx("Saved database settings take priority over environment settings. Changes apply to the next AI request.", "Cấu hình đã kích hoạt trong database ưu tiên hơn biến môi trường. Thay đổi áp dụng từ yêu cầu AI tiếp theo.")</p>
             <a href="/admin/users">@Tx("Role management", "Quản lý quyền")</a></header>
