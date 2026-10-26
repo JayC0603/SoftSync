@@ -1,6 +1,7 @@
 @page "/roadmap"
 @page "/roadmap/{UserId:int}"
 @rendermode InteractiveServer
+@attribute [StreamRendering]
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
 @using SoftSync.BLL.Interfaces
@@ -15,10 +16,7 @@
 @inject ILogger<RoadmapOverview> Logger
 
 <PageTitle>@Tx("Learn", "Học tập") · SoftSync</PageTitle>
-@* Keep page styles attached during enhanced navigation from the interactive dashboard. *@
-    <link rel="stylesheet" href="css/adventure-map.css?v=20261020-mobile-trail-v2" />
-    <link rel="stylesheet" href="css/learning-journey.css?v=20261019-light" media="(min-width: 901px)" />
-    <link rel="stylesheet" href="css/learn-v3.css?v=20261019-v4-mobile" />
+@* Styles load in App.razor before the first paint, including enhanced navigation. *@
 
 <section class="learning-journey learn-desktop" style="@Theme.Css">
     @if (loading)
@@ -61,7 +59,6 @@
     }
 </section>
 
-<link rel="stylesheet" href="css/learn-mobile-reference.css?v=20261022-cards" />
 <section class="learn-v3 @(CourseDetail ? "lm-detail" : "lm-overview")">
     @if (loading)
     {
@@ -176,7 +173,8 @@
 @code {
     [Parameter] public int UserId { get; set; }
     [SupplyParameterFromQuery(Name = "skill")] public string? RequestedSkill { get; set; }
-    private List<RoadmapItemDto> items = [];
+    private List<RoadmapItemDto> roadmapItems = [];
+    [PersistentState] public List<RoadmapItemDto> items { get => roadmapItems; set => roadmapItems = value ?? []; }
     private string learnQuery = string.Empty;
     private bool discover;
     [SupplyParameterFromQuery(Name = "course")] public string? Course { get; set; }
@@ -225,9 +223,12 @@
     }
     private string ActivityAction(JourneyLesson lesson) => lesson.Completed ? Tx("Review", "Xem lại") : lesson.Available ? Tx("Continue", "Tiếp tục") : Tx("Locked", "Chưa mở khóa");
 
-    private RoadmapItemDto? selected;
-    private bool loading = true;
-    private bool loadError;
+    // Restore selection by ID so it points at an item in the restored list.
+    [PersistentState] public int? SelectedItemId { get; set; }
+    private RoadmapItemDto? selected { get => items.FirstOrDefault(x => x.Id == SelectedItemId); set => SelectedItemId = value?.Id; }
+    [PersistentState] public bool DataLoaded { get; set; }
+    private bool loading { get => !DataLoaded; set => DataLoaded = !value; }
+    [PersistentState] public bool loadError { get; set; }
     private bool Vietnamese => L.Current == AppLanguage.Vi;
     private RoadmapItemDto SelectedItem => selected ?? items[0];
     private string SelectedKey => SkillKey(SelectedItem);
@@ -241,7 +242,11 @@
     private string SelectedDescription => !string.IsNullOrWhiteSpace(SelectedItem.Objective) ? SelectedItem.Objective : !string.IsNullOrWhiteSpace(SelectedItem.Description) ? SelectedItem.Description : WeekDescription(SelectedItem);
     private JourneyState StateOf(RoadmapItemDto item) => JourneyProgress.State(item, items.IndexOf(item), ActiveIndex, RoadmapReviewMode.Enabled);
 
-    protected override Task OnInitializedAsync() => LoadRoadmap();
+    protected override async Task OnInitializedAsync()
+    {
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (loading) await LoadRoadmap();
+    }
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(RequestedSkill) && items.Any(x => SkillKey(x) == RequestedSkill))

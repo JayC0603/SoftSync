@@ -14,7 +14,7 @@ html body .page .ss-mobile-bottom-nav {
   min-height:var(--ss-mobile-dock-height)!important;
   max-height:var(--ss-mobile-dock-height)!important;
   margin:0;
-  padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))!important;
   grid-template-columns:repeat(5,minmax(0,1fr))!important;
   gap:2px!important;
   z-index:1000;
@@ -60,6 +60,7 @@ html body .page .ss-mobile-bottom-link {
   line-height:1.2;
   text-decoration:none;
   transition:color 160ms ease,background-color 160ms ease;
+  -webkit-tap-highlight-color:transparent;
 }
 html body .page .ss-mobile-bottom-link i {
   display:grid;

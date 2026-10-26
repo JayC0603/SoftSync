@@ -21,7 +21,7 @@ html[data-theme='dark'] body .page {
 /* Home changes the page font. Keep navigation metrics independent of it. */
 html body .page :is(.ss-workspace-topbar, .ss-navbar, .ss-mobile-bottom-nav),
 html body .page :is(.ss-workspace-topbar, .ss-navbar, .ss-mobile-bottom-nav) :is(a, span, strong, small, button, summary) {
-    font-family: var(--ss-font-family, 'Segoe UI', Arial, sans-serif) !important;
+    font-family: 'Segoe UI', Arial, sans-serif !important;
 }
 html body .page .ss-workspace-topbar,
 html body .page > .ss-navbar {
@@ -57,6 +57,24 @@ html body .page .ss-mobile-bottom-link:is(:hover, :active, .active) {
     transform: none !important;
     translate: none !important;
     scale: none !important;
+    animation: none !important;
+}
+html body .page .ss-mobile-bottom-link span {
+    flex: 0 0 14px;
+    height: 14px;
+    font-size: 11px !important;
+    line-height: 14px !important;
+    font-weight: 650 !important;
+}
+html body .page .ss-mobile-bottom-link i {
+    flex: 0 0 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
 }
 html body .page .ss-mobile-bottom-link.active {
     border-color: var(--ss-nav-edge) !important;

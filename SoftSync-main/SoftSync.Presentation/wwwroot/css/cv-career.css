@@ -71,6 +71,17 @@ html body .page .ss-main-content .career-cv .career-menu-card small { font-size:
  .career-cv .career-tip { margin-top:24px; margin-bottom:16px; padding:16px 14px; }
 }
 
+/* Equal columns on desktop and full-width action cards on mobile. */
+.career-cv { width:100%; min-width:0; }
+.career-cv .career-menu { grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; }
+.career-cv .career-menu-card { width:100%; min-width:0; }
+.career-cv .career-menu-card > span:nth-child(2) { min-width:0; overflow-wrap:anywhere; }
+.career-cv .career-menu-card > .bi-chevron-right { flex-shrink:0; }
+.career-cv .career-tip { width:100%; max-width:none; box-sizing:border-box; }
+@media(max-width:900px) {
+    .career-cv .career-menu { grid-template-columns:minmax(0,1fr); grid-auto-rows:1fr; }
+}
+
 /* Keep the quick tip secondary to the three CV actions. */
 html body .page .ss-main-content .career-cv .career-tip { gap:9px; padding:12px 14px; margin:18px 0 0; border-radius:13px; }
 html body .page .ss-main-content .career-cv .career-tip>i { font-size:17px; line-height:1.5; }

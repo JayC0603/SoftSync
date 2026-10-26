@@ -317,14 +317,19 @@ window.ssSchedule = {
 window.ssDesktopVariant = (() => {
     let nextId = 0;
     const subscriptions = new Map();
+    const query = window.matchMedia('(min-width: 901px)');
+    const remember = () => {
+        document.cookie = `ss-viewport=${query.matches ? 'desktop' : 'mobile'}; path=/; max-age=31536000; samesite=lax`;
+    };
+    remember();
+    query.addEventListener('change', remember);
     return {
-        subscribe(reference) {
+        subscribe(reference, renderedDesktop) {
             const id = ++nextId;
-            const query = window.matchMedia('(min-width: 901px)');
             const notify = () => reference.invokeMethodAsync('SetDesktop', query.matches).catch(() => {});
             query.addEventListener('change', notify);
             subscriptions.set(id, { query, notify });
-            notify();
+            if (query.matches !== renderedDesktop) notify();
             return id;
         },
         unsubscribe(id) {

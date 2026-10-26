@@ -1,0 +1,31 @@
+@inherits LocalizedComponentBase
+
+<div class="lp-product @(Phone ? "lp-phone" : "lp-learning-preview")" aria-label="@T("Minh họa giao diện SoftSync", "SoftSync interface preview")">
+    @if (Phone) { <div class="lp-phone-notch" aria-hidden="true"></div> }
+    <div class="lp-product-top"><span><img src="/images/logo.png" alt="" width="21" height="21" />SoftSync</span><span><i class="bi bi-bell" aria-hidden="true"></i><span class="lp-mini-avatar">S</span></span></div>
+    @if (Phone)
+    {
+        <h3>@T("Chào mừng trở lại,", "Welcome back,")<br />Chánh!</h3>
+        <div class="lp-preview-progress"><strong>@T("Tiến độ tổng quan", "Your progress")</strong><div><span class="lp-progress-ring">38%</span><p>@T("Đã hoàn thành", "Completed")<small>@T("13/34 hoạt động", "13/34 activities")</small></p><i class="bi bi-chevron-right" aria-hidden="true"></i></div></div>
+        <h4>@T("Tiếp tục học", "Continue learning")</h4>
+    }
+    else { <h3>@T("Lộ trình học tập của bạn", "Your learning journey")</h3> }
+    <div class="lp-preview-lesson"><div class="lp-lesson-image"><img src="/images/home-v3/welcome-landscape.webp" alt="" width="300" height="150" loading="lazy" /><span><i class="bi bi-play-fill" aria-hidden="true"></i></span></div><div><strong>@T("Quản lý thời gian", "Time management")</strong><small>@T("Bài 1 · 12 phút", "Lesson 1 · 12 minutes")</small>@if (Phone) { <progress value="55" max="100" aria-label="@T("Tiến độ bài học minh họa", "Example lesson progress")"></progress> }</div></div>
+    <h4>@T("Lộ trình của bạn", "Your roadmap")</h4>
+    <ol class="lp-preview-checklist">
+        @foreach (var step in new[] { T("Hiểu về thời gian", "Understand your time"), T("Lên kế hoạch hiệu quả", "Plan effectively"), T("Thực hành và áp dụng", "Practice and apply"), T("Tổng kết và phản tư", "Review and reflect") }.Select((title, index) => (Title: title, Index: index)))
+        {
+            <li>
+                @if (Phone) { <b class="lp-preview-number">@(step.Index + 1)</b> }
+                else { <i class="bi @(step.Index == 0 ? "bi-check-circle-fill" : "bi-circle")" aria-hidden="true"></i> }
+                <span>@step.Title</span><i class="bi @(Phone && step.Index == 0 ? "bi-check-lg" : "bi-chevron-right")" aria-hidden="true"></i>
+            </li>
+        }
+    </ol>
+    <small class="lp-example-label">@T("Minh họa trải nghiệm học tập", "Learning experience preview")</small>
+</div>
+
+@code {
+    [Parameter] public bool Phone { get; set; }
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+}

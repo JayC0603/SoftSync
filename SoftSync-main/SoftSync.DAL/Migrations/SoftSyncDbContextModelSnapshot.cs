@@ -3705,6 +3705,42 @@ namespace SoftSync.DAL.Migrations
                     b.ToTable("RoleplayTurns");
                 });
 
+            modelBuilder.Entity("SoftSync.DAL.Entities.GameHistoryRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClientEntryId")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("DataJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("GameKey")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("PlayedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "GameKey", "ClientEntryId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "GameKey", "PlayedAtUtc");
+
+                    b.ToTable("GameHistoryRecords");
+                });
+
             modelBuilder.Entity("SoftSync.DAL.Entities.ScheduleTask", b =>
                 {
                     b.Property<int>("Id")
@@ -4361,6 +4397,17 @@ namespace SoftSync.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("SoftSync.DAL.Entities.GameHistoryRecord", b =>
+                {
+                    b.HasOne("SoftSync.DAL.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SoftSync.DAL.Entities.ScheduleTask", b =>

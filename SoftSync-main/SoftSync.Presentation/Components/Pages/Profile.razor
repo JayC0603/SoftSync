@@ -1,4 +1,4 @@
-@page "/profile"
+﻿@page "/profile"
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inherits LocalizedComponentBase
@@ -13,102 +13,60 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject UserProfileState UserProfileState
 
-<div class="max-720 tw:mx-auto">
-    <UiPageHeader Title="@L["nav.profile"]" Description="@L["redesign.profile.description"]" />
+<PageTitle>@L["nav.profile"] · SoftSync</PageTitle>
+<HeadContent><link rel="stylesheet" href="css/profile-reference.css?v=1" /></HeadContent>
+<div class="pr-profile">
+    <header class="pr-heading"><h1>@L["nav.profile"]</h1><p>@L["redesign.profile.description"]</p></header>
     @if (user is null)
     {
-        <div class="tw:text-center tw:py-12">
-            <div class="spinner-border text-primary" role="status"></div>
-        </div>
+        <div class="pr-card" role="status"><span class="spinner-border text-primary" aria-hidden="true"></span> @T("Loading profile…", "Đang tải hồ sơ…")</div>
     }
     else
     {
-        <!-- Header card: avatar + name + level -->
-        <div class="ss-card tw:p-8 tw:mb-6">
-            <div class="tw:flex tw:items-center tw:gap-6 tw:flex-col tw:sm:flex-row">
-                <div class="ss-avatar-upload">
-                    @if (!string.IsNullOrEmpty(user.AvatarUrl))
-                    {
-                        <img src="@user.AvatarUrl" alt="avatar" class="ss-avatar-img" />
-                    }
-                    else
-                    {
-                        <i class="bi bi-person-fill"></i>
-                    }
-                    <label class="ss-avatar-edit" title="@L["profile.avatar.change"]">
-                        <i class="bi bi-camera-fill"></i>
-                        <InputFile OnChange="OnAvatarSelected" accept="image/*" class="tw:hidden" />
-                    </label>
+        <section class="pr-card pr-identity" aria-label="@user.PublicName">
+            <div class="pr-person">
+                <div class="pr-avatar">
+                    @if (!string.IsNullOrWhiteSpace(user.AvatarUrl)) { <img src="@user.AvatarUrl" alt="@user.PublicName" /> }
+                    else { <span aria-hidden="true">@Initial</span> }
+                    <label class="pr-camera" title="@L["profile.avatar.change"]"><i class="bi bi-camera-fill" aria-hidden="true"></i><InputFile OnChange="OnAvatarSelected" accept="image/*" aria-label="@L["profile.avatar.change"]" /></label>
                 </div>
-
-                <div class="tw:flex-1 tw:text-center tw:sm:text-left">
-                    <h2 class="tw:font-bold tw:mb-1">@user.FullName</h2>
-                    <div class="tw:flex tw:items-center tw:gap-2 tw:justify-center tw:sm:justify-start tw:mb-3">
-                        <span class="ss-level-badge"><i class="bi bi-star-fill"></i> @L["nav.level"] @user.Level</span>
-                        <span class="text-muted tw:text-sm">@user.ExperiencePoints XP</span>
-                    </div>
-
-                    <!-- Level progress bar -->
-                    <div class="ss-xp-bar" title="@xpIntoLevel / @xpForNext XP">
-                        <div class="ss-xp-fill" style="width: @(user.LevelProgressPercent)%"></div>
-                    </div>
-                    <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mt-1">
-                        <span>@L["nav.level"] @user.Level</span>
-                        <span>@xpIntoLevel / @xpForNext XP → @L["nav.level"] @(user.Level + 1)</span>
-                    </div>
+                <div class="pr-person-info"><h2>@user.PublicName</h2>
+                    <div class="pr-level-row"><span class="pr-level"><i class="bi bi-star-fill" aria-hidden="true"></i>@L["nav.level"] @user.Level</span><span>@user.ExperiencePoints XP</span></div>
+                    <div class="pr-progress" role="progressbar" aria-label="@T("Level progress", "Tiến độ cấp độ")" aria-valuenow="@user.LevelProgressPercent" aria-valuemin="0" aria-valuemax="100"><span style="width: @(user.LevelProgressPercent)%"></span></div>
+                    <p>@(L.Current == AppLanguage.Vi ? $"Còn {Math.Max(0, xpForNext - xpIntoLevel)} XP để lên Cấp {user.Level + 1}" : $"{Math.Max(0, xpForNext - xpIntoLevel)} XP to Level {user.Level + 1}")</p>
                 </div>
             </div>
-            @if (!string.IsNullOrEmpty(avatarError))
-            {
-                <div class="text-danger tw:text-sm tw:mt-3">@avatarError</div>
-            }
-        </div>
-
-        <!-- Stats -->
-        <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-3 tw:gap-4 tw:mb-6">
-            <div class="ss-card tw:p-6 tw:text-center">
-                <div class="ss-stat-num">@assessmentCount</div>
-                <div class="text-muted tw:text-sm">@L["profile.stat.assessments"]</div>
+            @if (!string.IsNullOrEmpty(avatarError)) { <p class="text-danger" role="alert">@avatarError</p> }
+            <div class="pr-stats">
+                <div><i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i><strong>@assessmentCount</strong><span>@L["profile.stat.assessments"]</span></div>
+                <div><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><strong>@completedSkills</strong><span>@L["profile.stat.skillsTracked"]</span></div>
+                <div><i class="bi bi-award-fill" aria-hidden="true"></i><strong>@user.Level</strong><span>@L["profile.stat.currentLevel"]</span></div>
             </div>
-            <div class="ss-card tw:p-6 tw:text-center">
-                <div class="ss-stat-num">@completedSkills</div>
-                <div class="text-muted tw:text-sm">@L["profile.stat.skillsTracked"]</div>
-            </div>
-            <div class="ss-card tw:p-6 tw:text-center">
-                <div class="ss-stat-num">@user.Level</div>
-                <div class="text-muted tw:text-sm">@L["profile.stat.currentLevel"]</div>
-            </div>
-        </div>
-
-        <!-- Details -->
-        <div class="ss-card tw:p-6">
-            <h3 class="tw:font-bold tw:mb-4">@L["profile.details"]</h3>
-            <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-4">
-                <div>
-                    <div class="text-muted tw:text-sm">@L["auth.email"]</div>
-                    <div class="tw:font-medium">@email</div>
-                </div>
-                <div>
-                    <div class="text-muted tw:text-sm">@L["wizard.about.ageGroup"]</div>
-                    <div class="tw:font-medium">@(ProfileAgeGroups.LabelKey(user.Age) is { Length: > 0 } ageLabel ? L[ageLabel] : "—")</div>
-                </div>
-                <div class="tw:sm:col-span-2">
-                    <div class="text-muted tw:text-sm">@L["profile.goal"]</div>
-                    <div class="tw:font-medium">@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</div>
-                </div>
-            </div>
-            <button type="button" class="ss-btn-primary tw:mt-6 tw:px-6 tw:py-3" @onclick='() => Nav.NavigateTo("/settings")'>
-                <i class="bi bi-pencil tw:me-2"></i> @L["profile.edit"]
-            </button>
-
-            <button class="btn btn-outline-primary tw:mt-6 tw:ms-3 tw:px-6 tw:py-3" @onclick="GoJourney">
-                <i class="bi bi-compass tw:me-2"></i> @journeyButtonText
-            </button>
-        </div>
+        </section>
+        <section class="pr-card pr-details" aria-labelledby="pr-details-title">
+            <h2 id="pr-details-title">@T("Account information", "Thông tin tài khoản")</h2>
+            <dl>
+                <div><i class="bi bi-envelope" aria-hidden="true"></i><dt>@L["auth.email"]</dt><dd>@email</dd></div>
+                <div><i class="bi bi-people" aria-hidden="true"></i><dt>@L["wizard.about.ageGroup"]</dt><dd>@(ProfileAgeGroups.LabelKey(user.Age) is { Length: > 0 } ageLabel ? L[ageLabel] : "—")</dd></div>
+                <div><i class="bi bi-bullseye" aria-hidden="true"></i><dt>@L["profile.goal"]</dt><dd>@(string.IsNullOrWhiteSpace(user.Goal) ? "—" : L[user.Goal])</dd></div>
+            </dl>
+            <div class="pr-actions"><a href="/settings"><i class="bi bi-pencil" aria-hidden="true"></i>@L["profile.edit"]</a><button type="button" @onclick="GoJourney"><i class="bi bi-compass" aria-hidden="true"></i>@(profileComplete && hasAssessment ? T("Open Roadmap", "Mở Roadmap") : ResolveJourneyButtonText())</button></div>
+        </section>
+        <section class="pr-card pr-summary" aria-labelledby="pr-summary-title">
+            <h2 id="pr-summary-title">@T("Quick summary", "Tóm tắt nhanh")</h2>
+            <a href="/roadmap"><i class="bi bi-book" aria-hidden="true"></i><span>@T("Current skill", "Kỹ năng đang học")</span><strong>@(string.IsNullOrWhiteSpace(learningSkill) ? T("Not started", "Chưa bắt đầu") : L.Ui(learningSkill))</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a href="/progress"><i class="bi bi-play-circle" aria-hidden="true"></i><span>@T("Latest skill activity", "Kỹ năng luyện gần nhất")</span><strong>@(string.IsNullOrWhiteSpace(latestSkill) ? T("No activity yet", "Chưa có hoạt động") : L.Ui(latestSkill))</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a href="/progress"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>@T("Learning progress", "Tiến độ học tập")</span><strong>@progressPercent%</strong><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        </section>
     }
 </div>
 
 @code {
+    private string T(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
+    private string Initial => string.IsNullOrWhiteSpace(user?.PublicName) ? "?" : System.Globalization.StringInfo.GetNextTextElement(user.PublicName.Trim()).ToUpperInvariant();
+    private string learningSkill = "";
+    private string latestSkill = "";
+    private int progressPercent;
     private const long MaxAvatarBytes = 3 * 1024 * 1024;
     private UserDto? user;
     private int userId;
@@ -137,9 +95,12 @@
         }
 
         var results = await AssessmentService.GetLatestResultsAsync(userId, userId);
-        assessmentCount = results.Count();
-        hasAssessment = assessmentCount > 0;
-        var progress = await ProgressService.GetUserProgressAsync(userId);
+        assessmentCount = (await AssessmentService.GetHistoryAsync(userId, userId)).Count;
+        hasAssessment = results.Any();
+        var progress = (await ProgressService.GetUserProgressAsync(userId)).ToList();
+        learningSkill = progress.FirstOrDefault(x => x.PercentComplete < 100)?.SkillName ?? "";
+        latestSkill = progress.OrderByDescending(x => x.UpdatedAt).FirstOrDefault()?.SkillName ?? "";
+        progressPercent = progress.Count > 0 ? (int)progress.Average(x => x.PercentComplete) : 0;
         completedSkills = progress.Count();
         var selectedSkills = await UserService.GetSelectedSkillIdsAsync(userId);
         profileComplete = user is not null
@@ -197,48 +158,3 @@
         return $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
     }
 }
-
-<style>
-    .max-720 { max-width: 720px; }
-    .ss-avatar-upload {
-        position: relative;
-        width: 110px; height: 110px;
-        border-radius: 999px;
-        background: var(--gradient);
-        color: #fff;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 2.8rem;
-        flex-shrink: 0;
-    }
-    .ss-avatar-img { width: 100%; height: 100%; border-radius: 999px; object-fit: cover; }
-    .ss-avatar-edit {
-        position: absolute; bottom: 0; right: 0;
-        width: 36px; height: 36px; border-radius: 999px;
-        background: #fff; color: var(--color-brand);
-        border: 2px solid var(--glass-border);
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; box-shadow: var(--shadow-glass);
-    }
-    .ss-avatar-edit:hover { color: var(--color-brand-dark); }
-    .ss-level-badge {
-        display: inline-flex; align-items: center; gap: 0.3rem;
-        background: var(--gradient); color: #fff;
-        padding: 0.2rem 0.7rem; border-radius: 999px;
-        font-weight: 700; font-size: 0.85rem;
-    }
-    .ss-xp-bar {
-        height: 10px; border-radius: 999px;
-        background: rgba(99, 102, 241, 0.15);
-        overflow: hidden;
-    }
-    .ss-xp-fill {
-        height: 100%; border-radius: 999px;
-        background: var(--gradient);
-        transition: width 0.4s ease;
-    }
-    .ss-stat-num {
-        font-size: 2rem; font-weight: 800;
-        color: var(--color-brand-dark);
-        line-height: 1.1;
-    }
-</style>

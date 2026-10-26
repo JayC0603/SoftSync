@@ -50,6 +50,7 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<LearningActivitySession> LearningActivitySessions { get; set; }
     public DbSet<LearningHeartbeat> LearningHeartbeats { get; set; }
     public DbSet<ScheduleTask> ScheduleTasks { get; set; }
+    public DbSet<GameHistoryRecord> GameHistoryRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -154,6 +155,14 @@ public class SoftSyncDbContext : IdentityDbContext<ApplicationUser, IdentityRole
         schedule.Property(x => x.Description).HasMaxLength(2000);
         schedule.HasIndex(x => new { x.UserId, x.Date });
         schedule.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+
+        var gameHistory = modelBuilder.Entity<GameHistoryRecord>();
+        gameHistory.Property(x => x.GameKey).HasMaxLength(40).IsRequired();
+        gameHistory.Property(x => x.ClientEntryId).HasMaxLength(80).IsRequired();
+        gameHistory.Property(x => x.DataJson).IsRequired();
+        gameHistory.HasIndex(x => new { x.UserId, x.GameKey, x.PlayedAtUtc });
+        gameHistory.HasIndex(x => new { x.UserId, x.GameKey, x.ClientEntryId }).IsUnique();
+        gameHistory.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
 
         // Seed Data
         SeedData(modelBuilder);

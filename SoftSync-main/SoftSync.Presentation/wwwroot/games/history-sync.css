@@ -1,0 +1,29 @@
+#game-history { width: min(900px, 100%); margin: 1rem auto 2rem; }
+.ss-gh-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; padding: .8rem 1rem; border: 1px solid #e3e5ed; border-radius: 13px; background: rgb(255 255 255 / 88%); color: #697087; font: 500 .84rem/1.45 Inter, "Be Vietnam Pro", system-ui, sans-serif; }
+.ss-gh-status { flex: 1 1 240px; }
+.ss-gh-login { color: #5146e5; font-weight: 700; text-decoration: none; }
+.ss-gh-login:hover { text-decoration: underline; }
+.ss-gh-open, .ss-gh-close { min-height: 38px; padding: .45rem .75rem; border: 1px solid #d9d7f6; border-radius: 9px; background: #f0efff; color: #5146e5; font: inherit; font-weight: 700; cursor: pointer; }
+.ss-gh-panel { margin-top: .7rem; padding: clamp(1rem, 3vw, 1.5rem); border: 1px solid #e3e5ed; border-radius: 16px; background: white; box-shadow: 0 10px 28px rgb(38 42 92 / 5%); font-family: Inter, "Be Vietnam Pro", system-ui, sans-serif; color: #17182f; }
+.ss-gh-panel[hidden] { display: none; }
+.ss-gh-heading, .ss-gh-entry-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.ss-gh-heading { margin-bottom: .75rem; }
+.ss-gh-heading h2 { margin: 0; font-size: 1.15rem; }
+.ss-gh-heading-actions { display: flex; align-items: center; gap: .4rem; }
+.ss-gh-entry { margin-top: .65rem; padding: .9rem; border: 1px solid #e3e5ed; border-radius: 12px; background: #fcfcff; }
+.ss-gh-entry h3 { margin: 0; font-size: .98rem; line-height: 1.4; }
+.ss-gh-date, .ss-gh-summary { color: #697087; font-size: .82rem; }
+.ss-gh-date { white-space: nowrap; }
+.ss-gh-summary { margin: .35rem 0; line-height: 1.55; }
+.ss-gh-metrics { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+.ss-gh-metrics span { padding: .28rem .5rem; border-radius: 7px; background: #f0efff; color: #453dc0; font-size: .76rem; font-weight: 700; }
+.ss-gh-details { margin-top: .55rem; color: #697087; font-size: .84rem; }
+.ss-gh-details summary { width: fit-content; color: #5146e5; font-weight: 700; cursor: pointer; }
+.ss-gh-details ul { max-height: 300px; overflow: auto; padding-left: 1.2rem; line-height: 1.55; }
+.ss-gh-empty { margin: 0; padding: .9rem; border: 1px dashed #e3e5ed; border-radius: 10px; color: #697087; line-height: 1.5; }
+.ss-gh-close { background: white; color: #697087; border-color: #e3e5ed; }
+.ss-gh-export { min-height: 36px; margin-top: .5rem; padding: .4rem .65rem; border: 1px solid #e3e5ed; border-radius: 8px; background: white; color: #5146e5; font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
+.ss-gh-clear { min-height: 36px; padding: .4rem .65rem; border: 1px solid #f1c8c8; border-radius: 8px; background: #fff8f7; color: #a83232; font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
+.ss-gh-open:hover, .ss-gh-close:hover { filter: brightness(.97); }
+.ss-gh-open:focus-visible, .ss-gh-close:focus-visible, .ss-gh-login:focus-visible { outline: 3px solid #a5a0ff; outline-offset: 3px; }
+@media (max-width: 520px) { .ss-gh-entry-top { flex-direction: column; gap: .2rem; } }

@@ -20,6 +20,24 @@ namespace SoftSync.Tests;
 
 public sealed class LocalizationTests
 {
+    [Theory]
+    [InlineData("Tuần 1 - Nền tảng giao tiếp", "Week 1 - Communication foundations")]
+    [InlineData("Tuần 2 - Lắng nghe chủ động", "Week 2 - Active listening")]
+    [InlineData("Nền tảng Kỹ năng Quản lý thời gian", "Time Management Skills Foundations")]
+    [InlineData("Thực hành Kỹ năng Quản lý thời gian", "Time Management Skills Practice")]
+    public void Built_in_home_lesson_titles_follow_language_without_changing_stored_titles(string stored, string english)
+    {
+        var language = new LocalizationService();
+        var item = new RoadmapItemDto { Title = stored };
+        Assert.Equal(stored, language.Ui(item.Title));
+        language.SetLanguage(AppLanguage.En);
+        Assert.Equal(english, language.Ui(item.Title));
+        language.SetLanguage(AppLanguage.Vi);
+        Assert.Equal(stored, language.Ui(item.Title));
+        Assert.Equal(stored, item.Title);
+        Assert.Equal("Khóa học riêng của tôi", language.Ui("Khóa học riêng của tôi"));
+    }
+
     [Fact]
     public void UI_catalog_is_complete_in_both_directions_and_preserves_unknown_user_content()
     {

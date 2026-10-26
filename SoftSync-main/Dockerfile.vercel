@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1
+# Multi-stage build for the SoftSync Blazor Server app.
+# Build context is the REPOSITORY ROOT (so all four projects are visible).
+#   docker build -f SoftSync.Presentation/Dockerfile -t softsync .
+
+# ---- Build stage: .NET SDK + Node (for the Vite/Tailwind front-end build) ----
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Node 22 is needed so the csproj NpmInstall/ViteBuild targets can emit wwwroot/dist.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Restore first (better layer caching): copy only project files.
+COPY SoftSync.sln ./
+COPY SoftSync.Common/SoftSync.Common.csproj SoftSync.Common/
+COPY SoftSync.DAL/SoftSync.DAL.csproj SoftSync.DAL/
+COPY SoftSync.BLL/SoftSync.BLL.csproj SoftSync.BLL/
+COPY SoftSync.Presentation/SoftSync.Presentation.csproj SoftSync.Presentation/
+RUN dotnet restore SoftSync.Presentation/SoftSync.Presentation.csproj
+
+# Copy the rest of the source and publish.
+COPY . .
+
+# Build the frontend before dotnet publish so the generated Vite/Tailwind
+# assets exist when ASP.NET collects static web assets. Keep this step
+# fail-fast: deploying without app.css leaves the navigation and responsive
+# layout visibly broken.
+RUN cd SoftSync.Presentation \
+    && npm ci \
+    && npm run build \
+    && touch node_modules/.install-stamp
+
+RUN dotnet publish SoftSync.Presentation/SoftSync.Presentation.csproj \
+    -c Release -o /app/publish /p:UseAppHost=false
+
+# ---- Runtime stage: ASP.NET runtime only ----
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+# Npgsql may negotiate PostgreSQL GSS/Kerberos support at runtime. The slim
+# ASP.NET image doesn't include the native GSSAPI library, which causes
+# `libgssapi_krb5.so.2: cannot open shared object file` before EF can connect.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app/publish ./
+
+# Vercel Container Runtime routes HTTP traffic to port 80 by default.
+ENV ASPNETCORE_ENVIRONMENT=Production \
+    Hosting__Vercel=true \
+    DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false \
+    DOTNET_USE_POLLING_FILE_WATCHER=1
+EXPOSE 80
+ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://+:${PORT:-80} exec dotnet SoftSync.Presentation.dll"]

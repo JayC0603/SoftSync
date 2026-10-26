@@ -7,25 +7,29 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <PageTitle>@(mentor?.Name ?? Tx("Mentor profile", "Hồ sơ Mentor")) · SoftSync</PageTitle>
-<section class="eco-page mentor-profile" aria-labelledby="mentor-title">
+<section class="eco-page mentor-profile mentor-reference" aria-labelledby="mentor-title">
     <AuthorizeView><Authorized><a class="eco-back" href="/mentor-requests">@Tx("Track my support requests", "Theo dõi yêu cầu hỗ trợ của tôi")</a></Authorized></AuthorizeView>
-    <a class="eco-back" href="/mentors"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("All mentors", "Tất cả Mentor")</a>
+    <a class="eco-back mentor-back" href="/mentors"><i class="bi bi-arrow-left" aria-hidden="true"></i>@Tx("All mentors", "Tất cả mentor")</a>
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentor profile...", "Đang tải hồ sơ Mentor...")</p></div> }
     else if (mentor is null) { <div class="eco-state eco-state-error"><i class="bi bi-person-x" aria-hidden="true"></i><h1 id="mentor-title">@Tx("Mentor not found", "Không tìm thấy Mentor")</h1><p>@Tx("This profile may no longer be available.", "Hồ sơ này có thể không còn khả dụng.")</p><a href="/mentors">@Tx("Return to mentors", "Quay lại danh sách")</a></div> }
     else {
-        <div class="mentor-profile-grid">
+        <div class="mentor-profile-grid @(signedIn ? null : "mentor-profile-readonly")">
             <article class="mentor-profile-main">
-                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@Tx("SOFTSYNC MENTOR", "MENTOR SOFTSYNC")</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise)</strong></div></header>
-                <section><h2>@Tx("How this mentor can help", "Mentor này có thể hỗ trợ gì")</h2><p>@Ui(mentor.ShortBio)</p><p>@Tx("Use a support request to describe the decision, conversation or learning step where you feel stuck. The mentor receives only what you choose to write below.", "Dùng yêu cầu hỗ trợ để mô tả quyết định, cuộc trò chuyện hoặc bước học nơi bạn đang gặp khó. Mentor chỉ nhận nội dung bạn chủ động viết bên dưới.")</p></section>
-                <section><h2>@Tx("A focused support process", "Quy trình hỗ trợ tập trung")</h2><ol><li><span>1</span>@Tx("Describe one concrete learning goal.", "Mô tả một mục tiêu học cụ thể.")</li><li><span>2</span>@Tx("Choose whether to share learning context.", "Chọn có chia sẻ ngữ cảnh học hay không.")</li><li><span>3</span>@Tx("SoftSync records your request for follow-up.", "SoftSync lưu yêu cầu để tiếp tục xử lý.")</li></ol></section>
+                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>SOFTSYNC MENTOR</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong></div></header>
+                <section class="mentor-about"><h2>@Tx("How can this mentor help?", "Mentor có thể hỗ trợ gì?")</h2><p>@Ui(mentor.ShortBio)</p><p>@Tx("Send a support request to discuss challenges in your learning, find solutions or receive suggestions suited to your needs.", "Bạn có thể gửi yêu cầu hỗ trợ để trao đổi về những vấn đề trong quá trình học tập, tìm hướng giải quyết hoặc nhận gợi ý phù hợp với nhu cầu của mình.")</p></section>
+                <section class="mentor-process"><h2>@Tx("Support process", "Quy trình hỗ trợ")</h2><ol>
+                    <li><span>1</span><div><h3>@Tx("Describe your learning goal", "Mô tả mục tiêu học tập")</h3><p>@Tx("Tell us what you want to achieve.", "Nêu rõ điều bạn muốn đạt được.")</p></div></li>
+                    <li><span>2</span><div><h3>@Tx("Share context (optional)", "Chia sẻ bối cảnh (nếu có)")</h3><p>@Tx("Help your mentor understand your situation.", "Giúp mentor hiểu rõ hơn về tình huống của bạn.")</p></div></li>
+                    <li><span>3</span><div><h3>@Tx("SoftSync receives your request", "SoftSync ghi nhận yêu cầu")</h3><p>@Tx("Replies arrive in your notification inbox.", "Phản hồi được gửi qua hộp thông báo của bạn.")</p></div></li>
+                </ol></section>
             </article>
+            @if (signedIn)
+            {
             <aside class="mentor-request" aria-labelledby="request-title">
                 @if (submitted) {
                     <div class="eco-success" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i><h2 id="request-title">@Tx("Request received", "Đã nhận yêu cầu")</h2><p>@Tx("Your request was saved. SoftSync can now follow up through your selected contact method.", "Yêu cầu đã được lưu. SoftSync có thể tiếp tục hỗ trợ qua phương thức bạn đã chọn.")</p><a href="/roadmap">@Tx("Return to learning", "Quay lại học")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
                 } else {
-                    <h2 id="request-title">@Tx("Request mentor support", "Yêu cầu Mentor hỗ trợ")</h2><p>@Tx("SoftSync administrators coordinate these requests. Track status under My support requests; replies arrive in your notification inbox. Email is a contact preference, not an automatic email delivery.", "Quản trị viên SoftSync điều phối các yêu cầu này. Theo dõi trạng thái tại Yêu cầu hỗ trợ của tôi; phản hồi được gửi vào hộp thông báo. Email là phương thức liên hệ mong muốn, không phải gửi email tự động.")</p>
-                    @if (!signedIn) { <div class="eco-inline-note"><i class="bi bi-lock" aria-hidden="true"></i><span>@Tx("Sign in before sending a private request.", "Đăng nhập trước khi gửi yêu cầu riêng tư.")</span></div><a class="eco-primary" href="/Account/Login">@Tx("Sign in", "Đăng nhập")</a> }
-                    else {
+                    <h2 id="request-title">@Tx("Send a support request", "Gửi yêu cầu hỗ trợ")</h2><p>@Tx("SoftSync administrators coordinate these requests. Track their status under My support requests. Replies arrive in your notification inbox.", "Quản trị viên SoftSync sẽ điều phối các yêu cầu này. Theo dõi trạng thái tại mục Yêu cầu hỗ trợ của tôi. Phản hồi sẽ được gửi qua hộp thông báo trong ứng dụng.")</p>
                         <EditForm Model="request" OnSubmit="Submit">
                             <div class="eco-field"><label for="mentor-goal">@Tx("Support goal", "Mục tiêu hỗ trợ") <span aria-hidden="true">*</span></label><input id="mentor-goal" @bind="request.Goal" maxlength="120" aria-describedby="goal-help goal-error" /><small id="goal-help">@Tx("Example: prepare for a difficult feedback conversation.", "Ví dụ: chuẩn bị cho cuộc trao đổi phản hồi khó.")</small>@if (showErrors && request.Goal.Trim().Length < 3) { <small id="goal-error" class="field-error" role="alert">@Tx("Enter at least 3 characters.", "Nhập ít nhất 3 ký tự.")</small> }</div>
                             <div class="eco-field"><label for="mentor-skill">@Tx("Related skill", "Kỹ năng liên quan")</label><input id="mentor-skill" @bind="request.Skill" maxlength="100" /></div>
@@ -35,9 +39,9 @@
                             @if (!string.IsNullOrEmpty(saveError)) { <div class="eco-form-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>@saveError</div> }
                             <button class="eco-primary" type="submit" disabled="@saving" aria-busy="@saving">@if(saving){<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>@Tx("Saving...", "Đang lưu...")}else{@Tx("Send support request", "Gửi yêu cầu hỗ trợ")}</button>
                         </EditForm>
-                    }
                 }
             </aside>
+            }
         </div>
     }
 </section>

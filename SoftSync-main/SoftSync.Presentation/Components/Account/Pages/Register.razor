@@ -14,9 +14,9 @@
 <PageTitle>@L["auth.register.title"]</PageTitle>
 
 <div class="register-heading">
-    <span class="register-kicker"><i class="bi bi-person-plus"></i> SoftSync Account</span>
-    <h2>@L["auth.register.title"]</h2>
-    <p>@L["auth.register.subtitle"]</p>
+    <span class="register-kicker">SoftSync Secure</span>
+    <h2>@(L.Current == AppLanguage.Vi ? "Đăng ký" : "Sign up")</h2>
+    <p>@(L.Current == AppLanguage.Vi ? "Tạo tài khoản để bắt đầu hành trình cùng SoftSync." : "Create an account to start your journey with SoftSync.")</p>
 </div>
 
 <StatusMessage Message="@errorMessage" />
@@ -25,32 +25,32 @@
     <DataAnnotationsValidator />
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
 
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-fullname" class="form-label tw:font-medium">@L["profile.fullName"]</label>
-        <InputText id="register-fullname" @bind-Value="Input.FullName" class="form-control form-control-lg" placeholder="@L["profile.fullName.placeholder"]" />
+        <div class="login-input-wrap"><i class="bi bi-person" aria-hidden="true"></i><InputText id="register-fullname" @bind-Value="Input.FullName" class="form-control form-control-lg" autocomplete="name" placeholder="@(L.Current == AppLanguage.Vi ? "Nhập họ và tên" : "Enter your full name")" /></div>
         <ValidationMessage For="() => Input.FullName" class="text-danger" />
     </div>
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-email" class="form-label tw:font-medium">@L["auth.email"]</label>
-        <InputText id="register-email" @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" />
+        <div class="login-input-wrap"><i class="bi bi-envelope" aria-hidden="true"></i><InputText id="register-email" type="email" @bind-Value="Input.Email" class="form-control form-control-lg" autocomplete="email" placeholder="you@example.com" /></div>
         <ValidationMessage For="() => Input.Email" class="text-danger" />
     </div>
-    <div class="tw:mb-3">
+    <div class="login-field tw:mb-3">
         <label for="register-password" class="form-label tw:font-medium">@L["auth.password"]</label>
-        <div class="input-group">
-            <InputText id="register-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-password" aria-pressed="false"
+        <div class="login-input-wrap"><i class="bi bi-lock" aria-hidden="true"></i>
+            <InputText id="register-password" type="password" @bind-Value="Input.Password" class="form-control form-control-lg" autocomplete="new-password" placeholder="@(L.Current == AppLanguage.Vi ? "Tạo mật khẩu" : "Create a password")" />
+            <button type="button" class="ss-password-visibility" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-password" aria-pressed="false"
                     onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
         </div>
         <ValidationMessage For="() => Input.Password" class="text-danger" />
     </div>
-    <div class="tw:mb-4">
-        <label for="register-confirmpassword" class="form-label tw:font-medium">@L["auth.confirmPassword"]</label>
-        <div class="input-group">
-            <InputText id="register-confirmpassword" type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
-            <button type="button" class="btn btn-outline-secondary password-toggle" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
+    <div class="login-field tw:mb-4">
+        <label for="register-confirmpassword" class="form-label tw:font-medium">@(L.Current == AppLanguage.Vi ? "Xác nhận mật khẩu" : "Confirm password")</label>
+        <div class="login-input-wrap"><i class="bi bi-lock" aria-hidden="true"></i>
+            <InputText id="register-confirmpassword" type="password" @bind-Value="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" placeholder="@(L.Current == AppLanguage.Vi ? "Nhập lại mật khẩu" : "Confirm your password")" />
+            <button type="button" class="ss-password-visibility" aria-label="@L["redesign.passwordToggle"]" aria-controls="register-confirmpassword" aria-pressed="false"
                     onclick="window.ssDesign.togglePassword(this)">
                 <i class="bi bi-eye"></i>
             </button>
@@ -58,32 +58,30 @@
         <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
     </div>
 
-    <button type="submit" class="ss-btn-primary register-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.register.submit"]</span><i class="bi bi-arrow-right"></i></button>
+    <div class="register-consent">
+        <InputCheckbox id="register-consent" @bind-Value="Input.AcceptTerms" class="form-check-input" aria-describedby="register-consent-error" />
+        <div><label for="register-consent">@(L.Current == AppLanguage.Vi ? "Tôi đồng ý với" : "I agree to the")</label>
+            <button type="button" class="auth-legal-link" onclick="document.getElementById('register-legal-notice').showModal()">@(L.Current == AppLanguage.Vi ? "Điều khoản" : "Terms")</button>
+            @(L.Current == AppLanguage.Vi ? "và" : "and")
+            <button type="button" class="auth-legal-link" onclick="document.getElementById('register-legal-notice').showModal()">@(L.Current == AppLanguage.Vi ? "Chính sách bảo mật" : "Privacy policy")</button>
+        </div>
+    </div>
+    <div id="register-consent-error"><ValidationMessage For="() => Input.AcceptTerms" class="text-danger" /></div>
+    <button type="submit" class="ss-btn-primary login-submit register-submit tw:w-full tw:py-3 tw:text-lg"><span>@L["auth.register.submit"]</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
 </EditForm>
 
-<div class="neo-social"><ExternalLoginPicker IsRegistration="true" /></div>
+<dialog id="register-legal-notice" class="auth-legal-dialog" aria-labelledby="register-legal-title">
+    <h3 id="register-legal-title">@(L.Current == AppLanguage.Vi ? "Điều khoản và Chính sách bảo mật" : "Terms and Privacy policy")</h3>
+    <p>@(L.Current == AppLanguage.Vi ? "Nội dung chính thức đang được cập nhật." : "The official content is being updated.")</p>
+    <form method="dialog"><button type="submit">@(L.Current == AppLanguage.Vi ? "Đóng" : "Close")</button></form>
+</dialog>
+
+<div class="neo-social"><ExternalLoginPicker IsRegistration="true" ButtonLabel="@(L.Current == AppLanguage.Vi ? "Tiếp tục với Google" : "Continue with Google")" /></div>
 
 <div class="register-login tw:text-center tw:mt-4 tw:text-sm">
     @L["auth.haveAccount"] <a href="Account/Login">@L["auth.login.title"]</a>
 </div>
 
-<style>
-    .register-heading { margin-bottom: 26px; text-align: left; }
-    .register-kicker { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 15px; color: #9a93ff; font-size: .7rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
-    .register-heading h2 { margin: 0 0 8px; color: #f8fbff; font-size: clamp(1.9rem,4vw,2.35rem); font-weight: 820; letter-spacing: -.04em; }
-    .register-heading p { margin: 0; color: #9ba7c5; line-height: 1.55; }
-    .register-submit { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 13px; background: linear-gradient(90deg,#7267ff,#8d7dff 45%,#6f65ff); box-shadow: 0 14px 30px rgba(95,94,255,.25); }
-    .register-submit i { transition: transform .18s ease; }
-    .register-submit:hover i { transform: translateX(4px); }
-    .register-login { padding-top: 20px; color: #939fbc; border-top: 1px solid rgba(143,162,255,.16); }
-    .register-login a { color: #9a93ff; font-weight: 700; text-decoration: none; }
-    .register-login a:hover { text-decoration: underline; }
-    .form-label { color: #dce2f2; font-size: .82rem; font-weight: 700; }
-    .form-control { min-height: 50px; color: #f8fbff; border-color: rgba(126,146,255,.22); background: rgba(7,11,24,.56); }
-    .form-control:focus { color: #fff; border-color: #8d8cff; background: rgba(9,14,29,.78); box-shadow: 0 0 0 4px rgba(129,140,248,.13); }
-    .password-toggle { color: #aab5d4; border-color: rgba(126,146,255,.22); background: rgba(7,11,24,.56); }
-    .password-toggle:hover { color: #fff; background: rgba(61,72,117,.3); }
-</style>
 
 @code {
     private string? errorMessage;
@@ -129,6 +127,9 @@
 
     private sealed class InputModel
     {
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Vui lòng đồng ý với Điều khoản và Chính sách bảo mật / Please accept the Terms and Privacy policy.")]
+        public bool AcceptTerms { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
         public string FullName { get; set; } = "";
 

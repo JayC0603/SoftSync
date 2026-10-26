@@ -27,11 +27,28 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options =>
-        options.DetailedErrors = builder.Environment.IsDevelopment());
+    {
+        options.DetailedErrors = builder.Environment.IsDevelopment();
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(5);
+    })
+    .AddHubOptions(options =>
+    {
+        // Allow brief mobile network stalls without discarding a healthy circuit.
+        // Keep these intervals aligned with blazor-start.js.
+        options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    });
 
 // Needed so App.razor and scoped UI services can read browser preferences during
 // SSR / enhanced navigation and render the first frame without flashing.
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    // Compress static text assets; leave authenticated HTML outside compression.
+    options.MimeTypes = ["text/css", "text/javascript", "application/javascript", "image/svg+xml"];
+});
 
 var frontendOrigins = (builder.Configuration["FRONTEND_ORIGINS"] ?? "http://localhost:3000")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -45,6 +62,8 @@ builder.Services.AddCors(options =>
 
 // UI localization (EN/VI). Seed each circuit from the cookie so SSR and the
 // interactive render always use the same language.
+builder.Services.AddScoped<ViewportState>(services => new(
+    services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request.Cookies["ss-viewport"] == "desktop"));
 builder.Services.AddScoped<LocalizationService>(services =>
 {
     var request = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request;
@@ -212,6 +231,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 
 // Bind sender config + register senders and the OTP service.
@@ -277,6 +316,7 @@ builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IGameBankService, GameBankService>();
 builder.Services.AddScoped<IdentityRoleManagementService>();
+builder.Services.AddScoped<LearnerAccessState>();
 
 // 5. HttpClient for future AI integration
 // Credentials are per-request headers, never defaults/URL. Reject redirects to other hosts.
@@ -330,7 +370,19 @@ else if (!demoMode)
     app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        // App.razor fingerprints these files by content. A normal refresh can
+        // reuse them without revalidating dozens of stylesheets and scripts.
+        if (context.Context.Request.Query.TryGetValue("v", out var version)
+            && version.Count == 1 && version[0] is { Length: 16 } hash
+            && hash.All(Uri.IsHexDigit))
+            context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+    }
+});
 app.UseMiddleware<SystemMetricsMiddleware>();
 
 app.UseCors("Frontend");
@@ -340,6 +392,7 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
 app.MapCvReviewEndpoints();
+app.MapGameHistoryEndpoints();
 
 var learningApi = app.MapGroup("/api/learning/sessions").RequireAuthorization();
 learningApi.MapPost("/", async (StartLearningActivityRequest request, System.Security.Claims.ClaimsPrincipal user,

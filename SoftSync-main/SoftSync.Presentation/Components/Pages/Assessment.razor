@@ -1,3 +1,4 @@
+@inject LearnerAccessState Access
 @page "/assessment/{UserId:int}"
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
@@ -100,6 +101,7 @@
     private int selectedOptionId = 0;
     private readonly Dictionary<int, int> answers = new();
     private bool storageRestored;
+    private bool restoringDraft;
 
     protected override async Task OnInitializedAsync()
     {
@@ -125,7 +127,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || questions is null)
+        // Initialization can finish after the first interactive render. Restore
+        // once questions exist, rather than leaving the assessment on its spinner.
+        if (storageRestored || restoringDraft || questions is null)
             return;
 
         if (questions.Count == 0)
@@ -135,11 +139,15 @@
             return;
         }
 
-        var draft = await ReadDraftAsync();
-        if (!TryRestoreDraft(draft))
-            await PersistDraftAsync();
-
-        storageRestored = true;
+        restoringDraft = true;
+        try
+        {
+            var draft = await ReadDraftAsync();
+            if (!TryRestoreDraft(draft))
+                await PersistDraftAsync();
+            storageRestored = true;
+        }
+        finally { restoringDraft = false; }
         StateHasChanged();
     }
 
@@ -349,6 +357,7 @@
                 .Select(answer => new UserAnswerDto { QuestionId = answer.Key, OptionId = answer.Value })
                 .ToList();
             await AssessmentService.SubmitAssessmentAsync(UserId, submittedAnswers);
+            Access.Invalidate();
             try { await JS.InvokeVoidAsync("ssAssessment.clear", UserId); }
             catch (JSException) { }
             Nav.NavigateTo($"/assessment-result/{UserId}");

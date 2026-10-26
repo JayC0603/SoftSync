@@ -12,7 +12,6 @@
 @inject ILogger<Progress> Logger
 
 <PageTitle>@T("Tiến độ") · SoftSync</PageTitle>
-<HeadContent><link rel="stylesheet" href="css/progress-reference.css?v=20261022-v1" /></HeadContent>
 
 <section class="pg-page" aria-label="@T("Tiến độ học tập")">
     @if (loading)
@@ -31,9 +30,17 @@
 
 @code {
     [Parameter] public int UserId { get; set; }
-    private List<RoadmapItemDto> roadmapItems = [];
-    private bool loading = true, loadError;
-    protected override Task OnInitializedAsync() => LoadProgress();
+    private List<RoadmapItemDto> progressItems = [];
+    [PersistentState] public bool DataLoaded { get; set; }
+    private bool loading { get => !DataLoaded; set => DataLoaded = !value; }
+    [PersistentState] public List<RoadmapItemDto> roadmapItems { get => progressItems; set => progressItems = value ?? []; }
+    [PersistentState] public bool loadError { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        // Resolve identity again; never trust the optional user ID in the URL.
+        UserId = await AuthProvider.GetUserIdAsync();
+        if (loading) await LoadProgress();
+    }
     private async Task LoadProgress()
     {
         loading = true;

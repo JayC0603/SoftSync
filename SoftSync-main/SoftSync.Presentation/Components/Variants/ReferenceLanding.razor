@@ -1,0 +1,76 @@
+@inherits LocalizedComponentBase
+@inject AuthenticationStateProvider AuthProvider
+
+<PageTitle>@T("SoftSync — Phát triển kỹ năng mềm cùng AI", "SoftSync — Grow your soft skills with AI")</PageTitle>
+<HeadContent>
+    <meta name="description" content="@T("Lộ trình cá nhân hóa, bài học ngắn gọn, thực hành liên tục, phản tư sâu sắc và có mentor đồng hành cùng SoftSync.", "Personalized journeys, bite-sized lessons, hands-on practice and reflection, with AI and mentor support.")" />
+    <link rel="canonical" href="https://softsync.id.vn/" />
+    <meta property="og:title" content="SoftSync — Phát triển kỹ năng mềm cùng AI" />
+    <meta property="og:image" content="https://softsync.id.vn/images/landing/alpine-lake-reference-v2.webp" />
+</HeadContent>
+
+<div class="lp-landing">
+    <section class="lp-hero" aria-labelledby="lp-title">
+        <div class="lp-hero-copy">
+            <h1 id="lp-title">@T("Phát triển", "Grow your")<br />@T("kỹ năng mềm", "soft skills")<br /><em>@T("cùng AI", "with AI")</em></h1>
+            <p>@T("Lộ trình cá nhân hóa, bài học ngắn gọn, thực hành liên tục, phản tư sâu sắc và có mentor đồng hành.", "A journey built for you. Short lessons, meaningful practice, deeper reflection, and mentors by your side.")</p>
+            <div class="lp-hero-actions"><a class="lp-button lp-primary" href="@StartHref">@T("Bắt đầu miễn phí", "Start for free")<i class="bi bi-arrow-right" aria-hidden="true"></i></a><a class="lp-button lp-secondary" href="#learning-journey">@T("Xem lộ trình", "Explore the journey")</a></div>
+        </div>
+        <div class="lp-hero-device"><LandingProductPreview Phone="true" /></div>
+    </section>
+
+    <div class="lp-content">
+        <section class="lp-benefits" aria-label="@T("Vì sao chọn SoftSync", "Why SoftSync")">
+            <article><div class="lp-benefit-art"><img src="/images/learn-v3/roadmap-landscape.webp" alt="" width="160" height="115" loading="lazy" /></div><div><h2>@T("Cá nhân hóa lộ trình", "A journey that fits you")</h2><p>@T("Lộ trình học được thiết kế riêng dựa trên mục tiêu và năng lực của bạn.", "Find your starting point and a learning path shaped around your goals.")</p></div></article>
+            <article><div class="lp-benefit-art lp-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><h2>@T("Theo dõi tiến độ rõ ràng", "See your progress clearly")</h2><p>@T("Dễ dàng nắm bắt sự tiến bộ và nhận gợi ý phù hợp từ AI.", "Follow your growth and find the next step with support from AI.")</p></div></article>
+            <article><div class="lp-benefit-art lp-task-art" aria-hidden="true"><i class="bi bi-card-checklist"></i><span><i class="bi bi-play-fill"></i></span></div><div><h2>@T("Bài học ngắn và thực hành", "Small lessons, real practice")</h2><p>@T("Học qua tình huống thực tế, bài tập ngắn và hoạt động tương tác.", "Learn with real situations, short exercises and hands-on activities.")</p></div></article>
+            <article><div class="lp-benefit-art"><img src="/images/learn-v3/mentor-support.png" alt="" width="160" height="115" loading="lazy" /></div><div><h2>@T("Mentor đồng hành", "People in your corner")</h2><p>@T("Kết nối với mentor, chia sẻ khó khăn và tìm hướng phát triển phù hợp.", "Connect with mentors, share challenges and find your way forward.")</p></div></article>
+        </section>
+
+        <section id="learning-journey" class="lp-journey" aria-labelledby="lp-journey-title">
+            <div><h2 id="lp-journey-title">@T("Hành trình phát triển cùng SoftSync", "Your growth journey with SoftSync")</h2><p class="lp-section-intro">@T("Từ đánh giá năng lực đến thực hành, phản tư và tiến bộ rõ ràng.", "From understanding yourself to practicing, reflecting and growing.")</p>
+                <ol class="lp-steps">
+                    @foreach (var step in Steps.Select((value, index) => (value, index)))
+                    { <li><span>@(step.index + 1)</span><div><h3>@step.value.Title</h3><p>@step.value.Description</p></div></li> }
+                </ol>
+            </div>
+            <div class="lp-journey-preview"><LandingProductPreview /></div>
+        </section>
+
+        <section id="features" class="lp-features" aria-labelledby="lp-features-title">
+            <div class="lp-section-head"><h2 id="lp-features-title">@T("Tính năng nổi bật", "Made for your next step")</h2><a href="/about">@T("Khám phá tất cả tính năng", "Explore all features")<i class="bi bi-chevron-right" aria-hidden="true"></i></a></div>
+            <div class="lp-feature-grid">
+                <a class="lp-feature-card" href="/roadmap"><div class="lp-feature-heading"><span class="lp-feature-icon lp-purple"><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></span><div><h3>@T("Học tập", "Learning")</h3><p>@T("Bài học ngắn gọn, thực tế, từng bước phát triển kỹ năng.", "Short, practical lessons that build your skills step by step.")</p></div></div><div class="lp-feature-visual lp-feature-video"><img src="/images/home-v3/welcome-landscape.webp" alt="" loading="lazy" width="260" height="130" /><span><i class="bi bi-play-fill" aria-hidden="true"></i></span></div></a>
+                <a class="lp-feature-card" href="/progress"><div class="lp-feature-heading"><span class="lp-feature-icon"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i></span><div><h3>@T("Tiến độ", "Progress")</h3><p>@T("Theo dõi quá trình học tập và sự phát triển của bạn.", "See your learning journey and how far you have come.")</p></div></div><div class="lp-feature-visual lp-feature-chart"><small>@T("Tiến độ tổng quan", "Your progress")</small><div><span class="lp-progress-ring">38%</span><div class="lp-chart-bars" aria-hidden="true">@foreach (var height in new[] { 24, 38, 31, 56, 46, 72, 88 }) { <span style="height:@(height)%"></span> }</div></div></div></a>
+                <a class="lp-feature-card" href="/assistant"><div class="lp-feature-heading"><span class="lp-feature-icon lp-ai"><img src="/images/logo.png" alt="" width="36" height="36" /></span><div><h3>SYNCY AI</h3><p>@T("Trợ lý học tập thông minh, đồng hành trên hành trình của bạn.", "Your AI learning companion, here for your next step.")</p></div></div><div class="lp-feature-visual lp-feature-chat"><img src="/images/logo.png" alt="" width="32" height="32" /><div><p>@T("Hôm nay bạn muốn rèn luyện kỹ năng nào?", "What would you like to work on today?")</p><span>@T("Gợi ý lộ trình phù hợp…", "Let's find your next step…")</span></div></div></a>
+                <a class="lp-feature-card" href="/cv"><div class="lp-feature-heading"><span class="lp-feature-icon lp-green"><i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i></span><div><h3>Smart CV</h3><p>@T("Tổng hợp kỹ năng, thành tựu và tạo CV chuyên nghiệp.", "Bring your skills and achievements into a professional CV.")</p></div></div><div class="lp-feature-visual lp-feature-cv"><div><span><i class="bi bi-person-fill" aria-hidden="true"></i></span><div><strong>@T("Hồ sơ của bạn", "Your profile")</strong><small>@T("Sẵn sàng cho cơ hội mới", "Ready for new opportunities")</small></div></div><p><span>@T("Kỹ năng", "Skills")</span><span>@T("Kinh nghiệm", "Experience")</span></p><i></i><i></i><i></i></div></a>
+            </div>
+        </section>
+
+        <section class="lp-mentors" aria-labelledby="lp-mentors-title">
+            <div class="lp-section-head"><h2 id="lp-mentors-title">@T("Mentor và cộng đồng đồng hành", "Grow with people who care")</h2><a href="/mentors">@T("Xem tất cả mentor", "Meet the mentors")<i class="bi bi-chevron-right" aria-hidden="true"></i></a></div>
+            <div class="lp-mentor-grid">
+                <a class="lp-mentor-card" href="/mentors/2"><img src="/images/mentor-nguyen-thuy-to-tram.png" alt="Th.S. Nguyễn Thuỳ Tố Trâm" width="110" height="125" loading="lazy" /><div><h3>Th.S. Nguyễn Thuỳ Tố Trâm</h3><p>@T("Kỹ năng mềm và phát triển cộng đồng", "Soft skills and community development")</p><span>@T("Kỹ năng mềm", "Soft skills")</span><span>@T("Kết nối", "Connection")</span></div></a>
+                <a class="lp-mentor-card" href="/mentors/1"><img src="/images/mentor-nguyen-hoang-van-anh.png" alt="Th.S. Nguyễn Hoàng Vân Anh" width="110" height="125" loading="lazy" /><div><h3>Th.S. Nguyễn Hoàng Vân Anh</h3><p>@T("Tâm lý và phát triển cá nhân", "Psychology and personal development")</p><span>@T("Tâm lý", "Psychology")</span><span>@T("Định hướng", "Guidance")</span></div></a>
+                <div class="lp-community-card"><img src="/images/learn-v3/mentor-support.png" alt="" width="120" height="130" loading="lazy" /><div><h3>@T("Tham gia cộng đồng", "Find your community")</h3><p>@T("Cùng nhau học tập, chia sẻ kinh nghiệm và truyền cảm hứng.", "Learn together, share experiences and inspire each other.")</p><a class="lp-button lp-primary" href="/community">@T("Tham gia ngay", "Join us")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></div></div>
+            </div>
+        </section>
+
+        <section class="lp-closing" aria-labelledby="lp-closing-title"><h2 id="lp-closing-title">@T("Sẵn sàng bắt đầu hành trình", "Ready to take the next step?")<br />@T("phát triển kỹ năng?", "Let's grow together.")</h2><p>@T("Tạo ra phiên bản tốt hơn của chính mình, từng ngày cùng SoftSync.", "Build a more confident you, one small step at a time with SoftSync.")</p><div><a class="lp-button lp-primary" href="@StartHref">@T("Tạo tài khoản", "Get started")<i class="bi bi-arrow-right" aria-hidden="true"></i></a><a class="lp-button lp-secondary" href="/about">@T("Khám phá SoftSync", "Discover SoftSync")</a></div></section>
+    </div>
+</div>
+
+@code {
+    private string StartHref = "/Account/Register";
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private (string Title, string Description)[] Steps => [
+        (T("Đánh giá đầu vào", "Understand your starting point"), T("Hiểu rõ điểm mạnh, điểm cần cải thiện và mục tiêu của bạn.", "Discover your strengths, areas for growth and personal goals.")),
+        (T("Lộ trình cá nhân hóa", "Find your personal path"), T("Nhận lộ trình phù hợp với năng lực và thời gian của bạn.", "Get a learning journey that fits your skills and your schedule.")),
+        (T("Học và thực hành", "Learn by doing"), T("Học qua bài học ngắn, tình huống thực tế và bài tập ứng dụng.", "Explore short lessons, real situations and practical exercises.")),
+        (T("Phản tư và cải thiện", "Reflect and grow"), T("Ghi lại suy nghĩ, nhận phản hồi từ AI và theo dõi sự tiến bộ.", "Reflect on your experience, get AI feedback and follow your growth."))
+    ];
+    protected override async Task OnInitializedAsync()
+    {
+        if ((await AuthProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true) StartHref = "/dashboard";
+    }
+}

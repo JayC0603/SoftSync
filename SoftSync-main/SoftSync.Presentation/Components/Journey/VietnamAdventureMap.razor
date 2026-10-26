@@ -7,6 +7,7 @@
 @inject IWebHostEnvironment HostEnvironment
 
 <link rel="stylesheet" href="@VersionedAsset("dist/vietnam-map.css")" />
+<link rel="modulepreload" href="@VersionedAsset("dist/vietnam-map.js")" />
 
 <section class="vn-journey @(Compact ? "vn-compact" : null) @(expanded ? "is-expanded" : null)" @ref="root" aria-label="@T("Bản đồ kỹ năng", "Skill map")">
     <header class="vn-heading"><h2>@(Compact ? T("Bản đồ hành trình của bạn", "Your journey map") : T("Bản đồ kỹ năng", "Skill map"))</h2>@if (Compact) { <a class="vm-link" href="@FullMapUrl">@T("Xem bản đồ", "Open map") <i class="bi bi-chevron-right" aria-hidden="true"></i></a> } else { <button type="button" class="vm-link" @onclick="ToggleExpanded"><span>@(expanded ? T("Thu gọn", "Close map") : T("Xem bản đồ", "Open map"))</span><i class="bi @(expanded ? "bi-x-lg" : "bi-chevron-right")" aria-hidden="true"></i></button> }</header>
@@ -20,12 +21,13 @@
         </nav>
     }
     <div class="vn-map-stage">
+        <img class="vn-map-preview" src="/images/journey/vietnam-adventure-coast-v1.webp" width="1536" height="1024" alt="" fetchpriority="high" decoding="async" />
         <div class="vn-map-canvas" @ref="canvas" aria-label="@T("Bản đồ Việt Nam. Dùng hai ngón để kéo hoặc phóng to.", "Vietnam map. Use two fingers to pan or zoom.")"></div>
         <div class="vn-map-hint"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i>@(expanded ? T("Kéo để khám phá", "Drag to explore") : T("Hai ngón để khám phá", "Use two fingers to explore"))</div>
         <div class="vn-controls" aria-label="@T("Điều khiển bản đồ", "Map controls")"><button @onclick='() => Control("zoomIn")' aria-label="@T("Phóng to", "Zoom in")"><i class="bi bi-plus-lg" aria-hidden="true"></i></button><button @onclick='() => Control("zoomOut")' aria-label="@T("Thu nhỏ", "Zoom out")"><i class="bi bi-dash-lg" aria-hidden="true"></i></button><button @onclick='() => Control("current")' aria-label="@T("Đến mốc hiện tại", "Focus current checkpoint")"><i class="bi bi-crosshair" aria-hidden="true"></i></button><button @onclick='() => Control("reset")' aria-label="@T("Đặt lại bản đồ", "Reset map")"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button></div>
         @if (!mapReady && !mapError)
         {
-            <div class="vn-map-state" role="status"><span class="vn-spinner" aria-hidden="true"></span>@T("Đang mở hành trình…", "Opening your journey…")</div>
+            <div class="vn-map-state vn-map-loading" role="status"><span class="vn-spinner" aria-hidden="true"></span>@T("Đang bật tương tác…", "Enabling map controls…")</div>
         }
         @if (mapError)
         {

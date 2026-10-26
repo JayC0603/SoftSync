@@ -1,4 +1,4 @@
-using SoftSync.BLL.Interfaces;
+﻿using SoftSync.BLL.Interfaces;
 using SoftSync.BLL.Auth;
 using SoftSync.BLL.Services;
 using SoftSync.Common;
@@ -701,6 +701,7 @@ public sealed class CoreWorkflowTests
 
         Assert.Equal("Time Management", ai.LastWeakSkills[0]);
         Assert.Equal("Communication", ai.LastWeakSkills[1]);
+        Assert.Equal(1, assessments.ResultsReadCount);
     }
 
     [Fact]
@@ -708,7 +709,9 @@ public sealed class CoreWorkflowTests
     {
         var roadmaps = new RoadmapRepositoryStub { Item = new RoadmapItem { Id = 10, UserId = 1, WeekNumber = 1, SkillId = 1, Title = "Communication foundations" } };
         var ai = new RoadmapAiStub { Items = [new RoadmapItemDto { WeekNumber = 1, SkillId = 1, SkillName = "Communication", Title = "Communication foundations" }] };
-        var service = new RoadmapService(roadmaps, ai, new UserRepositoryStub(), AssessmentData.Create(1).Repository, new SkillRepositoryStub());
+        var assessments = AssessmentData.Create(1).Repository;
+        assessments.Results.Add(new AssessmentResult { UserId = 1, SkillId = 1, Skill = new Skill { Id = 1, Name = "Communication" }, Score = 20 });
+        var service = new RoadmapService(roadmaps, ai, new UserRepositoryStub(), assessments, new SkillRepositoryStub());
 
         var initial = await service.GetUserRoadmapAsync(1, 1);
         Assert.Equal(RoadmapActivityType.VideoLesson, initial.NextRecommendedActivity);
@@ -902,6 +905,7 @@ public sealed class CoreWorkflowTests
 
     private sealed class AssessmentRepositoryStub : IAssessmentRepository
     {
+        public int ResultsReadCount { get; private set; }
         public required List<AssessmentQuestion> Questions { get; init; }
         public required List<AssessmentOption> Options { get; init; }
         public List<AssessmentResult> Results { get; } = [];
@@ -913,8 +917,11 @@ public sealed class CoreWorkflowTests
             Task.FromResult<IEnumerable<AssessmentOption>>(Options.Where(o => optionIds.Contains(o.Id)).ToList());
         public Task SaveResultAsync(AssessmentResult result) { Results.Add(result); return Task.CompletedTask; }
         public Task SaveResultsAsync(IEnumerable<AssessmentResult> results) { Results.AddRange(results); return Task.CompletedTask; }
-        public Task<IEnumerable<AssessmentResult>> GetResultsByUserIdAsync(int userId) =>
-            Task.FromResult<IEnumerable<AssessmentResult>>(Results.Where(r => r.UserId == userId).ToList());
+        public Task<IEnumerable<AssessmentResult>> GetResultsByUserIdAsync(int userId)
+        {
+            ResultsReadCount++;
+            return Task.FromResult<IEnumerable<AssessmentResult>>(Results.Where(r => r.UserId == userId).ToList());
+        }
     }
 
     private sealed record AssessmentData(

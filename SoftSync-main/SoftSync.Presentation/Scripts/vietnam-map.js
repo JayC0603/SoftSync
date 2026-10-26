@@ -25,12 +25,20 @@ function fit(state) {
     state.sceneViewport={west:visible.getWest(),east:visible.getEast(),south:visible.getSouth(),north:visible.getNorth()};
     if(state.loaded)apply(state);
 }
+function scheduleLabels(state) {
+    if (state.disposed || state.labelFrame) return;
+    state.labelFrame = requestAnimationFrame(() => {
+        state.labelFrame = null;
+        if (!state.disposed) layoutLabels(state);
+    });
+}
 async function start(state) {
     if (state.disposed || state.map || state.starting || state.failed || !state.media.matches) return;
     state.starting = true;
     try {
-        state.geography = await loadLandmarks();
-        if (state.disposed) return;
+        // Fetch metadata while WebGL initializes and loads the landscape image.
+        const geography = loadLandmarks();
+        geography.catch(() => {});
         state.map = new maplibregl.Map({ container: state.canvas, style: baseStyle(isDark()),
             center: [6, 4], zoom: 4, minZoom: 0, maxZoom: 12, maxBounds:bounds,
             cooperativeGestures: true, attributionControl: { compact: true, customAttribution: 'Phong cảnh minh họa · SoftSync · <a href="https://www.wikidata.org/wiki/Wikidata:Licensing">Địa danh: Wikidata CC0</a>' },
@@ -42,15 +50,27 @@ async function start(state) {
             state.canvas.dataset.mapCenter = `${center.lng.toFixed(5)},${center.lat.toFixed(5)}`;
         };
         state.map.on('moveend', recordViewport);
-        state.map.on('render',()=>layoutLabels(state));
+        state.map.on('moveend',()=>scheduleLabels(state));
+        state.map.on('resize',()=>scheduleLabels(state));
         state.timeout = setTimeout(() => notify(state, 'MapStatus', false), 15000);
         state.map.once('load', async () => {
+            if (state.disposed) return;
+            try {
+            state.geography = await geography;
             if (state.disposed) return;
             await addJourneyLayers(state.map, state.geography);
             state.loaded = true;
             clearTimeout(state.timeout);
-            apply(state); fit(state); paintTheme(state);
+            fit(state); paintTheme(state);
+            state.root.dataset.mapReady = 'true';
             notify(state, 'MapStatus', true);
+            } catch (error) {
+                if (state.disposed) return;
+                clearTimeout(state.timeout);
+                state.failed = true;
+                console.warn('Vietnam map unavailable:', error.message);
+                notify(state, 'MapStatus', false);
+            }
         });
         state.map.on('error', event => { if (!state.loaded) console.warn('Vietnam map:', event.error?.message); });
     } catch (error) { state.failed = true; console.warn('Vietnam map unavailable:', error.message); notify(state, 'MapStatus', false); }
@@ -89,6 +109,7 @@ function apply(state) {
         });
     }
     try { localStorage.setItem(`ss-journey-skill:${state.payload.userId}`, state.payload.selectedKey); } catch { /* Private mode. */ }
+    scheduleLabels(state);
 }
 function layoutLabels(state) {
     if(!state.markers)return;
@@ -148,7 +169,7 @@ export function expand(root, expanded = false) {
     state.map?.scrollZoom.disable();
     requestAnimationFrame(() => { fit(state); root.querySelector('.vn-heading button')?.focus(); });
 }
-export async function retry(root) { const state = instances.get(root); if (!state) return; clearTimeout(state.timeout); state.map?.remove(); state.map = null; state.loaded = false; state.failed = false; await start(state); }
+export async function retry(root) { const state = instances.get(root); if (!state) return; clearTimeout(state.timeout); delete root.dataset.mapReady; state.map?.remove(); state.map = null; state.loaded = false; state.failed = false; await start(state); }
 export function focusSheet(root, sheet) {
     const state = instances.get(root); if (!state) return;
     state.focusBefore ??= document.activeElement;
@@ -162,4 +183,4 @@ export function focusSheet(root, sheet) {
     };
 }
 export function restoreFocus(root) { const state = instances.get(root); if (!state) return; (state.focusBefore?.isConnected ? state.focusBefore : root.querySelector('.vn-heading button'))?.focus(); state.focusBefore = null; }
-export function dispose(root) { const state = instances.get(root); if (!state) return; state.disposed = true; clearTimeout(state.timeout); state.resizeObserver.disconnect(); state.themeObserver.disconnect(); state.media.removeEventListener('change', state.onMedia); root.removeEventListener('keydown', state.onKey); state.map?.remove(); instances.delete(root); }
+export function dispose(root) { const state = instances.get(root); if (!state) return; state.disposed = true; clearTimeout(state.timeout); cancelAnimationFrame(state.labelFrame); state.resizeObserver.disconnect(); state.themeObserver.disconnect(); state.media.removeEventListener('change', state.onMedia); root.removeEventListener('keydown', state.onKey); state.map?.remove(); instances.delete(root); }

@@ -1,0 +1,20 @@
+﻿/* Shared public controls. Authenticated header and existing page art stay intact. */
+html body .ss-unified-public-header .ss-public-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+html body .ss-unified-public-header .ss-header-language{flex:none}
+html body .ss-unified-public-header .ss-header-language summary{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:4px;border-radius:12px;list-style:none;cursor:pointer}
+.ss-unified-public-header .ss-header-language summary::-webkit-details-marker{display:none}
+.ss-public-drawer{position:fixed;inset:0 0 0 auto;width:clamp(280px,50vw,540px);max-width:calc(100vw - 16px);height:100dvh;max-height:100dvh;margin:0;padding:0;border:0;border-left:1px solid var(--ss-border,#dce5f4);background:var(--ss-surface,#fff);color:var(--ss-text,#101744);box-shadow:-12px 0 35px #172c4e25}
+.ss-public-drawer::backdrop{background:#172c4e55}
+.ss-public-drawer-content{display:flex;flex-direction:column;min-height:100%;padding:20px}
+.ss-public-drawer-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px}
+.ss-public-drawer nav{display:grid;gap:4px}
+.ss-public-drawer nav :is(a,span){display:block;min-height:44px;padding:11px 8px;font-size:14px;line-height:1.5;color:inherit;text-decoration:none;border-radius:10px}
+.ss-public-drawer nav a:hover{background:#7a9de91a}.ss-public-drawer nav span{opacity:.55}
+.ss-public-drawer-auth{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;padding-top:24px}
+.ss-public-drawer-auth a{display:grid;place-items:center;min-height:44px;padding:10px;border:1px solid #baccff;border-radius:12px;text-decoration:none;color:inherit;font-size:14px}
+.ss-public-drawer-auth a:last-child{background:#1668f5;color:white;border-color:#1668f5}
+html[data-theme=dark] .ss-public-drawer{background:#17263c;color:#edf2ff}
+@media(max-width:600px){html body .ss-unified-public-header{gap:5px}html body .ss-unified-public-header .ss-public-actions{gap:4px}html body .ss-unified-public-header .ss-header-language summary{width:32px;height:36px}html body .ss-unified-public-header .ss-public-start{font-size:10px;padding:8px;white-space:nowrap}html body .ss-unified-public-header .ss-public-brand{gap:5px;font-size:18px}html body .ss-unified-public-header .ss-public-brand img{width:28px;height:28px}html body .ss-unified-public-header .ss-shell-control{min-width:32px;width:32px;min-height:36px;height:36px;padding:4px}html body .ss-unified-public-header .ss-public-links{display:none}}
+@media(max-width:350px){html body .ss-unified-public-header .ss-public-start{font-size:9px;padding:6px}html body .ss-unified-public-header .ss-public-start>i{display:none}html body .ss-unified-public-header .ss-public-brand{font-size:16px}}
+/* Reserve dock space only on routes where the dock actually exists. */
+@media(max-width:900px){html body .page:not(:has(.ss-mobile-bottom-nav)){padding-bottom:0!important}html body .page:not(:has(.ss-mobile-bottom-nav)) .shared-mobile-footer{padding-bottom:20px!important}}

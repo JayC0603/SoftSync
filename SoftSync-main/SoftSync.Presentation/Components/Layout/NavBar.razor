@@ -3,8 +3,9 @@
 @using SoftSync.Presentation.Services
 @inject LocalizationService L
 @inject AuthenticationStateProvider AuthProvider
+@inject LearnerAccessState Access
 
-@* Sidebar navigation shares localization with HeaderActions. MainLayout remains static SSR. *@
+@* Sidebar navigation shares localization with HeaderActions and stays mounted while the router changes pages. *@
 
 <nav id="ss-main-sidebar" class="ss-navbar tw:py-3 tw:px-6 tw:flex tw:justify-between tw:items-center" aria-label="@(L.Current == AppLanguage.Vi ? "Điều hướng chính" : "Main navigation")">
     <!-- Brand -->
@@ -19,64 +20,67 @@
     <div class="ss-navpills tw:flex tw:items-center tw:gap-1">
         @if (isAdmin)
         {
-            <NavLink class="ss-navpill" href="/admin/dashboard"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Tổng quan" : "Overview")</span></NavLink>
-            <NavLink class="ss-navpill" href="/admin/learners"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Học viên" : "Learners")</span></NavLink>
-            <NavLink class="ss-navpill" href="/admin/ai/settings"><i class="bi bi-stars" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Gemini" : "Gemini")</span></NavLink>
-            <NavLink class="ss-navpill ss-desktop-integration" href="/admin/ai-configuration"><i class="bi bi-cpu" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Cấu hình AI" : "AI configuration")</span></NavLink>
-            <NavLink class="ss-navpill" href="/admin/mentor-requests"><i class="bi bi-person-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Yêu cầu Mentor" : "Mentor requests")</span></NavLink>
-            <NavLink class="ss-navpill" href="/admin/users" aria-label="@L["layout.manageUsers"]"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
-            <NavLink class="ss-navpill" href="/admin/notifications" aria-label="@L["nav.notifications"]"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
-            <NavLink class="ss-navpill" href="/teacher" aria-label="@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></NavLink>
+            <a class="@LinkClass("ss-navpill", "/admin/dashboard")" href="/admin/dashboard" aria-current="@CurrentLink("/admin/dashboard")"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Tổng quan" : "Overview")</span></a>
+            <a class="@LinkClass("ss-navpill", "/admin/learners")" href="/admin/learners" aria-current="@CurrentLink("/admin/learners")"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Học viên" : "Learners")</span></a>
+            <a class="@LinkClass("ss-navpill", "/admin/ai/settings")" href="/admin/ai/settings" aria-current="@CurrentLink("/admin/ai/settings")"><i class="bi bi-stars" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Gemini" : "Gemini")</span></a>
+            <a class="@LinkClass("ss-navpill ss-desktop-integration", "/admin/ai-configuration")" href="/admin/ai-configuration" aria-current="@CurrentLink("/admin/ai-configuration")"><i class="bi bi-cpu" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Cấu hình AI" : "AI configuration")</span></a>
+            <a class="@LinkClass("ss-navpill", "/admin/mentor-requests")" href="/admin/mentor-requests" aria-current="@CurrentLink("/admin/mentor-requests")"><i class="bi bi-person-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Yêu cầu Mentor" : "Mentor requests")</span></a>
+            <a class="@LinkClass("ss-navpill", "/admin/users")" href="/admin/users" aria-current="@CurrentLink("/admin/users")" aria-label="@L["layout.manageUsers"]"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></a>
+            <a class="@LinkClass("ss-navpill", "/admin/notifications")" href="/admin/notifications" aria-current="@CurrentLink("/admin/notifications")" aria-label="@L["nav.notifications"]"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></a>
+            <a class="@LinkClass("ss-navpill", "/teacher")" href="/teacher" aria-current="@CurrentLink("/teacher")" aria-label="@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Quản lý khóa học" : "Manage courses")</span></a>
         }
         else
         {
-        <NavLink class="ss-navpill" href="@HomeHref" Match="NavLinkMatch.All" aria-label="@L["nav.home"]">
+        <a class="@LinkClass("ss-navpill", HomeHref)" href="@HomeHref" aria-current="@CurrentLink(HomeHref)" aria-label="@L["nav.home"]">
             <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/roadmap" aria-label="@L["nav.learn"]">
+        </a>
+        <a class="@LinkClass("ss-navpill", "/roadmap")" href="/roadmap" aria-current="@CurrentLink("/roadmap")" aria-label="@L["nav.learn"]">
             <i class="bi bi-book"></i> <span>@L["nav.learn"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/progress" aria-label="@L["nav.progress"]">
+        </a>
+        <a class="@LinkClass("ss-navpill", "/progress")" href="/progress" aria-current="@CurrentLink("/progress")" aria-label="@L["nav.progress"]">
             <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/resources" aria-label="@L["nav.resources"]">
+        </a>
+        <a class="@LinkClass("ss-navpill", "/resources")" href="/resources" aria-current="@CurrentLink("/resources")" aria-label="@L["nav.resources"]">
             <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/game" aria-label="@L.Ui("Mini Game")">
+        </a>
+        <a class="@LinkClass("ss-navpill", "/game")" href="/game" aria-current="@CurrentLink("/game")" aria-label="@L.Ui("Mini Game")">
             <i class="bi bi-controller"></i> <span>@L.Ui("Mini Game")</span>
-        </NavLink>
-        <NavLink class="ss-navpill" href="/assistant" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></NavLink>
-        <NavLink class="ss-navpill" href="/cv" aria-label="@L.Ui("Smart CV")"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></NavLink>
-        <NavLink class="ss-navpill ss-desktop-integration" href="/courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></NavLink>
-        <NavLink class="ss-navpill ss-desktop-integration" href="/schedule"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Lịch cá nhân" : "My schedule")</span></NavLink>
-        <NavLink class="ss-navpill ss-desktop-integration" href="/cv-review"><i class="bi bi-file-earmark-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Đánh giá CV" : "CV review")</span></NavLink>
+        </a>
+        <a class="@LinkClass("ss-navpill", "/assistant")" href="/assistant" aria-current="@CurrentLink("/assistant")" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></a>
+        <a class="@LinkClass("ss-navpill", "/cv")" href="/cv" aria-current="@CurrentLink("/cv")" aria-label="@L.Ui("Smart CV")"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></a>
+        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/courses")" href="/courses" aria-current="@CurrentLink("/courses")"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></a>
+        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/schedule")" href="/schedule" aria-current="@CurrentLink("/schedule")"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Lịch cá nhân" : "My schedule")</span></a>
+        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/cv-review")" href="/cv-review" aria-current="@CurrentLink("/cv-review")"><i class="bi bi-file-earmark-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Đánh giá CV" : "CV review")</span></a>
         }
     </div>
 
 </nav>
 
+@if (NavigationAccessRules.ShowBottomNavigation(RenderedPath, Access.IsAuthenticated, Access.IsStaff, DockStatus))
+{
 <nav class="ss-mobile-bottom-nav" aria-label="@L.Ui("Mobile navigation")">
     @if (isAdmin)
     {
-        <NavLink class="ss-mobile-bottom-link" href="/admin/users"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></NavLink>
-        <NavLink class="ss-mobile-bottom-link" href="/admin/notifications"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></NavLink>
-        <NavLink class="ss-mobile-bottom-link" href="/teacher"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></NavLink>
+        <a class="@LinkClass("ss-mobile-bottom-link", "/admin/users")" href="/admin/users" aria-current="@CurrentLink("/admin/users")"><i class="bi bi-person-gear" aria-hidden="true"></i><span>@L["layout.manageUsers"]</span></a>
+        <a class="@LinkClass("ss-mobile-bottom-link", "/admin/notifications")" href="/admin/notifications" aria-current="@CurrentLink("/admin/notifications")"><i class="bi bi-megaphone" aria-hidden="true"></i><span>@L["nav.notifications"]</span></a>
+        <a class="@LinkClass("ss-mobile-bottom-link", "/teacher")" href="/teacher" aria-current="@CurrentLink("/teacher")"><i class="bi bi-journal-text" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></a>
     }
     else
     {
-    <NavLink class="ss-mobile-bottom-link" href="@HomeHref" Match="NavLinkMatch.All">
+    <a class="@LinkClass("ss-mobile-bottom-link", HomeHref)" href="@HomeHref" aria-current="@CurrentLink(HomeHref)">
         <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
-    </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/roadmap">
+    </a>
+    <a class="@LinkClass("ss-mobile-bottom-link", "/roadmap")" href="/roadmap" aria-current="@CurrentLink("/roadmap")">
         <i class="bi bi-book"></i><span>@L["nav.learn"]</span>
-    </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/progress">
+    </a>
+    <a class="@LinkClass("ss-mobile-bottom-link", "/progress")" href="/progress" aria-current="@CurrentLink("/progress")">
         <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
-    </NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/cv"><i class="bi bi-file-earmark-person"></i><span>CV</span></NavLink>
-    <NavLink class="ss-mobile-bottom-link" href="/more"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></NavLink>
+    </a>
+    <a class="@LinkClass("ss-mobile-bottom-link", "/cv")" href="/cv" aria-current="@CurrentLink("/cv")"><i class="bi bi-file-earmark-person"></i><span>CV</span></a>
+    <a class="@LinkClass("ss-mobile-bottom-link", "/more")" href="/more" data-route-roots="@NavigationAccessRules.MoreRoutes" aria-current="@CurrentLink("/more")"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></a>
     }
 </nav>
+}
 
 <style>
     .ss-navbar {
@@ -413,16 +417,35 @@
 </style>
 
 @code {
-    private bool authenticated;
-    private bool isAdmin;
+    // Follow the page rendered by SSR, not the URL that changes before its
+    // enhanced-navigation response arrives.
+    [Parameter] public string RenderedPath { get; set; } = "/";
+    private bool IsCurrent(string href) => (href == "/more" && NavigationAccessRules.IsMoreRoute(RenderedPath)) || RenderedPath.Equals(href, StringComparison.OrdinalIgnoreCase)
+        || (href != "/" && RenderedPath.StartsWith(href.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase));
+    private string LinkClass(string css, string href) => IsCurrent(href) ? css + " active" : css;
+    private string? CurrentLink(string href) => IsCurrent(href) ? "page" : null;
+
+    // Keep SSR destinations during hydration instead of briefly resetting Home to '/'.
+    [PersistentState] public bool authenticated { get; set; }
+    [PersistentState] public bool isAdmin { get; set; }
+    // Reuse this request's server-verified result while the same identity
+    // hydrates. Unknown/error/logout states never reuse an older account's UI.
+    [PersistentState] public int? VerifiedCompletedUser { get; set; }
+    private AssessmentAccessStatus DockStatus => Access.Status == AssessmentAccessStatus.Loading
+        && VerifiedCompletedUser == Access.UserId ? AssessmentAccessStatus.Complete : Access.Status;
     private string HomeHref => isAdmin ? "/admin/dashboard" : authenticated ? "/dashboard" : "/";
-    protected override void OnInitialized() => L.OnChanged += StateHasChangedSafe;
+    protected override void OnInitialized() { L.OnChanged += StateHasChangedSafe; Access.Changed += StateHasChangedSafe; }
     protected override async Task OnInitializedAsync()
     {
         var principal = (await AuthProvider.GetAuthenticationStateAsync()).User;
         authenticated = principal.Identity?.IsAuthenticated == true;
         isAdmin = principal.IsInRole("Admin");
     }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Access.LoadAsync();
+        VerifiedCompletedUser = Access.Status == AssessmentAccessStatus.Complete ? Access.UserId : null;
+    }
     private void StateHasChangedSafe() => InvokeAsync(StateHasChanged);
-    public void Dispose() => L.OnChanged -= StateHasChangedSafe;
+    public void Dispose() { L.OnChanged -= StateHasChangedSafe; Access.Changed -= StateHasChangedSafe; }
 }
