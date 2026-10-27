@@ -13,7 +13,21 @@
 <div class="max-800 tw:mx-auto assessment-page">
     @if (storageRestored && questions is not null && questions.Count > 0)
     {
-        <StepIndicator CurrentStep="@(currentQuestionIndex + 1)" TotalSteps="@questions.Count" />
+        <div class="assessment-desktop-steps"><StepIndicator CurrentStep="@(currentQuestionIndex + 1)" TotalSteps="@questions.Count" /></div>
+        <nav class="assessment-mobile-steps" aria-label="@Tx("Question progress", "Tiến độ câu hỏi")">
+            <ol>
+                @foreach (var step in MobileQuestionSteps)
+                {
+                    <li class="@(step <= currentQuestionIndex + 1 ? "is-complete" : "")">
+                        @if (step is int number)
+                        {
+                            <span class="assessment-step @(number == currentQuestionIndex + 1 ? "is-current" : "")" aria-current="@(number == currentQuestionIndex + 1 ? "step" : null)">@number</span>
+                        }
+                        else { <span class="assessment-step-gap" aria-hidden="true">···</span> }
+                    </li>
+                }
+            </ol>
+        </nav>
     }
 
     @if (questions == null || !storageRestored)
@@ -33,10 +47,10 @@
     else if (currentQuestionIndex < questions.Count)
     {
         var q = questions[currentQuestionIndex];
-        <div class="ss-card tw:p-12">
-            <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
+        <div class="ss-card assessment-question-card tw:p-12" aria-labelledby="assessment-question-title">
+            <div class="assessment-question-meta tw:flex tw:justify-between tw:items-center tw:mb-4">
                 <span class="badge bg-primary tw:px-4 tw:py-2">@L["assessment.question"] @(currentQuestionIndex + 1) @L["assessment.of"] @questions.Count</span>
-                <div class="tw:flex tw:gap-2">
+                <div class="assessment-question-tags tw:flex tw:gap-2">
                     @if (q.Type == SoftSync.Common.Enums.QuestionType.Scenario)
                     {
                         <span class="badge bg-info text-dark tw:px-3 tw:py-2"><i class="bi bi-people tw:me-1"></i>@Tx("Scenario", "Tình huống")</span>
@@ -45,24 +59,25 @@
                 </div>
             </div>
 
-            <div class="progress tw:mb-6" style="height: 8px; border-radius: 6px;">
-                <div class="progress-bar" style="width: @(((currentQuestionIndex) * 100) / questions.Count)%; background: var(--gradient);"></div>
+            <div class="assessment-progress-row">
+                <div class="progress tw:mb-6" role="progressbar" aria-label="@Tx("Question progress", "Tiến độ câu hỏi")" aria-valuemin="0" aria-valuemax="@questions.Count" aria-valuenow="@(currentQuestionIndex + 1)" style="height: 8px; border-radius: 6px;">
+                    <div class="progress-bar" style="width: @(((currentQuestionIndex + 1) * 100d) / questions.Count)%; background: var(--gradient);"></div>
+                </div>
+                <span class="assessment-progress-count">@(currentQuestionIndex + 1) / @questions.Count</span>
             </div>
 
-            <h3 class="tw:font-bold tw:mb-6">@QuestionLabel(q)</h3>
+            <h3 id="assessment-question-title" class="tw:font-bold tw:mb-6">@QuestionLabel(q)</h3>
 
-            @if (MilestoneMessage() is { } milestone)
-            {
-                <div class="assessment-milestone tw:mb-5">
-                    <i class="bi bi-stars tw:me-2"></i>@milestone
-                </div>
-            }
+            @{ var milestone = MilestoneMessage(); }
+            <div class="assessment-milestone tw:mb-5 @(milestone is null ? "assessment-mobile-hint" : "")">
+                <span class="assessment-hint-icon"><i class="bi bi-stars" aria-hidden="true"></i></span><span>@(milestone ?? SkillProgressMessage(q))</span>
+            </div>
 
-            <div class="tw:grid tw:gap-4">
+            <div class="assessment-options tw:grid tw:gap-4">
                 @foreach (var opt in q.Options)
                 {
                     <button @key="opt.Id" type="button" class="btn btn-outline-primary assessment-option tw:text-start tw:p-6 tw:text-xl @(selectedOptionId == opt.Id ? "active" : "")"
-                            aria-pressed="@(selectedOptionId == opt.Id)"
+                            aria-pressed="@(selectedOptionId == opt.Id ? "true" : "false")"
                             @onclick="() => SelectOptionAsync(opt.Id)">
                         <i class="bi @(selectedOptionId == opt.Id ? "bi-check-circle-fill" : "bi-circle")" aria-hidden="true"></i>
                         <span>@OptionLabel(opt)</span>
@@ -70,11 +85,11 @@
                 }
             </div>
 
-            <div class="tw:mt-12 tw:flex tw:justify-between tw:gap-4">
-                <button class="btn btn-outline-primary tw:px-8" @onclick="PreviousQuestionAsync" disabled="@(currentQuestionIndex == 0)">
+            <div class="assessment-actions tw:mt-12 tw:flex tw:justify-between tw:gap-4">
+                <button class="btn btn-outline-primary assessment-back tw:px-8" @onclick="PreviousQuestionAsync" disabled="@(currentQuestionIndex == 0)">
                     <i class="bi bi-arrow-left tw:me-2"></i>@L["assessment.back"]
                 </button>
-                <button class="ss-btn-primary tw:px-12" @onclick="NextQuestion" disabled="@(selectedOptionId == 0)">
+                <button class="ss-btn-primary assessment-next tw:px-12" @onclick="NextQuestion" disabled="@(selectedOptionId == 0)">
                     @(currentQuestionIndex == questions.Count - 1 ? L["assessment.finish"] : L["assessment.nextQuestion"])
                     @if (currentQuestionIndex < questions.Count - 1)
                     {
@@ -102,6 +117,37 @@
     private readonly Dictionary<int, int> answers = new();
     private bool storageRestored;
     private bool restoringDraft;
+
+    private IEnumerable<int?> MobileQuestionSteps
+    {
+        get
+        {
+            var total = questions?.Count ?? 0;
+            if (total <= 5) return Enumerable.Range(1, total).Select(number => (int?)number);
+            var current = Math.Min(currentQuestionIndex + 1, total);
+            var visible = new SortedSet<int> { 1, total - 1, total, current };
+            if (current <= 3) { visible.Add(2); visible.Add(3); }
+            else visible.Add(current - 1);
+            var steps = new List<int?>();
+            var previous = 0;
+            foreach (var number in visible)
+            {
+                if (number > previous + 1) steps.Add(null);
+                steps.Add(number);
+                previous = number;
+            }
+            return steps;
+        }
+    }
+
+    private string SkillProgressMessage(AssessmentQuestionDto question)
+    {
+        var currentQuestions = questions ?? [];
+        var position = currentQuestions.Take(currentQuestionIndex + 1).Count(item => item.SkillId == question.SkillId);
+        var total = currentQuestions.Count(item => item.SkillId == question.SkillId);
+        return Tx($"You are on question {position}/{total} for this skill. Keep going! 💪",
+            $"Bạn đang ở câu {position}/{total} của kỹ năng này. Cố lên nào! 💪");
+    }
 
     protected override async Task OnInitializedAsync()
     {

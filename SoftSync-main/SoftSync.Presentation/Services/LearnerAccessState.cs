@@ -94,9 +94,9 @@ public static class NavigationAccessRules
         .Any(root => Under(path, root));
 
     public static bool BottomNavigationEnabled(string path) => !new[] {
-        "/Account", "/assessment", "/assessment-result", "/assessment-complete", "/profile-setup", "/select-skills"
+        "/Account", "/assessment-result", "/assessment-complete", "/profile-setup", "/select-skills"
     }.Any(root => Under(path, root));
 
     public static bool ShowBottomNavigation(string path, bool authenticated, bool staff, AssessmentAccessStatus status)
-        => authenticated && BottomNavigationEnabled(path) && (staff || status == AssessmentAccessStatus.Complete);
+        => authenticated && BottomNavigationEnabled(path) && (Under(path, "/assessment") || staff || status == AssessmentAccessStatus.Complete);
 }

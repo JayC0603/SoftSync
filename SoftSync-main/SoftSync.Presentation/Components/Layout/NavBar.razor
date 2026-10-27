@@ -33,7 +33,7 @@
         {
             @foreach (var item in LearnerLinks)
             {
-                <a class="@LinkClass("ss-navpill", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
+                <a class="@LinkClass("ss-navpill", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : item.Url == "/roadmap" ? "/assessment" : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
             }
         }
     </div>
@@ -53,7 +53,7 @@
     {
         @foreach (var item in LearnerLinks)
         {
-            <a class="@LinkClass("ss-mobile-bottom-link", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
+            <a class="@LinkClass("ss-mobile-bottom-link", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : item.Url == "/roadmap" ? "/assessment" : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
         }
     }
 </nav>
@@ -397,7 +397,7 @@
     // Follow the page rendered by SSR, not the URL that changes before its
     // enhanced-navigation response arrives.
     [Parameter] public string RenderedPath { get; set; } = "/";
-    private bool IsCurrent(string href) => (href == "/more" && NavigationAccessRules.IsMoreRoute(RenderedPath)) || RenderedPath.Equals(href, StringComparison.OrdinalIgnoreCase)
+    private bool IsCurrent(string href) => (href == "/roadmap" && RenderedPath.StartsWith("/assessment/", StringComparison.OrdinalIgnoreCase)) || (href == "/more" && NavigationAccessRules.IsMoreRoute(RenderedPath)) || RenderedPath.Equals(href, StringComparison.OrdinalIgnoreCase)
         || (href != "/" && RenderedPath.StartsWith(href.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase));
     private string LinkClass(string css, string href) => IsCurrent(href) ? css + " active" : css;
     private string? CurrentLink(string href) => IsCurrent(href) ? "page" : null;
