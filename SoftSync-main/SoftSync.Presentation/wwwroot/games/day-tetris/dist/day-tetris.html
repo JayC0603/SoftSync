@@ -1,0 +1,2481 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Day Tetris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<style>
+/* Bố cục: bàn chơi ở giữa, khối kế tiếp bên trái, chỉ số bên phải; trên điện thoại xếp dọc. */
+:root {
+  --bg: #090d1a;
+  --surface: #121832;
+  --surface-2: #1a2142;
+  --line: #29325c;
+  --fg: #e8ecf8;
+  --muted: #8b95b9;
+  --accent: #ffd166;
+  --accent-ink: #2b1e00;
+  --good: #3ddc97;
+  --bad: #ff6b6b;
+  --warn: #ffb454;
+  --font-display: "Bricolage Grotesque", "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 400 14px/1.5 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 20px;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+kbd {
+  font: 600 11px/1 var(--font-mono); padding: 3px 6px; border-radius: 5px;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--fg); white-space: nowrap;
+}
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+
+#app { max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Thanh trên ---------- */
+.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; }
+.brand b { font: 800 22px/1 var(--font-display); letter-spacing: -0.02em; }
+.mode-chip {
+  font: 500 12px/1 var(--font-body); color: var(--muted); padding: 6px 10px; border-radius: 999px;
+  border: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw;
+}
+.top-actions { display: flex; gap: 8px; }
+
+.btn {
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--fg);
+  padding: 9px 14px; border-radius: 9px; font-weight: 600; font-size: 13px; line-height: 1.1;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+.btn:hover { border-color: #3d4a86; background: #202955; }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { background: #ffdb85; }
+.btn.small { padding: 6px 10px; font-size: 12px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---------- Bố cục chính ---------- */
+.stage { display: grid; grid-template-columns: 214px minmax(0, 1fr) 262px; gap: 14px; align-items: start; }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-width: 0; }
+.card > h3 {
+  font: 600 11px/1 var(--font-body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.card > h3 kbd { text-transform: none; letter-spacing: 0; }
+
+.board-col { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.board-wrap { position: relative; line-height: 0; border-radius: 12px; border: 1px solid var(--line); background: #0a0e1b; overflow: hidden; max-width: 100%; }
+#board { display: block; touch-action: none; }
+#toasts { position: absolute; left: 50px; right: 20px; top: 34px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; line-height: 1.3; }
+.toast {
+  align-self: flex-start; max-width: 100%; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: rgba(14, 20, 44, .94); border: 1px solid var(--line); animation: toast-in .2s ease-out;
+  transition: opacity .4s ease, transform .4s ease;
+}
+.toast.good { border-color: var(--good); color: #b6f3d8; }
+.toast.bad { border-color: var(--bad); color: #ffc9c9; }
+.toast.warn { border-color: var(--warn); color: #ffe0b3; }
+.toast.out { opacity: 0; transform: translateY(-6px); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* ---------- Khối kế tiếp ---------- */
+.piece-row { display: flex; gap: 10px; align-items: center; min-width: 0; padding: 6px 0; }
+.piece-row + .piece-row { border-top: 1px dashed var(--line); }
+.piece-row canvas { flex: none; }
+.piece-info { min-width: 0; font-size: 12px; line-height: 1.35; }
+.piece-info b { display: block; font-weight: 600; font-size: 12.5px; overflow-wrap: anywhere; }
+.piece-info span { color: var(--muted); }
+.next-list .piece-row:first-child canvas { transform: scale(1.0); }
+.empty-note { color: var(--muted); font-size: 12px; padding: 6px 0; }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; font: 600 10.5px/1 var(--font-mono); padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.07); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.cur-name { font: 700 15px/1.25 var(--font-display); margin-bottom: 6px; overflow-wrap: anywhere; }
+.cur-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.cur-hint { font-size: 12px; color: var(--muted); }
+
+/* ---------- Chỉ số ---------- */
+.score-big { font: 800 34px/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.score-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; margin-bottom: 4px; }
+.day-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 10px; font-size: 13px; }
+.day-line b { font-family: var(--font-display); font-size: 16px; }
+.day-line span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.meters { display: flex; flex-direction: column; gap: 10px; }
+.meter { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 12px; align-items: baseline; }
+.meter .meter-label { font-weight: 600; }
+.meter .meter-val { font: 600 12px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.meter-bar { grid-column: 1 / -1; height: 7px; background: rgba(150,165,225,.14); border-radius: 99px; overflow: hidden; }
+.meter-bar i { display: block; height: 100%; width: 50%; background: var(--good); border-radius: 99px; transition: width .25s ease, background .25s ease; }
+.meter.mid .meter-bar i { background: var(--warn); }
+.meter.low .meter-bar i { background: var(--bad); }
+.status-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; min-height: 0; }
+.status-row .chip { background: rgba(255,107,107,.16); color: #ffb3b3; }
+.status-row .chip.warn { background: rgba(255,180,84,.16); color: #ffd9a3; }
+
+.pu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pu {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; text-align: left;
+  padding: 7px 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 11.5px; font-weight: 600;
+}
+.pu b { font: 700 12px var(--font-mono); color: var(--accent); }
+.pu.empty { opacity: .38; }
+.pu:not(.empty):hover { border-color: var(--accent); }
+.insert-row { display: flex; gap: 6px; margin-top: 8px; }
+.insert-row .btn { flex: 1; display: flex; gap: 6px; justify-content: center; align-items: center; }
+
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: 12px; max-height: 168px; overflow: hidden; }
+.log li { display: grid; grid-template-columns: 8px 1fr; gap: 8px; align-items: start; color: #c5cdea; line-height: 1.35; }
+.log li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; background: var(--muted); }
+.log li.good::before { background: var(--good); }
+.log li.bad::before { background: var(--bad); }
+.log li.warn::before { background: var(--warn); }
+.log li:first-child { color: var(--fg); }
+
+.hud-strip { display: none; }
+
+/* ---------- Điều khiển cảm ứng ---------- */
+.touch { display: none; gap: 8px; width: 100%; max-width: 520px; grid-template-columns: repeat(6, 1fr); }
+.touch button {
+  min-height: 52px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line);
+  font: 700 18px var(--font-display); touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.touch button:active { background: #28336a; }
+.touch button.wide { grid-column: span 2; font-size: 13px; }
+.keys-hint { font-size: 12px; color: var(--muted); display: flex; gap: 6px 12px; flex-wrap: wrap; justify-content: center; max-width: 560px; }
+.keys-hint span { display: inline-flex; gap: 5px; align-items: center; }
+
+/* ---------- Lớp phủ ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  background: rgba(5, 8, 18, .82); backdrop-filter: blur(5px);
+  padding: max(14px, env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  overflow-y: auto;
+}
+.overlay[hidden] { display: none; }
+.panel {
+  width: min(940px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px; max-height: 100%; overflow-y: auto; margin: auto;
+}
+.panel.narrow { width: min(520px, 100%); }
+.panel h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1; font-weight: 800; letter-spacing: -0.03em; }
+.panel h2 { font-size: 24px; line-height: 1.15; margin-bottom: 6px; }
+.panel h3 { font-size: 15px; margin: 18px 0 8px; }
+.panel p { margin: 0 0 10px; color: #cfd6f0; max-width: 62ch; }
+.panel .tagline { color: var(--muted); margin: 14px 0 0; max-width: 54ch; }
+.tagline b { color: var(--accent); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row.end { justify-content: flex-end; margin-top: 18px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-top: 18px; }
+.mode-card {
+  text-align: left; padding: 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 6px; min-width: 0; transition: border-color .15s ease, transform .1s ease;
+}
+.mode-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.mode-card .num { font: 700 11px var(--font-mono); color: var(--accent); letter-spacing: .06em; }
+.mode-card b { font: 700 16px/1.2 var(--font-display); }
+.mode-card span.d { color: var(--muted); font-size: 12.5px; }
+.mode-card .best { font: 500 11px var(--font-mono); color: var(--muted); margin-top: auto; padding-top: 4px; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.set-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; color: var(--muted); font-size: 13px; }
+select, input[type="text"], input[type="number"] {
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 13px; min-width: 0;
+}
+ul.tips { margin: 8px 0 0; padding-left: 18px; color: #cfd6f0; display: flex; flex-direction: column; gap: 6px; max-width: 64ch; }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px 14px; margin-top: 8px; font-size: 13px; }
+.legend div { display: flex; gap: 8px; align-items: center; color: #cfd6f0; }
+.legend .sw { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.t th { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+
+/* Báo cáo */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 16px 0 4px; }
+.stat { padding: 10px 12px; background: var(--surface-2); border-radius: 10px; border: 1px solid var(--line); }
+.stat b { display: block; font: 800 22px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.insights { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.insights li { display: grid; grid-template-columns: 4px 1fr; gap: 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); max-width: 70ch; }
+.insights li::before { content: ""; border-radius: 4px; background: var(--muted); }
+.insights li.good::before { background: var(--good); }
+.insights li.bad::before { background: var(--bad); }
+.insights li.warn::before { background: var(--warn); }
+.insights li.tip::before { background: #7aa7ff; }
+.exercise { margin-top: 16px; padding: 12px 14px; border: 1px dashed var(--accent); border-radius: 10px; color: #ffeab8; max-width: 70ch; }
+.result-win { color: var(--good); }
+.result-lose { color: var(--bad); }
+
+/* Trình soạn việc */
+.task-table input[type="text"] { width: 100%; min-width: 150px; }
+.task-table input[type="number"] { width: 64px; }
+.task-table td { padding: 5px 4px; border: 0; }
+.task-table th { padding: 4px; }
+.x { background: transparent; border: 0; color: var(--muted); font-size: 18px; padding: 4px 8px; }
+.x:hover { color: var(--bad); }
+
+/* ---------- Điện thoại ---------- */
+@media (max-width: 880px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .board-col { order: 1; }
+  .side-r { order: 2; }
+  .side-l { order: 3; }
+  .hud-strip {
+    display: grid; grid-template-columns: auto 1fr 1fr; gap: 12px; align-items: center; width: 100%; max-width: 520px;
+    padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .hud-strip .s { font: 800 22px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+  .hud-strip .meter { grid-template-columns: 1fr auto; }
+  .touch { display: grid; }
+  .keys-hint { display: none; }
+  .two-col { grid-template-columns: 1fr; }
+  .panel { padding: 18px; }
+  .side-r .score-card { display: none; }
+}
+@media (pointer: coarse) { .touch { display: grid; } .keys-hint { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="1" y="1" width="8" height="8" rx="2" fill="#4f8cff"/><rect x="11" y="1" width="8" height="8" rx="2" fill="#4f8cff"/><rect x="21" y="1" width="8" height="8" rx="2" fill="#4f8cff"/>
+        <rect x="11" y="11" width="8" height="8" rx="2" fill="#2fcf8a"/><rect x="11" y="21" width="8" height="8" rx="2" fill="#ffd166"/>
+      </svg>
+      <b>Day Tetris</b>
+      <span class="mode-chip" id="modeChip">Chưa bắt đầu</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn small" data-act="howto">Cách chơi</button>
+      <button class="btn small" data-act="pause">Tạm dừng <kbd>P</kbd></button>
+      <button class="btn small" data-act="menu">Menu</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <aside class="side side-l">
+      <section class="card" id="holdCard" hidden>
+        <h3>Hoãn <kbd>C</kbd></h3>
+        <div class="piece-row"><canvas id="holdCanvas" width="72" height="54"></canvas><div class="piece-info" id="holdInfo"><span>Trống. Mỗi ngày hoãn tối đa 1 lần.</span></div></div>
+      </section>
+      <section class="card">
+        <h3>Kế tiếp <span id="nextCount"></span></h3>
+        <div class="next-list" id="nextList"></div>
+      </section>
+      <section class="card">
+        <h3>Đang xếp</h3>
+        <div id="curCard"><div class="empty-note">Chọn một chế độ để bắt đầu.</div></div>
+      </section>
+    </aside>
+
+    <div class="board-col">
+      <div class="hud-strip">
+        <div><div class="score-label">Điểm</div><div class="s" data-hud="score">0</div></div>
+        <div class="meter" data-meter="energy"><span class="meter-label">Năng lượng</span><span class="meter-val" data-hud="energy">100</span><div class="meter-bar"><i></i></div></div>
+        <div class="meter" data-meter="rep"><span class="meter-label">Ngày <b data-hud="dayShort">1</b></span><span class="meter-val" data-hud="gpa">4.0</span><div class="meter-bar"><i></i></div></div>
+      </div>
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="board" aria-label="Bảng lịch: mỗi hàng là một ngày, mỗi cột là một giờ"></canvas>
+        <div id="toasts" aria-live="polite"></div>
+      </div>
+      <div class="touch" id="touch">
+        <button data-key="left" aria-label="Sang trái">◀</button>
+        <button data-key="right" aria-label="Sang phải">▶</button>
+        <button data-key="rotate" aria-label="Xoay">⟳</button>
+        <button data-key="soft" aria-label="Rơi nhanh">▼</button>
+        <button class="wide" data-key="drop">THẢ NGAY</button>
+        <button class="wide" data-key="hold">HOÃN</button>
+        <button class="wide" data-key="rest">+ NGHỈ</button>
+        <button class="wide" data-key="buffer">+ ĐỆM</button>
+        <button class="wide" data-key="pause">DỪNG</button>
+      </div>
+      <div class="keys-hint">
+        <span><kbd>←</kbd><kbd>→</kbd> di chuyển</span><span><kbd>↑</kbd> xoay</span><span><kbd>↓</kbd> rơi nhanh</span>
+        <span><kbd>Space</kbd> thả ngay</span><span><kbd>C</kbd> hoãn</span><span><kbd>R</kbd> nghỉ</span><span><kbd>B</kbd> đệm</span><span><kbd>1-4</kbd> vật phẩm</span>
+      </div>
+    </div>
+
+    <aside class="side side-r">
+      <section class="card score-card">
+        <div class="score-label">Điểm</div>
+        <div class="score-big" data-hud="score">0</div>
+        <div class="day-line"><b data-hud="dayLabel">Ngày 1</b><span data-hud="dayTimer"></span></div>
+      </section>
+      <section class="card">
+        <h3>Chỉ số</h3>
+        <div class="meters">
+          <div class="meter" data-meter="energy"><span class="meter-label">Năng lượng</span><span class="meter-val" data-hud="energy">100</span><div class="meter-bar"><i></i></div></div>
+          <div class="meter" data-meter="rep"><span class="meter-label">Uy tín (GPA)</span><span class="meter-val" data-hud="gpa">4.0</span><div class="meter-bar"><i></i></div></div>
+          <div class="meter" data-meter="balance"><span class="meter-label">Cân bằng cuộc sống</span><span class="meter-val" data-hud="balance">100</span><div class="meter-bar"><i></i></div></div>
+        </div>
+        <div class="status-row" id="statusRow"></div>
+      </section>
+      <section class="card" id="puCard" hidden>
+        <h3>Vật phẩm</h3>
+        <div class="pu-grid" id="puGrid"></div>
+      </section>
+      <section class="card" id="insertCard" hidden>
+        <h3>Chừa chỗ <span id="insertLeft"></span></h3>
+        <div class="insert-row">
+          <button class="btn small" data-act="rest" id="btnRest"><kbd>R</kbd> Nghỉ</button>
+          <button class="btn small" data-act="buffer" id="btnBuffer"><kbd>B</kbd> Đệm</button>
+        </div>
+      </section>
+      <section class="card">
+        <h3>Nhật ký</h3>
+        <ul class="log" id="log"></ul>
+      </section>
+    </aside>
+  </main>
+</div>
+<div class="overlay" id="overlay" hidden></div>
+<script>
+/* Day Tetris - cấu hình, hằng số, dữ liệu tĩnh */
+(function (g) {
+  'use strict';
+  var DT = (g.DT = g.DT || {});
+
+  DT.COLS = 10;
+  DT.ROWS = 14;
+
+  /* ---------- Ngày trong tuần (ngày 1 = Thứ Hai) ---------- */
+  DT.WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  DT.dayName = function (absDay) {
+    return DT.WEEKDAYS[(((absDay - 1) % 7) + 7) % 7];
+  };
+  DT.isWeekend = function (absDay) {
+    var w = (((absDay - 1) % 7) + 7) % 7;
+    return w >= 5;
+  };
+
+  /* ---------- Loại việc ---------- */
+  DT.CATS = {
+    study:    { name: 'Học',      color: '#4f8cff', light: '#8fb6ff', dark: '#2a5bc0' },
+    personal: { name: 'Cá nhân',  color: '#a77bff', light: '#c9b0ff', dark: '#6b45c7' },
+    health:   { name: 'Sức khỏe', color: '#2fcf8a', light: '#7ae8b9', dark: '#17935f' },
+    social:   { name: 'Xã hội',   color: '#ff6fa5', light: '#ff9fc3', dark: '#c73b74' },
+    rest:     { name: 'Nghỉ',     color: '#9fe3ff', light: '#d2f3ff', dark: '#5bb4d6' },
+    buffer:   { name: 'Đệm',      color: '#8a93a6', light: '#aab2c4', dark: '#5d6578' },
+    busy:     { name: 'Bận',      color: '#3a4060', light: '#4a5176', dark: '#262b45' },
+    sick:     { name: 'Ốm',       color: '#8a3544', light: '#b04c5d', dark: '#5c1f2b' }
+  };
+  DT.WORK_CATS = ['study', 'personal', 'health', 'social'];
+  DT.NON_WORK = { rest: 1, buffer: 1, busy: 1, sick: 1 };
+
+  /* ---------- Ma trận Eisenhower ---------- */
+  DT.Q = {
+    Q1: { name: 'Gấp & quan trọng',      color: '#ff5d5d' },
+    Q2: { name: 'Quan trọng, chưa gấp',  color: '#ffcf4a' },
+    Q3: { name: 'Gấp, ít quan trọng',    color: '#ff9a3c' },
+    Q4: { name: 'Không gấp, không quan trọng', color: '#9aa3b5' }
+  };
+  DT.Q_WEIGHTS = { Q1: 25, Q2: 40, Q3: 20, Q4: 15 };
+  // Hạn chót (số ngày kể từ lúc khối xuất hiện)
+  DT.DEADLINE_RANGE = { Q1: [3, 6], Q2: [6, 12], Q3: [2, 5], Q4: null };
+
+  /* ---------- Năng lượng ---------- */
+  DT.ENERGY = {
+    light: { name: 'Nhẹ',  cost: 0 },
+    mid:   { name: 'Vừa',  cost: 0.5 },
+    heavy: { name: 'Nặng', cost: 1.5 }
+  };
+  DT.ENERGY_BY_CAT = {
+    study:    { light: 15, mid: 45, heavy: 40 },
+    personal: { light: 50, mid: 40, heavy: 10 },
+    health:   { light: 30, mid: 50, heavy: 20 },
+    social:   { light: 60, mid: 35, heavy: 5 }
+  };
+  DT.ENERGY_START = 100;
+  DT.ENERGY_REST_GAIN = 3;        // mỗi ô nghỉ
+  DT.ENERGY_HEAVY_ADJ = 1.2;      // phạt khối nặng nằm sát khối nặng khác
+  DT.ENERGY_DAILY_REGEN = 8;
+  DT.ENERGY_LOW = 30;             // dưới mức này -> mất tập trung
+  DT.BURNOUT_RESET = 35;
+
+  /* ---------- Hình khối ---------- */
+  DT.SHAPES = {
+    I:  [[0, 0], [0, 1], [0, 2], [0, 3]],
+    O:  [[0, 0], [0, 1], [1, 0], [1, 1]],
+    T:  [[0, 1], [1, 0], [1, 1], [1, 2]],
+    L:  [[0, 2], [1, 0], [1, 1], [1, 2]],
+    J:  [[0, 0], [1, 0], [1, 1], [1, 2]],
+    S:  [[0, 1], [0, 2], [1, 0], [1, 1]],
+    Z:  [[0, 0], [0, 1], [1, 1], [1, 2]],
+    I3: [[0, 0], [0, 1], [0, 2]],
+    L3: [[0, 0], [1, 0], [1, 1]],
+    D2: [[0, 0], [0, 1]],
+    M1: [[0, 0]]
+  };
+  DT.SHAPE_LABELS = {
+    I:  'I · Dự án dài / ôn thi (4 ô thẳng)',
+    O:  'O · Bài tập nhóm / họp (2×2)',
+    T:  'T · Việc có phần phụ thuộc',
+    L:  'L · Việc nhà / đi lại / tập luyện',
+    J:  'J · Việc nhà / đi lại / tập luyện',
+    S:  'S · Việc lệch lịch',
+    Z:  'Z · Việc lệch lịch',
+    I3: 'I3 · Việc 3 giờ (thẳng)',
+    L3: 'L3 · Việc 3 giờ (góc)',
+    D2: 'D2 · Việc 2 giờ',
+    M1: 'M1 · Việc 1 giờ'
+  };
+  // Trọng số loại việc theo hình khối
+  DT.SHAPE_CATS = {
+    I: { study: 6, personal: 1, health: 1 },
+    O: { study: 4, social: 3, personal: 1 },
+    T: { study: 5, personal: 2, health: 1, social: 1 },
+    L: { personal: 4, health: 3, study: 1, social: 1 },
+    J: { personal: 4, health: 3, study: 1, social: 1 },
+    S: { social: 3, personal: 3, study: 2, health: 1 },
+    Z: { social: 3, personal: 3, study: 2, health: 1 }
+  };
+
+  /* ---------- Tên việc ---------- */
+  DT.NAMES = {
+    study:    ['Ôn thi Giải tích', 'Đồ án Lập trình', 'Bài tập Vật lý', 'Đọc tài liệu Kinh tế', 'Làm slide thuyết trình', 'Luyện đề Tiếng Anh', 'Báo cáo thí nghiệm', 'Học từ vựng'],
+    personal: ['Dọn phòng', 'Giặt giũ & nấu ăn', 'Đi chợ', 'Làm giấy tờ', 'Di chuyển / đi lại', 'Tập đàn guitar', 'Đọc sách'],
+    health:   ['Chạy bộ', 'Tập gym', 'Đạp xe', 'Yoga', 'Bơi lội', 'Đi bộ buổi tối'],
+    social:   ['Họp nhóm', 'Cà phê với bạn', 'Sinh hoạt CLB', 'Gọi điện về nhà', 'Sinh nhật bạn', 'Tình nguyện']
+  };
+  DT.SHAPE_NAMES = {
+    I: { study: ['Ôn thi cuối kỳ', 'Đồ án cuối kỳ', 'Đọc giáo trình', 'Luyện đề Tiếng Anh'] },
+    O: { study: ['Bài tập nhóm', 'Họp nhóm đồ án', 'Buổi thực hành'], social: ['Họp CLB', 'Buổi gặp nhóm'] },
+    T: { study: ['Học bài → làm bài tập', 'Đọc tài liệu → viết tóm tắt'] }
+  };
+  DT.REST_NAMES = ['Ngủ đủ giấc', 'Ăn trưa thong thả', 'Nghỉ ngơi', 'Đi dạo thư giãn', 'Xem phim'];
+  DT.EMERGENCY_NAMES = ['Sếp nhờ gấp', 'Sửa lỗi nộp ngay', 'Báo cáo đột xuất', 'Kiểm tra bất ngờ'];
+  DT.REST_CHANCE = 0.13;
+
+  /* ---------- Điểm số ---------- */
+  DT.SCORE = {
+    cellBase: 3,
+    q2Early: 150,
+    q2Ok: 80,
+    q1Ok: 100,
+    q3Ok: 40,
+    q4Ok: 20,
+    late: -150,
+    lateRep: -12,
+    onTimeRep: 2,
+    q2EarlyRep: 3,
+    q3Prime: -30,
+    splitI: 50,
+    rowPlain: 100,
+    rowBalanced: 200,
+    rowOverload: 50,
+    rowIdle: 40,
+    rowAllNighter: 80,
+    combo: 100,
+    dayCell: 5,
+    emptyDay: -20,
+    absorb: 30,
+    friend: 40,
+    bloatPerCell: 50
+  };
+  DT.REP_START = 100;
+  DT.REP_MIN_WIN = 40;
+  DT.LOCK_DELAY = 420;
+  DT.MAX_BLOAT_CELLS = 8;
+  DT.INSERTS_PER_DAY = 2;
+  DT.LIST_PIECES = 15;
+  // Khoảng lý tưởng (%) cho mỗi loại việc trong 40 ô gần nhất
+  DT.BALANCE_TARGET = {
+    study: [30, 60],
+    personal: [10, 30],
+    health: [10, 30],
+    social: [8, 28]
+  };
+
+  /* ---------- Vật phẩm ---------- */
+  DT.POWERUPS = {
+    pomodoro: { name: 'Pomodoro',       key: '1', desc: 'Khối nặng đang rơi → chia thành các phiên nhẹ.' },
+    list:     { name: 'Lên danh sách',  key: '2', desc: 'Xem trước 5 khối trong 15 khối tới.' },
+    delegate: { name: 'Ủy quyền',       key: '3', desc: 'Bỏ khối Q3 đang rơi, hoặc xóa 1 việc Q3 trên bảng.' },
+    dayoff:   { name: 'Ngày nghỉ thật', key: '4', desc: 'Xóa sạch hàng hôm nay, hồi đầy năng lượng.' }
+  };
+
+  /* ---------- Cấp độ (học kỳ) ---------- */
+  var ALL = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
+  DT.LEVELS = [
+    { id: 1, name: 'Học kỳ 1 · Làm quen', desc: 'Chỉ khối I, O, T. Xếp kín các ngày.',
+      days: 8, shapes: ['I', 'O', 'T'], labels: false, deadlines: false, energy: false, rest: false,
+      events: false, hold: false, powerups: false, busy: false, clusters: false, dayLen: 30, gravity: 800 },
+    { id: 2, name: 'Học kỳ 2 · Hạn chót', desc: 'Thêm hạn chót và nhãn Eisenhower (Q1–Q4).',
+      days: 10, shapes: ['I', 'O', 'T', 'L', 'J'], labels: true, deadlines: true, energy: false, rest: false,
+      events: false, hold: false, powerups: false, busy: false, clusters: false, dayLen: 28, gravity: 720 },
+    { id: 3, name: 'Học kỳ 3 · Năng lượng', desc: 'Thêm năng lượng, ô nghỉ và vật phẩm.',
+      days: 12, shapes: ALL, labels: true, deadlines: true, energy: true, rest: true,
+      events: false, hold: false, powerups: true, busy: false, clusters: false, dayLen: 26, gravity: 650 },
+    { id: 4, name: 'Học kỳ 4 · Bất ngờ', desc: 'Thêm sự kiện ngẫu nhiên và Hoãn (trì hoãn có giá).',
+      days: 14, shapes: ALL, labels: true, deadlines: true, energy: true, rest: true,
+      events: true, hold: true, powerups: true, busy: false, clusters: false, dayLen: 24, gravity: 580 },
+    { id: 5, name: 'Học kỳ 5 · Nhiều môn', desc: 'Nhiều dự án chồng hạn, lịch bận mỗi ngày khác nhau.',
+      days: 18, shapes: ALL, labels: true, deadlines: true, energy: true, rest: true,
+      events: true, hold: true, powerups: true, busy: true, clusters: true, dayLen: 22, gravity: 520 }
+  ];
+  DT.FREE_MODE = {
+    id: 0, name: 'Tự do', desc: 'Chơi không giới hạn, tốc độ tăng dần.',
+    days: null, shapes: ALL, labels: true, deadlines: true, energy: true, rest: true,
+    events: true, hold: true, powerups: true, busy: false, clusters: true, dayLen: 24, gravity: 700, speedUp: true
+  };
+  DT.CUSTOM_MODE = {
+    id: -1, name: 'Tùy chỉnh', desc: 'Nhập việc thật của bạn thành khối để tập xếp lịch.',
+    days: null, shapes: ALL, labels: true, deadlines: true, energy: true, rest: true,
+    events: false, hold: true, powerups: false, busy: false, clusters: false, dayLen: 0, gravity: 900, custom: true, soft: true
+  };
+
+  /* ---------- Việc mẫu cho chế độ tùy chỉnh ---------- */
+  DT.SAMPLE_TASKS = [
+    { name: 'Ôn thi giữa kỳ Giải tích', shape: 'I',  cat: 'study',    q: 'Q2', e: 'heavy', dl: 6 },
+    { name: 'Bài tập nhóm Kinh tế',     shape: 'O',  cat: 'study',    q: 'Q1', e: 'mid',   dl: 3 },
+    { name: 'Chạy bộ',                  shape: 'L',  cat: 'health',   q: 'Q2', e: 'mid',   dl: '' },
+    { name: 'Dọn phòng, giặt đồ',       shape: 'J',  cat: 'personal', q: 'Q3', e: 'light', dl: 4 },
+    { name: 'Làm slide thuyết trình',   shape: 'T',  cat: 'study',    q: 'Q1', e: 'mid',   dl: 4 },
+    { name: 'Cà phê với bạn',           shape: 'D2', cat: 'social',   q: 'Q4', e: 'light', dl: '' },
+    { name: 'Đọc sách',                 shape: 'I3', cat: 'personal', q: 'Q4', e: 'light', dl: '' }
+  ];
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Day Tetris - lõi game (không phụ thuộc DOM, chạy được cả trong Node để test) */
+(function (g) {
+  'use strict';
+  var DT = g.DT;
+  var COLS = DT.COLS, ROWS = DT.ROWS;
+
+  /* ================= Tiện ích ================= */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function norm(cells) {
+    var mr = Infinity, mc = Infinity;
+    cells.forEach(function (p) { mr = Math.min(mr, p[0]); mc = Math.min(mc, p[1]); });
+    return cells.map(function (p) { return [p[0] - mr, p[1] - mc]; })
+      .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+  }
+  function rotCW(cells) { return norm(cells.map(function (p) { return [p[1], -p[0]]; })); }
+  function rotCCW(cells) { return norm(cells.map(function (p) { return [-p[1], p[0]]; })); }
+  function dims(cells) {
+    var h = 0, w = 0;
+    cells.forEach(function (p) { h = Math.max(h, p[0] + 1); w = Math.max(w, p[1] + 1); });
+    return { h: h, w: w };
+  }
+  function emptyRow() { var r = []; for (var i = 0; i < COLS; i++) r.push(null); return r; }
+  function key(p) { return p[0] + ',' + p[1]; }
+  function connected(cells) {
+    if (cells.length <= 1) return true;
+    var set = {}; cells.forEach(function (p) { set[key(p)] = 1; });
+    var seen = {}, stack = [cells[0]]; seen[key(cells[0])] = 1;
+    var n = 1;
+    while (stack.length) {
+      var p = stack.pop();
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var q = [p[0] + d[0], p[1] + d[1]], k = key(q);
+        if (set[k] && !seen[k]) { seen[k] = 1; n++; stack.push(q); }
+      });
+    }
+    return n === cells.length;
+  }
+  // Thêm 1 ô vào khối (mô phỏng việc "phình to" do trì hoãn)
+  function growShape(cells, rng) {
+    var set = {}; cells.forEach(function (p) { set[key(p)] = 1; });
+    var cand = [], seen = {};
+    cells.forEach(function (p) {
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+        var q = [p[0] + d[0], p[1] + d[1]], k = key(q);
+        if (!set[k] && !seen[k]) { seen[k] = 1; cand.push(q); }
+      });
+    });
+    var best = [], bestScore = Infinity;
+    cand.forEach(function (q) {
+      var n = norm(cells.concat([q])), d = dims(n);
+      var s = Math.max(d.w, d.h) * 10 + d.w * d.h;
+      if (d.w > 6 || d.h > 6) s += 100;
+      if (s < bestScore) { bestScore = s; best = [n]; } else if (s === bestScore) best.push(n);
+    });
+    return best[Math.floor(rng() * best.length)];
+  }
+
+  DT.util = { norm: norm, rotCW: rotCW, rotCCW: rotCCW, dims: dims, mulberry32: mulberry32, clamp: clamp };
+
+  var ROW_KINDS = {
+    balanced:   { name: 'Ngày cân bằng', score: DT.SCORE.rowBalanced },
+    overload:   { name: 'Ngày quá tải',  score: DT.SCORE.rowOverload },
+    allnighter: { name: 'Ngày cày đêm',  score: DT.SCORE.rowAllNighter },
+    idle:       { name: 'Ngày thư giãn', score: DT.SCORE.rowIdle },
+    plain:      { name: 'Ngày hoàn thành', score: DT.SCORE.rowPlain }
+  };
+
+  /* ================= Game ================= */
+  function Game(mode, opts) {
+    opts = opts || {};
+    this.mode = mode;
+    this.rng = opts.rng || mulberry32(opts.seed != null ? opts.seed : ((Math.random() * 4294967296) >>> 0));
+    this.autoChoice = !!opts.autoChoice;
+    this.nextTaskId = 1;
+
+    this.board = [];
+    for (var r = 0; r < ROWS; r++) this.board.push(emptyRow());
+
+    this.day = 1;
+    this.dayTimer = 0;
+    this.time = 0;
+    this.score = 0;
+    this.rep = DT.REP_START;
+    this.energy = DT.ENERGY_START;
+    this.burnouts = 0;
+    this.fatigue = 0;
+    this.balance = 100;
+    this.socialDebt = 0;
+    this.daysSinceRest = 0;
+    this.recent = [];
+    this.powerups = { pomodoro: 0, list: 0, delegate: 0, dayoff: 0 };
+    if (mode.powerups) { this.powerups.pomodoro = 1; this.powerups.list = 1; }
+    this.goodPlays = 0;
+    this.previewBoost = 0;
+    this.hold = null;
+    this.holdUsed = false;
+    this.insertsLeft = DT.INSERTS_PER_DAY;
+    this.queue = [];
+    this.bag = [];
+    this.piece = null;
+    this.gravityTimer = 0;
+    this.lockTimer = 0;
+    this.lockResets = 0;
+    this.softDrop = false;
+    this.pieceAge = 0;
+    this.stuckAt = -9999;
+    this.active = [];
+    this.status = 'playing';
+    this.endReason = '';
+    this.choice = null;
+    this.events = [];
+    this.log = [];
+    this.planLog = [];
+    this.nextEventIn = 3 + (this.rng() < 0.5 ? 1 : 0);
+    this.projects = [];
+    this.busyTask = this.mkTask({ kind: 'busy', cat: 'busy', name: 'Bận', size: 1 });
+    this.sickTask = this.mkTask({ kind: 'sick', cat: 'sick', name: 'Ốm', size: 1 });
+    this.stats = {
+      tasksDone: 0, late: [], q2Early: 0, q1Ok: 0, rowsTotal: 0,
+      rows: { balanced: 0, overload: 0, allnighter: 0, plain: 0, idle: 0 },
+      verticalI: 0, q3Prime: 0, holds: 0, bloatLoss: 0, bloated: 0, q2Held: 0,
+      absorbed: 0, emergencyHit: 0, sickHit: 0, friendYes: 0, friendNo: 0,
+      catCells: { study: 0, personal: 0, health: 0, social: 0, rest: 0 },
+      emptyCells: 0, committedCells: 0, committedRows: 0, burnouts: 0,
+      pomodoro: 0, delegate: 0, dayoff: 0, piecesLocked: 0, bufferPlaced: 0, maxCombo: 0
+    };
+    this.combo = 0;
+
+    if (mode.custom) {
+      var self = this;
+      (opts.customTasks || []).forEach(function (o) { self.queue.push(self.customPiece(o)); });
+    }
+    if (mode.clusters) this.initProjects();
+    if (mode.busy) for (var rr = 0; rr < 3; rr++) this.seedBusy(1 + rr);
+    this.refill();
+    this.spawn();
+  }
+  DT.Game = Game;
+  var P = Game.prototype;
+
+  /* ---------- RNG helpers ---------- */
+  P.rand = function () { return this.rng(); };
+  P.randInt = function (a, b) { return a + Math.floor(this.rng() * (b - a + 1)); };
+  P.pick = function (arr) { return arr[Math.floor(this.rng() * arr.length)]; };
+  P.weighted = function (obj) {
+    var sum = 0, k;
+    for (k in obj) sum += obj[k];
+    var r = this.rng() * sum;
+    for (k in obj) { r -= obj[k]; if (r <= 0) return k; }
+    return k;
+  };
+  P.shuffle = function (arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(this.rng() * (i + 1)), t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  };
+
+  /* ---------- Thông báo ---------- */
+  P.emit = function (kind, text) {
+    var ev = { kind: kind, text: text, at: this.time, day: this.day };
+    this.events.push(ev);
+    if (this.events.length > 200) this.events.shift();
+    this.log.push(ev);
+    if (this.log.length > 80) this.log.shift();
+  };
+  P.addScore = function (n, label, silent) {
+    this.score += n;
+    if (!silent && label) this.emit(n >= 0 ? 'good' : 'bad', (n >= 0 ? '+' : '') + n + ' ' + label);
+  };
+
+  /* ---------- Tạo việc ---------- */
+  P.mkTask = function (o) {
+    return {
+      id: this.nextTaskId++, name: o.name || '', shape: o.shape || 'M1', cat: o.cat || 'study',
+      kind: o.kind || 'work', q: o.q || null, e: o.e || 'light',
+      dl: o.dl == null ? null : o.dl, dlOff: o.dlOff == null ? null : o.dlOff,
+      size: o.size || 1, cellsLeft: o.size || 1, late: false, done: false, lastDay: 0,
+      heldSince: null, emergency: !!o.emergency, project: o.project || null,
+      splitDone: false, bloat: 0, spawned: false
+    };
+  };
+  P.customPiece = function (o) {
+    var shape = DT.SHAPES[o.shape] ? o.shape : 'D2';
+    var cells = norm(DT.SHAPES[shape]);
+    var isRest = o.cat === 'rest';
+    var dl = (o.dl === '' || o.dl == null || isNaN(+o.dl)) ? null : Math.max(1, Math.round(+o.dl));
+    var t = this.mkTask({
+      name: o.name || 'Việc', shape: shape, cat: isRest ? 'rest' : (o.cat || 'study'),
+      kind: isRest ? 'rest' : 'work', q: isRest ? null : (o.q || 'Q2'), e: isRest ? 'light' : (o.e || 'mid'),
+      dl: dl, size: cells.length
+    });
+    return { task: t, cells: cells };
+  };
+  P.initProjects = function () {
+    var names = this.shuffle(['Giải tích', 'Vật lý', 'Kinh tế', 'Tiếng Anh', 'Lập trình']).slice(0, 3);
+    var offs = [5, 8, 11], self = this;
+    this.projects = names.map(function (n, i) { return { name: n, deadline: 1 + offs[i] }; });
+    this.projects.forEach(function (p) { p.base = p.deadline; });
+  };
+  P.nextShape = function () {
+    if (!this.bag.length) {
+      var s = this.mode.shapes.slice();
+      if (s.length < 5) s = s.concat(s);
+      this.bag = this.shuffle(s);
+    }
+    return this.bag.pop();
+  };
+  P.genPiece = function () {
+    var lv = this.mode, cells, shape, t;
+    var restP = DT.REST_CHANCE;
+    if (lv.energy && this.energy < 45) restP = 0.24;
+    if (lv.rest && this.rand() < restP) {
+      shape = this.rand() < 0.55 ? 'D2' : 'M1';
+      cells = norm(DT.SHAPES[shape]);
+      t = this.mkTask({ kind: 'rest', cat: 'rest', name: this.pick(DT.REST_NAMES), shape: shape, e: 'light', size: cells.length });
+      return { task: t, cells: cells };
+    }
+    shape = this.nextShape();
+    cells = norm(DT.SHAPES[shape]);
+    var cat = this.weighted(DT.SHAPE_CATS[shape]);
+    var names = (DT.SHAPE_NAMES[shape] && DT.SHAPE_NAMES[shape][cat]) || DT.NAMES[cat];
+    var name = this.pick(names);
+    var q = null, dlOff = null, dl = null, e = 'mid', project = null;
+    if (lv.labels) q = this.weighted(DT.Q_WEIGHTS);
+    if (lv.energy) e = this.weighted(DT.ENERGY_BY_CAT[cat]);
+    if (lv.deadlines && q && DT.DEADLINE_RANGE[q]) dlOff = this.randInt(DT.DEADLINE_RANGE[q][0], DT.DEADLINE_RANGE[q][1]);
+    if (lv.clusters && cat === 'study') {
+      var pr = this.pick(this.projects);
+      if (pr.deadline < this.day + 1) pr.deadline = this.day + this.randInt(7, 10);
+      project = pr.name; dl = pr.deadline; dlOff = null;
+      q = (pr.deadline - this.day <= 3) ? 'Q1' : 'Q2';
+      name = pr.name + ': ' + name;
+    }
+    t = this.mkTask({ name: name, shape: shape, cat: cat, q: q, e: e, dl: dl, dlOff: dlOff, size: cells.length, project: project });
+    return { task: t, cells: cells };
+  };
+  P.refill = function () {
+    if (this.mode.custom) return;
+    while (this.queue.length < 8) this.queue.push(this.genPiece());
+  };
+  P.getPreview = function () { return this.queue.slice(0, this.previewBoost > 0 ? 5 : 3); };
+
+  P.makeEmergency = function (size) {
+    var shape = size === 1 ? 'M1' : (size === 2 ? 'D2' : this.pick(['I3', 'L3']));
+    var cells = norm(DT.SHAPES[shape]);
+    var t = this.mkTask({
+      name: this.pick(DT.EMERGENCY_NAMES), shape: shape, cat: this.pick(['study', 'personal']),
+      q: 'Q1', e: 'mid', dl: this.day + 2, size: cells.length, emergency: true
+    });
+    return { task: t, cells: cells };
+  };
+
+  /* ---------- Bàn chơi & khối đang rơi ---------- */
+  P.fits = function (cells, r, c) {
+    for (var i = 0; i < cells.length; i++) {
+      var rr = r + cells[i][0], cc = c + cells[i][1];
+      if (cc < 0 || cc >= COLS || rr < 0 || rr >= ROWS) return false;
+      if (this.board[rr][cc]) return false;
+    }
+    return true;
+  };
+  P.dayOfRow = function (r) { return this.day + (ROWS - 1 - r); };
+  P.ghostRow = function () {
+    var p = this.piece; if (!p) return 0;
+    var r = p.r;
+    while (this.fits(p.cells, r + 1, p.c)) r++;
+    return r;
+  };
+  P.canAct = function () { return this.status === 'playing' && !this.choice && !!this.piece; };
+
+  P.spawn = function (desc) {
+    if (this.status !== 'playing') return;
+    if (!desc) {
+      if (this.mode.custom && !this.queue.length) {
+        if (this.hold) { desc = this.hold; this.hold = null; desc.task.heldSince = null; }
+        else { this.finish(true, 'plan'); return; }
+      }
+      if (!desc) {
+        desc = this.queue.shift();
+        this.refill();
+        if (this.previewBoost > 0) this.previewBoost--;
+      }
+    }
+    var t = desc.task;
+    if (!t.spawned) {
+      t.spawned = true;
+      if (t.dl == null && t.dlOff != null) t.dl = this.day + t.dlOff;
+      if (t.kind === 'work') this.active.push(t);
+    }
+    var cells = norm(desc.cells);
+    var d = dims(cells);
+    this.piece = { task: t, cells: cells, r: 0, c: Math.floor((COLS - d.w) / 2) };
+    this.gravityTimer = 0; this.lockTimer = 0; this.lockResets = 0; this.pieceAge = 0;
+    if (!this.fits(cells, 0, this.piece.c)) { this.lose('overflow'); }
+  };
+  P.interrupt = function (desc) {
+    if (this.piece) {
+      this.queue.unshift({ task: this.piece.task, cells: norm(this.piece.cells) });
+      this.piece = null;
+    }
+    this.spawn(desc);
+  };
+
+  /* ---------- Điều khiển ---------- */
+  P.touch = function () {
+    var p = this.piece;
+    if (p && !this.fits(p.cells, p.r + 1, p.c) && this.lockResets < 12) { this.lockTimer = 0; this.lockResets++; }
+  };
+  P.move = function (dc) {
+    if (!this.canAct()) return false;
+    var p = this.piece;
+    if (this.fits(p.cells, p.r, p.c + dc)) { p.c += dc; this.touch(); return true; }
+    return false;
+  };
+  P.rotate = function (dir) {
+    if (!this.canAct()) return false;
+    var p = this.piece;
+    if (this.mode.energy && this.energy < DT.ENERGY_LOW && this.rand() < 0.2) { this.stuckAt = this.time; return false; }
+    var o = dims(p.cells);
+    var cells = dir > 0 ? rotCW(p.cells) : rotCCW(p.cells);
+    var n = dims(cells);
+    var baseC = p.c + Math.trunc((o.w - n.w) / 2);
+    var kicks = [[0, 0], [0, -1], [0, 1], [0, -2], [0, 2], [-1, 0], [-1, -1], [-1, 1]];
+    for (var i = 0; i < kicks.length; i++) {
+      var rr = p.r + kicks[i][0], cc = baseC + kicks[i][1];
+      if (this.fits(cells, rr, cc)) { p.cells = cells; p.r = rr; p.c = cc; this.touch(); return true; }
+    }
+    return false;
+  };
+  P.setSoftDrop = function (on) { this.softDrop = !!on; };
+  P.hardDrop = function () {
+    if (!this.canAct()) return false;
+    var p = this.piece;
+    p.r = this.ghostRow();
+    this.lockPiece();
+    return true;
+  };
+  P.holdPiece = function () {
+    if (!this.canAct() || !this.mode.hold) return false;
+    if (this.holdUsed) { this.emit('warn', 'Mỗi ngày chỉ được hoãn 1 lần.'); return false; }
+    this.holdUsed = true; this.stats.holds++;
+    var cur = { task: this.piece.task, cells: norm(this.piece.cells) };
+    cur.task.heldSince = this.day;
+    this.piece = null;
+    var old = this.hold;
+    this.hold = cur;
+    if (old) { old.task.heldSince = null; this.spawn(old); } else this.spawn();
+    return true;
+  };
+  P.insertBlock = function (kind) {
+    if (!this.canAct()) return false;
+    var lv = this.mode;
+    if (kind === 'rest' && !lv.rest) return false;
+    if (kind === 'buffer' && !lv.events) { this.emit('warn', 'Ô đệm mở khóa từ Học kỳ 4.'); return false; }
+    if (this.insertsLeft <= 0) { this.emit('warn', 'Hôm nay hết lượt chèn nghỉ/đệm.'); return false; }
+    this.insertsLeft--;
+    var shape = kind === 'rest' ? 'D2' : 'M1';
+    var cells = norm(DT.SHAPES[shape]);
+    var t = this.mkTask({
+      kind: kind, cat: kind, name: kind === 'rest' ? this.pick(DT.REST_NAMES) : 'Ô đệm', shape: shape, e: 'light', size: cells.length
+    });
+    this.interrupt({ task: t, cells: cells });
+    return true;
+  };
+
+  /* ---------- Vòng cập nhật ---------- */
+  P.dayLength = function () {
+    var lv = this.mode;
+    return lv.speedUp ? Math.max(14, lv.dayLen - 0.6 * (this.day - 1)) : lv.dayLen;
+  };
+  P.gravityMs = function () {
+    var lv = this.mode, base = lv.gravity;
+    if (lv.speedUp) base = Math.max(180, base - 22 * (this.day - 1));
+    if (lv.energy && this.energy < DT.ENERGY_LOW) base *= 0.72;
+    return base;
+  };
+  P.update = function (dt) {
+    if (this.status !== 'playing' || this.choice) return;
+    dt = Math.min(dt, 250);
+    this.time += dt;
+    if (this.mode.dayLen) {
+      this.dayTimer += dt;
+      var len = this.dayLength() * 1000;
+      while (this.dayTimer >= len && this.status === 'playing' && !this.choice) {
+        this.dayTimer -= len;
+        this.dayTick();
+        len = this.dayLength() * 1000;
+      }
+    }
+    if (this.status !== 'playing' || this.choice) return;
+    if (this.piece) this.stepPiece(dt);
+  };
+  P.stepPiece = function (dt) {
+    var p = this.piece;
+    this.pieceAge += dt;
+    if (this.fits(p.cells, p.r + 1, p.c)) {
+      this.lockTimer = 0;
+      this.gravityTimer += dt;
+      var gm = this.softDrop ? Math.min(45, this.gravityMs()) : this.gravityMs();
+      while (this.gravityTimer >= gm && this.fits(p.cells, p.r + 1, p.c)) { p.r++; this.gravityTimer -= gm; }
+      if (!this.fits(p.cells, p.r + 1, p.c)) this.gravityTimer = 0;
+    } else {
+      this.lockTimer += dt;
+      if (this.lockTimer >= (this.softDrop ? 120 : DT.LOCK_DELAY)) this.lockPiece();
+    }
+  };
+
+  /* ---------- Khóa khối ---------- */
+  P.lockPiece = function () {
+    var p = this.piece;
+    if (!p || this.status !== 'playing') return;
+    var abs = [], i;
+    for (i = 0; i < p.cells.length; i++) {
+      var rr = p.r + p.cells[i][0], cc = p.c + p.cells[i][1];
+      this.board[rr][cc] = { t: p.task };
+      abs.push([rr, cc]);
+    }
+    this.piece = null;
+    this.stats.piecesLocked++;
+    this.onLocked(p, abs);
+    if (this.status !== 'playing') return;
+    this.clearRows();
+    if (this.status !== 'playing') return;
+    this.spawn();
+  };
+  P.pushRecent = function (cat) {
+    this.recent.push(cat);
+    if (this.recent.length > 40) this.recent.shift();
+  };
+  P.onLocked = function (p, abs) {
+    var t = p.task, lv = this.mode, n = abs.length, i, self = this;
+    if (t.kind === 'rest') {
+      this.changeEnergy(DT.ENERGY_REST_GAIN * n);
+      this.daysSinceRest = 0;
+      for (i = 0; i < n; i++) this.pushRecent('rest');
+      this.stats.catCells.rest += n;
+    } else if (t.kind === 'buffer') {
+      this.stats.bufferPlaced += n;
+    } else if (t.kind === 'work') {
+      this.score += DT.SCORE.cellBase * n;
+      for (i = 0; i < n; i++) this.pushRecent(t.cat);
+      this.stats.catCells[t.cat] += n;
+      if (lv.energy) {
+        var cost = DT.ENERGY[t.e].cost * n, adj = 0;
+        if (t.e === 'heavy') {
+          abs.forEach(function (a) {
+            [-1, 1].forEach(function (d) {
+              var cc = a[1] + d; if (cc < 0 || cc >= COLS) return;
+              var nb = self.board[a[0]][cc];
+              if (nb && nb.t !== t && nb.t.kind === 'work' && nb.t.e === 'heavy') adj++;
+            });
+          });
+          cost += adj * DT.ENERGY_HEAVY_ADJ;
+        }
+        if (this.fatigue > 0) cost *= 1.5;
+        if (adj > 0) this.emit('warn', 'Ô nặng liền nhau: mệt hơn (−' + Math.round(cost) + ' năng lượng)');
+        if (cost > 0) this.changeEnergy(-cost);
+        if (this.status !== 'playing') return;
+      }
+      // chia nhỏ khối I theo chiều dọc
+      if ((t.shape === 'I' || t.shape === 'I3') && !t.splitDone && n >= 3) {
+        var rows = {}, cols = {};
+        abs.forEach(function (a) { rows[a[0]] = 1; cols[a[1]] = 1; });
+        if (Object.keys(rows).length === n && Object.keys(cols).length === 1) {
+          t.splitDone = true; this.stats.verticalI++;
+          this.addScore(DT.SCORE.splitI, 'Chia nhỏ dự án theo chiều dọc');
+        }
+      }
+      // Q3 chen trước Q2
+      if (lv.labels && t.q === 'Q3') {
+        var maxR = Math.max.apply(null, abs.map(function (a) { return a[0]; })), prime = false;
+        if (this.hold && this.hold.task.q === 'Q2') prime = true;
+        else {
+          var seen = {};
+          for (var r = ROWS - 1; r >= 0 && !prime; r--) {
+            for (var c = 0; c < COLS; c++) {
+              var cell = this.board[r][c];
+              if (cell && cell.t.kind === 'work' && cell.t.q === 'Q2' && cell.t !== t && !seen[cell.t.id]) {
+                seen[cell.t.id] = 1;
+                if (r < maxR) { prime = true; break; }
+              }
+            }
+          }
+        }
+        if (prime) { this.stats.q3Prime++; this.addScore(DT.SCORE.q3Prime, 'Xếp việc Q3 trước việc quan trọng Q2'); }
+      }
+      // cảnh báo trễ hạn khi xếp
+      if (t.dl != null) {
+        var late = abs.some(function (a) { return self.dayOfRow(a[0]) > t.dl; });
+        if (late) this.emit('warn', '«' + t.name + '» đang nằm sau hạn chót!');
+      }
+    }
+    this.recalcBalance();
+  };
+
+  /* ---------- Năng lượng, cân bằng ---------- */
+  P.changeEnergy = function (d) {
+    if (!this.mode.energy) return;
+    this.energy = clamp(this.energy + d, 0, 100);
+    if (this.energy <= 0 && this.status === 'playing') this.burnout();
+  };
+  P.burnout = function () {
+    this.burnouts++; this.stats.burnouts++; this.fatigue = 2;
+    if (this.burnouts >= 2 && !this.mode.soft) {
+      this.emit('bad', '🔥 Kiệt sức lần 2!');
+      this.energy = 0;
+      this.lose('burnout');
+      return;
+    }
+    this.emit('bad', '🔥 KIỆT SỨC! Bạn phải nghỉ ngơi (lần ' + this.burnouts + '/2).');
+    this.energy = DT.BURNOUT_RESET;
+    this.addScore(-100, 'Kiệt sức');
+  };
+  P.changeRep = function (d) {
+    this.rep = clamp(this.rep + d, 0, 100);
+    if (this.rep <= 0 && !this.mode.soft && this.status === 'playing') this.lose('rep');
+  };
+  P.recalcBalance = function () {
+    if (!this.mode.energy) { this.balance = 100; return; }
+    var cnt = { study: 0, personal: 0, health: 0, social: 0, rest: 0 }, work = 0, tot = this.recent.length;
+    this.recent.forEach(function (c) { cnt[c]++; if (c !== 'rest') work++; });
+    var bal = 100;
+    if (work >= 12) {
+      DT.WORK_CATS.forEach(function (cat) {
+        var pct = cnt[cat] / work * 100, rg = DT.BALANCE_TARGET[cat];
+        if (pct < rg[0]) bal -= (rg[0] - pct) * 1.4; else if (pct > rg[1]) bal -= (pct - rg[1]) * 1.4;
+      });
+      var rp = tot ? cnt.rest / tot * 100 : 0;
+      if (rp < 6) bal -= (6 - rp) * 2;
+    }
+    bal -= this.socialDebt * 3;
+    this.balance = clamp(Math.round(bal), 0, 100);
+  };
+
+  /* ---------- Hoàn thành / trễ hạn ---------- */
+  P.removeCell = function (cell, dayOfCell) {
+    var t = cell.t;
+    if (t.kind !== 'work') return;
+    t.cellsLeft--;
+    if (dayOfCell > t.lastDay) t.lastDay = dayOfCell;
+    if (t.cellsLeft <= 0 && !t.done) this.completeTask(t);
+  };
+  P.applyLate = function (t) {
+    if (t.late) return;
+    t.late = true;
+    this.stats.late.push(t.name);
+    this.addScore(DT.SCORE.late, 'Trễ hạn «' + t.name + '»');
+    this.changeRep(DT.SCORE.lateRep);
+  };
+  P.completeTask = function (t) {
+    t.done = true;
+    this.stats.tasksDone++;
+    var lv = this.mode;
+    if (!lv.labels) { this.addScore(20, null, true); return; }
+    if (t.late) return;
+    if (t.dl != null && t.lastDay > t.dl) { this.applyLate(t); return; }
+    var S = DT.SCORE;
+    if (t.q === 'Q1') {
+      this.stats.q1Ok++;
+      this.addScore(S.q1Ok, 'Q1 đúng hạn «' + t.name + '»'); this.changeRep(S.onTimeRep); this.earnGood();
+    } else if (t.q === 'Q2') {
+      if (t.dl != null && t.dl - t.lastDay >= 2) {
+        this.stats.q2Early++;
+        this.addScore(S.q2Early, 'Q2 xong sớm «' + t.name + '»'); this.changeRep(S.q2EarlyRep); this.earnGood();
+      } else { this.addScore(S.q2Ok, 'Q2 đúng hạn «' + t.name + '»'); this.changeRep(S.onTimeRep); }
+    } else if (t.q === 'Q3') {
+      this.addScore(S.q3Ok, null, true);
+    } else {
+      this.addScore(S.q4Ok, null, true);
+    }
+  };
+  P.activeTasks = function () {
+    this.active = this.active.filter(function (t) { return !t.done; });
+    return this.active;
+  };
+  P.earnGood = function () {
+    this.goodPlays++;
+    if (!this.mode.powerups || this.goodPlays % 2) return;
+    var pool = { pomodoro: 3, list: 2, delegate: 2 };
+    if (this.mode.events) pool.dayoff = 1;
+    var k = this.weighted(pool);
+    if (this.powerups[k] >= 3) return;
+    this.powerups[k]++;
+    this.emit('good', '🎁 Mở khóa vật phẩm: ' + DT.POWERUPS[k].name);
+  };
+
+  /* ---------- Xóa hàng ---------- */
+  P.classifyRow = function (row) {
+    if (!this.mode.energy) return 'plain';
+    var slack = 0, heavy = 0, run = 0, maxRun = 0, relax = 0;
+    row.forEach(function (cell) {
+      var t = cell.t;
+      if (t.kind === 'rest' || t.kind === 'buffer') { slack++; relax++; }
+      if (t.kind === 'work' && t.e === 'heavy') { heavy++; run++; if (run > maxRun) maxRun = run; } else run = 0;
+    });
+    if (maxRun >= 4) return 'allnighter';
+    if (relax >= 6) return 'idle';
+    if (slack === 0) return 'overload';
+    return heavy <= 6 ? 'balanced' : 'plain';
+  };
+  P.clearRows = function () {
+    var full = [], r;
+    for (r = 0; r < ROWS; r++) {
+      var ok = true;
+      for (var c = 0; c < COLS; c++) if (!this.board[r][c]) { ok = false; break; }
+      if (ok) full.push(r);
+    }
+    if (!full.length) { this.combo = 0; return 0; }
+    this.removeRows(full, false);
+    return full.length;
+  };
+  // rows: danh sách chỉ số hàng; dayoff = true thì không chấm điểm hàng
+  P.removeRows = function (rows, dayoff) {
+    var self = this, i, kindCount = 0;
+    rows.forEach(function (r) {
+      var row = self.board[r], kind = null;
+      var dayN = self.dayOfRow(r);
+      if (!dayoff) {
+        kind = self.classifyRow(row);
+        var K = ROW_KINDS[kind];
+        self.stats.rows[kind]++; self.stats.rowsTotal++;
+        self.addScore(K.score, K.name + ' (' + DT.dayName(dayN) + ')');
+        if (kind === 'balanced') { self.changeEnergy(10); self.earnGood(); }
+        else if (kind === 'overload') { self.changeEnergy(-20); self.emit('warn', 'Quá tải: không có ô nghỉ (−20 năng lượng)'); }
+        else if (kind === 'allnighter') {
+          self.fatigue = Math.max(self.fatigue, 2); self.changeEnergy(-8);
+          self.emit('warn', 'Cày đêm! Những ngày tới bạn sẽ mệt mỏi.');
+        }
+        kindCount++;
+      }
+      if (self.mode.custom) {
+        var names = [], heavy = 0, rest = 0;
+        row.forEach(function (cell) {
+          if (!cell) return;
+          if (cell.t.kind === 'work') { if (names.indexOf(cell.t.name) < 0) names.push(cell.t.name); if (cell.t.e === 'heavy') heavy++; }
+          if (cell.t.kind === 'rest') rest++;
+        });
+        self.planLog.push({ day: dayN, filled: COLS, heavy: heavy, rest: rest, tasks: names, kind: kind });
+      }
+      if (self.status !== 'playing') return;
+      row.forEach(function (cell) { if (cell) self.removeCell(cell, dayN); });
+    });
+    if (this.status !== 'playing') return;
+    if (!dayoff && rows.length > 1) this.addScore((rows.length - 1) * DT.SCORE.combo, 'Xóa ' + rows.length + ' ngày cùng lúc');
+    this.combo += rows.length;
+    this.stats.maxCombo = Math.max(this.stats.maxCombo, rows.length);
+    var nb = [], n = rows.length;
+    for (i = 0; i < ROWS; i++) if (rows.indexOf(i) < 0) nb.push(this.board[i]);
+    while (nb.length < ROWS) nb.unshift(emptyRow());
+    this.board = nb;
+    this.fixPieceAfterShift();
+  };
+  P.fixPieceAfterShift = function () {
+    var p = this.piece; if (!p) return;
+    while (!this.fits(p.cells, p.r, p.c) && p.r > 0) p.r--;
+    if (!this.fits(p.cells, p.r, p.c)) this.lose('overflow');
+  };
+
+  /* ---------- Ngày mới ---------- */
+  // Lịch bận (họp, ca làm...) chen vào ngay: các ô rơi xuống chạm chồng khối trong cột của chúng.
+  P.seedBusy = function (dayN) {
+    var n = DT.isWeekend(dayN) ? this.randInt(0, 1) : this.randInt(1, 3);
+    var cols = this.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), placed = 0, pc = {};
+    if (this.piece) for (var k = 0; k < this.piece.cells.length; k++) pc[this.piece.c + this.piece.cells[k][1]] = 1;
+    for (var i = 0; i < cols.length && placed < n; i++) {
+      var c = cols[i], r = ROWS - 1;
+      while (r >= 0 && this.board[r][c]) r--;
+      if (r < 3 || pc[c]) continue;
+      this.board[r][c] = { t: this.busyTask };
+      placed++;
+    }
+    return placed;
+  };
+  P.dayTick = function () {
+    var lv = this.mode, tries = 0, i;
+    // khối đang rơi mà không "sống sót" sau khi bảng dịch xuống thì chốt luôn
+    while (this.piece) {
+      var p = this.piece, ok = true;
+      for (i = 0; i < p.cells.length; i++) {
+        var rr = p.r + p.cells[i][0] - 1, cc = p.c + p.cells[i][1];
+        if (rr >= 0 && this.board[rr][cc]) { ok = false; break; }
+      }
+      if (ok) break;
+      if (tries++ >= 4) { this.lose('overflow'); return; }
+      this.lockPiece();
+      if (this.status !== 'playing') return;
+    }
+    // chốt hàng hôm nay
+    var row = this.board[ROWS - 1], dayN = this.day, filled = 0, nonNull = 0, self = this;
+    row.forEach(function (cell) {
+      if (!cell) return;
+      nonNull++;
+      if (cell.t.kind === 'work') filled++;
+      self.removeCell(cell, dayN);
+    });
+    if (this.status !== 'playing') return;
+    this.stats.committedRows++;
+    this.stats.committedCells += COLS;
+    this.stats.emptyCells += COLS - nonNull;
+    var pts = filled * DT.SCORE.dayCell;
+    if (pts) { this.score += pts; this.emit('info', DT.dayName(dayN) + ' chốt: ' + filled + ' giờ làm việc (+' + pts + ')'); }
+    if (lv.energy && dayN >= 3 && nonNull === 0) this.addScore(DT.SCORE.emptyDay, 'Ngày bỏ trống');
+    this.board.pop();
+    this.board.unshift(emptyRow());
+    this.day++;
+    if (lv.busy) { var nb = this.seedBusy(this.day); if (nb) this.emit('info', '📌 Lịch bận ' + DT.dayName(this.day) + ': ' + nb + ' giờ bị chiếm sẵn.'); }
+    this.holdUsed = false;
+    this.insertsLeft = DT.INSERTS_PER_DAY;
+    if (this.socialDebt > 0 && this.day % 2 === 0) { this.socialDebt--; this.recalcBalance(); }
+
+    // quá hạn
+    this.activeTasks().forEach(function (t) {
+      if (t.dl != null && t.dl < self.day && !t.late) self.applyLate(t);
+    });
+    if (this.status !== 'playing') return;
+
+    // năng lượng theo ngày
+    if (lv.energy) {
+      var regen = Math.round(DT.ENERGY_DAILY_REGEN * (0.4 + 0.6 * this.balance / 100));
+      if (this.fatigue > 0) { regen = 0; this.fatigue--; }
+      this.daysSinceRest++;
+      if (this.daysSinceRest >= 3) { regen -= 2; this.emit('warn', 'Nhiều ngày không nghỉ: −2 năng lượng'); }
+      if (this.balance < 50) this.emit('warn', 'Cuộc sống mất cân bằng: hồi năng lượng chậm lại');
+      this.changeEnergy(regen);
+      if (this.status !== 'playing') return;
+    }
+    if (this.projects.length) this.projects.forEach(function (pr) {
+      if (pr.deadline < self.day) pr.deadline = self.day + self.randInt(7, 10);
+    });
+
+    // hoãn -> phình to
+    if (this.hold && lv.hold) {
+      var ht = this.hold.task, held = this.day - (ht.heldSince == null ? this.day : ht.heldSince);
+      if (held >= 2) {
+        if (ht.q === 'Q2') { ht.q = 'Q1'; this.stats.q2Held++; this.emit('bad', '«' + ht.name + '» bị hoãn quá lâu: Q2 → Q1!'); }
+        if (this.hold.cells.length < DT.MAX_BLOAT_CELLS) {
+          this.hold.cells = growShape(this.hold.cells, this.rng);
+          ht.size++; ht.cellsLeft++; ht.bloat++;
+          this.stats.bloated++; this.stats.bloatLoss += DT.SCORE.bloatPerCell;
+          this.addScore(-DT.SCORE.bloatPerCell, '«' + ht.name + '» phình to thêm 1 ô vì trì hoãn');
+        }
+      }
+    }
+
+    // sự kiện ngẫu nhiên
+    if (lv.events) {
+      this.nextEventIn--;
+      if (this.nextEventIn <= 0) {
+        this.nextEventIn = 3 + (this.rng() < 0.5 ? 1 : 0);
+        this.triggerEvent();
+        if (this.status !== 'playing') return;
+      }
+    }
+    if (lv.days && this.day > lv.days) this.finish(true, 'semester');
+  };
+
+  /* ---------- Sự kiện ---------- */
+  P.consumeBuffer = function (n) {
+    var got = 0;
+    for (var r = ROWS - 1; r >= 0 && got < n; r--)
+      for (var c = 0; c < COLS && got < n; c++) {
+        var cell = this.board[r][c];
+        if (cell && cell.t.kind === 'buffer') { this.board[r][c] = null; got++; }
+      }
+    return got;
+  };
+  P.absorbed = function (n) {
+    if (n > 0) { this.stats.absorbed++; this.addScore(DT.SCORE.absorb, 'Ô đệm hấp thụ ' + n + ' ô việc phát sinh'); }
+  };
+  P.triggerEvent = function () {
+    var pool = { emergency: 3, friend: 2, sick: 2, deadline: 2 };
+    if (!this.activeTasks().some(function (t) { return t.dl != null && !t.late; })) delete pool.deadline;
+    var k = this.weighted(pool), self = this;
+    if (k === 'emergency') {
+      var size = this.pick([1, 2, 2, 3]);
+      var ab = this.consumeBuffer(size);
+      if (ab > 0) this.absorbed(ab);
+      var remain = size - ab;
+      if (remain <= 0) { this.emit('good', '⚡ Việc đột xuất xuất hiện nhưng ô đệm đã đỡ hết!'); return; }
+      this.stats.emergencyHit++;
+      var desc = this.makeEmergency(remain);
+      this.emit('bad', '⚡ Việc đột xuất: «' + desc.task.name + '» (Q1, hạn ' + DT.dayName(this.day + 2) + ') rơi xuống ngay!');
+      this.interrupt(desc);
+    } else if (k === 'friend') {
+      var sz = this.pick([2, 3]);
+      this.choice = { type: 'friend', size: sz, title: 'Bạn rủ đi chơi', text: 'Một người bạn rủ bạn đi chơi (mất ' + sz + ' ô). Nhận lời hay từ chối?' };
+      this.emit('info', '💬 Bạn rủ đi chơi!');
+      if (this.autoChoice) this.resolveChoice(this.rand() < 0.5);
+    } else if (k === 'sick') {
+      var ab2 = this.consumeBuffer(2);
+      if (ab2 > 0) this.absorbed(ab2);
+      var need = 2 - ab2;
+      if (need <= 0) { this.emit('good', '🤒 Ốm nhẹ nhưng nhờ ô đệm bạn vẫn kịp lịch.'); return; }
+      var rr = ROWS - 2, used = {};
+      if (this.piece) this.piece.cells.forEach(function (cl) { if (self.piece.r + cl[0] === rr) used[self.piece.c + cl[1]] = 1; });
+      var cols = [];
+      for (var c = 0; c < COLS; c++) if (!this.board[rr][c] && !used[c]) cols.push(c);
+      var sup = cols.filter(function (c) { return self.board[ROWS - 1][c]; });
+      var order = this.shuffle(sup).concat(this.shuffle(cols.filter(function (c) { return sup.indexOf(c) < 0; })));
+      var placed = 0;
+      for (var i = 0; i < order.length && placed < need; i++) { this.board[rr][order[i]] = { t: this.sickTask }; placed++; }
+      this.stats.sickHit++;
+      this.changeEnergy(-5);
+      this.emit('bad', '🤒 Ốm nhẹ: ngày mai mất ' + placed + ' giờ khả dụng.');
+    } else if (k === 'deadline') {
+      var list = this.activeTasks().filter(function (t) { return t.dl != null && !t.late; });
+      var t = this.pick(list);
+      var delta = this.pick([-2, -1, 1, 1, 2]);
+      var nd = Math.max(this.day + 1, t.dl + delta);
+      if (nd === t.dl) nd = t.dl + 1;
+      this.emit(nd > t.dl ? 'good' : 'bad', '📅 Thầy cô dời hạn «' + t.name + '»: ' + DT.dayName(t.dl) + ' → ' + DT.dayName(nd));
+      t.dl = nd;
+    }
+  };
+  P.resolveChoice = function (accept) {
+    var ch = this.choice; if (!ch) return;
+    this.choice = null;
+    if (ch.type === 'friend') {
+      if (accept) {
+        var ab = this.consumeBuffer(ch.size);
+        if (ab > 0) this.absorbed(ab);
+        var remain = ch.size - ab;
+        if (remain > 0) {
+          var shape = remain === 1 ? 'M1' : (remain === 2 ? 'D2' : 'I3');
+          var cells = norm(DT.SHAPES[shape]);
+          var t = this.mkTask({ name: this.pick(DT.NAMES.social), shape: shape, cat: 'social', q: 'Q4', e: 'light', size: cells.length });
+          this.queue.unshift({ task: t, cells: cells });
+        }
+        this.stats.friendYes++;
+        this.addScore(DT.SCORE.friend, 'Đi chơi cùng bạn');
+      } else {
+        this.stats.friendNo++;
+        this.socialDebt = Math.min(5, this.socialDebt + 1);
+        this.recalcBalance();
+        this.emit('warn', 'Từ chối lời rủ: chỉ số Xã hội giảm nhẹ.');
+      }
+    }
+    if (this.mode.days && this.day > this.mode.days && this.status === 'playing') this.finish(true, 'semester');
+  };
+
+  /* ---------- Vật phẩm ---------- */
+  P.partition = function (cells) {
+    var n = cells.length, k = Math.ceil(n / 2), best = null, idx = [], i;
+    function rec(start, chosen) {
+      if (best) return;
+      if (chosen.length === k) {
+        var a = chosen.map(function (j) { return cells[j]; });
+        var b = cells.filter(function (_, j) { return chosen.indexOf(j) < 0; });
+        if (connected(a) && connected(b)) best = [a, b];
+        return;
+      }
+      for (var j = start; j < n; j++) rec(j + 1, chosen.concat([j]));
+    }
+    rec(0, []);
+    if (!best) best = [cells.slice(0, k), cells.slice(k)];
+    return best;
+  };
+  P.usePowerup = function (name) {
+    if (!this.canAct() || !this.mode.powerups) return false;
+    if (!this.powerups[name]) { this.emit('warn', 'Bạn chưa có vật phẩm «' + DT.POWERUPS[name].name + '».'); return false; }
+    var p = this.piece, t = p.task, self = this;
+    if (name === 'pomodoro') {
+      if (t.kind !== 'work' || t.e !== 'heavy' || p.cells.length < 2) { this.emit('warn', 'Pomodoro chỉ dùng cho khối NẶNG đang rơi.'); return false; }
+      var parts = this.partition(p.cells);
+      t.e = 'light';
+      this.piece = null;
+      this.queue.unshift({ task: t, cells: norm(parts[1]) });
+      this.spawn({ task: t, cells: norm(parts[0]) });
+      this.emit('good', '🍅 Pomodoro: «' + t.name + '» được chia thành 2 phiên nhẹ.');
+      this.stats.pomodoro++;
+    } else if (name === 'list') {
+      this.previewBoost = DT.LIST_PIECES;
+      this.emit('good', '📝 Lên danh sách: xem trước 5 khối trong ' + DT.LIST_PIECES + ' khối tới.');
+    } else if (name === 'delegate') {
+      if (t.q === 'Q3' && t.kind === 'work') {
+        t.cellsLeft -= p.cells.length; if (t.cellsLeft <= 0) t.done = true;
+        this.piece = null;
+        this.emit('good', '🤝 Ủy quyền «' + t.name + '» cho người khác.');
+        this.spawn();
+      } else {
+        var found = {}, order = [];
+        for (var r = ROWS - 1; r >= 0; r--) for (var c = 0; c < COLS; c++) {
+          var cell = this.board[r][c];
+          if (cell && cell.t.kind === 'work' && cell.t.q === 'Q3' && !cell.t.done) {
+            if (!found[cell.t.id]) { found[cell.t.id] = { t: cell.t, n: 0 }; order.push(found[cell.t.id]); }
+            found[cell.t.id].n++;
+          }
+        }
+        var cand = order.filter(function (o) { return o.n === o.t.cellsLeft; });
+        if (!cand.length) { this.emit('warn', 'Không có việc Q3 nào để ủy quyền.'); return false; }
+        cand.sort(function (a, b) { return b.n - a.n; });
+        var target = cand[0].t;
+        for (r = 0; r < ROWS; r++) for (c = 0; c < COLS; c++) {
+          if (this.board[r][c] && this.board[r][c].t === target) this.board[r][c] = null;
+        }
+        target.cellsLeft = 0; target.done = true;
+        this.emit('good', '🤝 Ủy quyền «' + target.name + '»: đã xóa khỏi lịch.');
+      }
+      this.stats.delegate++;
+    } else if (name === 'dayoff') {
+      this.removeRows([ROWS - 1], true);
+      if (this.status !== 'playing') return true;
+      this.energy = 100;
+      this.emit('good', '🏖️ Ngày nghỉ thật: xóa hôm nay, năng lượng đầy!');
+      this.stats.dayoff++;
+    }
+    this.powerups[name]--;
+    return true;
+  };
+
+  /* ---------- Kết thúc ---------- */
+  P.evaluateRemaining = function () {
+    var self = this, maxDay = {};
+    for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+      var cell = this.board[r][c];
+      if (cell && cell.t.kind === 'work') {
+        var d = this.dayOfRow(r);
+        if (!maxDay[cell.t.id] || d > maxDay[cell.t.id].d) maxDay[cell.t.id] = { t: cell.t, d: d };
+      }
+    }
+    for (var id in maxDay) {
+      var m = maxDay[id];
+      if (m.t.dl != null && m.d > m.t.dl && !m.t.late) this.applyLate(m.t);
+    }
+  };
+  P.finish = function (win, reason) {
+    if (this.status !== 'playing') return;
+    this.evaluateRemaining();
+    if (this.status !== 'playing') return;
+    if (win && !this.mode.soft && this.rep < DT.REP_MIN_WIN) {
+      this.lose('rep-low');
+      return;
+    }
+    this.status = 'won';
+    this.endReason = reason || 'semester';
+    if (this.mode.days) {
+      var bonus = 300 + Math.round(this.rep * 5);
+      this.score += bonus;
+      this.emit('good', '🎓 Hoàn thành học kỳ! +' + bonus);
+    }
+  };
+  P.lose = function (reason) {
+    if (this.status !== 'playing') return;
+    this.status = 'lost';
+    this.endReason = reason;
+    var msg = {
+      overflow: 'Backlog tràn! Công việc chất đến tận đỉnh.',
+      rep: 'Uy tín về 0: trượt môn!',
+      'rep-low': 'Hết học kỳ nhưng uy tín quá thấp.',
+      burnout: 'Burnout! Bạn kiệt sức 2 lần.'
+    }[reason] || 'Kết thúc';
+    this.emit('bad', '💥 ' + msg);
+  };
+
+  /* ---------- Dữ liệu cho giao diện ---------- */
+  P.deadlineMarks = function () {
+    var seen = {}, out = [], self = this;
+    function add(t) {
+      if (!t || t.dl == null || t.done || seen[t.id]) return;
+      seen[t.id] = 1;
+      out.push({ task: t, row: ROWS - 1 - (t.dl - self.day) });
+    }
+    for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) if (this.board[r][c]) add(this.board[r][c].t);
+    if (this.piece) add(this.piece.task);
+    if (this.hold) add(this.hold.task);
+    return out;
+  };
+  P.energyLow = function () { return this.mode.energy && this.energy < DT.ENERGY_LOW; };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Day Tetris - báo cáo cuối ván (phần "học") */
+(function (g) {
+  'use strict';
+  var DT = g.DT;
+
+  function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+
+  DT.buildReport = function (game) {
+    var s = game.stats, lv = game.mode, ins = [], i;
+    var win = game.status === 'won';
+    var reasons = {
+      overflow: 'Backlog tràn: công việc chất đến tận đỉnh.',
+      rep: 'Uy tín về 0: bạn trượt môn.',
+      'rep-low': 'Hết học kỳ nhưng uy tín chưa đủ để qua môn.',
+      burnout: 'Burnout: bạn kiệt sức hai lần.'
+    };
+    var title = win
+      ? (lv.custom ? 'Đã xếp xong lịch của bạn' : 'Qua học kỳ!')
+      : (reasons[game.endReason] || 'Kết thúc ván');
+
+    var workCells = 0;
+    DT.WORK_CATS.forEach(function (c) { workCells += s.catCells[c]; });
+
+    // ---- Trễ hạn ----
+    if (s.late.length) {
+      var names = s.late.slice(0, 3).map(function (n) { return '«' + n + '»'; }).join(', ');
+      ins.push({ kind: 'bad', text: 'Bạn trễ ' + s.late.length + ' hạn chót (' + names + (s.late.length > 3 ? '…' : '') +
+        '). Việc có hạn gần nên xếp xuống thấp (ngày gần) trước; việc lớn nên chia nhỏ thay vì dồn vào phút chót.' });
+    } else if (lv.deadlines && s.tasksDone >= 3) {
+      ins.push({ kind: 'good', text: 'Bạn không trễ hạn nào. Xếp việc có hạn gần xuống các ngày đầu là thói quen tốt.' });
+    }
+    // ---- Trì hoãn ----
+    if (s.bloated > 0) {
+      var heldN = s.q2Held || 1;
+      ins.push({ kind: 'bad', text: 'Bạn hoãn ' + heldN + ' khối Q2, đến hạn chúng phình to và mất ' + s.bloatLoss +
+        ' điểm. Thử xếp việc quan trọng sớm hơn, trước khi nó biến thành việc gấp.' });
+    } else if (lv.hold && s.holds === 0) {
+      ins.push({ kind: 'tip', text: 'Bạn chưa dùng Hoãn (C). Hoãn chỉ nên là lựa chọn hiếm hoi: khối bị hoãn từ 2 ngày sẽ phình to.' });
+    }
+    // ---- Chất lượng ngày ----
+    if (lv.energy && s.rowsTotal >= 3) {
+      var po = pct(s.rows.overload, s.rowsTotal), pb = pct(s.rows.balanced, s.rowsTotal);
+      if (po >= 40) ins.push({ kind: 'bad', text: po + '% hàng của bạn là quá tải. Hãy thêm ô nghỉ: xếp kín không có nghĩa là xếp tốt.' });
+      else if (pb >= 50) ins.push({ kind: 'good', text: pb + '% số ngày của bạn là ngày cân bằng, có chỗ nghỉ và không dồn quá nhiều việc nặng.' });
+      if (s.rows.allnighter > 0) ins.push({ kind: 'warn', text: 'Có ' + s.rows.allnighter + ' ngày cày đêm (≥ 4 giờ nặng liền nhau). Những ngày sau đó bạn bị mệt mỏi: hồi năng lượng chậm lại.' });
+    }
+    // ---- Chia nhỏ ----
+    if (s.verticalI >= 1) {
+      ins.push({ kind: 'good', text: 'Bạn chia nhỏ dự án thành các buổi đều đặn (' + s.verticalI + ' lần xếp dọc), rất tốt. Học đều mỗi ngày 1 giờ hiệu quả hơn cày một mạch.' });
+    } else if (lv.id >= 1 && s.piecesLocked >= 8) {
+      ins.push({ kind: 'tip', text: 'Thử xoay khối I thành thẳng đứng: học 1 giờ mỗi ngày trong 4 ngày thay vì dồn 4 giờ vào một ngày (+50 điểm).' });
+    }
+    if (s.q2Early >= 1) {
+      ins.push({ kind: 'good', text: 'Bạn xong ' + s.q2Early + ' việc quan trọng (Q2) trước hạn từ 2 ngày. Đây là cách phòng việc gấp tốt nhất.' });
+    }
+    if (s.q3Prime >= 2) {
+      ins.push({ kind: 'warn', text: 'Bạn xếp việc Q3 (gấp nhưng ít quan trọng) trước việc Q2 tới ' + s.q3Prime + ' lần. Việc gấp dễ cuốn bạn đi, hãy hỏi mình: việc này có thật sự quan trọng?' });
+    }
+    // ---- Cân bằng cuộc sống ----
+    if (lv.energy && workCells >= 20) {
+      var st = pct(s.catCells.study, workCells), he = pct(s.catCells.health, workCells), so = pct(s.catCells.social, workCells);
+      if (st > 65) ins.push({ kind: 'warn', text: 'Học chiếm ' + st + '% thời gian của bạn. Sức khỏe chỉ ' + he + '% và xã hội ' + so + '%, cân bằng cuộc sống bị tụt.' });
+      else if (he < 8) ins.push({ kind: 'warn', text: 'Sức khỏe chỉ chiếm ' + he + '% lịch của bạn. Cơ thể mệt thì học cũng chậm.' });
+      else if (so < 6) ins.push({ kind: 'warn', text: 'Xã hội chỉ chiếm ' + so + '% lịch. Gặp bạn bè cũng là một phần của lịch tốt.' });
+    }
+    // ---- Sự kiện ----
+    if (lv.events) {
+      if (s.absorbed > 0) ins.push({ kind: 'good', text: 'Ô đệm đã đỡ giúp bạn ' + s.absorbed + ' lần việc phát sinh. Chừa đệm là cách giữ lịch không bị vỡ.' });
+      if (s.emergencyHit + s.sickHit > 0 && s.bufferPlaced === 0) ins.push({ kind: 'tip', text: 'Việc phát sinh rơi thẳng vào lịch kín vì bạn không chừa ô đệm (phím B). Mỗi ngày nên chừa 1 ô trống.' });
+      if (s.friendNo >= 2) ins.push({ kind: 'warn', text: 'Bạn từ chối ' + s.friendNo + ' lời rủ đi chơi. Giữ lịch là tốt, nhưng quan hệ cũng cần thời gian.' });
+    }
+    // ---- Năng lượng ----
+    if (s.burnouts > 0) ins.push({ kind: 'bad', text: 'Bạn kiệt sức ' + s.burnouts + ' lần. Hãy chèn ô nghỉ (phím R) trước khi năng lượng xuống thấp.' });
+    if (s.pomodoro > 0) ins.push({ kind: 'good', text: 'Bạn dùng Pomodoro ' + s.pomodoro + ' lần: chia việc nặng thành các phiên nhẹ giúp đỡ mệt hơn.' });
+    // ---- Giờ trống ----
+    if (s.committedCells >= 30 && pct(s.emptyCells, s.committedCells) >= 45) {
+      ins.push({ kind: 'tip', text: 'Bạn bỏ trống ' + pct(s.emptyCells, s.committedCells) + '% số giờ khả dụng. Khối rơi nhanh hơn một chút sẽ giúp bạn tận dụng ngày tốt hơn.' });
+    }
+
+    // ---- Lịch của bạn (chế độ tùy chỉnh) ----
+    var plan = null;
+    if (lv.custom) {
+      plan = (game.planLog || []).map(function (p) {
+        return { label: 'Ngày ' + p.day + ' (' + DT.dayName(p.day) + ')', filled: p.filled, heavy: p.heavy, rest: p.rest, tasks: p.tasks, cleared: true };
+      });
+      for (var r = DT.ROWS - 1; r >= 0; r--) {
+        var filled = 0, heavy = 0, rest = 0, tasks = [], run = 0, maxRun = 0;
+        game.board[r].forEach(function (cell) {
+          if (!cell) { run = 0; return; }
+          filled++;
+          if (cell.t.kind === 'work') {
+            if (tasks.indexOf(cell.t.name) < 0) tasks.push(cell.t.name);
+            if (cell.t.e === 'heavy') { heavy++; run++; if (run > maxRun) maxRun = run; } else run = 0;
+          } else run = 0;
+          if (cell.t.kind === 'rest') rest++;
+        });
+        if (filled) plan.push({ label: 'Ngày ' + game.dayOfRow(r) + ' (' + DT.dayName(game.dayOfRow(r)) + ')', filled: filled, heavy: heavy, rest: rest, tasks: tasks, run: maxRun });
+      }
+      plan.forEach(function (d) {
+        if (d.filled >= 8 && d.rest === 0) ins.push({ kind: 'warn', text: d.label + ': ' + d.filled + '/10 giờ mà không có ô nghỉ. Hãy thêm giờ nghỉ hoặc dời bớt việc sang ngày khác.' });
+        if ((d.run || 0) >= 4 || d.heavy >= 6) ins.push({ kind: 'warn', text: d.label + ' dồn ' + d.heavy + ' giờ nặng. Thử chia việc nặng ra nhiều ngày.' });
+      });
+      if (game.hold) ins.push({ kind: 'warn', text: 'Việc «' + game.hold.task.name + '» vẫn đang bị hoãn, chưa có chỗ trong lịch.' });
+      if (!s.late.length && !ins.some(function (x) { return x.kind === 'warn' || x.kind === 'bad'; }))
+        ins.push({ kind: 'good', text: 'Lịch của bạn kịp mọi hạn chót và không có ngày nào quá tải. Hãy thử làm đúng như vậy với tuần thật!' });
+    }
+
+    if (ins.length < 2) ins.push({ kind: 'tip', text: 'Mỗi lượt chơi là một thí nghiệm nhỏ: thử một cách xếp khác và xem điểm thay đổi ra sao.' });
+
+    // sắp xếp: xấu trước, tốt sau
+    var order = { bad: 0, warn: 1, tip: 2, good: 3 };
+    ins.sort(function (a, b) { return order[a.kind] - order[b.kind]; });
+
+    var summary = [
+      { label: 'Điểm', value: game.score },
+      { label: 'Ngày đã qua', value: Math.min(game.day - 1, lv.days || 99999) + (lv.days ? '/' + lv.days : '') },
+      { label: 'Việc hoàn thành', value: s.tasksDone },
+      { label: 'Trễ hạn', value: s.late.length }
+    ];
+    if (lv.energy) summary.push({ label: 'Ngày cân bằng', value: s.rows.balanced + '/' + s.rowsTotal });
+    summary.push({ label: 'Uy tín (GPA)', value: (game.rep / 25).toFixed(1) });
+
+    return {
+      win: win, title: title, insights: ins, summary: summary, plan: plan,
+      exercise: 'Bài tập nhỏ: hãy mở lịch tuần này của bạn và thử xếp lại theo cách vừa chơi. Việc quan trọng nhưng chưa gấp đặt trước, việc lớn chia thành các buổi nhỏ, và chừa ít nhất một ô nghỉ mỗi ngày.'
+    };
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Day Tetris - vẽ canvas (bảng chơi, khối xem trước) */
+(function (g) {
+  'use strict';
+  var DT = g.DT, COLS = DT.COLS, ROWS = DT.ROWS;
+
+  var C = {
+    bg: '#0a0e1b', rowA: '#11172c', rowB: '#0e1426', today: 'rgba(255,209,102,0.10)',
+    weekend: 'rgba(140,120,255,0.07)', grid: 'rgba(150,165,225,0.10)', label: '#7f8aae',
+    labelStrong: '#ffd166', danger: '#ff5d5d', fg: '#e8ecf8'
+  };
+  var PIPS = { light: 1, mid: 2, heavy: 3 };
+
+  function rr(ctx, x, y, w, h, r) {
+    // r = [tl, tr, br, bl]
+    ctx.beginPath();
+    if (ctx.roundRect) { ctx.roundRect(x, y, w, h, r); return; }
+    ctx.rect(x, y, w, h);
+  }
+
+  /* Vẽ một ô việc. nb = {u,d,l,r}: có ô cùng việc ở cạnh đó không */
+  function drawTile(ctx, x, y, s, t, nb, o) {
+    o = o || {};
+    nb = nb || {};
+    var c = DT.CATS[t.cat] || DT.CATS.study, pad = Math.max(1, Math.round(s / 28)), rad = Math.max(3, s * 0.16);
+    var x0 = x + (nb.l ? 0 : pad), x1 = x + s - (nb.r ? 0 : pad);
+    var y0 = y + (nb.u ? 0 : pad), y1 = y + s - (nb.d ? 0 : pad);
+    var radii = [
+      (nb.u || nb.l) ? 0 : rad, (nb.u || nb.r) ? 0 : rad,
+      (nb.d || nb.r) ? 0 : rad, (nb.d || nb.l) ? 0 : rad
+    ];
+    ctx.save();
+    ctx.globalAlpha = o.alpha == null ? 1 : o.alpha;
+    var kind = t.kind;
+    if (kind === 'busy' || kind === 'sick') {
+      ctx.fillStyle = c.color; rr(ctx, x0, y0, x1 - x0, y1 - y0, radii); ctx.fill();
+      ctx.save(); rr(ctx, x0, y0, x1 - x0, y1 - y0, radii); ctx.clip();
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)'; ctx.lineWidth = 2;
+      for (var k = -s; k < s * 2; k += 8) { ctx.beginPath(); ctx.moveTo(x + k, y + s); ctx.lineTo(x + k + s, y); ctx.stroke(); }
+      ctx.restore();
+      if (s >= 26) {
+        ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '600 ' + Math.round(s * 0.28) + 'px "Be Vietnam Pro", system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(kind === 'busy' ? 'BẬN' : 'ỐM', x + s / 2, y + s / 2 + 1);
+      }
+      ctx.restore(); return;
+    }
+    if (kind === 'buffer') {
+      ctx.fillStyle = 'rgba(138,147,166,0.22)'; rr(ctx, x0, y0, x1 - x0, y1 - y0, radii); ctx.fill();
+      ctx.strokeStyle = c.light; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      rr(ctx, x0 + 1, y0 + 1, x1 - x0 - 2, y1 - y0 - 2, radii); ctx.stroke(); ctx.setLineDash([]);
+      if (s >= 26) {
+        ctx.fillStyle = c.light; ctx.font = '600 ' + Math.round(s * 0.26) + 'px "Be Vietnam Pro", system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('đệm', x + s / 2, y + s / 2 + 1);
+      }
+      ctx.restore(); return;
+    }
+    var gr = ctx.createLinearGradient(x, y, x, y + s);
+    gr.addColorStop(0, c.light); gr.addColorStop(1, c.color);
+    ctx.fillStyle = gr; rr(ctx, x0, y0, x1 - x0, y1 - y0, radii); ctx.fill();
+    // viền dưới sẫm cho có khối
+    if (!nb.d) { ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(x0, y1 - Math.max(2, s * 0.09), x1 - x0, Math.max(2, s * 0.09)); }
+    if (!nb.u) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fillRect(x0 + rad * (nb.l ? 0 : 0.6), y0, x1 - x0 - rad * 1.2, 2); }
+    if (kind === 'rest' && s >= 26) {
+      ctx.fillStyle = 'rgba(10,30,50,0.55)'; ctx.font = '700 ' + Math.round(s * 0.34) + 'px "Be Vietnam Pro", system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('z', x + s / 2, y + s / 2);
+    }
+    // năng lượng (chấm)
+    if (o.energy && kind === 'work') {
+      var n = PIPS[t.e] || 1, pr = Math.max(1.6, s * 0.055), gap = pr * 3;
+      ctx.fillStyle = 'rgba(8,12,30,0.62)';
+      for (var i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(x + s / 2 + (i - (n - 1) / 2) * gap, y + s - pr * 2.6, pr, 0, 6.2832); ctx.fill(); }
+    }
+    // trễ hạn
+    if (o.late) {
+      ctx.save(); rr(ctx, x0, y0, x1 - x0, y1 - y0, radii); ctx.clip();
+      ctx.fillStyle = 'rgba(120,10,20,0.38)'; ctx.fillRect(x, y, s, s);
+      ctx.strokeStyle = 'rgba(255,120,120,0.85)'; ctx.lineWidth = 2;
+      for (var j = -s; j < s * 2; j += 9) { ctx.beginPath(); ctx.moveTo(x + j, y + s); ctx.lineTo(x + j + s, y); ctx.stroke(); }
+      ctx.restore();
+    }
+    // nhãn Eisenhower
+    if (o.label && t.q && s >= 28) {
+      var q = DT.Q[t.q], fs = Math.max(8, Math.round(s * 0.26));
+      ctx.font = '700 ' + fs + 'px "JetBrains Mono", ui-monospace, monospace';
+      var tw = ctx.measureText(t.q).width + 6;
+      ctx.fillStyle = 'rgba(8,12,30,0.78)'; rr(ctx, x + 3, y + 3, tw, fs + 3, [3, 3, 3, 3]); ctx.fill();
+      ctx.fillStyle = q.color; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(t.q, x + 6, y + 4);
+    }
+    ctx.restore();
+  }
+
+  function neighbors(set, r, c, same) {
+    function has(rr2, cc) { var v = set(rr2, cc); return v && same(v); }
+    return { u: has(r - 1, c), d: has(r + 1, c), l: has(r, c - 1), r: has(r, c + 1) };
+  }
+
+  /* ================= Renderer ================= */
+  function Renderer(canvas) {
+    this.canvas = canvas; this.ctx = canvas.getContext('2d');
+    this.cell = 36; this.mL = 46; this.mT = 26; this.mR = 18; this.mB = 12;
+    this.startHour = 8; this.w = 0; this.h = 0;
+  }
+  Renderer.prototype.resize = function (availW, availH) {
+    var cw = (availW - this.mL - this.mR) / COLS, ch = (availH - this.mT - this.mB) / ROWS;
+    this.cell = Math.max(18, Math.min(46, Math.floor(Math.min(cw, ch))));
+    this.w = this.mL + COLS * this.cell + this.mR;
+    this.h = this.mT + ROWS * this.cell + this.mB;
+    var dpr = Math.min(2.5, g.devicePixelRatio || 1);
+    this.canvas.width = Math.round(this.w * dpr); this.canvas.height = Math.round(this.h * dpr);
+    this.canvas.style.width = this.w + 'px'; this.canvas.style.height = this.h + 'px';
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  Renderer.prototype.draw = function (game, now) {
+    var ctx = this.ctx, s = this.cell, mL = this.mL, mT = this.mT, lv = game.mode, r, c;
+    ctx.clearRect(0, 0, this.w, this.h);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, this.w, this.h);
+
+    // ----- nền lưới: mỗi hàng là một ngày -----
+    for (r = 0; r < ROWS; r++) {
+      var dayN = game.dayOfRow(r), y = mT + r * s;
+      ctx.fillStyle = (r % 2) ? C.rowA : C.rowB; ctx.fillRect(mL, y, COLS * s, s);
+      if (DT.isWeekend(dayN)) { ctx.fillStyle = C.weekend; ctx.fillRect(mL, y, COLS * s, s); }
+      if (r === ROWS - 1) { ctx.fillStyle = C.today; ctx.fillRect(mL, y, COLS * s, s); }
+      // nhãn ngày
+      var isToday = r === ROWS - 1;
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = isToday ? C.labelStrong : C.label;
+      ctx.font = '600 ' + Math.max(10, Math.round(s * 0.3)) + 'px "Be Vietnam Pro", system-ui, sans-serif';
+      ctx.fillText(DT.dayName(dayN), mL - 7, y + s / 2 - (s >= 30 ? 5 : 0));
+      if (s >= 30) {
+        ctx.font = '500 ' + Math.max(8, Math.round(s * 0.22)) + 'px "JetBrains Mono", ui-monospace, monospace';
+        ctx.fillStyle = isToday ? C.labelStrong : 'rgba(127,138,174,0.7)';
+        ctx.fillText(isToday ? 'nay' : 'N' + dayN, mL - 7, y + s / 2 + 8);
+      }
+    }
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.beginPath();
+    for (c = 0; c <= COLS; c++) { ctx.moveTo(mL + c * s + 0.5, mT); ctx.lineTo(mL + c * s + 0.5, mT + ROWS * s); }
+    for (r = 0; r <= ROWS; r++) { ctx.moveTo(mL, mT + r * s + 0.5); ctx.lineTo(mL + COLS * s, mT + r * s + 0.5); }
+    ctx.stroke();
+    // nhãn giờ
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.label;
+    ctx.font = '500 ' + Math.max(9, Math.round(s * 0.26)) + 'px "JetBrains Mono", ui-monospace, monospace';
+    for (c = 0; c < COLS; c++) ctx.fillText(((this.startHour + c) % 24) + 'h', mL + c * s + s / 2, mT - 12);
+
+    // ----- ô đã khóa -----
+    var board = game.board, self = this;
+    function cellAt(rr2, cc) { return (rr2 >= 0 && rr2 < ROWS && cc >= 0 && cc < COLS) ? board[rr2][cc] : null; }
+    for (r = 0; r < ROWS; r++) {
+      for (c = 0; c < COLS; c++) {
+        var cell = board[r][c]; if (!cell) continue;
+        var t = cell.t;
+        var nb = neighbors(cellAt, r, c, function (v) { return v.t === t; });
+        var late = t.dl != null && t.kind === 'work' && game.dayOfRow(r) > t.dl;
+        drawTile(ctx, mL + c * s, mT + r * s, s, t, nb, { energy: lv.energy, label: lv.labels && !nb.u && !nb.l, late: late && lv.deadlines });
+      }
+    }
+
+    // ----- vạch hạn chót -----
+    if (lv.deadlines) {
+      var marks = game.deadlineMarks(), curT = game.piece && game.piece.task;
+      marks.forEach(function (m) {
+        if (m.row < 0 || m.row > ROWS - 1) return;
+        var t = m.task, col = t.q ? DT.Q[t.q].color : DT.CATS[t.cat].color;
+        var y = mT + m.row * s, isCur = t === curT;
+        ctx.save();
+        ctx.strokeStyle = col; ctx.globalAlpha = isCur ? 1 : 0.6; ctx.lineWidth = isCur ? 2 : 1.4;
+        ctx.setLineDash(isCur ? [] : [6, 4]);
+        ctx.beginPath(); ctx.moveTo(mL, y); ctx.lineTo(mL + COLS * s, y); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.fillStyle = col;
+        ctx.beginPath(); ctx.moveTo(mL + COLS * s + 2, y); ctx.lineTo(mL + COLS * s + 13, y - 6); ctx.lineTo(mL + COLS * s + 13, y + 6); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // ----- khối "ma" và khối đang rơi -----
+    var p = game.piece;
+    if (p && game.status === 'playing') {
+      var gr = game.ghostRow(), t2 = p.task, i;
+      var lateGhost = t2.dl != null && p.cells.some(function (q) { return game.dayOfRow(gr + q[0]) > t2.dl; });
+      var gc = lateGhost && lv.deadlines ? C.danger : (DT.CATS[t2.cat] || DT.CATS.study).light;
+      ctx.save(); ctx.strokeStyle = gc; ctx.lineWidth = 2; ctx.globalAlpha = 0.85; ctx.setLineDash([5, 3]);
+      for (i = 0; i < p.cells.length; i++) {
+        ctx.strokeRect(mL + (p.c + p.cells[i][1]) * s + 3, mT + (gr + p.cells[i][0]) * s + 3, s - 6, s - 6);
+      }
+      ctx.restore();
+      var set = {}; p.cells.forEach(function (q) { set[q[0] + ',' + q[1]] = 1; });
+      var pc = function (a, b) { return set[a + ',' + b] ? { t: t2 } : null; };
+      var pulse = 0.5 + 0.5 * Math.sin(now / 160);
+      for (i = 0; i < p.cells.length; i++) {
+        var q = p.cells[i], nb2 = neighbors(pc, q[0], q[1], function () { return true; });
+        var cr = p.r + q[0];
+        drawTile(ctx, mL + (p.c + q[1]) * s, mT + cr * s, s, t2, nb2, { energy: lv.energy, label: lv.labels && i === 0 });
+      }
+      // viền sáng quanh khối đang rơi
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,' + (0.25 + 0.2 * pulse) + ')'; ctx.lineWidth = 1.5;
+      for (i = 0; i < p.cells.length; i++) {
+        var q2 = p.cells[i];
+        ctx.strokeRect(mL + (p.c + q2[1]) * s + 0.5, mT + (p.r + q2[0]) * s + 0.5, s - 1, s - 1);
+      }
+      ctx.restore();
+    }
+
+    // ----- đồng hồ ngày -----
+    if (lv.dayLen) {
+      var frac = Math.min(1, game.dayTimer / (game.dayLength() * 1000));
+      ctx.fillStyle = 'rgba(150,165,225,0.14)'; ctx.fillRect(mL, mT + ROWS * s + 4, COLS * s, 4);
+      ctx.fillStyle = frac > 0.8 ? C.danger : C.labelStrong; ctx.fillRect(mL, mT + ROWS * s + 4, COLS * s * frac, 4);
+    }
+
+    // ----- mệt mỏi: viền đỏ -----
+    if (game.energyLow() && game.status === 'playing') {
+      var a = 0.12 + 0.1 * Math.sin(now / 220);
+      var vg = ctx.createRadialGradient(mL + COLS * s / 2, mT + ROWS * s / 2, s * 3, mL + COLS * s / 2, mT + ROWS * s / 2, s * 9);
+      vg.addColorStop(0, 'rgba(255,60,60,0)'); vg.addColorStop(1, 'rgba(255,60,60,' + a + ')');
+      ctx.fillStyle = vg; ctx.fillRect(mL, mT, COLS * s, ROWS * s);
+    }
+    if (game.time - game.stuckAt < 500) {
+      ctx.fillStyle = 'rgba(255,209,102,0.95)'; ctx.font = '700 ' + Math.round(s * 0.5) + 'px "Bricolage Grotesque", system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.fillText('Mất tập trung!', mL + COLS * s / 2, mT + s * 1.5);
+    }
+  };
+
+  /* ----- khối xem trước / hoãn ----- */
+  function drawMini(canvas, desc, opts) {
+    opts = opts || {};
+    var ctx = canvas.getContext('2d'), dpr = Math.min(2.5, g.devicePixelRatio || 1);
+    var cs = opts.cell || 18, W = opts.w || 4, H = opts.h || 3;
+    canvas.width = W * cs * dpr; canvas.height = H * cs * dpr;
+    canvas.style.width = W * cs + 'px'; canvas.style.height = H * cs + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W * cs, H * cs);
+    if (!desc) return;
+    var cells = desc.cells, d = DT.util.dims(cells);
+    var sc = Math.min(cs, cs * W / Math.max(d.w, W) , cs * H / Math.max(d.h, H));
+    if (d.w > W || d.h > H) sc = Math.min(cs * W / d.w, cs * H / d.h);
+    var ox = (W * cs - d.w * sc) / 2, oy = (H * cs - d.h * sc) / 2, set = {};
+    cells.forEach(function (q) { set[q[0] + ',' + q[1]] = 1; });
+    var f = function (a, b) { return set[a + ',' + b] ? { t: desc.task } : null; };
+    cells.forEach(function (q) {
+      var nb = neighbors(f, q[0], q[1], function () { return true; });
+      drawTile(ctx, ox + q[1] * sc, oy + q[0] * sc, sc, desc.task, nb, { energy: false, label: false });
+    });
+  }
+
+  DT.Renderer = Renderer;
+  DT.drawMini = drawMini;
+  DT.drawTile = drawTile;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Day Tetris - giao diện, điều khiển, vòng lặp, menu và báo cáo */
+(function () {
+  'use strict';
+  var DT = window.DT;
+  var $ = function (s, root) { return (root || document).querySelector(s); };
+  var $$ = function (s, root) { return Array.prototype.slice.call((root || document).querySelectorAll(s)); };
+
+  var SAVE_KEY = 'daytetris.v1';
+  var app = {
+    game: null, mode: null, screen: 'menu', returnTo: 'menu', endTimer: 0,
+    save: { best: {}, custom: null, startHour: 8 }, last: 0, cache: {}
+  };
+
+  /* ---------- Lưu trữ ---------- */
+  function loadSave() {
+    try {
+      var raw = window.localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && typeof d === 'object') {
+          app.save.best = d.best || {};
+          app.save.custom = d.custom || null;
+          app.save.startHour = +d.startHour || 8;
+        }
+      }
+    } catch (e) { /* bỏ qua */ }
+  }
+  function persist() {
+    try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(app.save)); } catch (e) { /* bỏ qua */ }
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function modeById(id) {
+    id = +id;
+    if (id >= 1) return DT.LEVELS[id - 1];
+    return id === 0 ? DT.FREE_MODE : DT.CUSTOM_MODE;
+  }
+
+  var LEVEL_TIPS = {
+    1: ['Xếp khối thành hàng kín 10 ô để hoàn thành một ngày. Mỗi hàng là một ngày, mỗi cột là một giờ.',
+        'Cứ 30 giây, ngày hôm nay (hàng dưới cùng) được chốt và cả bảng dịch xuống một nấc.',
+        'Khối I xoay đứng = học đều 4 ngày, mỗi ngày 1 giờ (+50 điểm). Xoay ngang = cày một mạch 4 giờ trong một ngày.'],
+    2: ['Mỗi khối có nhãn Eisenhower Q1–Q4 và hạn chót: một vạch kẻ cùng màu trên bảng. Ô nằm cao hơn vạch là trễ hạn (sọc đỏ).',
+        'Q2 xong sớm từ 2 ngày: +150. Q1 đúng hạn: +100. Trễ hạn: −150 điểm và mất uy tín.',
+        'Khối Q3 chen trước việc Q2 sẽ bị trừ điểm.'],
+    3: ['Năng lượng: ô nặng (3 chấm) tốn nhiều hơn, ô nặng nằm liền nhau tốn thêm. Khối nghỉ màu xanh nhạt hồi năng lượng.',
+        'Phím R chèn khối nghỉ (tối đa 2 lần mỗi ngày). Năng lượng dưới 30 làm bạn mất tập trung: khối rơi nhanh, xoay đôi khi bị kẹt.',
+        'Hàng đầy có ô nghỉ là Ngày cân bằng (+200). Hàng đầy không nghỉ là Ngày quá tải (+50, −20 năng lượng).',
+        'Chơi tốt sẽ mở khóa vật phẩm (phím 1–4).'],
+    4: ['Hoãn (C): mỗi ngày một lần. Khối bị hoãn từ 2 ngày sẽ phình to thêm 1 ô mỗi ngày và Q2 biến thành Q1.',
+        'Sự kiện ngẫu nhiên mỗi vài ngày: việc đột xuất, bạn rủ đi chơi, ốm nhẹ, thầy cô dời hạn.',
+        'Phím B chèn ô đệm màu xám. Khi có việc phát sinh, ô đệm sẽ hấp thụ trước.'],
+    5: ['Nhiều môn học, mỗi môn một hạn riêng (tên môn đứng trước tên việc). Hạn của các môn chồng lên nhau.',
+        'Lịch bận (ô BẬN) chen vào bảng mỗi ngày, cuối tuần ít hơn. Số giờ khả dụng mỗi ngày khác nhau.'],
+    0: ['Chơi không giới hạn. Ngày trôi và khối rơi nhanh dần theo thời gian.', 'Đủ cơ chế: hạn chót, năng lượng, sự kiện, Hoãn, vật phẩm.'],
+    '-1': ['Nhập việc thật của bạn thành khối rồi xếp vào lịch tuần này. Không có đồng hồ ngày, bạn xếp thong thả.',
+           'Xếp hết việc để nhận nhận xét về lịch của bạn: trễ hạn, ngày quá tải, thiếu nghỉ.']
+  };
+
+  /* ---------- Lớp phủ ---------- */
+  var overlay = $('#overlay');
+  function openOverlay(html) { overlay.innerHTML = html; overlay.hidden = false; overlay.scrollTop = 0; var f = $('[autofocus], .btn.primary', overlay); if (f) { try { f.focus({ preventScroll: true }); } catch (e) { /* */ } } }
+  function closeOverlay() { overlay.hidden = true; overlay.innerHTML = ''; }
+
+  function chipsFor(m) {
+    var out = [];
+    out.push('<span class="chip">' + (m.days ? m.days + ' ngày' : '∞') + '</span>');
+    if (m.labels) out.push('<span class="chip">Q1–Q4</span>');
+    if (m.deadlines) out.push('<span class="chip">hạn chót</span>');
+    if (m.energy) out.push('<span class="chip">năng lượng</span>');
+    if (m.events) out.push('<span class="chip">sự kiện</span>');
+    if (m.busy) out.push('<span class="chip">lịch bận</span>');
+    return out.join('');
+  }
+
+  function showMenu() {
+    app.screen = 'menu';
+    var cards = DT.LEVELS.map(function (m) {
+      var b = app.save.best[m.id];
+      return '<button class="mode-card" data-act="intro" data-id="' + m.id + '"><span class="num">CẤP ' + m.id + '</span><b>' + esc(m.name.replace(/^Học kỳ \d · /, '')) + '</b>' +
+        '<span class="d">' + esc(m.desc) + '</span><div class="chips">' + chipsFor(m) + '</div><span class="best">' + (b ? 'Điểm cao nhất ' + b : 'Chưa chơi') + '</span></button>';
+    }).join('');
+    var free = DT.FREE_MODE, cus = DT.CUSTOM_MODE;
+    cards += '<button class="mode-card" data-act="intro" data-id="0"><span class="num">TỰ DO</span><b>Chơi không giới hạn</b><span class="d">' + esc(free.desc) + '</span><span class="best">' +
+      (app.save.best[0] ? 'Điểm cao nhất ' + app.save.best[0] : 'Chưa chơi') + '</span></button>';
+    cards += '<button class="mode-card" data-act="custom"><span class="num">TÙY CHỈNH</span><b>Xếp việc thật của bạn</b><span class="d">' + esc(cus.desc) + '</span></button>';
+    var hours = '';
+    for (var h = 5; h <= 11; h++) hours += '<option value="' + h + '"' + (h === app.save.startHour ? ' selected' : '') + '>' + h + ':00</option>';
+    openOverlay('<div class="panel">' +
+      '<h1>Day Tetris</h1>' +
+      '<p class="tagline">Mỗi khối là một đầu việc. <b>Mỗi ô là một giờ.</b> Mỗi hàng là một ngày. Xếp lịch cho kín nhưng đừng quên chừa chỗ nghỉ.</p>' +
+      '<div class="mode-grid">' + cards + '</div>' +
+      '<div class="set-row"><label for="startHour">Giờ bắt đầu mỗi ngày</label><select id="startHour">' + hours + '</select>' +
+      '<button class="btn small" data-act="howto">Cách chơi</button></div>' +
+      '</div>');
+  }
+
+  function showIntro(id) {
+    var m = modeById(id);
+    app.screen = 'intro'; app.introMode = m;
+    var tips = (LEVEL_TIPS[id] || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+    var goal = m.days
+      ? 'Mục tiêu: qua hết ' + m.days + ' ngày với uy tín từ ' + DT.REP_MIN_WIN + '/100 trở lên. Thua nếu chồng khối chạm đỉnh' + (m.energy ? ', uy tín về 0 hoặc kiệt sức 2 lần.' : ' hoặc uy tín về 0.')
+      : 'Mục tiêu: sống sót càng lâu càng tốt và ghi điểm cao.';
+    openOverlay('<div class="panel narrow">' +
+      '<div class="chips" style="margin-bottom:10px">' + chipsFor(m) + '</div>' +
+      '<h2>' + esc(m.name) + '</h2><p>' + esc(goal) + '</p>' +
+      '<h3>Mới ở cấp này</h3><ul class="tips">' + tips + '</ul>' +
+      '<div class="row end"><button class="btn" data-act="menu">Quay lại</button><button class="btn primary" data-act="start" data-id="' + id + '" autofocus>Bắt đầu</button></div></div>');
+  }
+
+  function showHowTo(back) {
+    app.returnTo = back || app.screen; app.screen = 'howto';
+    var cats = ['study', 'personal', 'health', 'social', 'rest', 'buffer', 'busy'].map(function (k) {
+      var c = DT.CATS[k];
+      return '<div><span class="sw" style="background:' + c.color + '"></span>' + esc(c.name) + '</div>';
+    }).join('');
+    var qs = Object.keys(DT.Q).map(function (k) {
+      return '<div><span class="chip" style="color:' + DT.Q[k].color + '">' + k + '</span>' + esc(DT.Q[k].name) + '</div>';
+    }).join('');
+    var shapes = ['I', 'O', 'T', 'L', 'S'].map(function (k) { return '<tr><td><b>' + k + '</b></td><td>' + esc(DT.SHAPE_LABELS[k].replace(/^[A-Z0-9]+ · /, '')) + '</td></tr>'; }).join('');
+    openOverlay('<div class="panel">' +
+      '<h2>Cách chơi</h2>' +
+      '<p>Bảng có 10 cột (10 giờ khả dụng) và 14 hàng. Hàng dưới cùng là hôm nay, hàng trên là ngày mai, ngày kia... Khối là các đầu việc rơi từ trên xuống. Xếp đủ 10 ô trong một hàng thì ngày đó hoàn thành và được xóa. Cứ vài chục giây, hôm nay được chốt và cả bảng dịch xuống một nấc.</p>' +
+      '<div class="two-col"><div>' +
+      '<h3>Điều khiển</h3><table class="t"><tbody>' +
+      '<tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Sang trái, phải</td></tr><tr><td><kbd>↑</kbd> / <kbd>X</kbd></td><td>Xoay (<kbd>Z</kbd> xoay ngược)</td></tr>' +
+      '<tr><td><kbd>↓</kbd></td><td>Rơi nhanh</td></tr><tr><td><kbd>Space</kbd></td><td>Thả ngay</td></tr>' +
+      '<tr><td><kbd>C</kbd> / <kbd>Shift</kbd></td><td>Hoãn khối (cấp 4+)</td></tr><tr><td><kbd>R</kbd></td><td>Chèn khối nghỉ (cấp 3+)</td></tr>' +
+      '<tr><td><kbd>B</kbd></td><td>Chèn ô đệm (cấp 4+)</td></tr><tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Pomodoro, Lên danh sách, Ủy quyền, Ngày nghỉ thật</td></tr>' +
+      '<tr><td><kbd>P</kbd></td><td>Tạm dừng</td></tr></tbody></table>' +
+      '<h3>Hình khối nghĩa là gì</h3><table class="t"><tbody>' + shapes + '</tbody></table>' +
+      '</div><div>' +
+      '<h3>Đọc bảng</h3><div class="legend">' + cats + '</div>' +
+      '<h3>Nhãn Eisenhower</h3><div class="legend">' + qs + '</div>' +
+      '<p style="margin-top:10px">Vạch kẻ trên bảng là hạn chót của một việc. Ô nằm cao hơn vạch (xa hơn về tương lai) bị sọc đỏ: trễ hạn. Chấm nhỏ cuối ô là mức năng lượng: 1 nhẹ, 2 vừa, 3 nặng.</p>' +
+      '<h3>Điểm số</h3><table class="t"><tbody>' +
+      '<tr><td>Ngày cân bằng</td><td>+200</td></tr><tr><td>Q2 xong sớm ≥ 2 ngày</td><td>+150</td></tr><tr><td>Q1 đúng hạn</td><td>+100</td></tr>' +
+      '<tr><td>Chia nhỏ khối I theo chiều dọc</td><td>+50</td></tr><tr><td>Ngày quá tải</td><td>+50, −20 năng lượng</td></tr>' +
+      '<tr><td>Xếp Q3 trước Q2</td><td>−30</td></tr><tr><td>Trễ hạn</td><td>−150, mất uy tín</td></tr></tbody></table>' +
+      '</div></div>' +
+      '<div class="row end"><button class="btn primary" data-act="closehelp" autofocus>Đã hiểu</button></div></div>');
+  }
+
+  function showPause() {
+    app.screen = 'paused';
+    openOverlay('<div class="panel narrow"><h2>Tạm dừng</h2><p>Thời gian trong game đang dừng lại.</p>' +
+      '<div class="row end" style="justify-content:flex-start"><button class="btn primary" data-act="resume" autofocus>Tiếp tục</button>' +
+      '<button class="btn" data-act="howto">Cách chơi</button><button class="btn" data-act="restart">Chơi lại</button><button class="btn" data-act="menu">Menu</button></div></div>');
+  }
+
+  function showChoice() {
+    var ch = app.game.choice; if (!ch) return;
+    app.screen = 'choice';
+    openOverlay('<div class="panel narrow"><h2>💬 ' + esc(ch.title) + '</h2><p>' + esc(ch.text) + '</p>' +
+      '<p style="color:var(--muted);font-size:13px">Nhận lời: +xã hội, mất ' + ch.size + ' ô (ô đệm sẽ đỡ trước). Từ chối: giữ lịch nhưng chỉ số Xã hội giảm nhẹ.</p>' +
+      '<div class="row end"><button class="btn" data-act="decline">Từ chối</button><button class="btn primary" data-act="accept" autofocus>Nhận lời</button></div></div>');
+  }
+
+  /* ----- Trình nhập việc (chế độ tùy chỉnh) ----- */
+  function taskRow(t, i) {
+    function opts(list, sel) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === sel ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join(''); }
+    var shapes = [['I', 'I · 4 giờ thẳng'], ['O', 'O · 2×2'], ['T', 'T · phụ thuộc'], ['L', 'L'], ['J', 'J'], ['S', 'S'], ['Z', 'Z'], ['I3', '3 giờ thẳng'], ['L3', '3 giờ góc'], ['D2', '2 giờ'], ['M1', '1 giờ']];
+    var cats = [['study', 'Học'], ['personal', 'Cá nhân'], ['health', 'Sức khỏe'], ['social', 'Xã hội'], ['rest', 'Nghỉ']];
+    var qs = [['Q1', 'Q1 gấp & quan trọng'], ['Q2', 'Q2 quan trọng'], ['Q3', 'Q3 gấp'], ['Q4', 'Q4 thường']];
+    var es = [['light', 'Nhẹ'], ['mid', 'Vừa'], ['heavy', 'Nặng']];
+    return '<tr data-i="' + i + '"><td><input type="text" class="f-name" value="' + esc(t.name) + '" aria-label="Tên việc" maxlength="40"></td>' +
+      '<td><select class="f-shape" aria-label="Hình khối">' + opts(shapes, t.shape) + '</select></td>' +
+      '<td><select class="f-cat" aria-label="Loại việc">' + opts(cats, t.cat) + '</select></td>' +
+      '<td><select class="f-q" aria-label="Nhãn Eisenhower">' + opts(qs, t.q) + '</select></td>' +
+      '<td><select class="f-e" aria-label="Năng lượng">' + opts(es, t.e) + '</select></td>' +
+      '<td><input type="number" class="f-dl" min="1" max="14" value="' + esc(t.dl) + '" placeholder="–" aria-label="Hạn chót (ngày thứ mấy)"></td>' +
+      '<td><button class="x" data-act="deltask" aria-label="Xóa việc">×</button></td></tr>';
+  }
+  function readTasks() {
+    return $$('#taskBody tr').map(function (tr) {
+      return { name: $('.f-name', tr).value.trim() || 'Việc', shape: $('.f-shape', tr).value, cat: $('.f-cat', tr).value, q: $('.f-q', tr).value, e: $('.f-e', tr).value, dl: $('.f-dl', tr).value };
+    });
+  }
+  function showCustom(tasks) {
+    app.screen = 'custom';
+    tasks = tasks || app.save.custom || DT.SAMPLE_TASKS.map(function (t) { return Object.assign({}, t); });
+    openOverlay('<div class="panel"><h2>Xếp việc thật của bạn</h2>' +
+      '<p>Mỗi việc là một khối. Chọn hình theo số giờ và cách bạn muốn làm (xoay đứng nghĩa là chia ra nhiều ngày). Hạn chót tính theo ngày thứ mấy trong tuần, 1 là hôm nay.</p>' +
+      '<div class="table-scroll"><table class="task-table t"><thead><tr><th>Việc</th><th>Hình</th><th>Loại</th><th>Nhãn</th><th>Năng lượng</th><th>Hạn (ngày)</th><th></th></tr></thead>' +
+      '<tbody id="taskBody">' + tasks.map(taskRow).join('') + '</tbody></table></div>' +
+      '<div class="row end" style="justify-content:space-between"><div class="row"><button class="btn small" data-act="addtask">+ Thêm việc</button><button class="btn small" data-act="sample">Dùng việc mẫu</button></div>' +
+      '<div class="row"><button class="btn" data-act="menu">Quay lại</button><button class="btn primary" data-act="startcustom">Bắt đầu xếp</button></div></div></div>');
+  }
+
+  /* ----- Báo cáo cuối ván ----- */
+  function showReport() {
+    var g = app.game, rp = DT.buildReport(g);
+    app.screen = 'report';
+    var m = app.mode;
+    if (m.id >= 0 && g.score > (app.save.best[m.id] || 0)) { app.save.best[m.id] = g.score; persist(); }
+    var stats = rp.summary.map(function (s) { return '<div class="stat"><b>' + esc(s.value) + '</b><span>' + esc(s.label) + '</span></div>'; }).join('');
+    var ins = rp.insights.map(function (i) { return '<li class="' + i.kind + '">' + esc(i.text) + '</li>'; }).join('');
+    var plan = '';
+    if (rp.plan && rp.plan.length) {
+      plan = '<h3>Lịch của bạn</h3><div class="table-scroll"><table class="t"><thead><tr><th>Ngày</th><th>Giờ</th><th>Nặng</th><th>Nghỉ</th><th>Việc</th></tr></thead><tbody>' +
+        rp.plan.map(function (d) { return '<tr><td>' + esc(d.label) + '</td><td>' + d.filled + '/10</td><td>' + d.heavy + '</td><td>' + d.rest + '</td><td>' + esc(d.tasks.join(', ')) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    var next = '';
+    if (rp.win && m.id >= 1 && m.id < DT.LEVELS.length) next = '<button class="btn primary" data-act="intro" data-id="' + (m.id + 1) + '">Cấp tiếp theo</button>';
+    openOverlay('<div class="panel">' +
+      '<div class="score-label">' + esc(m.name) + '</div>' +
+      '<h2 class="' + (rp.win ? 'result-win' : 'result-lose') + '">' + esc(rp.title) + '</h2>' +
+      '<div class="stat-grid">' + stats + '</div>' + plan +
+      '<h3>Nhận xét từ ván chơi của bạn</h3><ul class="insights">' + ins + '</ul>' +
+      '<div class="exercise">' + esc(rp.exercise) + '</div>' +
+      '<div class="row end"><button class="btn" data-act="menu">Menu</button><button class="btn' + (next ? '' : ' primary') + '" data-act="restart"' + (next ? '' : ' autofocus') + '>Chơi lại</button>' + next + '</div></div>');
+  }
+
+  /* ---------- Bắt đầu / kết thúc ---------- */
+  var canvas = $('#board'), renderer = new DT.Renderer(canvas), holdCanvas = $('#holdCanvas');
+  var toastsEl = $('#toasts'), logEl = $('#log');
+
+  function startGame(mode, opts) {
+    closeOverlay();
+    opts = opts || {};
+    if (mode.custom) opts.customTasks = app.save.custom || DT.SAMPLE_TASKS;
+    app.mode = mode; app.game = new DT.Game(mode, opts);
+    app.screen = 'playing'; app.cache = {};
+    clearTimeout(app.endTimer);
+    renderer.startHour = app.save.startHour;
+    toastsEl.innerHTML = ''; logEl.innerHTML = '';
+    $('#modeChip').textContent = mode.name;
+    $('#holdCard').hidden = !mode.hold;
+    $('#puCard').hidden = !mode.powerups;
+    $('#insertCard').hidden = !mode.rest;
+    $('#btnBuffer').hidden = !mode.events;
+    $$('[data-key="rest"]').forEach(function (b) { b.hidden = !mode.rest; });
+    $$('[data-key="buffer"]').forEach(function (b) { b.hidden = !mode.events; });
+    $$('[data-key="hold"]').forEach(function (b) { b.hidden = !mode.hold; });
+    $$('[data-meter="energy"]').forEach(function (e) { e.hidden = !mode.energy; });
+    $$('[data-meter="balance"]').forEach(function (e) { e.hidden = !mode.energy; });
+    if (mode.powerups) buildPowerups();
+    fitBoard();
+    window.scrollTo(0, 0);
+  }
+  function restart() {
+    if (!app.mode) return showMenu();
+    startGame(app.mode);
+  }
+  function endGame() {
+    app.screen = 'ended';
+    app.endTimer = setTimeout(showReport, 1100);
+  }
+  function pauseGame() {
+    if (app.screen !== 'playing') return;
+    showPause();
+  }
+  function resume() { closeOverlay(); app.screen = 'playing'; }
+
+  /* ---------- Bố cục ---------- */
+  function fitBoard() {
+    var wrap = $('#boardWrap').parentElement, vw = window.innerWidth, vh = window.innerHeight;
+    var mobile = vw <= 880;
+    var availW = Math.min(wrap.clientWidth || vw - 32, mobile ? 520 : 760);
+    var top = $('#boardWrap').getBoundingClientRect().top + window.scrollY;
+    var availH = mobile ? Math.max(380, Math.min(vh * 0.66, 640)) : Math.max(420, vh - top - 40);
+    renderer.resize(availW, availH);
+  }
+  window.addEventListener('resize', fitBoard);
+
+  /* ---------- Điều khiển ---------- */
+  var rep = {};
+  function stopRepeat(n) { var r = rep[n]; if (r) { clearTimeout(r.t); clearInterval(r.i); delete rep[n]; } }
+  function startRepeat(n, fn) {
+    stopRepeat(n); fn();
+    var r = rep[n] = {};
+    r.t = setTimeout(function () { r.i = setInterval(fn, 48); }, 160);
+  }
+  function stopAllRepeats() { Object.keys(rep).forEach(stopRepeat); if (app.game) app.game.setSoftDrop(false); }
+  function playing() { return app.screen === 'playing' && app.game; }
+
+  function press(name) {
+    var g = app.game;
+    if (name === 'pause') { pauseGame(); return; }
+    if (!playing()) return;
+    switch (name) {
+      case 'left': startRepeat('left', function () { g.move(-1); }); break;
+      case 'right': startRepeat('right', function () { g.move(1); }); break;
+      case 'rotate': g.rotate(1); break;
+      case 'rotateCCW': g.rotate(-1); break;
+      case 'soft': g.setSoftDrop(true); break;
+      case 'drop': g.hardDrop(); break;
+      case 'hold': g.holdPiece(); break;
+      case 'rest': g.insertBlock('rest'); break;
+      case 'buffer': g.insertBlock('buffer'); break;
+      case 'pu1': g.usePowerup('pomodoro'); break;
+      case 'pu2': g.usePowerup('list'); break;
+      case 'pu3': g.usePowerup('delegate'); break;
+      case 'pu4': g.usePowerup('dayoff'); break;
+    }
+  }
+  function release(name) {
+    if (name === 'left' || name === 'right') stopRepeat(name);
+    if (name === 'soft' && app.game) app.game.setSoftDrop(false);
+  }
+  var KEYMAP = {
+    ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
+    ArrowUp: 'rotate', x: 'rotate', X: 'rotate', z: 'rotateCCW', Z: 'rotateCCW',
+    ArrowDown: 'soft', s: 'soft', S: 'soft', ' ': 'drop', c: 'hold', C: 'hold', Shift: 'hold',
+    r: 'rest', R: 'rest', b: 'buffer', B: 'buffer', '1': 'pu1', '2': 'pu2', '3': 'pu3', '4': 'pu4',
+    p: 'pause', P: 'pause', Escape: 'pause'
+  };
+  var held = {};
+  window.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (app.screen === 'paused' && (e.key === 'p' || e.key === 'P' || e.key === 'Escape')) { e.preventDefault(); resume(); return; }
+    var name = KEYMAP[e.key];
+    if (!name) return;
+    if (playing()) e.preventDefault();
+    if (e.repeat || held[e.key]) return;
+    held[e.key] = true;
+    press(name);
+  });
+  window.addEventListener('keyup', function (e) {
+    held[e.key] = false;
+    var name = KEYMAP[e.key]; if (name) release(name);
+  });
+  window.addEventListener('blur', function () { held = {}; stopAllRepeats(); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { held = {}; stopAllRepeats(); pauseGame(); } });
+
+  // nút cảm ứng
+  $$('#touch button').forEach(function (b) {
+    var name = b.getAttribute('data-key');
+    b.addEventListener('pointerdown', function (e) { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (x) { /* */ } press(name); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { b.addEventListener(ev, function () { release(name); }); });
+  });
+
+  /* ---------- Bảng điều khiển & HUD ---------- */
+  function buildPowerups() {
+    $('#puGrid').innerHTML = Object.keys(DT.POWERUPS).map(function (k) {
+      var p = DT.POWERUPS[k];
+      return '<button class="pu empty" data-pu="' + k + '" title="' + esc(p.desc) + '"><kbd>' + p.key + '</kbd><span>' + esc(p.name) + '</span><b>0</b></button>';
+    }).join('');
+  }
+  var hudNodes = {};
+  function hud(name, val) {
+    if (app.cache['h' + name] === val) return;
+    app.cache['h' + name] = val;
+    if (!hudNodes[name]) hudNodes[name] = $$('[data-hud="' + name + '"]');
+    hudNodes[name].forEach(function (n) { n.textContent = val; });
+  }
+  function meter(name, pct, mid, low) {
+    var key = 'm' + name + Math.round(pct);
+    if (app.cache[key]) return; app.cache['m' + name] = null; app.cache[key] = 1;
+    $$('[data-meter="' + name + '"]').forEach(function (m) {
+      $('i', m).style.width = Math.max(0, Math.min(100, pct)) + '%';
+      m.classList.toggle('low', pct < low); m.classList.toggle('mid', pct >= low && pct < mid);
+    });
+  }
+  function taskMeta(t, g) {
+    var c = DT.CATS[t.cat] || DT.CATS.study, parts = [];
+    parts.push('<span class="chip"><i class="dot" style="background:' + c.color + '"></i>' + esc(c.name) + '</span>');
+    if (t.q && g.mode.labels) parts.push('<span class="chip" style="color:' + DT.Q[t.q].color + '" title="' + esc(DT.Q[t.q].name) + '">' + t.q + '</span>');
+    if (g.mode.energy && t.kind === 'work') parts.push('<span class="chip">' + esc(DT.ENERGY[t.e].name) + '</span>');
+    return parts.join('');
+  }
+  function dlText(t, g) {
+    if (t.kind !== 'work') return t.kind === 'rest' ? 'Hồi +' + DT.ENERGY_REST_GAIN + ' năng lượng mỗi ô' : '';
+    if (t.dl != null) { var left = t.dl - g.day; return 'Hạn ' + DT.dayName(t.dl) + (left > 0 ? ' · còn ' + left + ' ngày' : (left === 0 ? ' · hôm nay' : ' · quá hạn')); }
+    if (t.dlOff != null) return 'Hạn sau ~' + t.dlOff + ' ngày';
+    return g.mode.deadlines ? 'Không có hạn' : '';
+  }
+  function updatePanels(g) {
+    // điểm / ngày
+    hud('score', String(g.score));
+    var dayShow = Math.min(g.day, g.mode.days || g.day);
+    hud('dayLabel', 'Ngày ' + dayShow + (g.mode.days ? ' / ' + g.mode.days : '') + ' · ' + DT.dayName(g.day));
+    hud('dayShort', dayShow + (g.mode.days ? '/' + g.mode.days : ''));
+    if (g.mode.dayLen) hud('dayTimer', 'còn ' + Math.max(0, Math.ceil(g.dayLength() - g.dayTimer / 1000)) + 's'); else hud('dayTimer', 'tự xếp');
+    hud('energy', String(Math.round(g.energy)));
+    hud('gpa', (g.rep / 25).toFixed(1));
+    hud('balance', String(g.balance));
+    meter('energy', g.energy, 60, 30); meter('rep', g.rep, 70, 45); meter('balance', g.balance, 75, 50);
+
+    // trạng thái
+    var st = [];
+    if (g.energyLow()) st.push('<span class="chip">Mất tập trung</span>');
+    if (g.fatigue > 0) st.push('<span class="chip warn">Mệt mỏi ' + g.fatigue + ' ngày</span>');
+    if (g.burnouts > 0) st.push('<span class="chip">Kiệt sức ' + g.burnouts + '/2</span>');
+    if (g.previewBoost > 0) st.push('<span class="chip warn">Xem trước 5 (' + g.previewBoost + ')</span>');
+    var stKey = st.join('');
+    if (app.cache.st !== stKey) { app.cache.st = stKey; $('#statusRow').innerHTML = stKey; }
+
+    // vật phẩm + chèn
+    if (g.mode.powerups) {
+      $$('#puGrid .pu').forEach(function (b) {
+        var n = g.powerups[b.getAttribute('data-pu')];
+        b.classList.toggle('empty', !n); $('b', b).textContent = n;
+      });
+    }
+    if (g.mode.rest) {
+      var il = g.insertsLeft;
+      $('#insertLeft').textContent = 'còn ' + il + ' lượt hôm nay';
+      $('#btnRest').disabled = il <= 0; $('#btnBuffer').disabled = il <= 0;
+    }
+
+    // đang xếp
+    var p = g.piece, curKey = p ? p.task.id + ':' + p.task.dl + ':' + p.task.q + ':' + p.task.e + ':' + g.day : 'none';
+    if (app.cache.cur !== curKey) {
+      app.cache.cur = curKey;
+      if (!p) $('#curCard').innerHTML = '<div class="empty-note">–</div>';
+      else {
+        var t = p.task, hint = DT.SHAPE_LABELS[t.shape] ? DT.SHAPE_LABELS[t.shape].replace(/^[A-Z0-9]+ · /, '') : '';
+        if (t.emergency) hint = 'Việc đột xuất! Xếp xuống thấp để kịp hạn.';
+        $('#curCard').innerHTML = '<div class="cur-name">' + esc(t.name) + '</div><div class="cur-meta">' + taskMeta(t, g) + '</div>' +
+          '<div class="cur-hint">' + esc(dlText(t, g)) + '</div>' + (hint ? '<div class="cur-hint" style="margin-top:4px">' + esc(hint) + '</div>' : '');
+      }
+    }
+
+    // kế tiếp
+    var pv = g.getPreview(), nk = pv.map(function (d) { return d.task.id + ':' + d.cells.length; }).join('|') + '@' + g.day;
+    if (app.cache.next !== nk) {
+      app.cache.next = nk;
+      var list = $('#nextList');
+      list.innerHTML = pv.map(function () { return '<div class="piece-row"><canvas></canvas><div class="piece-info"></div></div>'; }).join('') || '<div class="empty-note">Hết việc trong danh sách.</div>';
+      $$('.piece-row', list).forEach(function (row, i) {
+        var d = pv[i];
+        DT.drawMini($('canvas', row), d, { cell: i === 0 ? 19 : 15, w: 4, h: 3 });
+        $('.piece-info', row).innerHTML = '<b>' + esc(d.task.name) + '</b>' + taskMeta(d.task, g) + '<br><span>' + esc(dlText(d.task, g)) + '</span>';
+      });
+      $('#nextCount').textContent = pv.length ? pv.length + ' khối' : '';
+    }
+    // hoãn
+    if (g.mode.hold) {
+      var hk = g.hold ? g.hold.task.id + ':' + g.hold.cells.length + ':' + g.hold.task.q + ':' + g.day : 'none';
+      if (app.cache.hold !== hk) {
+        app.cache.hold = hk;
+        DT.drawMini(holdCanvas, g.hold, { cell: 15, w: 4, h: 3 });
+        holdCanvas.style.display = g.hold ? '' : 'none';
+        $('#holdInfo').innerHTML = g.hold
+          ? '<b>' + esc(g.hold.task.name) + '</b>' + taskMeta(g.hold.task, g) + '<br><span>' + (g.hold.task.bloat ? 'Đã phình thêm ' + g.hold.task.bloat + ' ô' : 'Hoãn càng lâu càng phình') + '</span>'
+          : '<span>Trống. Mỗi ngày hoãn tối đa 1 lần.</span>';
+      }
+    }
+  }
+
+  function addToast(ev) {
+    if (ev.kind === 'info') return;
+    var el = document.createElement('div');
+    el.className = 'toast ' + ev.kind; el.textContent = ev.text;
+    toastsEl.appendChild(el);
+    while (toastsEl.children.length > 4) toastsEl.removeChild(toastsEl.firstChild);
+    setTimeout(function () { el.classList.add('out'); }, 2600);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 3100);
+  }
+  function addLog(ev) {
+    var li = document.createElement('li');
+    li.className = ev.kind; li.textContent = ev.text;
+    logEl.insertBefore(li, logEl.firstChild);
+    while (logEl.children.length > 8) logEl.removeChild(logEl.lastChild);
+  }
+  function drain(g) {
+    if (!g.events.length) return;
+    var evs = g.events.splice(0, g.events.length);
+    evs.forEach(function (e) { addLog(e); addToast(e); });
+  }
+
+  /* ---------- Vòng lặp ---------- */
+  function loop(ts) {
+    window.requestAnimationFrame(loop);
+    var dt = ts - app.last; app.last = ts;
+    var g = app.game;
+    if (!g) return;
+    if (app.screen === 'playing') {
+      g.update(dt);
+      if (g.choice) { stopAllRepeats(); showChoice(); }
+      else if (g.status !== 'playing') { stopAllRepeats(); endGame(); }
+    }
+    drain(g);
+    updatePanels(g);
+    renderer.draw(g, ts);
+  }
+
+  /* ---------- Sự kiện giao diện ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-act], [data-pu]');
+    if (!t) return;
+    var pu = t.getAttribute('data-pu');
+    if (pu && playing()) { app.game.usePowerup(pu); return; }
+    var act = t.getAttribute('data-act'), id = t.getAttribute('data-id');
+    switch (act) {
+      case 'menu': stopAllRepeats(); clearTimeout(app.endTimer); showMenu(); break;
+      case 'intro': showIntro(id); break;
+      case 'start': startGame(modeById(id)); break;
+      case 'custom': showCustom(); break;
+      case 'howto': showHowTo(app.screen === 'howto' ? app.returnTo : app.screen); break;
+      case 'closehelp':
+        if (app.returnTo === 'paused') showPause(); else if (app.returnTo === 'playing') resume(); else showMenu();
+        break;
+      case 'pause': pauseGame(); break;
+      case 'resume': resume(); break;
+      case 'restart': startGame(app.mode); break;
+      case 'accept': app.game.resolveChoice(true); closeOverlay(); app.screen = 'playing'; break;
+      case 'decline': app.game.resolveChoice(false); closeOverlay(); app.screen = 'playing'; break;
+      case 'rest': press('rest'); break;
+      case 'buffer': press('buffer'); break;
+      case 'addtask': {
+        var tasks = readTasks(); tasks.push({ name: 'Việc mới', shape: 'D2', cat: 'study', q: 'Q2', e: 'mid', dl: '' });
+        showCustom(tasks); break;
+      }
+      case 'deltask': { var ts2 = readTasks(); ts2.splice(+t.closest('tr').getAttribute('data-i'), 1); showCustom(ts2); break; }
+      case 'sample': showCustom(DT.SAMPLE_TASKS.map(function (x) { return Object.assign({}, x); })); break;
+      case 'startcustom': {
+        var list = readTasks();
+        if (!list.length) list = DT.SAMPLE_TASKS.slice();
+        app.save.custom = list; persist();
+        startGame(DT.CUSTOM_MODE); break;
+      }
+    }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'startHour') { app.save.startHour = +e.target.value; renderer.startHour = app.save.startHour; persist(); }
+  });
+
+  /* ---------- Khởi động ---------- */
+  loadSave();
+  // Bảng xem trước phía sau menu: một ván nền để trang không trống
+  app.mode = DT.LEVELS[0];
+  app.game = new DT.Game(app.mode, { seed: 20240901 });
+  (function demoFill() {
+    var g = app.game, U = DT.util;
+    for (var i = 0; i < 7; i++) {
+      var p = g.piece, best = null, cells = p.cells;
+      for (var rot = 0; rot < 4; rot++) {
+        var d = U.dims(cells);
+        for (var c = 0; c + d.w <= DT.COLS; c++) {
+          if (!g.fits(cells, 0, c)) continue;
+          var r = 0; while (g.fits(cells, r + 1, c)) r++;
+          var sc = r * 10 - c * 0.1 * (i % 2 ? -1 : 1);
+          if (!best || sc > best.sc) best = { sc: sc, cells: cells, c: c, r: r };
+        }
+        cells = U.rotCW(cells);
+      }
+      if (best) { p.cells = best.cells; p.c = best.c; p.r = best.r; g.lockPiece(); }
+    }
+    g.events.length = 0; g.log.length = 0;
+  })();
+  renderer.startHour = app.save.startHour;
+  $('#holdCard').hidden = true; $('#puCard').hidden = true; $('#insertCard').hidden = true;
+  fitBoard();
+  showMenu();
+  window.requestAnimationFrame(function (ts) { app.last = ts; loop(ts); });
+  // cho phép tải lại bố cục khi font tải xong
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { app.cache = {}; });
+  window.DT_APP = app;
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "day-tetris",
+  "version": "0.1.0",
+  "description": "Day Tetris: game xếp lịch kiểu Tetris (bản demo MVP, HTML5 Canvas, không phụ thuộc thư viện)",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "build": "node tools/build.js",
+    "test": "node tests/sim.js 2500 5"
+  }
+}

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Day Tetris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/games/history-sync.css">
+<link rel="stylesheet" href="/games/embedded-game.css">
+</head>
+<body>
+<nav class="ss-game-nav"><a href="/game">← SoftSync Mini Game</a><span>DAY TETRIS</span></nav>
+<!--BODY-->
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="1" y="1" width="8" height="8" rx="2" fill="#4f8cff"/><rect x="11" y="1" width="8" height="8" rx="2" fill="#4f8cff"/><rect x="21" y="1" width="8" height="8" rx="2" fill="#4f8cff"/>
+        <rect x="11" y="11" width="8" height="8" rx="2" fill="#2fcf8a"/><rect x="11" y="21" width="8" height="8" rx="2" fill="#ffd166"/>
+      </svg>
+      <b>Day Tetris</b>
+      <span class="mode-chip" id="modeChip">Chưa bắt đầu</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn small" data-act="howto">Cách chơi</button>
+      <button class="btn small" data-act="pause">Tạm dừng <kbd>P</kbd></button>
+      <button class="btn small" data-act="menu">Menu</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <aside class="side side-l">
+      <section class="card" id="holdCard" hidden>
+        <h3>Hoãn <kbd>C</kbd></h3>
+        <div class="piece-row"><canvas id="holdCanvas" width="72" height="54"></canvas><div class="piece-info" id="holdInfo"><span>Trống. Mỗi ngày hoãn tối đa 1 lần.</span></div></div>
+      </section>
+      <section class="card">
+        <h3>Kế tiếp <span id="nextCount"></span></h3>
+        <div class="next-list" id="nextList"></div>
+      </section>
+      <section class="card">
+        <h3>Đang xếp</h3>
+        <div id="curCard"><div class="empty-note">Chọn một chế độ để bắt đầu.</div></div>
+      </section>
+    </aside>
+
+    <div class="board-col">
+      <div class="hud-strip">
+        <div><div class="score-label">Điểm</div><div class="s" data-hud="score">0</div></div>
+        <div class="meter" data-meter="energy"><span class="meter-label">Năng lượng</span><span class="meter-val" data-hud="energy">100</span><div class="meter-bar"><i></i></div></div>
+        <div class="meter" data-meter="rep"><span class="meter-label">Ngày <b data-hud="dayShort">1</b></span><span class="meter-val" data-hud="gpa">4.0</span><div class="meter-bar"><i></i></div></div>
+      </div>
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="board" aria-label="Bảng lịch: mỗi hàng là một ngày, mỗi cột là một giờ"></canvas>
+        <div id="toasts" aria-live="polite"></div>
+      </div>
+      <div class="touch" id="touch">
+        <button data-key="left" aria-label="Sang trái">◀</button>
+        <button data-key="right" aria-label="Sang phải">▶</button>
+        <button data-key="rotate" aria-label="Xoay">⟳</button>
+        <button data-key="soft" aria-label="Rơi nhanh">▼</button>
+        <button class="wide" data-key="drop">THẢ NGAY</button>
+        <button class="wide" data-key="hold">HOÃN</button>
+        <button class="wide" data-key="rest">+ NGHỈ</button>
+        <button class="wide" data-key="buffer">+ ĐỆM</button>
+        <button class="wide" data-key="pause">DỪNG</button>
+      </div>
+      <div class="keys-hint">
+        <span><kbd>←</kbd><kbd>→</kbd> di chuyển</span><span><kbd>↑</kbd> xoay</span><span><kbd>↓</kbd> rơi nhanh</span>
+        <span><kbd>Space</kbd> thả ngay</span><span><kbd>C</kbd> hoãn</span><span><kbd>R</kbd> nghỉ</span><span><kbd>B</kbd> đệm</span><span><kbd>1-4</kbd> vật phẩm</span>
+      </div>
+    </div>
+
+    <aside class="side side-r">
+      <section class="card score-card">
+        <div class="score-label">Điểm</div>
+        <div class="score-big" data-hud="score">0</div>
+        <div class="day-line"><b data-hud="dayLabel">Ngày 1</b><span data-hud="dayTimer"></span></div>
+      </section>
+      <section class="card">
+        <h3>Chỉ số</h3>
+        <div class="meters">
+          <div class="meter" data-meter="energy"><span class="meter-label">Năng lượng</span><span class="meter-val" data-hud="energy">100</span><div class="meter-bar"><i></i></div></div>
+          <div class="meter" data-meter="rep"><span class="meter-label">Uy tín (GPA)</span><span class="meter-val" data-hud="gpa">4.0</span><div class="meter-bar"><i></i></div></div>
+          <div class="meter" data-meter="balance"><span class="meter-label">Cân bằng cuộc sống</span><span class="meter-val" data-hud="balance">100</span><div class="meter-bar"><i></i></div></div>
+        </div>
+        <div class="status-row" id="statusRow"></div>
+      </section>
+      <section class="card" id="puCard" hidden>
+        <h3>Vật phẩm</h3>
+        <div class="pu-grid" id="puGrid"></div>
+      </section>
+      <section class="card" id="insertCard" hidden>
+        <h3>Chừa chỗ <span id="insertLeft"></span></h3>
+        <div class="insert-row">
+          <button class="btn small" data-act="rest" id="btnRest"><kbd>R</kbd> Nghỉ</button>
+          <button class="btn small" data-act="buffer" id="btnBuffer"><kbd>B</kbd> Đệm</button>
+        </div>
+      </section>
+      <section class="card">
+        <h3>Nhật ký</h3>
+        <ul class="log" id="log"></ul>
+      </section>
+    </aside>
+  </main>
+</div>
+<div class="overlay" id="overlay" hidden></div>
+<section id="game-history"></section>
+<!--/BODY-->
+<script src="/games/history-sync.js"></script>
+<script src="js/config.js"></script>
+<script src="js/game.js"></script>
+<script src="js/report.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+<script>window.SoftSyncGameHistory?.mount({gameKey:'day-tetris',storageKey:'softsync.day-tetris.history.v1',title:'Day Tetris'});</script>
+</body>
+</html>

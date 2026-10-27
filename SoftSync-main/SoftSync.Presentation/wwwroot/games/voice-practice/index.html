@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Game 5 – Thực hành giọng nói</title>
+<style>
+:root{--bg:#f6f7fb;--c:#fff;--t:#1f2430;--m:#6b7280;--a:#4f46e5;--g:#16a34a;--r:#dc2626;--y:#d97706}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141b;--c:#1c1f2a;--t:#e8eaf0;--m:#9aa1b2;--a:#818cf8}}:root[data-theme="dark"]{--bg:#12141b;--c:#1c1f2a;--t:#e8eaf0;--m:#9aa1b2;--a:#818cf8}
+*{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,sans-serif;background:var(--bg);color:var(--t)}
+main{max-width:860px;margin:auto;padding:16px}h1{font-size:22px;margin:8px 0}
+.card{background:var(--c);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 4px #0002}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.item{cursor:pointer;border:1px solid #8883;border-radius:12px;padding:10px;background:var(--c)}.item:hover{border-color:var(--a)}
+button{background:var(--a);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:16px;cursor:pointer;margin:4px 4px 4px 0}
+button.s{background:#8885;color:var(--t)}button.r{background:var(--r)}
+.text{font-size:19px;line-height:1.8;padding:12px;border-left:4px solid var(--a);background:#8881}
+.chip{display:inline-block;background:#8882;border-radius:99px;padding:2px 10px;margin:2px;font-size:13px}
+.bar{height:10px;background:#8883;border-radius:9px;position:relative;margin:4px 0 10px}
+.bar i{position:absolute;top:0;bottom:0;background:#16a34a55;border-radius:9px}.bar b{position:absolute;top:-3px;width:4px;height:16px;background:var(--a);border-radius:2px}
+#meter{height:14px;background:#8883;border-radius:9px;overflow:hidden}#meter i{display:block;height:100%;width:0;background:var(--g)}
+.big{font-size:48px;font-weight:700;text-align:center}.hide{display:none}.m{color:var(--m)}
+button:disabled{opacity:.5;cursor:default}button.chip{background:#8882;color:var(--t);padding:4px 12px;font-size:14px;margin:2px}button.chip.on{background:var(--a);color:#fff}
+input{width:100%;max-width:420px;padding:8px 12px;margin:8px 0;border:1px solid #8885;border-radius:10px;font-size:16px;background:var(--c);color:var(--t)}.item:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--a)}.big{font-size:40px}
+
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+mark{background:#dc262638;color:inherit;border-radius:4px;padding:0 2px}#txt span{transition:color .25s}.rd{color:var(--a);font-weight:600}
+#go,#stp{font-size:18px;padding:14px 28px}.card h2{font-size:18px;margin:8px 0}
+</style><link rel="stylesheet" href="/games/history-sync.css"><link rel="stylesheet" href="/games/embedded-game.css"></head><body><nav class="ss-game-nav"><a href="/game">← SoftSync Mini Game</a><span>VOICE PRACTICE</span></nav><main>
+<h1>🎙️ Game 5 – Thực hành giọng nói</h1><div id="stat" class="m"></div>
+<section id="home"></section>
+<section id="play" class="hide">
+ <div class="card"><button class="s" onclick="rand()">🎲 Đổi đề khác</button><button class="s" onclick="challenge()">🏆 Thử thách 5 đề</button><button class="s" onclick="resetAll()">Xóa tiến độ</button><h2 id="ttl"></h2><div id="tags"></div>
+  <p class="m">Đọc bản mẫu bên dưới trong khoảng 30 giây. Khi ghi âm, chữ sẽ sáng dần theo tốc độ gợi ý để bạn bám theo (không cần khớp từng từ).</p><p id="tip" class="m"></p><div class="text" id="txt"></div>
+  <div class="big" id="clock">0:00 / 0:30</div><div class="bar"><i id="prog" style="left:0;width:0;background:var(--a)"></i></div><div id="meter"><i></i></div><p id="hint" class="m" role="status" aria-live="polite"></p>
+  <button id="go" onclick="start()">⏺ Bắt đầu ghi âm</button><button id="stp" class="r hide" onclick="stop()">⏹ Dừng &amp; chấm điểm</button></div>
+ <div id="res" class="card hide"></div>
+</section>
+</main><section id="game-history"></section><script src="/games/history-sync.js"></script>
+<script>
+// [tên đề, hồ sơ giọng, văn bản mẫu]
+const P={f:["Lịch sự, rõ ràng",115,170,2,5],w:["Ấm áp, chậm rãi",105,155,2.2,5.5],p:["Chắc chắn, bình tĩnh",115,165,1.8,4.5],e:["Truyền cảm, nhiệt huyết",140,195,2.8,6.5],u:["Khẩn trương nhưng rõ ràng",150,205,2,5.5]};
+const T={f:"Giữ giọng lịch sự, nói rõ từng ý, nhấn nhẹ ở lời cảm ơn hoặc xin phép.",w:"Nói chậm và dịu, hạ giọng ở cuối câu để thể hiện sự quan tâm.",p:"Giữ giọng đều và chắc, không gằn; nhấn vào ý chính rồi đưa ra đề nghị.",e:"Nâng giọng ở từ khóa, tăng nhịp ở câu kêu gọi, mỉm cười khi nói.",u:"Nói gọn và rõ ý chính trước, bình tĩnh để người nghe kịp hiểu."};
+const S=[
+["Giới thiệu bản thân 30 giây tại Ngày hội Hướng nghiệp","f","Em chào anh/chị ạ, em tên Nguyễn Minh Nam, hiện đang học lớp 12, định hướng theo ngành Công nghệ thông tin. Em khá mạnh về tư duy logic và thích làm việc nhóm. Em đang tìm cơ hội thực tập hoặc học hỏi thêm ở lĩnh vực lập trình, không biết bên mình có đang tuyển vị trí nào phù hợp với sinh viên/học sinh không ạ? Em cảm ơn anh/chị."],
+["Nhắc bạn cùng nhóm nộp bài trễ","p","Ê, bài của cậu tới giờ vẫn chưa gửi á, trễ 1 ngày rồi đó. Tớ hơi lo vì chỉ còn 3 ngày nữa là báo cáo rồi. Cậu đang bận gì hả, có cần tụi mình hỗ trợ không? Tớ mong tối nay trước 8 giờ cậu gửi được để nhóm ghép nội dung kịp nha."],
+["Xin đổi ca làm thêm để ôn thi","f","Em chào anh Lâm ạ, tối thứ Bảy này em có ca làm nhưng em mới biết lịch thi của trường lại trùng đúng giờ đó anh ơi. Em hỏi bạn Vy rồi, bạn ấy đồng ý trực thay em ca này. Anh xem giúp em đổi ca được không ạ? Em cảm ơn anh nhiều."],
+["Xin thầy cô gia hạn bài tập vì bị bệnh","w","Dạ em chào thầy/cô ạ, em là Trần Minh Tuấn, học sinh lớp 12A1. Em xin phép báo với thầy/cô là em đang bị sốt cao, phải nhập viện nên chưa nộp bài kịp được ạ. Em có giấy xác nhận của bệnh viện, mong thầy/cô cho em xin gia hạn tới thứ Năm ạ. Em cảm ơn thầy/cô nhiều."],
+["Thuyết phục bạn cân đối chi phí họp nhóm","p","Khôi ơi, ý tưởng họp ở quán đó nghe hay đó, nhưng mà chi phí chắc vượt ngân sách tụi mình đặt ra rồi. Nếu chi nhiều quá cho buổi họp, mấy tuần sau nhóm sẽ thiếu tiền in tài liệu á. Hay mình họp ở thư viện trường cho đỡ tốn, được không?"],
+["Phân biệt “Sự thật” và “Ý kiến” khi thuyết trình","e","Mọi người để ý nha, sự thật là những điều mình có thể kiểm chứng được, ví dụ như “Trái Đất quay quanh Mặt Trời”. Còn ý kiến thì chỉ là quan điểm riêng của mỗi người thôi, chưa chắc đã có bằng chứng đi kèm. Khi tìm hiểu vấn đề gì đó, mình cần phân biệt rõ đâu là sự thật, đâu là ý kiến cá nhân."],
+["An ủi bạn cùng phòng lo chuyện tiền bạc","w","Tớ hiểu cậu đang rất căng thẳng vì tiền chưa kịp về mà hạn đóng thì sắp tới rồi. Nghe cũng áp lực thật đấy. Cậu đừng lo quá nha, mình lên phòng công tác học sinh hỏi thử xem sao, hoặc nếu cần thì tớ có ít tiền để dành, cậu mượn tạm đóng trước cũng được."],
+["Thương lượng chọn địa điểm họp nhóm","f","Họp ở quán cà phê thì vui thật, nhưng ồn quá dễ mất tập trung khi làm bài á mọi người. Hay tụi mình họp ở thư viện trước 2 tiếng cho xong việc, xong rồi ai rảnh thì đi cà phê sau cũng được, mọi người thấy sao?"],
+["Tiếp thu góp ý của thầy cô về lỗi lập luận","f","Dạ em cảm ơn thầy/cô đã góp ý ạ. Em thấy đúng là phần lập luận của nhóm còn thiếu dẫn chứng cụ thể nên chưa thuyết phục lắm. Em sẽ tìm thêm tài liệu và bổ sung dẫn chứng để hoàn thiện bài tốt hơn ạ."],
+["Giúp bạn Minh rụt rè tự tin hơn khi thảo luận","w","Minh ơi, đừng ngại nha, ý kiến của cậu quan trọng với nhóm lắm đó. Tớ biết thảo luận trực tiếp đôi khi nói nhanh dễ bị áp lực. Hay là Minh viết trước ý chính ra giấy hoặc nhắn vào nhóm chat, để tụi mình đọc và bàn từ từ cũng được mà."],
+["Gọi điện báo trễ giờ vì sự cố xe cộ","u","Alo Vy hả, Tuấn đây. Tớ gọi báo nhanh là xe bị thủng lốp giữa đường luôn á. Chắc tớ trễ khoảng 15 phút. Cậu báo nhóm cứ thuyết trình phần đầu trước cho kịp giờ nha, tớ đang cố di chuyển nhanh nhất rồi. Xin lỗi cả nhóm nhiều."],
+["Góp ý về slide thuyết trình của bạn","w","Slide cậu tìm hình đẹp lắm, trực quan nè. Tớ nghĩ nếu mình đồng bộ lại một kiểu font và bớt màu nền nổi thì người xem sẽ dễ tập trung vào nội dung hơn á. Tối nay tụi mình cùng chỉnh lại chút được không?"],
+["Giải quyết mâu thuẫn khi bạn tự ý sửa bài","p","Hà ơi, tớ biết cậu sửa bài để kịp tiến độ nhóm, cảm ơn cậu vì điều đó. Nhưng mà cậu sửa mà không nói trước với tớ khiến tớ hơi buồn, cảm giác công sức của mình không được tôn trọng á. Tối nay tụi mình gọi video 15 phút, đối chiếu hai bản rồi chọn cái nào tốt hơn nha?"],
+["Từ chối bạn nhờ làm bài hộ","p","Tớ cũng muốn giúp cậu lắm, nhưng mai tớ có bài kiểm tra quan trọng, tối nay cần tập trung ôn thật sự. Tớ không làm bài hộ cậu được đâu. Nếu sau kỳ thi cậu vẫn chưa hiểu dạng bài này thì tụi mình học nhóm với nhau nha."],
+["Nhắc bạn cùng phòng dọn dẹp (OTFD)","p","Bình ơi, tớ thấy tuần này rác chưa dọn, sàn nhà cũng bừa bộn quá. Tớ nghĩ cứ để vậy chắc phòng mình mất vệ sinh mất. Nói thật là điều đó làm tớ hơi căng thẳng, khó tập trung học lắm. Từ tuần sau mình quay lại đúng lịch dọn dẹp như đã hẹn nha?"],
+["Gặp thầy cô chủ nhiệm khi bị điểm kém","f","Dạ em chào thầy/cô ạ, em muốn xin tư vấn một chút về việc học của em. Kỳ này em bị điểm không tốt môn Toán, mà đây lại là môn khá quan trọng cho các môn sau nên em hơi lo. Thầy/cô có thể hướng dẫn em cách cải thiện hoặc sắp xếp lại kế hoạch học kỳ tới không ạ?"],
+["Phản bác bình luận định kiến trên nhóm chat","p","Mình tôn trọng ý kiến của bạn, nhưng câu này nghe hơi định kiến quá, không đúng với thực tế đâu. Học giỏi hay không nằm ở cách mình tư duy và cố gắng, chứ không phải do là con trai hay con gái. Thôi mình cứ nhìn vào kết quả bài làm thực tế của từng người cho công bằng nha."],
+["Xin lỗi quản lý vì trễ báo cáo","f","Em chào anh Lâm, em xin lỗi vì gửi báo cáo trễ so với hạn 5 giờ chiều nay, tại em quên mất thời gian ạ. Em gửi lại báo cáo đầy đủ đây ạ. Em đã cài nhắc nhở trên điện thoại rồi, để lần sau không bị trễ nữa."],
+["Điều phối lại công việc khi lập thỏa thuận nhóm","p","Cảm ơn cậu đã xung phong thuyết trình nha, nhưng theo thỏa thuận nhóm mình đã thống nhất thì mỗi người nên làm đều cả hai phần: nghiên cứu và trình bày, để ai cũng được rèn kỹ năng và điểm chia đều công bằng. Hay mình chia đôi phần thuyết trình lần này được không?"],
+["Kêu gọi tham gia câu lạc bộ tình nguyện","e","Tham gia hoạt động tình nguyện không chỉ là làm việc thiện đâu nha. Đây còn là cơ hội để mình rèn kỹ năng mềm, quen thêm nhiều bạn mới, và trưởng thành hơn mỗi ngày. Đừng ngại nữa, hãy bước ra khỏi lớp học và hành động ngay hôm nay để tạo nên điều khác biệt cho cộng đồng của mình!"],
+["Hỏi phòng đào tạo về đăng ký học phần","f","Dạ em chào cô ạ, em muốn hỏi về đăng ký học phần kỳ này. Em bị trùng lịch hai môn, không biết em có thể đổi sang lớp khác trong tuần này không ạ? Em cảm ơn cô."],
+["Phỏng vấn vào câu lạc bộ","f","Em chào các anh chị, em là Lan, sinh viên năm nhất. Em muốn vào câu lạc bộ để học hỏi và đóng góp. Em có thể quản lý thời gian tốt và luôn sẵn sàng làm việc nhóm."],
+["Mở đầu bài thuyết trình nhóm","e","Xin chào cả lớp! Hôm nay nhóm em xin trình bày về chủ đề rác thải nhựa. Các bạn thử nghĩ xem, mỗi ngày mình dùng bao nhiêu túi ni lông mà không hề để ý?"],
+["Chào hỏi thầy cô khi gặp ở sân trường","f","Em chào thầy ạ! Dạ em vừa nộp bài tập hôm qua, nếu có chỗ nào chưa đúng thầy cứ nhắc em nha. Chúc thầy một ngày làm việc vui vẻ ạ."],
+["Hỏi bài thầy cô sau giờ học","f","Dạ thầy ơi, em xin phép hỏi một chút ạ. Phần công thức ở bài hôm nay em vẫn chưa hiểu vì sao lại biến đổi như vậy. Thầy giải thích lại giúp em được không ạ?"],
+["Xin nghỉ học vì việc gia đình","w","Dạ em chào cô ạ. Ngày mai gia đình em có việc đột xuất nên em xin phép nghỉ một buổi. Em sẽ nhờ bạn ghi bài giúp và tự học bù ngay ạ. Em cảm ơn cô."],
+["Nhờ bạn chia sẻ tài liệu học tập","f","Linh ơi, hôm qua tớ nghỉ học nên chưa có bài giảng. Cậu cho tớ mượn tài liệu hoặc gửi ảnh chụp giúp tớ được không? Tớ cảm ơn cậu nhiều nha."],
+["Cảm ơn bạn đã giúp đỡ","w","Thật sự cảm ơn cậu nhiều lắm. Nếu hôm qua không có cậu giải thích bài, chắc tớ không kịp nộp đâu. Lần sau cậu cần gì cứ nói tớ nha, tớ rất sẵn lòng giúp."],
+["Chúc mừng bạn đạt học bổng","e","Chúc mừng cậu nha! Tớ vui lắm luôn đó! Cậu đã cố gắng rất nhiều suốt cả năm, học bổng này hoàn toàn xứng đáng. Tối nay tụi mình đi ăn mừng nhé!"],
+["Xin lỗi bạn vì lỡ hẹn","w","Mai ơi, tớ xin lỗi vì hôm qua đã không đến đúng hẹn. Tớ quên mất lịch và để cậu chờ lâu. Cậu đừng giận tớ nha, hôm nay tớ mời cậu ly trà sữa nhé."],
+["Từ chối lời rủ đi chơi để ôn bài","p","Cảm ơn cậu đã rủ tớ nha, nhưng tối nay tớ phải ôn bài cho kỳ thi tuần sau. Tớ xin phép không đi được. Lần sau xong thi, tụi mình đi chơi thoải mái nhé."],
+["Nhắc bạn trong nhóm ít đóng góp","p","Tuấn ơi, tớ thấy mấy buổi gần đây cậu chưa gửi phần việc của mình. Nhóm đang cần để hoàn thành kịp hạn. Cậu cho tụi tớ biết khi nào xong được không?"],
+["Báo cáo tiến độ cho nhóm trưởng","f","Chào cậu, tớ báo cáo tiến độ nhé. Phần tìm tài liệu tớ đã xong rồi, còn phần viết tớ hoàn thành khoảng bảy mươi phần trăm. Chiều mai tớ sẽ gửi bản đầy đủ."],
+["Giữ tinh thần nhóm trước hạn nộp","e","Mọi người ơi, chỉ còn hai ngày nữa thôi! Tụi mình đã làm được hơn nửa rồi, cố thêm chút nữa là xong. Cùng nhau cố gắng nhé, tụi mình làm được mà!"],
+["Xin thầy viết thư giới thiệu","f","Dạ em chào thầy ạ. Em đang nộp hồ sơ xin học bổng và cần một thư giới thiệu. Em xin phép nhờ thầy hỗ trợ ạ. Em sẽ gửi thầy bản thành tích để tiện tham khảo."],
+["Hỏi phòng công tác sinh viên về học bổng","f","Em chào anh chị ạ. Em muốn tìm hiểu về học bổng khuyến khích học tập của trường. Anh chị cho em hỏi điều kiện xét và thời hạn nộp hồ sơ như thế nào ạ?"],
+["Trao đổi với chủ nhà trọ về tiền điện","p","Dạ cô ơi, con xem hóa đơn thấy tiền điện tháng này cao hơn mọi khi nhiều ạ. Cô cho con xin xem lại số điện được không ạ? Con muốn kiểm tra cho chính xác."],
+["Nhờ bạn cùng phòng giữ yên lặng giờ ôn bài","p","Bình ơi, tối nay tớ ôn thi nên cần yên tĩnh một chút. Cậu có thể nghe nhạc bằng tai nghe hoặc nói nhỏ lại giúp tớ không? Cảm ơn cậu nhiều nha."],
+["Báo mất đồ cho bảo vệ ký túc xá","u","Dạ chú ơi, cháu vừa bị mất ví ở sảnh ký túc xá, trong đó có thẻ sinh viên. Chú giúp cháu xem camera hoặc ghi lại thông tin giúp cháu ngay được không ạ?"],
+["Báo trễ giờ học vì kẹt xe","u","Alo cô ạ, em xin lỗi vì em đang bị kẹt xe nên sẽ vào lớp muộn khoảng mười phút. Em sẽ cố gắng đến nhanh nhất có thể. Em xin lỗi cô nhiều ạ."],
+["Hỏi thầy cô về điểm thi","f","Dạ em chào cô ạ. Em xin phép hỏi về điểm bài thi giữa kỳ, em thấy điểm hơi thấp so với dự đoán. Em có thể xem lại bài làm để biết mình sai ở đâu không ạ?"],
+["Phản biện ý kiến trong buổi thảo luận","p","Mình hiểu quan điểm của bạn, nhưng mình xin có ý kiến khác. Theo số liệu mà nhóm mình tìm được thì kết quả không như vậy. Bạn thử xem lại nguồn này nhé."],
+["Đặt câu hỏi cho diễn giả","f","Dạ em chào diễn giả. Em rất ấn tượng với phần chia sẻ của anh. Em xin hỏi, nếu là sinh viên mới ra trường thì nên bắt đầu rèn kỹ năng nào trước ạ?"],
+["Động viên bạn thi chưa đạt","w","Tớ biết cậu đang buồn lắm, nhưng một lần chưa đạt không có nghĩa là cậu kém đâu. Mình cùng xem lại phần sai rồi ôn lại nhé, tớ sẽ học cùng cậu."],
+["Giới thiệu câu lạc bộ trong ngày hội","e","Chào các bạn! Đến với câu lạc bộ tiếng Anh tụi mình, các bạn sẽ được luyện nói mỗi tuần, chơi trò chơi và làm quen thật nhiều bạn mới. Đăng ký ngay nhé!"],
+["Mời bạn tham gia nhóm học","e","Này, tụi tớ đang lập nhóm học Toán mỗi tối thứ Ba, vui lắm. Cậu tham gia cùng tụi tớ nha, mình cùng nhau giải bài và giúp nhau tiến bộ!"],
+["Xin phép ba mẹ đi trại hè","w","Ba mẹ ơi, con muốn xin đi trại hè của trường trong ba ngày. Có thầy cô đi cùng, con sẽ giữ liên lạc mỗi tối. Ba mẹ cho con đi nha, con cảm ơn ba mẹ."],
+["Thuyết phục ba mẹ cho đi học thêm","w","Ba mẹ ơi, con thấy môn Anh văn của con còn yếu nên con muốn đăng ký lớp học thêm. Học phí con đã tìm hiểu rồi, con sẽ cố gắng học thật nghiêm túc ạ."],
+["Xin giảm ca làm thêm gần kỳ thi","f","Em chào chị ạ. Tuần sau trường em bắt đầu thi nên em xin phép giảm hai ca làm trong tuần. Em sẽ sắp xếp làm bù sau kỳ thi ạ. Em cảm ơn chị."],
+["Phỏng vấn xin việc làm thêm","f","Em chào anh ạ, em là sinh viên năm hai. Em có thể làm vào buổi tối và cuối tuần. Em chăm chỉ, biết lắng nghe và sẵn sàng học hỏi nhanh. Em cảm ơn anh đã cho em cơ hội."],
+["Chốt lịch họp nhóm","p","Mọi người ơi, tụi mình chốt lịch họp là bảy giờ tối thứ Năm tại thư viện nha. Ai có việc bận thì báo trong nhóm trước trưa mai để mình sắp xếp lại."],
+["MC dẫn chương trình văn nghệ lớp","e","Xin chào tất cả các bạn thân mến! Chào mừng mọi người đến với đêm văn nghệ của lớp mình. Hãy dành những tràng pháo tay thật lớn cho tiết mục đầu tiên nào!"],
+["Tổng kết dự án trước lớp","e","Đến đây, nhóm em xin kết thúc phần trình bày. Qua dự án này, tụi em học được cách làm việc nhóm và quản lý thời gian. Cảm ơn thầy cô và các bạn đã lắng nghe!"],
+["Hướng dẫn bạn mới làm quen trường","w","Chào cậu, chào mừng cậu đến lớp mình nha! Cậu cứ hỏi tớ nếu cần gì, căn tin ở tầng một, thư viện bên tay phải. Từ từ rồi cậu sẽ quen thôi."],
+["Khen ngợi bạn trong nhóm","e","Phần thuyết trình của cậu hôm nay hay lắm! Cậu nói rõ ràng, tự tin và ví dụ rất dễ hiểu. Cả nhóm tự hào về cậu đó, cảm ơn cậu nhiều nha!"],
+["Góp ý lịch học với giáo vụ","f","Dạ em chào thầy ạ. Em xin góp ý là lịch học của lớp em dồn nhiều môn vào hai ngày nên hơi nặng. Thầy xem xét giãn lịch ra giúp tụi em được không ạ?"],
+["Từ chối khi bị rủ gian lận","p","Tớ không giúp cậu được đâu, chép bài như vậy là gian lận. Nếu cậu cần, tớ sẵn sàng ngồi cùng giải thích bài để cậu tự làm. Còn cách kia thì tớ xin không tham gia."],
+["Báo sự cố phòng máy với thầy","u","Thưa thầy, máy số năm ở phòng thực hành bị mất nguồn và có mùi khét. Em đã tắt và rút điện rồi ạ. Thầy đến kiểm tra giúp tụi em ngay nhé."],
+["Hỏi thăm bạn có dấu hiệu buồn bã","w","Dạo này tớ thấy cậu hơi ít nói, tớ lo cho cậu lắm. Nếu cậu muốn chia sẻ thì tớ luôn sẵn sàng nghe, không vội đâu. Có gì cứ nói với tớ nha."],
+["Lời cảm ơn thầy cô cuối học kỳ","w","Em xin gửi lời cảm ơn chân thành đến thầy cô. Nhờ sự hướng dẫn tận tình, tụi em học được rất nhiều điều. Chúc thầy cô thật nhiều sức khỏe và niềm vui ạ."],
+["Xin phát biểu trong buổi họp trực tuyến","f","Dạ em xin phép góp ý một chút ạ. Em thấy phương án thứ hai khả thi hơn vì tiết kiệm thời gian. Nếu mọi người đồng ý, em xin trình bày thêm lý do."],
+["Báo mất kết nối khi học online","u","Dạ cô ơi, mạng nhà em bị chập chờn nên em bị rớt khỏi lớp. Em đang kết nối lại ngay ạ. Cô cho em xin lại phần cô vừa giảng nhé."],
+["Nhắn tin thoại nhờ bạn chép bài","w","Chi ơi, hôm nay tớ bị đau đầu nên xin về sớm. Cậu chép giúp tớ phần cuối tiết Văn nhé. Mai tớ mời cậu uống nước để cảm ơn nha."],
+["Dẫn livestream giới thiệu câu lạc bộ","e","Xin chào các bạn đang xem trực tiếp! Hôm nay câu lạc bộ mình có rất nhiều hoạt động thú vị. Các bạn ở nhà đừng rời đi nhé, bình luận ngay để nhận quà!"],
+["Nhắc bạn tắt mic khi đang họp","p","Hưng ơi, mic của cậu đang bật và mọi người nghe thấy tiếng ồn nè. Cậu tắt mic giúp tụi mình, khi nào phát biểu thì bật lại nhé."],
+["Tranh luận: có nên mặc đồng phục không","p","Theo quan điểm của em, đồng phục giúp học sinh bình đẳng và tạo nề nếp. Em đồng ý rằng mỗi người có cá tính riêng, nhưng lợi ích chung vẫn quan trọng hơn."],
+["Tranh luận: học online hay học trực tiếp","p","Em cho rằng học trực tiếp hiệu quả hơn vì có tương tác ngay với thầy cô và bạn bè. Học online tiện lợi, nhưng dễ mất tập trung nếu thiếu kỷ luật."],
+["Đồng ý một phần ý kiến của đối phương","f","Em đồng ý với bạn ở điểm học thêm giúp củng cố kiến thức. Tuy nhiên, nếu học quá nhiều thì không còn thời gian tự học, và đó mới là điều em lo ngại."],
+["Yêu cầu dẫn chứng khi tranh luận","p","Bạn nói rằng đa số sinh viên không đọc sách, vậy bạn dựa trên khảo sát nào? Mình muốn xem nguồn số liệu để cùng đánh giá cho chính xác."],
+["Chốt lại phần tranh luận","f","Tóm lại, hai bên đều có lý lẽ riêng. Điểm chung là cùng muốn học tập hiệu quả hơn. Vậy mình thử kết hợp cả hai cách trong một học kỳ rồi đánh giá lại nhé."],
+["Trình bày số liệu khảo sát","f","Theo khảo sát của nhóm em với một trăm bạn, có sáu mươi lăm phần trăm ngủ dưới bảy tiếng mỗi đêm. Con số này cho thấy thiếu ngủ là vấn đề khá phổ biến."],
+["Mô tả biểu đồ trước lớp","f","Mọi người nhìn vào biểu đồ này nhé. Cột màu xanh là điểm trung bình học kỳ một, cột màu cam là học kỳ hai. Có thể thấy điểm đã tăng đáng kể."],
+["Mở đầu thuyết trình bằng một câu hỏi","e","Các bạn thử đoán xem, một người trẻ nhìn vào điện thoại bao nhiêu lần mỗi ngày? Câu trả lời có thể làm các bạn bất ngờ đó, và đó là chủ đề của hôm nay!"],
+["Chuyển ý giữa các phần thuyết trình","f","Vậy là chúng ta đã cùng tìm hiểu nguyên nhân của vấn đề. Bây giờ, nhóm em xin chuyển sang phần tiếp theo, đó là những giải pháp cụ thể mà mình có thể áp dụng."],
+["Kết luận thuyết trình bằng lời kêu gọi","e","Thay đổi không đến từ những điều lớn lao, mà bắt đầu từ hành động nhỏ mỗi ngày. Hãy cùng nhau phân loại rác ngay từ hôm nay. Em xin cảm ơn các bạn!"],
+["Chào bạn quốc tế, nói chậm rãi","w","Chào bạn, mình là Nam. Rất vui được làm quen với bạn. Nếu mình nói nhanh quá, bạn cứ nhắc mình nhé, mình sẽ nói chậm lại cho bạn dễ nghe."],
+["Chỉ đường cho du học sinh","w","Bạn đi thẳng đến hết con đường này, sau đó rẽ phải. Thư viện là tòa nhà màu vàng bên tay trái. Nếu bạn bị lạc, cứ gọi cho mình nhé, mình sẽ đến đón."],
+["Giới thiệu Tết với bạn nước ngoài","e","Tết là dịp lễ lớn nhất của người Việt! Gia đình sum họp, ăn bánh chưng, và trẻ em được nhận lì xì. Nếu có dịp, mình mời bạn về nhà mình đón Tết nhé!"],
+["Hỏi bạn nước ngoài về trường của họ","f","Mình rất tò mò về trường đại học của bạn. Bạn học ngành gì, và một ngày học của bạn diễn ra như thế nào? Mình muốn tìm hiểu thêm để so sánh với trường mình."],
+["Nhờ bạn nhắc lại vì chưa nghe rõ","w","Xin lỗi bạn, mình chưa nghe rõ lắm. Bạn có thể nói lại chậm hơn một chút được không? Mình muốn hiểu chính xác để không bị nhầm lẫn."],
+["Xin làm bài bù sau khi vắng thi","f","Dạ em chào thầy ạ. Hôm thi giữa kỳ em bị ốm nên không dự thi được. Em xin phép làm bài thi bù vào thời gian thầy thấy thuận tiện ạ. Em cảm ơn thầy."],
+["Đề nghị đổi phân công trong nhóm","p","Mình nghĩ phần thiết kế nên giao cho Hoa vì bạn ấy làm rất tốt. Còn mình sẽ nhận phần số liệu. Mọi người thấy cách chia này hợp lý không?"],
+["Báo tin dự án gặp sự cố","u","Mọi người ơi, mình báo gấp nhé. File dự án bị lỗi và mất phần cập nhật hôm qua. Mình đang khôi phục bản cũ, mọi người đừng chỉnh sửa gì thêm giúp mình."],
+["Nhận lỗi khi làm hỏng đồ của bạn","w","Dũng ơi, tớ xin lỗi, tớ lỡ làm rơi tai nghe của cậu và nó bị hỏng rồi. Tớ sẽ đền cho cậu cái mới, cậu đừng buồn tớ nhé."],
+["Cảm ơn nhà tuyển dụng sau phỏng vấn","f","Em xin cảm ơn anh chị đã dành thời gian phỏng vấn em hôm nay. Em rất hứng thú với vị trí này và mong có cơ hội làm việc cùng đội ngũ. Em chúc anh chị một ngày tốt lành."],
+["Hỏi thầy về nghiên cứu khoa học","f","Dạ thầy ơi, em rất quan tâm đến nghiên cứu khoa học. Em muốn hỏi thầy có đề tài nào phù hợp với sinh viên năm hai không ạ? Em sẵn sàng học hỏi thêm."],
+["Mời thầy cô dự lễ tổng kết","f","Kính thưa thầy cô, lớp em xin trân trọng kính mời thầy cô tham dự lễ tổng kết vào sáng thứ Bảy. Sự hiện diện của thầy cô là niềm vinh dự của tụi em ạ."],
+["Phát biểu khi nhận giải","e","Em xin cảm ơn ban tổ chức, thầy cô và cả nhóm! Giải thưởng này là thành quả của rất nhiều đêm làm việc cùng nhau. Em xin dành tặng nó cho tất cả mọi người!"],
+["Cổ vũ đội thể thao của lớp","e","Cả đội ơi, hít thở thật sâu nào! Tụi mình đã tập luyện rất chăm chỉ rồi. Dù thắng hay thua, hãy chơi hết mình và tận hưởng trận đấu nhé!"],
+["An ủi bạn nhớ nhà","w","Tớ hiểu cảm giác xa nhà khó chịu thế nào. Cậu cứ gọi về cho gia đình nhiều hơn nha. Cuối tuần này tụi mình đi dạo cho đỡ buồn, có tớ ở đây mà."],
+["Nhắc bạn giữ yên lặng trong thư viện","p","Bạn ơi, mình xin lỗi làm phiền, nhưng bạn nói chuyện hơi to và mọi người đang học bài. Bạn giúp mình nói nhỏ lại hoặc ra ngoài nói chuyện nhé. Cảm ơn bạn."],
+["Từ chối cho bạn mượn tiền nhiều lần","p","Tớ xin lỗi, lần này tớ không cho cậu mượn được nữa. Tớ cũng phải giữ tiền sinh hoạt tháng này. Nếu cậu khó khăn thật, mình cùng nghĩ cách khác nhé."],
+["Xin mượn phòng học để họp nhóm","f","Em chào cô ạ, nhóm em muốn xin mượn phòng học B203 vào chiều thứ Tư để họp và luyện thuyết trình. Nhóm em sẽ giữ gìn và dọn dẹp sạch sẽ ạ."],
+["Gọi cấp cứu cho bạn bị ngất","u","Alo, cấp cứu ạ! Ở sân trường có một bạn học sinh bị ngất, thở yếu. Địa chỉ là trường trung học số một. Xin xe đến ngay giúp em, em đang ở cạnh bạn."],
+["Hòa giải hai bạn đang giận nhau","w","Hai cậu bình tĩnh một chút nha. Tớ nghĩ chỉ là hiểu lầm thôi. Mỗi người hãy nói cảm nhận của mình, tụi mình cùng nghe và tìm cách giải quyết nhé."],
+["Thông báo thay đổi lịch cho cả lớp","f","Thông báo đến cả lớp. Buổi học thứ Sáu được chuyển sang thứ Bảy, vẫn tại phòng cũ, bắt đầu lúc tám giờ. Bạn nào không tham gia được hãy báo với mình trước tối nay."],
+["Phát biểu ứng cử lớp trưởng","e","Chào các bạn, mình là Khánh. Mình ứng cử lớp trưởng vì muốn xây dựng một lớp đoàn kết và năng động. Hãy tin tưởng và đồng hành cùng mình nhé. Xin cảm ơn!"],
+["Trả lời phỏng vấn về điểm yếu","f","Điểm yếu của em là đôi khi còn hồi hộp khi nói trước đám đông. Em đang khắc phục bằng cách luyện tập thuyết trình mỗi tuần, và thấy mình tiến bộ rõ rệt."],
+["Chia sẻ mục tiêu năm học","e","Mục tiêu của em trong năm học này là đạt điểm trung bình trên tám phẩy năm và tham gia ít nhất một câu lạc bộ. Em tin rằng mình sẽ làm được!"],
+["Lời chia tay ngày tốt nghiệp","w","Bốn năm qua đã trôi qua thật nhanh. Cảm ơn thầy cô và các bạn đã đồng hành cùng mình. Dù đi đâu, mình mong chúng ta vẫn luôn nhớ về nhau."]];
+
+const $=id=>document.getElementById(id),hint=m=>{$("hint").textContent=m};
+const E=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");
+let best={};try{best=JSON.parse(localStorage.g5||"{}")}catch(e){}
+const save=()=>{try{localStorage.g5=JSON.stringify(best)}catch(e){}};
+const stars=s=>s>=90?"⭐⭐⭐":s>=75?"⭐⭐":s>=55?"⭐":"☆";
+const NAMES={all:"Tất cả",new:"Chưa chơi",f:"Lịch sự",w:"Ấm áp",p:"Chắc chắn",e:"Truyền cảm",u:"Khẩn trương"};
+let flt="all",qry="",cur=0,ses=null,busy=false,tok=0,chal=null,aurl=null;
+const pool=()=>{const u=S.map((_,i)=>i).filter(i=>best[i]==null);return u.length>=5?u:S.map((_,i)=>i)};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function showHome(){
+  abort();chal=null;
+  const xp=Object.values(best).reduce((a,b)=>a+b,0);
+  $("stat").textContent=`Đã chơi ${Object.keys(best).length}/${S.length} đề · Tổng điểm ${xp} · Cấp ${1+Math.floor(xp/400)}`;
+  $("home").innerHTML=`<div class="card"><b>Cách chơi:</b> ① Chọn một đề ② Bấm ghi âm và đọc theo dải sáng ③ Xem điểm, biểu đồ và gợi ý cải thiện. Hệ thống chấm tốc độ, ngữ điệu, âm lượng, ngắt nghỉ và độ khớp lời.<br>
+  <button onclick="rand()">🎲 Đề ngẫu nhiên</button><button onclick="challenge()">🏆 Thử thách 5 đề</button><button class="s" onclick="resetAll()">Xóa tiến độ</button>
+  <div><input id="q" type="search" placeholder="Tìm đề theo tên…" value="${E(qry)}" oninput="qry=this.value;list()"></div><div id="chips"></div></div><div class="grid" id="list"></div>`;
+  rand();
+}
+function list(){
+  $("chips").innerHTML=Object.keys(NAMES).map(k=>`<button class="chip${flt==k?" on":""}" onclick="flt='${k}';list()">${NAMES[k]}</button>`).join("");
+  const nq=norm(qry.trim()),r=S.map((s,i)=>[s,i]).filter(([s,i])=>(flt=="all"||(flt=="new"?best[i]==null:s[1]==flt))&&(!nq||norm(s[0]).includes(nq)));
+  $("list").innerHTML=r.length?r.map(([s,i])=>`<div class="item" tabindex="0" role="button" onclick="open_(${i})" onkeydown="if(event.key==='Enter')open_(${i})"><b>Đề ${i+1}</b> ${best[i]!=null?stars(best[i])+" "+best[i]:""}<br>${E(s[0])}</div>`).join(""):'<p class="m">Không có đề phù hợp.</p>';
+}
+function stat(){const xp=Object.values(best).reduce((a,b)=>a+b,0);$("stat").textContent=`Đã chơi ${Object.keys(best).length}/${S.length} đề · Tổng điểm ${xp} · Cấp ${1+Math.floor(xp/400)}`}
+function rand(){const p=pool().filter(i=>i!==cur);open_(p[Math.floor(Math.random()*p.length)])}
+function challenge(){chal={ids:shuffle(pool()).slice(0,5),i:0,sc:[]};open_(chal.ids[0])}
+function cNext(){chal.i++;open_(chal.ids[chal.i])}
+function cEnd(){const s=chal.ids.map((_,j)=>chal.sc[j]||0),avg=Math.round(s.reduce((a,b)=>a+b,0)/s.length);
+  $("res").innerHTML=`<div class="big">🏆 ${avg}/100 ${stars(avg)}</div><p class="m" style="text-align:center">Tổng kết thử thách 5 đề</p>`+chal.ids.map((id,j)=>`<div>Đề ${id+1}: ${E(S[id][0])} — <b>${s[j]}</b></div>`).join("")+`<button onclick="challenge()">🏆 Thử thách mới</button><button class="s" onclick="rand()">🎲 Đề ngẫu nhiên</button>`}
+function resetAll(){if(confirm("Xóa toàn bộ điểm đã lưu?")){best={};save();showHome()}}
+
+function open_(i){
+  abort();cur=i;const [t,k,x]=S[i],p=P[k],w=x.trim().split(/\s+/).length;
+  $("home").classList.add("hide");$("play").classList.remove("hide");$("res").classList.add("hide");
+  $("ttl").textContent=`Đề ${i+1}${chal?` · Thử thách ${chal.i+1}/5`:""}: ${t}`;$("txt").innerHTML=x.trim().split(/\s+/).map((w,i)=>`<span id="w${i}">${E(w)}</span>`).join(" ");$("tip").textContent="💡 "+T[k];
+  $("tags").innerHTML=`<span class="chip">Giọng: ${p[0]}</span><span class="chip">${w} từ</span><span class="chip">Tốc độ ${p[1]}–${p[2]} tiếng/phút</span><span class="chip">Ngữ điệu ${p[3]}–${p[4]} bán cung</span>`;
+  $("clock").textContent="0:00 / 0:30";$("prog").style.width="0";$("meter").firstElementChild.style.width="0";
+  hint("Đọc thầm một lượt, rồi bấm ghi âm và đọc tự nhiên như đang nói thật.");
+  $("go").disabled=false;$("go").textContent="⏺ Bắt đầu ghi âm";$("go").classList.remove("hide");$("stp").classList.add("hide");window.scrollTo(0,0);
+}
+
+// ---- ghi âm + phân tích ----
+function pitch(b,sr){
+  let n=b.length,e=0;for(let i=0;i<n;i++)e+=b[i]*b[i];
+  if(e/n<1e-5)return 0;
+  const lo=Math.floor(sr/400),hi=Math.floor(sr/70);let bs=0,bl=0;
+  for(let l=lo;l<=hi;l++){let s=0;for(let i=0;i<n-l;i++)s+=b[i]*b[i+l];if(s>bs){bs=s;bl=l}}
+  return bs/e>0.4?sr/bl:0;
+}
+const cleanup=s=>{s.stream.getTracks().forEach(t=>t.stop());try{s.ac.close()}catch(e){}};
+function abort(){tok++;busy=false;if(ses){const s=ses;ses=null;clearInterval(s.iv);try{s.mr.onstop=null;s.mr.stop()}catch(e){}try{s.rec&&s.rec.abort()}catch(e){}cleanup(s)}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function start(){
+  if(busy||ses)return;busy=true;const my=++tok;$("go").disabled=true;$("res").classList.add("hide");
+  let stream;
+  try{if(!window.MediaRecorder)throw 0;stream=await navigator.mediaDevices.getUserMedia({audio:{autoGainControl:false}})}
+  catch(e){hint("Không dùng được micro. Hãy cho phép micro và dùng Chrome/Edge. Nếu khung xem thử chặn micro, hãy chạy bản zip bằng http://localhost (xem README).");busy=false;$("go").disabled=false;return}
+  if(my!==tok){stream.getTracks().forEach(t=>t.stop());return}
+  for(let n=3;n>0;n--){hint("Chuẩn bị… "+n);await sleep(800);if(my!==tok){stream.getTracks().forEach(t=>t.stop());return}}
+  const ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.resume)ac.resume();
+  const an=ac.createAnalyser();an.fftSize=2048;ac.createMediaStreamSource(stream).connect(an);
+  const buf=new Float32Array(an.fftSize),frames=[],chunks=[],mr=new MediaRecorder(stream),t0=performance.now();
+  mr.ondataavailable=e=>chunks.push(e.data);mr.start();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let tr="",rec=null;
+  if(SR){try{rec=new SR();rec.lang="vi-VN";rec.continuous=true;rec.interimResults=false;
+    rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)tr+=" "+e.results[i][0].transcript};
+    rec.onend=()=>{if(ses&&ses.rec===rec){try{rec.start()}catch(e){}}};rec.onerror=()=>{};rec.start()}catch(e){rec=null}}
+  const [,kk,xx]=S[cur],pc=(P[kk][1]+P[kk][2])/2,WN=xx.trim().split(/\s+/).length;let lit=0;
+  const iv=setInterval(()=>{
+    an.getFloatTimeDomainData(buf);let s=0;for(const v of buf)s+=v*v;
+    const db=10*Math.log10(s/buf.length+1e-10),t=performance.now()-t0;frames.push({t,db,f0:pitch(buf,ac.sampleRate)});
+    $("meter").firstElementChild.style.width=Math.max(0,Math.min(100,(db+60)*2))+"%";
+    const sec=t/1000;$("clock").textContent=Math.floor(sec/60)+":"+String(Math.floor(sec%60)).padStart(2,"0")+" / 0:30";
+    $("prog").style.width=Math.min(100,sec/30*100)+"%";
+    const ix=Math.min(WN,Math.floor(sec*pc/60));while(lit<ix){const w=$("w"+lit);if(w)w.classList.add("rd");lit++}if(sec>=45)stop();
+  },50);
+  ses={stream,ac,iv,mr,frames,chunks,rec,get tr(){return tr}};
+  $("go").classList.add("hide");$("stp").classList.remove("hide");hint("Đang ghi âm… đọc hết bản mẫu rồi bấm dừng.");
+}
+function stop(){
+  if(!ses)return;const s=ses;ses=null;clearInterval(s.iv);busy=false;
+  try{s.rec&&s.rec.stop()}catch(e){}
+  s.mr.onstop=()=>{cleanup(s);setTimeout(()=>result(s.frames,new Blob(s.chunks,{type:s.mr.mimeType}),s.tr),s.rec?900:0)};
+  try{s.mr.stop()}catch(e){cleanup(s)}
+  $("stp").classList.add("hide");$("go").classList.remove("hide");$("go").disabled=false;$("go").textContent="🔁 Ghi âm lại";hint("Đang chấm điểm…");
+}
+
+// ---- chấm điểm ----
+const pct=(a,q)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(q*s.length))]};
+const sc=(v,lo,hi,tol)=>v>=lo&&v<=hi?100:Math.max(0,100-100*(v<lo?lo-v:v-hi)/tol);
+const cl=x=>Math.max(0,Math.min(100,x));
+const btns=()=>chal?(chal.i<chal.ids.length-1?`<button onclick="cNext()">➡ Đề tiếp (${chal.i+2}/${chal.ids.length})</button>`:`<button onclick="cEnd()">🏁 Xem tổng kết</button>`)+`<button class="s" onclick="open_(cur)">🔁 Luyện lại</button>`
+  :`<button onclick="open_(cur)">🔁 Luyện lại</button><button onclick="rand()">🎲 Đề ngẫu nhiên tiếp theo</button>`;
+function result(fr,blob,tr){
+  hint("");const [t,k,x]=S[cur],p=P[k],words=x.trim().split(/\s+/).length,r=$("res");r.classList.remove("hide");
+  const fail=m=>{r.innerHTML=`<p>${m}</p>`+btns()};
+  if(!fr.length)return fail("Chưa thu được dữ liệu. Hãy thử lại.");
+  const db=fr.map(f=>f.db),p95=pct(db,.95),thr=Math.max(-58,p95-24),v=db.map(d=>d>thr),a=v.indexOf(true),b=v.lastIndexOf(true);
+  if(p95<-50)return fail("Micro gần như không thu được tiếng. Hãy kiểm tra micro, nói to hơn và thử lại.");
+  if(a<0||fr[b].t-fr[a].t<2500)return fail("Bản ghi quá ngắn. Hãy đọc hết văn bản mẫu rồi mới bấm dừng.");
+  const dur=(fr[b].t-fr[a].t)/1000;let pz=0,longest=0,rs=-1;
+  for(let i=a;i<=b;i++){if(!v[i]){if(rs<0)rs=i}else if(rs>=0){const d=(fr[i].t-fr[rs].t)/1000;longest=Math.max(longest,d);if(d>=.35)pz+=d;rs=-1}}
+  const pauseRatio=pz/dur,pace=words/(dur/60),vd=[],f0=[];
+  for(let i=a;i<=b;i++){if(v[i])vd.push(fr[i].db);if(fr[i].f0>0)f0.push(fr[i].f0)}
+  const vol=vd.reduce((s,d)=>s+d,0)/vd.length;let st=null;
+  if(f0.length>=15){const m=pct(f0,.5),sem=f0.map(f=>12*Math.log2(f/m)),mu=sem.reduce((s,d)=>s+d,0)/sem.length;st=Math.sqrt(sem.reduce((s,d)=>s+(d-mu)**2,0)/sem.length)}
+  const M=[
+   ["Tốc độ nói",pace,p[1],p[2],45,"tiếng/phút",.3,0,p[2]*1.5,pace<p[1]?"Bạn nói hơi chậm, thử đọc liền mạch hơn.":"Bạn nói hơi nhanh, hãy chậm lại để người nghe theo kịp."],
+   ["Ngữ điệu (độ lên xuống)",st,p[3],p[4],2.5,"bán cung",.25,0,p[4]*1.5,st<p[3]?"Giọng khá đều, hãy nhấn mạnh từ khóa và lên/xuống giọng ở cuối câu.":"Giọng lên xuống nhiều, thử giữ ổn định hơn."],
+   ["Âm lượng",vol,-36,-14,14,"dBFS",.2,-60,0,vol<-36?"Giọng hơi nhỏ, hãy nói to và gần micro hơn.":"Giọng hơi to hoặc sát micro, hãy lùi ra một chút."],
+   ["Ngắt nghỉ",pauseRatio*100,8,35,20,"% thời gian",.25,0,52,pauseRatio<.08?"Ít ngắt nghỉ, hãy dừng nhẹ sau dấu phẩy và hết câu.":"Ngắt nghỉ nhiều, thử nối ý mượt hơn."]
+  ].map(m=>({n:m[0],v:m[1],lo:m[2],hi:m[3],s:m[1]==null?null:Math.round(sc(m[1],m[2],m[3],m[4])),u:m[5],w:m[6],mn:m[7],mx:m[8],tip:m[9]}));
+  const dw=x.trim().split(/\s+/),cw=w=>norm(w).replace(/[^a-z0-9]/g,""),ref=dw.map(cw),hy=(tr||"").split(/\s+/).map(cw).filter(Boolean);let accS=null,mark="";
+  if(hy.length>=3){const n=ref.length,m2=hy.length,D=Array.from({length:n+1},()=>new Array(m2+1).fill(0));
+    for(let i=1;i<=n;i++)for(let j=1;j<=m2;j++)D[i][j]=ref[i-1]&&ref[i-1]==hy[j-1]?D[i-1][j-1]+1:Math.max(D[i-1][j],D[i][j-1]);
+    const hit=new Array(n).fill(false);let i=n,j=m2;while(i>0&&j>0){if(ref[i-1]&&ref[i-1]==hy[j-1]){hit[i-1]=true;i--;j--}else if(D[i-1][j]>=D[i][j-1])i--;else j--}
+    accS=Math.round(cl((D[n][m2]/n-.4)/.45*100));mark=dw.map((w,q)=>hit[q]?E(w):`<mark>${E(w)}</mark>`).join(" ")}
+  const ok=M.filter(m=>m.s!=null);if(accS!=null)ok.push({s:accS,w:.15});const total=Math.round(ok.reduce((s,m)=>s+m.s*m.w,0)/ok.reduce((s,m)=>s+m.w,0));
+  if(best[cur]==null||total>best[cur]){best[cur]=total;save();stat()}
+  if(chal)chal.sc[chal.i]=total;
+  window.SoftSyncGameHistory?.append('voice-practice',{title:`Voice Practice · Đề ${cur+1}`,score:total,unit:'/100',summary:`${t} · ${dur.toFixed(1)} giây nói`,metrics:[{label:'Tốc độ',value:`${pace.toFixed(0)} tiếng/phút`},{label:'Ngắt nghỉ',value:`${(pauseRatio*100).toFixed(0)}%`},{label:'Độ khớp lời',value:accS==null?'Chưa đo':`${accS}/100`}],details:M.filter(m=>m.s!=null).map(m=>`${m.n}: ${m.v.toFixed(1)} ${m.u} · ${m.s} điểm`)},'softsync.voice-practice.history.v1');
+  if(aurl)URL.revokeObjectURL(aurl);aurl=URL.createObjectURL(blob);
+  r.innerHTML=`<div class="big">${total}/100 ${stars(total)}</div><p class="m" style="text-align:center">Thời lượng nói ${dur.toFixed(1)}s · quãng nghỉ dài nhất ${longest.toFixed(1)}s${best[cur]===total?" · 🎉 Kỷ lục mới của đề này":` · Điểm cao nhất: ${best[cur]}`}</p>`+
+  (pace>p[2]+70?`<p class="m">⚠️ Tốc độ rất nhanh, có thể bạn đã bỏ sót câu trong văn bản mẫu.</p>`:"")+
+  M.map(m=>{if(m.s==null)return `<div><b>${m.n}:</b> không đủ dữ liệu cao độ (nơi ồn hoặc nói quá nhỏ), chỉ số này không tính điểm.</div>`;
+    const f=y=>cl((y-m.mn)/(m.mx-m.mn)*100);
+    return `<div><b>${m.n}:</b> ${m.v.toFixed(1)} ${m.u} — <b>${m.s}đ</b> <span class="m">(mục tiêu ${m.lo}–${m.hi})</span><div class="bar"><i style="left:${f(m.lo)}%;width:${f(m.hi)-f(m.lo)}%"></i><b style="left:${f(m.v)}%"></b></div>${m.s<85?`<div class="m">💡 ${m.tip}</div>`:""}</div>`}).join("")+
+  (accS!=null?`<div><b>Độ khớp với văn bản mẫu:</b> ${accS}đ<div class="m">Từ chưa nghe khớp được tô màu: ${mark}</div></div>`:`<div class="m">Độ khớp lời: chưa có dữ liệu (trình duyệt không hỗ trợ nhận diện giọng nói hoặc chưa nghe rõ), không tính điểm.</div>`)+`<canvas id="cv" width="640" height="90" style="width:100%;height:90px;margin-top:8px"></canvas><p class="m">Biểu đồ: cột = âm lượng, vạch xanh = cao độ, khoảng thấp = ngắt nghỉ.</p><audio controls src="${aurl}" style="width:100%;margin:10px 0"></audio><p class="m">Lưu ý: các chỉ số mang tính tham khảo; ngữ điệu tiếng Việt bị ảnh hưởng bởi thanh điệu và chất lượng micro.</p>`+btns();
+  try{const c=$("cv"),g=c.getContext("2d"),W=c.width,H=c.height,n=b-a+1,bw=W/n,md=f0.length?pct(f0,.5):1;
+    for(let i=a;i<=b;i++){const X=(i-a)*bw,h=cl((fr[i].db+60)/60*100)/100*H;g.fillStyle=v[i]?"#818cf866":"#8883";g.fillRect(X,H-h,Math.max(1,bw),h);
+      if(fr[i].f0>0){const y=H-cl((12*Math.log2(fr[i].f0/md)+8)/16*100)/100*H;g.fillStyle="#16a34a";g.fillRect(X,y-1.5,Math.max(2,bw),3)}}}catch(e){}
+  r.scrollIntoView({behavior:"smooth"});
+}
+window.addEventListener("pagehide",abort);
+showHome();
+window.SoftSyncGameHistory?.mount({gameKey:'voice-practice',storageKey:'softsync.voice-practice.history.v1',title:'Voice Practice'});
+</script></body></html>
