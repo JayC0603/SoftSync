@@ -31,26 +31,10 @@
         }
         else
         {
-        <a class="@LinkClass("ss-navpill", HomeHref)" href="@HomeHref" aria-current="@CurrentLink(HomeHref)" aria-label="@L["nav.home"]">
-            <i class="bi bi-house-door"></i> <span>@L["nav.home"]</span>
-        </a>
-        <a class="@LinkClass("ss-navpill", "/roadmap")" href="/roadmap" aria-current="@CurrentLink("/roadmap")" aria-label="@L["nav.learn"]">
-            <i class="bi bi-book"></i> <span>@L["nav.learn"]</span>
-        </a>
-        <a class="@LinkClass("ss-navpill", "/progress")" href="/progress" aria-current="@CurrentLink("/progress")" aria-label="@L["nav.progress"]">
-            <i class="bi bi-graph-up-arrow"></i> <span>@L["nav.progress"]</span>
-        </a>
-        <a class="@LinkClass("ss-navpill", "/resources")" href="/resources" aria-current="@CurrentLink("/resources")" aria-label="@L["nav.resources"]">
-            <i class="bi bi-folder"></i> <span>@L["nav.resources"]</span>
-        </a>
-        <a class="@LinkClass("ss-navpill", "/game")" href="/game" aria-current="@CurrentLink("/game")" aria-label="@L.Ui("Mini Game")">
-            <i class="bi bi-controller"></i> <span>@L.Ui("Mini Game")</span>
-        </a>
-        <a class="@LinkClass("ss-navpill", "/assistant")" href="/assistant" aria-current="@CurrentLink("/assistant")" aria-label="SYNCY"><i class="bi bi-chat-heart"></i><span>SYNCY</span></a>
-        <a class="@LinkClass("ss-navpill", "/cv")" href="/cv" aria-current="@CurrentLink("/cv")" aria-label="@L.Ui("Smart CV")"><i class="bi bi-file-earmark-person"></i><span>@(L.Current == AppLanguage.Vi ? "CV thông minh" : "Smart CV")</span></a>
-        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/courses")" href="/courses" aria-current="@CurrentLink("/courses")"><i class="bi bi-journal-bookmark" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Khóa học" : "Courses")</span></a>
-        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/schedule")" href="/schedule" aria-current="@CurrentLink("/schedule")"><i class="bi bi-calendar3" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Lịch cá nhân" : "My schedule")</span></a>
-        <a class="@LinkClass("ss-navpill ss-desktop-integration", "/cv-review")" href="/cv-review" aria-current="@CurrentLink("/cv-review")"><i class="bi bi-file-earmark-check" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Đánh giá CV" : "CV review")</span></a>
+            @foreach (var item in LearnerLinks)
+            {
+                <a class="@LinkClass("ss-navpill", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
+            }
         }
     </div>
 
@@ -67,17 +51,10 @@
     }
     else
     {
-    <a class="@LinkClass("ss-mobile-bottom-link", HomeHref)" href="@HomeHref" aria-current="@CurrentLink(HomeHref)">
-        <i class="bi bi-house-door-fill"></i><span>@L["nav.home"]</span>
-    </a>
-    <a class="@LinkClass("ss-mobile-bottom-link", "/roadmap")" href="/roadmap" aria-current="@CurrentLink("/roadmap")">
-        <i class="bi bi-book"></i><span>@L["nav.learn"]</span>
-    </a>
-    <a class="@LinkClass("ss-mobile-bottom-link", "/progress")" href="/progress" aria-current="@CurrentLink("/progress")">
-        <i class="bi bi-bar-chart-fill"></i><span>@L["nav.progress"]</span>
-    </a>
-    <a class="@LinkClass("ss-mobile-bottom-link", "/cv")" href="/cv" aria-current="@CurrentLink("/cv")"><i class="bi bi-file-earmark-person"></i><span>CV</span></a>
-    <a class="@LinkClass("ss-mobile-bottom-link", "/more")" href="/more" data-route-roots="@NavigationAccessRules.MoreRoutes" aria-current="@CurrentLink("/more")"><i class="bi bi-grid" aria-hidden="true"></i><span>@(L.Current == AppLanguage.Vi ? "Thêm" : "More")</span></a>
+        @foreach (var item in LearnerLinks)
+        {
+            <a class="@LinkClass("ss-mobile-bottom-link", item.Url)" href="@item.Url" aria-current="@CurrentLink(item.Url)" aria-label="@item.Title" data-route-roots="@(item.Url == "/more" ? NavigationAccessRules.MoreRoutes : null)"><i class="bi @item.Icon" aria-hidden="true"></i><span>@item.Title</span></a>
+        }
     }
 </nav>
 }
@@ -433,6 +410,13 @@
     [PersistentState] public int? VerifiedCompletedUser { get; set; }
     private AssessmentAccessStatus DockStatus => Access.Status == AssessmentAccessStatus.Loading
         && VerifiedCompletedUser == Access.UserId ? AssessmentAccessStatus.Complete : Access.Status;
+    private (string Url, string Icon, string Title)[] LearnerLinks => [
+        (HomeHref, "bi-house-door-fill", L["nav.home"]),
+        ("/roadmap", "bi-book", L["nav.learn"]),
+        ("/progress", "bi-bar-chart-fill", L["nav.progress"]),
+        ("/cv", "bi-file-earmark-person", "CV"),
+        ("/more", "bi-grid", L.Current == AppLanguage.Vi ? "Thêm" : "More")
+    ];
     private string HomeHref => isAdmin ? "/admin/dashboard" : authenticated ? "/dashboard" : "/";
     protected override void OnInitialized() { L.OnChanged += StateHasChangedSafe; Access.Changed += StateHasChangedSafe; }
     protected override async Task OnInitializedAsync()

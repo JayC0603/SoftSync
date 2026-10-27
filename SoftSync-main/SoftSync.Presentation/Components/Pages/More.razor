@@ -21,6 +21,9 @@
 @code {
     private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
     private (string Url, string Icon, string Title, string Description)[] Explore => [
+        ("/courses", "bi-journal-bookmark", T("Khóa học", "Courses"), T("Danh sách khóa học và bài học", "Browse courses and lessons")),
+        ("/schedule", "bi-calendar3", T("Lịch cá nhân", "My schedule"), T("Sắp xếp lịch học và công việc", "Plan your study time and tasks")),
+        ("/cv-review", "bi-file-earmark-check", T("Đánh giá CV", "CV review"), T("Nhận góp ý để cải thiện CV", "Get feedback to improve your CV")),
         ("/resources", "bi-folder", T("Tài nguyên", "Resources"), T("Tài liệu, video và công cụ học tập", "Documents, videos and learning tools")),
         ("/game", "bi-controller", T("Trò chơi nhỏ", "Mini games"), T("Học mà chơi, ôn tập kiến thức", "Learn through play and review your knowledge")),
         ("/assistant", "bi-chat-dots", "SYNCY", T("Hỏi đáp và hỗ trợ học tập", "Questions, answers and learning support")),

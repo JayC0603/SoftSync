@@ -85,7 +85,7 @@ public sealed class LearnerAccessState(AuthenticationStateProvider authenticatio
 
 public static class NavigationAccessRules
 {
-    public const string MoreRoutes = "/profile /settings /mentors /mentor-requests /resources /community /game";
+    public const string MoreRoutes = "/profile /settings /mentors /mentor-requests /resources /community /game /assistant /courses /schedule /cv-review";
     public static bool IsMoreRoute(string path) => MoreRoutes.Split(' ').Any(root => Under(path, root));
     private static bool Under(string path, string root) => path.Equals(root, StringComparison.OrdinalIgnoreCase)
         || path.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase);
