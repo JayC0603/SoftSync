@@ -15,7 +15,7 @@ public static class GameHistoryEndpoints
     private const int MaxEntryJsonLength = 50_000;
     private const int MaxRequestBytes = 2_000_000;
     private const string ClearMarkerId = "__clear-marker__";
-    private static readonly HashSet<string> GameKeys = ["inbox-rush", "eisenhower", "focus-fortress"];
+    private static readonly HashSet<string> GameKeys = ["inbox-rush", "eisenhower", "focus-fortress", "day-tetris", "luat-an", "voice-practice"];
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static void MapGameHistoryEndpoints(this WebApplication app)
