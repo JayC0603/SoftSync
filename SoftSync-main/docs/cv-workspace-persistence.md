@@ -2,8 +2,10 @@
 
 The `/cv` workspace stores PDF/TXT originals, extracted text, and saved bilingual
 reviews in PostgreSQL, scoped to the signed-in account. CV uploads are committed
-immediately. Press **Save** on a completed analysis to retain its scores, feedback,
-and the JD. Signing out, closing the browser, or restarting the application does
+immediately. Completed analyses automatically save their scores, feedback,
+and the JD before leaving the result screen. If saving fails, the result stays
+visible and **Save** retries the same review without duplicating it.
+Signing out, closing the browser, or restarting the application does
 not remove these records when PostgreSQL is configured.
 
 The original file can be downloaded from its library card. The download endpoint
@@ -31,3 +33,5 @@ reviews. Reviews retain the CV name and JD after their source document is delete
 original-file integrity, account isolation, preserving reviews after deleting a
 CV, idempotent review saves, and invalid uploads. The tests use EF InMemory;
 PostgreSQL migration execution must also succeed on the deployment database.
+`CvReviewHistoryTests` exercises the analysis action itself: automatic persistence,
+reopening, account isolation, and retrying a failed automatic save.

@@ -1,0 +1,70 @@
+/* Registration content only; account controls and the shared footer keep their layout. */
+html body .registration-welcome {
+    --welcome-ink: #0d235a; --welcome-blue: #0873ff; --welcome-muted: #697d9f; --welcome-line: #dce9ff;
+    width: 100%; max-width: 640px; margin-inline: auto; padding: clamp(22px, 4vw, 40px);
+    border: 1px solid #fff; border-radius: 30px; color: var(--welcome-ink);
+    background: linear-gradient(135deg, #ffffffed, #f8fbfff2);
+    box-shadow: 0 20px 60px #4488df16;
+}
+.registration-illustration { display: block; width: min(360px, 100%); height: auto; max-height: 220px; margin: 0 auto 12px; }
+.registration-heading { text-align: left; }
+.registration-eyebrow { color: #5893ff; font-size: 11px; font-weight: 750; line-height: 1.5; letter-spacing: .18em; }
+html body .registration-welcome .registration-heading .registration-title { margin: 10px 0 16px; color: var(--welcome-ink); font-size: clamp(26px, 4.8vw, 42px); font-weight: 750; line-height: 1.13; letter-spacing: -1.1px; }
+html body .registration-welcome .registration-heading .registration-title span { color: var(--welcome-blue); }
+html body .registration-welcome .registration-intro { margin: 0 0 24px; color: var(--welcome-muted); font-size: 17px; line-height: 1.55; }
+.registration-notice { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding: 16px; border: 1px solid #d5e5ff; border-radius: 16px; background: #edf5ffb3; }
+.registration-notice > i { flex: 0 0 auto; color: var(--welcome-blue); font-size: 25px; }
+html body .registration-welcome .registration-notice p { margin: 0; color: var(--welcome-muted); font-size: 14px; line-height: 1.55; }
+html body .registration-welcome .registration-primary .external-google,
+html body main#ss-auth-page.auth-register .registration-welcome .external-google {
+    display: grid; grid-template-columns: 40px minmax(0, 1fr) 22px; align-items: center; gap: 12px;
+    width: 100%; min-height: 62px; height: auto; padding: 10px 16px !important;
+    border: 1px solid #5aa8ff !important; border-radius: 40px !important;
+    color: #fff !important; background: linear-gradient(110deg, #0569ff, #2a99ff) !important;
+    box-shadow: 0 12px 24px #196fff25; font-size: 16px !important; font-weight: 700; line-height: 1.3;
+}
+.registration-primary .external-google::after { content: '→'; font-size: 25px; font-weight: 400; }
+.registration-primary .external-google .auth-google-icon { width: 40px !important; height: 40px !important; padding: 8px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px #03419b18; }
+.registration-primary .external-google:disabled { opacity: .6; cursor: not-allowed; }
+.registration-primary .external-divider, .registration-primary .external-help:not(#google-unavailable) { display: none !important; }
+html body .registration-welcome .registration-primary #google-unavailable { display: block; position: static; width: auto; height: auto; margin: 12px 0 0; clip-path: none; overflow: visible; white-space: normal; color: var(--welcome-muted); font-size: 12px; }
+html body .registration-welcome .registration-signin { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 22px 0 26px; color: var(--welcome-muted); font-size: 14px; line-height: 1.5; text-align: center; }
+.registration-signin a { display: inline-flex; align-items: center; gap: 8px; color: var(--welcome-blue); text-decoration: none; font-weight: 700; }
+.registration-divider, .registration-email > summary { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0 0 24px; color: var(--welcome-muted); font-size: 13px; text-align: center; }
+.registration-divider::before, .registration-divider::after, .registration-email > summary::before, .registration-email > summary::after { content: ''; height: 1px; flex: 1; background: var(--welcome-line); }
+.registration-email > summary { min-height: 44px; margin: 0 0 18px; cursor: pointer; list-style: none; }
+.registration-email > summary::-webkit-details-marker { display: none; }
+.registration-email:not([open]) > summary { margin-bottom: 24px; }
+.registration-email[open] { padding-bottom: 20px; }
+.registration-benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.registration-benefits li { display: flex; align-items: flex-start; gap: 10px; min-width: 0; color: var(--welcome-muted); font-size: 12px; line-height: 1.45; }
+.registration-benefits li + li { border-left: 1px solid var(--welcome-line); padding-left: 12px; }
+.registration-benefits i { flex: 0 0 auto; color: var(--welcome-blue); font-size: 23px; line-height: 1.2; }
+.registration-home { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; margin-top: 28px; color: var(--welcome-blue); font-size: 14px; text-decoration: none; }
+.registration-welcome :is(a, button, summary):focus-visible { outline: 3px solid #2a7bff; outline-offset: 4px; }
+
+/* Override the old registration form scale only inside the optional email form. */
+html body main#ss-auth-page.auth-register .registration-email :is(.login-field label, .register-consent, .form-label) { font-size: 14px; }
+html body main#ss-auth-page.auth-register .registration-email .login-input-wrap .form-control { min-height: 48px; height: auto; padding: 12px 42px !important; border-radius: 14px !important; font-size: 16px !important; }
+html body main#ss-auth-page.auth-register .registration-email .login-input-wrap > i { left: 14px; font-size: 19px; }
+html body main#ss-auth-page.auth-register .registration-email .ss-password-visibility { right: 8px; font-size: 19px; }
+html body main#ss-auth-page.auth-register .registration-email .register-submit { height: auto; min-height: 52px; gap: 14px; margin-top: 12px; padding: 12px 18px !important; border-radius: 28px !important; font-size: 16px !important; }
+html body main#ss-auth-page.auth-register .registration-email .register-submit > i { position: static; width: auto; height: auto; background: none; font-size: 20px; }
+
+html[data-theme='dark'] body .registration-welcome { --welcome-ink: #ecf4ff; --welcome-muted: #adc1df; --welcome-blue: #80b6ff; --welcome-line: #365274; border-color: #365274; background: linear-gradient(135deg, #1c2e48, #17273d); box-shadow: none; }
+html[data-theme='dark'] .registration-notice { background: #203c60; border-color: #3b5e87; }
+
+@media (max-width: 600px) {
+    html body .registration-welcome { padding: 22px 18px; border-radius: 26px; }
+    .registration-illustration { max-height: 180px; margin-bottom: 10px; }
+    html body .registration-welcome .registration-intro { font-size: 15px; margin-bottom: 20px; }
+    .registration-notice { gap: 10px; padding: 12px; }
+    html body .registration-welcome .registration-notice p { font-size: 13px; }
+    html body .registration-welcome .registration-primary .external-google, html body main#ss-auth-page.auth-register .registration-welcome .external-google { grid-template-columns: 34px minmax(0, 1fr) 18px; gap: 9px; padding: 10px 12px !important; min-height: 58px; font-size: 14px !important; }
+    .registration-primary .external-google .auth-google-icon { width: 34px !important; height: 34px !important; padding: 7px; }
+    .registration-primary .external-google::after { font-size: 23px; }
+    .registration-benefits { gap: 8px; }
+    .registration-benefits li { flex-direction: column; gap: 7px; font-size: 11px; }
+    .registration-benefits li + li { padding-left: 8px; }
+    html body .registration-welcome .registration-signin { font-size: 13px; gap: 5px; margin: 20px 0; }
+}

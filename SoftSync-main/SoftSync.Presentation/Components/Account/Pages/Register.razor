@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Identity
 @using SoftSync.DAL.Entities
 @inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
+@inject EmailRegistrationService Registration
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
@@ -13,14 +13,21 @@
 
 <PageTitle>@L["auth.register.title"]</PageTitle>
 
-<div class="register-heading">
-    <span class="register-kicker">SoftSync Secure</span>
-    <h2>@(L.Current == AppLanguage.Vi ? "Đăng ký" : "Sign up")</h2>
-    <p>@(L.Current == AppLanguage.Vi ? "Tạo tài khoản để bắt đầu hành trình cùng SoftSync." : "Create an account to start your journey with SoftSync.")</p>
-</div>
-
 <StatusMessage Message="@errorMessage" />
-
+@if (showAccountRecovery)
+{
+    <div class="tw:flex tw:gap-4 tw:mb-4" role="navigation" aria-label="@(L.Current == AppLanguage.Vi ? "Khôi phục truy cập" : "Account access")">
+        <a href="Account/Login">@L["auth.login.submit"]</a>
+        <a href="Account/ForgotPassword">@L["auth.forgot"]</a>
+    </div>
+}
+<RegistrationWelcome>
+    <ChildContent>
+        <ExternalLoginPicker IsRegistration="true" ButtonLabel="@(L.Current == AppLanguage.Vi ? "Tạo tài khoản với Google" : "Create account with Google")" />
+    </ChildContent>
+    <Alternative>
+        <details class="registration-email" open="@(HttpContext.Request.Method == "POST")">
+            <summary>@(L.Current == AppLanguage.Vi ? "Hoặc đăng ký bằng email" : "Or sign up with email")</summary>
 <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
     <DataAnnotationsValidator />
     <ValidationSummary class="text-danger tw:mb-3" role="alert" />
@@ -75,38 +82,37 @@
     <p>@(L.Current == AppLanguage.Vi ? "Nội dung chính thức đang được cập nhật." : "The official content is being updated.")</p>
     <form method="dialog"><button type="submit">@(L.Current == AppLanguage.Vi ? "Đóng" : "Close")</button></form>
 </dialog>
-
-<div class="neo-social"><ExternalLoginPicker IsRegistration="true" ButtonLabel="@(L.Current == AppLanguage.Vi ? "Tiếp tục với Google" : "Continue with Google")" /></div>
-
-<div class="register-login tw:text-center tw:mt-4 tw:text-sm">
-    @L["auth.haveAccount"] <a href="Account/Login">@L["auth.login.title"]</a>
-</div>
-
+        </details>
+    </Alternative>
+</RegistrationWelcome>
 
 @code {
     private string? errorMessage;
+    private bool showAccountRecovery;
 
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm(Name = "Input")] private InputModel? SuppliedInput { get; set; }
+    private InputModel Input => SuppliedInput ??= new();
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
     public async Task RegisterUser(EditContext editContext)
     {
+        errorMessage = null;
+        showAccountRecovery = false;
         var user = new ApplicationUser
         {
+            Email = Input.Email,
             FullName = Input.FullName,
             CreatedAt = DateTime.UtcNow,
             Role = SoftSync.Common.Enums.UserRole.Student
         };
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = (IUserEmailStore<ApplicationUser>)UserStore;
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
+        var result = await Registration.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
         {
-            errorMessage = "Error: " + string.Join(" ", result.Errors.Select(e => e.Description));
+            showAccountRecovery = result.Errors.Any(e => e.Code == EmailRegistrationService.DuplicateAccount);
+            errorMessage = "Error: " + string.Join(" ", result.Errors.Select(e => L.IdentityError(e.Code)));
             return;
         }
 
@@ -133,9 +139,10 @@
         [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
         public string FullName { get; set; } = "";
 
+        private string email = "";
         [Required(ErrorMessage = "Vui lòng nhập email.")]
         [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
-        public string Email { get; set; } = "";
+        public string Email { get => email; set => email = value?.Trim() ?? ""; }
 
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string? PhoneNumber { get; set; }

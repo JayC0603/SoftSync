@@ -5,13 +5,21 @@
 @using SoftSync.BLL.Services
 @using SoftSync.Common.Dtos
 @inject IAiProviderManagementService Management
+@inject IConfiguration DeploymentConfiguration
 @implements IDisposable
 
 <PageTitle>@Tx("AI Configuration · SoftSync", "Cấu hình AI · SoftSync")</PageTitle>
 <main class="ss-admin-ai-configuration">
     <section class="ss-admin-content" aria-labelledby="ai-config-title" aria-busy="@busy">
         <header><h1 id="ai-config-title">@Tx("AI Configuration", "Cấu hình AI")</h1>
-            <p>@Tx("Saved database settings take priority over environment settings. Changes apply to the next AI request.", "Cấu hình đã kích hoạt trong database ưu tiên hơn biến môi trường. Thay đổi áp dụng từ yêu cầu AI tiếp theo.")</p>
+            @if (EnvironmentAiConfiguration.IsDeploymentOverride(DeploymentConfiguration))
+            {
+                <p role="status">@Tx("AI uses the deployment configuration. Saved providers apply after the deployment override is disabled. CV review uses its separate server configuration.", "AI đang dùng cấu hình triển khai. Provider đã lưu sẽ áp dụng khi tắt chế độ ưu tiên triển khai. Đánh giá CV dùng cấu hình server riêng.")</p>
+            }
+            else
+            {
+                <p>@Tx("Saved database settings take priority over environment settings. Changes apply to the next AI request.", "Cấu hình đã kích hoạt trong database ưu tiên hơn biến môi trường. Thay đổi áp dụng từ yêu cầu AI tiếp theo.")</p>
+            }
             <a href="/admin/users">@Tx("Role management", "Quản lý quyền")</a></header>
         <div aria-live="polite">@if (message.Length > 0) { <p class="alert alert-info" role="status">@message</p> }</div>
         <section class="ss-glass tw:rounded-2xl tw:p-6 tw:mt-4" aria-labelledby="provider-form-title">

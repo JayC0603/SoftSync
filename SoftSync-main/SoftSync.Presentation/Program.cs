@@ -93,17 +93,19 @@ app.UseMiddleware<SystemMetricsMiddleware>();
 
 
 // Deployment uploads exclude large lesson media. Preserve the existing lesson
-// URLs by redirecting them to the public Blob URLs generated before deploy.
+// URLs by redirecting them to the verified public media source in the manifest.
 var videoManifestPath = Path.Combine(app.Environment.WebRootPath, "video-manifest.json");
 var lessonVideos = File.Exists(videoManifestPath)
     ? System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(videoManifestPath)) ?? new()
     : new Dictionary<string, string>();
-app.MapGet("/videos/{fileName}", (string fileName) =>
+app.MapMethods("/videos/{fileName}", ["GET", "HEAD"], (string fileName) =>
 {
     if (lessonVideos.TryGetValue(fileName, out var url)
         && Uri.TryCreate(url, UriKind.Absolute, out var uri)
         && uri.Scheme == "https"
-        && uri.Host.EndsWith(".public.blob.vercel-storage.com", StringComparison.OrdinalIgnoreCase))
+        && (uri.Host.EndsWith(".public.blob.vercel-storage.com", StringComparison.OrdinalIgnoreCase)
+            || (uri.Host.Equals("softsync.id.vn", StringComparison.OrdinalIgnoreCase)
+                && uri.AbsolutePath.Equals($"/videos/{fileName}", StringComparison.Ordinal))))
         return Results.Redirect(url);
     return Results.NotFound();
 });

@@ -29,7 +29,8 @@ public sealed class HuggingFaceJsonClient(
     {
         try
         {
-            if (gemini is not null && (await gemini.GetSettingsAsync(cancellationToken)).Enabled)
+            if (!EnvironmentAiConfiguration.IsDeploymentOverride(configuration)
+                && gemini is not null && (await gemini.GetSettingsAsync(cancellationToken)).Enabled)
             {
                 var operation = task.Contains("cv", StringComparison.OrdinalIgnoreCase) ? "cv-review" : task == "assistant" ? "chat" : "evaluation";
                 var geminiResponse = await gemini.GenerateJsonAsync(operation, systemPrompt, input, cancellationToken);
@@ -41,6 +42,7 @@ public sealed class HuggingFaceJsonClient(
             var request = new
             {
                 model,
+                max_tokens = Math.Clamp(configuration.GetValue("AiApi:MaxOutputTokens", 4096), 256, 12000),
                 temperature = task == "assistant" ? 0.25 : 0.15,
                 response_format = new { type = "json_object" },
                 messages = new[]

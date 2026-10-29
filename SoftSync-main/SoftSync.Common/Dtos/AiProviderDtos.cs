@@ -1,6 +1,6 @@
 namespace SoftSync.Common.Dtos;
 
-public enum AiProviderType { HuggingFace, Gemini, OpenAI }
+public enum AiProviderType { HuggingFace, Gemini, OpenAI, Xah }
 
 // Read model: never contains secret material.
 public sealed record AiProviderDto(Guid Id, AiProviderType Provider, string DisplayName,

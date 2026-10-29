@@ -1,0 +1,190 @@
+/* Shared across every course, week and learning step, including future content.
+   Explicit sizes prevent the application shell from enlarging lesson controls. */
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) {
+    --lesson-primary:#0874ed;
+    --lesson-primary-2:#075dce;
+    --fj-primary:#0874ed;
+    --fj-primary-soft:#eaf3ff;
+    --study-blue:#0874ed;
+    --learning-blue:#0874ed;
+    --learning-hover:#075dce;
+    --learning-soft:#eaf3ff;
+    --learning-line:var(--ss-border,#dce6f4);
+    --learning-panel:var(--ss-surface,#fff);
+    --learning-text:var(--ss-text,#172b4d);
+    --learning-muted:var(--ss-text-muted,#63748e);
+    min-width:0;
+    width:100%;
+    max-width:1180px;
+    margin-inline:auto;
+    color:var(--learning-text);
+    font-family:var(--ss-font-family,'Be Vietnam Pro','Segoe UI',sans-serif);
+    font-size:14px;
+    line-height:1.6;
+}
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) *,
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) *::before { box-sizing:border-box; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(h1,h2,h3,h4,p,li,button,a,summary,label) {
+    max-width:100%;
+    min-width:0;
+    word-break:normal;
+    overflow-wrap:break-word;
+    font-family:inherit;
+}
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) h1 { font-size:clamp(23px,2.8vw,32px)!important; font-weight:700; line-height:1.3; letter-spacing:-.025em; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) h2 { font-size:clamp(19px,2.2vw,25px)!important; font-weight:650; line-height:1.4; letter-spacing:-.02em; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) h3 { font-size:17px!important; line-height:1.5; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(p,li,label) { font-size:14px!important; line-height:1.7; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(button,a.btn,.course-learning-start,.course-learning-quiz) {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:44px!important;
+    height:auto;
+    padding:10px 14px;
+    border:1px solid var(--learning-blue)!important;
+    border-radius:10px!important;
+    background:var(--learning-blue)!important;
+    color:#fff!important;
+    box-shadow:none!important;
+    font-size:13px!important;
+    font-weight:600;
+    line-height:1.5;
+    text-decoration:none;
+    white-space:normal;
+    text-align:center;
+    cursor:pointer;
+}
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(button,a.btn,.course-learning-start,.course-learning-quiz):hover:not(:disabled) { background:var(--learning-hover)!important; border-color:var(--learning-hover)!important; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) button:disabled { opacity:.48; cursor:not-allowed; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(button,a,summary,textarea,input):focus-visible { outline:3px solid #83baff!important; outline-offset:3px; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) :is(video,iframe,img) { max-width:100%; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) video { display:block; width:100%; aspect-ratio:16/9; max-height:65dvh; object-fit:contain; background:#101827; border-radius:12px; }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) textarea { width:100%; min-width:0; max-width:100%; font-family:inherit; font-size:16px!important; line-height:1.6; color:var(--learning-text); background:var(--learning-panel); border-color:var(--learning-line); }
+html body .page .ss-main-content :is(.lesson-page,.pipeline-practice) { min-height:0!important; padding:20px clamp(12px,2.5vw,28px) 24px!important; background:transparent!important; }
+html body .page .ss-main-content .lesson-shell { width:100%!important; max-width:1100px; min-width:0; }
+html body .page .ss-main-content .lesson-top { grid-template-columns:auto minmax(0,1fr) auto; gap:16px; margin:0!important; padding:18px; border:1px solid var(--learning-line); border-radius:16px; background:var(--learning-panel); }
+html body .page .ss-main-content .lesson-top>div { min-width:0; }
+html body .page .ss-main-content .lesson-top h1 { margin:6px 0 0; }
+html body .page .ss-main-content .lesson-top small { display:block; color:var(--learning-blue); font-size:11px; font-weight:650; letter-spacing:.03em; }
+html body .page .ss-main-content .lesson-top>span { width:fit-content; padding:5px 10px; color:var(--learning-blue); background:var(--learning-soft); font-size:12px; font-weight:600; white-space:nowrap; }
+html body .page .ss-main-content .lesson-steps { display:grid!important; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; margin:12px 0!important; padding:8px!important; overflow:visible!important; background:var(--learning-panel)!important; border-color:var(--learning-line)!important; }
+html body .page .ss-main-content .lesson-steps button { flex-direction:column; min-width:0!important; min-height:64px!important; padding:8px 4px; gap:4px; border:0!important; font-size:11px!important; }
+html body .page .ss-main-content .lesson-steps :is(button.active,button[aria-current='step']) { background:#064faf!important; box-shadow:inset 0 0 0 2px #87bfff!important; }
+html body .page .ss-main-content .lesson-steps button span { flex-shrink:0; width:24px; height:24px; color:#fff!important; background:#ffffff20!important; border-color:#ffffff60!important; font-size:11px; }
+html body .page .ss-main-content .lesson-steps button b { display:block!important; font-size:11px; font-weight:500; line-height:1.4; }
+html body .page .ss-main-content .lesson-steps button>i { font-size:10px; }
+html body .page .ss-main-content .lesson-content { margin-top:0!important; min-width:0; padding:20px!important; border-color:var(--learning-line)!important; background:var(--learning-panel)!important; }
+html body .page .ss-main-content .content-heading { display:block; margin:16px 0 12px; }
+html body .page .ss-main-content .content-heading small { color:var(--learning-blue); font-size:11px; font-weight:650; }
+html body .page .ss-main-content .content-heading h2 { margin:5px 0; }
+/* The lesson title already appears above the player and in this heading. */
+html body .page .ss-main-content .content-heading>span { display:none; }
+html body .page .ss-main-content .lesson-page :is(.notice,.saved-complete,.save-error,.answer-feedback) { margin:12px 0; padding:12px 14px; font-size:13px; line-height:1.6; }
+html body .page .ss-main-content .lesson-page .notice { color:var(--learning-text); background:var(--learning-soft); border:1px solid #bfd9fb; }
+html body .page .ss-main-content .lesson-page .actions { position:static!important; display:flex!important; flex-direction:row!important; flex-wrap:wrap; align-items:stretch; justify-content:flex-end; gap:10px; margin-top:18px; padding:14px 0 0!important; border:0!important; border-top:1px solid var(--learning-line)!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
+html body .page .ss-main-content .lesson-page .actions>button { flex:1 1 180px; width:auto!important; margin:0; }
+html body .page .ss-main-content .lesson-page :is(.theory,.quiz-sheet,.quiz-card,.roleplay,.reflection-form,.learning-review,.voice-practice-launch) { min-width:0; max-width:100%; font-size:14px; }
+html body .page .ss-main-content .lesson-page :is(.quiz-card,.reflection-form,.learning-review,.voice-practice-launch,.quiz-result,.summary-card) { padding:18px; background:var(--learning-panel); border-color:var(--learning-line); }
+html body .page .ss-main-content .lesson-page :is(.summary-card,.quiz-result,.voice-practice-launch,.ai-reflection) { background:var(--learning-soft); }
+html body .page .ss-main-content .lesson-page :is(.voice-practice-launch,.ai-reflection) { border-color:var(--learning-line); }
+html body .page .ss-main-content .lesson-page :is(.summary-card>i,.quiz-result>i,.voice-practice-launch>small,.voice-practice-launch span b,.ai-reflection>b) { color:var(--learning-blue); }
+html body .page .ss-main-content .lesson-page .voice-practice-launch>i { background:var(--learning-blue); }
+html body .page .ss-main-content .lesson-page :is(.summary-grid,.reflection-layout,.confidence,.rubric-strip,.mini-rubric) { gap:12px; }
+html body .page .ss-main-content .lesson-page .summary-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); margin-top:16px; }
+html body .page .ss-main-content .lesson-page .reflection-layout { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); }
+html body .page .ss-main-content .lesson-page :is(.quiz-options button,.question-card button) { justify-content:flex-start; text-align:left; }
+html body .page .ss-main-content .lesson-page .quiz-options button span { background:#ffffff26; color:#fff; }
+html body .page .ss-main-content .lesson-page .quiz-options button.optimal { border:2px solid #128354!important; }
+html body .page .ss-main-content .lesson-page .quiz-options button.negative { border:2px solid #d84242!important; }
+html body .page .ss-main-content .lesson-page :is(.theory,.ss-transcript) { overflow-wrap:break-word; }
+html body .page .ss-main-content .lesson-page .chat-compose { grid-template-columns:minmax(0,1fr) auto; }
+html body .page .ss-main-content .pipeline-practice :is(.game-shell,.game-header,.scenario-card,.scenario-context,.scenario-options,.game-result,.game-state) { min-width:0; }
+html body .page .ss-main-content :is(.pipeline-practice,.vp-page,.inbox-rush) .practice-journey { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; max-width:980px; margin:0 auto 14px; }
+html body .page .ss-main-content :is(.pipeline-practice,.vp-page,.inbox-rush) .practice-journey>span { min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 2px; color:var(--learning-blue); background:var(--learning-soft); border-radius:10px; font-size:11px; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button { text-align:left; justify-content:start; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button>span { color:#fff; background:#ffffff26; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button small { color:#fff; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button:disabled { opacity:1; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button:disabled:not(.best):not(.selected) { opacity:.48; }
+html body .page .ss-main-content .pipeline-practice .scenario-options button:is(.best,.selected) { border-width:2px!important; border-color:#064faf!important; }
+html body .page .ss-main-content .pipeline-practice .game-actions { flex-wrap:wrap; gap:12px; }
+html body .page .ss-main-content .pipeline-practice .scenario-context { background:var(--learning-soft); }
+html body .page .ss-main-content .pipeline-practice :is(.game-header small,.scenario-context>span) { color:var(--learning-blue); }
+html body .page .ss-main-content .pipeline-practice .game-progress>i { background:var(--learning-blue); }
+html body .page .ss-main-content :is(.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) { padding:16px 12px 24px; }
+html body .page .ss-main-content .shared-course-details .ss-learning-layout { display:grid; grid-template-columns:minmax(220px,.65fr) minmax(0,1.65fr); gap:16px; }
+html body .page .ss-main-content .shared-course-details :is(.ss-learning-layout>*,.ss-course-card,.ss-course-grid) { min-width:0; }
+html body .page .ss-main-content .shared-course-details .ss-action-bar { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
+html body .page .ss-main-content .shared-course-details .ss-outline ol { padding-left:20px; }
+html body .page .ss-main-content .shared-course-details .ss-outline a { display:flex; gap:8px; padding:10px 0; font-size:13px; }
+html body .page .ss-main-content .learning-catalog>section>div { gap:16px; }
+html body .page .ss-main-content .learning-catalog article { min-width:0; padding:18px; border-radius:16px; }
+html body .page .ss-main-content .learning-catalog article ol { padding-left:20px; }
+html body .page .ss-main-content .course-learning-page .course-learning-progress>span { background:var(--learning-blue); }
+html body .page .ss-main-content .course-learning-page :is(.course-learning-eyebrow,.course-learning-section-heading>div>span,.course-progress-heading strong) { color:var(--learning-blue); }
+@media(max-width:900px) {
+    html body .page .ss-main-content .lesson-top { grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:16px; }
+    html body .page .ss-main-content .lesson-top>button { justify-self:start; }
+    html body .page .ss-main-content .lesson-top>div { grid-column:1/-1; grid-row:2; }
+    html body .page .ss-main-content .lesson-top>span { grid-column:2; grid-row:1; }
+    html body .page .ss-main-content .lesson-page .reflection-layout { grid-template-columns:minmax(0,1fr); }
+    html body .page .ss-main-content .shared-course-details .ss-learning-layout { grid-template-columns:minmax(0,1fr); }
+    html body .page .ss-main-content .lesson-content { padding:16px!important; }
+}
+@media(max-width:520px) {
+    html body .page .ss-main-content .lesson-steps { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    html body .page .ss-main-content .lesson-steps button { flex-direction:row; min-height:44px!important; gap:5px; font-size:10px!important; }
+    html body .page .ss-main-content .lesson-steps button b { font-size:10px; }
+    html body .page .ss-main-content .lesson-steps button span { width:20px; height:20px; font-size:10px; }
+    html body .page .ss-main-content .lesson-page :is(.quiz-card,.reflection-form,.learning-review,.voice-practice-launch,.quiz-result,.summary-card) { padding:12px; }
+    html body .page .ss-main-content .lesson-page :is(.confidence,.rubric-strip,.mini-rubric) { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    html body .page .ss-main-content .lesson-page .chat-compose { grid-template-columns:minmax(0,1fr); }
+    html body .page .ss-main-content .lesson-page .chat-message { max-width:95%; }
+    html body .page .ss-main-content :is(.pipeline-practice,.vp-page,.inbox-rush) .practice-journey { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    html body .page .ss-main-content .pipeline-practice :is(.scenario-context,.scenario-options) { padding:14px; }
+}
+@media(orientation:landscape) and (max-height:600px) {
+    html body .page .ss-main-content :is(.lesson-page,.pipeline-practice) { padding-top:12px!important; }
+    html body .page .ss-main-content .lesson-top { padding:12px 16px; }
+    html body .page .ss-main-content .lesson-page .video-wrap { width:min(100%,640px); margin-inline:auto; }
+    html body .page .ss-main-content :is(.lesson-page,.learning-catalog,.shared-course-details) video { max-height:68dvh; }
+}
+html[data-theme='dark'] body .page .ss-main-content :is(.lesson-page,.pipeline-practice,.game-page,.shared-course-details,.learning-catalog,.course-learning-page,.vp-page,.inbox-rush) { --learning-soft:#152d4b; }
+/* Course discovery and roadmap actions use the same blue as the lesson player. */
+html body .page:has(.learn-v3) { --lv-purple:#0874ed; --lm-blue:#0874ed; }
+html body .page .ss-main-content .learn-v3 :is(.lm-primary,.lm-discussion>a,.lm-back) { background:#0874ed!important; border-color:#0874ed!important; color:#fff!important; box-shadow:none!important; }
+html body .page .ss-main-content .learn-v3 :is(.lm-primary,.lm-discussion>a,.lm-back):hover { background:#075dce!important; }
+html body .page .ss-main-content .learn-v3 :is(h1,h2,h3,button,a) { min-width:0; word-break:normal; overflow-wrap:break-word; }
+html body .page .ss-main-content .learn-v3 .lm-detail-heading h1 { font-size:clamp(22px,3vw,30px)!important; }
+html body .page .ss-main-content .lesson-page :is(.conclusion,.reflection-requirement,.roleplay>header>span) { background:var(--learning-soft); color:var(--learning-text); border-color:var(--learning-blue); }
+html body .page .ss-main-content .lesson-page h1:focus { outline:none!important; }
+html body .page .ss-main-content :is(.pipeline-practice,.vp-page,.inbox-rush) h1:focus { outline:none!important; }
+html body .page .ss-main-content .lesson-page .reflection-actions { display:flex; flex:1 1 280px; flex-wrap:wrap; gap:10px; min-width:0; }
+html body .page .ss-main-content .lesson-page .reflection-actions>button { flex:1 1 120px; margin:0; }
+html body .page .ss-main-content :is(.vp-page,.inbox-rush) { --p:#0874ed; padding:20px clamp(12px,2.5vw,28px) 24px; background:transparent; }
+html body .page .ss-main-content .vp-grid { grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr); gap:16px; }
+html body .page .ss-main-content .ir-grid { grid-template-columns:minmax(0,.85fr) minmax(0,1.25fr); gap:16px; }
+html body .page .ss-main-content :is(.vp-grid,.ir-grid)>* { min-width:0; }
+html body .page .ss-main-content :is(.vp-hero,.ir-hero) { min-width:0; padding:16px; gap:12px; }
+html body .page .ss-main-content :is(.vp-hero,.ir-hero)>div { min-width:0; }
+html body .page .ss-main-content :is(.vp-page,.inbox-rush) .practice-journey { overflow:visible; }
+html body .page .ss-main-content .vp-mic { background:#0874ed; }
+html body .page .ss-main-content :is(.vp-stack,.vp-context,.vp-script,.vp-score-grid article,.vp-disclaimer) { background:var(--learning-soft); border-color:var(--learning-line); }
+html body .page .ss-main-content .inbox-rush :is(.ir-hero small,.ir-count b,.ir-task-top,.ir-slot>b,.ir-day>header small,.ir-inbox header small,.ir-result small) { color:var(--learning-blue); }
+html body .page .ss-main-content .inbox-rush :is(.ir-task,.ir-slot) { border-color:var(--learning-line); }
+html body .page .ss-main-content .inbox-rush .ir-task:not(.interrupt) { border-left-color:var(--learning-blue); }
+html body .page .ss-main-content .inbox-rush .ir-slot.filled { background:var(--learning-soft); }
+html body .page .ss-main-content .inbox-rush .ir-guide b { background:var(--learning-blue); }
+html body .page .ss-main-content .vp-page:after { background:radial-gradient(circle,#60a5fa38,transparent 68%); }
+html body .page .ss-main-content .vp-grid select { max-width:100%; width:100%; font-size:16px; }
+html body .page .ss-main-content .ir-guide { flex-wrap:wrap; gap:10px; margin:14px 0; font-size:12px; }
+html body .page .ss-main-content .ir-task-top { flex-wrap:wrap; gap:6px; }
+html body .page .ss-main-content .ir-slot { grid-template-columns:58px minmax(0,1fr); gap:8px; padding:10px; }
+@media(max-width:800px) {
+    html body .page .ss-main-content :is(.vp-grid,.ir-grid) { grid-template-columns:minmax(0,1fr); }
+    html body .page .ss-main-content .ir-hero { flex-wrap:wrap; }
+    html body .page .ss-main-content .ir-hero>div:nth-child(2) { flex-basis:calc(100% - 70px); }
+    html body .page .ss-main-content .ir-count { display:flex; align-items:center; gap:8px; margin-left:auto; }
+}

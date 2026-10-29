@@ -20,541 +20,184 @@
 @inject UserProfileState UserProfileState
 @inject IJSRuntime JS
 @inject ILogger<Settings> Logger
+@implements IAsyncDisposable
 
 <PageTitle>@L["nav.settings"] · SoftSync</PageTitle>
-<div class="ss-settings-shell ss-settings-direct tw:mx-auto">
-    <header class="ss-settings-mobile-title"><a href="/more" aria-label="@L["nav.settings"]"><i class="bi bi-chevron-left" aria-hidden="true"></i></a><h1>@L["nav.settings"]</h1></header>
-    <UiPageHeader Title="@L["nav.settings"]" Description="@L["redesign.settings.description"]" />
+<div class="ss-settings-shell settings-studio">
+    <header class="st-page-heading">
+        <div><a class="st-breadcrumb" href="/more"><i class="bi bi-arrow-left" aria-hidden="true"></i> @Tx("Your space", "Không gian của bạn")</a><h1>@Tx("Make SoftSync yours", "Cài đặt của bạn")</h1><p>@Tx("A little more personal. A little more you.", "Một không gian học tập theo cách của riêng bạn.")</p></div>
+        <span class="st-private-badge"><i class="bi bi-shield-check" aria-hidden="true"></i> @Tx("Your account, protected", "Tài khoản được bảo vệ")</span>
+    </header>
     @if (loadFailed)
     {
-        <div class="ss-card tw:p-8 tw:text-center">
-            <i class="bi bi-exclamation-circle tw:text-3xl text-warning"></i>
-            <h3 class="tw:mt-3">@Tx("Settings could not be loaded", "Không thể tải cài đặt")</h3>
-            <p class="text-muted">@Tx("Please reload the page or return to your profile.", "Vui lòng tải lại trang hoặc quay về hồ sơ.")</p>
-            <a class="ss-btn-primary tw:inline-flex tw:px-5 tw:py-2" href="/profile">@Tx("Open profile", "Mở hồ sơ")</a>
-        </div>
+        <div class="st-card st-empty" role="alert"><i class="bi bi-cloud-slash" aria-hidden="true"></i><h2>@Tx("We could not load your settings", "Chưa thể tải cài đặt")</h2><p>@Tx("Please reload the page and try again.", "Vui lòng tải lại trang và thử lại.")</p><a class="st-button st-button-primary" href="/settings" data-enhance-nav="false">@Tx("Try again", "Thử lại")</a></div>
     }
     else if (user is null)
     {
-        <div class="tw:text-center tw:py-12"><div class="spinner-border text-primary" role="status"></div></div>
+        <div class="st-card st-skeleton" role="status" aria-label="@Tx("Loading settings", "Đang tải cài đặt")"><span></span><span></span><span></span></div>
     }
     else
     {
-        <fieldset disabled="@(!interactiveReady)" class="tw:m-0 tw:min-w-0 tw:border-0 tw:p-0">
-        <div class="ss-settings-grid">
-            <!-- Sidebar -->
-            <aside class="ss-side">
-                <div class="ss-side-card">
-                    <div class="ss-side-eyebrow"><i class="bi bi-gear-fill tw:me-1"></i> @L["settings.eyebrow"]</div>
-                    <h2 class="ss-side-title">
-                        @L["settings.tab.account"]
-                        <i class="bi bi-stars ss-side-star"></i>
-                    </h2>
-                    <p class="ss-side-sub">@L["settings.side.sub"]</p>
-
-                    <nav class="ss-settings-nav">
-                        <button class="@(tab == Tab.Account ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Account)">
-                            <i class="bi bi-person-circle"></i>
-                            <span>@L["settings.tab.account"]</span>
-                            <i class="bi bi-chevron-right ss-nav-caret"></i>
-                        </button>
-                        <button class="@(tab == Tab.Learning ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Learning)">
-                            <i class="bi bi-mortarboard"></i>
-                            <span>@L["settings.tab.learning"]</span>
-                        </button>
-                        <button class="@(tab == Tab.Notifications ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Notifications)">
-                            <i class="bi bi-bell"></i>
-                            <span>@L["settings.tab.notifications"]</span>
-                        </button>
-                        <button class="@(tab == Tab.Appearance ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Appearance)">
-                            <i class="bi bi-palette"></i>
-                            <span>@L["settings.tab.appearance"]</span>
-                        </button>
-                        <button class="@(tab == Tab.Privacy ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Privacy)">
-                            <i class="bi bi-shield-check"></i>
-                            <span>@L["settings.tab.privacy"]</span>
-                        </button>
-                        <button class="@(tab == Tab.Danger ? "active" : "")" @onclick="() => SelectTabAsync(Tab.Danger)">
-                            <i class="bi bi-credit-card"></i>
-                            <span>@L["settings.tab.billing"]</span>
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Go Premium promo -->
-                <div class="ss-premium">
-                    <div class="ss-premium-crown">@Crown("ss-crown-corner")</div>
-                    <h5 class="ss-premium-title">@L["settings.premium.title"]</h5>
-                    <p class="ss-premium-sub">@Tx("Premium subscriptions are not available yet. You can keep using the current features.", "Gói Premium hiện chưa được mở. Bạn vẫn có thể sử dụng các tính năng hiện có.")</p>
-                    <button class="ss-btn-primary tw:w-full tw:py-2" type="button" disabled>
-                        @Crown("tw:me-1") @Tx("Not available yet", "Chưa khả dụng")
-                    </button>
-                </div>
-            </aside>
-
-            <!-- Main column -->
-            <div class="ss-main">
-
-                <!-- Hero banner: shows on every tab like the mockup -->
-                <div class="ss-hero">
-                    <div class="ss-hero-inner">
-                        <div class="ss-hero-avatar">
-                            @if (!string.IsNullOrEmpty(user.AvatarUrl))
-                            {
-                                <img src="@user.AvatarUrl" alt="avatar" class="ss-avatar-img" />
-                            }
-                            else
-                            {
-                                <img src="@Mascot.ImageFor(user.Gender)" alt="mascot"
-                                     class="ss-avatar-img"
-                                     onerror="this.style.display='none';this.parentElement.querySelector('.ss-hero-fallback').style.display='flex'" />
-                                <span class="ss-hero-fallback">@Mascot.Emoji</span>
-                            }
-                            <label class="ss-avatar-edit" title="@L["profile.avatar.change"]">
-                                <i class="bi bi-camera-fill"></i>
-                                <InputFile OnChange="OnAvatarSelected" accept="image/*" class="tw:hidden" />
-                            </label>
-                        </div>
-
-                        <div class="ss-hero-id">
-                            <div class="ss-hero-name-row">
-                                <h3 class="ss-hero-name">@user.PublicName</h3>
-                                <span class="ss-level-badge">@L["nav.level"] @user.Level</span>
-                            </div>
-                            <p class="ss-hero-quote">"@L["settings.hero.quote"]"</p>
-                        </div>
-
-                        <div class="ss-hero-stats">
-                            <div class="ss-stat">
-                                <div class="ss-stat-icon ss-stat-icon--xp"><i class="bi bi-gem"></i></div>
-                                <div class="ss-stat-num">@user.ExperiencePoints</div>
-                                <div class="ss-stat-label">@L["settings.hero.xp"]</div>
-                            </div>
-                            <div class="ss-stat">
-                                <div class="ss-stat-icon ss-stat-icon--streak"><i class="bi bi-fire"></i></div>
-                                <div class="ss-stat-num">@trackedSkillCount</div>
-                                <div class="ss-stat-label">@Tx("Skills in progress", "Kỹ năng có tiến độ")</div>
-                            </div>
-                            <div class="ss-stat">
-                                <div class="ss-stat-icon ss-stat-icon--badge"><i class="bi bi-award-fill"></i></div>
-                                <div class="ss-stat-num">@assessedSkillCount</div>
-                                <div class="ss-stat-label">@Tx("Skills assessed", "Kỹ năng đã đánh giá")</div>
-                            </div>
-                        </div>
-                    </div>
-                    @if (!string.IsNullOrEmpty(avatarError))
+        <fieldset disabled="@(!interactiveReady || saving)" class="st-fieldset">
+        <section class="st-profile-banner" aria-label="@Tx("Your profile", "Hồ sơ của bạn")">
+            <div class="st-avatar"><img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? Mascot.ImageFor(user.Gender) : user.AvatarUrl)" alt="@user.PublicName" /><label class="st-avatar-edit" title="@L["profile.avatar.change"]"><i class="bi bi-camera" aria-hidden="true"></i><InputFile OnChange="OnAvatarSelected" accept="image/png,image/jpeg,image/webp" aria-label="@L["profile.avatar.change"]" /></label></div>
+            <div class="st-profile-name"><span class="st-eyebrow">@Tx("YOUR LEARNING SPACE", "KHÔNG GIAN HỌC TẬP")</span><h2>@user.PublicName <span class="st-level">@L["nav.level"] @user.Level</span></h2><p>@email</p></div>
+            <div class="st-profile-facts"><div><strong>@user.ExperiencePoints</strong><span>XP</span></div><div><strong>@trackedSkillCount</strong><span>@Tx("Skills in progress", "Kỹ năng đang học")</span></div><div><strong>@assessedSkillCount</strong><span>@Tx("Skills assessed", "Kỹ năng đã đánh giá")</span></div></div>
+        </section>
+        @if (!string.IsNullOrEmpty(avatarError)) { <p class="st-feedback st-feedback-error" role="alert">@avatarError</p> }
+        <div class="st-layout">
+            <aside class="st-sidebar">
+                <nav class="st-navigation" aria-label="@Tx("Settings sections", "Danh mục cài đặt")">
+                    <span class="st-nav-label">@Tx("PREFERENCES", "TÙY CHỈNH CỦA BẠN")</span>
+                    @foreach (var item in Sections)
                     {
-                        <div class="text-danger tw:text-sm tw:px-6 tw:pb-3">@avatarError</div>
+                        <button type="button" class="st-nav-item @(tab == item.Value ? "is-active" : "")" aria-current="@(tab == item.Value ? "page" : null)" aria-controls="st-panel" data-section="@item.Value" @onclick="() => SelectTabAsync(item.Value)"><i class="bi @item.Icon" aria-hidden="true"></i><span><strong>@item.Title</strong><small>@item.Description</small></span><i class="bi bi-chevron-right st-nav-arrow" aria-hidden="true"></i></button>
                     }
-                </div>
-
-                <!-- Panels -->
-                <div class="ss-settings-panels">
-                    <section id="settings-account" class="ss-settings-section @(tab == Tab.Account ? "active" : null)" aria-label="@L["settings.tab.account"]">
-                        <section class="ss-card ss-card--flat ss-account-panel" aria-labelledby="ss-account-title">
-                            <header class="ss-account-heading">
-                                <div class="ss-account-heading-copy">
-                                    <span class="ss-account-heading-icon" aria-hidden="true"><i class="bi bi-person-vcard"></i></span>
-                                    <div><h2 id="ss-account-title">@L["settings.profile.info"]</h2><p>@Tx("Your personal details and sign-in preferences, in one place.", "Quản lý thông tin cá nhân và tài khoản đăng nhập của bạn.")</p></div>
-                                </div>
-                                <a class="ss-account-password" href="#settings-password">
-                                    <i class="bi bi-lock" aria-hidden="true"></i> @L["settings.password.title"]
-                                </a>
-                            </header>
-
-                            <div class="ss-account-fields">
-                                <div class="ss-field">
-                                    <i class="bi bi-person ss-field-icon"></i>
-                                    <div class="ss-field-body">
-                                        <label for="fullName" class="ss-field-label">@L["profile.fullName"]</label>
-                                        <input id="fullName" class="ss-field-input" maxlength="100" required @bind="user.FullName" @bind:event="oninput" />
-                                    </div>
-                                </div>
-                                <div class="ss-field">
-                                    <i class="bi bi-pencil ss-field-icon"></i>
-                                    <div class="ss-field-body">
-                                        <label for="displayName" class="ss-field-label">@L["settings.displayName"]</label>
-                                        <input id="displayName" class="ss-field-input" maxlength="60" @bind="user.DisplayName" @bind:event="oninput" placeholder="@user.FullName" />
-                                    </div>
-                                </div>
-                                <div class="ss-field">
-                                    <i class="bi bi-calendar ss-field-icon"></i>
-                                    <div class="ss-field-body">
-                                        <label for="age" class="ss-field-label">@L["wizard.about.ageGroup"]</label>
-                                        <select id="age" class="ss-field-input" value="@ProfileAgeGroups.ForAge(user.Age)" @onchange="OnAgeGroupChanged">
-                                            <option value="" disabled>—</option>
-                                            @foreach (var group in ProfileAgeGroups.Options)
-                                            {
-                                                <option value="@group.Key">@L[group.LabelKey]</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="ss-field">
-                                    <i class="bi bi-person ss-field-icon"></i>
-                                    <div class="ss-field-body">
-                                        <label for="gender" class="ss-field-label">@Tx("Gender", "Giới tính")</label>
-                                        <select id="gender" class="ss-field-input" @bind="user.Gender">
-                                            <option value="@Gender.Unspecified">@L["wizard.gender.other"]</option>
-                                            <option value="@Gender.Male">@L["wizard.gender.male"]</option>
-                                            <option value="@Gender.Female">@L["wizard.gender.female"]</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="ss-field ss-field-readonly">
-                                    <i class="bi bi-envelope ss-field-icon" aria-hidden="true"></i>
-                                    <div class="ss-field-body">
-                                        <label for="email" class="ss-field-label">@L["auth.email"]</label>
-                                        <input id="email" class="ss-field-input" value="@email" disabled />
-                                    </div>
-                                </div>
-                                <div class="ss-field ss-field-readonly">
-                                    <i class="bi bi-telephone ss-field-icon" aria-hidden="true"></i>
-                                    <div class="ss-field-body">
-                                        <label for="phone" class="ss-field-label">@L["auth.phone"]</label>
-                                        <input id="phone" class="ss-field-input" value="@phone" disabled placeholder="—" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <section class="ss-account-connections" aria-labelledby="ss-connections-title">
-                            <div class="ss-account-section-heading"><div><h3 id="ss-connections-title">@L["settings.linkedAccounts"]</h3><p>@Tx("Choose how you sign in to SoftSync.", "Các phương thức đăng nhập vào SoftSync.")</p></div><span class="ss-account-section-icon" aria-hidden="true"><i class="bi bi-link-45deg"></i></span></div>
-                            <div class="ss-linked-grid">
-                                @foreach (var p in linkedProviders)
-                                {
-                                    <div class="ss-linked @(p.Connected ? "ss-linked-connected" : "")">
-                                        <div class="ss-linked-icon" style="background:@p.Bg;color:@p.Fg"><i class="bi @p.Icon" aria-hidden="true"></i></div>
-                                        <div class="ss-linked-body">
-                                            <div class="ss-linked-name">@p.Name</div>
-                                            <div class="ss-linked-state @(p.Connected ? "connected" : "")">
-                                                @(p.Connected ? L["settings.linked.connected"] : L["settings.linked.notConnected"])
-                                            </div>
-                                        </div>
-                                        @if (p.Connected)
-                                        {
-                                            <span class="ss-linked-check" title="@L["settings.linked.connected"]"><i class="bi bi-check-circle-fill" aria-hidden="true"></i></span>
-                                        }
-                                        else if (p.Available)
-                                        {
-                                            <form action="Account/PerformExternalLogin" method="post" class="tw:m-0">
-                                                <AntiforgeryToken />
-                                                <input type="hidden" name="ReturnUrl" value="/settings" />
-                                                <button type="submit" name="provider" value="@p.Scheme" class="ss-linked-btn">
-                                                    @L["settings.linked.connect"]
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <button class="ss-linked-btn" type="button" disabled title="@Tx("This sign-in provider is not available yet.", "Phương thức đăng nhập này hiện chưa khả dụng.")">
-                                                @Tx("Unavailable", "Chưa khả dụng")
-                                            </button>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                            </section>
-
-                            <footer class="ss-account-actions">
-                                <div class="ss-account-security">
-                                    <i class="bi bi-shield-check" aria-hidden="true"></i><span>@L["settings.secureNote"]</span>
-                                </div>
-                                <button type="button" class="ss-account-save" @onclick="SaveAsync" disabled="@saving">
-                                    <i class="bi @(saving ? "bi-hourglass-split" : "bi-check2")" aria-hidden="true"></i> @(saving ? Tx("Saving…", "Đang lưu…") : L["settings.save"])
-                                </button>
-                            </footer>
-                        </section>
-
-                        <section id="settings-password" class="ss-card ss-card--flat ss-inline-password tw:p-6" aria-labelledby="settings-password-heading">
-                            <h3 id="settings-password-heading">@L["settings.password.title"]</h3>
-                            <form action="/Account/ChangePassword" method="post" data-enhance="false">
-                                <AntiforgeryToken />
-                                <input type="hidden" name="_handler" value="change-password" />
-                                @if (hasLocalPassword)
-                                {
-                                    <label for="settings-current-password">@L["settings.password.current"]</label>
-                                    <input id="settings-current-password" name="Input.OldPassword" type="password" autocomplete="current-password" class="form-control" required />
-                                }
-                                <label for="settings-new-password">@L["settings.password.new"]</label>
-                                <input id="settings-new-password" name="Input.NewPassword" type="password" autocomplete="new-password" class="form-control" minlength="6" maxlength="100" required />
-                                <label for="settings-confirm-password">@L["settings.password.confirm"]</label>
-                                <input id="settings-confirm-password" name="Input.ConfirmPassword" type="password" autocomplete="new-password" class="form-control" minlength="6" maxlength="100" required />
-                                <button type="submit" class="ss-btn-primary">@L["settings.password.submit"]</button>
-                            </form>
-                        </section>
-
-                        <div class="ss-card ss-card--flat ss-danger-zone tw:p-6">
-                            <h5 class="tw:font-bold tw:mb-1 text-danger">@L["settings.danger"]</h5>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.danger.hint"]</p>
-
-                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:mb-3 tw:flex-wrap">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.suspend.title"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.suspend.hint"]</div>
-                                </div>
-                                <button class="btn btn-outline-warning tw:py-2 tw:px-4" @onclick="() => showSuspend = true">
-                                    @L["settings.suspend.button"]
-                                </button>
-                            </div>
-                            <hr />
-                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:flex-wrap">
-                                <div>
-                                    <div class="tw:font-semibold text-danger">@L["settings.delete.title"]</div>
-                                    <div class="text-muted tw:text-sm">@L["settings.delete.hint"]</div>
-                                </div>
-                                <button class="btn btn-danger tw:py-2 tw:px-4" @onclick="() => showDelete = true">
-                                    @L["settings.delete.button"]
-                                </button>
-                            </div>
+                </nav>
+                <div class="st-help-card"><span class="st-help-icon"><i class="bi bi-chat-heart" aria-hidden="true"></i></span><h3>@Tx("A little help?", "Bạn cần hỗ trợ?")</h3><p>@Tx("Your learning assistant is a conversation away.", "Trợ lý học tập luôn sẵn sàng đồng hành cùng bạn.")</p><a href="/assistant">@Tx("Ask SoftSync", "Trò chuyện với trợ lý") <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+                <form action="/Account/Logout" method="post" class="st-signout"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="Account/Login" /><button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>@L["nav.logout"]</button></form>
+            </aside>
+            <section id="st-panel" class="st-content" aria-labelledby="st-panel-heading">
+                <header class="st-section-heading"><div class="st-section-symbol"><i class="bi @ActiveSection.Icon" aria-hidden="true"></i></div><div><h2 id="st-panel-heading">@ActiveSection.Title</h2><p>@SectionDescription</p></div><span class="st-section-index">@((Array.FindIndex(Sections, x => x.Value == tab) + 1).ToString("00")) / 07</span></header>
+                @if (tab == Tab.Account)
+                {
+                    <section class="st-card" aria-labelledby="st-personal-title">
+                        <header class="st-card-heading"><div><h3 id="st-personal-title">@Tx("Personal information", "Thông tin cá nhân")</h3><p>@Tx("Let us get to know you a little better.", "Thông tin giúp SoftSync hiểu bạn hơn.")</p></div><span class="st-soft-tag"><i class="bi bi-person-check" aria-hidden="true"></i>@Tx("Only you", "Chỉ mình bạn")</span></header>
+                        <div class="st-form-grid">
+                            <div class="st-field"><label for="fullName">@L["profile.fullName"] <span aria-hidden="true">*</span></label><div class="st-input-wrap"><i class="bi bi-person" aria-hidden="true"></i><input id="fullName" autocomplete="name" maxlength="100" required @bind="user.FullName" @bind:event="oninput" /></div></div>
+                            <div class="st-field"><label for="displayName">@L["settings.displayName"]</label><div class="st-input-wrap"><i class="bi bi-at" aria-hidden="true"></i><input id="displayName" maxlength="60" @bind="user.DisplayName" @bind:event="oninput" placeholder="@user.FullName" aria-describedby="st-display-hint" /></div><small id="st-display-hint">@Tx("The name you will see throughout SoftSync.", "Tên xuất hiện trong không gian học tập của bạn.")</small></div>
+                            <div class="st-field"><label for="age">@L["wizard.about.ageGroup"]</label><div class="st-input-wrap"><i class="bi bi-calendar3" aria-hidden="true"></i><select id="age" value="@ProfileAgeGroups.ForAge(user.Age)" @onchange="OnAgeGroupChanged"><option value="">@Tx("Select your age group", "Chọn nhóm tuổi")</option>@foreach (var group in ProfileAgeGroups.Options) { <option value="@group.Key">@L[group.LabelKey]</option> }</select></div></div>
+                            <div class="st-field"><label for="gender">@Tx("Gender", "Giới tính")</label><div class="st-input-wrap"><i class="bi bi-person-badge" aria-hidden="true"></i><select id="gender" @bind="user.Gender"><option value="@Gender.Unspecified">@L["wizard.gender.other"]</option><option value="@Gender.Male">@L["wizard.gender.male"]</option><option value="@Gender.Female">@L["wizard.gender.female"]</option></select></div></div>
+                            <div class="st-field"><label for="email">@L["auth.email"] <i class="bi bi-lock" aria-hidden="true"></i></label><div class="st-input-wrap is-readonly"><i class="bi bi-envelope" aria-hidden="true"></i><input id="email" value="@email" readonly /></div><small>@Tx("Your sign-in email is managed by your account provider.", "Email đăng nhập được quản lý bởi nhà cung cấp tài khoản.")</small></div>
+                            <div class="st-field"><label for="phone">@L["auth.phone"] <i class="bi bi-lock" aria-hidden="true"></i></label><div class="st-input-wrap is-readonly"><i class="bi bi-telephone" aria-hidden="true"></i><input id="phone" value="@phone" readonly placeholder="@Tx("Not provided", "Chưa cập nhật")" /></div></div>
                         </div>
                     </section>
-
-                    <section id="settings-learning" class="ss-settings-section @(tab == Tab.Learning ? "active" : null)" aria-label="@L["settings.tab.learning"]">
-                        <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title tw:mb-1">@L["settings.tab.learning"]</h4>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.learning.hint"]</p>
-
-                            <label class="form-label tw:font-medium">@L["profile.goal"]</label>
-                            <div class="tw:flex tw:flex-wrap tw:gap-2 tw:mb-4">
-                                @foreach (var g in goals)
-                                {
-                                    <button type="button" class="ss-seg-1 @(user.Goal == g.Value ? "active" : "")" @onclick="() => user.Goal = g.Value">
-                                        <i class="bi @g.Key tw:me-1"></i> @L[g.Value]
-                                    </button>
-                                }
+                    <section class="st-card" aria-labelledby="st-linked-title"><header class="st-card-heading"><div><h3 id="st-linked-title">@L["settings.linkedAccounts"]</h3><p>@Tx("Your connected sign-in methods.", "Quản lý các phương thức đăng nhập của bạn.")</p></div><i class="bi bi-link-45deg st-heading-icon" aria-hidden="true"></i></header><div class="st-provider-list">
+                        @foreach (var provider in linkedProviders)
+                        {
+                            <div class="st-provider"><span class="st-provider-logo" style="--provider-bg:@provider.Bg;--provider-color:@provider.Fg"><i class="bi @provider.Icon" aria-hidden="true"></i></span><div><strong>@provider.Name</strong><small>@(provider.Connected ? Tx("Connected to your account", "Đã liên kết với tài khoản") : provider.Available ? Tx("Available to connect", "Có thể liên kết") : Tx("Not supported yet", "Hiện chưa hỗ trợ"))</small></div>
+                                @if (provider.Connected) { <span class="st-connected"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>@Tx("Connected", "Đã liên kết")</span> }
+                                else if (provider.Available) { <form action="/Account/PerformExternalLogin" method="post"><AntiforgeryToken /><input type="hidden" name="ReturnUrl" value="/settings" /><button type="submit" name="provider" value="@provider.Scheme" class="st-button st-button-secondary">@L["settings.linked.connect"]<i class="bi bi-arrow-up-right" aria-hidden="true"></i></button></form> }
+                                else { <span class="st-unavailable">@Tx("Unavailable", "Chưa khả dụng")</span> }
                             </div>
-
-                            <label class="form-label tw:font-medium">@L["settings.prioritySkills"]</label>
-                            <div class="tw:flex tw:flex-wrap tw:gap-2 tw:mb-4">
-                                @if (skills is not null)
-                                {
-                                    @foreach (var s in skills)
-                                    {
-                                        <button class="ss-seg-1 @(selectedSkillIds.Contains(s.Id) ? "active" : "")"
-                                                @onclick="() => ToggleSkill(s.Id)" type="button">
-                                            <i class="bi @s.IconName tw:me-1"></i> @Ui(s.Name)
-                                        </button>
-                                    }
-                                }
-                            </div>
-
-                            <label class="form-label tw:font-medium">@L["settings.currentLevel"]</label>
-                            <div class="ss-seg tw:mb-4">
-                                @foreach (var lvl in new[] { LearningLevel.Beginner, LearningLevel.Intermediate, LearningLevel.Advanced })
-                                {
-                                    <button type="button" class="@(user.CurrentLevel == lvl ? "active" : "")" @onclick="() => user.CurrentLevel = lvl">
-                                        @L[$"settings.level.{lvl.ToString().ToLower()}"]
-                                    </button>
-                                }
-                            </div>
-
-                            <div class="tw:grid tw:grid-cols-1 tw:sm:grid-cols-2 tw:gap-4 tw:mb-4">
-                                <div>
-                                    <label for="dailyMinutes" class="form-label tw:font-medium">@L["settings.dailyMinutes"]</label>
-                                    <select id="dailyMinutes" class="form-control" @bind="user.DailyStudyMinutes">
-                                        <option value="0">—</option>
-                                        <option value="15">15 @L["settings.minutes"]</option>
-                                        <option value="30">30 @L["settings.minutes"]</option>
-                                        <option value="45">45 @L["settings.minutes"]</option>
-                                        <option value="60">60 @L["settings.minutes"]</option>
-                                        <option value="90">90 @L["settings.minutes"]</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="studyDays" class="form-label tw:font-medium">@L["settings.daysPerWeek"]</label>
-                                    <select id="studyDays" class="form-control" @bind="user.StudyDaysPerWeek">
-                                        @for (var d = 0; d <= 7; d++)
-                                        {
-                                            <option value="@d">@(d == 0 ? "—" : d.ToString())</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-
-                            <label class="form-label tw:font-medium">@L["settings.preferredTime"]</label>
-                            <div class="ss-seg tw:mb-4">
-                                @foreach (var t in new[] { StudyTime.Morning, StudyTime.Afternoon, StudyTime.Evening, StudyTime.Night })
-                                {
-                                    <button type="button" class="@(user.PreferredStudyTime == t ? "active" : "")" @onclick="() => user.PreferredStudyTime = t">
-                                        @L[$"settings.time.{t.ToString().ToLower()}"]
-                                    </button>
-                                }
-                            </div>
-
-                            <button class="ss-btn-primary tw:mt-2 tw:px-6 tw:py-2" @onclick="SaveAsync" disabled="@saving">
-                                <i class="bi bi-stars tw:me-1"></i> @L["settings.save"]
-                            </button>
+                        }
+                        @if (linkedProviders.Count == 0) { <p class="st-inline-note">@Tx("Sign-in providers could not be loaded. Your profile settings are still available.", "Chưa tải được phương thức đăng nhập. Bạn vẫn có thể chỉnh sửa hồ sơ.")</p> }
+                    </div></section>
+                }
+                else if (tab == Tab.Learning)
+                {
+                    <section class="st-card"><header class="st-card-heading"><div><h3>@Tx("Your learning direction", "Định hướng học tập")</h3><p>@Tx("Build a plan that fits your goals and your pace.", "Lựa chọn mục tiêu và nhịp độ phù hợp với bạn.")</p></div><i class="bi bi-compass st-heading-icon" aria-hidden="true"></i></header>
+                        <div class="st-card-body">
+                            <fieldset class="st-choice-group"><legend>@L["profile.goal"]</legend><div class="st-goal-grid">@foreach (var goal in goals) { <button type="button" class="st-goal @(user.Goal == goal.Value ? "is-selected" : "")" aria-pressed="@(user.Goal == goal.Value ? "true" : "false")" @onclick="() => user.Goal = goal.Value"><i class="bi @goal.Key" aria-hidden="true"></i><span>@L[goal.Value]</span><i class="bi @(user.Goal == goal.Value ? "bi-check-circle-fill" : "bi-circle")" aria-hidden="true"></i></button> }</div></fieldset>
+                            <fieldset class="st-choice-group"><legend>@L["settings.prioritySkills"]</legend><p>@Tx("Select the skills you want to focus on.", "Bạn có thể chọn nhiều kỹ năng muốn tập trung.")</p><div class="st-chips">@if (skills is not null) { @foreach (var skill in skills) { <button type="button" class="st-chip @(selectedSkillIds.Contains(skill.Id) ? "is-selected" : "")" aria-pressed="@(selectedSkillIds.Contains(skill.Id) ? "true" : "false")" @onclick="() => ToggleSkill(skill.Id)"><i class="bi @skill.IconName" aria-hidden="true"></i>@Ui(skill.Name) @if (selectedSkillIds.Contains(skill.Id)) { <i class="bi bi-check2" aria-hidden="true"></i> }</button> } }</div></fieldset>
+                            <fieldset class="st-choice-group"><legend>@L["settings.currentLevel"]</legend><div class="st-segment">@foreach (var level in new[] { LearningLevel.Beginner, LearningLevel.Intermediate, LearningLevel.Advanced }) { <button type="button" class="@(user.CurrentLevel == level ? "is-selected" : "")" aria-pressed="@(user.CurrentLevel == level ? "true" : "false")" @onclick="() => user.CurrentLevel = level">@L[$"settings.level.{level.ToString().ToLower()}"]</button> }</div></fieldset>
                         </div>
                     </section>
-
-                    <section id="settings-notifications" class="ss-settings-section @(tab == Tab.Notifications ? "active" : null)" aria-label="@L["settings.tab.notifications"]">
-                        <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title">@L["settings.tab.notifications"]</h4>
-                            <p>@Tx("Announcements from SoftSync are available in your notification inbox. Automatic study reminders and community subscriptions are not available yet.", "Thông báo từ SoftSync được lưu trong hộp thông báo. Nhắc học tự động và đăng ký thông báo cộng đồng hiện chưa khả dụng.")</p>
-                            <a class="ss-btn-primary" href="/notifications">@Tx("Open notifications", "Mở thông báo")</a>
-                        </div>
+                    <section class="st-card"><header class="st-card-heading"><div><h3>@Tx("A rhythm that works for you", "Nhịp học của riêng bạn")</h3><p>@Tx("Small, consistent steps make a difference.", "Dành một chút thời gian mỗi ngày để tiến bộ.")</p></div><i class="bi bi-calendar-week st-heading-icon" aria-hidden="true"></i></header><div class="st-card-body">
+                        <div class="st-form-grid st-form-grid-plain"><div class="st-field"><label for="dailyMinutes">@L["settings.dailyMinutes"]</label><select id="dailyMinutes" @bind="user.DailyStudyMinutes"><option value="0">@Tx("Not set", "Chưa thiết lập")</option>@foreach (var minutes in new[] { 15, 30, 45, 60, 90 }) { <option value="@minutes">@minutes @L["settings.minutes"]</option> }</select></div><div class="st-field"><label for="studyDays">@L["settings.daysPerWeek"]</label><select id="studyDays" @bind="user.StudyDaysPerWeek"><option value="0">@Tx("Not set", "Chưa thiết lập")</option>@for (var day = 1; day <= 7; day++) { <option value="@day">@day @Tx("days / week", "ngày / tuần")</option> }</select></div></div>
+                        <fieldset class="st-choice-group"><legend>@L["settings.preferredTime"]</legend><div class="st-time-grid">@foreach (var time in new[] { StudyTime.Morning, StudyTime.Afternoon, StudyTime.Evening, StudyTime.Night }) { <button type="button" class="st-time @(user.PreferredStudyTime == time ? "is-selected" : "")" aria-pressed="@(user.PreferredStudyTime == time ? "true" : "false")" @onclick="() => user.PreferredStudyTime = time"><i class="bi @TimeIcon(time)" aria-hidden="true"></i>@L[$"settings.time.{time.ToString().ToLower()}"]</button> }</div></fieldset>
+                    </div></section>
+                }
+                else if (tab == Tab.Appearance)
+                {
+                    <section class="st-card"><header class="st-card-heading"><div><h3>@Tx("A space that feels like you", "Không gian theo sở thích của bạn")</h3><p>@Tx("Preview changes as you make them.", "Các tùy chọn hiển thị được áp dụng ngay để bạn xem thử.")</p></div><i class="bi bi-palette2 st-heading-icon" aria-hidden="true"></i></header><div class="st-card-body">
+                        <fieldset class="st-choice-group"><legend>@L["settings.language"]</legend><div class="st-segment"><button type="button" class="@(langCode == "vi" ? "is-selected" : "")" aria-pressed="@(langCode == "vi" ? "true" : "false")" @onclick='() => SetLanguage("vi")'>🇻🇳 Tiếng Việt</button><button type="button" class="@(langCode == "en" ? "is-selected" : "")" aria-pressed="@(langCode == "en" ? "true" : "false")" @onclick='() => SetLanguage("en")'>English</button></div></fieldset>
+                        <fieldset class="st-choice-group"><legend>@L["settings.theme"]</legend><div class="st-theme-grid">@foreach (var theme in new[] { ThemePreference.Light, ThemePreference.Dark, ThemePreference.System }) { <button type="button" class="st-theme @(user.Theme == theme ? "is-selected" : "")" aria-pressed="@(user.Theme == theme ? "true" : "false")" @onclick="() => SetTheme(theme)"><span class="st-theme-preview st-theme-@theme.ToString().ToLower()" aria-hidden="true"><span></span><span></span><span></span></span><span><i class="bi @(theme == ThemePreference.Light ? "bi-sun" : theme == ThemePreference.Dark ? "bi-moon-stars" : "bi-display")" aria-hidden="true"></i>@L[$"settings.theme.{theme.ToString().ToLower()}"]<i class="bi @(user.Theme == theme ? "bi-check-circle-fill" : "bi-circle")" aria-hidden="true"></i></span></button> }</div></fieldset>
+                        <fieldset class="st-choice-group"><legend>@Tx("Text size", "Cỡ chữ")</legend><div class="st-segment">@foreach (var size in new[] { "small", "normal", "large" }) { <button type="button" class="@(fontScale == size ? "is-selected" : "")" aria-pressed="@(fontScale == size ? "true" : "false")" @onclick="() => SetFontScale(size)"><span class="st-font-@size">Aa</span> @FontLabel(size)</button> }</div></fieldset>
+                        <div class="st-toggle-row"><div><label for="reduceMotion">@L["settings.reduceMotion"]</label><p>@L["settings.reduceMotion.hint"]</p></div><input id="reduceMotion" class="st-switch" type="checkbox" role="switch" checked="@user.ReduceMotion" @onchange="OnReduceMotionChanged" /></div>
+                        <div class="st-toggle-row"><div><label for="highContrast">@Tx("High contrast", "Tương phản cao")</label><p>@Tx("Make text, borders and controls easier to see.", "Giúp chữ, đường viền và nút bấm dễ nhận biết hơn.")</p></div><input id="highContrast" class="st-switch" type="checkbox" role="switch" checked="@highContrast" @onchange="OnHighContrastChanged" /></div>
+                        <p class="st-device-note"><i class="bi bi-laptop" aria-hidden="true"></i>@Tx("Text size and contrast are remembered on this device.", "Cỡ chữ và độ tương phản được ghi nhớ trên thiết bị này.")</p>
+                    </div></section>
+                }
+                else if (tab == Tab.Security)
+                {
+                    <section class="st-card"><header class="st-card-heading"><div><h3>@L["settings.password.title"]</h3><p>@Tx("Use a unique password to keep your account secure.", "Sử dụng mật khẩu riêng để bảo vệ tài khoản của bạn.")</p></div><i class="bi bi-key st-heading-icon" aria-hidden="true"></i></header>
+                        <form class="st-card-body st-password-form" action="/Account/ChangePassword" method="post" data-enhance="false"><AntiforgeryToken /><input type="hidden" name="_handler" value="change-password" />
+                            @if (hasLocalPassword) { <div class="st-field"><label for="settings-current-password">@L["settings.password.current"]</label><input id="settings-current-password" name="Input.OldPassword" type="@(showPasswords ? "text" : "password")" autocomplete="current-password" required /></div> }
+                            <div class="st-field"><label for="settings-new-password">@L["settings.password.new"]</label><input id="settings-new-password" name="Input.NewPassword" type="@(showPasswords ? "text" : "password")" autocomplete="new-password" minlength="6" maxlength="100" required @bind="newPassword" @bind:event="oninput" aria-describedby="st-password-hint" /><small id="st-password-hint">@Tx("At least 6 characters. Avoid reusing a password.", "Tối thiểu 6 ký tự. Hạn chế dùng lại mật khẩu cũ.")</small></div>
+                            <div class="st-field"><label for="settings-confirm-password">@L["settings.password.confirm"]</label><input id="settings-confirm-password" name="Input.ConfirmPassword" type="@(showPasswords ? "text" : "password")" autocomplete="new-password" minlength="6" maxlength="100" required @bind="confirmPassword" @bind:event="oninput" aria-invalid="@(confirmPassword.Length > 0 && newPassword != confirmPassword ? "true" : null)" />@if (confirmPassword.Length > 0 && newPassword != confirmPassword) { <small class="st-error" role="status">@Tx("The passwords do not match.", "Mật khẩu nhập lại chưa khớp.")</small> }</div>
+                            <label class="st-check-label"><input type="checkbox" @bind="showPasswords" />@Tx("Show passwords", "Hiển thị mật khẩu")</label><div><button type="submit" class="st-button st-button-primary" disabled="@(newPassword.Length < 6 || newPassword != confirmPassword)"><i class="bi bi-lock" aria-hidden="true"></i>@L["settings.password.submit"]</button></div>
+                        </form>
                     </section>
-
-                    <section id="settings-appearance" class="ss-settings-section @(tab == Tab.Appearance ? "active" : null)" aria-label="@L["settings.tab.appearance"]">
-                        <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title tw:mb-4">@L["settings.tab.appearance"]</h4>
-
-                            <label class="form-label tw:font-medium">@L["settings.language"]</label>
-                            <div class="ss-seg tw:mb-4">
-                                <button type="button" class="@(langCode == "vi" ? "active" : "")" @onclick='() => SetLanguage("vi")'>Tiếng Việt</button>
-                                <button type="button" class="@(langCode == "en" ? "active" : "")" @onclick='() => SetLanguage("en")'>English</button>
-                            </div>
-
-                            <label class="form-label tw:font-medium">@L["settings.theme"]</label>
-                            <div class="ss-seg tw:mb-4">
-                                @foreach (var th in new[] { ThemePreference.Light, ThemePreference.Dark, ThemePreference.System })
-                                {
-                                    <button type="button" class="@(user.Theme == th ? "active" : "")" @onclick="() => SetTheme(th)">
-                                        @L[$"settings.theme.{th.ToString().ToLower()}"]
-                                    </button>
-                                }
-                            </div>
-
-                            <label class="form-label tw:font-medium">@Tx("Text size", "Cỡ chữ")</label>
-                            <div class="ss-seg tw:mb-4">
-                                <button type="button" class="@(fontScale == "small" ? "active" : "")" @onclick='() => SetFontScale("small")'>@Tx("Small", "Nhỏ")</button>
-                                <button type="button" class="@(fontScale == "normal" ? "active" : "")" @onclick='() => SetFontScale("normal")'>@Tx("Normal", "Vừa")</button>
-                                <button type="button" class="@(fontScale == "large" ? "active" : "")" @onclick='() => SetFontScale("large")'>@Tx("Large", "Lớn")</button>
-                            </div>
-
-                            <div class="form-check form-switch tw:mb-2">
-                                <input class="form-check-input" type="checkbox" id="reduceMotion" checked="@user.ReduceMotion"
-                                       @onchange="OnReduceMotionChanged" />
-                                <label class="form-check-label tw:font-medium" for="reduceMotion">@L["settings.reduceMotion"]</label>
-                            </div>
-                            <p class="text-muted tw:text-sm tw:mb-4">@L["settings.reduceMotion.hint"]</p>
-
-                            <div class="form-check form-switch tw:mb-2">
-                                <input class="form-check-input" type="checkbox" id="highContrast" checked="@highContrast"
-                                       @onchange="OnHighContrastChanged" />
-                                <label class="form-check-label tw:font-medium" for="highContrast">@Tx("High contrast", "Tương phản cao")</label>
-                            </div>
-                            <p class="text-muted tw:text-sm tw:mb-4">@Tx("Use stronger colors, borders and focus indicators.", "Dùng màu sắc, đường viền và chỉ báo focus rõ hơn.")</p>
-
-                            <button class="ss-btn-primary tw:px-6 tw:py-2" @onclick="SaveAsync" disabled="@saving">
-                                <i class="bi bi-stars tw:me-1"></i> @L["settings.save"]
-                            </button>
-                        </div>
-                    </section>
-
-                    <section id="settings-privacy" class="ss-settings-section @(tab == Tab.Privacy ? "active" : null)" aria-label="@L["settings.tab.privacy"]">
-                        <div class="ss-card ss-card--flat tw:p-6">
-                            <h4 class="ss-panel-title">@L["settings.tab.privacy"]</h4>
-                            <p>@Tx("Your account profile and learning records are accessible through your signed-in account. Public learner profiles and a public leaderboard are not available.", "Hồ sơ tài khoản và kết quả học được truy cập qua tài khoản đăng nhập. Hiện chưa có hồ sơ học viên công khai hoặc bảng xếp hạng công khai.")</p>
-                            <p>@Tx("When requesting mentor support, share only the context you choose to submit. Your Reflection text is not attached automatically.", "Khi yêu cầu Mentor hỗ trợ, chỉ gửi ngữ cảnh bạn muốn chia sẻ. Nội dung phản tư không được tự động đính kèm.")</p>
-                        </div>
-                    </section>
-
-                    <section id="settings-danger" class="ss-settings-section @(tab == Tab.Danger ? "active" : null)" aria-label="@L["settings.tab.billing"]">
-                        <div class="ss-card ss-card--flat tw:p-6 tw:mb-4">
-                            <h4 class="ss-panel-title tw:mb-1">@L["settings.tab.billing"]</h4>
-                            <p class="text-muted tw:text-sm tw:mb-4">@Tx("Payments and paid subscriptions are not available yet.", "Thanh toán và đăng ký gói trả phí hiện chưa được mở.")</p>
-
-                            <div class="ss-billing-plan">
-                                <div>
-                                    <div class="tw:font-semibold">@L["settings.billing.currentPlan"]</div>
-                                    <div class="text-muted tw:text-sm">@Tx("You are using the free plan.", "Bạn đang sử dụng gói miễn phí.")</div>
-                                </div>
-                                <button class="ss-btn-primary tw:px-4 tw:py-2" type="button" disabled>
-                                    @Crown("tw:me-1") @Tx("Not available yet", "Chưa khả dụng")
-                                </button>
-                            </div>
-                        </div>
-
-                    </section>
-                </div>
-            </div>
+                    <details class="st-card st-danger"><summary><span class="st-danger-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><span><strong>@Tx("Account management", "Quản lý tài khoản")</strong><small>@Tx("Pause or permanently delete your account.", "Tạm khóa hoặc xóa vĩnh viễn tài khoản.")</small></span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="st-card-body"><div class="st-action-row"><div><h3>@L["settings.suspend.title"]</h3><p>@L["settings.suspend.hint"]</p></div><button type="button" class="st-button st-button-secondary" @onclick="() => showSuspend = true">@L["settings.suspend.button"]</button></div><div class="st-action-row"><div><h3>@L["settings.delete.title"]</h3><p>@L["settings.delete.hint"]</p></div><button type="button" class="st-button st-button-danger" @onclick="() => showDelete = true">@L["settings.delete.button"]</button></div></div></details>
+                }
+                else if (tab == Tab.Notifications)
+                {
+                    <section class="st-card st-notifications"><span class="st-feature-icon"><i class="bi bi-bell" aria-hidden="true"></i><span></span></span><h3>@Tx("Stay in the loop", "Đừng bỏ lỡ điều quan trọng")</h3><p>@Tx("Find announcements and updates from SoftSync in your notification inbox.", "Theo dõi thông báo và cập nhật từ SoftSync trong hộp thông báo của bạn.")</p><a href="/notifications" class="st-button st-button-primary">@Tx("Open notification inbox", "Mở hộp thông báo")<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><div class="st-coming-soon"><i class="bi bi-clock-history" aria-hidden="true"></i><div><strong>@Tx("More options are on the way", "Thêm lựa chọn trong thời gian tới")</strong><p>@Tx("Automatic study reminders and community subscriptions are not available yet.", "Nhắc học tự động và đăng ký thông báo cộng đồng hiện chưa khả dụng.")</p></div></div></section>
+                }
+                else if (tab == Tab.Privacy)
+                {
+                    <section class="st-card"><header class="st-card-heading"><div><h3>@Tx("Your information, thoughtfully handled", "Thông tin của bạn được tôn trọng")</h3><p>@Tx("Know what is shared and what stays in your account.", "Hiểu rõ những gì được chia sẻ và lưu trong tài khoản.")</p></div><i class="bi bi-shield-lock st-heading-icon" aria-hidden="true"></i></header><div class="st-card-body st-privacy-list"><article><span><i class="bi bi-person-lock" aria-hidden="true"></i></span><div><h3>@Tx("A personal learning profile", "Hồ sơ học tập cá nhân")</h3><p>@Tx("Your profile and learning records are accessed through your signed-in account. Public learner profiles and public leaderboards are not available.", "Bạn truy cập hồ sơ và kết quả học qua tài khoản đăng nhập. SoftSync hiện chưa có hồ sơ học viên hoặc bảng xếp hạng công khai.")</p></div></article><article><span><i class="bi bi-chat-square-heart" aria-hidden="true"></i></span><div><h3>@Tx("Share with intention", "Chủ động khi chia sẻ")</h3><p>@Tx("When asking a mentor for support, only share the context you choose. Your Reflection text is not attached automatically.", "Khi nhờ Mentor hỗ trợ, bạn chủ động chọn ngữ cảnh muốn gửi. Nội dung phản tư không được tự động đính kèm.")</p></div></article></div></section>
+                    <section class="st-card st-support-card"><header class="st-card-heading"><div><h3>@Tx("Support & information", "Hỗ trợ & thông tin")</h3></div></header><SupportOptionLinks /></section>
+                }
+                else if (tab == Tab.Danger)
+                {
+                    <section class="st-card st-plan"><span class="st-soft-tag">SOFTSYNC FREE</span><h3>@Tx("Your space to grow", "Không gian để bạn phát triển")</h3><p>@Tx("You are currently using the free plan.", "Bạn đang sử dụng gói miễn phí của SoftSync.")</p><div class="st-plan-price">0 <span>₫ / @Tx("month", "tháng")</span></div><div class="st-inline-note"><i class="bi bi-info-circle" aria-hidden="true"></i>@Tx("Paid subscriptions and payments are not available yet. No action is needed.", "Gói trả phí và thanh toán hiện chưa được mở. Bạn không cần thực hiện thêm thao tác nào.")</div></section>
+                }
+                @if (tab is Tab.Account or Tab.Learning or Tab.Appearance)
+                {
+                    <footer class="st-save-bar"><div class="st-save-state" role="status"><i class="bi @(HasUnsavedChanges ? "bi-pencil-square" : "bi-cloud-check")" aria-hidden="true"></i><span>@(saving ? Tx("Saving your preferences…", "Đang lưu tùy chọn của bạn…") : HasUnsavedChanges ? Tx("You have unsaved changes", "Bạn có thay đổi chưa lưu") : Tx("Your preferences are up to date", "Cài đặt của bạn đã được cập nhật"))</span></div><button type="button" class="st-button st-button-primary" @onclick="SaveAsync" disabled="@(saving || !HasUnsavedChanges)"><i class="bi @(saving ? "bi-arrow-repeat" : "bi-check2")" aria-hidden="true"></i>@(saving ? Tx("Saving…", "Đang lưu…") : L["settings.save"])</button></footer>
+                }
+                @if (!string.IsNullOrEmpty(savedMessage)) { <div class="st-feedback @(saveFailed ? "st-feedback-error" : "st-feedback-success")" @key="toastSeq" role="@(saveFailed ? "alert" : "status")"><i class="bi @(saveFailed ? "bi-exclamation-circle" : "bi-check-circle")" aria-hidden="true"></i>@savedMessage</div> }
+            </section>
         </div>
         </fieldset>
-        <div class="ss-settings-direct-footer">
-            <section class="ss-options-group"><h2>@Tx("Other", "Khác")</h2><SupportOptionLinks /></section>
-            <form action="/Account/Logout" method="post" class="ss-options-logout"><AntiforgeryToken /><input type="hidden" name="returnUrl" value="Account/Login" /><button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>@L["nav.logout"]</button></form>
-        </div>
+        <footer class="st-page-footer"><span>SoftSync <span aria-hidden="true">·</span> @Tx("Learn. Connect. Grow.", "Học hỏi. Kết nối. Phát triển.")</span><a href="/about">@Tx("About SoftSync", "Về SoftSync")<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></footer>
     }
 </div>
-
-@* Floating glass toast — replays its show→hold→fade animation each time
-   toastSeq changes (i.e. each save). Ends invisible with pointer-events:none. *@
-@if (!string.IsNullOrEmpty(savedMessage))
+@if (showSuspend || showDelete)
 {
-    <div class="ss-toast @(saveFailed ? "text-danger" : "")" @key="toastSeq" role="@(saveFailed ? "alert" : "status")" aria-live="polite">
-        <i class="bi @(saveFailed ? "bi-exclamation-circle-fill" : "bi-check-circle-fill")"></i>
-        <span>@savedMessage</span>
+    <div class="st-dialog-backdrop" @onclick="CloseDialogs" @onkeydown="DialogKeyDown">
+        <section class="st-dialog" role="dialog" aria-modal="true" aria-labelledby="st-dialog-title" @onclick:stopPropagation="true" tabindex="-1" @ref="dialogElement">
+            <button type="button" class="st-dialog-close" @onclick="CloseDialogs" aria-label="@Tx("Close", "Đóng")"><i class="bi bi-x-lg" aria-hidden="true"></i></button><span class="st-danger-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><h2 id="st-dialog-title">@(showDelete ? L["settings.delete.title"] : L["settings.suspend.title"])</h2><p>@(showDelete ? L["settings.delete.confirm"] : L["settings.suspend.confirm"])</p>
+            @if (showDelete) { <label for="st-delete-confirm">@L["settings.delete.typePrompt"] <strong>@DeleteWord</strong></label><input id="st-delete-confirm" @bind="deleteConfirmText" @bind:event="oninput" autocomplete="off" placeholder="@DeleteWord" /> }
+            <form action="@(showDelete ? "/Account/DeleteAccount" : "/Account/Suspend")" method="post" data-enhance="false"><AntiforgeryToken /><button type="button" class="st-button st-button-secondary" @onclick="CloseDialogs">@L["logout.confirm.cancel"]</button><button type="submit" class="st-button st-button-danger" disabled="@(showDelete && !DeleteConfirmed)">@(showDelete ? L["settings.delete.button"] : L["settings.suspend.button"])</button></form>
+        </section>
     </div>
 }
-
-<!-- Suspend confirm -->
-@if (showSuspend)
-{
-    <div class="ss-modal-backdrop" @onclick="() => showSuspend = false">
-        <div class="ss-modal" @onclick:stopPropagation="true">
-            <h4 class="tw:font-bold tw:mb-2">@L["settings.suspend.title"]</h4>
-            <p class="text-muted tw:mb-4">@L["settings.suspend.confirm"]</p>
-            <form id="ss-suspend-form" action="Account/Suspend" method="post" class="tw:m-0">
-                <AntiforgeryToken />
-                <div class="tw:flex tw:gap-3">
-                    <button type="button" class="btn btn-light tw:flex-1 tw:py-2" @onclick="() => showSuspend = false">@L["logout.confirm.cancel"]</button>
-                    <button type="submit" class="btn btn-warning tw:flex-1 tw:py-2">@L["settings.suspend.button"]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-}
-
-<!-- Delete confirm (typed) -->
-@if (showDelete)
-{
-    <div class="ss-modal-backdrop" @onclick="CancelDelete">
-        <div class="ss-modal" @onclick:stopPropagation="true">
-            <h4 class="tw:font-bold tw:mb-2 text-danger">@L["settings.delete.title"]</h4>
-            <p class="text-muted tw:mb-3">@L["settings.delete.confirm"]</p>
-            <p class="tw:text-sm tw:mb-2">@L["settings.delete.typePrompt"] <strong>@DeleteWord</strong></p>
-            <input class="form-control tw:mb-4" @bind="deleteConfirmText" @bind:event="oninput" placeholder="@DeleteWord" />
-            <form id="ss-delete-form" action="Account/DeleteAccount" method="post" class="tw:m-0">
-                <AntiforgeryToken />
-                <div class="tw:flex tw:gap-3">
-                    <button type="button" class="btn btn-light tw:flex-1 tw:py-2" @onclick="CancelDelete">@L["logout.confirm.cancel"]</button>
-                    <button type="submit" class="btn btn-danger tw:flex-1 tw:py-2" disabled="@(!DeleteConfirmed)">@L["settings.delete.button"]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-}
-
-<style>
-    .ss-premium {
-        background: radial-gradient(circle at 85% 0%, rgba(250,204,21,.2), transparent 38%), linear-gradient(145deg, rgba(255,255,255,.94), rgba(237,233,254,.92));
-        border-color: rgba(124,58,237,.38);
-        box-shadow: 0 16px 38px rgba(76,29,149,.24), inset 0 1px 0 rgba(255,255,255,.95);
-        -webkit-backdrop-filter: blur(18px) saturate(150%);
-        backdrop-filter: blur(18px) saturate(150%);
-    }
-    .ss-premium-title { color: #312e81; font-size: 1.05rem; text-shadow: 0 1px 0 rgba(255,255,255,.9); }
-    .ss-premium-sub { color: #475569; font-size: .82rem; font-weight: 600; }
-    html[data-theme="dark"] .ss-premium { background: radial-gradient(circle at 85% 0%, rgba(250,204,21,.16), transparent 40%), linear-gradient(145deg, rgba(49,46,129,.92), rgba(30,27,75,.94)); border-color: rgba(196,181,253,.42); }
-    html[data-theme="dark"] .ss-premium-title { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.55); }
-    html[data-theme="dark"] .ss-premium-sub { color: #ddd6fe; }
-</style>
 
 @code {
     private string Tx(string en, string vi) => L.Current == AppLanguage.Vi ? vi : en;
 
-    // Bootstrap Icons has no "crown" glyph, so render a gold crown as inline SVG.
-    private static Microsoft.AspNetCore.Components.MarkupString Crown(string cssClass = "") =>
-        new($"<svg class=\"ss-crown {cssClass}\" viewBox=\"0 0 576 512\" width=\"1em\" height=\"1em\" aria-hidden=\"true\" focusable=\"false\">" +
-            "<path fill=\"#facc15\" stroke=\"#eab308\" stroke-width=\"12\" stroke-linejoin=\"round\" " +
-            "d=\"M309 106c11.4-7 19-19.7 19-34c0-22.1-17.9-40-40-40s-40 17.9-40 40c0 14.4 7.6 27 19 34" +
-            "L209.7 220.6c-9.1 18.2-32.7 23.4-48.6 10.7L72 160c5-6.7 8-15 8-24c0-22.1-17.9-40-40-40" +
-            "S0 113.9 0 136s17.9 40 40 40c.2 0 .5 0 .7 0L86.4 427.4c5.5 30.4 32 52.6 63 52.6l277.2 0" +
-            "c30.9 0 57.4-22.1 63-52.6L535.3 176c.2 0 .5 0 .7 0c22.1 0 40-17.9 40-40s-17.9-40-40-40" +
-            "s-40 17.9-40 40c0 9 3 17.3 8 24l-89.1 71.3c-15.9 12.7-39.5 7.5-48.6-10.7L309 106z\"/></svg>");
-
-    private enum Tab { Account, Learning, Notifications, Appearance, Privacy, Danger }
+    private enum Tab { Account, Learning, Notifications, Appearance, Privacy, Danger, Security }
+    private record SettingsSection(Tab Value, string Icon, string Title, string Description);
+    private SettingsSection[] Sections => [
+        new(Tab.Account, "bi-person", Tx("Profile", "Hồ sơ cá nhân"), Tx("Details & connected accounts", "Thông tin & tài khoản liên kết")),
+        new(Tab.Security, "bi-shield-check", Tx("Security", "Bảo mật"), Tx("Password & account access", "Mật khẩu & quản lý tài khoản")),
+        new(Tab.Learning, "bi-mortarboard", Tx("Learning", "Học tập"), Tx("Goals & study rhythm", "Mục tiêu & nhịp học")),
+        new(Tab.Notifications, "bi-bell", Tx("Notifications", "Thông báo"), Tx("Stay up to date", "Cập nhật dành cho bạn")),
+        new(Tab.Appearance, "bi-palette", Tx("Appearance", "Giao diện"), Tx("Display & language", "Hiển thị & ngôn ngữ")),
+        new(Tab.Privacy, "bi-fingerprint", Tx("Privacy", "Quyền riêng tư"), Tx("Your information & support", "Thông tin & hỗ trợ")),
+        new(Tab.Danger, "bi-credit-card", Tx("Your plan", "Gói sử dụng"), Tx("Your current subscription", "Thông tin gói hiện tại"))
+    ];
+    private SettingsSection ActiveSection => Sections.First(x => x.Value == tab);
+    private string SectionDescription => tab switch {
+        Tab.Account => Tx("Manage the details that make this space yours.", "Quản lý thông tin để không gian này mang dấu ấn của bạn."),
+        Tab.Security => Tx("A few simple steps to keep your account safe.", "Chủ động bảo vệ tài khoản và thông tin đăng nhập."),
+        Tab.Learning => Tx("Shape a learning plan around your everyday life.", "Thiết kế hành trình học phù hợp với cuộc sống của bạn."),
+        Tab.Notifications => Tx("Keep up with the things that matter to you.", "Theo dõi những cập nhật quan trọng dành cho bạn."),
+        Tab.Appearance => Tx("Make every visit comfortable and familiar.", "Tùy chỉnh để mỗi lần học đều thoải mái và quen thuộc."),
+        Tab.Privacy => Tx("Understand how your learning information is shared.", "Hiểu rõ cách thông tin học tập của bạn được chia sẻ."),
+        _ => Tx("Everything about your current SoftSync plan.", "Thông tin về gói SoftSync bạn đang sử dụng.")
+    };
+    private static string TimeIcon(StudyTime time) => time switch { StudyTime.Morning => "bi-sunrise", StudyTime.Afternoon => "bi-sun", StudyTime.Evening => "bi-sunset", _ => "bi-moon-stars" };
+    private string FontLabel(string size) => size switch { "small" => Tx("Small", "Nhỏ"), "large" => Tx("Large", "Lớn"), _ => Tx("Normal", "Vừa") };
+    private bool showPasswords;
+    private string newPassword = "", confirmPassword = "";
+    private string? savedSnapshot;
+    private bool HasUnsavedChanges => savedSnapshot is not null && savedSnapshot != SettingsSnapshot();
+    private string SettingsSnapshot() => System.Text.Json.JsonSerializer.Serialize(new {
+        user?.FullName, user?.DisplayName, user?.Age, user?.Gender, user?.Goal, user?.CurrentLevel,
+        user?.DailyStudyMinutes, user?.StudyDaysPerWeek, user?.PreferredStudyTime,
+        Language = L.Code, user?.Theme, user?.ReduceMotion, fontScale, highContrast,
+        Skills = selectedSkillIds.Order().ToArray()
+    });
+    private ElementReference dialogElement;
+    private IJSObjectReference? settingsModule;
+    private Tab? renderedSection;
+    private bool dialogWasOpen;
+    private void CloseDialogs() { showSuspend = false; CancelDelete(); }
+    private void DialogKeyDown(KeyboardEventArgs e) { if (e.Key == "Escape") CloseDialogs(); }
     private Tab tab = Tab.Account;
     [SupplyParameterFromQuery(Name = "section")] public string? RequestedSection { get; set; }
     protected override void OnParametersSet()
@@ -688,8 +331,23 @@
             fontScale = await JS.InvokeAsync<string>("ssFontSize.init");
             highContrast = await JS.InvokeAsync<bool>("ssContrast.init");
             interactiveReady = true;
+            savedSnapshot = SettingsSnapshot();
             StateHasChanged();
         }
+        var dialogOpen = showSuspend || showDelete;
+        if (interactiveReady && renderedSection != tab)
+        {
+            settingsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/settings-accessibility.js");
+            await settingsModule.InvokeVoidAsync("revealSection", tab.ToString());
+            renderedSection = tab;
+        }
+        if (dialogOpen != dialogWasOpen)
+        {
+            settingsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/settings-accessibility.js");
+            if (dialogOpen) await settingsModule.InvokeVoidAsync("openDialog", dialogElement);
+            else await settingsModule.InvokeVoidAsync("closeDialog");
+        }
+        dialogWasOpen = dialogOpen;
     }
 
     private void ToggleSkill(int id)
@@ -706,6 +364,10 @@
     private async Task SelectTabAsync(Tab next)
     {
         tab = next;
+        savedMessage = null;
+        newPassword = confirmPassword = "";
+        showPasswords = false;
+        Nav.NavigateTo(Nav.GetUriWithQueryParameter("section", next.ToString()), replace: true);
         if (next != Tab.Appearance || user is null) return;
         var theme = await JS.InvokeAsync<ThemeState>("ssTheme.get");
         if (Enum.TryParse<ThemePreference>(theme.Preference, true, out var preference))
@@ -778,6 +440,7 @@
             await UserService.UpdateSettingsAsync(userId, user);
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
             UserProfileState.NotifyDisplayNameChanged(user.PublicName);
+            savedSnapshot = SettingsSnapshot();
             savedMessage = L["settings.saved"];
             toastSeq++; // bump so the toast remounts and replays its animation
         }
@@ -832,5 +495,16 @@
         using var buffer = new MemoryStream();
         await stream.CopyToAsync(buffer);
         return $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (settingsModule is null) return;
+        try
+        {
+            await settingsModule.InvokeVoidAsync("closeDialog");
+            await settingsModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
     }
 }

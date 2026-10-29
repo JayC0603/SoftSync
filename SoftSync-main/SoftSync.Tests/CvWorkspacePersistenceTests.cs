@@ -8,6 +8,37 @@ namespace SoftSync.Tests;
 
 public sealed class CvWorkspacePersistenceTests
 {
+    [Fact]
+    public async Task Durable_reuse_is_owner_document_JD_version_and_age_scoped_across_contexts()
+    {
+        var options = Options();
+        Guid documentId, reviewId = Guid.NewGuid();
+        await using (var db = new SoftSyncDbContext(options))
+        {
+            await Seed(db);
+            var store = new CvWorkspaceService(db);
+            documentId = (await store.AddDocumentAsync(101, "cv.txt", "txt", "Saved document", [1])).Id;
+            await store.SaveReviewAsync(101, new(reviewId, documentId, "cv.txt", "Review", "Exact JD", "{\"CacheKey\":\"current-key\"}", DateTime.UtcNow));
+        }
+        await using var fresh = new SoftSyncDbContext(options);
+        var service = new CvWorkspaceService(fresh);
+        Assert.Equal(reviewId, (await service.FindReusableReviewAsync(101, documentId, " Exact JD ", "current-key"))!.Id);
+        Assert.Null(await service.FindReusableReviewAsync(102, documentId, "Exact JD", "current-key"));
+        Assert.Null(await service.FindReusableReviewAsync(101, Guid.NewGuid(), "Exact JD", "current-key"));
+        Assert.Null(await service.FindReusableReviewAsync(101, documentId, "Changed JD", "current-key"));
+        Assert.Null(await service.FindReusableReviewAsync(101, documentId, "Exact JD", "other-language-or-model-or-version"));
+        var record = await fresh.CvReviews.SingleAsync(x => x.Id == reviewId);
+        record.CreatedAtUtc = DateTime.UtcNow.AddHours(-25);
+        await fresh.SaveChangesAsync();
+        Assert.Null(await service.FindReusableReviewAsync(101, documentId, "Exact JD", "current-key"));
+        record.CreatedAtUtc = DateTime.UtcNow;
+        record.ResultJson = "malformed legacy data";
+        await fresh.SaveChangesAsync();
+        Assert.Null(await service.FindReusableReviewAsync(101, documentId, "Exact JD", "current-key"));
+        using var canceled = new CancellationTokenSource(); canceled.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.FindReusableReviewAsync(101, documentId, "Exact JD", "current-key", canceled.Token));
+    }
+
     private static DbContextOptions<SoftSyncDbContext> Options() =>
         new DbContextOptionsBuilder<SoftSyncDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
@@ -61,6 +92,27 @@ public sealed class CvWorkspacePersistenceTests
         Assert.Equal(reviewId, review.Id);
         Assert.Equal("A detailed job description", review.JobDescription);
         Assert.Equal("{\"QualityScore\":78}", review.ResultJson);
+    }
+
+    [Fact]
+    public async Task Library_metadata_omits_document_contents_and_selected_document_remains_private()
+    {
+        await using var db = new SoftSyncDbContext(Options());
+        await Seed(db);
+        var service = new CvWorkspaceService(db);
+        var doc = await service.AddDocumentAsync(101, "private.txt", "txt", "Private CV text", [1, 2, 3], "{\"pages\":[]}");
+        var metadata = Assert.Single(await service.ListDocumentSummariesAsync(101));
+        Assert.Equal(doc.Id, metadata.Id);
+        Assert.Empty(metadata.Text);
+        Assert.Null(metadata.ExtractionJson);
+        Assert.Empty(await service.ListDocumentSummariesAsync(102));
+        Assert.Null(await service.GetDocumentAsync(102, doc.Id));
+        var full = await service.GetDocumentAsync(101, doc.Id);
+        Assert.Equal(doc.Text, full!.Text);
+        Assert.Equal(doc.ExtractionJson, full.ExtractionJson);
+        using var cancelled = new CancellationTokenSource(); cancelled.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.ListDocumentSummariesAsync(101, cancelled.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.GetDocumentAsync(101, doc.Id, cancelled.Token));
     }
 
     [Fact]

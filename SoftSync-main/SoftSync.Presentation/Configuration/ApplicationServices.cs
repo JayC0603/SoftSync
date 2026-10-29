@@ -32,6 +32,9 @@ public static class ApplicationServices
             })
             .AddHubOptions(options =>
             {
+                // A supported 20,000-character JD can exceed 32 KB in UTF-8/JSON.
+                // Keep a finite limit with room for Unicode and event metadata.
+                options.MaximumReceiveMessageSize = 256 * 1024;
                 // Allow brief mobile network stalls without discarding a healthy circuit.
                 // Keep these intervals aligned with blazor-start.js.
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
@@ -106,7 +109,18 @@ public static class ApplicationServices
         builder.Services.AddSingleton<PdfDocumentKnowledge>();
         builder.Services.AddScoped<HuggingFaceJsonClient>();
         builder.Services.AddScoped<SoftSync.Presentation.Services.CvReviewService>();
+        builder.Services.AddScoped<ICvReviewLanguageModel, XahCvReviewClient>();
+        builder.Services.AddTransient<XahFallbackHandler>();
+        builder.Services.AddHttpClient("CvLlm", client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers()
+            .AddHttpMessageHandler<XahFallbackHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddScoped<CvWorkspaceService>();
+        builder.Services.AddScoped<ICvPageOcr, CvPageOcrClient>();
+        builder.Services.AddScoped<CvDocumentExtractionService>();
+        builder.Services.AddHttpClient("CvOcr", client => client.Timeout = Timeout.InfiniteTimeSpan)
+            .RemoveAllLoggers()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddScoped<IAiSecretProtector, AiSecretProtector>();
         builder.Services.AddScoped<IAiAdminAccess, IdentityAiAdminAccess>();
         builder.Services.AddScoped<IAiProviderConfigurationResolver, AiProviderConfigurationResolver>();
@@ -144,11 +158,13 @@ public static class ApplicationServices
         // Credentials are per-request headers, never defaults/URL. Reject redirects to other hosts.
         builder.Services.AddHttpClient("AiRuntime", client => client.Timeout = Timeout.InfiniteTimeSpan)
             .RemoveAllLoggers()
+            .AddHttpMessageHandler<XahFallbackHandler>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddHttpClient("AiApi", client =>
         {
             AiApiConfiguration.Configure(client, builder.Configuration);
-        });
+        }).RemoveAllLoggers().AddHttpMessageHandler<XahFallbackHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddHttpClient("Gemini", client =>
         {
             client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");

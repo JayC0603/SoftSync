@@ -1,0 +1,22 @@
+# Optional OCR service: docker compose -f docker-compose.yml -f docker-compose.ocr.yml up -d --build web cv-ocr
+services:
+  web:
+    environment:
+      CvOcr__BaseUrl: http://cv-ocr:8090/
+      CvOcr__ApiKey: ${CV_OCR_API_KEY:?Set CV_OCR_API_KEY in your environment}
+      CvOcr__TimeoutSeconds: "90"
+  cv-ocr:
+    build: ./CvOcr
+    environment:
+      CV_OCR_API_KEY: ${CV_OCR_API_KEY:?Set CV_OCR_API_KEY in your environment}
+    volumes:
+      - cv-ocr-models:/home/ocr/.paddlex
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+      start_period: 180s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  cv-ocr-models:

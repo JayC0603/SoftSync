@@ -10,6 +10,32 @@ namespace SoftSync.Tests;
 public sealed class GeminiConfigurationTests
 {
     [Fact]
+    public async Task Xah_deployment_uses_pinned_endpoint_namespaced_model_and_bearer_key()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AiApi:Enabled"] = "true", ["AiApi:UseDeploymentConfiguration"] = "true",
+            ["AiApi:Provider"] = "Xah", ["AiApi:ApiKey"] = "synthetic-xah-key",
+            ["AiApi:BaseUrl"] = "https://example.invalid/", // Never forward the XAH key elsewhere.
+            ["AiApi:Model"] = "tranhieu13102003/gpt-6-luna"
+        }).Build();
+        Assert.True(EnvironmentAiConfiguration.IsDeploymentOverride(configuration));
+        var resolved = EnvironmentAiConfiguration.Resolve(configuration)!;
+        Assert.Equal(SoftSync.Common.Dtos.AiProviderType.Xah, resolved.Provider);
+        var handler = new RecordingHandler();
+        using var http = new HttpClient(handler);
+        var client = new HuggingFaceJsonClient(new Factory(http), configuration, NullLogger<HuggingFaceJsonClient>.Instance);
+        var reply = await client.AskAsync<Reply>("assistant", "Return JSON only.", new { question = "Example" });
+        Assert.Equal("ok", reply?.Text);
+        Assert.Equal("https://api.xah.io/v1/chat/completions", handler.Url);
+        Assert.Equal("Bearer synthetic-xah-key", handler.Authorization);
+        Assert.DoesNotContain("synthetic-xah-key", handler.Body);
+        using var body = JsonDocument.Parse(handler.Body);
+        Assert.Equal("tranhieu13102003/gpt-6-luna", body.RootElement.GetProperty("model").GetString());
+        Assert.Equal(4096, body.RootElement.GetProperty("max_tokens").GetInt32());
+    }
+
+    [Fact]
     public async Task Default_transport_uses_Gemini_and_keeps_key_out_of_payload_and_URL()
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

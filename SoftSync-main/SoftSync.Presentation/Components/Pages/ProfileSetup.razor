@@ -12,6 +12,7 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 @inject IJSRuntime JS
+@inject LearnerAccessState Access
 
 <div class="wizard-shell tw:mx-auto">
     <!-- Progress dots -->
@@ -200,7 +201,8 @@
             mascotGender = existing.Gender;
             if (IsProfileComplete(existing))
             {
-                Nav.NavigateTo("/dashboard", true);
+                var completed = (await AssessmentService.GetLatestResultsAsync(userId, userId)).Any();
+                Nav.NavigateTo(completed ? "/dashboard" : $"/assessment/{userId}", replace: true);
                 return;
             }
         }
@@ -220,7 +222,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || stateRestored || userId <= 0)
+        if (stateRestored || userId <= 0 || skills is null)
             return;
 
         stateRestored = true;
@@ -302,6 +304,7 @@
         {
             await UserService.AddSkillSelectionsAsync(userId, selectedSkillIds);
         }
+        Access.Invalidate();
         await JS.InvokeVoidAsync("ssWizard.clear", userId);
         Nav.NavigateTo($"/assessment/{userId}");
     }
@@ -341,14 +344,43 @@
 }
 
 <style>
-    .wizard-shell { max-width: 640px; }
+    body:has(.wizard-shell) {
+        --color-brand: #1671d9;
+        --color-brand-dark: #1057b2;
+        --gradient: linear-gradient(135deg, #2588ed, #155fc8);
+        background: radial-gradient(ellipse at 15% 0%, #d9efff 0%, transparent 55%), #eff6ff;
+    }
+    .wizard-shell {
+        max-width: 640px;
+        --wizard-ink: #12375b;
+        --wizard-muted: #496986;
+        --wizard-surface: #ffffff;
+        --wizard-soft: #eaf5ff;
+        --wizard-border: #bedbf4;
+        --wizard-primary: #1671d9;
+        --wizard-primary-dark: #1057b2;
+        --wizard-gradient: linear-gradient(135deg, #2588ed, #155fc8);
+        --wizard-choice-bg: #dceeff;
+        --wizard-choice-border: #83baf0;
+        --ss-primary: var(--wizard-primary);
+        --ss-primary-hover: #104fae;
+        --ss-border: var(--wizard-border);
+        --ss-text: var(--wizard-ink);
+        --ss-surface: var(--wizard-surface);
+        color: var(--wizard-ink);
+    }
     .wiz-dot {
         width: 28px; height: 6px; border-radius: 999px;
-        background: rgba(99, 102, 241, 0.2);
+        background: #c7e0f8;
         transition: background 0.3s;
     }
-    .wiz-dot.active { background: var(--gradient); }
-    .wiz-card { border-radius: 24px; }
+    .wizard-shell .wiz-dot.active { background: var(--wizard-gradient); }
+    .wizard-shell .wiz-card {
+        border: 1px solid var(--wizard-border);
+        border-radius: 24px;
+        background: var(--wizard-surface);
+        box-shadow: 0 18px 48px rgb(27 93 158 / 10%), inset 0 1px 0 #ffffff80;
+    }
 
     .wiz-mascot {
         position: relative;
@@ -357,7 +389,7 @@
     .wiz-mascot img {
         width: 100%; height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 4px 10px rgba(99,102,241,0.35));
+        filter: drop-shadow(0 4px 10px rgb(37 136 237 / 24%));
     }
     .wiz-mascot-fallback {
         display: none;
@@ -366,34 +398,94 @@
         font-size: 2.4rem;
     }
     .wiz-bubble {
-        background: rgba(99, 102, 241, 0.08);
+        background: var(--wizard-soft);
+        border: 1px solid var(--wizard-border);
         border-radius: 16px 16px 16px 4px;
         padding: 0.9rem 1.1rem;
         flex: 1;
+        min-width: 0;
+    }
+    .wizard-shell .text-muted { color: var(--wizard-muted) !important; }
+    .wizard-shell .form-label { color: var(--wizard-ink); }
+    .wizard-shell .form-control {
+        background: var(--wizard-surface);
+        border-color: var(--wizard-border);
+        color: var(--wizard-ink);
+        border-radius: 14px;
+    }
+    .wizard-shell .ss-btn-primary {
+        background: var(--wizard-gradient);
+        border: 1px solid var(--wizard-primary);
+        color: #fff;
+        box-shadow: 0 6px 18px rgb(21 95 200 / 22%);
+    }
+    .wizard-shell .ss-btn-primary:hover:not(:disabled) {
+        background: linear-gradient(135deg, #1671d9, #104fae);
+    }
+    body .ss-main-content .wizard-shell .ss-btn-primary:disabled {
+        background: #d5e9fc !important;
+        border-color: var(--wizard-border) !important;
+        color: #456889 !important;
+        opacity: 1;
+        box-shadow: none !important;
+    }
+    .wizard-shell .btn-link {
+        color: var(--wizard-primary-dark) !important;
+        background: var(--wizard-soft);
+        border: 1px solid var(--wizard-choice-border);
+        border-radius: 999px;
+        padding: .75rem 1.25rem;
+        text-decoration: none;
+    }
+    .wizard-shell :is(button, input):focus-visible {
+        outline: 3px solid #55a7f0;
+        outline-offset: 3px;
     }
 
     .wiz-choice {
-        border: 2px solid var(--glass-border);
-        background: rgba(255,255,255,0.6);
+        border: 2px solid var(--wizard-choice-border);
+        background: var(--wizard-choice-bg);
         border-radius: 14px;
         padding: 0.7rem 0.9rem;
         font-weight: 600;
         font-size: 0.9rem;
-        color: #374151;
+        color: var(--wizard-primary-dark);
         cursor: pointer;
         transition: all 0.18s ease;
         text-align: center;
     }
-    .wiz-choice:hover { border-color: var(--color-brand); color: var(--color-brand-dark); }
-    .wiz-choice.selected {
-        border-color: var(--color-brand);
-        background: var(--gradient);
+    .wizard-shell .wiz-choice:hover {
+        border-color: var(--wizard-primary);
+        color: var(--wizard-primary-dark);
+    }
+    .wizard-shell .wiz-choice.selected {
+        border-color: var(--wizard-primary);
+        background: var(--wizard-gradient);
         color: #fff;
+        box-shadow: 0 4px 14px rgb(21 95 200 / 20%);
     }
     .wiz-choice-lg { padding: 1rem; font-size: 0.95rem; text-align: left; }
 
-    .form-control:focus {
-        border-color: var(--color-brand);
-        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    .wizard-shell .form-control:focus {
+        border-color: var(--wizard-primary);
+        box-shadow: 0 0 0 0.25rem rgb(22 113 217 / 15%);
     }
+    html[data-theme="dark"] body:has(.wizard-shell) {
+        background: radial-gradient(ellipse at 15% 0%, #153d63 0%, transparent 55%), #0b1729;
+    }
+    html[data-theme="dark"] .wizard-shell {
+        --wizard-ink: #e3f1ff;
+        --wizard-muted: #b0c9e2;
+        --wizard-surface: #12273e;
+        --wizard-soft: #173854;
+        --wizard-border: #325b7e;
+        --wizard-primary-dark: #8cc9ff;
+        --wizard-choice-bg: #173854;
+        --wizard-choice-border: #427bab;
+    }
+    html[data-theme="dark"] body .ss-main-content .wizard-shell .ss-btn-primary:disabled {
+        background: #1d3e5e !important;
+        color: #9cbbd8 !important;
+    }
+    html[data-theme="dark"] .wizard-shell .wiz-dot:not(.active) { background: #325b7e; }
 </style>

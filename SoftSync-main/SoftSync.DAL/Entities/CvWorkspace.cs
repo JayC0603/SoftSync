@@ -13,6 +13,7 @@ public sealed class CvDocumentRecord
     public DateTime CreatedAtUtc { get; set; }
     [MaxLength(40_000)] public string Text { get; set; } = string.Empty;
     public byte[] OriginalFile { get; set; } = [];
+    public string? ExtractionJson { get; set; }
 }
 
 public sealed class CvReviewRecord

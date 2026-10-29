@@ -13,6 +13,7 @@ public static class AiProviderRules
         AiProviderType.Gemini => "https://generativelanguage.googleapis.com/v1beta/openai/",
         AiProviderType.HuggingFace => "https://router.huggingface.co/v1/",
         AiProviderType.OpenAI => "https://api.openai.com/v1/",
+        AiProviderType.Xah => "https://api.xah.io/v1/",
         _ => throw new AiConfigurationException("Unsupported provider.")
     };
     public static void Validate(AiProviderEditDto input)

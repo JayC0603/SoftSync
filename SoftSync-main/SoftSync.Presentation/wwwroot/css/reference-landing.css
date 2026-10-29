@@ -339,3 +339,141 @@ html body .ss-reference-home .ss-public-links { display:none; }
     .ss-reference-home .lp-phone .lp-preview-progress p { --lp-type:8px; }
     .ss-reference-home .lp-phone .lp-preview-progress small { --lp-type:7px; }
 }
+
+/* Keep translated header controls from shrinking into the brand. */
+html body .ss-reference-home .ss-unified-public-header .ss-public-brand { flex-shrink:0; white-space:nowrap; }
+html body .ss-reference-home .ss-unified-public-header .ss-public-brand strong { font-size:inherit; }
+html body .ss-reference-home .ss-unified-public-header .ss-public-actions { min-width:0; }
+html body .ss-reference-home .ss-unified-public-header .ss-public-actions > .ss-shell-control { flex-shrink:0; }
+html body .ss-reference-home .ss-unified-public-header .ss-public-start { min-width:0; white-space:normal; text-align:center; line-height:1.35; }
+@media(max-width:600px) {
+    html body .ss-reference-home .ss-unified-public-header .ss-public-brand { font-size:16px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-brand img { flex-shrink:0; width:26px; height:26px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-actions { flex:1; justify-content:flex-end; gap:4px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-start { flex:0 1 auto; font-size:11px; padding:8px; }
+}
+
+/* Readable landing copy and a dedicated, balanced three-mentor section. */
+.ss-reference-home .lp-hero h1 { --lp-type:clamp(48px,5.8vw,78px); }
+.ss-reference-home .lp-hero-copy > p { --lp-type:20px; --lp-leading:1.6; max-width:480px; }
+.ss-reference-home .lp-landing h2 { --lp-type:clamp(26px,2.8vw,34px); --lp-leading:1.3; }
+.ss-reference-home .lp-benefits h2 { --lp-type:20px; }
+.ss-reference-home .lp-benefits p,
+.ss-reference-home .lp-section-intro,
+.ss-reference-home .lp-steps p,
+.ss-reference-home .lp-closing > p { --lp-type:17px; --lp-leading:1.6; }
+.ss-reference-home .lp-steps h3 { --lp-type:20px; }
+.ss-reference-home .lp-section-head { margin-top:32px; flex-wrap:wrap; }
+.ss-reference-home .lp-section-head > a { --lp-type:15px; font-size:var(--lp-type); max-width:none; white-space:normal; }
+.ss-reference-home .lp-feature-card h3 { --lp-type:19px; }
+.ss-reference-home .lp-feature-heading > div { min-width:0; }
+.ss-reference-home .lp-feature-heading > div > p { --lp-type:16px; --lp-leading:1.5; }
+.ss-reference-home .lp-button,
+.ss-reference-home .lp-closing .lp-button { --lp-type:16px; font-size:var(--lp-type); min-height:46px; }
+.ss-reference-home .lp-mentor-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.ss-reference-home .lp-mentor-card { flex-direction:column; align-items:center; padding:28px 20px; gap:20px; text-align:center; }
+.ss-reference-home .lp-mentor-card > img { flex:0 0 auto; width:128px; height:144px; object-fit:contain; }
+.ss-reference-home .lp-mentor-card > div { min-width:0; }
+.ss-reference-home .lp-mentor-card h3 { --lp-type:20px; --lp-leading:1.4; }
+.ss-reference-home .lp-mentor-card p { --lp-type:16px; --lp-leading:1.5; margin:10px 0 14px; }
+.ss-reference-home .lp-mentor-card div > span { font-size:13px; padding:5px 10px; }
+.ss-reference-home .lp-community { margin-top:24px; }
+.ss-reference-home .lp-community-card { padding:24px 32px; gap:32px; }
+.ss-reference-home .lp-community-card > img { flex:0 0 150px; width:150px; height:150px; object-fit:contain; }
+.ss-reference-home .lp-community-card p { --lp-type:17px; --lp-leading:1.6; margin:10px 0 16px; }
+.ss-reference-home .lp-community-card .lp-button { font-size:16px; min-height:46px; padding:10px 22px; }
+html[data-theme='dark'] .ss-reference-home .lp-mentor-card div > span { color:#c5ddff; border-color:var(--lp-edge); }
+@media(max-width:1100px) {
+    .ss-reference-home .lp-feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .ss-reference-home .lp-feature-card { padding:20px 16px 16px; }
+    .ss-reference-home .lp-benefits article { flex-direction:column; align-items:flex-start; }
+    .ss-reference-home .lp-benefit-art { flex-basis:auto; }
+    .ss-reference-home .lp-mentor-card { padding:22px 14px; }
+    .ss-reference-home .lp-mentor-card h3 { --lp-type:18px; }
+}
+@media(max-width:800px) {
+    .ss-reference-home .lp-hero { padding:32px 24px 64px; }
+    .ss-reference-home .lp-content { width:calc(100% - 40px); }
+    .ss-reference-home .lp-hero h1 { --lp-type:clamp(40px,6vw,48px); }
+    .ss-reference-home .lp-hero-copy > p { --lp-type:18px; }
+    .ss-reference-home .lp-journey { grid-template-columns:1fr; gap:28px; padding:24px; }
+    .ss-reference-home .lp-learning-preview { width:100%; max-width:320px; }
+    .ss-reference-home .lp-mentor-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .ss-reference-home .lp-mentor-card { flex-direction:column; text-align:center; padding:22px 12px; }
+    .ss-reference-home .lp-mentor-card > img { width:100px; height:116px; }
+    .ss-reference-home .lp-mentor-card h3 { --lp-type:20px; }
+}
+@media(max-width:600px) {
+    .ss-reference-home .lp-hero { grid-template-columns:1fr; padding:32px 24px 46px; gap:28px; }
+    .ss-reference-home .lp-hero h1 { --lp-type:clamp(40px,10vw,56px); letter-spacing:-1.5px; }
+    .ss-reference-home .lp-hero-copy > p { --lp-type:17px; margin:18px 0 22px; }
+    .ss-reference-home .lp-hero-actions { gap:10px; }
+    .ss-reference-home .lp-hero-actions .lp-button { max-width:320px; min-height:48px; --lp-type:16px; padding:12px 18px; }
+    .ss-reference-home .lp-hero-device { height:360px; padding:8px 0 0; }
+    .ss-reference-home .lp-phone { width:245px; margin:0 auto; transform:rotate(4deg); transform-origin:center top; }
+    .ss-reference-home .lp-content { width:calc(100% - 32px); margin-top:0; }
+    .ss-reference-home .lp-benefits { grid-template-columns:1fr; gap:12px; }
+    .ss-reference-home .lp-benefits article { flex-direction:row; gap:16px; padding:18px 16px; }
+    .ss-reference-home .lp-benefit-art { flex:0 0 64px; width:64px; height:68px; }
+    .ss-reference-home .lp-benefits h2 { --lp-type:19px; }
+    .ss-reference-home .lp-benefits p { --lp-type:16px; }
+    .ss-reference-home .lp-journey { padding:22px 18px; }
+    .ss-reference-home .lp-landing h2 { --lp-type:26px; letter-spacing:-.5px; }
+    .ss-reference-home .lp-benefits h2 { --lp-type:19px; }
+    .ss-reference-home .lp-steps { margin-top:22px; }
+    .ss-reference-home .lp-steps li { gap:14px; padding-bottom:20px; }
+    .ss-reference-home .lp-steps li > span { flex-basis:36px; height:36px; --lp-type:18px; }
+    .ss-reference-home .lp-steps li::before { left:18px; top:36px; height:calc(100% - 36px); }
+    .ss-reference-home .lp-steps h3 { --lp-type:18px; }
+    .ss-reference-home .lp-steps p { --lp-type:16px; --lp-leading:1.5; }
+    .ss-reference-home .lp-section-head { flex-direction:column; align-items:flex-start; gap:10px; margin:28px 2px 16px; }
+    .ss-reference-home .lp-section-head h2 { max-width:none; }
+    .ss-reference-home .lp-section-head > a { font-size:15px; text-align:left; }
+    .ss-reference-home .lp-feature-grid { grid-template-columns:1fr; gap:14px; }
+    .ss-reference-home .lp-feature-card { padding:20px 18px 16px; border-radius:16px; }
+    .ss-reference-home .lp-feature-heading { gap:12px; margin-bottom:16px; }
+    .ss-reference-home .lp-feature-icon { flex-basis:38px; height:38px; font-size:24px; }
+    .ss-reference-home .lp-feature-icon img { width:32px; height:32px; }
+    .ss-reference-home .lp-feature-card h3 { --lp-type:20px; }
+    .ss-reference-home .lp-feature-visual { min-height:115px; }
+    .ss-reference-home .lp-feature-video img { height:120px; }
+    .ss-reference-home .lp-mentor-grid { gap:8px; }
+    .ss-reference-home .lp-mentor-card { gap:12px; padding:16px 8px; border-radius:16px; }
+    .ss-reference-home .lp-mentor-card > img { flex-basis:auto; width:80px; max-width:100%; height:96px; }
+    .ss-reference-home .lp-mentor-card h3 { --lp-type:16px; overflow-wrap:anywhere; }
+    .ss-reference-home .lp-mentor-card p { --lp-type:14px; margin:8px 0 10px; overflow-wrap:anywhere; }
+    .ss-reference-home .lp-mentor-card div > span { max-width:100%; font-size:11px; padding:4px 6px; margin-right:0; overflow-wrap:anywhere; }
+    .ss-reference-home .lp-community-card { flex-direction:column; align-items:flex-start; gap:18px; padding:24px 20px; border-radius:16px; }
+    .ss-reference-home .lp-community-card > img { flex-basis:auto; width:110px; height:110px; }
+    .ss-reference-home .lp-community-card p { --lp-type:16px; }
+    .ss-reference-home .lp-closing { padding:28px 18px; margin-top:24px; }
+    .ss-reference-home .lp-closing > p { max-width:440px; --lp-type:16px; margin:14px auto 20px; }
+    .ss-reference-home .lp-closing > div { flex-direction:column; align-items:stretch; gap:12px; }
+    .ss-reference-home .lp-feature-chart { padding:14px; }
+    .ss-reference-home .lp-feature-chart > small { --lp-type:12px; }
+    .ss-reference-home .lp-feature-chart .lp-progress-ring { width:58px; height:58px; font-size:15px; }
+    .ss-reference-home .lp-chart-bars { height:70px; gap:6px; }
+    .ss-reference-home .lp-feature-chat { padding:16px 12px; gap:10px; }
+    .ss-reference-home .lp-feature-chat > img { width:28px; height:28px; }
+    .ss-reference-home .lp-feature-chat p { --lp-type:12px; padding:10px; }
+    .ss-reference-home .lp-feature-chat span { font-size:12px; padding:8px; }
+    .ss-reference-home .lp-feature-cv { padding:14px; }
+    .ss-reference-home .lp-feature-cv > div { gap:10px; }
+    .ss-reference-home .lp-feature-cv > div > span { width:30px; height:30px; font-size:18px; }
+    .ss-reference-home .lp-feature-cv strong { font-size:12px; }
+    .ss-reference-home .lp-feature-cv small { --lp-type:11px; }
+    .ss-reference-home .lp-feature-cv p { gap:8px; margin:10px 0; }
+    .ss-reference-home .lp-feature-cv p span { font-size:11px; padding:4px 8px; }
+    .ss-reference-home .lp-feature-cv > i { height:4px; margin-top:5px; }
+    .ss-reference-home .lp-learning-preview { padding:16px; }
+    .ss-reference-home .lp-learning-preview .lp-product-top { font-size:12px; margin-bottom:12px; }
+    .ss-reference-home .lp-learning-preview .lp-product-top img { width:24px; height:24px; }
+    .ss-reference-home .lp-learning-preview .lp-product-top .bi { font-size:16px; }
+    .ss-reference-home .lp-learning-preview .lp-mini-avatar { width:23px; height:23px; }
+    .ss-reference-home .lp-learning-preview h3 { --lp-type:15px; }
+    .ss-reference-home .lp-learning-preview .lp-lesson-image { height:110px; }
+    .ss-reference-home .lp-learning-preview .lp-preview-lesson strong { font-size:12px; }
+    .ss-reference-home .lp-learning-preview .lp-preview-lesson small { --lp-type:11px; }
+    .ss-reference-home .lp-learning-preview .lp-preview-checklist li { --lp-type:12px; gap:8px; padding:8px 0; }
+    .ss-reference-home .lp-learning-preview .lp-example-label { --lp-type:10px; }
+}
