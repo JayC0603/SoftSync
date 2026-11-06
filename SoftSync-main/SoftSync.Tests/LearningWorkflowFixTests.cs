@@ -113,6 +113,16 @@ public sealed class LearningWorkflowFixTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.ListAsync(Caller(102, "Admin"), true));
     }
 
+    [Fact]
+    public async Task Unassessed_learner_cannot_create_a_personalized_roadmap()
+    {
+        await using var db = await DatabaseAsync();
+        var service = new RoadmapService(new RoadmapRepository(db), new FakeAiRoadmapService(),
+            new UserRepository(db), new AssessmentRepository(db), new SkillRepository(db));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.GetUserRoadmapAsync(101, 101));
+        Assert.False(await db.RoadmapItems.AnyAsync(x => x.UserId == 101));
+    }
+
     private static ClaimsPrincipal Caller(int id, string? role = null)
     {
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, id.ToString()) };
@@ -127,6 +137,8 @@ public sealed class LearningWorkflowFixTests
         await db.Database.EnsureCreatedAsync();
         db.Users.AddRange(new ApplicationUser { Id = 100, UserName = "learner" },
             new ApplicationUser { Id = 101, UserName = "other" }, new ApplicationUser { Id = 102, UserName = "admin" });
+        // Learning regression fixtures represent an assessed learner.
+        db.AssessmentResults.Add(new AssessmentResult { UserId = 100, SkillId = 1, Score = 20 });
         db.Roles.Add(new IdentityRole<int> { Id = 102, Name = "Admin", NormalizedName = "ADMIN" });
         db.UserRoles.Add(new IdentityUserRole<int> { UserId = 102, RoleId = 102 });
         await db.SaveChangesAsync();

@@ -1,11 +1,10 @@
 @rendermode InteractiveServer
+@attribute [StreamRendering(false)]
 @implements IDisposable
 @using SoftSync.BLL.Interfaces
-@using SoftSync.Common.Dtos
 @using SoftSync.Common.Enums
 @inject LocalizationService L
 @inject IJSRuntime JS
-@inject NavigationManager Nav
 @inject IServiceScopeFactory ScopeFactory
 @inject AuthenticationStateProvider AuthProvider
 @inject UserProfileState UserProfileState
@@ -85,15 +84,26 @@
     private static string AvatarInitial(string? name) => string.IsNullOrWhiteSpace(name)
         ? "S" : System.Globalization.StringInfo.GetNextTextElement(name.Trim()).ToUpperInvariant();
 
-    private UserDto? profile;
+    // Persist only the fields displayed by the header, never the full user DTO.
+    [PersistentState] public HeaderProfile? Profile { get; set; }
+    private HeaderProfile? profile => Profile;
+    public sealed class HeaderProfile
+    {
+        public string? AvatarUrl { get; set; }
+        public string? PublicName { get; set; }
+        public int Level { get; set; }
+    }
     private bool interactiveReady;
+    private bool disposed;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         L.OnChanged += StateHasChangedSafe;
         UserProfileState.AvatarChanged += OnAvatarChanged;
         UserProfileState.DisplayNameChanged += OnDisplayNameChanged;
-        Nav.LocationChanged += OnLocationChanged;
+        // SSR supplies the final identity; hydration reuses it without a second
+        // query or a frame showing the email/initial in place of the avatar.
+        if (Profile is null) await LoadProfileAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -102,10 +112,6 @@
         {
             interactiveReady = true;
             await InvokeAsync(StateHasChanged);
-            // Load the user's profile (avatar + level) in its own DI scope so we
-            // don't share the page's scoped DbContext (avoids a concurrent-query
-            // crash when a page also queries the DB during its own init).
-            await LoadProfileAsync();
         }
     }
 
@@ -135,18 +141,13 @@
     {
         if (profile is not null)
         {
-            profile.DisplayName = displayName;
+            profile.PublicName = displayName;
             _ = InvokeAsync(StateHasChanged);
         }
         else
         {
             _ = LoadProfileAsync();
         }
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        _ = LoadProfileAsync();
     }
 
     private async Task LoadProfileAsync()
@@ -156,15 +157,22 @@
 
         await using var scope = ScopeFactory.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        profile = await userService.GetUserByIdAsync(userId);
+        var user = await userService.GetUserByIdAsync(userId);
+        if (disposed) return;
+        Profile = user is null ? null : new HeaderProfile
+        {
+            AvatarUrl = user.AvatarUrl,
+            PublicName = user.PublicName,
+            Level = user.Level
+        };
         await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
+        disposed = true;
         L.OnChanged -= StateHasChangedSafe;
         UserProfileState.AvatarChanged -= OnAvatarChanged;
         UserProfileState.DisplayNameChanged -= OnDisplayNameChanged;
-        Nav.LocationChanged -= OnLocationChanged;
     }
 }

@@ -1,0 +1,83 @@
+/* Shared login/register reference. Footer remains outside this scope. */
+html body .neo-login.auth-reference {
+  padding: 100px 24px 28px;
+  background: radial-gradient(ellipse at 50% 35%, #f8fcff, #eaf5ff 65%, #f5faff);
+}
+html body .neo-login.auth-reference .neo-content { width: min(550px, 100%); }
+html body .neo-login.auth-reference .neo-home { top: 30px; font-size: 18px; }
+html body .neo-login.auth-reference .auth-toolbar { position: absolute; top: 24px; right: clamp(20px, 6vw, 52px); display: flex; align-items: center; gap: 18px; z-index: 2; }
+html body .neo-login.auth-reference .auth-language { display: flex; padding: 3px; border: 1px solid #dceaf9; border-radius: 999px; background: #ffffff65; box-shadow: 0 8px 20px #7199c514; }
+html body .neo-login.auth-reference .auth-language button { width: 52px; min-height: 34px; padding: 5px; border: 0; border-radius: 999px; background: transparent; color: var(--neo-ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+html body .neo-login.auth-reference .auth-language button[aria-pressed='true'] { color: #1456ff; background: #d6ecff; }
+html body .neo-login.auth-reference .neo-theme { position: static; width: 48px; height: 40px; border-radius: 999px; border: 1px solid #fff; }
+html body .neo-login.auth-reference .auth-language { margin-right: 0; }
+html body .neo-login.auth-reference .neo-theme::before { content: ''; position: absolute; left: -15px; width: 1px; height: 25px; background: #b8cde9; }
+html body .neo-login.auth-reference .neo-theme { position: relative; top: auto; right: auto; }
+html body .neo-login.auth-reference .auth-toolbar { gap: 30px; }
+html body .neo-login.auth-reference .register-consent { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 17px; color: var(--neo-muted); font-size: 16px; line-height: 1.5; }
+html body .neo-login.auth-reference .register-consent .form-check-input { flex: 0 0 24px; float: none; width: 24px; height: 24px; margin: 0; }
+html body .neo-login.auth-reference .register-consent label { display: inline; cursor: pointer; }
+html body .neo-login.auth-reference .auth-legal-link { display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--neo-accent); font: inherit; font-weight: 650; text-decoration: underline; cursor: pointer; }
+html body .neo-login.auth-reference .auth-legal-dialog { width: min(440px, calc(100% - 32px)); padding: 24px; border: 1px solid var(--neo-line); border-radius: 20px; background: var(--neo-bg); color: var(--neo-ink); box-shadow: 0 20px 70px #14294940; }
+html body .neo-login.auth-reference .auth-legal-dialog::backdrop { background: #0b17496b; }
+html body .neo-login.auth-reference .auth-legal-dialog button { min-height: 44px; padding: 8px 22px; border: 0; border-radius: 12px; background: #2860ef; color: white; }
+html body .neo-login.auth-reference .neo-logo { width: 110px; height: 110px; margin-bottom: 16px; padding: 7px; border-radius: 30px; }
+html body .neo-login.auth-reference .neo-logo img { width: 96px; height: 96px; border-radius: 24px; }
+html body .neo-login.auth-reference :is(.login-heading, .register-heading) { margin: 0 0 28px; text-align: center; }
+html body .neo-login.auth-reference :is(.login-kicker, .register-kicker) { display: block; margin: 0 0 18px; color: var(--neo-muted); font-size: 13px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; }
+html body .neo-login.auth-reference :is(.login-heading h2, .register-heading h2) { margin: 0 0 12px; color: var(--neo-ink); font-size: 48px; font-weight: 800; letter-spacing: -.04em; line-height: 1.15; }
+html body .neo-login.auth-reference :is(.login-heading p, .register-heading p) { color: var(--neo-muted); font-size: 20px; line-height: 1.5; letter-spacing: 0; }
+html body .neo-login.auth-reference .login-card { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+html body .neo-login.auth-reference .login-field { margin-bottom: 21px !important; }
+html body .neo-login.auth-reference .login-field label { color: var(--neo-muted) !important; font-size: 18px; }
+html body .neo-login.auth-reference .login-input-wrap .form-control { min-height: 64px; border: 1px solid #ccdcf4 !important; border-radius: 19px !important; background: #ffffffd9 !important; box-shadow: 0 10px 22px #a8c9e82b !important; }
+html body .neo-login.auth-reference .login-input-wrap input::placeholder { color: #8a9cbc; }
+html body .neo-login.auth-reference .login-options { margin: 0 0 26px; font-size: 17px; }
+html body .neo-login.auth-reference .login-options a { font-size: 17px; }
+html body .neo-login.auth-reference .login-submit { min-height: 72px; margin-top: 6px; font-size: 26px !important; background: linear-gradient(115deg, #568dff, #295aef 75%, #3166f5) !important; box-shadow: 0 14px 25px #2e64e52e, inset 0 1px 1px #ffffffb0 !important; }
+html body .neo-login.auth-reference .neo-social { margin-top: 22px; gap: 18px; }
+html body .neo-login.auth-reference .external-google { min-height: 66px; border: 1px solid #b6cdef !important; border-radius: 22px; color: var(--neo-ink) !important; background: #ffffffcf !important; font-size: 22px; box-shadow: 0 10px 22px #9dbfe426 !important; }
+html body .neo-login.auth-reference .external-help { font-size: 12px; }
+html body .neo-login.auth-reference .auth-google-icon { flex: 0 0 30px; width: 30px; height: 30px; }
+html body .neo-login.auth-reference .register-submit > i { top: 0; bottom: 0; margin-block: auto; transform: none !important; }
+html body .neo-login.auth-reference :is(.login-register, .register-login) { padding: 0; margin: 27px 0 0 !important; border: 0; color: var(--neo-muted); text-align: center; font-size: 17px; }
+html body .neo-login.auth-reference :is(.login-register, .register-login) a { color: var(--neo-accent); font-size: inherit; font-weight: 700; text-decoration: none; }
+html body .neo-login.auth-reference .neo-decoration-one { width: 720px; height: 600px; left: -450px; top: -420px; background: #ffffffa6; transform: rotate(-25deg); }
+html body .neo-login.auth-reference .neo-decoration-one::after { display: none; }
+html body .neo-login.auth-reference .neo-decoration-two { width: 600px; height: 900px; right: -560px; top: 6%; background: #c9e4ff5c; border: 0; }
+html body .neo-login.auth-reference .neo-decoration-three { width: 850px; height: 600px; bottom: -500px; right: -460px; background: #ffffffb3; }
+html body .neo-login.auth-reference::before { opacity: .3; }
+html[data-theme='dark'] body .neo-login.auth-reference { background: radial-gradient(ellipse at 50% 35%, #203b5d, #111f35); }
+html[data-theme='dark'] body .neo-login.auth-reference .login-input-wrap .form-control,
+html[data-theme='dark'] body .neo-login.auth-reference .external-google { background: #203752 !important; border-color: #47658b !important; }
+html[data-theme='dark'] body .neo-login.auth-reference .auth-language { background: #203752; border-color: #47658b; }
+html[data-theme='dark'] body .neo-login.auth-reference .auth-language button[aria-pressed='true'] { background: #345582; color: #a8d0ff; }
+html body .neo-login.auth-reference :is(button, a):focus-visible { outline: 3px solid #5c9fff; outline-offset: 3px; }
+@media(max-width:600px) {
+  html body .neo-login.auth-reference { padding: 78px 24px 26px; }
+  html body .neo-login.auth-reference .neo-home { top: 25px; left: 20px; gap: 8px; font-size: 14px; }
+  html body .neo-login.auth-reference .neo-home i { font-size: 21px; }
+  html body .neo-login.auth-reference .auth-toolbar { top: 20px; right: 18px; gap: 22px; }
+  html body .neo-login.auth-reference .neo-theme::before { left: -12px; height: 20px; }
+  html body .neo-login.auth-reference .register-consent { gap: 9px; font-size: 13px; }
+  html body .neo-login.auth-reference .register-consent .form-check-input { flex-basis: 20px; width: 20px; height: 20px; }
+  html body .neo-login.auth-reference .auth-language button { width: 36px; min-height: 29px; font-size: 12px; }
+  html body .neo-login.auth-reference .neo-theme { width: 39px; height: 36px; }
+  html body .neo-login.auth-reference .neo-theme .bi { font-size: 22px; }
+  html body .neo-login.auth-reference .neo-logo { width: 80px; height: 80px; margin-bottom: 12px; }
+  html body .neo-login.auth-reference .neo-logo img { width: 66px; height: 66px; }
+  html body .neo-login.auth-reference :is(.login-kicker, .register-kicker) { font-size: 10px; margin-bottom: 18px; }
+  html body .neo-login.auth-reference :is(.login-heading h2, .register-heading h2) { font-size: 39px; }
+  html body .neo-login.auth-reference :is(.login-heading p, .register-heading p) { font-size: 16px; }
+  html body .neo-login.auth-reference .login-field label { font-size: 15px; }
+  html body .neo-login.auth-reference .login-input-wrap .form-control { min-height: 54px; font-size: 16px; border-radius: 15px !important; }
+  html body .neo-login.auth-reference .login-options, html body .neo-login.auth-reference .login-options a { font-size: 13px; }
+  html body .neo-login.auth-reference .login-submit { min-height: 60px; font-size: 22px !important; }
+  html body .neo-login.auth-reference .external-google { min-height: 56px; font-size: 18px; border-radius: 18px; }
+  html body .neo-login.auth-reference :is(.login-register, .register-login) { font-size: 15px; }
+}
+@media(max-width:359px) {
+  html body .neo-login.auth-reference { padding-inline: 16px; }
+  html body .neo-login.auth-reference .neo-home { font-size: 12px; }
+  html body .neo-login.auth-reference .auth-toolbar { right: 12px; gap: 6px; }
+}

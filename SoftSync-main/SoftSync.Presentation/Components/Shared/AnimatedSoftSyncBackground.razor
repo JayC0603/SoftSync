@@ -1,0 +1,49 @@
+<div class="ss-animated-bg ss-bg-intensity-@Intensity" aria-hidden="true">
+    <div class="ss-bg-image"></div>
+    <div class="ss-bg-gradient"></div>
+    <div class="ss-bg-blob ss-bg-blob-purple"></div>
+    <div class="ss-bg-blob ss-bg-blob-blue"></div>
+    <div class="ss-bg-blob ss-bg-blob-pink"></div>
+
+    <svg class="ss-bg-ribbons" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+            <linearGradient id="ss-ribbon-gradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#67bfff" stop-opacity="0" />
+                <stop offset=".42" stop-color="#d15fff" stop-opacity=".62" />
+                <stop offset=".72" stop-color="#fff" stop-opacity=".82" />
+                <stop offset="1" stop-color="#7927ff" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+        <path class="ss-bg-ribbon ss-bg-ribbon-one" d="M-80 625 C220 430 390 785 720 578 S1190 330 1530 498" />
+        <path class="ss-bg-ribbon ss-bg-ribbon-two" d="M-70 710 C260 530 430 850 760 670 S1200 455 1510 600" />
+    </svg>
+
+    <svg class="ss-bg-vietnam" viewBox="0 0 180 440" aria-hidden="true">
+        <defs>
+            <linearGradient id="ss-vietnam-gradient" x1="0" y1="0" x2="0.8" y2="1">
+                <stop offset="0" stop-color="#d15fff" />
+                <stop offset="1" stop-color="#67bfff" />
+            </linearGradient>
+        </defs>
+        <path class="ss-vietnam-outline" d="M55 8 C76 20 88 34 80 53 C72 69 88 82 103 91 C118 101 113 118 98 131 C85 142 91 157 112 164 C132 171 136 185 120 199 C108 210 110 222 127 231 C143 240 138 254 119 264 C102 273 107 286 126 296 C142 305 138 320 116 329 C95 338 93 351 109 362 C123 372 118 389 95 397 C78 404 71 419 65 435 C53 417 48 400 57 384 C68 365 54 352 39 340 C23 328 27 312 45 299 C61 287 57 275 39 265 C20 255 24 239 44 227 C62 216 57 203 41 191 C25 179 30 164 49 153 C68 143 64 129 47 117 C31 105 36 90 55 79 C73 68 68 55 52 43 C38 32 42 18 55 8 Z" />
+        <path class="ss-vietnam-network" d="M70 31 C90 66 60 91 91 119 S72 170 105 195 S84 244 112 268 S77 315 104 344 S65 389 66 415" />
+        <g class="ss-vietnam-nodes">
+            <circle cx="70" cy="31" r="4" /><circle cx="78" cy="72" r="3" /><circle cx="78" cy="105" r="4" />
+            <circle cx="92" cy="143" r="3" /><circle cx="105" cy="195" r="4" /><circle cx="98" cy="232" r="3" />
+            <circle cx="112" cy="268" r="4" /><circle cx="91" cy="304" r="3" /><circle cx="104" cy="344" r="4" />
+            <circle cx="73" cy="378" r="3" /><circle cx="66" cy="415" r="4" />
+        </g>
+    </svg>
+
+    <div class="ss-bg-petals" aria-hidden="true">
+        <span class="ss-bg-petal ss-bg-petal-one"><svg viewBox="0 0 42 64"><path d="M21 2C7 15 2 29 12 43c4 6 7 12 9 19 2-7 5-13 9-19C40 29 35 15 21 2Z" /></svg></span>
+        <span class="ss-bg-petal ss-bg-petal-two"><svg viewBox="0 0 42 64"><path d="M21 2C7 15 2 29 12 43c4 6 7 12 9 19 2-7 5-13 9-19C40 29 35 15 21 2Z" /></svg></span>
+        <span class="ss-bg-petal ss-bg-petal-three"><svg viewBox="0 0 42 64"><path d="M21 2C7 15 2 29 12 43c4 6 7 12 9 19 2-7 5-13 9-19C40 29 35 15 21 2Z" /></svg></span>
+        <span class="ss-bg-petal ss-bg-petal-four"><svg viewBox="0 0 42 64"><path d="M21 2C7 15 2 29 12 43c4 6 7 12 9 19 2-7 5-13 9-19C40 29 35 15 21 2Z" /></svg></span>
+        <span class="ss-bg-petal ss-bg-petal-five"><svg viewBox="0 0 42 64"><path d="M21 2C7 15 2 29 12 43c4 6 7 12 9 19 2-7 5-13 9-19C40 29 35 15 21 2Z" /></svg></span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Intensity { get; set; } = "Quiet";
+}

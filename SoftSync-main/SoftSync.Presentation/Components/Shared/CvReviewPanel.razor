@@ -1,0 +1,92 @@
+@inherits LocalizedComponentBase
+@using CvReviewException = SoftSync.Presentation.Services.CvReviewException
+@implements IAsyncDisposable
+@inject CvReviewService Review
+@inject ILogger<CvReviewPanel> Logger
+
+<HeadContent><link rel="stylesheet" href="css/cv-review.css?v=20261022-v1" /></HeadContent>
+<section class="cvr-panel" aria-labelledby="cvr-title">
+    <header class="cvr-heading"><span class="cvr-heading-icon"><i class="bi bi-stars" aria-hidden="true"></i></span><div><h2 id="cvr-title">@T("Đánh giá CV bằng AI", "AI CV review")</h2><p>@T("Nhận xét chất lượng CV và mức phù hợp với công việc bạn muốn ứng tuyển.", "Get feedback on your CV and its fit for the job you want.")</p></div></header>
+    <div class="cvr-inputs">
+        <div><label for="cvr-cv">@T("CV của bạn", "Your CV")</label><InputFile id="cvr-cv" class="form-control" OnChange="SelectCv" accept=".pdf,.txt" disabled="@busy" /><small>@T("PDF hoặc TXT · Tối đa 10 MB · PDF cần có văn bản chọn được.", "PDF or TXT · Up to 10 MB · PDFs must contain selectable text.")</small></div>
+        <div><div class="cvr-jd-heading"><label for="cvr-jd">@T("Mô tả công việc (JD)", "Job description (JD)")</label><div class="cvr-input-tabs"><button type="button" class="@(jdMode == "text" ? "is-active" : null)" aria-pressed="@(jdMode == "text")" disabled="@busy" @onclick="UseJdText">@T("Dán JD", "Paste JD")</button><button type="button" class="@(jdMode == "file" ? "is-active" : null)" aria-pressed="@(jdMode == "file")" disabled="@busy" @onclick="UseJdFile">@T("Tải tệp", "Upload file")</button></div></div>
+            @if (jdMode == "text") { <textarea id="cvr-jd" class="form-control" rows="5" maxlength="@CvReviewService.MaxJdCharacters" @bind="jdText" @bind:after="ResetResult" disabled="@busy" placeholder="@T("Dán yêu cầu công việc, kỹ năng và kinh nghiệm cần có…", "Paste the role's requirements, skills and experience…")"></textarea> }
+            else { <InputFile id="cvr-jd" class="form-control" OnChange="SelectJd" accept=".pdf,.txt" disabled="@busy" /> }
+            <small>@T("Thêm JD để nhận đánh giá độ phù hợp; có thể để trống nếu chỉ nhận xét CV.", "Add a JD to assess job fit; leave it blank for a CV-only review.")</small>
+        </div>
+    </div>
+    <div class="cvr-actions"><button type="button" class="cvr-primary" disabled="@(busy || cvFile is null)" @onclick="Evaluate"><i class="bi @(busy ? "bi-hourglass-split" : "bi-stars")" aria-hidden="true"></i>@(busy ? T("Đang phân tích…", "Analyzing…") : T("Nhận xét và đánh giá", "Review my CV"))</button>@if (busy) { <button type="button" class="cvr-cancel" @onclick="Cancel">@T("Hủy", "Cancel")</button><span role="status">@T("AI đang đọc CV và đối chiếu nội dung.", "AI is reading your CV and reviewing its content.")</span> }</div>
+    @if (error is not null) { <p class="cvr-error" role="alert">@Display(error)</p> }
+    @if (result is not null)
+    {
+        <div class="cvr-results" aria-live="polite">
+            <div class="cvr-score-grid"><article class="cvr-score-card"><span>@T("Chất lượng CV", "CV quality")</span><strong>@result.QualityScore<small>/100</small></strong><p>@Display(result.Summary)</p></article>
+                @if (result.JobMatch is { } match) { <article class="cvr-score-card cvr-match"><span>@T("Mức phù hợp với JD", "Job fit")</span><strong>@match.Score<small>/100</small></strong><p>@Display(match.Summary)</p></article> }
+            </div>
+            <div class="cvr-criteria">@foreach (var criterion in result.Criteria) { <article><header><strong>@CriterionName(criterion.Id)</strong><b>@criterion.Score/100</b></header><progress value="@criterion.Score" max="100" aria-label="@CriterionName(criterion.Id)"></progress><p>@Display(criterion.Feedback)</p></article> }</div>
+            <div class="cvr-feedback-grid"><section><h3><i class="bi bi-check-circle" aria-hidden="true"></i>@T("Điểm mạnh", "Strengths")</h3><ul>@foreach (var item in result.Strengths) { <li>@Display(item)</li> }</ul></section><section><h3><i class="bi bi-lightbulb" aria-hidden="true"></i>@T("Nên cải thiện", "What to improve")</h3><ol>@foreach (var item in result.Improvements) { <li>@Display(item)</li> }</ol></section></div>
+            @if (result.JobMatch is { } job)
+            {
+                <div class="cvr-feedback-grid"><section><h3>@T("Yêu cầu đã có minh chứng", "Evidenced requirements")</h3><ul>@foreach (var item in job.MatchedRequirements) { <li>@Display(item)</li> }</ul>@if (job.MatchedRequirements.Count == 0) { <p>@T("Chưa thấy yêu cầu nào được chứng minh rõ trong CV.", "No requirements are clearly evidenced in the CV yet.")</p> }</section><section><h3>@T("Yêu cầu chưa thấy trong CV", "Requirements not evidenced")</h3><ul>@foreach (var item in job.MissingRequirements) { <li>@Display(item)</li> }</ul>@if (job.MissingRequirements.Count == 0) { <p>@T("AI chưa chỉ ra yêu cầu nào còn thiếu minh chứng.", "The review did not identify requirements lacking evidence.")</p> }</section></div>
+            }
+            @if (result.Rewrites.Count > 0)
+            {
+                <section class="cvr-rewrites"><h3>@T("Gợi ý viết lại", "Suggested rewrites")</h3>@foreach (var rewrite in result.Rewrites) { <article><div><small>@T("Bản gốc", "Original")</small><blockquote>@rewrite.Original</blockquote></div><div><small>@T("Gợi ý", "Suggestion")</small><p>@Display(rewrite.Suggested)</p></div><p class="cvr-reason">@Display(rewrite.Reason)</p></article> }</section>
+            }
+            <p class="cvr-note">@T("Điểm AI mang tính tham khảo, dựa trên văn bản đọc được từ CV. Điểm phù hợp này độc lập với kết quả so khớp/xếp hạng CV hiện có.", "AI scores are guidance based on the CV's readable text. This job-fit score is independent of the existing matching and ranking results.")</p>
+        </div>
+    }
+</section>
+
+@code {
+    private IBrowserFile? cvFile, jdFile;
+    private string jdMode = "text", jdText = string.Empty;
+    private bool busy;
+    private CvReviewText? error;
+    private CvReviewResult? result;
+    private CancellationTokenSource? reviewCancellation;
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+    private string Display(CvReviewText text) => T(text.Vi, text.En);
+    private void ResetResult() { result = null; error = null; }
+    private void SelectCv(InputFileChangeEventArgs e) { cvFile = e.File; ResetResult(); }
+    private void SelectJd(InputFileChangeEventArgs e) { jdFile = e.File; ResetResult(); }
+    private void UseJdText() => SetJdMode("text");
+    private void UseJdFile() => SetJdMode("file");
+    private void SetJdMode(string mode) { jdMode = mode; jdFile = null; ResetResult(); }
+    private void Cancel() => reviewCancellation?.Cancel();
+    private string CriterionName(string id) => id switch
+    {
+        "content" => T("Nội dung & kinh nghiệm", "Content & experience"),
+        "clarity" => T("Diễn đạt rõ ràng", "Clarity"),
+        "achievements" => T("Thành tích & minh chứng", "Achievements & evidence"),
+        _ => T("Cấu trúc nội dung", "Text structure")
+    };
+    private static async Task<string> ReadFile(IBrowserFile file, CancellationToken token)
+    {
+        if (file.Size > CvReviewDocumentReader.MaxFileBytes) throw new CvReviewException("file_too_large", "Mỗi tệp không được vượt quá 10 MB.", "Each file must be no larger than 10 MB.");
+        await using var stream = file.OpenReadStream(CvReviewDocumentReader.MaxFileBytes, token);
+        return await CvReviewDocumentReader.ReadAsync(stream, file.Name, token);
+    }
+    private async Task Evaluate()
+    {
+        if (cvFile is null || busy) return;
+        ResetResult(); busy = true;
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+        reviewCancellation = cancellation;
+        try
+        {
+            var cv = await ReadFile(cvFile, cancellation.Token);
+            var jd = jdMode == "file" && jdFile is not null ? await ReadFile(jdFile, cancellation.Token) : jdMode == "text" ? jdText : null;
+            result = await Review.ReviewAsync(new(cv, jd), cancellation.Token);
+        }
+        catch (OperationCanceledException) { error = new() { Vi = "Đã dừng đánh giá. Bạn có thể thử lại.", En = "The review was stopped. You can try again." }; }
+        catch (CvReviewException ex) { error = ex.Feedback; }
+        catch (Exception ex)
+        {
+            Logger.LogWarning("CV review failed ({FailureType})", ex.GetType().Name);
+            error = new() { Vi = "Chưa thể đánh giá CV. Vui lòng kiểm tra tệp và thử lại.", En = "The CV could not be reviewed. Check the file and try again." };
+        }
+        finally { busy = false; reviewCancellation = null; }
+    }
+    public ValueTask DisposeAsync() { reviewCancellation?.Cancel(); base.Dispose(); return ValueTask.CompletedTask; }
+}

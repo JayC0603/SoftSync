@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8fc">
+  <title>Focus Fortress · SoftSync</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/games/history-sync.css">
+</head>
+<body>
+<main>
+  <a class="back-link" href="/game"><span aria-hidden="true">←</span> Quay lại Mini Game</a>
+  <div class="top"><a class="brand" href="/game"><span class="brand-mark" aria-hidden="true">S</span> SoftSync <span class="brand-divider">/</span> Focus Fortress</a><span id="best" aria-live="polite"></span></div>
+
+  <section id="st" class="screen hero">
+    <span class="eyebrow">SOFT SKILLS · TẬP TRUNG</span>
+    <h1>Giữ vững pháo đài tập trung</h1>
+    <p class="sub">Rèn khả năng bảo vệ sự tập trung qua ba phiên Pomodoro ngắn. Cân nhắc thông báo nào cần chặn, ghi lại để xử lý sau, hoặc giải quyết ngay.</p>
+    <div class="rules-grid">
+      <article class="rule"><span class="rule-icon">🚫</span><div><b>Chặn</b><p>Dành cho xao nhãng không cần phản hồi, như video đang thịnh hành hoặc tin nhắn không quan trọng.</p></div></article>
+      <article class="rule"><span class="rule-icon">📝</span><div><b>Ghi lại để xử lý sau</b><p>Dành cho ý tưởng và việc cần làm nhưng chưa khẩn cấp. Cuối phiên, bạn sẽ quyết định lên lịch hay bỏ qua.</p></div></article>
+      <article class="rule"><span class="rule-icon">⚡</span><div><b>Xử lý ngay</b><p>Chỉ chọn việc thật sự có hậu quả gần kề. Chuyển sự chú ý khỏi việc chính sẽ làm chậm tiến độ.</p></div></article>
+    </div>
+    <p class="sub tipline">Quyết định đúng liên tiếp giúp tăng hệ số điểm. Dùng phím 1, 2, 3 cho thông báo đang được viền sáng; nhấn P để tạm dừng.</p>
+    <button id="go" class="btn pri">Bắt đầu phiên 1</button>
+  </section>
+
+  <section id="gm" class="screen hide" aria-label="Phiên tập trung">
+    <div class="hud"><span id="hR"></span><span>Điểm <b id="hS">0</b></span><span class="mult">x<span id="hM">1.0</span></span><span class="streak">🔥 <b id="hC">0</b></span><button class="btn pause" id="pb2" aria-label="Tạm dừng">Ⅱ</button></div>
+    <div class="timer"><i id="tb"></i></div>
+    <div class="card focus-card" id="cd">
+      <div class="cardrow"><div class="shield"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="rb" cx="60" cy="60" r="52"/><circle id="rf" class="rf" cx="60" cy="60" r="52"/></svg><div class="rt"><b id="tm">0s</b><small>Khiên <span id="fv">100</span>%</small></div></div>
+        <div class="main-task"><div class="lbl"><span>Việc chính: viết chương 3 báo cáo</span><b id="pg">0%</b></div><div class="bar"><i id="pb"></i></div><div id="pz" class="pz hide">Ⅱ Đang chuyển ngữ cảnh, tiến độ đứng yên</div></div></div>
+    </div>
+    <p id="say" class="status" role="status" aria-live="polite"></p>
+    <div class="lbl inbox-label"><span>Thông báo đến</span><span>Bãi đỗ: <b id="pk">0</b></span></div>
+    <div id="tray"></div>
+  </section>
+
+  <section id="br" class="screen hide card break-screen">
+    <span class="eyebrow">NGHỈ NGẮN · SẮP XẾP LẠI ƯU TIÊN</span>
+    <h2 id="bt"></h2><p class="sub" id="bs"></p><div id="bl"></div><p class="sub" id="bw"></p><button id="nx" class="btn pri"></button>
+  </section>
+
+  <section id="en" class="screen hide card result-screen" aria-live="polite"></section>
+</main>
+<section id="game-history"></section>
+<script src="/games/history-sync.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

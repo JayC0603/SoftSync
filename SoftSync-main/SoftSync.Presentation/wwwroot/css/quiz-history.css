@@ -1,0 +1,11 @@
+﻿/* Match Home typography and let the table scroll within its own frame. */
+html body .page .ss-main-content .qh-history{width:100%;max-width:960px;min-width:0;margin-inline:auto;font-family:'Segoe UI',Arial,sans-serif;line-height:1.5}
+html body .page .ss-main-content .qh-history :is(h1,p,a,table,th,td,span,caption){font-family:inherit!important}
+html body .page .ss-main-content .qh-history h1{font-size:clamp(26px,3vw,36px)!important;font-weight:800!important;letter-spacing:-.035em;line-height:1.25;margin:8px 0 16px}
+html body .page .ss-main-content .qh-history :is(p,.alert,table){font-size:14px!important}
+html body .page .ss-main-content .qh-history :is(a,.badge){font-size:13px!important}
+.qh-history .table-responsive{max-width:100%;min-width:0;overflow-x:auto;border:1px solid var(--ss-border,#dfe7f5);border-radius:16px;background:var(--ss-surface,#fff)}
+.qh-history table{width:100%;min-width:600px;margin-bottom:0;table-layout:fixed}
+.qh-history :is(th,td){padding:12px;vertical-align:middle;white-space:normal;overflow-wrap:anywhere}
+.qh-history :is(th,td):first-child{width:26%}.qh-history :is(th,td):nth-child(2){width:22%}
+@media(max-width:600px){html body .page .ss-main-content .qh-history h1{font-size:26px!important}.qh-history :is(th,td){padding:10px}}

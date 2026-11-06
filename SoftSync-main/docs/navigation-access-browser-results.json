@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "guestWidth": 320,
+      "header": true,
+      "drawer": true,
+      "noDock": true
+    },
+    {
+      "guestWidth": 390,
+      "header": true,
+      "drawer": true,
+      "noDock": true
+    },
+    {
+      "guestWidth": 430,
+      "header": true,
+      "drawer": true,
+      "noDock": true
+    },
+    {
+      "language": true,
+      "theme": true
+    },
+    {
+      "unassessedLogin": "assessment",
+      "noDock": true
+    },
+    {
+      "draftRestored": true
+    },
+    {
+      "completedRoute": "/dashboard",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/roadmap",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/progress",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/mentors",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/resources",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/community",
+      "dock": 1
+    },
+    {
+      "completedRoute": "/game",
+      "dock": 1
+    },
+    {
+      "refreshRestores": true
+    },
+    {
+      "newAccountRequiresProfile": true,
+      "noRedirectLoop": true
+    },
+    {
+      "logoutClears": true,
+      "reloginSkipsAssessment": true
+    }
+  ]
+}

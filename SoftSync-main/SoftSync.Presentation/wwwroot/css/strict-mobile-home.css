@@ -1,6 +1,6 @@
-/* Approved mobile dashboard only. Desktop and other routes retain their layout. */
+/* Approved dashboard, shared across mobile and desktop. */
 .sh-home { display:none; }
-@media(max-width:900px) {
+@media all {
  html body .page:has(.sh-home) .mobile-home.mh-v3 { display:none!important; }
  html body .page:has(.sh-home) .eco-footer { display:none!important; }
  html body .page:has(.sh-home) main#main-content.ss-main-content { padding:12px 12px 0!important; margin:0; max-width:100%; }

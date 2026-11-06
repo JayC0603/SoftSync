@@ -42,11 +42,11 @@
                 }
             </header>
 
-            <nav class="lesson-steps">
+            <nav class="lesson-steps" aria-label="@Tx("Lesson steps", "Các bước học")">
                 @foreach (var step in Steps)
                 {
                     var unlocked = CanOpen(step.Id);
-                    <button class="@(currentStep == step.Id ? "active" : null) @(IsComplete(step.Id) ? "done" : null)" disabled="@(!unlocked)" @onclick="() => OpenStep(step.Id)">
+                    <button class="@(currentStep == step.Id ? "active" : null) @(IsComplete(step.Id) ? "done" : null)" aria-current="@(currentStep == step.Id ? "step" : null)" disabled="@(!unlocked)" @onclick="() => OpenStep(step.Id)">
                         <span>@(IsComplete(step.Id) ? "✓" : step.Id.ToString())</span><b>@Tx(step.En, step.Vi)</b>@if (!unlocked) { <i class="bi bi-lock-fill"></i> }
                     </button>
                 }

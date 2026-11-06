@@ -1,0 +1,56 @@
+.ss-navigation-status[hidden] { display:none; }
+.ss-navigation-status {
+    position:fixed;
+    z-index:1100;
+    top:calc(80px + env(safe-area-inset-top));
+    left:50%;
+    transform:translateX(-50%);
+    width:min(560px,calc(100% - 24px));
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-sizing:border-box;
+    padding:10px 14px;
+    border:1px solid var(--ss-border,#dce7f6);
+    border-radius:12px;
+    background:var(--ss-surface,#fff);
+    color:var(--ss-text,#152a4a);
+    font:500 14px/1.5 'Segoe UI',Arial,sans-serif;
+}
+.ss-navigation-status[data-loading='true']::before {
+    content:'';
+    flex:0 0 16px;
+    width:16px;
+    height:16px;
+    border:2px solid #b8d5fa;
+    border-top-color:#2169d9;
+    border-radius:50%;
+    animation:ss-navigation-spin .8s linear infinite;
+}
+.ss-navigation-status span { flex:1; }
+.ss-navigation-status a { color:var(--ss-primary,#2169d9); }
+.ss-navigation-status a[hidden] { display:none; }
+.ss-mobile-bottom-link[data-navigation-pending], .ss-navpill[data-navigation-pending] { cursor:progress; }
+/* A browser-local response to the click, independent of server/network latency. */
+html[data-navigation-pending]::after {
+    content:'';
+    position:fixed;
+    z-index:1200;
+    top:0;
+    left:0;
+    width:100%;
+    height:3px;
+    background:linear-gradient(90deg,transparent,#2587ff 35%,#70caff 65%,transparent);
+    transform-origin:left;
+    pointer-events:none;
+    animation:ss-navigation-progress 1.1s ease-in-out infinite;
+}
+@keyframes ss-navigation-progress {
+    from { transform:scaleX(.12); opacity:.55; }
+    65% { transform:scaleX(.85); opacity:1; }
+    to { transform:scaleX(1); opacity:.45; }
+}
+@media(prefers-reduced-motion:reduce) { html[data-navigation-pending]::after { animation:none; background:#2587ff; } }
+html[data-reduce-motion='1'][data-navigation-pending]::after { animation:none; background:#2587ff; }
+@keyframes ss-navigation-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .ss-navigation-status::before { animation:none!important; } }

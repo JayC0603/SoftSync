@@ -1,10 +1,20 @@
 @inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
-<div class="ss-public-site">
+<AuthorizeView>
+    <Authorized><div class="ss-public-site @(IsLanding ? "ss-reference-home ss-authenticated-landing" : null)"><LayoutView Layout="@typeof(MainLayout)">@Body</LayoutView></div></Authorized>
+    <NotAuthorized>@PublicContent</NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool IsLanding => new Uri(Navigation.Uri).AbsolutePath == "/";
+    private RenderFragment PublicContent => @<div class="ss-public-site @(IsLanding ? "ss-reference-home" : null)">
     <a class="ss-skip-link" href="#main-content"><LocalizedText Text="Skip to main content" /></a>
     <PublicNavigation />
-    <main id="main-content" tabindex="-1" class="ss-public-content">
+    <main id="main-content" data-page-route="@(new Uri(Navigation.Uri).AbsolutePath)" tabindex="-1" class="ss-public-content @(!IsLanding ? "ss-main-content" : null)">
         @Body
     </main>
     <AppFooter />
 </div>
+    ;
+}

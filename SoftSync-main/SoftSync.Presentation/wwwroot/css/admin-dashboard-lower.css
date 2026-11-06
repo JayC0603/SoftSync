@@ -1,0 +1,79 @@
+/* Lower admin dashboard: measured activity and operational signals. */
+html body .ss-main-content .admin-dashboard {
+    --dash-accent: #416da8; --dash-accent-strong: #315b94; --dash-accent-soft: #edf3fa;
+    --dash-mint: #16846f; --dash-surface: #fff; --dash-line: #dce3ec;
+    --dash-ink: #202b3c; --dash-muted: #5d6b7c; --dash-grid: #e7edf4;
+    padding-top: 4px !important;
+}
+/* Visit reporting is the first working section below the overview banner. */
+html body .ss-main-content .admin-dashboard .visit-analytics { margin: 26px 0 28px; padding: 24px 0 28px; border-block: 1px solid var(--dash-line); color: var(--dash-ink); }
+html body .ss-main-content .admin-dashboard .visits-heading h2 { margin: 6px 0; color: var(--dash-ink); font-size: clamp(20px, 2vw, 25px); letter-spacing: -.025em; }
+html body .ss-main-content .admin-dashboard :is(.visits-heading p,.visits-range,.visits-method,.visits-scale) { color: var(--dash-muted); }
+html body .ss-main-content .admin-dashboard .visits-eyebrow { color: var(--dash-accent-strong); font-size: 12px; letter-spacing: .07em; }
+html body .ss-main-content .admin-dashboard .visits-toolbar { align-items: end; gap: 12px; margin: 20px 0 14px; padding: 14px; border: 1px solid var(--dash-line); border-radius: 12px; background: var(--dash-accent-soft); }
+html body .ss-main-content .admin-dashboard .visits-period { border-color: var(--dash-line); border-radius: 9px; background: var(--dash-surface); }
+html body .ss-main-content .admin-dashboard .visits-period button { min-height: 42px; padding: 9px 14px; color: var(--dash-ink); font-weight: 600; }
+html body .ss-main-content .admin-dashboard .visits-period button.selected { background: var(--dash-accent-strong); color: #fff; }
+html body .ss-main-content .admin-dashboard .visits-date { gap: 5px; color: var(--dash-muted); font-size: 13px; font-weight: 600; }
+html body .ss-main-content .admin-dashboard .visits-date input { min-height: 42px; border-color: var(--dash-line); border-radius: 8px; background: var(--dash-surface); color: var(--dash-ink); }
+html body .ss-main-content .admin-dashboard .visits-navigation button { min-height: 42px; }
+html body .ss-main-content .admin-dashboard .visits-range { margin: 12px 2px; font-size: 13px; font-variant-numeric: tabular-nums; }
+html body .ss-main-content .admin-dashboard .visits-cards { gap: 12px; margin: 14px 0 16px; }
+html body .ss-main-content .admin-dashboard :is(.visits-cards article,.visits-chart) { border: 1px solid var(--dash-line); border-radius: 12px; background: var(--dash-surface); box-shadow: none; }
+html body .ss-main-content .admin-dashboard .visits-cards article { min-height: 132px; gap: 8px; padding: 17px; border-top: 2px solid var(--dash-accent); }
+html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(2) { border-top-color: #bc705c; }
+html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(3) { border-top-color: var(--dash-mint); }
+html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(4) { border-top-color: #7568bd; }
+html body .ss-main-content .admin-dashboard .visits-cards span { color: var(--dash-ink); font-weight: 650; }
+html body .ss-main-content .admin-dashboard .visits-cards strong { color: var(--dash-ink); font-size: clamp(25px, 2.5vw, 32px); letter-spacing: -.04em; }
+html body .ss-main-content .admin-dashboard .visits-cards small { color: var(--dash-muted); line-height: 1.45; }
+html body .ss-main-content .admin-dashboard .visits-chart-grid { gap: 12px; }
+html body .ss-main-content .admin-dashboard .visits-chart { padding: 20px; }
+html body .ss-main-content .admin-dashboard .visits-chart h3 { color: var(--dash-ink); font-size: 16px; }
+html body .ss-main-content .admin-dashboard .visits-plot { background: repeating-linear-gradient(to top,transparent 0,transparent 49px,var(--dash-grid) 50px,transparent 51px); }
+html body .ss-main-content .admin-dashboard .visits-column > span { color: var(--dash-muted); }
+html body .ss-main-content .admin-dashboard .visits-details { border-color: var(--dash-line); border-radius: 10px; background: var(--dash-surface); color: var(--dash-ink); }
+html body .ss-main-content .admin-dashboard .visits-details th { color: var(--dash-accent-strong); }
+/* Compact KPI grid and quiet chart panels keep live operational signals scannable. */
+html body .ss-main-content .admin-dashboard > .updated { margin: 0 2px 10px; color: var(--dash-muted); font-size: 12px; }
+html body .ss-main-content .admin-dashboard > .cards { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+html body .ss-main-content .admin-dashboard > .cards article { min-width: 0; min-height: 138px; gap: 8px; padding: 17px 18px; border: 1px solid var(--dash-line); border-top: 2px solid var(--dash-accent); border-radius: 12px; background: var(--dash-surface); box-shadow: none; }
+html body .ss-main-content .admin-dashboard > .cards article:nth-child(n+5) { border-top-color: var(--dash-mint); }
+html body .ss-main-content .admin-dashboard > .cards article:last-child { grid-column: auto !important; display: grid; align-items: initial; justify-content: initial; min-height: 138px; border-top: 2px solid #7568bd; border-left: 1px solid var(--dash-line); background: var(--dash-surface); }
+html body .ss-main-content .admin-dashboard > .cards span { color: var(--dash-muted); font-size: 13px; line-height: 1.4; }
+html body .ss-main-content .admin-dashboard > .cards strong { color: var(--dash-ink); font-size: clamp(25px,2.5vw,32px); letter-spacing: -.04em; }
+html body .ss-main-content .admin-dashboard > .cards small { color: var(--dash-muted); font-size: 12px; line-height: 1.45; }
+html body .ss-main-content .admin-dashboard > .cards small a { color: var(--dash-accent-strong); font-weight: 650; }
+html body .ss-main-content .admin-dashboard > .charts { gap: 12px; margin-top: 16px; }
+html body .ss-main-content .admin-dashboard > .charts article { min-width: 0; padding: 20px; border: 1px solid var(--dash-line); border-radius: 12px; background: var(--dash-surface); box-shadow: none; }
+html body .ss-main-content .admin-dashboard > .charts h2 { color: var(--dash-ink); font-size: 16px; }
+html body .ss-main-content .admin-dashboard > .charts p { min-height: 38px; color: var(--dash-muted); font-size: 13px; line-height: 1.5; }
+html body .ss-main-content .admin-dashboard > .charts svg { display: block; overflow: visible; border-radius: 8px; background: repeating-linear-gradient(to top,transparent 0,transparent 49px,var(--dash-grid) 50px,transparent 51px); }
+html body .ss-main-content .admin-dashboard > .note { margin-top: 14px; padding: 17px 20px; border: 1px solid var(--dash-line); border-left: 3px solid var(--dash-mint); border-radius: 10px; background: var(--dash-accent-soft); box-shadow: none; }
+html body .ss-main-content .admin-dashboard > .note h2 { margin: 0 0 5px; color: var(--dash-ink); font-size: 15px; }
+html body .ss-main-content .admin-dashboard > .note p { color: var(--dash-muted); font-size: 13px; line-height: 1.55; }
+html body .ss-main-content .admin-dashboard :is(a,button,input,summary):focus-visible { outline: 3px solid #416da8; outline-offset: 3px; }
+html[data-theme="dark"] body .ss-main-content .admin-dashboard { --dash-accent:#93b9ec; --dash-accent-strong:#a8cbf6; --dash-accent-soft:#1b2b41; --dash-mint:#66c3a9; --dash-surface:#182338; --dash-line:#34435c; --dash-ink:#edf2fb; --dash-muted:#b0bfd3; --dash-grid:#30415a; }
+html[data-theme="dark"] body .ss-main-content .admin-dashboard .visits-period button.selected { color: #101d2c; }
+html[data-theme="dark"] body .ss-main-content .admin-dashboard .visits-cards article:nth-child(2) { border-top-color: #e09a82; }
+html[data-theme="dark"] body .ss-main-content .admin-dashboard :is(.visits-details th,.cards small a) { color: #a8cbf6; }
+html[data-theme="dark"] body .ss-main-content .admin-dashboard :is(a,button,input,summary):focus-visible { outline-color: #a8cbf6; }
+@media (max-width: 1000px) { html body .ss-main-content .admin-dashboard > .cards { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 650px) {
+    html body .ss-main-content .admin-dashboard { padding: 0 14px 36px !important; }
+    html body .ss-main-content .admin-dashboard .visit-analytics { margin: 18px 0 22px; padding: 20px 0; }
+    html body .ss-main-content .admin-dashboard .visits-toolbar { align-items: stretch; padding: 10px; }
+    html body .ss-main-content .admin-dashboard .visits-date { flex: 1 1 145px; }
+    html body .ss-main-content .admin-dashboard .visits-navigation { flex: 1 1 100%; }
+    html body .ss-main-content .admin-dashboard .visits-navigation button:nth-child(2) { flex: 1; }
+    html body .ss-main-content .admin-dashboard .visits-cards { gap: 8px; }
+    html body .ss-main-content .admin-dashboard .visits-cards article { min-height: 124px; padding: 13px; }
+    html body .ss-main-content .admin-dashboard > .cards { gap: 9px; }
+    html body .ss-main-content .admin-dashboard > .cards article,html body .ss-main-content .admin-dashboard > .cards article:last-child { min-height: 126px; padding: 14px; }
+    html body .ss-main-content .admin-dashboard > .charts { gap: 10px; }
+    html body .ss-main-content .admin-dashboard > .charts article { padding: 16px; }
+}
+@media (max-width: 380px) {
+    html body .ss-main-content .admin-dashboard > .cards { grid-template-columns: 1fr; }
+    html body .ss-main-content .admin-dashboard > .cards article,html body .ss-main-content .admin-dashboard > .cards article:last-child { min-height: 110px; }
+}

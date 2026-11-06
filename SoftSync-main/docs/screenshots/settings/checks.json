@@ -1,0 +1,35 @@
+[
+  {
+    "profileSavedAndReloaded": true
+  },
+  {
+    "learningSavedAndReloaded": true
+  },
+  {
+    "passwordValidation": true,
+    "dialogKeyboardAndFocus": true
+  },
+  {
+    "width": 320,
+    "allSectionsNoOverflow": true
+  },
+  {
+    "width": 390,
+    "allSectionsNoOverflow": true
+  },
+  {
+    "width": 768,
+    "allSectionsNoOverflow": true
+  },
+  {
+    "width": 1440,
+    "allSectionsNoOverflow": true
+  },
+  {
+    "themes": true,
+    "largeText": true,
+    "contrast": true,
+    "reduceMotion": true,
+    "english": true
+  }
+]

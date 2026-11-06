@@ -38,7 +38,7 @@ html body .page .ss-more-page > header p { margin: 4px 0 0; font-size: 16px !imp
 .ss-more-copy strong { display: block; font-size: 18px; font-weight: 700; line-height: 1.4; }
 html body .page .ss-main-content .ss-more-copy small { display: block; margin-top: 4px; font-size: 14px !important; line-height: 1.5; color: var(--option-muted); }
 .ss-more-feature > .bi-chevron-right { flex-shrink: 0; font-size: 16px; }
-.ss-more-settings { margin: 20px 2px 0; padding: 14px 0 22px; border-block: 1px solid var(--option-line); }
+.ss-more-settings { margin: 20px 0 0; padding: 14px 0 22px; border-block: 1px solid var(--option-line); }
 .ss-more-settings .ss-more-icon { color: #1763ff; background: #eaf0ff; }
 .ss-more-feature:hover { color: #255de2; border-color: rgb(111 154 238 / 40%); }
 .ss-option-row {

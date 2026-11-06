@@ -1,0 +1,153 @@
+:root {
+    --ss-bg-purple: #7927ff;
+    --ss-bg-pink: #d15fff;
+    --ss-bg-blue: #3025ff;
+    --ss-bg-sky: #67bfff;
+}
+
+.ss-animated-bg {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    overflow: clip;
+    pointer-events: none;
+    isolation: isolate;
+    background: #f7f7ff;
+    contain: layout paint style;
+}
+
+.ss-bg-image,
+.ss-bg-gradient,
+.ss-bg-blob,
+.ss-bg-ribbons,
+.ss-bg-vietnam,
+.ss-bg-petals {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ss-bg-image {
+    background-image: url('/images/softsync-vietnam-future.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.ss-bg-gradient {
+    background: linear-gradient(125deg, rgba(245, 249, 255, .20) 0%, rgba(247, 238, 255, .36) 45%, rgba(237, 247, 255, .24) 100%);
+    background-size: 250% 250%;
+    animation: ss-bg-gradient-drift 24s ease-in-out infinite alternate;
+}
+
+.ss-bg-blob {
+    inset: auto;
+    width: clamp(19rem, 39vw, 42rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    opacity: .34;
+    transform: translate3d(0, 0, 0);
+    animation: ss-bg-blob-drift 28s ease-in-out infinite alternate;
+}
+
+.ss-bg-blob-purple { top: -25%; left: -12%; background: radial-gradient(circle, rgba(121,39,255,.34), rgba(121,39,255,0) 68%); }
+.ss-bg-blob-blue { right: -16%; bottom: -35%; background: radial-gradient(circle, rgba(103,191,255,.52), rgba(103,191,255,0) 70%); animation-delay: -12s; }
+.ss-bg-blob-pink { top: 16%; right: 14%; width: clamp(17rem, 29vw, 32rem); background: radial-gradient(circle, rgba(209,95,255,.26), rgba(209,95,255,0) 68%); animation-delay: -19s; }
+
+.ss-bg-ribbons { opacity: .48; animation: ss-bg-ribbon-float 22s ease-in-out infinite alternate; }
+.ss-bg-ribbon { fill: none; stroke: url(#ss-ribbon-gradient); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.ss-bg-ribbon-two { stroke-width: 1.3; opacity: .68; }
+
+.ss-bg-vietnam {
+    inset: auto 5% 10% auto;
+    width: clamp(7rem, 13vw, 12rem);
+    height: auto;
+    overflow: visible;
+    opacity: .3;
+}
+.ss-vietnam-outline { fill: rgba(209,95,255,.06); stroke: url(#ss-vietnam-gradient); stroke-width: 2; vector-effect: non-scaling-stroke; animation: ss-bg-vietnam-breathe 5s ease-in-out infinite; }
+.ss-vietnam-network { fill: none; stroke: rgba(103,191,255,.7); stroke-width: 1.5; stroke-dasharray: 5 7; vector-effect: non-scaling-stroke; animation: ss-bg-network-flow 18s linear infinite; }
+.ss-vietnam-nodes circle { fill: #fff; stroke: #d15fff; stroke-width: 1.5; animation: ss-bg-node-pulse 4.8s ease-in-out infinite; }
+.ss-vietnam-nodes circle:nth-child(3n) { animation-delay: -1.6s; }
+.ss-vietnam-nodes circle:nth-child(3n + 1) { animation-delay: -3.2s; }
+
+.ss-bg-petal {
+    position: absolute;
+    display: block;
+    width: 1.15rem;
+    opacity: .64;
+    animation: ss-bg-petal-float 12s ease-in-out infinite;
+}
+.ss-bg-petal svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ss-bg-petal path { fill: rgba(255,255,255,.56); stroke: rgba(209,95,255,.52); stroke-width: 1.5; }
+.ss-bg-petal-one { top: 24%; left: 13%; animation-delay: -3s; }
+.ss-bg-petal-two { top: 62%; left: 32%; width: .8rem; animation-duration: 15s; animation-delay: -8s; }
+.ss-bg-petal-three { top: 18%; right: 27%; width: 1rem; animation-duration: 14s; animation-delay: -10s; }
+.ss-bg-petal-four { top: 72%; right: 18%; width: .75rem; animation-duration: 16s; animation-delay: -5s; }
+.ss-bg-petal-five { top: 42%; right: 42%; width: .65rem; animation-duration: 13s; animation-delay: -11s; }
+
+.ss-bg-intensity-Hero .ss-bg-blob { opacity: .55; }
+.ss-bg-intensity-Hero .ss-bg-gradient { opacity: .45; }
+.ss-bg-intensity-Hero .ss-bg-ribbons { opacity: .72; }
+.ss-bg-intensity-Hero .ss-bg-vietnam { opacity: .46; }
+.ss-bg-intensity-Ambient .ss-bg-blob { opacity: .34; }
+.ss-bg-intensity-Ambient .ss-bg-image { background-image: url('/images/backgrounds/softsync-dashboard.webp'); background-position: 54% center; }
+.ss-bg-intensity-Ambient .ss-bg-gradient { opacity: .8; }
+.ss-bg-intensity-Ambient .ss-bg-ribbons { opacity: .4; }
+.ss-bg-intensity-Ambient .ss-bg-vietnam { opacity: .24; }
+.ss-bg-intensity-Quiet .ss-bg-blob { opacity: .2; }
+.ss-bg-intensity-Quiet .ss-bg-image { display: none; }
+.ss-bg-intensity-Quiet .ss-bg-gradient { background: rgba(248, 249, 255, .68); animation: none; }
+.ss-bg-intensity-Quiet .ss-bg-ribbons { opacity: .2; }
+.ss-bg-intensity-Quiet .ss-bg-vietnam { opacity: .14; }
+.ss-bg-intensity-Quiet .ss-bg-petals { opacity: .28; }
+
+html[data-theme="dark"] .ss-animated-bg { background: #100d24; }
+html[data-theme="dark"] .ss-bg-gradient { background: linear-gradient(125deg, rgba(11, 17, 38, .83), rgba(28, 18, 57, .72), rgba(15, 25, 52, .8)); background-size: 250% 250%; }
+html[data-theme="dark"] .ss-bg-intensity-Quiet .ss-bg-gradient { background: rgba(15, 16, 37, .88); }
+html[data-theme="dark"] .ss-bg-blob-purple { background: radial-gradient(circle, rgba(121,39,255,.3), rgba(121,39,255,0) 68%); }
+html[data-theme="dark"] .ss-bg-blob-blue { background: radial-gradient(circle, rgba(48,37,255,.28), rgba(48,37,255,0) 70%); }
+html[data-theme="dark"] .ss-bg-blob-pink { background: radial-gradient(circle, rgba(209,95,255,.2), rgba(209,95,255,0) 68%); }
+html[data-theme="dark"] .ss-vietnam-nodes circle { fill: #d8ceff; }
+html[data-theme="dark"] .ss-bg-petal path { fill: rgba(224,216,255,.16); stroke: rgba(209,95,255,.45); }
+
+@keyframes ss-bg-gradient-drift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes ss-bg-blob-drift { from { transform: translate3d(-2%, 1%, 0) scale(.96); } to { transform: translate3d(3%, -4%, 0) scale(1.04); } }
+@keyframes ss-bg-ribbon-float { from { transform: translate3d(-1%, 0, 0); } to { transform: translate3d(1%, -1%, 0); } }
+@keyframes ss-bg-vietnam-breathe { 0%, 100% { opacity: .62; } 50% { opacity: 1; } }
+@keyframes ss-bg-network-flow { to { stroke-dashoffset: -48; } }
+@keyframes ss-bg-node-pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+@keyframes ss-bg-petal-float { 0%, 100% { transform: translate3d(0, 0, 0) rotate(-14deg); } 50% { transform: translate3d(8px, -14px, 0) rotate(13deg); } }
+
+.page { position: relative; z-index: 1; }
+.account-page { z-index: 1; }
+
+@media (max-width: 720px) {
+    .ss-bg-image { background-position: 67% center; }
+    .ss-bg-gradient { animation-duration: 32s; }
+    .ss-bg-blob { width: 72vw; opacity: .22; }
+    .ss-bg-ribbons { opacity: .24 !important; }
+    .ss-bg-vietnam { inset: auto 2% 11% auto; width: 5.5rem; opacity: .14 !important; }
+    .ss-bg-petal-three, .ss-bg-petal-five { display: none; }
+    .ss-bg-petal { opacity: .4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ss-bg-gradient, .ss-bg-blob, .ss-bg-ribbons, .ss-bg-vietnam,
+    .ss-vietnam-outline, .ss-vietnam-network, .ss-vietnam-nodes circle, .ss-bg-petal {
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
+html[data-reduce-motion="1"] .ss-bg-gradient,
+html[data-reduce-motion="1"] .ss-bg-blob,
+html[data-reduce-motion="1"] .ss-bg-ribbons,
+html[data-reduce-motion="1"] .ss-bg-vietnam,
+html[data-reduce-motion="1"] .ss-vietnam-network,
+html[data-reduce-motion="1"] .ss-vietnam-nodes circle,
+html[data-reduce-motion="1"] .ss-vietnam-outline,
+html[data-reduce-motion="1"] .ss-bg-petal {
+    animation: none !important;
+    transform: none !important;
+}

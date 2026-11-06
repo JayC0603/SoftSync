@@ -14,8 +14,16 @@
 
 # Local secrets / uploads
 .env
+**/data-protection-keys/
+*.pfx
+*.p12
 **/appsettings.*.local.json
 **/wwwroot/uploads/
+CvBackend/**/__pycache__/
+CvAi/**/__pycache__/
+CvBackend/**/*.py[cod]
+CvAi/**/*.py[cod]
+**/.pytest_cache/
 
 # OS
 Thumbs.db
@@ -27,3 +35,12 @@ Thumbs.db
 **/.next/
 **/.vercel/
 .vercel-validation/
+
+.vercel-validation/
+
+# Local preview builds and diagnostics
+.review-*/
+.preview-*/
+tmp/
+build_error.txt
+TestResults/

@@ -1,0 +1,96 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f8fc;
+  --surface: #fff;
+  --ink: #17182f;
+  --muted: #697087;
+  --line: #e3e5ed;
+  --primary: #5146e5;
+  --primary-soft: #f0efff;
+  --q1: #fff0ed;
+  --q2: #edf8f3;
+  --q3: #fff8e8;
+  --q4: #f0f2f7;
+  --ok: #16845b;
+  --bad: #c93636;
+  font-family: Inter, "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse at 50% -20%, #e9e8ff 0, transparent 48rem), var(--bg); }
+main { width: min(1080px, 100%); margin: 0 auto; padding: clamp(1rem, 4vw, 2.5rem); }
+.back-link { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 1rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 650; }
+.back-link:hover { color: var(--primary); }
+.hero { padding: clamp(1.25rem, 4vw, 2rem); margin-bottom: 1.25rem; border: 1px solid #e9e8f6; border-radius: 22px; background: rgb(255 255 255 / 88%); box-shadow: 0 12px 32px rgb(38 42 92 / 6%); }
+.eyebrow { color: var(--primary); font-size: .72rem; font-weight: 800; letter-spacing: .1em; }
+.hero-row { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin-top: .45rem; }
+h1 { margin: 0; font-size: clamp(1.65rem, 4vw, 2.35rem); line-height: 1.15; letter-spacing: -.035em; }
+.hero p { margin: .5rem 0 0; color: var(--muted); }
+.meta { color: var(--muted); font-size: .9rem; font-weight: 650; text-align: right; white-space: nowrap; }
+details { margin-top: 1.1rem; color: var(--muted); font-size: .9rem; }
+summary { width: fit-content; color: var(--primary); font-weight: 700; cursor: pointer; }
+details p { max-width: 72ch; line-height: 1.65; }
+.card { margin-bottom: 1rem; padding: 1.15rem 1.25rem; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 8px 24px rgb(38 42 92 / 4%); }
+.card > b { font-size: 1.1rem; }
+.card p { line-height: 1.6; }
+.pool { display: flex; flex-wrap: wrap; gap: .6rem; min-height: 3.25rem; margin: .25rem 0 1rem; }
+.task { max-width: 100%; padding: .65rem .8rem; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; line-height: 1.45; text-align: left; cursor: grab; user-select: none; }
+.task:hover { border-color: #bbb7f7; }
+.task.sel { border-color: var(--primary); box-shadow: 0 0 0 3px rgb(81 70 229 / 13%); }
+.task.ok { border-color: var(--ok); }
+.task.bad { border-color: var(--bad); }
+.task small { display: block; margin-top: .3rem; color: var(--bad); font-size: .78rem; }
+.grid { display: grid; grid-template-columns: minmax(90px, .38fr) 1fr 1fr; gap: .55rem; align-items: stretch; }
+.ax { align-self: end; padding: .25rem; color: var(--muted); font-size: .78rem; font-weight: 700; text-align: center; }
+.ax.v { display: flex; align-items: center; justify-content: flex-end; color: var(--muted); text-align: right; }
+.quad { display: flex; min-height: 185px; flex-direction: column; gap: .55rem; padding: .85rem; border: 2px dashed transparent; border-radius: 16px; }
+.quad.hot { border-color: var(--primary); cursor: pointer; }
+.qb { padding: 0 0 .25rem; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: inherit; }
+.qb b { display: block; font-size: .96rem; }
+.qb span { display: block; margin-top: .2rem; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+.quad .task { padding: .55rem .65rem; font-size: .88rem; cursor: pointer; }
+.q0 { background: var(--q1); }
+.q1 { background: var(--q2); }
+.q2 { background: var(--q3); }
+.q3 { background: var(--q4); }
+.bar { height: 7px; margin-bottom: 1rem; overflow: hidden; border-radius: 99px; background: #e7e7f1; }
+.bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7166e9, var(--primary)); transition: width .25s ease; }
+.hint { margin: 0 0 .7rem; color: var(--muted); font-size: .86rem; line-height: 1.5; }
+.row { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+.btn { min-height: 44px; padding: .65rem 1.05rem; border: 1px solid var(--primary); border-radius: 11px; background: var(--primary); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.btn:hover:not(:disabled) { background: #4035d0; }
+.btn:disabled { opacity: .42; cursor: not-allowed; }
+.fb { border-left: 4px solid var(--ok); }
+.why { display: grid; gap: .8rem; margin: .8rem 0 0; padding: 0; list-style: none; }
+.why li { font-size: .9rem; line-height: 1.55; }
+.why b, .why span { display: block; }
+.why span { margin-top: .15rem; color: var(--muted); }
+.why .ok b { color: var(--ok); }
+.why .bad b { color: var(--bad); }
+.big { margin: 0; color: var(--primary); font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 800; line-height: 1.1; }
+.dots { display: flex; flex-wrap: wrap; gap: .4rem; margin: .8rem 0; }
+.dots span { padding: .25rem .55rem; border-radius: 8px; background: var(--primary-soft); color: #453dc0; font-size: .84rem; }
+button:focus-visible, .task:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #a5a0ff; outline-offset: 3px; }
+#sit:focus { outline: none; }
+.task.drag { opacity: .4; }
+.over { outline: 3px dashed var(--primary); outline-offset: -3px; }
+.task[draggable="false"] { cursor: default; }
+@media (max-width: 680px) {
+  main { padding: 1rem .85rem 2rem; }
+  .hero { border-radius: 17px; }
+  .hero-row { align-items: start; flex-direction: column; }
+  .meta { text-align: left; }
+  .grid { grid-template-columns: 66px minmax(0, 1fr) minmax(0, 1fr); gap: .35rem; }
+  .ax { font-size: .68rem; }
+  .quad { min-height: 155px; padding: .55rem; border-radius: 12px; }
+  .qb b { font-size: .82rem; }
+  .qb span { font-size: .68rem; }
+  .quad .task { padding: .48rem; font-size: .78rem; overflow-wrap: anywhere; }
+  .task { font-size: .88rem; }
+  .card { padding: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }

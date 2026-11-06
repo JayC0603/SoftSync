@@ -10,13 +10,13 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthProvider
 
-<div class="max-800 mx-auto">
+<div class="max-800 mx-auto assessment-result-page">
     @if (results is not null)
     {
-        <StepIndicator CurrentStep="@TotalQuestionCount" TotalSteps="@TotalQuestionCount" IsComplete="true" />
+        <div class="result-completion"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> @TotalQuestionCount / @TotalQuestionCount @L["result.questionsCompleted"]</div>
     }
 
-    <div class="tw:text-center tw:mb-12">
+    <div class="result-heading tw:text-center">
         <h2 class="tw:font-bold">@L["result.title.prefix"] <span class="ss-gradient-text">@L["result.title.highlight"]</span></h2>
         <p class="text-muted">@L["result.subtitle"]</p>
     </div>
@@ -27,55 +27,61 @@
     }
     else
     {
-        <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6 tw:mb-12">
+        <div class="result-grid tw:grid tw:grid-cols-1 tw:md:grid-cols-2">
             @foreach (var res in results)
             {
                 <article aria-labelledby="skill-result-@res.SkillId">
-                    <div class="ss-card ss-glass-interactive tw:p-6">
+                    <div class="ss-card result-skill-card">
                         <div class="tw:flex tw:justify-between tw:items-center tw:mb-2">
                             <h3 id="skill-result-@res.SkillId" class="tw:font-bold tw:mb-0 tw:text-xl">@SkillName(res)</h3>
                             <span class="badge @GetLevelBadgeClass(res.Level)">@LevelLabel(res.Level)</span>
                         </div>
-                        <div class="tw:flex tw:justify-between tw:text-sm text-muted tw:mb-1">
-                            <span>@L["result.questionsCompleted"]</span>
+                        <div class="result-score-row">
+                            <span><strong>@res.Score</strong> / @AssessmentScoring.MaxScore</span>
                             <span>@AssessmentScoring.QuestionsPerSkill @L["result.questions"]</span>
-                        </div>
-                        <div class="tw:flex tw:justify-between tw:items-center tw:text-sm tw:mb-2">
-                            <span class="text-muted">@L["result.score"]: @res.Score / @AssessmentScoring.MaxScore</span>
-                            <strong class="performance-label">@PerformanceLabel(res.Level)</strong>
                         </div>
                         <div class="progress tw:mb-4" style="height: 12px; border-radius: 6px;" role="progressbar"
                              aria-label="@($"{SkillName(res)}: {res.Score}/{AssessmentScoring.MaxScore}")"
                              aria-valuemin="@AssessmentScoring.MinScore" aria-valuemax="@AssessmentScoring.MaxScore" aria-valuenow="@res.Score">
                             <div class="progress-bar" style="width: @(ScorePercent(res.Score))%; background: var(--gradient);"></div>
                         </div>
-                        <p class="tw:text-sm text-muted">@LevelDescription(res.SkillId, res.Level)</p>
+                        <p class="result-description text-muted">@LevelDescription(res.SkillId, res.Level)</p>
                         @{ var diagnosis = Diagnosis(res); }
                         <section class="diagnosis-section" aria-label="@Tx("Learning diagnosis", "Chẩn đoán học tập")">
-                            <h4>@Tx("Strengths", "Điểm mạnh")</h4>
+                            <details class="result-detail">
+                            <summary>@Tx("Strengths", "Điểm mạnh") <span>@diagnosis.Strengths.Count()</span></summary>
                             <ul>@foreach (var item in diagnosis.Strengths) { <li>@item</li> }</ul>
-                            <h4>@Tx("Growth areas", "Điểm cần cải thiện")</h4>
+                            </details>
+                            <details class="result-detail">
+                            <summary>@Tx("Growth areas", "Điểm cần cải thiện") <span>@diagnosis.Weaknesses.Count()</span></summary>
                             <ul>@foreach (var item in diagnosis.Weaknesses) { <li>@item</li> }</ul>
-                            <h4>@Tx("Evidence", "Bằng chứng")</h4>
+                            </details>
+                            <details class="result-detail">
+                            <summary>@Tx("Evidence & interpretation", "Bằng chứng và diễn giải")</summary>
                             <ul>@foreach (var item in diagnosis.Evidence) { <li>@item</li> }</ul>
                             <p><strong>@Tx("Interpretation:", "Diễn giải:")</strong> @diagnosis.Feedback</p>
-                            <h4>@Tx("Next actions", "Hành động tiếp theo")</h4>
+                            </details>
+                            <details class="result-detail">
+                            <summary>@Tx("Next actions", "Hành động tiếp theo") <span>@diagnosis.RecommendedActions.Count()</span></summary>
                             <ol>@foreach (var item in diagnosis.RecommendedActions) { <li>@item</li> }</ol>
+                            </details>
                         </section>
                     </div>
                 </article>
             }
         </div>
 
-        <div class="ss-card tw:p-12 tw:text-center tw:mb-12" style="background: var(--gradient-soft);">
+        <div class="ss-card result-next-step tw:text-center">
             <h2 class="tw:font-bold tw:mb-4">@Tx("Your next learning step", "Bước học tiếp theo")</h2>
             <p class="tw:text-xl tw:mb-6">@OverallRecommendation()</p>
-            <button class="ss-btn-primary tw:px-12 tw:py-4 tw:text-xl" @onclick="GoToRoadmap">
+            <div class="result-buttons">
+            <button class="ss-btn-primary" @onclick="GoToRoadmap">
                 @L["result.viewRoadmap"] <i class="bi bi-calendar-check tw:ms-2"></i>
             </button>
-            <button class="btn btn-outline-primary tw:ms-3 tw:px-8 tw:py-4" @onclick="RetakeAssessment">
+            <button class="btn btn-outline-primary" @onclick="RetakeAssessment">
                 @Tx("Take another assessment", "Làm lại bài đánh giá")
             </button>
+            </div>
         </div>
 
         @if (history.Count > 1)
@@ -128,8 +134,6 @@
 
     private string LevelLabel(AssessmentLevel level) => L[$"result.level.{LevelKey(level)}"];
 
-    private string PerformanceLabel(AssessmentLevel level) => L[$"result.performance.{LevelKey(level)}"];
-
     private string SkillName(AssessmentResultDto result) => result.SkillId is >= 1 and <= 7
         ? L[$"skill.name.{result.SkillId}"]
         : result.SkillName;
@@ -178,10 +182,64 @@
 }
 
 <style>
-    .max-800 { max-width: 800px; }
-    .performance-label { color: var(--primary); }
-    .diagnosis-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(99,102,241,.18); }
-    .diagnosis-section h4 { margin: .8rem 0 .35rem; font-size: .9rem; font-weight: 800; }
-    .diagnosis-section ul, .diagnosis-section ol { margin: 0; padding-left: 1.25rem; color: var(--text-muted); font-size: .88rem; }
-    .diagnosis-section p { margin: .85rem 0 0; font-size: .88rem; }
+    .assessment-result-page {
+        max-width: 800px;
+        --ss-primary: #1671d9;
+        --ss-primary-hover: #1057b2;
+        --gradient: linear-gradient(90deg, #2588ed, #155fc8);
+    }
+    .result-completion {
+        display: flex; justify-content: center; align-items: center; gap: 7px;
+        margin-bottom: 12px; color: #1671d9; font-size: .8rem; font-weight: 650;
+    }
+    .result-heading { margin-bottom: 20px; }
+    .assessment-result-page .result-heading h2 { font-size: 1.4rem; margin: 0 0 6px; }
+    .result-heading .ss-gradient-text { color: #1671d9; background: none; -webkit-text-fill-color: currentColor; }
+    .assessment-result-page .result-heading p { font-size: .875rem; margin: 0; }
+    .result-grid { gap: 14px; margin-bottom: 16px; align-items: start; }
+    .assessment-result-page .result-skill-card { padding: 18px !important; border-radius: 18px !important; }
+    .result-skill-card h3 { min-width: 0; font-size: 1.05rem !important; }
+    .result-skill-card .badge { flex-shrink: 0; margin-left: 8px; }
+    .result-score-row { display: flex; align-items: baseline; justify-content: space-between; margin: 12px 0 8px; color: var(--text-muted); font-size: .8rem; }
+    .result-score-row strong { color: #1671d9; font-size: 1.75rem; line-height: 1; }
+    .assessment-result-page .result-skill-card .progress { height: 6px !important; margin-bottom: 12px !important; }
+    .assessment-result-page .result-description { margin: 0; font-size: .85rem; line-height: 1.55; }
+    .diagnosis-section { margin-top: 14px; border-top: 1px solid #bedbf455; }
+    .result-detail { border-bottom: 1px solid #bedbf455; }
+    .result-detail:last-child { border-bottom: 0; }
+    .result-detail summary {
+        padding: 12px 0; min-height: 44px; cursor: pointer;
+        color: var(--text); font-size: .85rem; font-weight: 650;
+    }
+    .result-detail summary::marker { color: #1671d9; }
+    .result-detail summary span { margin-left: 6px; color: #1671d9; font-size: .75rem; }
+    .result-detail summary:focus-visible { outline: 2px solid #1671d9; outline-offset: 2px; border-radius: 4px; }
+    .result-detail[open] summary { color: #1671d9; }
+    .diagnosis-section ul, .diagnosis-section ol { margin: 0 0 12px; padding-left: 1.25rem; color: var(--text-muted); font-size: .85rem; line-height: 1.55; }
+    .diagnosis-section li + li { margin-top: 6px; }
+    .diagnosis-section p { margin: 0 0 12px; font-size: .85rem; line-height: 1.55; }
+    .assessment-result-page .result-next-step { padding: 20px !important; margin-bottom: 20px; background: #eaf5ff; border-radius: 18px !important; }
+    .assessment-result-page .result-next-step h2 { font-size: 1.05rem; margin-bottom: 8px !important; }
+    .assessment-result-page .result-next-step p { font-size: .875rem; line-height: 1.5; margin-bottom: 16px !important; }
+    .result-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .result-buttons button { min-height: 44px; padding: 10px 18px; font-size: .875rem; border-radius: 12px; }
+    body .ss-main-content .assessment-result-page .result-buttons button {
+        color: #fff !important;
+        border: 1px solid #1671d9 !important;
+        background: #1671d9 !important;
+    }
+    body .ss-main-content .assessment-result-page .result-buttons button:hover:not(:disabled) {
+        background: #1057b2 !important;
+        border-color: #1057b2 !important;
+    }
+    .result-buttons button:focus-visible { outline: 3px solid #8cc9ff; outline-offset: 3px; }
+    html[data-theme="dark"] .assessment-result-page .result-next-step { background: #173854; }
+    html[data-theme="dark"] .assessment-result-page :is(.result-completion, .result-score-row strong, .result-detail[open] summary, .result-detail summary span) { color: #8cc9ff; }
+    @@media (max-width: 900px) {
+        body .page:has(.assessment-result-page) main#main-content.ss-main-content { padding: 16px 14px !important; }
+        .result-grid { grid-template-columns: 1fr; }
+        .assessment-result-page .result-skill-card { padding: 16px !important; }
+        .result-buttons { flex-direction: column; }
+        .result-buttons button { width: 100%; margin: 0; }
+    }
 </style>

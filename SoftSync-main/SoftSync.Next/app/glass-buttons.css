@@ -1,0 +1,115 @@
+/* Shared action buttons for Blazor and Next. Keep navigation, icon buttons,
+   destructive actions and form controls on their existing styles. */
+:root {
+    --ss-button-fill: rgba(255, 255, 255, .62);
+    --ss-button-ink: var(--ss-text, #172033);
+    --ss-button-edge: rgba(111, 98, 205, .28);
+    --ss-button-glow: rgba(81, 70, 216, .18);
+}
+
+html[data-theme="dark"] {
+    --ss-button-fill: rgba(46, 42, 80, .65);
+    --ss-button-ink: #f0f0f5;
+    --ss-button-edge: rgba(196, 185, 255, .38);
+}
+
+/* Important declarations override the existing theme's important CTA rules.
+   Layered backgrounds provide the sheen without covering icons or labels. */
+html body :is(.glass-button, .about-button, .ss-btn-primary, .ss-primary-cta,
+    .focus-primary, .eco-primary, .login-submit, .register-submit,
+    .ss-secondary-cta, .login-otp, .btn-primary, .btn-secondary,
+    .btn-outline-primary, .marketing .primary, .marketing .secondary):not(.btn-link) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    min-height: 44px;
+    border: 1px solid var(--ss-button-edge) !important;
+    border-radius: 999px !important;
+    color: var(--ss-button-ink) !important;
+    background:
+        linear-gradient(110deg, transparent 35%, rgba(255,255,255,.3) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat,
+        linear-gradient(160deg, rgba(255,255,255,.18), transparent 65%),
+        var(--ss-button-fill) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 6px 20px var(--ss-button-glow) !important;
+    text-decoration: none;
+    transition: transform 200ms ease, box-shadow 200ms ease, background-position 650ms ease !important;
+}
+
+html body :is(.glass-button--primary, .about-button, .ss-btn-primary,
+    .ss-primary-cta, .focus-primary, .eco-primary, .login-submit,
+    .register-submit, .btn-primary, .marketing .primary) {
+    --ss-button-fill: rgba(77, 57, 192, .86);
+    --ss-button-ink: #fff;
+    --ss-button-edge: rgba(199, 188, 255, .6);
+}
+
+@media (hover: hover) {
+    html body :is(.glass-button, .about-button, .ss-btn-primary, .ss-primary-cta,
+        .focus-primary, .eco-primary, .login-submit, .register-submit,
+        .ss-secondary-cta, .login-otp, .btn-primary, .btn-secondary,
+        .btn-outline-primary, .marketing .primary, .marketing .secondary):not(.btn-link):hover:not(:disabled):not(.disabled):not([aria-disabled="true"]) {
+        background-position: 150% 0, 0 0, 0 0 !important;
+        transform: translateY(-2px);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 10px 28px var(--ss-button-glow) !important;
+    }
+}
+
+html body :is(.glass-button, .about-button, .ss-btn-primary, .ss-primary-cta,
+    .focus-primary, .eco-primary, .login-submit, .register-submit,
+    .ss-secondary-cta, .login-otp, .btn-primary, .btn-secondary,
+    .btn-outline-primary, .marketing .primary, .marketing .secondary):not(.btn-link):active:not(:disabled):not(.disabled):not([aria-disabled="true"]) {
+    transform: translateY(0) scale(.97);
+}
+
+html body :is(.glass-button, .about-button, .ss-btn-primary, .ss-primary-cta,
+    .focus-primary, .eco-primary, .login-submit, .register-submit,
+    .ss-secondary-cta, .login-otp, .btn-primary, .btn-secondary,
+    .btn-outline-primary, .marketing .primary, .marketing .secondary):focus-visible {
+    outline: 3px solid var(--ss-primary, #5146d8) !important;
+    outline-offset: 4px;
+}
+
+/* A solid fallback retains readable labels without backdrop-filter support. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root { --ss-button-fill: #f1effa; }
+    html[data-theme="dark"] { --ss-button-fill: #2e2a50; }
+    html body :is(.glass-button--primary, .about-button, .ss-btn-primary,
+        .ss-primary-cta, .focus-primary, .eco-primary, .login-submit,
+        .register-submit, .btn-primary, .marketing .primary) { --ss-button-fill: #4d39c0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body .glass-button:not(.btn-link):not(.disabled),
+    html body :is(.about-button, .ss-btn-primary, .ss-primary-cta,
+        .focus-primary, .eco-primary, .login-submit, .register-submit,
+        .ss-secondary-cta, .login-otp, .btn-primary, .btn-secondary,
+        .btn-outline-primary, .marketing .primary, .marketing .secondary):not(.btn-link) {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+html[data-reduce-motion="1"] body :is(.glass-button, .about-button,
+    .ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary,
+    .login-submit, .register-submit, .ss-secondary-cta, .login-otp,
+    .btn-primary, .btn-secondary, .btn-outline-primary,
+    .marketing .primary, .marketing .secondary) {
+    transition: none !important;
+    transform: none !important;
+}
+
+html[data-high-contrast="1"] body :is(.glass-button, .about-button,
+    .ss-btn-primary, .ss-primary-cta, .focus-primary, .eco-primary,
+    .login-submit, .register-submit, .ss-secondary-cta, .login-otp,
+    .btn-primary, .btn-secondary, .btn-outline-primary,
+    .marketing .primary, .marketing .secondary) {
+    color: #000 !important;
+    background: #fff !important;
+    border: 2px solid #000 !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}

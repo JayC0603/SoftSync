@@ -1,3 +1,4 @@
+using SoftSync.Presentation.Configuration;
 using SoftSync.Presentation.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,8 @@ using Microsoft.AspNetCore.Authentication;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<WebsiteAnalyticsService>();
 
 // Generate an idempotent schema from the checked-in EF migrations without
 // connecting to a database or starting the web server.
@@ -40,241 +43,10 @@ if (schemaArgument is not null)
     return;
 }
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents(options =>
-        options.DetailedErrors = builder.Environment.IsDevelopment());
-
-// Needed so App.razor and scoped UI services can read browser preferences during
-// SSR / enhanced navigation and render the first frame without flashing.
-builder.Services.AddHttpContextAccessor();
-
-var frontendOrigins = (builder.Configuration["FRONTEND_ORIGINS"] ?? "http://localhost:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins(frontendOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
-
-// UI localization (EN/VI). Seed each circuit from the cookie so SSR and the
-// interactive render always use the same language.
-builder.Services.AddScoped<LocalizationService>(services =>
-{
-    var request = services.GetRequiredService<IHttpContextAccessor>().HttpContext?.Request;
-    return new LocalizationService(LocalizationService.Parse(request?.Cookies["ss-lang"]));
-});
-builder.Services.AddScoped<UserProfileState>();
-builder.Services.AddSingleton<NotificationChanges>();
-builder.Services.AddScoped<AnnouncementService>();
-builder.Services.AddScoped<NotificationInbox>();
-builder.Services.AddScoped<MentorRequestWorkflow>();
-builder.Services.AddScoped<MentorRequests>();
-builder.Services.AddScoped<CourseUploadService>();
-builder.Services.AddHttpClient("CourseBlob", client => client.Timeout = TimeSpan.FromMinutes(10));
-builder.Services.Configure<CvIntegrationOptions>(builder.Configuration.GetSection("CvIntegration"));
-builder.Services.AddHttpClient<CvIntegrationService>(client => client.Timeout = TimeSpan.FromSeconds(20));
-
-// 1. Database Configuration. Demo mode uses an ephemeral in-memory database so
-// reviewers can exercise the product locally without PostgreSQL credentials.
-var demoMode = builder.Configuration.GetValue<bool>("SoftSync:DemoMode");
-
-if (demoMode)
-{
-    // Windows Event Log requires elevated privileges on some machines. Console
-    // logging keeps the zero-setup demo profile usable for normal accounts.
-    builder.Logging.ClearProviders();
-    builder.Logging.AddConsole();
-}
-
-// Prefer Vercel's DATABASE_URL so a stale ConnectionStrings__SoftSyncDb value
-// cannot override the managed database's current internal connection URL.
-// Local/other environments can still use ConnectionStrings:SoftSyncDb.
-// IConfiguration includes environment variables and Development User Secrets,
-// allowing the same DATABASE_URL key to work on Vercel and on a local machine.
-if (demoMode)
-{
-    builder.Services.AddDbContext<SoftSyncDbContext>(options =>
-        options.UseInMemoryDatabase("SoftSyncDemo"));
-}
-else
-{
-    var connectionString = PostgresConnection.Resolve(builder.Configuration);
-    builder.Services.AddDbContext<SoftSyncDbContext>(options =>
-        options.UseNpgsql(connectionString));
-}
-
-builder.Services.AddSingleton<EfDataProtectionKeyRepository>();
-builder.Services
-    .AddDataProtection()
-    .SetApplicationName("SoftSync");
-builder.Services.AddOptions<KeyManagementOptions>()
-    .Configure<EfDataProtectionKeyRepository>((options, repository) =>
-    {
-        options.XmlRepository = repository;
-    });
-
-// 1b. Authentication & Identity (ASP.NET Core Identity + cookie auth)
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-var authBuilder = builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-});
-
-// Only register Google when configured — AddGoogle throws at startup on empty keys.
-var googleSection = builder.Configuration.GetSection("Authentication:Google");
-var googleClientId = !string.IsNullOrWhiteSpace(googleSection["ClientId"])
-    ? googleSection["ClientId"]
-    : builder.Configuration["GOOGLE_CLIENT_ID"];
-var googleClientSecret = !string.IsNullOrWhiteSpace(googleSection["ClientSecret"])
-    ? googleSection["ClientSecret"]
-    : builder.Configuration["GOOGLE_CLIENT_SECRET"];
-var googleAuthConfigured = !string.IsNullOrWhiteSpace(googleClientId)
-    && !string.IsNullOrWhiteSpace(googleClientSecret);
-if (googleAuthConfigured)
-{
-    authBuilder.AddGoogle(options =>
-    {
-        options.ClientId = googleClientId;
-        options.ClientSecret = googleClientSecret;
-        // Keep the callback explicit so local, Docker and production Google
-        // Cloud registrations all use the same predictable endpoint.
-        options.CallbackPath = "/signin-google";
-        options.ClaimActions.MapJsonKey("urn:google:picture", "picture");
-        options.ClaimActions.MapJsonKey("urn:google:email_verified", "email_verified");
-        options.Events.OnRemoteFailure = context =>
-        {
-            // Cancellation and provider failures should return to a usable login page.
-            context.HandleResponse();
-            var savedReturnUrl = context.Properties is { } properties && properties.Items.TryGetValue("SoftSync.ReturnUrl", out var target) ? target : null;
-            var returnTo = LocalReturnUrl.Normalize(savedReturnUrl);
-            context.Response.Redirect("/Account/Login?googleError=1&ReturnUrl=" + Uri.EscapeDataString(returnTo));
-            return Task.CompletedTask;
-        };
-    });
-}
-authBuilder.AddIdentityCookies();
-
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = false; // dev: no email confirmation gate
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequiredLength = 6;
-    })
-    .AddRoles<IdentityRole<int>>()
-    .AddEntityFrameworkStores<SoftSyncDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(CourseAuthorization.UserPolicy, policy =>
-        policy.RequireAuthenticatedUser())
-    .AddPolicy(CourseAuthorization.TeacherPolicy, policy =>
-        policy.RequireAuthenticatedUser().RequireRole(
-            CourseAuthorization.TeacherRole,
-            CourseAuthorization.AdminRole))
-    .AddPolicy(CourseAuthorization.AdminPolicy, policy =>
-        policy.RequireAuthenticatedUser().RequireRole(CourseAuthorization.AdminRole));
-
-// A role change updates the user's security stamp, invalidating old role claims.
-builder.Services.Configure<SecurityStampValidatorOptions>(options =>
-    options.ValidationInterval = TimeSpan.FromMinutes(1));
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.Name = "SoftSync.Auth";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    options.SlidingExpiration = true;
-});
-
-// Bind sender config + register senders and the OTP service.
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
-builder.Services.Configure<TwilioOptions>(builder.Configuration.GetSection("Twilio"));
-builder.Services.AddScoped<IAppEmailSender, MailKitEmailSender>();
-builder.Services.AddScoped<IAppSmsSender, TwilioSmsSender>();
-builder.Services.AddScoped<VerificationCodeService>();
-
-// 2. Register Repositories (DAL)
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ISkillRepository, SkillRepository>();
-builder.Services.AddScoped<IAssessmentRepository, AssessmentRepository>();
-builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
-builder.Services.AddScoped<IRoleplayRepository, RoleplayRepository>();
-builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<ICaseStudyRepository, CaseStudyRepository>();
-builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
-builder.Services.AddScoped<IChatRepository, ChatRepository>();
-builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
-builder.Services.AddScoped<IMentorRepository, MentorRepository>();
-builder.Services.AddScoped<IMentorSupportRequestRepository, MentorSupportRequestRepository>();
-
-// 3. Register AI Services (BLL - Mocked)
-builder.Services.AddScoped<IAiAssessmentService, HuggingFaceAiAssessmentService>();
-builder.Services.AddSingleton(_ => AssistantKnowledgeBase.Load(
-    Path.Combine(builder.Environment.ContentRootPath, "Assets", "AiKnowledge", "softsync-assistant.vi-en.json")));
-builder.Services.AddScoped<KnowledgeBasedAiAssistantService>();
-builder.Services.AddScoped<IAiAssistantService, LlmAiAssistantService>();
-builder.Services.AddSingleton<PdfDocumentKnowledge>();
-builder.Services.AddScoped<HuggingFaceJsonClient>();
-builder.Services.AddScoped<CvReviewService>();
-builder.Services.AddScoped<CvWorkspaceService>();
-builder.Services.AddScoped<AiProviderService>();
-builder.Services.AddSingleton<SystemTelemetry>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<SystemTelemetry>());
-builder.Services.AddScoped<AdminAnalyticsService>();
-builder.Services.AddScoped<LearningActivityService>();
-builder.Services.AddScoped<IAiLearningEvaluationService, AiLearningEvaluationService>();
-builder.Services.AddScoped<IAiQuizService, AiQuizService>();
-builder.Services.AddScoped<IRoleplayAiService, HuggingFaceRoleplayAiService>();
-builder.Services.AddScoped<IAiRoadmapService, FakeAiRoadmapService>();
-
-// 4. Register Business Services (BLL)
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ISkillService, SkillService>();
-builder.Services.AddScoped<IAssessmentService, AssessmentService>();
-builder.Services.AddScoped<IRoadmapService, RoadmapService>();
-builder.Services.AddScoped<IRoleplayService, RoleplayService>();
-builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<IChallengeService, ChallengeService>();
-builder.Services.AddScoped<IProgressService, ProgressService>();
-builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
-builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
-builder.Services.AddScoped<IMentorService, MentorService>();
-builder.Services.AddScoped<IGameBankService, GameBankService>();
-builder.Services.AddScoped<IdentityRoleManagementService>();
-
-// 5. HttpClient for future AI integration
-builder.Services.AddHttpClient("AiApi", client =>
-{
-    var baseUrl = builder.Configuration["AiApi:BaseUrl"];
-    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(baseUrl) ? "https://router.huggingface.co/" : baseUrl.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiApi:TimeoutSeconds", 45));
-});
-builder.Services.AddHttpClient("Gemini", client =>
-{
-    client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
-    client.Timeout = TimeSpan.FromSeconds(45);
-});
-
-// CV/JD matching runs as an internal Python service. Authentication remains in
-// SoftSync; the AI service receives only the files needed for one inference.
-builder.Services.AddHttpClient<RecruitmentAiClient>(client =>
-{
-    var baseUrl = builder.Configuration["RecruitmentAi:BaseUrl"];
-    client.BaseAddress = new Uri(string.IsNullOrWhiteSpace(baseUrl) ? "http://127.0.0.1:8001/" : baseUrl.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("RecruitmentAi:TimeoutSeconds", 600));
-});
+builder.AddSoftSyncUi();
+var demoMode = builder.AddSoftSyncDatabase();
+var googleAuthConfigured = builder.AddSoftSyncIdentity();
+builder.AddSoftSyncApplicationServices();
 
 var app = builder.Build();
 
@@ -304,25 +76,39 @@ else if (!demoMode)
     app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        // App.razor fingerprints these files by content. A normal refresh can
+        // reuse them without revalidating dozens of stylesheets and scripts.
+        if (context.Context.Request.Query.TryGetValue("v", out var version)
+            && version.Count == 1 && version[0] is { Length: 16 } hash
+            && hash.All(Uri.IsHexDigit))
+            context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+    }
+});
+app.UseMiddleware<SystemMetricsMiddleware>();
+
 
 // Deployment uploads exclude large lesson media. Preserve the existing lesson
-// URLs by redirecting them to the public Blob URLs generated before deploy.
+// URLs by redirecting them to the verified public media source in the manifest.
 var videoManifestPath = Path.Combine(app.Environment.WebRootPath, "video-manifest.json");
 var lessonVideos = File.Exists(videoManifestPath)
     ? System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(videoManifestPath)) ?? new()
     : new Dictionary<string, string>();
-app.MapGet("/videos/{fileName}", (string fileName) =>
+app.MapMethods("/videos/{fileName}", ["GET", "HEAD"], (string fileName) =>
 {
     if (lessonVideos.TryGetValue(fileName, out var url)
         && Uri.TryCreate(url, UriKind.Absolute, out var uri)
         && uri.Scheme == "https"
-        && uri.Host.EndsWith(".public.blob.vercel-storage.com", StringComparison.OrdinalIgnoreCase))
+        && (uri.Host.EndsWith(".public.blob.vercel-storage.com", StringComparison.OrdinalIgnoreCase)
+            || (uri.Host.Equals("softsync.id.vn", StringComparison.OrdinalIgnoreCase)
+                && uri.AbsolutePath.Equals($"/videos/{fileName}", StringComparison.Ordinal))))
         return Results.Redirect(url);
     return Results.NotFound();
 });
-app.UseMiddleware<SystemMetricsMiddleware>();
-
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -330,6 +116,8 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapCvIntegrationEndpoints();
 app.MapCvReviewEndpoints();
+app.MapGameHistoryEndpoints();
+app.MapWebsiteAnalytics();
 
 var learningApi = app.MapGroup("/api/learning/sessions").RequireAuthorization();
 learningApi.MapPost("/", async (StartLearningActivityRequest request, System.Security.Claims.ClaimsPrincipal user,

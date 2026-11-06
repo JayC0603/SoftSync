@@ -4,7 +4,7 @@ using SoftSync.BLL.Services;
 
 namespace SoftSync.Presentation.Services;
 
-public sealed class AiQuizService(HuggingFaceJsonClient ai) : IAiQuizService
+public sealed class AiQuizService(HuggingFaceJsonClient ai, LocalizationService language) : IAiQuizService
 {
     public async Task<AiQuizQuestionDraftDto?> GenerateQuestionDraftAsync(AiQuizDraftRequestDto input, CancellationToken cancellationToken = default)
     {
@@ -13,8 +13,10 @@ public sealed class AiQuizService(HuggingFaceJsonClient ai) : IAiQuizService
             {"questionText":"...","scenario":"...","options":["...","...","...","..."],"suggestedCorrectOptionIndex":0,"explanation":"...","suggestedAltText":"..."}.
             Produce exactly four distinct, non-empty options. The correct index must be 0-3. Include a concise explanation.
             This is an editable teacher draft, not published content. Do not include private or sensitive data.
+            Write all narrative fields in the requested language (vi or en).
             """, new
         {
+            language = language.Code,
             input.LessonTitle,
             lessonContent = Limit(input.LessonContent, 6000),
             input.TargetSkill,
@@ -28,11 +30,12 @@ public sealed class AiQuizService(HuggingFaceJsonClient ai) : IAiQuizService
     public async Task<string?> ExplainAnswerAsync(QuizAnswerReviewDto answer, CancellationToken cancellationToken = default)
     {
         var result = await ai.AskAsync<TextResponse>("quiz-answer-explanation", """
-            Explain a completed quiz answer in clear Vietnamese. Use only the supplied question, selected answer,
+            Explain a completed quiz answer clearly in the requested language (vi or en). Use only the supplied question, selected answer,
             authoritative correct answer, and teacher explanation. Do not change which answer is correct and do not diagnose the learner.
             Return JSON only: {"text":"..."}.
             """, new
         {
+            language = language.Code,
             answer.QuestionText,
             answer.Scenario,
             answer.SelectedAnswer,
@@ -46,12 +49,13 @@ public sealed class AiQuizService(HuggingFaceJsonClient ai) : IAiQuizService
     public async Task<AiQuizFeedbackDto?> GenerateFeedbackAsync(QuizAttemptReviewDto review, CancellationToken cancellationToken = default)
     {
         var result = await ai.AskAsync<AiQuizFeedbackDto>("quiz-personalized-feedback", """
-            Summarize this completed quiz in cautious Vietnamese. The persisted score and result are authoritative and must not be changed.
+            Summarize this completed quiz cautiously in the requested language (vi or en). The persisted score and result are authoritative and must not be changed.
             Identify evidence-based strengths, weak areas, and concrete next practice. Never make psychological diagnoses or absolute claims.
-            Prefer phrases such as 'Trong bài kiểm tra này', 'Bạn có xu hướng', and 'Bạn có thể luyện thêm'.
+            Use cautious wording such as 'In this quiz' or the equivalent in the requested language.
             Return JSON only: {"summary":"...","strengths":["..."],"weakAreas":["..."],"suggestedNextPractice":["..."]}.
             """, new
         {
+            language = language.Code,
             score = new { review.Result.CorrectAnswers, review.Result.TotalQuestions, result = review.Result.Result.ToString() },
             answers = review.Answers.Select(x => new { x.QuestionText, x.SelectedAnswer, x.CorrectAnswer, x.IsCorrect, teacherExplanation = x.Explanation })
         }, cancellationToken);

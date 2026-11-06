@@ -110,6 +110,14 @@ public enum ThemePreference
     Dark
 }
 
+public enum PreferredLearningMode
+{
+    Text,
+    Visual,
+    Audio,
+    AiGuided
+}
+
 /// <summary>What a <c>VerificationCode</c> is issued for.</summary>
 public enum VerificationPurpose
 {

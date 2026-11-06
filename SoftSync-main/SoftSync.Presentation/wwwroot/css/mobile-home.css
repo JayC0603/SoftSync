@@ -232,7 +232,6 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     .mh-v3 .ss-mentor-carousel-tools { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     .mh-v3 .ss-mentor-carousel-tools:focus-within { position: static; width: auto; height: auto; margin: 0 0 6px; clip-path: none; white-space: normal; }
     html body .page:has(.mh-v3) { overflow-x: visible; }
-    html body .page:has(.mh-v3) .ss-workspace { padding: 0 0 calc(68px + env(safe-area-inset-bottom, 0px)); }
     html body .page:has(.mh-v3) .ss-sidebar-toggle { display: none; }
     html body .page:has(.mh-v3) .ss-workspace-left { display: none; }
     html body .page:has(.mh-v3) .ss-mobile-brand { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; font-size: 20px; }
@@ -241,11 +240,6 @@ html:has(.mh-v3), html body:has(.mh-v3) { overflow-x: visible; overflow-y: visib
     html body .page:has(.mh-v3) .ss-header-actions :is(.ss-header-control, .ss-header-theme) { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 4px; }
     html body .page:has(.mh-v3) .ss-header-fullscreen { display: none; }
     html body .page:has(.mh-v3) .ss-header-language-trigger { border: 0; }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-nav { min-height: 68px; left: 12px; right: 12px; bottom: 0; padding: 5px 5px calc(5px + env(safe-area-inset-bottom, 0px)); border-radius: 20px; background: var(--mh-surface); border-color: var(--mh-border); box-shadow: 0 4px 20px #15234a08; }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-link { min-height: 54px; padding: 5px 1px; gap: 5px; color: var(--mh-muted); }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-link i { font-size: 23px; }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-link span { font-size: 12px; }
-    html body .page:has(.mh-v3) .ss-mobile-bottom-link.active { background: transparent; color: var(--mh-accent); }
 }
 @media (max-width:374px) {
     html body .page:has(.mh-v3) .ss-workspace-topbar { width: calc(100% - 16px); margin-inline: 8px; padding-inline: 6px; gap: 2px; }

@@ -14,7 +14,7 @@ function isPublicCourse(value: unknown): value is PublicCourse {
         && typeof course.totalLessons === "number" && Number.isInteger(course.totalLessons) && course.totalLessons >= 0;
 }
 export function learningUrl() {
-    const configured = process.env.BACKEND_URL;
+    const configured = process.env.SOFTSYNC_APP_URL || process.env.BACKEND_URL;
     if (!configured)
         return null;
     try {

@@ -1,0 +1,96 @@
+/* Each scene is a separate static asset; only the current page's image is requested. */
+.ss-scene-hero {
+    position: relative;
+    display: flex;
+    min-height: 350px;
+    margin-bottom: 1.5rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    overflow: hidden;
+    align-items: flex-end;
+    border: 1px solid rgba(113, 102, 185, .2);
+    border-radius: 24px;
+    background-color: #e7e9ff;
+    background-image: var(--ss-scene-overlay), var(--ss-scene-image);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: var(--ss-scene-position, center);
+    box-shadow: 0 18px 45px rgba(51, 47, 111, .1);
+    isolation: isolate;
+}
+
+.ss-scene-hero > * { position: relative; z-index: 1; }
+.ss-scene-hero :is(h1, p, .ss-eyebrow) { color: #171e43; }
+.ss-scene-hero :is(h1, p) { text-shadow: 0 1px 10px rgba(255, 255, 255, .48); }
+.ss-scene-hero .ss-page-heading { width: min(100%, 590px); margin: 0; }
+
+.ss-scene-courses {
+    --ss-scene-image: url('/images/backgrounds/softsync-courses.webp');
+    --ss-scene-overlay: linear-gradient(90deg, transparent 20%, rgba(250, 249, 255, .32) 48%, rgba(250, 249, 255, .95) 100%);
+    --ss-scene-position: 50% 50%;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.ss-scene-game {
+    --ss-scene-image: url('/images/backgrounds/softsync-mini-game.webp');
+    --ss-scene-overlay: linear-gradient(0deg, rgba(251, 248, 255, .96), rgba(251, 248, 255, .65) 27%, transparent 68%);
+    --ss-scene-position: 52% 45%;
+    min-height: 420px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.ss-scene-game .badge { margin-bottom: .4rem; }
+.ss-scene-game p { max-width: 52ch; }
+
+.ss-scene-schedule {
+    --ss-scene-image: url('/images/backgrounds/softsync-schedule.webp');
+    --ss-scene-overlay: linear-gradient(90deg, rgba(250, 249, 255, .95) 0%, rgba(250, 249, 255, .78) 35%, transparent 78%);
+    --ss-scene-position: 53% 50%;
+    min-height: 350px;
+    margin-top: 0;
+    align-items: flex-end;
+}
+
+.ss-scene-schedule > div { max-width: 520px; }
+.ss-scene-schedule .schedule-add { margin-left: auto; }
+
+html[data-theme="dark"] .ss-scene-hero {
+    --ss-scene-overlay: linear-gradient(90deg, rgba(15, 17, 39, .96), rgba(15, 17, 39, .75) 44%, rgba(15, 17, 39, .25));
+}
+html[data-theme="dark"] .ss-scene-game {
+    --ss-scene-overlay: linear-gradient(0deg, rgba(15, 17, 39, .96), rgba(15, 17, 39, .7) 29%, transparent 76%);
+}
+html[data-theme="dark"] .ss-scene-hero :is(h1, p, .ss-eyebrow) { color: #f8f7ff; text-shadow: 0 1px 8px rgba(4, 7, 23, .7); }
+
+@media (max-width: 760px) {
+    .ss-scene-hero {
+        min-height: 410px;
+        padding: 1.25rem;
+        border-radius: 18px;
+        background-size: auto, auto 240px;
+        background-position: center, var(--ss-scene-mobile-position, center top);
+        background-color: #f4f1ff;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: stretch;
+        text-align: left;
+    }
+    .ss-scene-courses { --ss-scene-mobile-position: 25% top; }
+    .ss-scene-game { --ss-scene-mobile-position: 44% top; }
+    .ss-scene-schedule { --ss-scene-mobile-position: 66% top; }
+    .ss-scene-hero .ss-page-heading { width: 100%; }
+    .ss-scene-schedule .schedule-add { width: 100%; margin-left: 0; }
+    .ss-scene-hero :is(h1, p) { text-shadow: none; }
+    .ss-scene-courses, .ss-scene-schedule {
+        --ss-scene-overlay: linear-gradient(0deg, #f7f6ff 0%, #f7f6ff 39%, rgba(247, 246, 255, .8) 51%, transparent 70%);
+    }
+    .ss-scene-game {
+        --ss-scene-overlay: linear-gradient(0deg, #f7f6ff 0%, #f7f6ff 35%, rgba(247, 246, 255, .82) 49%, transparent 70%);
+    }
+    html[data-theme="dark"] .ss-scene-hero {
+        --ss-scene-overlay: linear-gradient(0deg, #17172f 0%, #17172f 39%, rgba(23, 23, 47, .82) 52%, transparent 73%);
+        background-color: #17172f;
+    }
+}
