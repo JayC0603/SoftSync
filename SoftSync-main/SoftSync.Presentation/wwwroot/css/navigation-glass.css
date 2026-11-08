@@ -1,4 +1,28 @@
 /* Shared shell: route-specific home themes must not move navigation. */
+.ss-workspace-topbar .ss-mobile-more-back { display: none; }
+@media (max-width: 900px) {
+    .ss-workspace-topbar .ss-mobile-more-back {
+        display: inline-flex;
+        flex: 0 0 44px;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        color: inherit;
+        text-decoration: none;
+        font-size: 20px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .ss-workspace-topbar .ss-mobile-more-back:hover,
+    .ss-workspace-topbar .ss-mobile-more-back:focus-visible {
+        background: var(--ss-accent-soft, rgb(99 102 241 / 12%));
+    }
+    .ss-workspace-topbar .ss-mobile-more-back:focus-visible {
+        outline: 2px solid var(--ss-accent, #0877f9);
+        outline-offset: 2px;
+    }
+}
 html { scrollbar-gutter: stable; }
 /* Route swaps must not animate shell dimensions or smooth-scroll to focus. */
 html, html body { scroll-behavior: auto !important; }

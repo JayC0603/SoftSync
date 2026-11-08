@@ -1,0 +1,64 @@
+@rendermode InteractiveServer
+@inherits LocalizedComponentBase
+@inject NavigationManager Navigation
+
+@if (Destination is { } destination)
+{
+    <a class="ss-mobile-more-back" href="@destination.Href" aria-label="@destination.Label" title="@destination.Label">
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+    </a>
+}
+
+@code {
+    private string path = "/";
+
+    private (string Href, string Label)? Destination
+    {
+        get
+        {
+            var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 0) return null;
+            var root = segments[0].ToLowerInvariant();
+            if (root is not ("courses" or "schedule" or "resources" or "game" or "assistant"
+                or "community" or "mentors" or "mentor-requests" or "about" or "teacher")) return null;
+
+            if (root == "courses" && segments.Length > 2)
+                return ($"/courses/{segments[1]}", T("Quay lại khóa học", "Back to course"));
+            if (root == "courses" && segments.Length == 2)
+                return ("/courses", T("Quay lại danh sách khóa học", "Back to courses"));
+            if (root == "game" && segments.Length > 1)
+                return ("/game", T("Quay lại trò chơi", "Back to games"));
+            if (root == "community" && segments.Length > 1)
+                return ("/community", T("Quay lại cộng đồng", "Back to community"));
+            if (root == "mentors" && segments.Length > 1)
+                return ("/mentors", T("Quay lại danh sách mentor", "Back to mentors"));
+            if (root == "teacher" && segments.Length > 1)
+                return ("/teacher", T("Quay lại không gian giảng viên", "Back to Teacher Studio"));
+
+            return ("/more", T("Quay lại trang Thêm", "Back to More"));
+        }
+    }
+
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        UpdatePath();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void UpdatePath() => path = new Uri(Navigation.Uri).AbsolutePath;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _ = InvokeAsync(() =>
+    {
+        UpdatePath();
+        StateHasChanged();
+    });
+
+    public override void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        base.Dispose();
+    }
+}
