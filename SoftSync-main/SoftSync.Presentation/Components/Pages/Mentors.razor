@@ -9,7 +9,7 @@
 <section class="eco-page mentor-directory mentor-reference" aria-labelledby="mentors-title">
     <AuthorizeView><Authorized><a class="eco-back" href="/mentor-requests">@Tx("My support requests", "Yêu cầu hỗ trợ của tôi")</a></Authorized></AuthorizeView>
     <header class="eco-page-head eco-page-head-compact"><h1 id="mentors-title">@Tx("Mentors by your side", "Mentor đồng hành")</h1><p>@Tx("Find the right person to support your learning journey.", "Tìm người phù hợp để hỗ trợ hành trình học tập của bạn.")</p></header>
-    <div class="eco-search" role="search"><i class="bi bi-search" aria-hidden="true"></i><label class="mentor-sr-only" for="mentor-search">@Tx("Search mentors", "Tìm Mentor")</label><input id="mentor-search" type="search" @bind="query" @bind:event="oninput" placeholder="@Tx("Search by name or expertise", "Tìm theo tên hoặc chuyên môn")" /></div>
+    <div class="eco-search" role="search"><i class="bi bi-search" aria-hidden="true"></i><label class="mentor-sr-only" for="mentor-search">@Tx("Search mentors", "Tìm Mentor")</label><input id="mentor-search" type="search" @bind="query" @bind:event="oninput" placeholder="@L["mentor.directory.searchPlaceholder"]" /></div>
     <div class="mentor-filters" role="group" aria-label="@Tx("Filter by skill", "Lọc theo kỹ năng")">
         @foreach (var filter in Filters)
         {
@@ -20,7 +20,23 @@
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentors...", "Đang tải Mentor...")</p></div> }
     else if (!string.IsNullOrEmpty(error)) { <div class="eco-state eco-state-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><h2>@Tx("Mentors could not be loaded", "Không thể tải Mentor")</h2><p>@error</p><button @onclick="Load">@Tx("Try again", "Thử lại")</button></div> }
     else if (!Filtered.Any()) { <div class="eco-state"><i class="bi bi-search" aria-hidden="true"></i><h2>@Tx("No matching mentors", "Không có Mentor phù hợp")</h2><p>@Tx("Try a broader name or expertise.", "Hãy thử tên hoặc chuyên môn rộng hơn.")</p><button @onclick="ClearFilters">@Tx("Reset filters", "Xóa bộ lọc")</button></div> }
-    else { <section class="mentor-list" aria-label="@Tx("Mentor directory", "Danh sách Mentor")">@foreach (var mentor in Filtered) { <article class="mentor-row" @key="mentor.Id"><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="88" height="88" loading="lazy" /><div><h2>@mentor.Name</h2><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong><p>@Summary(mentor)</p></div><a href="/mentors/@mentor.Id" aria-label="@($"{Tx("View profile", "Xem hồ sơ")}: {mentor.Name}")">@Tx("View profile", "Xem hồ sơ")<i class="bi bi-arrow-right" aria-hidden="true"></i></a></article> }</section> }
+    else {
+        <section class="mentor-list" aria-label="@Tx("Mentor directory", "Danh sách Mentor")">
+            @foreach (var mentor in Filtered)
+            {
+                var profile = PublishedMentorProfiles.For(mentor);
+                <article class="mentor-row" @key="mentor.Id">
+                    <img src="@mentor.AvatarUrl" alt="@mentor.Name" width="88" height="88" loading="lazy" />
+                    <div>
+                        <h2>@mentor.Name</h2><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong>
+                        @if (profile is not null) { <p class="mentor-position"><i class="bi bi-building" aria-hidden="true"></i>@L[profile.PositionKey]</p> }
+                        <p>@Summary(mentor)</p>
+                    </div>
+                    <a href="/mentors/@mentor.Id" aria-label="@($"{Tx("View profile", "Xem hồ sơ")}: {mentor.Name}")">@Tx("View profile", "Xem hồ sơ")<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </article>
+            }
+        </section>
+    }
 </section>
 
 @code {
@@ -42,14 +58,15 @@
     }
     private static string SearchText(string text) => string.Concat(text.Normalize(System.Text.NormalizationForm.FormD).Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)).Replace('đ', 'd').Replace('Đ', 'D');
     private static bool ContainsText(string text, string term) => SearchText(text).Contains(SearchText(term), StringComparison.OrdinalIgnoreCase);
-    private string Summary(MentorDto mentor) => mentor.AvatarUrl switch
+    private string Summary(MentorDto mentor) => PublishedMentorProfiles.For(mentor) is { } profile
+        ? L[profile.SummaryKey] : Ui(mentor.ShortBio);
+    private static string SearchableText(MentorDto mentor)
     {
-        "/images/mentor-nguyen-hoang-van-anh.png" => Tx("Build confidence, self-awareness and sustainable learning habits.", "Hỗ trợ xây dựng sự tự tin, nhận thức bản thân và thói quen học tập bền vững."),
-        "/images/mentor-nguyen-thuy-to-tram.png" => Tx("Apply communication and teamwork skills in real situations.", "Hướng dẫn áp dụng kỹ năng giao tiếp và làm việc nhóm trong thực tế."),
-        "/images/mentor-nguyen-xuan.png" => Tx("Develop effective learning methods and use technology in education.", "Phát triển phương pháp học tập hiệu quả và ứng dụng công nghệ trong giáo dục."),
-        _ => Ui(mentor.ShortBio)
-    };
-    private IEnumerable<MentorDto> Filtered => mentors.Where(x => MatchesSkill(x) && (string.IsNullOrWhiteSpace(query) || ContainsText($"{x.Name} {x.Expertise} {x.ShortBio}", query.Trim())));
+        var text = $"{mentor.Name} {mentor.Expertise} {mentor.ShortBio}";
+        if (PublishedMentorProfiles.For(mentor) is not { } profile) return text;
+        return $"{text} {Translations.Get(profile.PositionKey, AppLanguage.Vi)} {Translations.Get(profile.PositionKey, AppLanguage.En)} {Translations.Get(profile.SummaryKey, AppLanguage.Vi)} {Translations.Get(profile.SummaryKey, AppLanguage.En)}";
+    }
+    private IEnumerable<MentorDto> Filtered => mentors.Where(x => MatchesSkill(x) && (string.IsNullOrWhiteSpace(query) || ContainsText(SearchableText(x), query.Trim())));
     private void ClearFilters() { query = string.Empty; selectedSkill = "all"; }
     protected override Task OnInitializedAsync() => Load();
     private async Task Load(){ loading=true; error=null; try { mentors=(await MentorService.GetAllAsync()).ToList(); } catch { error=Tx("Check your connection and try again.", "Kiểm tra kết nối và thử lại."); } finally { loading=false; } }

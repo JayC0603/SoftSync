@@ -13,10 +13,23 @@
     @if (loading) { <div class="eco-state" role="status"><span class="spinner-border" aria-hidden="true"></span><p>@Tx("Loading mentor profile...", "Đang tải hồ sơ Mentor...")</p></div> }
     else if (mentor is null) { <div class="eco-state eco-state-error"><i class="bi bi-person-x" aria-hidden="true"></i><h1 id="mentor-title">@Tx("Mentor not found", "Không tìm thấy Mentor")</h1><p>@Tx("This profile may no longer be available.", "Hồ sơ này có thể không còn khả dụng.")</p><a href="/mentors">@Tx("Return to mentors", "Quay lại danh sách")</a></div> }
     else {
+        var profile = PublishedMentorProfiles.For(mentor);
         <div class="mentor-profile-grid @(signedIn ? null : "mentor-profile-readonly")">
             <article class="mentor-profile-main">
-                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>SOFTSYNC MENTOR</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong></div></header>
-                <section class="mentor-about"><h2>@Tx("How can this mentor help?", "Mentor có thể hỗ trợ gì?")</h2><p>@Ui(mentor.ShortBio)</p><p>@Tx("Send a support request to discuss challenges in your learning, find solutions or receive suggestions suited to your needs.", "Bạn có thể gửi yêu cầu hỗ trợ để trao đổi về những vấn đề trong quá trình học tập, tìm hướng giải quyết hoặc nhận gợi ý phù hợp với nhu cầu của mình.")</p></section>
+                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@(profile is null ? "SOFTSYNC MENTOR" : L[profile.RoleKey])</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong>@if (profile is not null) { <p class="mentor-position">@L[profile.PositionKey]</p> }</div></header>
+                @if (profile is not null)
+                {
+                    <section class="mentor-background" aria-labelledby="mentor-background-title">
+                        <h2 id="mentor-background-title">@L["mentor.profile.background"]</h2>
+                        <ul>@foreach (var key in profile.HighlightKeys) { <li>@L[key]</li> }</ul>
+                    </section>
+                }
+                <section class="mentor-about">
+                    <h2>@L["mentor.main.about"]</h2>
+                    @if (profile is null) { <p>@Ui(mentor.ShortBio)</p> }
+                    else { @foreach (var key in profile.BiographyKeys) { <p>@L[key]</p> } }
+                    <p>@Tx("Send a support request to discuss challenges in your learning, find solutions or receive suggestions suited to your needs.", "Bạn có thể gửi yêu cầu hỗ trợ để trao đổi về những vấn đề trong quá trình học tập, tìm hướng giải quyết hoặc nhận gợi ý phù hợp với nhu cầu của mình.")</p>
+                </section>
                 <section class="mentor-process"><h2>@Tx("Support process", "Quy trình hỗ trợ")</h2><ol>
                     <li><span>1</span><div><h3>@Tx("Describe your learning goal", "Mô tả mục tiêu học tập")</h3><p>@Tx("Tell us what you want to achieve.", "Nêu rõ điều bạn muốn đạt được.")</p></div></li>
                     <li><span>2</span><div><h3>@Tx("Share context (optional)", "Chia sẻ bối cảnh (nếu có)")</h3><p>@Tx("Help your mentor understand your situation.", "Giúp mentor hiểu rõ hơn về tình huống của bạn.")</p></div></li>
