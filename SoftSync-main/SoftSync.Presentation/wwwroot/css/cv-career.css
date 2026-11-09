@@ -13,20 +13,20 @@ html body .page .ss-main-content .career-cv :is(h1,h2,h3,h4,p,a,strong,small,spa
     font-family:inherit;
 }
 html body .page .ss-main-content .career-cv h1 {
-    font-size:clamp(26px,3vw,36px)!important;
-    font-weight:800;
+    font-size:var(--ss-page-title,clamp(26px,3vw,36px))!important;
+    font-weight:var(--ss-heading-weight,800);
     line-height:1.25;
     letter-spacing:-.04em;
 }
 html body .page .ss-main-content .career-cv h2 {
-    font-size:21px!important;
+    font-size:var(--ss-section-title,21px)!important;
     font-weight:750;
     line-height:1.35;
     letter-spacing:-.025em;
 }
 html body .page .ss-main-content .career-cv :is(p,li,label,input,textarea,select) {
-    font-size:14px!important;
-    line-height:1.5;
+    font-size:var(--ss-copy-size,14px)!important;
+    line-height:var(--ss-copy-leading,1.5);
 }
 html body .page .ss-main-content .career-cv :is(button,.career-primary) {
     font-size:14px;

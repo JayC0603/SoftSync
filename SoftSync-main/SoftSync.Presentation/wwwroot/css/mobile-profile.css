@@ -7,7 +7,7 @@
     .ss-profile-mobile { --mp-ink: #101348; --mp-muted: #526a9b; --mp-line: #d3dff6; display: grid; gap: 8px; color: var(--mp-ink); }
     html body .page:has(.ss-profile-page) .ss-workspace { background: radial-gradient(ellipse at 20% 0, #ebe6ff80, transparent 52%), linear-gradient(130deg, #edf4ff, #eaf3ff 65%, #edf1ff) !important; }
     html body .ss-profile-mobile .mp-heading { margin: 0 0 2px; }
-    html body .ss-profile-mobile .mp-heading h1 { margin: 0 0 3px; font-size: clamp(26px, 6.5vw, 38px); line-height: 1.2; font-weight: 800; letter-spacing: -.035em; }
+    html body .ss-profile-mobile .mp-heading h1 { margin: 0 0 3px; font-size: var(--ss-page-title,clamp(26px, 6.5vw, 38px)); line-height: 1.2; font-weight: 800; letter-spacing: -.035em; }
     html body .ss-profile-mobile .mp-heading p { margin: 0; color: var(--mp-muted); font-size: 13px; line-height: 1.5; }
     .ss-profile-mobile .mp-card { min-width: 0; border: 1px solid var(--mp-line); border-radius: 13px; background: linear-gradient(125deg, #ffffffeb, #fbfbffed); box-shadow: 0 8px 22px #526d9c0d; }
     .mp-identity { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: center; gap: 20px; padding: 15px 18px; }
@@ -63,7 +63,7 @@
     html[data-theme='dark'] .mp-roadmap { background: #262c4b; }
 
     /* Keep the reference proportions ahead of the shared shell typography. */
-    html body .page .ss-main-content .ss-profile-mobile .mp-heading h1 { font-size: clamp(26px, 6.5vw, 38px) !important; }
+    html body .page .ss-main-content .ss-profile-mobile .mp-heading h1 { font-size: var(--ss-page-title,clamp(26px, 6.5vw, 38px)) !important; }
     html body .page .ss-main-content .ss-profile-mobile .mp-heading p { font-size: 13px !important; }
     html body .page .ss-main-content .ss-profile-mobile .mp-person h2 { font-size: 17px !important; }
     html body .page .ss-main-content .ss-profile-mobile :is(.mp-details, .mp-direction) h2 { font-size: 14px !important; }

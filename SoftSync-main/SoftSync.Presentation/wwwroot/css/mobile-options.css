@@ -139,7 +139,7 @@ html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) {
     line-height: 1.5;
 }
 html body .page .ss-main-content :is(.ss-more-page, .ss-settings-shell) h1 {
-    font-size: 1.3125rem !important;
+    font-size: var(--ss-page-title,1.3125rem) !important;
     line-height: 1.35;
     font-weight: 750;
     letter-spacing: -.04em;

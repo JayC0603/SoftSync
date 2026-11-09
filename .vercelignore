@@ -21,6 +21,7 @@
 .agents/**
 .codex/**
 .review-dev/**
+.tools/**
 **/wwwroot/videos/**
 **/__pycache__/**
 **/.venv/**

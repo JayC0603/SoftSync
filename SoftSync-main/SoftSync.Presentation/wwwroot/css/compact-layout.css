@@ -6,18 +6,43 @@ html {
     --ss-text-body: .875rem;
     --ss-text-title: 1.125rem;
 }
+/* Desktop roles extend the existing density tokens. Mobile keeps its own sizes;
+   landing-page illustrations and game canvases do not consume these roles. */
+@media (min-width: 901px) {
+    html {
+        --ss-page-title: 1.5rem;
+        --ss-page-caption: .75rem;
+        --ss-heading-weight: 650;
+        --ss-section-title: 1.125rem;
+        --ss-card-title: 1rem;
+        --ss-kpi-size: 1.75rem;
+        --ss-text-label: .8125rem;
+        --ss-text-reading: 1rem;
+        --ss-reading-leading: 1.7;
+        --ss-content-padding: 1.5rem;
+        --ss-section-gap: 1.5rem;
+        --ss-card-padding: 1rem;
+        --ss-card-radius: .75rem;
+        --ss-control-height: 2.5rem;
+        --ss-desktop-control-text: .875rem;
+        --ss-banner-padding: 1.25rem;
+        --ss-input-padding: .5rem .75rem;
+        --ss-settings-nav-width: 224px;
+        --ss-header-height: 3.75rem;
+    }
+}
 html body { font-family: var(--ss-font-family) !important; font-size: var(--ss-text-body); line-height: 1.6; }
 html body .page { --ss-sidebar-width: 64px; }
 html[data-sidebar="expanded"] body .page { --ss-sidebar-width: 200px; }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) { font-family: var(--ss-font-family); font-size: var(--ss-text-body); line-height: 1.6; }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h1, h2, h3, h4, p, button, input, select, textarea) { font-family: inherit !important; }
-html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(p, li, label, td, th, input, select, textarea, .form-label, .form-control, .form-select, .text-muted) { font-size: var(--ss-text-body) !important; line-height: 1.6; }
+html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(p, li, label, td, th, input, select, textarea, .form-label, .form-control, .form-select, .text-muted) { font-size: var(--ss-copy-size, var(--ss-text-body)) !important; line-height: var(--ss-copy-leading, 1.6); }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) button { font-size: var(--ss-text-body); font-weight: 600; line-height: 1.5; }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h1, h2) { font-weight: 700 !important; letter-spacing: -.025em; line-height: 1.3; }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(h3, h4) { font-weight: 600 !important; letter-spacing: -.015em; line-height: 1.4; }
-html body :is(.ss-main-content, .ss-public-content) h1 { font-size: clamp(1.5rem, 2.3vw, 1.75rem) !important; }
-html body :is(.ss-main-content, .ss-public-content) h2 { font-size: 1.375rem !important; }
-html body :is(.ss-main-content, .ss-public-content) h3 { font-size: 1.125rem !important; }
+html body :is(.ss-main-content, .ss-public-content) h1 { font-size: var(--ss-page-title, clamp(1.5rem, 2.3vw, 1.75rem)) !important; }
+html body :is(.ss-main-content, .ss-public-content) h2 { font-size: var(--ss-section-title, 1.375rem) !important; }
+html body :is(.ss-main-content, .ss-public-content) h3 { font-size: var(--ss-card-title, 1.125rem) !important; }
 html body :is(.ss-main-content, .ss-public-content) h4 { font-size: 1rem !important; }
 html body :is(.ss-main-content, .ss-public-content, .neo-login) :is(small, .badge, .form-text, .validation-message) { font-size: var(--ss-text-small) !important; line-height: 1.5; }
 html body .ss-main-content :is(.resource-side, .pg-card, .ss-card, .ss-announcement-card) h2 { font-size: var(--ss-text-title) !important; }
@@ -81,7 +106,7 @@ html body .ss-language-flag { width: 24px; height: 17px; }
 html body .page .ss-header-avatar { width: 30px; height: 30px; }
 html body .page .ss-header-avatar img { width: 28px; height: 28px; }
 html body .ss-header-user-info strong, html body .ss-workspace-topbar strong { font-size: 0.8125rem; }
-html body .ss-header-user-info small, html body .ss-workspace-kicker { font-size: 0.6875rem; }
+html body .ss-header-user-info small, html body .ss-workspace-kicker { font-size: var(--ss-page-caption,0.6875rem); }
 html body .ss-header-dropdown :is(a, button) { font-size: 0.8125rem; }
 html body .ss-notification-trigger { width: 36px; height: 36px; }
 html body .ss-header-profile-dropdown > a, html body .ss-header-profile-dropdown form button { min-height: 44px; padding: 10px 12px; }

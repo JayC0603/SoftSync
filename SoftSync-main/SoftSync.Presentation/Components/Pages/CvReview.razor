@@ -14,7 +14,7 @@
 @inject NavigationManager Navigation
 
 <PageTitle>@DesktopText.Text("CV Review — SoftSync")</PageTitle>
-<main class="ss-workspace" aria-busy="@busy.ToString().ToLowerInvariant()">
+<section class="ss-cv-review" aria-busy="@busy.ToString().ToLowerInvariant()">
     <h1>@DesktopText.Text("CV Review")</h1>
     <p role="status">@(aiConfigured ? DesktopText.Text("AI: đã cấu hình (chưa xác minh kết nối provider).") : DesktopText.Text("AI: chưa cấu hình. Bạn vẫn có thể thử upload và đọc CV; chưa lưu phân tích khi thiếu cấu hình."))</p>
     <p>@DesktopText.Text("AI đánh giá chất lượng nội dung CV: độ rõ ràng, bằng chứng kỹ năng, kinh nghiệm/dự án và thông tin còn thiếu; đề xuất cách sửa theo ưu tiên, không chỉ trích xuất văn bản.")</p>
@@ -105,7 +105,7 @@
             }
         </article>
     }
-</main>
+</section>
 
 @code {
     [Parameter] public int? AnalysisId { get; set; }

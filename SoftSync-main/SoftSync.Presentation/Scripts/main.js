@@ -65,6 +65,12 @@ window.ssLang = {
 // Keep AI chat usable across refreshes even when the remote database is
 // temporarily unavailable. PostgreSQL remains the primary history store.
 window.ssChatHistory = {
+    scrollChat(element) {
+        if (element) element.scrollTop = element.scrollHeight;
+    },
+    focusComposer() {
+        document.getElementById('syncy-message')?.focus({ preventScroll: true });
+    },
     key(userId, sessionId) { return `ss-chat-history-${userId}-${sessionId || 'draft'}`; },
     load(userId, sessionId) {
         try {
@@ -81,6 +87,19 @@ window.ssChatHistory = {
         if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 };
+
+// Scope keyboard shortcuts to the chat composer. Shift+Enter and IME input
+// keep their native behavior; disabled send buttons ignore duplicate submits.
+if (!window.__ssSyncyComposerBound) {
+    window.__ssSyncyComposerBound = true;
+    document.addEventListener('keydown', event => {
+        if (!(event.target instanceof HTMLTextAreaElement) || !event.target.hasAttribute('data-syncy-composer')) return;
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+            event.preventDefault();
+            document.getElementById('syncy-send')?.click();
+        }
+    });
+}
 
 // Welcome flag — set as a short-lived cookie by the server right after a
 // successful login, read once by the WelcomeToast component, then cleared so

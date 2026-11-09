@@ -2,7 +2,7 @@
 .mg-directory{--mg-ink:#101744;--mg-muted:#586f9c;--mg-surface:#fff;--mg-line:#dceaff;max-width:960px;margin:0 auto 24px;color:var(--mg-ink);font-family:'Segoe UI',Arial,sans-serif;isolation:isolate}
 .mg-directory :is(h1,h2,p,a,span){font-family:inherit!important}
 .mg-hero{position:relative;display:flex;align-items:center;gap:12px;padding:0 0 18px}.mg-intro{flex:1;min-width:0;z-index:1}.mg-kicker{display:inline-block;border-radius:24px;padding:5px 10px;background:#cce8ff;color:#0067ee;font-size:12px;font-weight:700}
-html body .ss-main-content .mg-directory h1{font-size:clamp(26px,3vw,36px)!important;font-weight:800!important;line-height:1.2;letter-spacing:-.04em;margin:7px 0}
+html body .ss-main-content .mg-directory h1{font-size:var(--ss-page-title,clamp(26px,3vw,36px))!important;font-weight:var(--ss-heading-weight,800)!important;line-height:1.2;letter-spacing:-.04em;margin:7px 0}
 html body .ss-main-content .mg-directory p{font-size:14px!important;line-height:1.5;margin:0;color:var(--mg-muted)}
 .mg-controller{flex:0 0 150px;transform:rotate(-8deg);filter:drop-shadow(0 10px 12px #2179f22a)}.mg-controller svg{display:block;width:100%;height:auto}
 .mg-tabs{display:flex;gap:3px;padding:3px;margin-bottom:12px;background:#edf6ffb3;border:1px solid #fff;border-radius:17px;box-shadow:0 8px 22px #3889e51a}.mg-tabs>*{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:7px 5px;border-radius:13px;font-size:13px;font-weight:700;color:var(--mg-muted);text-decoration:none}.mg-tabs>span{color:white;background:linear-gradient(110deg,#087fff,#0069ff);box-shadow:0 3px 7px #147dff40}.mg-tabs i{font-size:18px}

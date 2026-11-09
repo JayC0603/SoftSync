@@ -25,7 +25,7 @@ html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(2) {
 html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(3) { border-top-color: var(--dash-mint); }
 html body .ss-main-content .admin-dashboard .visits-cards article:nth-child(4) { border-top-color: #7568bd; }
 html body .ss-main-content .admin-dashboard .visits-cards span { color: var(--dash-ink); font-weight: 650; }
-html body .ss-main-content .admin-dashboard .visits-cards strong { color: var(--dash-ink); font-size: clamp(25px, 2.5vw, 32px); letter-spacing: -.04em; }
+html body .ss-main-content .admin-dashboard .visits-cards strong { color: var(--dash-ink); font-size: var(--ss-kpi-size,clamp(25px, 2.5vw, 32px)); letter-spacing: -.04em; }
 html body .ss-main-content .admin-dashboard .visits-cards small { color: var(--dash-muted); line-height: 1.45; }
 html body .ss-main-content .admin-dashboard .visits-chart-grid { gap: 12px; }
 html body .ss-main-content .admin-dashboard .visits-chart { padding: 20px; }
@@ -41,7 +41,7 @@ html body .ss-main-content .admin-dashboard > .cards article { min-width: 0; min
 html body .ss-main-content .admin-dashboard > .cards article:nth-child(n+5) { border-top-color: var(--dash-mint); }
 html body .ss-main-content .admin-dashboard > .cards article:last-child { grid-column: auto !important; display: grid; align-items: initial; justify-content: initial; min-height: 138px; border-top: 2px solid #7568bd; border-left: 1px solid var(--dash-line); background: var(--dash-surface); }
 html body .ss-main-content .admin-dashboard > .cards span { color: var(--dash-muted); font-size: 13px; line-height: 1.4; }
-html body .ss-main-content .admin-dashboard > .cards strong { color: var(--dash-ink); font-size: clamp(25px,2.5vw,32px); letter-spacing: -.04em; }
+html body .ss-main-content .admin-dashboard > .cards strong { color: var(--dash-ink); font-size: var(--ss-kpi-size,clamp(25px,2.5vw,32px)); letter-spacing: -.04em; }
 html body .ss-main-content .admin-dashboard > .cards small { color: var(--dash-muted); font-size: 12px; line-height: 1.45; }
 html body .ss-main-content .admin-dashboard > .cards small a { color: var(--dash-accent-strong); font-weight: 650; }
 html body .ss-main-content .admin-dashboard > .charts { gap: 12px; margin-top: 16px; }

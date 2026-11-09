@@ -125,7 +125,7 @@ html[data-theme="dark"] .schedule-reference .schedule-empty-action button { back
 html body .schedule-reference .schedule-header .schedule-add { background: linear-gradient(110deg,#1591ff,#0060ff) !important; border-color: #53a6ff !important; color: white !important; }
 html body .schedule-reference .schedule-day-number { border: 0 !important; box-shadow: none !important; background: transparent !important; }
 html body .schedule-reference .schedule-day.is-today .schedule-day-number { background: linear-gradient(135deg,#168aff,#0063ff) !important; color: white !important; }
-html body .schedule-reference .schedule-header h1 { font-size: clamp(2rem,4vw,3.5rem) !important; }
+html body .schedule-reference .schedule-header h1 { font-size: var(--ss-page-title,clamp(2rem,4vw,3.5rem)) !important; }
 html body .schedule-reference .schedule-header h1:focus { outline: none !important; }
 @media (max-width:760px) {
     html body .schedule-reference .schedule-header h1 { font-size: clamp(1.9rem,7.5vw,2.7rem) !important; }
