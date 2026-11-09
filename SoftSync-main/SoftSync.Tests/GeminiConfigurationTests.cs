@@ -24,7 +24,7 @@ public sealed class GeminiConfigurationTests
         await client.AskAsync<Reply>(task, "Return JSON only.", new { text = "Synthetic input" });
         using var body = JsonDocument.Parse(handler.Body);
         Assert.Equal("dungcsnd113/gemini-flash-3.8", body.RootElement.GetProperty("model").GetString());
-        Assert.Equal("dungcsnd113/gemini-flash-3.8", XahCvReviewClient.DefaultModel);
+        Assert.Equal("cuzem3/gemini-3.8-flash-low", XahCvReviewClient.DefaultModel);
     }
 
     [Fact]

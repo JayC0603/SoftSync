@@ -387,8 +387,9 @@ else
         if (selected is null || busy || JdTooLong) return;
         using var logScope = Logger.BeginScope(new Dictionary<string, object> { ["CvOperationId"] = Guid.NewGuid().ToString("N") });
         busy = true; error = null; notice = null; saved = false;
-        // Allow the initial provider request and one validated regeneration (110s each).
-        using var token = new CancellationTokenSource(TimeSpan.FromSeconds(240));
+        // Review owns one total AI deadline across generation and correction.
+        // Leave room for the saved-result lookup and persistence around that call.
+        using var token = new CancellationTokenSource(TimeSpan.FromSeconds(120));
         cancellation = token;
         processing = T("Đang đánh giá CV và đối chiếu JD…", "Reviewing CV and comparing the JD…");
         try

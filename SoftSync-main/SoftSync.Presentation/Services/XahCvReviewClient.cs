@@ -16,13 +16,19 @@ public interface ICvReviewLanguageModel
 public sealed class XahCvReviewClient(IHttpClientFactory clients, IConfiguration configuration,
     ILogger<XahCvReviewClient> logger) : ICvReviewLanguageModel
 {
-    public const string DefaultModel = AiApiConfiguration.DefaultXahModel;
-    public string Model => configuration["CvLlm:Model"]?.Trim() is { Length: > 0 } model ? model : DefaultModel;
+    public const string DefaultModel = "cuzem3/gemini-3.8-flash-low";
+    // The previous XAH route disappeared from its model catalog. Migrate that
+    // exact legacy setting too, since a deployment environment overrides JSON.
+    public string Model => configuration["CvLlm:Model"]?.Trim() is { Length: > 0 } model
+        && model != AiApiConfiguration.DefaultXahModel ? model : DefaultModel;
     public string ResponseModel { get; private set; } = string.Empty;
     // This JSON is model input inside an HTTP message, never embedded in HTML.
     // Preserve Vietnamese text instead of making the model tokenize literal \uXXXX sequences.
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
-    { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+    };
 
     public async Task<CvReviewAiResponse> AnalyzeAsync(string systemPrompt, object input, CancellationToken cancellationToken)
     {

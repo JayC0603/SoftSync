@@ -426,7 +426,7 @@ public sealed class XahCvReviewTests
     internal static XahCvReviewClient Client(HttpMessageHandler handler, string key = "synthetic-xah-key") => new(new Factory(handler),
         new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["CvLlm:ApiKey"] = key }).Build(), NullLogger<XahCvReviewClient>.Instance);
     private static CvReviewText Text() => new() { Vi = "Nhận xét dựa trên bằng chứng", En = "Evidence-based feedback" };
-    private static CvReviewAiResponse Response() => new()
+    internal static CvReviewAiResponse Response() => new()
     {
         Summary = Text(), Strengths = [Text()], Improvements = [Text()],
         Criteria = new[] { "content", "clarity", "achievements", "structure" }.Select(id => new CvReviewCriterion { Id = id, Score = 70, Feedback = Text() }).ToList(),

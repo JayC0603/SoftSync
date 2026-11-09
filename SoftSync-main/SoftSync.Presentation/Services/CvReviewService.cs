@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace SoftSync.Presentation.Services;
 
-public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewService>? logger = null) : IDisposable
+public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewService>? logger = null, IConfiguration? configuration = null) : IDisposable
 {
     public const int MaxCvCharacters = 40_000;
     public const int MaxJdCharacters = 20_000;
@@ -21,7 +21,7 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
     // Includes the complete rubric and schema revision so old reviews cannot mask a changed evaluator.
     public string GetCacheKey(CvReviewRequest request) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
         JsonSerializer.Serialize(new { cv = request.CvText.Trim(), jd = string.IsNullOrWhiteSpace(request.JdText) ? null : request.JdText.Trim(),
-            model = ai.Model, language = ReviewLanguage(request.Language), version = 2, prompt = Prompt }))));
+            model = ai.Model, language = ReviewLanguage(request.Language), version = 3, prompt = Prompt }))));
 
     private static string? ReviewLanguage(string? language) => language switch
     {
@@ -51,16 +51,21 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
         // JSON framing prevents ambiguous keys when document text contains delimiters.
         var language = ReviewLanguage(request.Language);
         var key = GetCacheKey(request);
-        await reviewGate.WaitAsync(cancellationToken);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(configuration?.GetValue("CvLlm:TotalTimeoutSeconds", 90) ?? 90, 1, 110)));
+        var entered = false;
         try
         {
+            await reviewGate.WaitAsync(deadline.Token);
+            entered = true;
+            deadline.Token.ThrowIfCancellationRequested();
             if (cache.TryGetValue<string>(key, out var cached) && cached is not null)
             {
                 logger?.LogInformation("CV review cache hit after {ElapsedMilliseconds} milliseconds", timer.ElapsedMilliseconds);
                 return JsonSerializer.Deserialize<CvReviewResult>(cached)! with { ElapsedMilliseconds = timer.ElapsedMilliseconds };
             }
-            var review = (await ReviewCoreAsync(cv, jd, language, cancellationToken)) with { CacheKey = key, OutputLanguage = language };
-            cancellationToken.ThrowIfCancellationRequested();
+            var review = (await ReviewCoreAsync(cv, jd, language, deadline.Token)) with { CacheKey = key, OutputLanguage = language };
+            deadline.Token.ThrowIfCancellationRequested();
             // Store a snapshot so callers cannot mutate a later cached result.
             cache.Set(key, JsonSerializer.Serialize(review), new MemoryCacheEntryOptions
             {
@@ -69,7 +74,12 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
             logger?.LogInformation("CV review completed in {ElapsedMilliseconds} ms; language {Language}; cache miss", timer.ElapsedMilliseconds, language ?? "bilingual");
             return review with { ElapsedMilliseconds = timer.ElapsedMilliseconds };
         }
-        finally { reviewGate.Release(); }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new CvReviewException("ai_timeout", "AI phản hồi quá lâu. CV đã lưu vẫn còn; bạn có thể phân tích lại.",
+                "AI took too long. Your saved CV is retained; you can analyze it again.");
+        }
+        finally { if (entered) reviewGate.Release(); }
     }
 
     private async Task<CvReviewResult> ReviewCoreAsync(string cv, string? jd, string? language, CancellationToken cancellationToken)
@@ -81,7 +91,7 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
         {
             cancellationToken.ThrowIfCancellationRequested();
             var original = result;
-            var repairSections = original is null ? [] : issues.Select(i => i.Split(':', 2)[0]).Distinct(StringComparer.Ordinal).ToArray();
+            var repairSections = original is null ? [] : issues.Select(i => i.Split(['.', '[', ':'], 2)[0]).Distinct(StringComparer.Ordinal).ToArray();
             var systemPrompt = BuildPrompt(hasJd, repairSections, language) + (repairSections.Length == 0 ? "" :
                 "\nCORRECTIVE RESPONSE: Return ONLY these top-level JSON sections: " + string.Join(", ", repairSections) +
                 ". Regenerate those sections from the original CV/JD, fixing every listed issue. Do not repeat other sections; the server preserves them and validates the merged review.");
@@ -94,12 +104,14 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
                     requiredCriterionIds = Rubric.Select(x => x.Id), includeJobMatch = hasJd, outputLanguage = language,
                     validationIssuesToCorrect = issues,
                     repairSections,
+                    previousSections = original is null ? null : RepairContext(original, repairSections),
                     responseInstruction = attempt == 0 ? "Return the complete JSON review."
                         : repairSections.Length > 0 ? "Return only the requested repairSections. Preserve verbatim evidence and correct every listed issue."
                         : "Regenerate the ENTIRE JSON review, correcting every listed validation issue. Keep explanations brief so the JSON fits the output limit. Copy evidence and requirements verbatim from the documents; never invent them."
                 }, cancellationToken);
                 logger?.LogInformation("CV AI attempt {Attempt} completed in {ElapsedMilliseconds} ms; repair {IsRepair}", attempt + 1, attemptTimer.ElapsedMilliseconds, attempt > 0);
                 result = original is not null && generated is not null ? MergeRepair(original, generated, repairSections) : generated;
+                NormalizeContract(result);
                 cancellationToken.ThrowIfCancellationRequested();
                 issues = GetValidationIssues(result, cv, jd, language);
             }
@@ -173,6 +185,13 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
         return original;
     }
 
+    private static Dictionary<string, JsonElement> RepairContext(CvReviewAiResponse original, string[] sections)
+    {
+        var json = JsonSerializer.SerializeToElement(original, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return json.EnumerateObject().Where(property => sections.Contains(property.Name, StringComparer.Ordinal))
+            .ToDictionary(property => property.Name, property => property.Value);
+    }
+
     private static int EvidenceScore(IReadOnlyList<CvRequirementMatch> requirements)
     {
         double Weight(CvRequirementMatch r) => r.Importance switch { "Required" => 3, "Preferred" => 1, _ => 2 };
@@ -183,7 +202,25 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
         && (language == "en" || !string.IsNullOrWhiteSpace(value.Vi))
         && (language == "vi" || !string.IsNullOrWhiteSpace(value.En))
         && value.Vi is { Length: <= 2_000 } && value.En is { Length: <= 2_000 };
-    private static string Normalize(string value) => Regex.Replace(value, @"\s+", " ").Trim();
+    private static string Normalize(string value) => Regex.Replace(value.Normalize(NormalizationForm.FormKC)
+        .Replace("\u00ad", "").Replace("\u200b", "").Replace("\ufeff", "")
+        .Replace('\u2018', '\'').Replace('\u2019', '\'').Replace('\u201c', '"').Replace('\u201d', '"'), @"\s+", " ").Trim();
+
+    private static void NormalizeContract(CvReviewAiResponse? value)
+    {
+        if (value is null) return;
+        foreach (var criterion in value.Criteria ?? [])
+            if (criterion is not null) criterion.Id = criterion.Id?.Trim().ToLowerInvariant() ?? "";
+        string Canonical(string? text, params string[] allowed) => allowed.FirstOrDefault(option => string.Equals(option, text?.Trim(), StringComparison.OrdinalIgnoreCase)) ?? text ?? "";
+        foreach (var action in value.Actions ?? [])
+            if (action is not null) action.Priority = Canonical(action.Priority, "High", "Medium", "Low");
+        foreach (var row in value.JobMatch?.Requirements ?? [])
+            if (row is not null)
+            {
+                row.Status = Canonical(row.Status, "Met", "Partial", "NotDemonstrated");
+                row.Importance = Canonical(row.Importance, "Required", "Preferred", "Unspecified");
+            }
+    }
     public static bool IsValid(CvReviewAiResponse value, string cv, string? jd, string? language = null) => GetValidationIssues(value, cv, jd, language).Count == 0;
 
     public static IReadOnlyList<string> GetValidationIssues(CvReviewAiResponse? value, string cv, string? jd, string? language = null)
@@ -222,16 +259,29 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
             if (value.JobMatch is not null) issues.Add("jobMatch: must be null when no JD is provided");
             return issues;
         }
-        var validMatch = value.JobMatch is { Score: >= 0 and <= 100 } match && TextValid(match.Summary)
-            && ListValid(match.MatchedRequirements) && ListValid(match.MissingRequirements)
-            && match.Requirements is { Count: > 0 and <= 20 }
-            && match.Requirements.All(r => r is not null && !string.IsNullOrWhiteSpace(r.Requirement)
-                && r.Requirement.Length <= 2_000 && normalizedJd.Contains(Normalize(r.Requirement), StringComparison.OrdinalIgnoreCase)
-                && TextValid(r.Recommendation) && r.Status is "Met" or "Partial" or "NotDemonstrated"
-                && r.Importance is "Required" or "Preferred" or "Unspecified"
-                && (r.Status == "NotDemonstrated" ? r.Evidence == "" : EvidenceValid(r.Evidence)))
-            && match.Requirements.Select(r => Normalize(r.Requirement)).Distinct(StringComparer.OrdinalIgnoreCase).Count() == match.Requirements.Count;
-        if (!validMatch) issues.Add("jobMatch: include score 0-100, bilingual summary/matchedRequirements/missingRequirements, and 1-20 distinct exact JD excerpts; importance Required/Preferred/Unspecified; status Met/Partial/NotDemonstrated; exact CV evidence for Met/Partial, empty evidence for NotDemonstrated, bilingual recommendation");
+        if (value.JobMatch is not {} match) { issues.Add("jobMatch: include the JD comparison object"); return issues; }
+        if (match.Score is not (>= 0 and <= 100)) issues.Add("jobMatch.score: set the provisional numeric score to 0; the server calculates it");
+        if (!TextValid(match.Summary)) issues.Add($"jobMatch.summary: nonempty {language ?? "vi and en"} feedback, at most 2000 characters");
+        if (!ListValid(match.MatchedRequirements) || !ListValid(match.MissingRequirements))
+            issues.Add("jobMatch.matchedRequirements: return matchedRequirements=[] and missingRequirements=[]; use the detailed requirements instead");
+        if (match.Requirements is not { Count: > 0 and <= 20 })
+        { issues.Add("jobMatch.requirements: include 1-20 distinct requirements from the entire JD"); return issues; }
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var index = 0; index < match.Requirements.Count; index++)
+        {
+            var row = match.Requirements[index];
+            var path = $"jobMatch.requirements[{index}]";
+            if (row is null) { issues.Add(path + ": a requirement object is required"); continue; }
+            if (string.IsNullOrWhiteSpace(row.Requirement) || row.Requirement.Length > 2000
+                || !normalizedJd.Contains(Normalize(row.Requirement), StringComparison.OrdinalIgnoreCase))
+                issues.Add(path + ".requirement: copy a short contiguous exact excerpt from the JD; do not translate or paraphrase it");
+            else if (!seen.Add(Normalize(row.Requirement))) issues.Add(path + ".requirement: remove this duplicate JD requirement");
+            if (row.Importance is not ("Required" or "Preferred" or "Unspecified")) issues.Add(path + ".importance: use Required, Preferred or Unspecified");
+            if (row.Status is not ("Met" or "Partial" or "NotDemonstrated")) issues.Add(path + ".status: use Met, Partial or NotDemonstrated");
+            if (row.Status == "NotDemonstrated" ? row.Evidence != "" : !EvidenceValid(row.Evidence))
+                issues.Add(path + ".evidence: Met/Partial requires a short exact CV excerpt, never a paraphrase; NotDemonstrated requires evidence=\"\"");
+            if (!TextValid(row.Recommendation)) issues.Add(path + $".recommendation: nonempty {language ?? "vi and en"} feedback, at most 2000 characters");
+        }
         return issues;
     }
 
@@ -257,6 +307,9 @@ public sealed class CvReviewService(ICvReviewLanguageModel ai, ILogger<CvReviewS
         2 concrete actions and at most 1 useful rewrite. Use one short sentence per text. Avoid repeating advice across sections.
         These brevity limits apply to explanations only: preserve exact evidence excerpts and
         evaluate the JD requirements throughout the entire document, including the final sections.
+        For evidence/original, quote the shortest contiguous passage that supports the point (normally under 180 characters).
+        For requirement, copy a short contiguous JD excerpt (normally under 220 characters). Do not paraphrase, translate,
+        concatenate distant passages or insert ellipses inside a quote. Short exact quotes reduce repetition and output time.
         Provide 1-6 strengths and 1-6 prioritized improvements, based on quoted or identifiable evidence.
         Provide 2 distinct actions (1-6 when justified), sorted High, Medium, Low. Each action identifies a section, issue and
         concrete edit. For an existing weak passage, evidence MUST be an exact CV excerpt and
