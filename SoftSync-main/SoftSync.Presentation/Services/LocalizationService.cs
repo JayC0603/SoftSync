@@ -36,6 +36,7 @@ public class LocalizationService
     public string IdentityError(string code) => Current == AppLanguage.En ? code switch
     {
         "DuplicateEmail" or "DuplicateUserName" => "An account with these details already exists.",
+        "DuplicateAccount" => "Unable to register with these details. If you already have an account, sign in or recover your password.",
         "PasswordTooShort" => "The password is too short.",
         "PasswordRequiresNonAlphanumeric" => "The password requires a symbol.",
         "PasswordRequiresDigit" => "The password requires a digit.",
@@ -49,6 +50,7 @@ public class LocalizationService
     } : code switch
     {
         "DuplicateEmail" or "DuplicateUserName" => "Tài khoản với thông tin này đã tồn tại.",
+        "DuplicateAccount" => "Không thể đăng ký với thông tin này. Nếu bạn đã có tài khoản, hãy đăng nhập hoặc khôi phục mật khẩu.",
         "PasswordTooShort" => "Mật khẩu quá ngắn.",
         "PasswordRequiresNonAlphanumeric" => "Mật khẩu cần có ký tự đặc biệt.",
         "PasswordRequiresDigit" => "Mật khẩu cần có chữ số.",

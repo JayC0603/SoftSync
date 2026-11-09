@@ -7,7 +7,7 @@
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>@Ui("Courses") · SoftSync</PageTitle>
-<section class="tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
+<section class="learning-catalog tw:min-h-screen tw:bg-slate-50 tw:px-4 tw:py-10"><section class="tw:mx-auto tw:max-w-6xl" aria-labelledby="courses-title" aria-busy="@loading">
 <header class="tw:mb-8"><span class="badge bg-primary">@Ui("Inclusive Learning")</span><h1 id="courses-title" class="tw:mt-3 tw:text-3xl tw:font-bold">@Ui("Courses")</h1><p>@Ui("Video, caption, transcript and persistent learning progress.")</p></header>
 @if(loading){<p role="status">@Ui("Loading courses...")</p>}
 @if(!string.IsNullOrWhiteSpace(message)){<div class="alert alert-info" role="status">@Ui(message)</div>}

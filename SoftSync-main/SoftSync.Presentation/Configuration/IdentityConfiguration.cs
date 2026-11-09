@@ -27,6 +27,7 @@ public static class IdentityConfiguration
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddScoped<IdentityUserAccessor>();
         builder.Services.AddScoped<IdentityRedirectManager>();
+        builder.Services.AddScoped<EmailRegistrationService>();
         builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
         var authBuilder = builder.Services.AddAuthentication(options =>

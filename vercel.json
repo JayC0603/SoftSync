@@ -4,6 +4,14 @@
     "softsync": {
       "root": "SoftSync-main",
       "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "bindings": [
+        { "type": "service", "service": "cv-ocr", "format": "url", "env": "CV_OCR_SERVICE_URL" }
+      ]
+    },
+    "cv-ocr": {
+      "root": "SoftSync-main/CvOcr",
+      "runtime": "container",
       "entrypoint": "Dockerfile.vercel"
     }
   },

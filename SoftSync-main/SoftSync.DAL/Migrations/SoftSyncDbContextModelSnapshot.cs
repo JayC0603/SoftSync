@@ -3227,6 +3227,9 @@ namespace SoftSync.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("ExtractionJson")
+                        .HasColumnType("text");
+
                     b.Property<byte[]>("OriginalFile")
                         .IsRequired()
                         .HasColumnType("bytea");

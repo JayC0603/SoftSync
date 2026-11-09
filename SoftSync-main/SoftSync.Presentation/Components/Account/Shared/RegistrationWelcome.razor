@@ -1,0 +1,37 @@
+@inherits LocalizedComponentBase
+
+<section class="registration-welcome" aria-labelledby="registration-welcome-title">
+    <RegistrationIllustration />
+    <header class="registration-heading">
+        <span class="registration-eyebrow">@T("BƯỚC ĐẦU TIÊN CỦA BẠN", "YOUR FIRST STEP")</span>
+        <h1 id="registration-welcome-title" class="registration-title">@T("Một khởi đầu mới,", "A fresh start,")<br /><span>@T("nhiều cơ hội hơn.", "more possibilities.")</span></h1>
+        <p class="registration-intro">@T("Tạo tài khoản để bắt đầu hành trình học tập của riêng bạn cùng SoftSync.", "Create an account to start your own learning journey with SoftSync.")</p>
+    </header>
+    <div class="registration-notice" role="status">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <p>@(ShowMissingAccountNotice ? L["auth.googleNeedsRegistration"] : T("Đăng ký với Google để bắt đầu hành trình học tập cùng SoftSync.", "Sign up with Google to start your learning journey with SoftSync."))</p>
+    </div>
+    <div class="registration-primary">@ChildContent</div>
+    <p class="registration-signin">@T("Đã có tài khoản?", "Already have an account?") <a href="Account/Login">@L["auth.login.title"] <i class="bi bi-arrow-right" aria-hidden="true"></i></a></p>
+    @if (Alternative is not null)
+    {
+        <div class="registration-alternative">@Alternative</div>
+    }
+    else
+    {
+        <div class="registration-divider"><span>@L["auth.or"]</span></div>
+    }
+    <ul class="registration-benefits">
+        <li><i class="bi bi-shield-check" aria-hidden="true"></i><span>@T("Bảo mật và riêng tư", "Secure and private")</span></li>
+        <li><i class="bi bi-bar-chart" aria-hidden="true"></i><span>@T("Học tập hiệu quả hơn", "Learn faster")</span></li>
+        <li><i class="bi bi-star" aria-hidden="true"></i><span>@T("Không gian để bạn phát triển", "Your personal space to grow")</span></li>
+    </ul>
+    <a class="registration-home" href="/"><i class="bi bi-arrow-left" aria-hidden="true"></i>@L["auth.backHome"]</a>
+</section>
+
+@code {
+    [Parameter] public bool ShowMissingAccountNotice { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Alternative { get; set; }
+    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
+}

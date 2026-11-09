@@ -4,6 +4,7 @@
 @attribute [Authorize(Policy = SoftSync.BLL.Auth.CourseAuthorization.AdminPolicy)]
 @using Microsoft.AspNetCore.Identity
 @inject AiProviderService Ai
+@inject IConfiguration DeploymentConfiguration
 @inject AuthenticationStateProvider Auth
 
 <PageTitle>@Ui("Cấu hình AI", "AI configuration") · SoftSync</PageTitle>
@@ -13,6 +14,11 @@
             <p>@Ui("Chọn model cho từng tác vụ và sắp xếp tối đa 3 key dự phòng.", "Choose a model for each task and order up to three backup keys.")</p></div>
         <a class="btn btn-outline-secondary" href="/admin/dashboard">@Ui("Dashboard", "Dashboard")</a>
     </header>
+
+    @if (EnvironmentAiConfiguration.IsDeploymentOverride(DeploymentConfiguration))
+    {
+        <p class="alert alert-info" role="status">@Ui("SYNCY và bài học đang dùng cấu hình AI triển khai; đánh giá CV dùng cấu hình server riêng. Cấu hình Gemini dưới đây chỉ áp dụng khi tắt chế độ ưu tiên triển khai.", "SYNCY and learning use the deployed AI configuration; CV review uses its separate server configuration. Gemini settings below apply after the deployment override is disabled.")</p>
+    }
 
     @if (!string.IsNullOrWhiteSpace(message))
     {

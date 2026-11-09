@@ -44,6 +44,9 @@ public sealed class AiProviderConfigurationResolver(IDbContextFactory<SoftSyncDb
 {
     public async Task<ResolvedAiProviderConfiguration?> ResolveAsync(string? task = null, CancellationToken cancellationToken = default)
     {
+        // An explicit deployment override keeps older database settings from selecting another provider.
+        if (EnvironmentAiConfiguration.IsDeploymentOverride(configuration))
+            return EnvironmentAiConfiguration.Resolve(configuration, task);
         await using var db = await contexts.CreateDbContextAsync(cancellationToken);
         var row = await db.AiProviderConfigurations.AsNoTracking().SingleOrDefaultAsync(x => x.IsEnabled && x.IsDefault, cancellationToken);
         if (row is null) return EnvironmentAiConfiguration.Resolve(configuration, task);
@@ -63,14 +66,18 @@ public sealed class AiProviderConfigurationResolver(IDbContextFactory<SoftSyncDb
 
 public static class EnvironmentAiConfiguration
 {
+    public static bool IsDeploymentOverride(IConfiguration configuration)
+        => configuration.GetValue("AiApi:UseDeploymentConfiguration", false);
+
     public static ResolvedAiProviderConfiguration? Resolve(IConfiguration configuration, string? task = null)
     {
         var key = configuration["AiApi:ApiKey"];
         if (!configuration.GetValue("AiApi:Enabled", false) || string.IsNullOrWhiteSpace(key)) return null;
-        var endpoint = configuration["AiApi:BaseUrl"];
+        var isXah = string.Equals(configuration["AiApi:Provider"], "Xah", StringComparison.OrdinalIgnoreCase);
+        var endpoint = isXah ? SoftSync.BLL.Services.AiProviderRules.Endpoint(AiProviderType.Xah) : configuration["AiApi:BaseUrl"];
         endpoint = string.IsNullOrWhiteSpace(endpoint) ? AiApiConfiguration.DefaultBaseUrl : endpoint.Trim().TrimEnd('/') + "/";
         return new() { Endpoint = endpoint, ApiKey = key, Model = AiApiConfiguration.Model(configuration, task),
-            Provider = endpoint.StartsWith("https://router.huggingface.co/", StringComparison.Ordinal) ? AiProviderType.HuggingFace
+            Provider = isXah ? AiProviderType.Xah : endpoint.StartsWith("https://router.huggingface.co/", StringComparison.Ordinal) ? AiProviderType.HuggingFace
                 : endpoint.StartsWith("https://api.openai.com/", StringComparison.Ordinal) ? AiProviderType.OpenAI : AiProviderType.Gemini,
             TimeoutSeconds = Math.Clamp(configuration.GetValue("AiApi:TimeoutSeconds", 45), 1, 120) };
     }
@@ -87,6 +94,7 @@ public sealed class AiProviderConnectionTester(IHttpClientFactory clients) : IAi
         {
             using var client = clients.CreateClient("AiRuntime");
             using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(new Uri(configuration.Endpoint), AiApiConfiguration.ChatEndpoint));
+            request.Options.Set(XahFallbackHandler.SkipFallback, true);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.ApiKey);
             request.Content = JsonContent.Create(new { model = configuration.Model, max_tokens = 16,
                 messages = new[] { new { role = "user", content = "Reply OK." } } });

@@ -22,3 +22,5 @@
 .codex/**
 .review-dev/**
 **/wwwroot/videos/**
+**/__pycache__/**
+**/.venv/**

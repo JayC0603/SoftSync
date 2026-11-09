@@ -1,0 +1,11 @@
+# CV latency optimization
+
+The `/cv` workspace requests feedback only in its selected language (`vi` or `en`). The AI schema omits the other language throughout summaries, criteria, actions, rewrites and JD recommendations. Exact CV/JD evidence and server-side scoring/validation remain required. Calls without a language retain the previous bilingual contract.
+
+Reviews save `OutputLanguage` and `CacheKey` inside their existing result JSON. The key includes trimmed CV/JD text, configured model, language, complete rubric/prompt and evaluator version. Before a new call, the workspace checks at most ten recent reviews for the same owned document and exact JD, within 24 hours. It validates the matching result again before reuse. Reuse works after reload and does not create duplicate history. Deleted documents, other users, changed input/language/model/version, expired results and legacy results without a key cannot reuse a result. The lookup has a three-second deadline and falls back to a normal analysis if storage is unavailable; user cancellation still cancels the operation. No migration is needed.
+
+Single-language results retain their original text when the interface language changes and display their review language. Analyze again in the selected language to obtain different-language feedback. Old bilingual history remains readable.
+
+Structured logs measure upload, text extraction, OCR, document save, saved-result lookup, AI attempts/repairs, total review and review save. Workspace operations include a random `CvOperationId` logging scope for hosts that capture scopes. Logs contain timings/counts/outcomes, never CV/JD contents or API keys. The progress message follows actual extraction/OCR/analysis/save stages.
+
+Validation covers single-language schemas and responses, unchanged evidence checks and scores, invalid-output retries, isolated memory-cache snapshots, reuse across fresh workspace/service/database contexts, ownership, input/language/model/age invalidation, corrupt history, cancellation and save failures. Provider latency is variable: the previous synthetic 33-second bilingual sample is not a benchmark of this release. The first review still depends on OCR and the configured AI gateway; repeated unchanged requests can avoid AI entirely.

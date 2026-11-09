@@ -8,10 +8,21 @@ public static class RegisterLanguageContent
     private static readonly string[] Keys =
     [
         "auth.register.title", "auth.register.submit", "auth.haveAccount",
-        "profile.fullName", "auth.email"
+        "profile.fullName", "auth.email", "auth.googleNeedsRegistration", "auth.googleSignUp.help"
     ];
     private static readonly string[][] Phrases =
     [
+        ["BƯỚC ĐẦU TIÊN CỦA BẠN", "YOUR FIRST STEP"],
+        ["Một khởi đầu mới,", "A fresh start,"],
+        ["nhiều cơ hội hơn.", "more possibilities."],
+        ["Tạo tài khoản để bắt đầu hành trình học tập của riêng bạn cùng SoftSync.", "Create an account to start your own learning journey with SoftSync."],
+        ["Đăng ký với Google để bắt đầu hành trình học tập cùng SoftSync.", "Sign up with Google to start your learning journey with SoftSync."],
+        ["Tạo tài khoản với Google", "Create account with Google"],
+        ["Đã có tài khoản?", "Already have an account?"],
+        ["Hoặc đăng ký bằng email", "Or sign up with email"],
+        ["Bảo mật và riêng tư", "Secure and private"],
+        ["Học tập hiệu quả hơn", "Learn faster"],
+        ["Không gian để bạn phát triển", "Your personal space to grow"],
         ["Tạo tài khoản để bắt đầu hành trình cùng SoftSync.", "Create an account to start your journey with SoftSync."],
         ["Nhập họ và tên", "Enter your full name"],
         ["Tạo mật khẩu", "Create a password"],
