@@ -71,10 +71,14 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
         display: none;
     }
 
+    html body .page[data-responsive-layout="shared"] .ss-workspace > main#main-content.ss-main-content.container:has(.sh-home) {
+        padding: 20px clamp(20px, 2.5vw, 40px) 32px !important;
+    }
+
     html body .page[data-responsive-layout="shared"] .sh-home {
         display: grid;
         grid-template-columns: repeat(12, minmax(0, 1fr));
-        gap: 24px;
+        gap: 16px;
         align-items: start;
     }
 
@@ -100,30 +104,35 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
     }
 
     .page[data-responsive-layout="shared"] .sh-home .sh-card {
-        padding: 20px;
-        border-radius: 20px;
+        padding: 16px;
+        border-radius: 16px;
     }
 
-    html body .page[data-responsive-layout="shared"] .sh-home h1 { font-size: 32px !important; }
-    html body .page[data-responsive-layout="shared"] .sh-home h2 { font-size: 21px !important; }
-    html body .page[data-responsive-layout="shared"] .sh-home p { font-size: 15px !important; }
+    html body .page[data-responsive-layout="shared"] .sh-home h1 { font-size: 24px !important; }
+    html body .page[data-responsive-layout="shared"] .sh-home h2 { font-size: 18px !important; }
+    html body .page[data-responsive-layout="shared"] .sh-home p { font-size: 14px !important; }
     .page[data-responsive-layout="shared"] .sh-home small { font-size: 13px; }
-    .page[data-responsive-layout="shared"] .sh-greeting { min-height: 94px; }
+    .page[data-responsive-layout="shared"] .sh-greeting { min-height: 56px; }
     .page[data-responsive-layout="shared"] .sh-greeting > img { width: 36%; }
-    .page[data-responsive-layout="shared"] .sh-home .sh-continue { min-height: 242px; }
-    html body .page[data-responsive-layout="shared"] .sh-home .sh-continue h3 { font-size: 25px !important; }
+    /* Keep compact labels distinct from section headings. */
+    html body .page[data-responsive-layout="shared"] .sh-home .sh-goal h2 { font-size: 14px !important; }
+    html body .page[data-responsive-layout="shared"] .sh-home .sh-goal p { font-size: 13px !important; }
+    .page[data-responsive-layout="shared"] .sh-home .sh-goal { padding: 12px 16px; }
+    .page[data-responsive-layout="shared"] .sh-home .sh-continue { min-height: 184px; }
+    html body .page[data-responsive-layout="shared"] .sh-home .sh-continue h2 { font-size: 12px !important; }
+    html body .page[data-responsive-layout="shared"] .sh-home .sh-continue h3 { font-size: 20px !important; }
     .page[data-responsive-layout="shared"] .sh-lesson-copy { width: 62%; }
-    .page[data-responsive-layout="shared"] .sh-primary { min-height: 48px; }
+    .page[data-responsive-layout="shared"] .sh-primary { min-height: 44px; }
 
     .page[data-responsive-layout="shared"] .sh-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         align-self: stretch;
     }
-    .page[data-responsive-layout="shared"] .sh-stats > a { min-height: 112px; padding: 16px; }
-    .page[data-responsive-layout="shared"] .sh-stats strong { font-size: 29px; }
+    .page[data-responsive-layout="shared"] .sh-stats > a { min-height: 82px; padding: 12px; }
+    .page[data-responsive-layout="shared"] .sh-stats strong { font-size: 24px; }
     .page[data-responsive-layout="shared"] .sh-quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .page[data-responsive-layout="shared"] .sh-quick-grid img { height: 88px; }
+    .page[data-responsive-layout="shared"] .sh-quick-grid img { height: 64px; }
     .page[data-responsive-layout="shared"] .sh-mentor-grid.ss-mentor-carousel {
         grid-auto-flow: row;
         grid-auto-columns: auto;
@@ -131,11 +140,12 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
         overflow: visible;
         scroll-snap-type: none;
     }
-    .page[data-responsive-layout="shared"] .sh-journey-row { min-height: 90px; }
+    .page[data-responsive-layout="shared"] .sh-mentor-grid.ss-mentor-carousel > a { min-height: 72px; }
+    .page[data-responsive-layout="shared"] .sh-journey-row { min-height: 72px; }
     .page[data-responsive-layout="shared"] .sh-heading > a { font-size: 13px; }
-    .page[data-responsive-layout="shared"] .sh-home .sh-syncy { min-height: 104px; gap: 20px; }
-    .page[data-responsive-layout="shared"] .sh-syncy img { width: 80px; height: 80px; }
-    .page[data-responsive-layout="shared"] .sh-syncy strong { font-size: 20px; }
+    .page[data-responsive-layout="shared"] .sh-home .sh-syncy { min-height: 72px; gap: 16px; }
+    .page[data-responsive-layout="shared"] .sh-syncy img { width: 48px; height: 48px; }
+    .page[data-responsive-layout="shared"] .sh-syncy strong { font-size: 17px; }
 
     html body .page[data-responsive-layout="shared"] .learn-v3 {
         display: grid !important;
