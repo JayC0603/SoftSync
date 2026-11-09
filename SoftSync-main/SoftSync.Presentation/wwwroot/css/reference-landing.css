@@ -1,4 +1,6 @@
 /* Reference landing page. All overrides are contained by its public layout. */
+.lp-mobile-only { display:none; }
+.lp-hero-secondary-row { display:contents; }
 body .ss-public-site.ss-reference-home {
     --lp-ink:#08134f; --lp-blue:#0560ff; --lp-muted:#536798;
     --lp-panel:rgba(255,255,255,.88); --lp-edge:#dceaff;
@@ -526,4 +528,92 @@ html[data-theme='dark'] .ss-reference-home .lp-mentor-card div > span { color:#c
         border-width: 6px;
         border-radius: 36px;
     }
+}
+
+/* Mobile introduction: one primary action and a complete, readable preview.
+   The desktop phone composition and the sections below the hero stay shared. */
+@media (max-width:600px) {
+    html body .ss-public-site.ss-reference-home { padding-top:12px; }
+    html body .ss-reference-home .ss-unified-public-header {
+        width:calc(100% - 24px); min-height:64px; gap:8px; padding:8px 10px;
+        border-radius:20px; box-shadow:0 6px 24px #3874bf0a;
+    }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-brand { gap:8px; font-size:17px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-brand img { width:30px; height:30px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-actions { flex:0 0 auto; margin-left:auto; gap:2px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-start { display:none; }
+    html body .ss-reference-home .ss-unified-public-header :is(.ss-shell-control,.ss-header-control) {
+        width:44px; min-width:44px; height:44px; min-height:44px; border-radius:14px;
+        padding:10px; font-size:19px;
+    }
+    html body .ss-reference-home .ss-unified-public-header .ss-public-drawer-trigger { font-size:23px; }
+    html body .ss-reference-home .ss-unified-public-header .ss-language-flag { width:24px; height:18px; }
+    html body .ss-reference-home .lp-hero {
+        display:grid; grid-template-columns:minmax(0,1fr); gap:24px;
+        width:100%; min-height:0; padding:28px 24px 32px;
+    }
+    html body .ss-reference-home .lp-hero::before {
+        inset:0; background:radial-gradient(ellipse at 70% 78%,#cfe4ff99,transparent 64%);
+        mask-image:none;
+    }
+    html body .ss-reference-home .lp-hero-copy { min-width:0; padding:0; }
+    html body .ss-reference-home .lp-mobile-eyebrow {
+        display:inline-flex; align-items:center; gap:7px; padding:6px 10px; margin-bottom:14px;
+        border:1px solid #d3e4ff; border-radius:99px; background:#f5faffb3;
+        color:#365c9c; font-size:12px; line-height:1.4; font-weight:650;
+    }
+    html body .ss-reference-home .lp-mobile-eyebrow i { color:var(--lp-blue); font-size:14px; }
+    html body .ss-reference-home .lp-hero h1 {
+        --lp-type:clamp(34px,10vw,44px); --lp-leading:1.12; letter-spacing:-1.5px; text-wrap:balance;
+    }
+    html body .ss-reference-home .lp-hero-copy > p {
+        --lp-type:16px; --lp-leading:1.6; max-width:34ch; margin:16px 0 22px; color:var(--lp-muted);
+    }
+    html body .ss-reference-home .lp-hero-copy > p .lp-desktop-description { display:none; }
+    html body .ss-reference-home .lp-hero-copy > p .lp-mobile-only { display:inline; }
+    html body .ss-reference-home .lp-hero-actions { align-items:stretch; flex-direction:column; gap:4px; }
+    html body .ss-reference-home .lp-hero-actions > .lp-primary {
+        width:100%; max-width:none; min-height:52px; padding:14px 18px;
+        border-radius:16px; --lp-type:16px; gap:12px; background:linear-gradient(115deg,#2b6bdd,#0b51df);
+    }
+    html body .ss-reference-home .lp-hero-secondary-row { display:flex; align-items:center; justify-content:center; gap:12px; }
+    html body .ss-reference-home .lp-hero-secondary-row .lp-secondary {
+        width:auto; max-width:none; min-height:44px; padding:10px 4px; border:0;
+        border-radius:8px; background:none; box-shadow:none; --lp-type:14px; color:var(--lp-blue) !important;
+    }
+    html body .ss-reference-home .lp-mobile-signin {
+        display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:10px 4px;
+        font-size:14px; font-weight:650; color:var(--lp-ink);
+    }
+    html body .ss-reference-home .lp-hero-device { display:none; }
+    html body .ss-reference-home .lp-mobile-preview {
+        display:block; width:100%; max-width:380px; justify-self:center; margin:0; padding:14px;
+        border:1px solid #fff; border-radius:22px; background:var(--lp-panel);
+        box-shadow:0 12px 32px #32659f12; color:var(--lp-ink);
+    }
+    html body .ss-reference-home .lp-mobile-preview figcaption { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+    html body .ss-reference-home .lp-mobile-preview figcaption > span { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; }
+    html body .ss-reference-home .lp-mobile-preview figcaption i { color:var(--lp-blue); }
+    html body .ss-reference-home .lp-mobile-preview figcaption small { --lp-type:11px; color:var(--lp-muted); }
+    html body .ss-reference-home .lp-mobile-preview-scene { display:block; width:100%; height:108px; object-fit:cover; border-radius:12px; }
+    html body .ss-reference-home .lp-mobile-preview-lesson {
+        position:relative; display:flex; align-items:center; gap:10px; margin:-20px 8px 0; padding:12px;
+        border:1px solid var(--lp-edge); border-radius:14px; background:#fff; box-shadow:0 4px 14px #22558d0a;
+    }
+    html body .ss-reference-home .lp-mobile-preview-icon {
+        display:grid; place-items:center; flex:0 0 36px; height:36px; border-radius:12px;
+        color:var(--lp-blue); background:#edf4ff; font-size:19px;
+    }
+    html body .ss-reference-home .lp-mobile-preview-lesson > div { min-width:0; }
+    html body .ss-reference-home .lp-mobile-preview-lesson small { display:block; --lp-type:11px; margin-bottom:3px; color:var(--lp-muted); }
+    html body .ss-reference-home .lp-mobile-preview-lesson strong { display:block; font-size:14px; font-weight:700; line-height:1.35; }
+    html body .ss-reference-home .lp-mobile-preview-steps { display:flex; align-items:center; justify-content:center; gap:9px; padding-top:14px; color:var(--lp-muted); font-size:12px; }
+    html body .ss-reference-home .lp-mobile-preview-steps span { display:inline-flex; align-items:center; gap:5px; }
+    html body .ss-reference-home .lp-mobile-preview-steps > i { color:#91accc; font-size:10px; }
+    html[data-theme='dark'] body .ss-reference-home .lp-hero { --lp-blue:#8bbdff; }
+    html[data-theme='dark'] body .ss-reference-home .lp-hero::before { background:radial-gradient(ellipse at 70% 78%,#254b7366,transparent 64%); }
+    html[data-theme='dark'] body .ss-reference-home .lp-mobile-eyebrow { color:#bcd6ff; background:#16324d; border-color:var(--lp-edge); }
+    html[data-theme='dark'] body .ss-reference-home .lp-mobile-preview { border-color:var(--lp-edge); }
+    html[data-theme='dark'] body .ss-reference-home .lp-mobile-preview-lesson { background:#1a3552; }
+    html[data-theme='dark'] body .ss-reference-home .lp-mobile-preview-icon { background:#244766; }
 }

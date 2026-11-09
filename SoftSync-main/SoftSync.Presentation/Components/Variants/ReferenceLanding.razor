@@ -12,11 +12,24 @@
 <div class="lp-landing">
     <section class="lp-hero" aria-labelledby="lp-title">
         <div class="lp-hero-copy">
+            <span class="lp-mobile-only lp-mobile-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i>@L["landing.mobile.eyebrow"]</span>
             <h1 id="lp-title">@T("Phát triển", "Grow your")<br />@T("kỹ năng mềm", "soft skills")<br /><em>@T("cùng AI", "with AI")</em></h1>
-            <p>@T("Lộ trình cá nhân hóa, bài học ngắn gọn, thực hành liên tục, phản tư sâu sắc và có mentor đồng hành.", "A journey built for you. Short lessons, meaningful practice, deeper reflection, and mentors by your side.")</p>
-            <div class="lp-hero-actions"><a class="lp-button lp-primary" href="@StartHref">@T("Bắt đầu miễn phí", "Start for free")<i class="bi bi-arrow-right" aria-hidden="true"></i></a><a class="lp-button lp-secondary" href="#learning-journey">@T("Xem lộ trình", "Explore the journey")</a></div>
+            <p><span class="lp-desktop-description">@T("Lộ trình cá nhân hóa, bài học ngắn gọn, thực hành liên tục, phản tư sâu sắc và có mentor đồng hành.", "A journey built for you. Short lessons, meaningful practice, deeper reflection, and mentors by your side.")</span><span class="lp-mobile-only">@L["landing.mobile.description"]</span></p>
+            <div class="lp-hero-actions">
+                <a class="lp-button lp-primary" href="@StartHref">@T("Bắt đầu miễn phí", "Start for free")<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <div class="lp-hero-secondary-row">
+                    <a class="lp-button lp-secondary" href="#learning-journey">@T("Xem lộ trình", "Explore the journey")</a>
+                    @if (!IsAuthenticated) { <a class="lp-mobile-only lp-mobile-signin" href="/Account/Login">@L["nav.login"]<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a> }
+                </div>
+            </div>
         </div>
         <div class="lp-hero-device"><LandingProductPreview Phone="true" /></div>
+        <figure class="lp-mobile-only lp-mobile-preview">
+            <figcaption><span><i class="bi bi-signpost-split" aria-hidden="true"></i>@L["landing.mobile.preview.title"]</span><small>@L["landing.mobile.preview.example"]</small></figcaption>
+            <img class="lp-mobile-preview-scene" src="/images/home-v3/welcome-landscape.webp" width="600" height="200" alt="" decoding="async" />
+            <div class="lp-mobile-preview-lesson"><span class="lp-mobile-preview-icon"><i class="bi bi-chat-dots" aria-hidden="true"></i></span><div><small>@L["landing.mobile.preview.step"]</small><strong>@L["landing.mobile.preview.lesson"]</strong></div></div>
+            <div class="lp-mobile-preview-steps" aria-label="@L["landing.mobile.preview.process"]"><span><i class="bi bi-book" aria-hidden="true"></i>@L["landing.mobile.preview.learn"]</span><i class="bi bi-arrow-right" aria-hidden="true"></i><span>@L["landing.mobile.preview.practice"]</span><i class="bi bi-arrow-right" aria-hidden="true"></i><span>@L["landing.mobile.preview.reflect"]</span></div>
+        </figure>
     </section>
 
     <div class="lp-content">
@@ -66,6 +79,7 @@
 
 @code {
     private string StartHref = "/Account/Register";
+    private bool IsAuthenticated;
     private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
     private (string Title, string Description)[] Steps => [
         (T("Đánh giá đầu vào", "Understand your starting point"), T("Hiểu rõ điểm mạnh, điểm cần cải thiện và mục tiêu của bạn.", "Discover your strengths, areas for growth and personal goals.")),
@@ -75,6 +89,7 @@
     ];
     protected override async Task OnInitializedAsync()
     {
-        if ((await AuthProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true) StartHref = "/dashboard";
+        IsAuthenticated = (await AuthProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true;
+        if (IsAuthenticated) StartHref = "/dashboard";
     }
 }

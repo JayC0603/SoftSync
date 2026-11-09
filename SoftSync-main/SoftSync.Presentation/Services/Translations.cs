@@ -27,6 +27,16 @@ public static class Translations
         ["nav.community"] = ("Community", "Cộng đồng"),
 
         // ===== Home / About SoftSync Space =====
+        ["landing.mobile.eyebrow"] = ("With AI & mentor support", "AI & mentor đồng hành"),
+        ["landing.mobile.description"] = ("Short lessons and real practice. A learning path made for you.", "Bài học ngắn, thực hành thực tế. Một lộ trình dành riêng cho bạn."),
+        ["landing.mobile.preview.title"] = ("Your learning journey", "Lộ trình của bạn"),
+        ["landing.mobile.preview.example"] = ("Preview", "Minh họa"),
+        ["landing.mobile.preview.step"] = ("Your first lesson", "Bài học đầu tiên"),
+        ["landing.mobile.preview.lesson"] = ("Communicate with confidence", "Giao tiếp tự tin"),
+        ["landing.mobile.preview.process"] = ("Learn, practice and reflect", "Học, thực hành và phản tư"),
+        ["landing.mobile.preview.learn"] = ("Learn", "Học"),
+        ["landing.mobile.preview.practice"] = ("Practice", "Thực hành"),
+        ["landing.mobile.preview.reflect"] = ("Reflect", "Phản tư"),
         ["home.about.heading"] = ("Welcome to SoftSync Space", "Chào mừng bạn đến với SoftSync Space"),
         ["home.about.eyebrow"] = ("About SoftSync Space", "Giới thiệu SoftSync Space"),
         ["home.about.cta"] = ("Explore Community", "Khám phá Community"),
