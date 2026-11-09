@@ -177,7 +177,7 @@ public sealed class CvPostgreSqlAcceptanceTests
             {
                 command.CommandText = "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('AspNetUsers','CvDocument','CvAnalysis')";
                 Assert.Equal(3L, await command.ExecuteScalarAsync());
-                command.CommandText = "SELECT count(*) FROM pg_constraint WHERE contype='f' AND conname IN ('FK_CvDocument_AspNetUsers_UserId','FK_CvAnalysis_CvDocument_CvDocumentId') AND confdeltype='c'";
+                command.CommandText = "SELECT count(*) FROM pg_constraint WHERE connamespace = 'public'::regnamespace AND contype='f' AND conname IN ('FK_CvDocument_AspNetUsers_UserId','FK_CvAnalysis_CvDocument_CvDocumentId') AND confdeltype='c'";
                 Assert.Equal(2L, await command.ExecuteScalarAsync());
                 command.CommandText = "SELECT count(*) FROM pg_indexes WHERE schemaname='public' AND indexname IN ('IX_CvDocument_UserId_UploadedAtUtc','IX_CvAnalysis_CvDocumentId_CreatedAtUtc')";
                 Assert.Equal(2L, await command.ExecuteScalarAsync());

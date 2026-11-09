@@ -85,7 +85,7 @@ public sealed class CvHttpAcceptanceTests
         Assert.DoesNotContain("<video", coursePage);
         Assert.DoesNotContain("Khóa học · SoftSync", coursePage);
         var quizHistory = WebUtility.HtmlDecode(await a.GetStringAsync("/game/history"));
-        Assert.Contains("Attempt history", quizHistory);
+        Assert.Contains("Quiz History", quizHistory);
         Assert.DoesNotContain("Lịch sử làm bài", quizHistory);
         a.DefaultRequestHeaders.Remove("Cookie");
         a.DefaultRequestHeaders.Add("Cookie", "ss-lang=vi");
@@ -93,7 +93,7 @@ public sealed class CvHttpAcceptanceTests
     }
     internal static HttpClient Client(Uri origin) => new(new HttpClientHandler { CookieContainer = new(), AllowAutoRedirect = true }) { BaseAddress = origin };
     internal static Task Register(HttpClient client, string email, string password) => PostForm(client, "/Account/Register", new()
-    { ["Input.FullName"] = "Synthetic CV acceptance user", ["Input.Email"] = email, ["Input.Password"] = password, ["Input.ConfirmPassword"] = password });
+    { ["Input.FullName"] = "Synthetic CV acceptance user", ["Input.Email"] = email, ["Input.Password"] = password, ["Input.ConfirmPassword"] = password, ["Input.AcceptTerms"] = "true" });
     internal static Task Login(HttpClient client, string email, string password) => PostForm(client, "/Account/Login", new()
     { ["Input.Identifier"] = email, ["Input.Password"] = password, ["Input.RememberMe"] = "false" });
     private static async Task PostForm(HttpClient client, string route, Dictionary<string, string> fields)
