@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace SoftSync.Presentation.Services;
 
-// Used by the deployment's XAH clients only. Each request still tries its primary key first.
+// Used by the deployment's XAH clients only. Each request tries its primary model first.
 public sealed class XahFallbackHandler(IConfiguration configuration, ILogger<XahFallbackHandler> logger) : DelegatingHandler
 {
     public static readonly HttpRequestOptionsKey<bool> SkipFallback = new("SoftSync.SkipXahFallback");
@@ -19,7 +19,7 @@ public sealed class XahFallbackHandler(IConfiguration configuration, ILogger<Xah
             && request.Headers.Authorization?.Scheme == "Bearer"
             && !string.IsNullOrWhiteSpace(primaryKey)
             && (primaryKey == configuration["AiApi:ApiKey"]?.Trim() || primaryKey == configuration["CvLlm:ApiKey"]?.Trim())
-            && !string.IsNullOrWhiteSpace(key) && key != primaryKey
+            && !string.IsNullOrWhiteSpace(key)
             && !string.IsNullOrWhiteSpace(model) && model.Length <= 200 && !model.Any(char.IsWhiteSpace) && !model.Any(char.IsControl)
             && !(request.Options.TryGetValue(SkipFallback, out var skip) && skip)
             && request.Content is not null;
@@ -31,6 +31,11 @@ public sealed class XahFallbackHandler(IConfiguration configuration, ILogger<Xah
         try { body = JsonNode.Parse(bytes) as JsonObject; }
         catch (System.Text.Json.JsonException) { return await base.SendAsync(request, cancellationToken); }
         if (body is null) return await base.SendAsync(request, cancellationToken);
+        // One account key can authorize several models. Avoid only an identical
+        // key/model retry; a different model can recover from model-level failures.
+        var primaryModel = body["model"] is JsonValue value && value.TryGetValue<string>(out var name) ? name : null;
+        if (key == primaryKey && string.Equals(model, primaryModel, StringComparison.Ordinal))
+            return await base.SendAsync(request, cancellationToken);
 
         HttpResponseMessage? response;
         try

@@ -76,6 +76,7 @@ public sealed class LlmAiAssistantService : IAiAssistantService
                 logger.LogWarning("AI Assistant did not receive valid bilingual feedback.");
                 return await FallbackAsync(message, userId);
             }
+            modelReply.FromModel = true;
             logger.LogInformation("AI Assistant received a provider response.");
             return modelReply;
         }

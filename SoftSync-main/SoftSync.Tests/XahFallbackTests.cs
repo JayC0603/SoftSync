@@ -27,6 +27,37 @@ public sealed class XahFallbackTests
     private static HttpClient Client(Transport transport) => new(new XahFallbackHandler(Config(), NullLogger<XahFallbackHandler>.Instance) { InnerHandler = transport });
 
     [Fact]
+    public async Task Same_key_can_fall_back_to_another_model_and_preserve_request_context()
+    {
+        var config = Config();
+        config["XahFallback:ApiKey"] = Primary;
+        var transport = new Transport { FirstStatus = 404 };
+        using var client = new HttpClient(new XahFallbackHandler(config, NullLogger<XahFallbackHandler>.Instance) { InnerHandler = transport });
+        using var response = await client.SendAsync(Request());
+        Assert.True(response.IsSuccessStatusCode);
+        Assert.Equal(new[] { Primary, Primary }, transport.Keys);
+        using var original = JsonDocument.Parse(transport.Bodies[0]);
+        using var backup = JsonDocument.Parse(transport.Bodies[1]);
+        Assert.Equal(Model, backup.RootElement.GetProperty("model").GetString());
+        foreach (var field in new[] { "messages", "max_tokens", "response_format" })
+            Assert.Equal(original.RootElement.GetProperty(field).GetRawText(), backup.RootElement.GetProperty(field).GetRawText());
+        Assert.Equal(Model, Assert.Single(response.Headers.GetValues(XahFallbackHandler.ModelHeader)));
+    }
+
+    [Fact]
+    public async Task Identical_key_and_model_do_not_retry_the_same_request()
+    {
+        var config = Config();
+        config["XahFallback:ApiKey"] = Primary;
+        config["XahFallback:Model"] = "primary/model";
+        var transport = new Transport { FirstStatus = 404 };
+        using var client = new HttpClient(new XahFallbackHandler(config, NullLogger<XahFallbackHandler>.Instance) { InnerHandler = transport });
+        using var response = await client.SendAsync(Request());
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Single(transport.Keys);
+    }
+
+    [Fact]
     public async Task Healthy_primary_never_calls_backup_and_next_request_still_tries_primary()
     {
         var transport = new Transport { FirstStatus = 401 };
