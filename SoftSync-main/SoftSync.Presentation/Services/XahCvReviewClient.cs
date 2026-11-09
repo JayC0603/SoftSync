@@ -16,7 +16,7 @@ public interface ICvReviewLanguageModel
 public sealed class XahCvReviewClient(IHttpClientFactory clients, IConfiguration configuration,
     ILogger<XahCvReviewClient> logger) : ICvReviewLanguageModel
 {
-    public const string DefaultModel = "tranhieu13102003/gpt-6-luna";
+    public const string DefaultModel = AiApiConfiguration.DefaultXahModel;
     public string Model => configuration["CvLlm:Model"]?.Trim() is { Length: > 0 } model ? model : DefaultModel;
     public string ResponseModel { get; private set; } = string.Empty;
     // This JSON is model input inside an HTTP message, never embedded in HTML.

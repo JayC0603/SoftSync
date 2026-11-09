@@ -9,6 +9,24 @@ namespace SoftSync.Tests;
 
 public sealed class GeminiConfigurationTests
 {
+    [Theory]
+    [InlineData("assistant")]
+    [InlineData("cv-review")]
+    public async Task Xah_without_a_model_uses_Gemini_38_as_the_primary(string task)
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AiApi:Enabled"] = "true", ["AiApi:Provider"] = "Xah", ["AiApi:ApiKey"] = "synthetic-key"
+        }).Build();
+        var handler = new RecordingHandler();
+        using var http = new HttpClient(handler);
+        var client = new HuggingFaceJsonClient(new Factory(http), configuration, NullLogger<HuggingFaceJsonClient>.Instance);
+        await client.AskAsync<Reply>(task, "Return JSON only.", new { text = "Synthetic input" });
+        using var body = JsonDocument.Parse(handler.Body);
+        Assert.Equal("dungcsnd113/gemini-flash-3.8", body.RootElement.GetProperty("model").GetString());
+        Assert.Equal("dungcsnd113/gemini-flash-3.8", XahCvReviewClient.DefaultModel);
+    }
+
     [Fact]
     public async Task Xah_deployment_uses_pinned_endpoint_namespaced_model_and_bearer_key()
     {
