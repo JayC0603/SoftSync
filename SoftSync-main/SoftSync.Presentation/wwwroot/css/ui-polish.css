@@ -1,0 +1,107 @@
+/* Final responsive corrections. Keep page artwork and existing theme tokens. */
+@media (min-width: 901px) {
+    html body .page > .ss-navbar,
+    html body .page > .ss-navbar .ss-navpills {
+        overflow: visible;
+    }
+    html body .page > .ss-navbar .ss-navpills {
+        flex-shrink: 0;
+    }
+    /* Invisible absolute labels otherwise create a horizontal scroll range. */
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill > span {
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill:is(:hover, :focus-visible) > span {
+        width: max-content;
+        height: auto;
+        padding: 8px 12px;
+        border: 1px solid var(--ss-border);
+        clip-path: none;
+    }
+}
+
+/* Keep every destination reachable in a short laptop window. The temporary
+   wider rail contains the focused label while the navigation scrolls. */
+@media (min-width: 901px) and (max-height: 650px) {
+    html body .page > .ss-navbar {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpills {
+        width: 55px;
+    }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar:has(.ss-navpill:is(:hover, :focus-visible)) {
+        width: 320px;
+    }
+    html:not([data-sidebar="expanded"]) body .page > .ss-navbar .ss-navpill > span {
+        max-width: 224px;
+    }
+}
+
+.page[data-responsive-layout="shared"] :is(.lm-lesson-copy, .lm-summary-copy, .lv-mine > *, .lm-summary > *) {
+    min-width: 0;
+}
+.page[data-responsive-layout="shared"] :is(.lm-lesson-copy, .lm-summary-copy) {
+    overflow-wrap: anywhere;
+}
+
+/* At these widths the sidebar leaves less room than a full desktop canvas.
+   Match the named-card selector specificity so the single-column rule wins. */
+@media (min-width: 901px) and (max-width: 1100px) {
+    .page[data-responsive-layout="shared"] .sh-home > :is(.sh-continue, .sh-journey, .sh-recommendation, .sh-achievements, .sh-stats, .sh-quick, .sh-mentors, .sh-quote) {
+        grid-column: 1 / -1;
+    }
+    .page[data-responsive-layout="shared"] .lv-mine,
+    .page[data-responsive-layout="shared"] .lm-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .page[data-responsive-layout="shared"] .lm-summary .lm-cover {
+        height: 240px;
+    }
+    .page[data-responsive-layout="shared"] .ss-profile-mobile {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Avoid input-focus zoom on phones; retain the established desktop density. */
+@media (max-width: 900px) {
+    html body .page .ss-main-content .settings-studio :is(.st-field input, .st-field select, .st-dialog input) {
+        font-size: 16px !important;
+    }
+    html body .page .ss-main-content .ss-profile-mobile :is(.mp-details dt, .mp-details dd, .mp-next-level, .mp-chip) {
+        font-size: 13px !important;
+        line-height: 1.55;
+    }
+    html body .page .ss-main-content .ss-profile-mobile .mp-stat p {
+        font-size: 12px !important;
+        line-height: 1.5;
+    }
+    .ss-profile-mobile .mp-stat { min-width: 0; }
+    .ss-profile-mobile .mp-stat > div { min-width: 0; overflow-wrap: break-word; }
+    .ss-profile-mobile .mp-details dl > div {
+        grid-template-columns: 18px minmax(75px, .9fr) minmax(0, 1.65fr);
+        padding-block: 10px;
+    }
+    .ss-public-drawer-content {
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+    .ss-public-drawer {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+}
+
+@media (max-width: 540px) {
+    .ss-profile-mobile .mp-stat {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+    html body .page .ss-main-content .settings-studio :is(.st-field > label, .st-field > span:first-child) {
+        font-size: 14px;
+    }
+}

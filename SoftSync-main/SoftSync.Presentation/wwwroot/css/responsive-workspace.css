@@ -23,9 +23,11 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
     }
 
     html body .page[data-responsive-layout="shared"] > .ss-workspace {
-        width: calc(100% - var(--ss-sidebar-width));
+        /* Let the sidebar offset determine the available width once. */
+        width: auto;
+        min-width: 0;
         max-width: none;
-        margin-right: 0;
+        margin-inline: var(--ss-sidebar-width) 0;
         padding: 0;
     }
 
@@ -41,8 +43,28 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
     }
 
     html body .page[data-responsive-layout="shared"] .ss-workspace-topbar {
-        min-height: 76px;
+        height: 64px;
+        min-height: 64px;
+        max-height: none;
+        box-sizing: border-box;
         padding-inline: clamp(24px, 3vw, 48px);
+    }
+
+    html body .page[data-responsive-layout="shared"] .ss-workspace-title {
+        flex-wrap: wrap;
+        gap: 2px 10px;
+    }
+
+    html body .page[data-responsive-layout="shared"] .ss-header-user-info {
+        min-width: 0;
+        max-width: 180px;
+    }
+
+    html body .page[data-responsive-layout="shared"] .ss-header-user-info strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     html body .page[data-responsive-layout="shared"] .ss-workspace-topbar .ss-mobile-brand {
@@ -54,6 +76,15 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
         grid-template-columns: repeat(12, minmax(0, 1fr));
         gap: 24px;
         align-items: start;
+    }
+
+    .page[data-responsive-layout="shared"] .sh-home > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .page[data-responsive-layout="shared"] .sh-home :is(h1, h2, h3, p, a) {
+        overflow-wrap: break-word;
     }
 
     .page[data-responsive-layout="shared"] .sh-home > :is(.sh-search, .sh-greeting, .sh-goal, .sh-syncy) {
@@ -154,9 +185,12 @@ html body .ss-authenticated-landing .page[data-responsive-layout="shared"] > .ss
 
 @media (min-width: 901px) and (max-width: 1100px) {
     .page[data-responsive-layout="shared"] .sh-home { gap: 18px; }
-    .page[data-responsive-layout="shared"] .sh-home > :is(.sh-journey, .sh-recommendation, .sh-achievements) { grid-column: span 7; }
-    .page[data-responsive-layout="shared"] .sh-home > :is(.sh-quick, .sh-mentors, .sh-quote) { grid-column: span 5; }
+    .page[data-responsive-layout="shared"] .sh-home > * { grid-column: 1 / -1; }
+    .page[data-responsive-layout="shared"] .sh-home .sh-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .page[data-responsive-layout="shared"] .sh-home .sh-quick-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .page[data-responsive-layout="shared"] .lm-discover { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    html body .page[data-responsive-layout="shared"] .ss-workspace-kicker { display: none; }
+    html body .page[data-responsive-layout="shared"] .ss-header-user-info { display: none; }
 }
 
 /* Admin pages use the available workspace beside the collapsible sidebar. */

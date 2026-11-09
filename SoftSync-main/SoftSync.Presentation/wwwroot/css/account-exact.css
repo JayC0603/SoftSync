@@ -92,3 +92,37 @@ html[data-theme='dark'] body main#ss-auth-page.auth-reference .neo-sun { display
 
 html body main#ss-auth-page.auth-register .neo-logo { margin-bottom:calc(12 * var(--u)); }
 html body main#ss-auth-page.auth-register .register-kicker { margin-bottom:calc(6 * var(--u)); }
+
+/* Use form-sized dimensions on desktop as well as mobile. The artwork's
+   original 941px coordinate system otherwise produces oversized controls. */
+html body main#ss-auth-page.auth-reference {
+ --u:clamp(.38px,.053vw,.5px);
+ min-height:100dvh;
+ padding:80px 16px 32px;
+}
+html body main#ss-auth-page.auth-reference .neo-content { width:100%; max-width:460px; }
+html body main#ss-auth-page.auth-reference .neo-home { top:20px; left:24px; gap:10px; min-height:44px; font-size:16px; }
+html body main#ss-auth-page.auth-reference .neo-home i { font-size:24px; }
+html body main#ss-auth-page.auth-reference .auth-toolbar { top:20px; right:24px; gap:24px; }
+html body main#ss-auth-page.auth-reference .auth-language { padding:3px; }
+html body main#ss-auth-page.auth-reference .auth-language button { width:48px; height:38px; font-size:14px; }
+html body main#ss-auth-page.auth-reference .neo-theme { width:44px; height:44px; }
+html body main#ss-auth-page.auth-reference .neo-theme::before { left:-13px; height:24px; }
+html body main#ss-auth-page.auth-reference .neo-theme i { font-size:24px; }
+html body main#ss-auth-page.auth-reference .neo-logo { width:72px; height:72px; padding:5px; border-radius:20px; margin-bottom:16px; }
+html body main#ss-auth-page.auth-reference .neo-logo img { border-radius:14px; }
+html body main#ss-auth-page.auth-reference :is(.login-heading h2,.register-heading h2) { font-size:32px; }
+html body main#ss-auth-page.auth-reference :is(.login-heading p,.register-heading p) { font-size:16px; }
+html body main#ss-auth-page.auth-reference .login-field label { font-size:14px; }
+html[data-theme='dark'] body main#ss-auth-page.auth-reference .login-field label { color:var(--muted) !important; }
+html body main#ss-auth-page.auth-reference .login-options { font-size:14px; }
+html body main#ss-auth-page.auth-reference :is(.login-register,.register-login) { font-size:14px; }
+html body main#ss-auth-page.auth-register .neo-content { max-width:520px; }
+html body main#ss-auth-page.auth-register .neo-logo { width:60px; height:60px; margin-bottom:12px; }
+@media(max-width:600px) {
+ html body main#ss-auth-page.auth-reference { padding:80px 16px 24px; }
+ html body main#ss-auth-page.auth-reference .neo-home { left:16px; font-size:14px; gap:6px; }
+ html body main#ss-auth-page.auth-reference .auth-toolbar { right:16px; gap:18px; }
+ html body main#ss-auth-page.auth-reference .auth-language button { width:36px; }
+ html body main#ss-auth-page.auth-reference .neo-theme::before { left:-10px; }
+}
