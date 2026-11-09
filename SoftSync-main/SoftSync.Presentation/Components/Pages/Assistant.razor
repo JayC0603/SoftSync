@@ -14,7 +14,7 @@
 
 <div class="sy-workspace" data-syncy-workspace>
     <aside class="sy-sidebar" aria-label="@Ui("Không gian hội thoại", "Conversation space")">
-        <a href="/assistant" class="sy-brand"><span class="sy-brand-mark"><img src="/images/logo.png" alt="" width="30" height="30" /></span><span>SYNCY<small>BY SOFTSYNC</small></span></a>
+        <a href="/assistant" class="sy-brand"><span class="sy-brand-mark"><img src="/images/optimized/logo.webp" alt="" width="30" height="30" /></span><span>SYNCY<small>BY SOFTSYNC</small></span></a>
         <button type="button" class="sy-new-chat" @onclick="NewChat" disabled="@isTyping"><i class="bi bi-plus-lg" aria-hidden="true"></i>@L["assistant.newChat"]<i class="bi bi-pencil-square" aria-hidden="true"></i></button>
 
         <div class="sy-history-section">
@@ -44,7 +44,7 @@
             <a href="/progress"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>@L["assistant.trackProgress"]<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
             <a href="/community"><i class="bi bi-people" aria-hidden="true"></i>@L["assistant.joinCommunity"]<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
         </nav>
-        <div class="sy-companion-card"><span class="sy-companion-star">✦</span><p>@Ui("Mỗi bước nhỏ,", "Small steps,")<br /><strong>@Ui("một phiên bản tốt hơn.", "a better you.")</strong></p><img src="/images/syncy-robot.png" alt="" width="88" height="88" decoding="async" /></div>
+        <div class="sy-companion-card"><span class="sy-companion-star">✦</span><p>@Ui("Mỗi bước nhỏ,", "Small steps,")<br /><strong>@Ui("một phiên bản tốt hơn.", "a better you.")</strong></p><img src="/images/optimized/syncy-robot.webp" alt="" width="88" height="88" decoding="async" /></div>
         <div class="sy-sidebar-foot"><span class="sy-small-dot"></span>@Ui("Không gian học tập của bạn", "Your space to grow")</div>
     </aside>
 
@@ -80,7 +80,7 @@
             @if (!HasConversation)
             {
                 <section class="sy-welcome">
-                    <div class="sy-welcome-mascot"><img src="/images/syncy-robot.png" alt="SYNCY" width="88" height="88" decoding="async" /><span>✦</span></div>
+                    <div class="sy-welcome-mascot"><img src="/images/optimized/syncy-robot.webp" alt="SYNCY" width="88" height="88" decoding="async" /><span>✦</span></div>
                     <span class="sy-eyebrow">@Ui("MỘT CHÚT TÒ MÒ. MỘT BƯỚC TIẾN MỚI.", "A LITTLE CURIOSITY. A NEW STEP FORWARD.")</span>
                     <h2>@Ui("Hôm nay, mình có thể", "How can I help you")<br /><span>@Ui("giúp gì cho bạn?", "grow today?")</span></h2>
                     <p>@Ui("Một kỹ năng muốn rèn luyện, một tình huống khó xử, hay đơn giản là một điều bạn đang băn khoăn.", "A skill to practise, a tricky situation, or simply something that's been on your mind.")</p>

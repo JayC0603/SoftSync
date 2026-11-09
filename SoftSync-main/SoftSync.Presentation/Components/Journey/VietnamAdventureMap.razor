@@ -90,7 +90,7 @@
     private IReadOnlyList<VietnamJourneyStop> Stops => VietnamJourney.Stops(orderedItems, selectedKey);
     private string selectedKey = "";
     private bool expanded, mapReady, mapError, disposed, needsUpdate = true, focusSheet;
-    private bool initialViewApplied;
+    private bool initialViewApplied, wasCompact, needsExpand;
     private VietnamJourneyStop? selectedStop;
     private IReadOnlyList<VietnamJourneyStop> clusterChoices = [];
     private bool placeDetail;
@@ -118,11 +118,13 @@
     private string T(string vi, string en) => Vietnamese ? vi : en;
     protected override void OnParametersSet()
     {
-        if (!initialViewApplied)
+        if (!initialViewApplied || wasCompact != Compact)
         {
             var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Nav.Uri).Query);
             expanded = !Compact && query.TryGetValue("map", out var mode) && mode == "full";
             initialViewApplied = true;
+            wasCompact = Compact;
+            needsExpand = true;
         }
         orderedItems = VietnamJourney.Order(Items);
         if (SelectedSkill is not null && Groups.Any(x => x.Key == SelectedSkill)) selectedKey = SelectedSkill;
@@ -136,8 +138,10 @@
         try
         {
             module ??= await JS.InvokeAsync<IJSObjectReference>("import", VersionedAsset("dist/vietnam-map.js"));
-            if (firstRender) { callback = DotNetObjectReference.Create(this); await module.InvokeVoidAsync("mount", root, canvas, Payload, callback); if (expanded) await module.InvokeVoidAsync("expand", root, true); needsUpdate = false; }
+            if (disposed) { await module.DisposeAsync(); module = null; return; }
+            if (firstRender) { callback = DotNetObjectReference.Create(this); await module.InvokeVoidAsync("mount", root, canvas, Payload, callback); needsUpdate = false; }
             else if (needsUpdate) { needsUpdate = false; await module.InvokeVoidAsync("update", root, Payload); }
+            if (needsExpand) { needsExpand = false; await module.InvokeVoidAsync("expand", root, expanded); }
             if (focusSheet) { focusSheet = false; await module.InvokeVoidAsync("focusSheet", root, sheet); }
         }
         catch (Exception ex) when (ex is JSException or JSDisconnectedException or TaskCanceledException)

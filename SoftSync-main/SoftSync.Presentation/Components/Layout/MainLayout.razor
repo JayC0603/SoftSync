@@ -13,8 +13,7 @@
     <div class="ss-workspace">
         <header class="ss-workspace-topbar">
             <button type="button" class="ss-sidebar-toggle ss-shell-control" data-sidebar-toggle aria-controls="ss-main-sidebar" aria-expanded="false" aria-label="@L["layout.toggleSidebar"]" onclick="window.ssDesign.toggleSidebar()"><i class="bi bi-list" aria-hidden="true"></i></button>
-            <MobileMoreBackLink />
-            <a class="ss-mobile-brand" href="/dashboard" aria-label="SoftSync"><img src="/images/logo.png" alt="" width="32" height="32" /><span>SoftSync</span></a>
+            <a class="ss-mobile-brand" href="/dashboard" aria-label="SoftSync"><img src="/images/optimized/logo.webp" alt="" width="32" height="32" /><span>SoftSync</span></a>
             <div class="ss-workspace-left">
                 <WorkspaceTitle />
             </div>
@@ -23,6 +22,7 @@
 
         <div id="ss-navigation-status" class="ss-navigation-status" role="status" aria-live="polite" hidden><span></span><a hidden onclick="location.assign(this.href); return false;"></a></div>
         <main id="main-content" data-page-route="@CurrentPath" tabindex="-1" class="container tw:py-12 ss-main-content">
+            <div class="ss-page-back"><MobileMoreBackLink /></div>
             @Body
         </main>
         <AppFooter />

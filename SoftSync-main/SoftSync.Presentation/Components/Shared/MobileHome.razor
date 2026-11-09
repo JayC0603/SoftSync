@@ -165,7 +165,7 @@
                 @foreach (var mentor in mentors)
                 {
                     <article>
-                        <img src="@mentor.AvatarUrl" alt="@mentor.Name" width="72" height="80" loading="lazy" />
+                        <img src="@DisplayImages.Url(mentor.AvatarUrl)" alt="@mentor.Name" width="72" height="80" loading="lazy" />
                         <div><h3>@mentor.Name</h3><p>@L.Ui(mentor.Expertise)</p><small>@L.Ui(mentor.ShortBio)</small></div>
                         <a class="mh-mentor-detail" href="/mentors/@mentor.Id" aria-label="@(T("Xem cố vấn ", "View mentor ") + mentor.Name)"><span>@T("Xem chi tiết", "View details")</span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                     </article>

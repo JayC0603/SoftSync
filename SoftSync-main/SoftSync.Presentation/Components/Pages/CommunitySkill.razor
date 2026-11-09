@@ -30,7 +30,7 @@
             <section aria-labelledby="related-mentors-title">
                 <h2 id="related-mentors-title">@Tx("Related mentors", "Mentor liên quan")</h2>
                 @if (mentors.Count == 0) { <p class="eco-muted">@Tx("No mentor is currently mapped to this skill.", "Hiện chưa có Mentor được gắn với kỹ năng này.")</p> }
-                else { @foreach (var mentor in mentors) { <a class="skill-mentor" href="/mentors/@mentor.Id"><img src="@mentor.AvatarUrl" alt="" width="48" height="48" /><span><strong>@mentor.Name</strong><small>@Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }
+                else { @foreach (var mentor in mentors) { <a class="skill-mentor" href="/mentors/@mentor.Id"><img src="@DisplayImages.Url(mentor.AvatarUrl)" alt="" width="48" height="48" /><span><strong>@mentor.Name</strong><small>@Ui(mentor.Expertise)</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a> } }
             </section>
         </div>
     }

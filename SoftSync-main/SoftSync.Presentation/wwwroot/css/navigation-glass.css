@@ -1,11 +1,13 @@
 /* Shared shell: route-specific home themes must not move navigation. */
-.ss-workspace-topbar .ss-mobile-more-back {
+.ss-page-back:has(.ss-more-back) { margin-bottom: 16px; }
+.ss-page-back .ss-more-back {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     gap: 8px;
     min-height: 40px;
+    max-width: 100%;
     padding: 8px 12px;
     border: 1px solid var(--ss-border);
     border-radius: 8px;
@@ -16,38 +18,16 @@
     line-height: 1.4;
     text-decoration: none;
 }
-.ss-workspace-topbar .ss-mobile-more-back:hover,
-.ss-workspace-topbar .ss-mobile-more-back:focus-visible {
+.ss-page-back .ss-more-back:hover,
+.ss-page-back .ss-more-back:focus-visible {
     background: var(--ss-accent-soft, rgb(99 102 241 / 12%));
 }
-.ss-workspace-topbar .ss-mobile-more-back:focus-visible {
+.ss-page-back .ss-more-back:focus-visible {
     outline: 2px solid var(--ss-accent, #0877f9);
     outline-offset: 2px;
 }
-@media (max-width: 900px) {
-    .ss-workspace-topbar .ss-mobile-more-back {
-        display: inline-flex;
-        flex: 0 0 44px;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        min-height: 44px;
-        padding: 0;
-        border: 0;
-        border-radius: 12px;
-        background: transparent;
-        color: inherit;
-        text-decoration: none;
-        font-size: 20px;
-        -webkit-tap-highlight-color: transparent;
-    }
-    .ss-workspace-topbar .ss-more-back-label { display: none; }
-}
-/* Leave room for the back arrow and account controls on small phones.
-   The brand link retains its SoftSync accessible name and visible logo. */
-@media (max-width: 400px) {
-    .ss-workspace-topbar:has(.ss-more-back) .ss-mobile-brand > span { display: none; }
+@media (max-width: 360px) {
+    .ss-workspace-topbar .ss-mobile-brand > span { display: none; }
 }
 html { scrollbar-gutter: stable; }
 /* Route swaps must not animate shell dimensions or smooth-scroll to focus. */

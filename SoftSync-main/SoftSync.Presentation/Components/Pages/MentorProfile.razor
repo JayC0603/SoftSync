@@ -16,7 +16,7 @@
         var profile = PublishedMentorProfiles.For(mentor);
         <div class="mentor-profile-grid @(signedIn ? null : "mentor-profile-readonly")">
             <article class="mentor-profile-main">
-                <header><img src="@mentor.AvatarUrl" alt="@mentor.Name" width="112" height="112" /><div><span>@(profile is null ? "SOFTSYNC MENTOR" : L[profile.RoleKey])</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong>@if (profile is not null) { <p class="mentor-position">@L[profile.PositionKey]</p> }</div></header>
+                <header><img src="@DisplayImages.Url(mentor.AvatarUrl)" alt="@mentor.Name" width="112" height="112" /><div><span>@(profile is null ? "SOFTSYNC MENTOR" : L[profile.RoleKey])</span><h1 id="mentor-title">@mentor.Name</h1><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong>@if (profile is not null) { <p class="mentor-position">@L[profile.PositionKey]</p> }</div></header>
                 @if (profile is not null)
                 {
                     <section class="mentor-background" aria-labelledby="mentor-background-title">

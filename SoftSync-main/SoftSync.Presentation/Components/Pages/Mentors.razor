@@ -26,7 +26,7 @@
             {
                 var profile = PublishedMentorProfiles.For(mentor);
                 <article class="mentor-row" @key="mentor.Id">
-                    <img src="@mentor.AvatarUrl" alt="@mentor.Name" width="88" height="88" loading="lazy" />
+                    <img src="@DisplayImages.Url(mentor.AvatarUrl)" alt="@mentor.Name" width="88" height="88" loading="lazy" />
                     <div>
                         <h2>@mentor.Name</h2><strong>@Ui(mentor.Expertise).Replace(" và ", " & ")</strong>
                         @if (profile is not null) { <p class="mentor-position"><i class="bi bi-building" aria-hidden="true"></i>@L[profile.PositionKey]</p> }
