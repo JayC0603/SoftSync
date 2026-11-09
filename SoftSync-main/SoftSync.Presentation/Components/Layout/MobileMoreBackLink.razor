@@ -4,8 +4,9 @@
 
 @if (Destination is { } destination)
 {
-    <a class="ss-mobile-more-back" href="@destination.Href" aria-label="@destination.Label" title="@destination.Label">
+    <a class="ss-mobile-more-back ss-more-back" href="@destination.Href" aria-label="@destination.Label" title="@destination.Label">
         <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        <span class="ss-more-back-label">@destination.Label</span>
     </a>
 }
 
@@ -20,26 +21,27 @@
             if (segments.Length == 0) return null;
             var root = segments[0].ToLowerInvariant();
             if (root is not ("courses" or "schedule" or "resources" or "game" or "assistant"
-                or "community" or "mentors" or "mentor-requests" or "about" or "teacher")) return null;
+                or "community" or "mentors" or "mentor-requests" or "about" or "teacher"
+                or "settings" or "profile" or "notifications" or "cv-review")) return null;
 
             if (root == "courses" && segments.Length > 2)
-                return ($"/courses/{segments[1]}", T("Quay lại khóa học", "Back to course"));
+                return ($"/courses/{segments[1]}", L["navigation.backCourse"]);
             if (root == "courses" && segments.Length == 2)
-                return ("/courses", T("Quay lại danh sách khóa học", "Back to courses"));
+                return ("/courses", L["navigation.backCourses"]);
             if (root == "game" && segments.Length > 1)
-                return ("/game", T("Quay lại trò chơi", "Back to games"));
+                return ("/game", L["navigation.backGames"]);
             if (root == "community" && segments.Length > 1)
-                return ("/community", T("Quay lại cộng đồng", "Back to community"));
+                return ("/community", L["navigation.backCommunity"]);
             if (root == "mentors" && segments.Length > 1)
-                return ("/mentors", T("Quay lại danh sách mentor", "Back to mentors"));
+                return ("/mentors", L["navigation.backMentors"]);
             if (root == "teacher" && segments.Length > 1)
-                return ("/teacher", T("Quay lại không gian giảng viên", "Back to Teacher Studio"));
+                return ("/teacher", L["navigation.backTeacher"]);
+            if (root == "cv-review" && segments.Length > 1)
+                return ("/cv-review", L["navigation.backCvReviews"]);
 
-            return ("/more", T("Quay lại trang Thêm", "Back to More"));
+            return ("/more", L["navigation.backMore"]);
         }
     }
-
-    private string T(string vi, string en) => L.Current == AppLanguage.Vi ? vi : en;
 
     protected override void OnInitialized()
     {
