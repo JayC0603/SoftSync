@@ -7,6 +7,7 @@
 @using SoftSync.DAL.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject GoogleAccountLinkService GoogleAccounts
 @inject IUserStore<ApplicationUser> UserStore
 @inject ILogger<ExternalLogin> Logger
 @inject NavigationManager NavigationManager
@@ -131,7 +132,23 @@ else
         var user = await UserManager.FindByEmailAsync(email!);
         if (user is not null)
         {
-            // Matching email alone does not prove ownership of a local account.
+            if (GoogleAccounts.CanLink(user, externalLoginInfo))
+            {
+                var linkedSignIn = await GoogleAccounts.LinkAndSignInAsync(user, externalLoginInfo);
+                if (linkedSignIn.Succeeded)
+                {
+                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                    WelcomeCookie.Set(HttpContext, user.FullName);
+                    Logger.LogInformation("Google sign-in linked to existing user {UserId}.", user.Id);
+                    RedirectManager.RedirectTo(Destination);
+                }
+                if (linkedSignIn.IsLockedOut)
+                    RedirectManager.RedirectToWithStatus("Account/Login", $"Error: {L["auth.error.lockedOut"]}", HttpContext);
+                message = "Error: " + L["auth.googleLink.unavailable"];
+                return;
+            }
+            // Google does not control third-party mailboxes without a hosted
+            // domain claim, so those still need proof of the local account.
             if (!await UserManager.HasPasswordAsync(user))
                 message = "Error: " + L["auth.googleLink.unavailable"];
             else

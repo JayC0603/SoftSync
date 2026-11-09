@@ -28,6 +28,7 @@ public static class IdentityConfiguration
         builder.Services.AddScoped<IdentityUserAccessor>();
         builder.Services.AddScoped<IdentityRedirectManager>();
         builder.Services.AddScoped<EmailRegistrationService>();
+        builder.Services.AddScoped<GoogleAccountLinkService>();
         builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
         var authBuilder = builder.Services.AddAuthentication(options =>
@@ -57,6 +58,7 @@ public static class IdentityConfiguration
                 options.CallbackPath = "/signin-google";
                 options.ClaimActions.MapJsonKey("urn:google:picture", "picture");
                 options.ClaimActions.MapJsonKey("urn:google:email_verified", "email_verified");
+                options.ClaimActions.MapJsonKey("urn:google:hosted_domain", "hd");
                 options.Events.OnRemoteFailure = context =>
                 {
                     // Cancellation and provider failures should return to a usable login page.
