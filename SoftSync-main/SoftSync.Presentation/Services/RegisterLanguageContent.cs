@@ -7,7 +7,11 @@ public static class RegisterLanguageContent
 {
     private static readonly string[] Keys =
     [
-        "auth.register.title", "auth.register.submit", "auth.haveAccount",
+        "auth.register.title", "auth.register.submit", "auth.register.subtitle", "auth.haveAccount",
+        "auth.register.fullNamePlaceholder", "auth.register.passwordPlaceholder",
+        "auth.register.confirmPassword", "auth.register.confirmPlaceholder", "auth.register.agree",
+        "auth.register.terms", "auth.register.and", "auth.register.privacy", "auth.register.legalTitle",
+        "auth.register.legalPending", "auth.register.close", "auth.register.recovery", "auth.googleSignUp",
         "profile.fullName", "auth.email", "auth.googleNeedsRegistration", "auth.googleSignUp.help"
     ];
     private static readonly string[][] Phrases =

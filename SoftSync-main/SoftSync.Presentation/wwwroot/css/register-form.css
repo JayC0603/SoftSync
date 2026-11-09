@@ -1,0 +1,61 @@
+/* The same canvas and controls as sign-in, with a permanently visible email form.
+   Keep these adjustments scoped to registration; Google onboarding also uses
+   RegistrationWelcome and retains its own layout. */
+html body main#ss-auth-page.auth-register { overflow:clip; }
+html body main#ss-auth-page.auth-register .neo-content { max-width:460px; }
+html body main#ss-auth-page.auth-register .neo-logo {
+ width:72px; height:72px; margin-bottom:20px;
+}
+html body main#ss-auth-page.auth-register .register-heading { margin:0 0 28px; text-align:center; }
+html body main#ss-auth-page.auth-register .register-kicker { margin-bottom:8px; font-size:11px; }
+html body main#ss-auth-page.auth-register .register-heading h1 {
+ margin:0 0 10px; color:var(--ink); font:800 32px/1.2 'Segoe UI',Arial,sans-serif; letter-spacing:-.035em;
+}
+/* The router focuses the heading for screen readers; keep its outline separate
+   from the visible focus rings on inputs, links and buttons. */
+html body main#ss-auth-page.auth-register .register-heading h1:focus { outline:none; }
+html body main#ss-auth-page.auth-register .register-heading p {
+ max-width:34ch; margin-inline:auto; font-size:16px; line-height:1.5;
+}
+html body main#ss-auth-page.auth-register .login-field { margin-bottom:18px !important; }
+html body main#ss-auth-page.auth-register .login-field label { margin:0 0 8px; font-size:14px; }
+html body main#ss-auth-page.auth-register .login-input-wrap .form-control {
+ height:52px; padding:0 50px 0 48px; border-radius:14px !important; font-size:16px;
+}
+html body main#ss-auth-page.auth-register .login-input-wrap > i { left:16px; font-size:21px; }
+html body main#ss-auth-page.auth-register .ss-password-visibility { right:4px; width:44px; height:44px; }
+html body main#ss-auth-page.auth-register .register-consent {
+ align-items:flex-start; gap:10px; margin:2px 0 0; font-size:14px; line-height:1.65;
+}
+html body main#ss-auth-page.auth-register .register-consent .form-check-input {
+ width:20px; height:20px; margin-top:2px; border-radius:5px;
+}
+html body main#ss-auth-page.auth-register #register-consent-error { margin-bottom:22px; }
+html body main#ss-auth-page.auth-register .login-submit {
+ height:54px; padding-inline:50px !important; border-radius:18px !important; font-size:18px !important;
+}
+html body main#ss-auth-page.auth-register .login-submit > i { right:12px; width:34px; height:34px; font-size:23px; }
+html body main#ss-auth-page.auth-register .neo-social { margin-top:24px; gap:18px; }
+html body main#ss-auth-page.auth-register .external-google {
+ height:52px; gap:12px; border-radius:16px !important; font-size:17px !important;
+}
+html body main#ss-auth-page.auth-register .auth-google-icon { width:24px; height:24px; }
+html body main#ss-auth-page.auth-register .register-login { margin-top:24px !important; font-size:14px; }
+html body main#ss-auth-page.auth-register .register-login a { display:inline-block; padding-block:6px; }
+html body main#ss-auth-page.auth-register .register-recovery { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px; }
+html body main#ss-auth-page.auth-register .register-recovery a { color:var(--blue); }
+html body main#ss-auth-page.auth-register :is(.validation-message,.text-danger) {
+ display:block; margin-top:6px; font-size:13px; line-height:1.5; color:#b42336 !important;
+}
+html body main#ss-auth-page.auth-register .login-input-wrap .form-control.invalid { border-color:#c6384e !important; }
+html body main#ss-auth-page.auth-register .external-google:disabled + .external-help {
+ position:static; width:auto; height:auto; margin:10px 0 0; overflow:visible; clip-path:none;
+ white-space:normal; color:var(--muted); font-size:13px;
+}
+html[data-theme='dark'] body main#ss-auth-page.auth-register :is(.validation-message,.text-danger) { color:#ffb5be !important; }
+@media(max-width:360px) {
+ html body main#ss-auth-page.auth-register .register-heading h1 { font-size:30px; }
+ html body main#ss-auth-page.auth-register .neo-home { font-size:13px; }
+ html body main#ss-auth-page.auth-register .auth-toolbar { gap:14px; }
+ html body main#ss-auth-page.auth-register .auth-language button { width:32px; }
+}
