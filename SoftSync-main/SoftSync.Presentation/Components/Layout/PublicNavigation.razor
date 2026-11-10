@@ -8,6 +8,10 @@
         <NavLink href="/" Match="NavLinkMatch.All">@L["nav.home"]</NavLink><NavLink href="/about">@Tx("About", "Giới thiệu")</NavLink><NavLink href="/mentors">Mentor</NavLink><NavLink href="/community">@Tx("Community", "Cộng đồng")</NavLink>
     </nav>
     <div class="ss-public-actions">
+        <div class="ss-landing-language" role="group" aria-label="@L["layout.languageMenu"]">
+            <button type="button" lang="vi" aria-label="Tiếng Việt" aria-pressed="@(L.Current == AppLanguage.Vi)" @onclick="() => SetLanguage(AppLanguage.Vi)">VN</button>
+            <button type="button" lang="en" aria-label="English" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguage(AppLanguage.En)">ENG</button>
+        </div>
         <details class="ss-header-language ss-header-menu">
             <summary class="ss-header-control ss-header-language-trigger" aria-label="@L["layout.languageMenu"]">
                 <img class="ss-language-flag" src="@(L.Current == AppLanguage.Vi ? "/images/flags/vi.svg" : "/images/flags/en.svg")" width="28" height="20" alt="@(L.Current == AppLanguage.Vi ? "Tiếng Việt" : "English")" />
@@ -17,7 +21,7 @@
                 <button type="button" aria-pressed="@(L.Current == AppLanguage.En)" @onclick="() => SetLanguage(AppLanguage.En)"><img src="/images/flags/en.svg" width="28" height="20" alt="" />English</button>
             </div>
         </details>
-        <button type="button" class="ss-shell-control" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
+        <button type="button" class="ss-shell-control ss-public-theme" onclick="window.ssDesign.toggleTheme()" aria-label="@L["layout.toggleTheme"]"><i class="bi bi-circle-half" aria-hidden="true"></i></button>
         <a class="ss-public-start" href="/Account/Register"><span>@Tx("Start for free", "Bắt đầu miễn phí")</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         <button type="button" class="ss-shell-control ss-public-drawer-trigger" onclick="document.getElementById('ss-public-drawer').showModal()" aria-haspopup="dialog" aria-controls="ss-public-drawer" aria-label="@Tx("Open navigation", "Mở điều hướng")"><i class="bi bi-list" aria-hidden="true"></i></button>
     </div>
@@ -28,7 +32,6 @@
         <nav aria-label="@Tx("Explore SoftSync", "Khám phá SoftSync")" onclick="if(event.target.closest('a'))document.getElementById('ss-public-drawer').close()">
             <a href="/about">@Tx("About SoftSync", "Về SoftSync")</a>
             <a href="/#learning-journey">@Tx("Growth journey", "Hành trình phát triển")</a>
-            <a href="/#features">@Tx("Key features", "Tính năng nổi bật")</a>
             <a href="/mentors">@Tx("Mentors & community", "Mentor & Cộng đồng")</a>
             <a href="/resources">@Tx("Learning resources", "Tài nguyên học tập")</a>
             <span aria-disabled="true" title="TBD — URL">@Tx("Help", "Trợ giúp")</span>
@@ -36,6 +39,7 @@
             <span aria-disabled="true" title="TBD — URL">@Tx("Privacy policy", "Chính sách bảo mật")</span>
         </nav>
         <div class="ss-public-drawer-auth"><a href="/Account/Login">@L["nav.login"]</a><a href="/Account/Register">@Tx("Register", "Đăng ký")</a></div>
+        <button type="button" class="ss-landing-drawer-theme" onclick="window.ssDesign.toggleTheme()"><i class="bi bi-circle-half" aria-hidden="true"></i> @L["layout.toggleTheme"]</button>
     </div>
 </dialog>
 
