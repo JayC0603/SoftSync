@@ -53,6 +53,25 @@ html body main#ss-auth-page.auth-register .external-google:disabled + .external-
  white-space:normal; color:var(--muted); font-size:13px;
 }
 html[data-theme='dark'] body main#ss-auth-page.auth-register :is(.validation-message,.text-danger) { color:#ffb5be !important; }
+
+/* The footer is a sibling of the account canvas, so it needs its own palette. */
+html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell {
+ --ss-canvas:#f4f8fd; --ss-text:#142746; --ss-text-muted:#415675;
+ --ss-border:#cdd9ea; --ss-primary:#1557d6;
+}
+html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .shared-mobile-footer nav > a {
+ color:var(--ss-text); font-weight:600;
+}
+html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .shared-mobile-footer nav > a:hover {
+ color:var(--ss-primary); text-decoration:underline; text-underline-offset:3px;
+}
+html[data-theme='dark'] body main#ss-auth-page.auth-register ~ .ss-site-footer-shell {
+ --ss-canvas:#102036; --ss-text:#edf4ff; --ss-text-muted:#bdcce2;
+ --ss-border:#334b6b; --ss-primary:#9bc0ff;
+}
+html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .sh-footer-socials > [aria-disabled='true'] {
+ color:var(--ss-text-muted);
+}
 @media(max-width:360px) {
  html body main#ss-auth-page.auth-register .register-heading h1 { font-size:30px; }
  html body main#ss-auth-page.auth-register .neo-home { font-size:13px; }
@@ -63,6 +82,11 @@ html[data-theme='dark'] body main#ss-auth-page.auth-register :is(.validation-mes
 /* Keep the mobile registration form together without scaling text or clipping
    fields. Validation and the onscreen keyboard can still grow the document. */
 @media (max-width:600px) {
+ html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .shared-mobile-footer { font-size:13px; line-height:1.6; }
+ html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .shared-mobile-footer :is(nav > a,nav > span,.sh-footer-brand small,.sh-copyright small) {
+  font-size:13px !important; line-height:1.6;
+ }
+ html body main#ss-auth-page.auth-register ~ .ss-site-footer-shell .sh-footer-brand strong { font-size:14px; }
  html body main#ss-auth-page.auth-register {
   min-height:100svh; height:auto; overflow:visible;
   padding:64px max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
