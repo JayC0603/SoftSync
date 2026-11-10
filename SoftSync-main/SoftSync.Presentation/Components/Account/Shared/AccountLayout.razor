@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="css/account-exact.css?v=1" />
         @if (accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase))
         {
-            <link rel="stylesheet" href="css/register-form.css?v=20261110-compact" />
+            <link rel="stylesheet" href="css/register-form.css?v=20261110-compact-footer" />
         }
     </HeadContent>
     <main id="ss-auth-page" class="auth-reference @(accountPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase) ? "auth-register" : "auth-login")">
@@ -92,7 +92,7 @@ else
     (footerPath.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase) || footerPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase)))
 {
     @* Account forms translate locally; keep the footer in the same static render. *@
-    <div class="ss-site-footer-shell @(footerPath.Equals("/Account/Register", StringComparison.OrdinalIgnoreCase) ? "ss-registration-footer" : null)"><MobileSiteFooter /></div>
+    <div class="ss-site-footer-shell"><MobileSiteFooter /></div>
 }
 else
 {

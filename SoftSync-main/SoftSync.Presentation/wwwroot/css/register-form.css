@@ -105,8 +105,6 @@ html[data-theme='dark'] body main#ss-auth-page.auth-register :is(.validation-mes
  html body main#ss-auth-page.auth-register :is(.validation-message,.text-danger) { font-size:12px; line-height:1.45; }
  html body main#ss-auth-page.auth-register :is(.validation-message,.text-danger):empty { display:none; }
  html body main#ss-auth-page.auth-register .register-recovery { gap:12px; margin-bottom:12px; }
- /* Terms and privacy remain available beside the consent checkbox. */
- .ss-registration-footer { display:none; }
 }
 
 @media (max-width:600px) and (max-height:740px) {
